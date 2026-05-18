@@ -1,0 +1,43 @@
+# 認証情報・秘密情報（絶対にコミットしない）
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# OS
+.DS_Store
+Thumbs.db
+
+# エディタ
+.vscode/
+.idea/
+*.swp
+*~
+
+# 依存・ビルド成果物
+node_modules/
+dist/
+build/
+.next/
+.nuxt/
+.output/
+.cache/
+
+# Python（将来の調査スクリプト用）
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# ログ・一時ファイル
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.tmp
+*.bak
+
+# Supabase（将来用、ローカル鍵情報など）
+supabase/.branches/
+supabase/.temp/
