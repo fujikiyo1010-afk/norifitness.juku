@@ -43,6 +43,22 @@ export default async function Home() {
           </p>
         </header>
 
+        <div className="rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950 p-4 text-sm">
+          <h2 className="font-semibold mb-2 text-blue-900 dark:text-blue-100">
+            📚 学習を始める
+          </h2>
+          <ul className="space-y-1">
+            <li>
+              <Link
+                href="/courses"
+                className="text-blue-700 dark:text-blue-300 underline hover:text-blue-900 dark:hover:text-blue-100"
+              >
+                → コース一覧
+              </Link>
+            </li>
+          </ul>
+        </div>
+
         {admin && (
           <div className="rounded-lg border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950 p-4 text-sm">
             <h2 className="font-semibold mb-2 text-violet-900 dark:text-violet-100">
