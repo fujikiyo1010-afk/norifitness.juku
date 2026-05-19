@@ -1,7 +1,13 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import type { User } from "@supabase/supabase-js";
 
-export async function updateSession(request: NextRequest) {
+export type SessionResult = {
+  response: NextResponse;
+  user: User | null;
+};
+
+export async function updateSession(request: NextRequest): Promise<SessionResult> {
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -25,8 +31,10 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // 認証状態を Cookie で同期
-  await supabase.auth.getUser();
+  // セッションを Cookie 経由で同期し、現在のユーザーも取得
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  return supabaseResponse;
+  return { response: supabaseResponse, user };
 }
