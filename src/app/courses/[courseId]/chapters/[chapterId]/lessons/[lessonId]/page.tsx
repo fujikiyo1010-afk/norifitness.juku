@@ -5,6 +5,7 @@ import {
   getPublicChapter,
   getPublicLesson,
 } from "@/lib/courses/queries";
+import { VimeoEmbed } from "@/components/VimeoEmbed";
 
 export const dynamic = "force-dynamic";
 
@@ -76,26 +77,13 @@ export default async function StudentLessonPage({
           )}
         </header>
 
-        {/* 動画(Phase 2-4 で埋め込み実装、Phase 2-3 は外部リンクのみ) */}
+        {/* 動画 */}
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
             🎥 動画
           </h2>
           {lesson.vimeo_url ? (
-            <div className="rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 p-4 space-y-2">
-              <p className="text-xs text-zinc-500">
-                ※ 動画埋め込みは次のフェーズで実装予定。現在は外部リンクで開きます。
-              </p>
-              <a
-                href={lesson.vimeo_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-sm text-zinc-900 dark:text-zinc-50 underline break-all"
-              >
-                {lesson.vimeo_url}
-                <span className="text-xs">↗</span>
-              </a>
-            </div>
+            <VimeoEmbed url={lesson.vimeo_url} />
           ) : (
             <p className="text-sm text-zinc-500">動画 URL が設定されていません。</p>
           )}
