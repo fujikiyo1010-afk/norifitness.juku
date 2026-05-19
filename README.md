@@ -1,75 +1,165 @@
-# 06_kinniku_juku_app — 筋肉塾 新サイト構築
+# 🎓 筋肉塾 — のりfitness 新サイト
 
-軸サービス「筋肉塾」の新サイトを構築するプロジェクト。現行ツール「**エキスパ**」から **Supabase** ベースの新サイトへ完全移行する。
+軸サービス「筋肉塾」の**サクセスラーニング型 学習プラットフォーム**。
+現行ツール「エキスパ」のサイポン部分を、**Next.js + Supabase** で置き換える。
 
 ---
 
 ## 🎯 ゴール
 
-- 筋肉塾の新サイトを構築・公開（MVP）
-- 完成後、エキスパは閉鎖判断（当分は壊さず保持）
-- MVP の最低ライン: 「エキスパでできていたことは全部できる」
+- **生徒の実施完工率を最大化**する学習プラットフォーム
+- 主軸: 生徒の学習継続・完工 / 副軸: 売上向上（間接効果）
+- 完成目標: **2026年8月末**
 
-## 📊 現在の進行ステータス
-
-**フェーズ0：前提条件抽出 + エキスパ完全理解** に着手中
+## 📊 進行ステータス
 
 | フェーズ | 内容 | 状態 |
 |---|---|---|
-| **0** | 前提条件抽出 + エキスパ完全理解 + 社長確認サマリー | 🟡 進行中 |
-| 1 | 骨組み設計（技術スタック、Supabase設計、MVP範囲確定） | ⚪ 未着手 |
+| 0 | 前提条件抽出 + エキスパ完全理解 + 社長確認サマリー | ✅ 完了 |
+| **1** | **骨組み設計（技術スタック、Supabase設計、MVP範囲確定）** | **🟡 進行中** |
 | 2 | デザイン（参考サイト → ワイヤー → カンプ） | ⚪ 未着手 |
 | 3 | 実装（フロント、Supabase連携、決済、テスト） | ⚪ 未着手 |
 | 4 | 公開・運用（既存会員移行、エキスパ閉鎖判断） | ⚪ 未着手 |
 
-各フェーズ完了時に**確認ゲート**あり。きよむさん承認後に次フェーズへ。
+---
+
+## 🛠 技術スタック
+
+| カテゴリ | 採用 |
+|---|---|
+| フロントエンド | Next.js 16 (App Router) + React 19 + TypeScript |
+| スタイリング | Tailwind CSS v4 |
+| バックエンド | Supabase (PostgreSQL + Auth + Storage) |
+| 決済 | Stripe（直接、Webhook 受信のみ）|
+| 動画 | Vimeo 埋め込み |
+| メール | Resend |
+| LINE | LINE Messaging API |
+| ホスティング | Cloudflare Pages |
+| ドメイン | juku.norifitness.com |
+
+---
+
+## 🚀 開発環境セットアップ
+
+### 必要なもの
+- Node.js 20 以上
+- npm
+- Supabase アカウント（プロジェクト作成済み）
+
+### 手順
+
+```bash
+# 1. リポジトリに移動
+cd 06_kinniku_juku_app
+
+# 2. 依存パッケージインストール
+npm install
+
+# 3. 環境変数設定
+cp .env.local.example .env.local
+# → .env.local を編集して Supabase の URL/API キー等を記入
+
+# 4. 開発サーバー起動
+npm run dev
+```
+
+→ http://localhost:3000 でアクセス可能
+
+### 環境変数（`.env.local`）
+[`.env.local.example`](./.env.local.example) を参照。最低限 Supabase の3点が必要:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+---
 
 ## 🗂 ディレクトリ構成
 
 ```
 06_kinniku_juku_app/
-├── README.md            ← このファイル
-├── CLAUDE.md            ← Claude 用プロジェクト指示書（必読）
-├── DO_NOT_DO.md         ← やらないことリスト（スコープガード）
-├── .env.example         ← 環境変数テンプレート
-├── .env                 ← 実値（.gitignore済、絶対コミット不可）
+├── README.md               ← このファイル
+├── CLAUDE.md               ← Claude 用プロジェクト指示書（必読）
+├── DO_NOT_DO.md            ← やらないことリスト
+├── .env.local.example      ← 環境変数テンプレート
+├── .env.local              ← 実値（.gitignore済、絶対コミット不可）
 ├── .gitignore
-└── docs/
-    ├── README.md            ← docs インデックス
-    ├── 00_premises/         ← フェーズ0 抽出物
-    │   └── _toc_map.md      ← 既存ナレッジの目次マップ
-    └── 01_expa/             ← エキスパ調査結果
-        └── screenshots/     ← 画面ベース調査のスクショ
+├── package.json
+├── tsconfig.json
+├── next.config.ts
+├── tailwind は v4 で PostCSS 設定経由
+├── eslint.config.mjs
+├── public/                 ← 静的ファイル
+├── src/
+│   ├── app/                ← App Router ページ
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   └── globals.css
+│   ├── components/         ← 再利用可能なコンポーネント
+│   │   └── ui/             ← UI コンポーネント（shadcn/ui 等、フェーズ2 で本格構築）
+│   ├── lib/                ← ユーティリティ・クライアント
+│   │   └── supabase/       ← Supabase クライアント
+│   │       ├── client.ts   ← Browser Client
+│   │       ├── server.ts   ← Server Client
+│   │       └── middleware.ts ← セッション同期
+│   ├── middleware.ts       ← Next.js Middleware（認証セッション同期）
+│   └── types/              ← TypeScript 型定義
+│       └── database.ts     ← Supabase テーブル型（自動生成予定）
+└── docs/                   ← プロジェクトドキュメント
+    └── 00_premises/        ← フェーズ0 成果物（14ファイル）
 ```
+
+---
 
 ## 🛠 関係者
 
-- **きよむさん**: 株式会社ボディチェンジャー社長の右腕。本プロジェクト完全一任
-- **のり社長**: のりfitness 代表。フェーズ0完了時のサマリー確認 + 最終決定権者
-- **Claude（私）**: 抽出・構造化・実装の実行役、きよむさんの参謀
+- **きよむさん**: 株式会社ボディチェンジャー社長の右腕、プロジェクト総括
+- **のり社長**: のりfitness 代表、最終決定権者
+- **Claude（参謀役）**: 抽出・構造化・実装の実行役
 
 ## 🔗 主要な情報源
 
 - `../03_brain/memory/` — 構造化済みナレッジ（思想・人格・事業・顧客像 等）
-- `../03_brain/data/` — 2.9GB の原資料（書籍要約・論文・レシピ・セミナー・サポートログ 等）
-- `../_noriAI_hearing.md` / `../_norisan_hearing.md` — ヒアリング記録
-- エキスパ（現筋肉塾ツール）— ログイン情報は `.env` 経由
+- `docs/00_premises/` — フェーズ0 で抽出した前提条件・設計（14ファイル、3,500行超）
+- 既存サイト: https://saipon.jp/h/dyz555/
 
 ## 📜 確定事項
 
 | 項目 | 内容 |
 |---|---|
-| サーバー | Supabase |
-| その他技術スタック | フェーズ1冒頭で確定 |
-| 公開形態 | MVP |
-| エキスパの扱い | 完成後に閉鎖判断、当分は壊さず保持 |
-| 02_kinniku_lp との関係 | 当面役割分担（02=販売LP / 06=会員本体）、統合可能性は後で検討 |
-| 抽出物の保存先 | ハイブリッド: 筋肉塾特化 → `docs/`、汎用 → `../03_brain/memory/` にも逆輸入 |
-| 社長確認サマリー | Markdown + Notion の二段運用 |
+| 役割 | サクセスラーニング型 学習プラットフォーム（サイポンの置き換え）|
+| 決済 | Stripe で外部完結（新サイトは Webhook 受信のみ）|
+| 招待 | 管理画面から手動招待（Supabase Auth）|
+| trainercloud | 完全に別アプリ（連携機能なし）|
+| MVP 機能 | 12機能（受講生8画面 + 管理者12画面）|
+| DB | Supabase Postgres（16テーブル）|
 
-## ⚙️ 開発・運用
+詳細: [`docs/00_premises/phase0_summary.md`](./docs/00_premises/phase0_summary.md)
 
-未着手。フェーズ1で技術スタック確定後に追記。
+---
+
+## 📚 ドキュメント早見表
+
+| 何を知りたい? | ファイル |
+|---|---|
+| プロジェクト全体像 | [`docs/00_premises/phase0_summary.md`](./docs/00_premises/phase0_summary.md) |
+| 事業背景・MVP範囲 | [`docs/00_premises/business_context.md`](./docs/00_premises/business_context.md) |
+| 技術スタックの選定理由 | [`docs/00_premises/tech_stack_proposal.md`](./docs/00_premises/tech_stack_proposal.md) |
+| DB スキーマ | [`docs/00_premises/database_design_draft.md`](./docs/00_premises/database_design_draft.md) |
+| サイトマップ・画面遷移 | [`docs/00_premises/sitemap_draft.md`](./docs/00_premises/sitemap_draft.md) |
+| フェーズ1 進め方 | [`docs/00_premises/phase1_kickoff_checklist.md`](./docs/00_premises/phase1_kickoff_checklist.md) |
+| やらないこと | [`DO_NOT_DO.md`](./DO_NOT_DO.md) |
+| Claude 向け指示 | [`CLAUDE.md`](./CLAUDE.md) |
+
+---
+
+## ⚙️ よく使うコマンド
+
+```bash
+npm run dev      # 開発サーバー起動
+npm run build    # 本番ビルド
+npm run start    # 本番サーバー起動
+npm run lint     # ESLint 実行
+```
 
 ---
 

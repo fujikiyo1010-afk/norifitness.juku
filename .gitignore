@@ -41,3 +41,16 @@ yarn-error.log*
 # Supabase（将来用、ローカル鍵情報など）
 supabase/.branches/
 supabase/.temp/
+
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo
+/coverage
+.vercel
+.pnp
+.pnp.*
+
+# Sentry (フェーズ3で導入予定)
+.sentryclirc
