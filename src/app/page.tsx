@@ -57,6 +57,14 @@ export default async function Home() {
                   → 受講生招待
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/admin/courses"
+                  className="text-violet-700 dark:text-violet-300 underline hover:text-violet-900 dark:hover:text-violet-100"
+                >
+                  → コース管理
+                </Link>
+              </li>
             </ul>
           </div>
         )}
