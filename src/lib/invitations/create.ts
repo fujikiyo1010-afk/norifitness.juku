@@ -56,15 +56,33 @@ export async function createInvitation(
     };
   }
 
+  const normalizedEmail = email.toLowerCase();
+  const supabase = createAdminClient();
+
+  // ───── 冪等性: 既に受講生として登録済みなら拒否 ─────
+  const { data: existingUser } = await supabase
+    .from("users")
+    .select("id")
+    .eq("email", normalizedEmail)
+    .maybeSingle();
+
+  if (existingUser) {
+    return {
+      ok: false,
+      status: 409,
+      error: "already_registered",
+      message: "このメールアドレスは既に受講生として登録されています",
+    };
+  }
+
   // ───── トークン生成と DB 登録 ─────
   const token = randomBytes(32).toString("base64url");
   const expiresAt = new Date(Date.now() + INVITATION_TTL_HOURS * 3600 * 1000);
 
-  const supabase = createAdminClient();
   const { data: invitation, error: dbError } = await supabase
     .from("invitations")
     .insert({
-      email: email.toLowerCase(),
+      email: normalizedEmail,
       name,
       token,
       expires_at: expiresAt.toISOString(),
@@ -110,6 +128,16 @@ export async function createInvitation(
         message: sendResult.error.message ?? "メール送信に失敗しました",
       };
     }
+
+    // ───── 冪等性: 新規招待が確実に届いた後、古い未承認招待を無効化 ─────
+    // 順序が重要: 新しい招待の送信成功を確認してから古いを無効化することで、
+    // 「両方無効になって受講生が詰む」事故を防ぐ
+    await supabase
+      .from("invitations")
+      .update({ expires_at: new Date().toISOString() })
+      .eq("email", normalizedEmail)
+      .is("accepted_at", null)
+      .neq("id", invitation.id);
 
     return {
       ok: true,

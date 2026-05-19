@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/auth/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,10 @@ function keyShape(key: string | undefined): string {
 }
 
 export default async function SupabaseDebugPage() {
+  // 防御 2 層目: admin 以外は / に追い返す
+  // (middleware 側でも /debug は公開パスから外したので、未ログインは /login へ)
+  await requireAdmin();
+
   const checks: CheckResult[] = [];
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

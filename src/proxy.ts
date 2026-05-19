@@ -2,11 +2,13 @@ import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
 // 認証なしでアクセス可能なパス(プレフィックスマッチ)
+//
+// 注: /debug は意図的に除外。本番情報漏洩防止のため、page.tsx 側でも
+//     requireAdmin() を呼び、middleware と合わせて 2 層防御。
 const PUBLIC_PATH_PREFIXES = [
   "/login",
   "/invite",
-  "/debug", // Phase 1 用、本番では削除予定
-  "/api",   // API は各エンドポイントで個別に認証
+  "/api", // API は各エンドポイントで個別に認証
 ];
 
 function isPublicPath(pathname: string): boolean {
@@ -15,7 +17,8 @@ function isPublicPath(pathname: string): boolean {
   );
 }
 
-export async function middleware(request: NextRequest) {
+// Next.js 16+ では `middleware` → `proxy` にリネーム
+export async function proxy(request: NextRequest) {
   const { response, user } = await updateSession(request);
   const { pathname, search } = request.nextUrl;
 
