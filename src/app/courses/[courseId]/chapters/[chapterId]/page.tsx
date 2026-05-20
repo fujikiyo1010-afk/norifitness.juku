@@ -112,28 +112,31 @@ export default async function StudentChapterPage({
                     >
                       {done ? "✓" : ""}
                     </span>
-                    <Link
-                      href={`/courses/${courseId}/chapters/${chapterId}/lessons/${l.id}`}
-                      className="min-w-0 flex-1 group block space-y-1"
-                    >
-                      <h3
-                        className={`font-medium group-hover:underline ${
-                          done
-                            ? "text-zinc-500 dark:text-zinc-400"
-                            : "text-zinc-900 dark:text-zinc-50"
-                        }`}
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <Link
+                        href={`/courses/${courseId}/chapters/${chapterId}/lessons/${l.id}`}
+                        className="group block"
                       >
-                        {l.title}
-                      </h3>
+                        <h3
+                          className={`font-medium group-hover:underline ${
+                            done
+                              ? "text-zinc-500 dark:text-zinc-400"
+                              : "text-zinc-900 dark:text-zinc-50"
+                          }`}
+                        >
+                          {l.title}
+                        </h3>
+                      </Link>
                       {l.meta_tags && l.meta_tags.length > 0 && (
                         <div className="flex flex-wrap gap-1">
                           {l.meta_tags.map((tag) => (
-                            <span
+                            <Link
                               key={tag}
-                              className="text-xs rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 px-1.5 py-0.5"
+                              href={`/search?q=${encodeURIComponent(tag)}`}
+                              className="text-xs rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 px-1.5 py-0.5 hover:bg-zinc-200 dark:hover:bg-zinc-700"
                             >
                               {tag}
-                            </span>
+                            </Link>
                           ))}
                         </div>
                       )}
@@ -142,7 +145,7 @@ export default async function StudentChapterPage({
                           {l.description}
                         </p>
                       )}
-                    </Link>
+                    </div>
                   </li>
                 );
               })}

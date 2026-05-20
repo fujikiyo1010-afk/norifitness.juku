@@ -5,6 +5,7 @@ import {
   listLessonIdsInCourse,
   getMyLessonProgress,
 } from "@/lib/courses/queries";
+import { SearchBox } from "./SearchBox";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +45,9 @@ export default async function CoursesPage() {
             学びたいコースを選んでください
           </p>
         </header>
+
+        {/* 検索ボックス(Phase 2-7 でヘッダー共通化予定) */}
+        <SearchBox />
 
         {courses.length === 0 ? (
           <p className="text-sm text-zinc-500">

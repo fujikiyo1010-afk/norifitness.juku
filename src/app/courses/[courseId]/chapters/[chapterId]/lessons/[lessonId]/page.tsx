@@ -71,12 +71,13 @@ export default async function StudentLessonPage({
           {lesson.meta_tags && lesson.meta_tags.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {lesson.meta_tags.map((tag) => (
-                <span
+                <Link
                   key={tag}
-                  className="text-xs rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 px-2 py-0.5"
+                  href={`/search?q=${encodeURIComponent(tag)}`}
+                  className="text-xs rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 px-2 py-0.5 hover:bg-zinc-200 dark:hover:bg-zinc-700"
                 >
                   {tag}
-                </span>
+                </Link>
               ))}
             </div>
           )}

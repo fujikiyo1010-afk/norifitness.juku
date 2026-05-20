@@ -173,32 +173,35 @@ export function CourseAccordion({
                           </button>
 
                           {/* レッスン情報 */}
-                          <Link
-                            href={`/courses/${courseId}/chapters/${ch.id}/lessons/${l.id}`}
-                            className="min-w-0 flex-1 group"
-                          >
-                            <p
-                              className={`text-sm font-medium group-hover:underline ${
-                                done
-                                  ? "text-zinc-500 dark:text-zinc-400"
-                                  : "text-zinc-900 dark:text-zinc-50"
-                              }`}
+                          <div className="min-w-0 flex-1">
+                            <Link
+                              href={`/courses/${courseId}/chapters/${ch.id}/lessons/${l.id}`}
+                              className="group block"
                             >
-                              {l.title}
-                            </p>
+                              <p
+                                className={`text-sm font-medium group-hover:underline ${
+                                  done
+                                    ? "text-zinc-500 dark:text-zinc-400"
+                                    : "text-zinc-900 dark:text-zinc-50"
+                                }`}
+                              >
+                                {l.title}
+                              </p>
+                            </Link>
                             {l.meta_tags && l.meta_tags.length > 0 && (
                               <div className="mt-0.5 flex flex-wrap gap-1">
                                 {l.meta_tags.map((tag) => (
-                                  <span
+                                  <Link
                                     key={tag}
-                                    className="text-[10px] rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 px-1.5 py-0.5"
+                                    href={`/search?q=${encodeURIComponent(tag)}`}
+                                    className="text-[10px] rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 px-1.5 py-0.5 hover:bg-zinc-200 dark:hover:bg-zinc-700"
                                   >
                                     {tag}
-                                  </span>
+                                  </Link>
                                 ))}
                               </div>
                             )}
-                          </Link>
+                          </div>
                         </li>
                       );
                     })}
