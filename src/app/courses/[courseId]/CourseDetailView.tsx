@@ -122,6 +122,8 @@ export function CourseDetailView({
           results={results}
           loading={loading}
           error={error}
+          onClear={() => setQuery("")}
+          clearLabel="✕ クリアして章一覧に戻る"
         />
       )}
     </div>

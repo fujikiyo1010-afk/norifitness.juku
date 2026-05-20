@@ -92,6 +92,7 @@ export function CoursesView({ initialCourses }: { initialCourses: CourseSummary[
           results={results}
           loading={loading}
           error={error}
+          onClear={() => setQuery("")}
         />
       )}
     </div>

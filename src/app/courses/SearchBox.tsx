@@ -45,11 +45,6 @@ export function SearchBox({
     router.push(`/search?q=${encodeURIComponent(trimmed)}`);
   }
 
-  function handleClear() {
-    setValue("");
-    onClear?.();
-  }
-
   const hasValue = (current ?? "").length > 0;
 
   return (
@@ -59,24 +54,25 @@ export function SearchBox({
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none">
             🔍
           </span>
+          {/*
+            type="search" にすると、ブラウザがネイティブで「クリア(✕)ボタン」を
+            自動表示する。独自 ✕ ボタンは追加しない(二重表示防止)。
+            ネイティブ ✕ クリック時も onChange が空文字で発火するので state は同期される。
+          */}
           <input
             type="search"
             value={current ?? ""}
-            onChange={(e) => setValue(e.target.value)}
+            onChange={(e) => {
+              setValue(e.target.value);
+              // ネイティブ ✕ で空になった場合、onClear コールバックも呼ぶ
+              if (e.target.value === "" && hasValue) {
+                onClear?.();
+              }
+            }}
             placeholder={placeholder}
             autoFocus={autoFocus}
-            className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 pl-10 pr-9 py-2 text-sm text-zinc-900 dark:text-zinc-50 focus:border-zinc-900 dark:focus:border-zinc-50 focus:outline-none"
+            className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 pl-10 pr-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 focus:border-zinc-900 dark:focus:border-zinc-50 focus:outline-none"
           />
-          {hasValue && (
-            <button
-              type="button"
-              onClick={handleClear}
-              aria-label="クリア"
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-            >
-              ✕
-            </button>
-          )}
         </div>
         {submitOnEnter && (
           <button
