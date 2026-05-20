@@ -134,3 +134,51 @@ export async function countPublicLessons(chapterId: string): Promise<number> {
     .or(`released_at.is.null,released_at.lte.${nowIso()}`);
   return count ?? 0;
 }
+
+/**
+ * 現在のログインユーザーの lesson_progress を取得。
+ * RLS により自分の行のみ返るので、明示的なフィルタは不要。
+ * 戻り値: lesson_id → is_completed の Map(完了レコードがあるレッスンのみ)
+ */
+export async function getMyLessonProgress(
+  lessonIds: string[]
+): Promise<Map<string, boolean>> {
+  const map = new Map<string, boolean>();
+  if (lessonIds.length === 0) return map;
+
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("lesson_progress")
+    .select("lesson_id, is_completed")
+    .in("lesson_id", lessonIds);
+
+  (data ?? []).forEach((row) => {
+    map.set(row.lesson_id as string, row.is_completed as boolean);
+  });
+  return map;
+}
+
+/**
+ * コースに含まれる公開済みレッスンの ID 配列を取得。
+ * 進捗集計のために使う。
+ */
+export async function listLessonIdsInCourse(courseId: string): Promise<string[]> {
+  const supabase = await createClient();
+  // chapters の released_at と courses の is_published は RLS で対応済み。
+  // ただし admin が「受講生視点で」見るとき RLS が緩いので、明示フィルタも入れる。
+  const now = nowIso();
+  const { data: chapters } = await supabase
+    .from("chapters")
+    .select("id")
+    .eq("course_id", courseId)
+    .or(`released_at.is.null,released_at.lte.${now}`);
+  const chapterIds = (chapters ?? []).map((c) => c.id as string);
+  if (chapterIds.length === 0) return [];
+
+  const { data: lessons } = await supabase
+    .from("lessons")
+    .select("id")
+    .in("chapter_id", chapterIds)
+    .or(`released_at.is.null,released_at.lte.${now}`);
+  return (lessons ?? []).map((l) => l.id as string);
+}

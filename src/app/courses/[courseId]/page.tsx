@@ -3,12 +3,16 @@ import { notFound } from "next/navigation";
 import {
   getPublicCourse,
   listPublicChapters,
-  countPublicLessons,
+  getMyLessonProgress,
 } from "@/lib/courses/queries";
+import { createClient } from "@/lib/supabase/server";
+import { CourseAccordion, type AccordionChapter } from "./CourseAccordion";
 
 export const dynamic = "force-dynamic";
 
 type RouteParams = Promise<{ courseId: string }>;
+
+const nowIso = () => new Date().toISOString();
 
 export default async function StudentCoursePage({
   params,
@@ -22,11 +26,57 @@ export default async function StudentCoursePage({
     notFound();
   }
 
+  // 章一覧
   const chapters = await listPublicChapters(courseId);
-  const lessonCounts = await Promise.all(
-    chapters.map((ch) => countPublicLessons(ch.id).then((n) => [ch.id, n] as const))
-  );
-  const countMap = new Map(lessonCounts);
+  const chapterIds = chapters.map((c) => c.id);
+
+  // 全章配下の公開済みレッスンを 1 クエリで取得
+  const supabase = await createClient();
+  const lessonsByChapter = new Map<string, AccordionChapter["lessons"]>();
+  let allLessonIds: string[] = [];
+
+  if (chapterIds.length > 0) {
+    const { data: lessons } = await supabase
+      .from("lessons")
+      .select("id, chapter_id, title, meta_tags, sort_order")
+      .in("chapter_id", chapterIds)
+      .or(`released_at.is.null,released_at.lte.${nowIso()}`)
+      .order("sort_order", { ascending: true });
+
+    (lessons ?? []).forEach((l) => {
+      const arr = lessonsByChapter.get(l.chapter_id as string) ?? [];
+      arr.push({
+        id: l.id as string,
+        title: l.title as string,
+        meta_tags: (l.meta_tags as string[] | null) ?? null,
+        sort_order: l.sort_order as number,
+      });
+      lessonsByChapter.set(l.chapter_id as string, arr);
+    });
+    allLessonIds = (lessons ?? []).map((l) => l.id as string);
+  }
+
+  // 進捗マップ取得
+  const progressMap = await getMyLessonProgress(allLessonIds);
+  const initialProgress: Record<string, boolean> = {};
+  progressMap.forEach((v, k) => {
+    initialProgress[k] = v;
+  });
+
+  // AccordionChapter 形式に組み立て
+  const accordionChapters: AccordionChapter[] = chapters.map((c) => ({
+    id: c.id,
+    title: c.title,
+    description: c.description,
+    sort_order: c.sort_order,
+    lessons: lessonsByChapter.get(c.id) ?? [],
+  }));
+
+  // コース全体の進捗集計
+  const totalLessons = allLessonIds.length;
+  const completedLessons = Object.values(initialProgress).filter(Boolean).length;
+  const coursePercent =
+    totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
   return (
     <main className="flex flex-1 flex-col p-6 sm:p-8">
@@ -51,45 +101,47 @@ export default async function StudentCoursePage({
               {course.description}
             </p>
           )}
-          <p className="text-xs text-zinc-500">{chapters.length} 章 公開中</p>
+
+          {/* コース全体の進捗 */}
+          <div className="pt-2 space-y-1">
+            <div className="flex items-baseline justify-between gap-3 text-xs">
+              <span className="text-zinc-600 dark:text-zinc-400">
+                全体進捗: {completedLessons} / {totalLessons} レッスン
+              </span>
+              <span className="font-mono text-zinc-700 dark:text-zinc-300">
+                {coursePercent}%
+              </span>
+            </div>
+            <div className="h-2.5 rounded-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden">
+              <div
+                className={`h-full transition-all duration-500 ${
+                  coursePercent === 100 && totalLessons > 0
+                    ? "bg-emerald-500"
+                    : "bg-zinc-900 dark:bg-zinc-300"
+                }`}
+                style={{ width: `${coursePercent}%` }}
+              />
+            </div>
+          </div>
         </header>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-            章一覧
-          </h2>
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+              章一覧 ({chapters.length} 章)
+            </h2>
+            <p className="text-xs text-zinc-500">章をクリックで開閉</p>
+          </div>
           {chapters.length === 0 ? (
             <p className="text-sm text-zinc-500">
               現在公開中の章はありません。新しい章の公開をお待ちください。
             </p>
           ) : (
-            <ul className="space-y-2">
-              {chapters.map((ch) => (
-                <li
-                  key={ch.id}
-                  className="rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4"
-                >
-                  <Link
-                    href={`/courses/${courseId}/chapters/${ch.id}`}
-                    className="group block space-y-1"
-                  >
-                    <div className="flex items-baseline justify-between gap-3">
-                      <h3 className="font-medium text-zinc-900 dark:text-zinc-50 group-hover:underline">
-                        {ch.title}
-                      </h3>
-                      <span className="shrink-0 text-xs text-zinc-500">
-                        {countMap.get(ch.id) ?? 0} レッスン
-                      </span>
-                    </div>
-                    {ch.description && (
-                      <p className="text-sm text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap">
-                        {ch.description}
-                      </p>
-                    )}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <CourseAccordion
+              courseId={courseId}
+              chapters={accordionChapters}
+              initialProgress={initialProgress}
+            />
           )}
         </section>
       </div>

@@ -4,6 +4,7 @@ import {
   getPublicCourse,
   getPublicChapter,
   listPublicLessons,
+  getMyLessonProgress,
 } from "@/lib/courses/queries";
 
 export const dynamic = "force-dynamic";
@@ -26,6 +27,11 @@ export default async function StudentChapterPage({
   }
 
   const lessons = await listPublicLessons(chapterId);
+  const progressMap = await getMyLessonProgress(lessons.map((l) => l.id));
+  const completedCount = lessons.filter((l) => progressMap.get(l.id)).length;
+  const totalCount = lessons.length;
+  const percent =
+    totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   return (
     <main className="flex flex-1 flex-col p-6 sm:p-8">
@@ -57,7 +63,26 @@ export default async function StudentChapterPage({
               {chapter.description}
             </p>
           )}
-          <p className="text-xs text-zinc-500">{lessons.length} レッスン</p>
+          <div className="pt-1 space-y-1">
+            <div className="flex items-baseline justify-between gap-3 text-xs">
+              <span className="text-zinc-600 dark:text-zinc-400">
+                {completedCount} / {totalCount} レッスン完了
+              </span>
+              <span className="font-mono text-zinc-700 dark:text-zinc-300">
+                {percent}%
+              </span>
+            </div>
+            <div className="h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden">
+              <div
+                className={`h-full transition-all duration-500 ${
+                  percent === 100 && totalCount > 0
+                    ? "bg-emerald-500"
+                    : "bg-zinc-900 dark:bg-zinc-300"
+                }`}
+                style={{ width: `${percent}%` }}
+              />
+            </div>
+          </div>
         </header>
 
         <section className="space-y-3">
@@ -70,38 +95,57 @@ export default async function StudentChapterPage({
             </p>
           ) : (
             <ul className="space-y-2">
-              {lessons.map((l) => (
-                <li
-                  key={l.id}
-                  className="rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4"
-                >
-                  <Link
-                    href={`/courses/${courseId}/chapters/${chapterId}/lessons/${l.id}`}
-                    className="group block space-y-1"
+              {lessons.map((l) => {
+                const done = progressMap.get(l.id) === true;
+                return (
+                  <li
+                    key={l.id}
+                    className="rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 flex items-start gap-3"
                   >
-                    <h3 className="font-medium text-zinc-900 dark:text-zinc-50 group-hover:underline">
-                      {l.title}
-                    </h3>
-                    {l.meta_tags && l.meta_tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {l.meta_tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="text-xs rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 px-1.5 py-0.5"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    {l.description && (
-                      <p className="text-sm text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap line-clamp-2">
-                        {l.description}
-                      </p>
-                    )}
-                  </Link>
-                </li>
-              ))}
+                    <span
+                      aria-label={done ? "完了済み" : "未完了"}
+                      className={`shrink-0 mt-0.5 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                        done
+                          ? "bg-emerald-500 text-white"
+                          : "border border-zinc-300 dark:border-zinc-700 text-zinc-400"
+                      }`}
+                    >
+                      {done ? "✓" : ""}
+                    </span>
+                    <Link
+                      href={`/courses/${courseId}/chapters/${chapterId}/lessons/${l.id}`}
+                      className="min-w-0 flex-1 group block space-y-1"
+                    >
+                      <h3
+                        className={`font-medium group-hover:underline ${
+                          done
+                            ? "text-zinc-500 dark:text-zinc-400"
+                            : "text-zinc-900 dark:text-zinc-50"
+                        }`}
+                      >
+                        {l.title}
+                      </h3>
+                      {l.meta_tags && l.meta_tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {l.meta_tags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="text-xs rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 px-1.5 py-0.5"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {l.description && (
+                        <p className="text-sm text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap line-clamp-2">
+                          {l.description}
+                        </p>
+                      )}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </section>

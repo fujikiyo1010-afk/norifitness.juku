@@ -4,8 +4,10 @@ import {
   getPublicCourse,
   getPublicChapter,
   getPublicLesson,
+  getMyLessonProgress,
 } from "@/lib/courses/queries";
 import { VimeoEmbed } from "@/components/VimeoEmbed";
+import { CompleteButton } from "./CompleteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +32,9 @@ export default async function StudentLessonPage({
   if (!course || !chapter || !lesson) {
     notFound();
   }
+
+  const progressMap = await getMyLessonProgress([lesson.id]);
+  const isCompleted = progressMap.get(lesson.id) === true;
 
   return (
     <main className="flex flex-1 flex-col p-6 sm:p-8">
@@ -87,6 +92,11 @@ export default async function StudentLessonPage({
           ) : (
             <p className="text-sm text-zinc-500">動画 URL が設定されていません。</p>
           )}
+        </section>
+
+        {/* 学習完了ボタン */}
+        <section className="space-y-2">
+          <CompleteButton lessonId={lesson.id} initialCompleted={isCompleted} />
         </section>
 
         {/* 説明 */}
