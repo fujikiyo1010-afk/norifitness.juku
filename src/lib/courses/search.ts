@@ -28,20 +28,30 @@ export type SearchResult = {
  * - chapters.released_at が NULL or 過去
  * - lessons.released_at  が NULL or 過去
  *
+ * オプション scope:
+ * - courseId 指定時はそのコース内のレッスンのみ検索対象
+ *
  * 並び順: タイトル一致 > タグ一致 > 説明文一致、各内で sort_order
  */
-export async function searchLessons(query: string): Promise<SearchResult[]> {
+export async function searchLessons(
+  query: string,
+  options: { courseId?: string } = {}
+): Promise<SearchResult[]> {
   const q = query.trim();
   if (q.length === 0) return [];
 
   const supabase = await createClient();
   const now = nowIso();
 
-  // 1. 公開コース取得
-  const { data: courses } = await supabase
+  // 1. 公開コース取得(courseId 指定時はそのコースのみ)
+  let courseQuery = supabase
     .from("courses")
     .select("id, title")
     .eq("is_published", true);
+  if (options.courseId) {
+    courseQuery = courseQuery.eq("id", options.courseId);
+  }
+  const { data: courses } = await courseQuery;
   if (!courses || courses.length === 0) return [];
   const courseMap = new Map<string, string>(
     courses.map((c) => [c.id as string, c.title as string])

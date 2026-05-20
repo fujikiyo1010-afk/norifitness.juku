@@ -21,11 +21,12 @@ export async function GET(request: NextRequest) {
 
   const url = new URL(request.url);
   const q = (url.searchParams.get("q") ?? "").trim();
+  const courseId = url.searchParams.get("course_id") ?? undefined;
   if (q.length === 0) {
     return NextResponse.json({ results: [], query: "" }, { status: 200 });
   }
 
-  const results = await searchLessons(q);
+  const results = await searchLessons(q, { courseId });
   const progressMap = await getMyLessonProgress(results.map((r) => r.id));
 
   return NextResponse.json(

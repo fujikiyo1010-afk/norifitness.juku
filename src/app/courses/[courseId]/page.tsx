@@ -6,7 +6,8 @@ import {
   getMyLessonProgress,
 } from "@/lib/courses/queries";
 import { createClient } from "@/lib/supabase/server";
-import { CourseAccordion, type AccordionChapter } from "./CourseAccordion";
+import { type AccordionChapter } from "./CourseAccordion";
+import { CourseDetailView } from "./CourseDetailView";
 
 export const dynamic = "force-dynamic";
 
@@ -125,25 +126,11 @@ export default async function StudentCoursePage({
           </div>
         </header>
 
-        <section className="space-y-3">
-          <div className="flex items-baseline justify-between gap-3">
-            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-              章一覧 ({chapters.length} 章)
-            </h2>
-            <p className="text-xs text-zinc-500">章をクリックで開閉</p>
-          </div>
-          {chapters.length === 0 ? (
-            <p className="text-sm text-zinc-500">
-              現在公開中の章はありません。新しい章の公開をお待ちください。
-            </p>
-          ) : (
-            <CourseAccordion
-              courseId={courseId}
-              chapters={accordionChapters}
-              initialProgress={initialProgress}
-            />
-          )}
-        </section>
+        <CourseDetailView
+          courseId={courseId}
+          chapters={accordionChapters}
+          initialProgress={initialProgress}
+        />
       </div>
     </main>
   );

@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { SearchBox } from "./SearchBox";
 import {
-  SearchResultCard,
-  type SearchResultCardData,
-} from "@/components/SearchResultCard";
+  SearchResultsList,
+  type SearchResultItem,
+} from "@/components/SearchResultsList";
 
 type CourseSummary = {
   id: string;
@@ -18,13 +18,9 @@ type CourseSummary = {
   percent: number;
 };
 
-type ApiResult = SearchResultCardData & {
-  is_completed: boolean;
-};
-
 type ApiResponse = {
   query: string;
-  results: ApiResult[];
+  results: SearchResultItem[];
 };
 
 const DEBOUNCE_MS = 250;
@@ -32,11 +28,10 @@ const DEBOUNCE_MS = 250;
 export function CoursesView({ initialCourses }: { initialCourses: CourseSummary[] }) {
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
-  const [results, setResults] = useState<ApiResult[]>([]);
+  const [results, setResults] = useState<SearchResultItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // デバウンス: タイプが落ち着いてから検索
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebounced(query.trim());
@@ -44,7 +39,6 @@ export function CoursesView({ initialCourses }: { initialCourses: CourseSummary[
     return () => clearTimeout(timer);
   }, [query]);
 
-  // デバウンス済みクエリで検索 API を叩く
   useEffect(() => {
     if (debounced.length === 0) {
       setResults([]);
@@ -87,21 +81,17 @@ export function CoursesView({ initialCourses }: { initialCourses: CourseSummary[
       <SearchBox
         value={query}
         onChange={setQuery}
-        submitOnEnter={false} /* ライブ検索なので submit 不要 */
-        autoFocus={false}
+        submitOnEnter={false}
       />
 
       {!isSearching ? (
-        // 検索クエリが空 = 通常のコース一覧表示
         <CoursesGrid courses={initialCourses} />
       ) : (
-        // 検索中
-        <SearchResults
+        <SearchResultsList
           query={debounced}
           results={results}
           loading={loading}
           error={error}
-          onClear={() => setQuery("")}
         />
       )}
     </div>
@@ -161,65 +151,5 @@ function CoursesGrid({ courses }: { courses: CourseSummary[] }) {
         );
       })}
     </ul>
-  );
-}
-
-function SearchResults({
-  query,
-  results,
-  loading,
-  error,
-  onClear,
-}: {
-  query: string;
-  results: ApiResult[];
-  loading: boolean;
-  error: string | null;
-  onClear: () => void;
-}) {
-  return (
-    <div className="space-y-4">
-      <div className="flex items-baseline justify-between gap-3">
-        <p className="text-sm text-zinc-700 dark:text-zinc-300">
-          🔍 「<span className="font-medium">{query}</span>」の検索結果{" "}
-          {loading ? "(検索中…)" : `(${results.length} 件)`}
-        </p>
-        <button
-          type="button"
-          onClick={onClear}
-          className="text-xs text-zinc-600 dark:text-zinc-400 underline hover:text-zinc-900 dark:hover:text-zinc-100"
-        >
-          ✕ クリアして一覧に戻る
-        </button>
-      </div>
-
-      {error && (
-        <div className="rounded-md border border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-950 p-3 text-sm text-red-800 dark:text-red-100">
-          ❌ {error}
-        </div>
-      )}
-
-      {!loading && results.length === 0 && !error ? (
-        <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 text-center space-y-2">
-          <p className="text-sm text-zinc-700 dark:text-zinc-300">
-            該当するレッスンが見つかりませんでした。
-          </p>
-          <p className="text-xs text-zinc-500">
-            別のキーワード(部位名、種目名 等)でお試しください。
-          </p>
-        </div>
-      ) : (
-        <ul className="space-y-3">
-          {results.map((r) => (
-            <SearchResultCard
-              key={r.id}
-              result={r}
-              query={query}
-              isCompleted={r.is_completed}
-            />
-          ))}
-        </ul>
-      )}
-    </div>
   );
 }
