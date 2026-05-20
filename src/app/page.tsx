@@ -59,6 +59,22 @@ export default async function Home() {
           </ul>
         </div>
 
+        <div className="rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950 p-4 text-sm">
+          <h2 className="font-semibold mb-2 text-emerald-900 dark:text-emerald-100">
+            📊 マイ学習ログ
+          </h2>
+          <ul className="space-y-1">
+            <li>
+              <Link
+                href="/my-log"
+                className="text-emerald-700 dark:text-emerald-300 underline hover:text-emerald-900 dark:hover:text-emerald-100"
+              >
+                → 振り返り・学習履歴
+              </Link>
+            </li>
+          </ul>
+        </div>
+
         {admin && (
           <div className="rounded-lg border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950 p-4 text-sm">
             <h2 className="font-semibold mb-2 text-violet-900 dark:text-violet-100">
