@@ -8,6 +8,8 @@ import { updateSession } from "@/lib/supabase/middleware";
 const PUBLIC_PATH_PREFIXES = [
   "/login",
   "/invite",
+  "/forgot-password", // パスワード忘れ → リセットメール送信
+  "/reset-password",  // リセットメールリンクの着地点
   "/api", // API は各エンドポイントで個別に認証
 ];
 

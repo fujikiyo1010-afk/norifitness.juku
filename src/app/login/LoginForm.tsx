@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { signIn } from "./actions";
 
 export function LoginForm({ next }: { next: string | null }) {
@@ -84,6 +85,13 @@ export function LoginForm({ next }: { next: string | null }) {
       >
         {pending ? "ログイン中…" : "ログイン"}
       </button>
+
+      <Link
+        href="/forgot-password"
+        className="block text-center text-xs text-zinc-600 dark:text-zinc-400 underline"
+      >
+        パスワードを忘れた方 →
+      </Link>
     </form>
   );
 }

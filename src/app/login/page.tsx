@@ -26,7 +26,7 @@ export default async function LoginPage({
         <LoginForm next={next ?? null} />
 
         <p className="text-xs text-center text-zinc-500">
-          パスワードを忘れた場合は、サポート LINE までご連絡ください
+          ログインできない場合は、サポート LINE までご連絡ください
         </p>
       </div>
     </main>
