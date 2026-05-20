@@ -158,6 +158,37 @@ export async function getMyLessonProgress(
   return map;
 }
 
+export type LessonReview = {
+  id: string;
+  learned: string | null;
+  impressed: string | null;
+  next_action: string | null;
+  updated_at: string;
+};
+
+/**
+ * 現在のログインユーザーの 3 行振り返りを取得。
+ * 未記入なら null。RLS により他人の振り返りは取得不可。
+ */
+export async function getMyLessonReview(
+  lessonId: string
+): Promise<LessonReview | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("lesson_reviews")
+    .select("id, learned, impressed, next_action, updated_at")
+    .eq("lesson_id", lessonId)
+    .maybeSingle();
+  if (!data) return null;
+  return {
+    id: data.id as string,
+    learned: (data.learned as string | null) ?? null,
+    impressed: (data.impressed as string | null) ?? null,
+    next_action: (data.next_action as string | null) ?? null,
+    updated_at: data.updated_at as string,
+  };
+}
+
 /**
  * コースに含まれる公開済みレッスンの ID 配列を取得。
  * 進捗集計のために使う。

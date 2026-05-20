@@ -5,9 +5,11 @@ import {
   getPublicChapter,
   getPublicLesson,
   getMyLessonProgress,
+  getMyLessonReview,
 } from "@/lib/courses/queries";
 import { VimeoEmbed } from "@/components/VimeoEmbed";
 import { CompleteButton } from "./CompleteButton";
+import { ReviewAccordion } from "./ReviewAccordion";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +35,10 @@ export default async function StudentLessonPage({
     notFound();
   }
 
-  const progressMap = await getMyLessonProgress([lesson.id]);
+  const [progressMap, review] = await Promise.all([
+    getMyLessonProgress([lesson.id]),
+    getMyLessonReview(lesson.id),
+  ]);
   const isCompleted = progressMap.get(lesson.id) === true;
 
   return (
@@ -98,6 +103,11 @@ export default async function StudentLessonPage({
         {/* 学習完了ボタン */}
         <section className="space-y-2">
           <CompleteButton lessonId={lesson.id} initialCompleted={isCompleted} />
+        </section>
+
+        {/* 3 行振り返り (アコーディオン) */}
+        <section className="space-y-2">
+          <ReviewAccordion lessonId={lesson.id} initial={review} />
         </section>
 
         {/* 説明 */}
