@@ -2,7 +2,6 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import {
   getMyFlashbackReview,
-  listMyUnreviewedCompletedLessons,
   type MyReviewWithContext,
 } from "@/lib/courses/queries";
 
@@ -18,7 +17,7 @@ export default async function MyLogPage() {
   const supabase = await createClient();
 
   // 各セクションのカウント取得
-  const [{ count: reviewCount }, { count: completedCount }, flashback, unreviewed] =
+  const [{ count: reviewCount }, { count: completedCount }, flashback] =
     await Promise.all([
       supabase.from("lesson_reviews").select("*", { count: "exact", head: true }),
       supabase
@@ -26,7 +25,6 @@ export default async function MyLogPage() {
         .select("*", { count: "exact", head: true })
         .eq("is_completed", true),
       getMyFlashbackReview(),
-      listMyUnreviewedCompletedLessons(),
     ]);
 
   return (
@@ -58,11 +56,6 @@ export default async function MyLogPage() {
             title="振り返り"
             count={reviewCount ?? 0}
             countLabel="件記入"
-            badge={
-              unreviewed.length > 0
-                ? `${unreviewed.length} 件 未記入`
-                : null
-            }
           />
           <HubCard
             icon="🔖"
@@ -143,7 +136,6 @@ function HubCard({
   title,
   count,
   countLabel,
-  badge,
   comingSoon = false,
 }: {
   href?: string;
@@ -151,7 +143,6 @@ function HubCard({
   title: string;
   count?: number;
   countLabel?: string;
-  badge?: string | null;
   comingSoon?: boolean;
 }) {
   const content = (
@@ -181,11 +172,6 @@ function HubCard({
             {count}
           </span>
           <span className="ml-1 text-xs text-zinc-500">{countLabel}</span>
-        </p>
-      )}
-      {badge && (
-        <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
-          ⚠️ {badge}
         </p>
       )}
       {!comingSoon && href && (

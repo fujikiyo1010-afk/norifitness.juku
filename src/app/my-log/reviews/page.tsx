@@ -1,17 +1,11 @@
 import Link from "next/link";
-import {
-  listMyReviewsWithContext,
-  listMyUnreviewedCompletedLessons,
-} from "@/lib/courses/queries";
+import { listMyReviewsWithContext } from "@/lib/courses/queries";
 import { ReviewsListView } from "./ReviewsListView";
 
 export const dynamic = "force-dynamic";
 
 export default async function MyReviewsPage() {
-  const [reviews, unreviewed] = await Promise.all([
-    listMyReviewsWithContext(),
-    listMyUnreviewedCompletedLessons(),
-  ]);
+  const reviews = await listMyReviewsWithContext();
 
   return (
     <main className="flex flex-1 flex-col p-6 sm:p-8">
@@ -36,10 +30,7 @@ export default async function MyReviewsPage() {
           </p>
         </header>
 
-        <ReviewsListView
-          reviews={reviews}
-          unreviewedLessons={unreviewed}
-        />
+        <ReviewsListView reviews={reviews} />
       </div>
     </main>
   );

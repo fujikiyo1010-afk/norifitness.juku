@@ -21,17 +21,7 @@ type Review = {
   updated_at: string;
 };
 
-type UnreviewedLesson = {
-  lesson_id: string;
-  lesson_title: string;
-  chapter_id: string;
-  chapter_title: string;
-  course_id: string;
-  course_title: string;
-  completed_at: string;
-};
-
-type Mode = "latest" | "by_course" | "unwritten";
+type Mode = "latest" | "by_course";
 
 function formatJst(iso: string): string {
   if (!iso) return "—";
@@ -72,10 +62,8 @@ function Highlight({ text, query }: { text: string; query: string }) {
 
 export function ReviewsListView({
   reviews,
-  unreviewedLessons,
 }: {
   reviews: Review[];
-  unreviewedLessons: UnreviewedLesson[];
 }) {
   const [mode, setMode] = useState<Mode>("latest");
   const [query, setQuery] = useState("");
@@ -129,13 +117,6 @@ export function ReviewsListView({
           label="コース別"
           count={reviews.length}
         />
-        <ModeTab
-          active={mode === "unwritten"}
-          onClick={() => setMode("unwritten")}
-          label="未記入"
-          count={unreviewedLessons.length}
-          highlight={unreviewedLessons.length > 0}
-        />
       </div>
 
       {/* 検索中の表示 */}
@@ -152,9 +133,6 @@ export function ReviewsListView({
       {mode === "by_course" && (
         <CourseGroupedList reviews={filteredReviews} query={query} />
       )}
-      {mode === "unwritten" && (
-        <UnwrittenList lessons={unreviewedLessons} />
-      )}
     </div>
   );
 }
@@ -164,13 +142,11 @@ function ModeTab({
   onClick,
   label,
   count,
-  highlight = false,
 }: {
   active: boolean;
   onClick: () => void;
   label: string;
   count: number;
-  highlight?: boolean;
 }) {
   return (
     <button
@@ -183,13 +159,7 @@ function ModeTab({
       }`}
     >
       {label}
-      <span
-        className={`ml-1.5 text-xs rounded-full px-1.5 py-0.5 ${
-          highlight
-            ? "bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200"
-            : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
-        }`}
-      >
+      <span className="ml-1.5 text-xs rounded-full px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
         {count}
       </span>
     </button>
@@ -306,52 +276,6 @@ function CourseGroupedList({
           </div>
         );
       })}
-    </div>
-  );
-}
-
-function UnwrittenList({ lessons }: { lessons: UnreviewedLesson[] }) {
-  if (lessons.length === 0) {
-    return (
-      <div className="rounded-lg border border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950 p-4 text-center space-y-1">
-        <p className="text-sm text-emerald-900 dark:text-emerald-100 font-medium">
-          🎉 素晴らしい!
-        </p>
-        <p className="text-xs text-emerald-700 dark:text-emerald-300">
-          完了したレッスンすべてに振り返りを書いています。
-        </p>
-      </div>
-    );
-  }
-  return (
-    <div className="space-y-3">
-      <p className="text-xs text-zinc-600 dark:text-zinc-400">
-        💡 完了マークしたけど振り返り未記入のレッスン。書き残しておくと後で活きます。
-      </p>
-      <ul className="space-y-2">
-        {lessons.map((l) => (
-          <li
-            key={l.lesson_id}
-            className="rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3"
-          >
-            <Link
-              href={`/courses/${l.course_id}/chapters/${l.chapter_id}/lessons/${l.lesson_id}`}
-              className="group block"
-            >
-              <p className="font-medium text-zinc-900 dark:text-zinc-50 group-hover:underline">
-                {l.lesson_title}
-              </p>
-              <p className="text-xs text-zinc-500 mt-0.5">
-                📖 {l.course_title} / 📑 {l.chapter_title}
-                {l.completed_at && ` · 完了 ${formatJst(l.completed_at)}`}
-              </p>
-              <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
-                → 振り返りを書く
-              </p>
-            </Link>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }
