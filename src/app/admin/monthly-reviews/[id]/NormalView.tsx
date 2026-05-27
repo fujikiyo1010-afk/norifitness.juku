@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
 import {
   AUDIT_QUESTIONS,
@@ -11,6 +12,7 @@ import {
   type MonthlyAuditItems,
 } from "@/lib/monthly-audit/types";
 import { formatElapsed } from "@/lib/hooks/useVideoRecorder";
+import { useUploadJob } from "@/lib/upload/UploadJobContext";
 import type { DetailViewData, RecordedVideo } from "./DetailClient";
 
 /**
@@ -101,6 +103,9 @@ export function NormalView({
           {recorded ? (
             <RecordedPreview
               recorded={recorded}
+              auditId={audit.id}
+              userName={user.name}
+              targetMonthLabel={audit.monthLabel}
               nextAuditId={nextAuditId}
               onDiscard={onDiscardRecorded}
               onRetry={() => {
@@ -212,15 +217,52 @@ export function NormalView({
 
 function RecordedPreview({
   recorded,
+  auditId,
+  userName,
+  targetMonthLabel,
   nextAuditId,
   onDiscard,
   onRetry,
 }: {
   recorded: RecordedVideo;
+  auditId: string;
+  userName: string;
+  targetMonthLabel: string;
   nextAuditId: string | null;
   onDiscard: () => void;
   onRetry: () => void;
 }) {
+  const router = useRouter();
+  const { job, startUpload } = useUploadJob();
+  const isUploading = job.status === "uploading";
+
+  const handleSendAndExit = () => {
+    if (isUploading) return;
+    startUpload({
+      auditId,
+      userName,
+      targetMonthLabel,
+      blob: recorded.blob,
+      mimeType: recorded.mimeType,
+      durationSec: recorded.durationSec,
+    });
+    // 即座に受信箱に戻る (案 B: 裏でアップロード継続)
+    router.push("/admin/monthly-reviews");
+  };
+
+  const handleSendAndNext = () => {
+    if (isUploading || !nextAuditId) return;
+    startUpload({
+      auditId,
+      userName,
+      targetMonthLabel,
+      blob: recorded.blob,
+      mimeType: recorded.mimeType,
+      durationSec: recorded.durationSec,
+    });
+    // 即座に次の未返答へ
+    router.push(`/admin/monthly-reviews/${nextAuditId}`);
+  };
   const blobUrl = useMemo(
     () => URL.createObjectURL(recorded.blob),
     [recorded.blob]
@@ -288,26 +330,34 @@ function RecordedPreview({
           </div>
         </div>
 
-        {/* 右: 送信操作ボタン群 (録画済み時のみ表示、Step 9c で機能化) */}
+        {/* 右: 送信操作ボタン群 (Step 9c で機能化、案 B: 裏でアップロード継続) */}
         <div className="flex flex-col gap-2 w-44 flex-shrink-0">
           <button
             disabled
             className="bg-white text-zinc-500 border-[#e8ebe9] px-4 py-2.5 rounded-lg text-xs font-medium border cursor-not-allowed opacity-60"
-            title="Step 9c-d で機能実装予定"
+            title="下書き保存は将来検討予定"
           >
             下書き保存
           </button>
           <button
-            disabled
-            className="bg-[#00897b]/50 text-white border-transparent px-4 py-2.5 rounded-lg text-xs font-bold border cursor-not-allowed opacity-60"
-            title="Step 9c-d で機能実装予定"
+            onClick={handleSendAndExit}
+            disabled={isUploading}
+            className="bg-[#00897b] text-white border-transparent px-4 py-2.5 rounded-lg text-xs font-bold border hover:bg-[#00695c] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title={isUploading ? "他の動画を送信中" : "送信して受信箱に戻る"}
           >
             送信して終了
           </button>
           <button
-            disabled
-            className="bg-zinc-900/70 text-white border-transparent px-4 py-2.5 rounded-lg text-xs font-bold border cursor-not-allowed opacity-60 flex items-center justify-center gap-1.5"
-            title="Step 9c-d で機能実装予定"
+            onClick={handleSendAndNext}
+            disabled={isUploading || !nextAuditId}
+            className="bg-zinc-900 text-white border-transparent px-4 py-2.5 rounded-lg text-xs font-bold border hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+            title={
+              isUploading
+                ? "他の動画を送信中"
+                : !nextAuditId
+                  ? "次の未返答はありません"
+                  : "送信して次の未返答へ"
+            }
           >
             送信して次へ
             <span className="text-[#00897b]">→</span>
