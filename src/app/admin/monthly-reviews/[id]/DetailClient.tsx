@@ -70,13 +70,16 @@ export function DetailClient({ data }: { data: DetailViewData }) {
   // 録画モード終了 (採用前に「← 録画モードを終了」)
   const handleExit = () => {
     setMode("normal");
-    // 録画モード中に録ってあった blob は破棄せず recorded を保持しない
-    // (recorded は「採用」を経由した時のみ更新される)
   };
 
   // 通常モードで「録画済み」を破棄 (録り直したい)
   const handleDiscardRecorded = () => {
     setRecorded(null);
+  };
+
+  // ファイル選択 (Step 9e)。スマホ動画や他ツールで撮ったファイルを recorded として受け入れる
+  const handleSelectFile = (video: RecordedVideo) => {
+    setRecorded(video);
   };
 
   return (
@@ -87,6 +90,7 @@ export function DetailClient({ data }: { data: DetailViewData }) {
             data={data}
             recorded={recorded}
             onStartRecording={() => setMode("recording_ready")}
+            onSelectFile={handleSelectFile}
             onDiscardRecorded={handleDiscardRecorded}
           />
         ) : (

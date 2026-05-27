@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AUDIT_QUESTIONS,
   type AuditQuestion,
@@ -24,15 +24,64 @@ export function NormalView({
   data,
   recorded,
   onStartRecording,
+  onSelectFile,
   onDiscardRecorded,
 }: {
   data: DetailViewData;
   recorded: RecordedVideo | null;
   onStartRecording: () => void;
+  onSelectFile: (video: RecordedVideo) => void;
   onDiscardRecorded: () => void;
 }) {
   const { audit, user, pastReplied, replyCount, remainingCount, nextAuditId, adminName, adminInitial } =
     data;
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
+
+  const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500 MB
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // 同じファイル再選択可
+    if (!file) return;
+    setFileError(null);
+
+    if (!file.type.startsWith("video/")) {
+      setFileError("動画ファイルを選んでください (MP4 / MOV / WebM 等)");
+      return;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      setFileError(
+        `ファイルサイズが大きすぎます (${(file.size / 1024 / 1024).toFixed(0)} MB / 上限 500 MB)`
+      );
+      return;
+    }
+
+    // duration を一時的な <video> 要素で取得
+    const videoEl = document.createElement("video");
+    videoEl.preload = "metadata";
+    const url = URL.createObjectURL(file);
+    videoEl.src = url;
+    videoEl.onloadedmetadata = () => {
+      URL.revokeObjectURL(url);
+      const durationSec = Math.floor(videoEl.duration);
+      onSelectFile({
+        blob: file,
+        mimeType: file.type,
+        durationSec: isFinite(durationSec) && durationSec > 0 ? durationSec : 0,
+      });
+    };
+    videoEl.onerror = () => {
+      URL.revokeObjectURL(url);
+      setFileError("動画ファイルの読み込みに失敗しました");
+    };
+  };
+
+  const handleClickFileButton = () => {
+    setFileError(null);
+    fileInputRef.current?.click();
+  };
 
   return (
     <>
@@ -133,9 +182,9 @@ export function NormalView({
                   <div className="text-[10px] opacity-80">推奨 ・ 読みながらすぐ撮れる</div>
                 </button>
                 <button
-                  disabled
-                  className="bg-white border-[#e8ebe9] text-zinc-700 border rounded-xl px-3.5 py-4 text-center cursor-not-allowed opacity-60"
-                  title="Step 9e で機能実装予定"
+                  onClick={handleClickFileButton}
+                  className="bg-white border-[#e8ebe9] text-zinc-700 border rounded-xl px-3.5 py-4 text-center cursor-pointer transition-all hover:border-[#00897b] hover:bg-[rgba(0,137,123,0.04)]"
+                  title="動画ファイルを選んでアップロード"
                 >
                   <span className="block mb-1.5 flex justify-center">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
@@ -143,9 +192,21 @@ export function NormalView({
                     </svg>
                   </span>
                   <div className="text-[13px] font-bold mb-0.5">ファイルをアップロード</div>
-                  <div className="text-[10px] opacity-70">tldv / スタジオ撮影 等</div>
+                  <div className="text-[10px] opacity-70">スマホ動画 / tldv / スタジオ撮影 等</div>
                 </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="video/*"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
               </div>
+              {fileError && (
+                <div className="mt-3 px-3 py-2 bg-[#fef5f5] border border-[#d32f2f]/30 text-[#d32f2f] text-xs rounded-md text-center">
+                  {fileError}
+                </div>
+              )}
             </>
           )}
         </section>
