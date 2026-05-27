@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useUploadJob } from "@/lib/upload/UploadJobContext";
 
@@ -16,6 +17,16 @@ import { useUploadJob } from "@/lib/upload/UploadJobContext";
 export function UploadIndicator() {
   const { job, retry, dismiss } = useUploadJob();
   const router = useRouter();
+  const prevStatusRef = useRef(job.status);
+
+  // uploading → success に変わった瞬間に受信箱を自動 refresh
+  // (受信箱の楽観表示が本物の DB データに置換される)
+  useEffect(() => {
+    if (prevStatusRef.current === "uploading" && job.status === "success") {
+      router.refresh();
+    }
+    prevStatusRef.current = job.status;
+  }, [job.status, router]);
 
   if (job.status === "idle") return null;
 
