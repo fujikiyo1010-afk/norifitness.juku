@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo, useRef } from "react";
 import {
   AUDIT_QUESTIONS,
   type AuditQuestion,
@@ -8,35 +9,112 @@ import {
   type TextAnswer,
   type MonthlyAuditItems,
 } from "@/lib/monthly-audit/types";
-import type { DetailMode, DetailViewData } from "./DetailClient";
+import { useVideoRecorder, formatElapsed } from "@/lib/hooks/useVideoRecorder";
+import type { DetailMode, DetailViewData, RecordedVideo } from "./DetailClient";
 
 /**
- * 録画モード (Step 9a で UI スケルトン、9b で MediaRecorder 統合)。
+ * 録画モード (Step 9b で MediaRecorder 統合済)。
  *
  * 内部で 3 状態を扱う:
  *   - recording_ready (準備中): カメラプレビュー + 録画開始ボタン
- *   - recording (録画中): タイマー + 録画停止ボタン (9b)
- *   - preview (プレビュー): 再生 + 採用/録り直し (9b)
+ *   - recording (録画中): タイマー + 録画停止ボタン
+ *   - preview (プレビュー): 再生 + 採用/録り直し
  *
- * レイアウト: 左右 50:50 grid
- *   - 左: 受講生プロフィール + 17 項目スクロール (常に表示)
- *   - 右: カメラエリア + 録画コントロール (mode に応じて変化)
+ * mode は外部 (DetailClient) から渡る。録画フックの state と連動して
+ * recording / preview の表示を切り替える。
  *
- * Step 9a 時点では recording_ready の UI のみ実装、
- * カメラ起動・録画機能はまだなし (Step 9b で MediaRecorder 統合)。
+ * 採用 → onAccept(video) で normal モードに戻る (Blob 持ち越し)。
+ * 終了 → onExit で normal モードに戻る (Blob 破棄)。
+ *
+ * カメラの cleanup は useVideoRecorder の useEffect で自動実行。
  */
 export function RecordingView({
   data,
   mode,
   onChangeMode,
-  onExitRecording,
+  onAccept,
+  onExit,
 }: {
   data: DetailViewData;
   mode: DetailMode;
   onChangeMode: (mode: DetailMode) => void;
-  onExitRecording: () => void;
+  onAccept: (video: RecordedVideo) => void;
+  onExit: () => void;
 }) {
   const { audit, user } = data;
+  const recorder = useVideoRecorder();
+  const liveVideoRef = useRef<HTMLVideoElement>(null);
+  const previewVideoRef = useRef<HTMLVideoElement>(null);
+
+  // 録画モード突入時、自動でカメラ起動
+  useEffect(() => {
+    if (mode === "recording_ready" && recorder.state === "idle") {
+      recorder.startCamera();
+    }
+  }, [mode, recorder]);
+
+  // ライブカメラを <video> 要素に流す
+  useEffect(() => {
+    if (liveVideoRef.current && recorder.videoStream) {
+      liveVideoRef.current.srcObject = recorder.videoStream;
+    }
+  }, [recorder.videoStream]);
+
+  // 録画停止 → mode を preview に変更
+  useEffect(() => {
+    if (recorder.state === "stopped" && mode === "recording") {
+      onChangeMode("preview");
+    }
+  }, [recorder.state, mode, onChangeMode]);
+
+  // プレビュー用の Blob URL
+  const blobUrl = useMemo(() => {
+    if (!recorder.recordedBlob) return null;
+    return URL.createObjectURL(recorder.recordedBlob);
+  }, [recorder.recordedBlob]);
+
+  // cleanup: blobUrl が変わった時に古い URL を revoke
+  useEffect(() => {
+    return () => {
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
+    };
+  }, [blobUrl]);
+
+  // 録画開始ボタン
+  const handleStartRec = () => {
+    recorder.startRecording();
+    onChangeMode("recording");
+  };
+
+  // 録画停止ボタン
+  const handleStopRec = () => {
+    recorder.stopRecording();
+    // useEffect で mode を preview に切り替える
+  };
+
+  // 採用ボタン (プレビューから)
+  const handleAccept = () => {
+    if (!recorder.recordedBlob) return;
+    onAccept({
+      blob: recorder.recordedBlob,
+      mimeType: recorder.recordedMimeType,
+      durationSec: recorder.elapsedSec,
+    });
+    // カメラは onAccept 後の unmount で cleanup される
+    recorder.stopCamera();
+  };
+
+  // 録り直し
+  const handleRetry = () => {
+    recorder.discardRecording();
+    onChangeMode("recording_ready");
+  };
+
+  // 録画モード終了
+  const handleExit = () => {
+    recorder.stopCamera();
+    onExit();
+  };
 
   return (
     <>
@@ -59,10 +137,12 @@ export function RecordingView({
           <StatusBadge mode={mode} />
         </div>
         <button
-          onClick={onExitRecording}
+          onClick={handleExit}
           className="text-xs text-white/70 hover:text-white cursor-pointer"
+          disabled={mode === "recording"}
+          title={mode === "recording" ? "録画停止後に終了できます" : ""}
         >
-          ← 録画モードを終了
+          {mode === "recording" ? "⚠ 録画中: 停止ボタンで終了" : "← 録画モードを終了"}
         </button>
       </header>
 
@@ -100,9 +180,140 @@ export function RecordingView({
           </div>
         </div>
 
-        {/* === 右: カメラエリア (ダークテーマ) === */}
+        {/* === 右: カメラ/プレビューエリア === */}
         <div className="bg-zinc-900 flex flex-col items-center justify-center p-6 relative">
-          <CameraArea mode={mode} onChangeMode={onChangeMode} />
+          {recorder.error && (
+            <div className="bg-red-500/10 border border-red-500/40 text-red-200 text-xs px-3 py-2 rounded-lg mb-3 max-w-md text-center">
+              {recorder.error}
+            </div>
+          )}
+
+          {/* recording_ready + recording: カメラプレビュー (video 要素は 1 つに統合、
+              mode 切替時に DOM 再生成を避けて srcObject 紐付けを維持) */}
+          {(mode === "recording_ready" || mode === "recording") && (
+            <>
+              <div
+                className={`w-full aspect-[4/3] bg-[#0a0a0a] rounded-xl mb-5 overflow-hidden relative transition-all ${
+                  mode === "recording"
+                    ? "border-2 border-[#d32f2f] shadow-[0_0_0_4px_rgba(211,47,47,.18)]"
+                    : "border-2 border-white/10"
+                }`}
+              >
+                <video
+                  ref={liveVideoRef}
+                  autoPlay
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover"
+                />
+                {/* 録画中タイマー */}
+                {mode === "recording" && (
+                  <div className="absolute top-3 left-3 bg-black/60 text-white px-2.5 py-1 rounded-md font-mono text-xs font-semibold flex items-center gap-1.5">
+                    <span className="w-2 h-2 bg-[#d32f2f] rounded-full animate-pulse" />
+                    {formatElapsed(recorder.elapsedSec)}
+                  </div>
+                )}
+                {/* カメラ起動前のオーバーレイ */}
+                {mode === "recording_ready" && recorder.state !== "ready" && (
+                  <div className="absolute inset-0 flex items-center justify-center text-white/60 text-xs bg-[#0a0a0a]/80">
+                    {recorder.state === "starting" ? "カメラ起動中..." : "待機中"}
+                  </div>
+                )}
+              </div>
+
+              {/* mode に応じてボタンを切替 */}
+              {mode === "recording_ready" ? (
+                <>
+                  <button
+                    onClick={handleStartRec}
+                    disabled={recorder.state !== "ready"}
+                    className="w-16 h-16 rounded-full bg-[#d32f2f] text-white flex items-center justify-center text-2xl shadow-[0_4px_16px_rgba(211,47,47,.4)] hover:scale-105 transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
+                    title={recorder.state !== "ready" ? "カメラ起動を待っています" : "録画開始"}
+                  >
+                    ●
+                  </button>
+                  <div className="text-[11px] text-white/60 mt-2 text-center">
+                    {recorder.state === "ready"
+                      ? "録画開始 (押すとすぐ録画が始まります)"
+                      : "カメラ準備中..."}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={handleStopRec}
+                    className="w-16 h-16 rounded-full bg-white text-[#d32f2f] flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
+                    title="録画停止"
+                  >
+                    <span className="w-5 h-5 bg-[#d32f2f] rounded" />
+                  </button>
+                  <div className="text-[11px] text-white/60 mt-2 text-center">
+                    録画停止 (停止後にプレビュー確認できます)
+                  </div>
+                </>
+              )}
+            </>
+          )}
+
+          {/* preview: 録画した動画を再生 + 採用/録り直し */}
+          {mode === "preview" && blobUrl && (
+            <>
+              <video
+                ref={previewVideoRef}
+                src={blobUrl}
+                controls
+                playsInline
+                preload="auto"
+                onLoadedMetadata={(e) => {
+                  // 最初のフレームを静止画表示 (黒画面回避)
+                  const v = e.currentTarget;
+                  if (v.currentTime === 0) v.currentTime = 0.1;
+                }}
+                className="w-full aspect-[4/3] bg-[#0a0a0a] rounded-xl mb-5 object-cover"
+              />
+              <div className="text-white/70 text-xs text-center mb-4 font-mono">
+                <span className="text-white font-semibold">録画完了</span> ・ 長さ:{" "}
+                <span className="text-white font-semibold">
+                  {formatElapsed(recorder.elapsedSec)}
+                </span>
+                {recorder.recordedBlob && (
+                  <>
+                    {" "}・ サイズ:{" "}
+                    <span className="text-white font-semibold">
+                      {(recorder.recordedBlob.size / 1024 / 1024).toFixed(2)} MB
+                    </span>
+                  </>
+                )}
+              </div>
+              <div className="flex gap-3 w-full max-w-md">
+                <button
+                  onClick={handleRetry}
+                  className="flex-1 bg-white/10 border border-white/20 text-white px-4 py-3 rounded-lg text-sm font-bold hover:bg-white/20 transition-colors flex items-center justify-center gap-1.5"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="w-3.5 h-3.5"
+                  >
+                    <polyline points="23 4 23 10 17 10" />
+                    <polyline points="1 20 1 14 7 14" />
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                  </svg>
+                  録り直す
+                </button>
+                <button
+                  onClick={handleAccept}
+                  className="flex-1 bg-[#00897b] text-white px-4 py-3 rounded-lg text-sm font-bold hover:bg-[#00695c] transition-colors flex items-center justify-center gap-1.5"
+                >
+                  ✓ この動画を採用
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </>
@@ -118,7 +329,7 @@ function StatusBadge({ mode }: { mode: DetailMode }) {
     recording_ready: "bg-white/10 text-white/80",
     recording: "bg-[#d32f2f] text-white",
     preview: "bg-[#00897b] text-white",
-    normal: "bg-white/10 text-white/80", // 通常表示されないが念のため
+    normal: "bg-white/10 text-white/80",
   }[mode];
 
   const label = {
@@ -138,79 +349,7 @@ function StatusBadge({ mode }: { mode: DetailMode }) {
 }
 
 // =====================================================================
-// カメラエリア (mode に応じて UI 変化)
-// =====================================================================
-
-function CameraArea({
-  mode,
-  onChangeMode,
-}: {
-  mode: DetailMode;
-  onChangeMode: (mode: DetailMode) => void;
-}) {
-  if (mode === "recording_ready") {
-    return (
-      <>
-        <div className="w-full aspect-[4/3] bg-[#0a0a0a] rounded-xl mb-5 flex items-center justify-center border-2 border-white/10 overflow-hidden">
-          <div className="text-white/60 text-center text-xs p-5">
-            <div className="w-24 h-24 rounded-full bg-white/10 mx-auto mb-3 flex items-center justify-center">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-10 h-10"
-              >
-                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-                <circle cx="12" cy="13" r="4" />
-              </svg>
-            </div>
-            のりさんの顔がここに映ります
-            <br />
-            <span className="text-[11px] opacity-60">
-              (Step 9b でカメラ起動を実装します)
-            </span>
-          </div>
-        </div>
-        <button
-          disabled
-          className="w-16 h-16 rounded-full bg-[#d32f2f] text-white flex items-center justify-center text-2xl shadow-[0_4px_16px_rgba(211,47,47,.4)] cursor-not-allowed opacity-50"
-          title="Step 9b で機能実装予定"
-        >
-          ●
-        </button>
-        <div className="text-[11px] text-white/60 mt-2 text-center">
-          録画開始 (Step 9b で実装)
-        </div>
-      </>
-    );
-  }
-
-  if (mode === "recording") {
-    // Step 9b で実装
-    return (
-      <div className="text-white/60 text-center text-xs">
-        (Step 9b で実装予定)
-      </div>
-    );
-  }
-
-  if (mode === "preview") {
-    // Step 9b で実装
-    return (
-      <div className="text-white/60 text-center text-xs">
-        (Step 9b で実装予定)
-      </div>
-    );
-  }
-
-  return null;
-}
-
-// =====================================================================
-// コンパクト QA アイテム (左側の 17 項目スクロール用)
+// コンパクト QA アイテム
 // =====================================================================
 
 function CompactQAItem({
@@ -220,7 +359,6 @@ function CompactQAItem({
   question: AuditQuestion;
   answer: BodyMeasureAnswer | ScoreAnswer | TextAnswer | undefined;
 }) {
-  // スコアまたは数値 (簡易表示)
   let score: string | null = null;
   if (question.type === "score") {
     const a = answer as ScoreAnswer | undefined;

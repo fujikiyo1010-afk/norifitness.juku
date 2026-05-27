@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useMemo } from "react";
 import {
   AUDIT_QUESTIONS,
   type AuditQuestion,
@@ -9,24 +10,24 @@ import {
   type TextAnswer,
   type MonthlyAuditItems,
 } from "@/lib/monthly-audit/types";
-import type { DetailViewData } from "./DetailClient";
+import { formatElapsed } from "@/lib/hooks/useVideoRecorder";
+import type { DetailViewData, RecordedVideo } from "./DetailClient";
 
 /**
- * 通常モード (Step 8 で実装した UI を移植)。
- *
- * - 受講生プロフィールカード
- * - 17 項目回答 (フラット表示)
- * - 過去の返信動画リスト
- * - 動画返信エリア (録画ボタンは onStartRecording を呼ぶ、Step 9a で機能化)
- * - 操作バー sticky bottom (Step 9c-d で機能化)
- * - 戻るリンク
+ * 通常モード。録画済み Blob が DetailClient から渡れば、
+ * 動画返信エリアに「録画済みプレビュー」を表示する (Step 9b)。
+ * 「送信して終了 / 次へ」は Step 9c で機能化予定。
  */
 export function NormalView({
   data,
+  recorded,
   onStartRecording,
+  onDiscardRecorded,
 }: {
   data: DetailViewData;
+  recorded: RecordedVideo | null;
   onStartRecording: () => void;
+  onDiscardRecorded: () => void;
 }) {
   const { audit, user, pastReplied, replyCount, remainingCount, nextAuditId, adminName, adminInitial } =
     data;
@@ -85,31 +86,63 @@ export function NormalView({
           </div>
         </section>
 
-        {/* 17 項目回答 */}
-        <section className="bg-white border border-[#e8ebe9] rounded-xl px-5 py-4 mb-3.5">
+        {/* 動画返信エリア (画面開いてすぐ録画開始できるよう最上部に、2026-05-27 きよむさん要望) */}
+        <section className="bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] border border-[rgba(255,235,59,0.55)] rounded-xl px-5 py-4 mb-3.5">
           <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-[#e8ebe9]">
-            <h3 className="text-[13px] font-bold text-zinc-700 tracking-wide flex items-center gap-1.5">
+            <h3 className="text-[13px] font-bold text-[#b8860b] tracking-wide flex items-center gap-1.5">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
+                <polygon points="23 7 16 12 23 17 23 7" />
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
               </svg>
-              提出された内容 (17 項目)
+              動画で返信する (1 本にまとめて)
             </h3>
-            {audit.avgScore !== null && (
-              <span className="bg-[#f8f9fa] text-zinc-600 text-[10px] px-2 py-0.5 rounded-full font-mono font-medium">
-                平均 {audit.avgScore.toFixed(1)} / 10
-              </span>
-            )}
           </div>
-          <div className="flex flex-col">
-            {AUDIT_QUESTIONS.map((q) => (
-              <QAItem
-                key={q.key}
-                question={q}
-                answer={audit.items[q.key as keyof MonthlyAuditItems]}
-              />
-            ))}
-          </div>
+
+          {recorded ? (
+            <RecordedPreview
+              recorded={recorded}
+              nextAuditId={nextAuditId}
+              onDiscard={onDiscardRecorded}
+              onRetry={() => {
+                onDiscardRecorded();
+                onStartRecording();
+              }}
+            />
+          ) : (
+            <>
+              <p className="text-xs text-zinc-700 text-center mb-3 leading-relaxed">
+                下の 17 項目を読みながら、1 本の動画にまとめて返信してください。
+              </p>
+              <div className="grid grid-cols-2 gap-2.5">
+                <button
+                  onClick={onStartRecording}
+                  className="bg-[#00897b] border-[#00897b] text-white border rounded-xl px-3.5 py-4 text-center cursor-pointer transition-all hover:bg-[#00695c] hover:border-[#00695c]"
+                >
+                  <span className="block mb-1.5 flex justify-center">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+                      <polygon points="23 7 16 12 23 17 23 7" />
+                      <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                    </svg>
+                  </span>
+                  <div className="text-[13px] font-bold mb-0.5">ブラウザで録画する</div>
+                  <div className="text-[10px] opacity-80">推奨 ・ 読みながらすぐ撮れる</div>
+                </button>
+                <button
+                  disabled
+                  className="bg-white border-[#e8ebe9] text-zinc-700 border rounded-xl px-3.5 py-4 text-center cursor-not-allowed opacity-60"
+                  title="Step 9e で機能実装予定"
+                >
+                  <span className="block mb-1.5 flex justify-center">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+                      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                    </svg>
+                  </span>
+                  <div className="text-[13px] font-bold mb-0.5">ファイルをアップロード</div>
+                  <div className="text-[10px] opacity-70">tldv / スタジオ撮影 等</div>
+                </button>
+              </div>
+            </>
+          )}
         </section>
 
         {/* 過去の返信動画リスト */}
@@ -139,70 +172,157 @@ export function NormalView({
           )}
         </section>
 
-        {/* 動画返信エリア */}
-        <section className="bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] border border-[rgba(255,235,59,0.55)] rounded-xl px-5 py-4 mb-3.5">
+        {/* 17 項目回答 */}
+        <section className="bg-white border border-[#e8ebe9] rounded-xl px-5 py-4 mb-3.5">
           <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-[#e8ebe9]">
-            <h3 className="text-[13px] font-bold text-[#b8860b] tracking-wide flex items-center gap-1.5">
+            <h3 className="text-[13px] font-bold text-zinc-700 tracking-wide flex items-center gap-1.5">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
-                <polygon points="23 7 16 12 23 17 23 7" />
-                <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
               </svg>
-              動画で返信する (1 本にまとめて)
+              提出された内容 (17 項目)
             </h3>
+            {audit.avgScore !== null && (
+              <span className="bg-[#f8f9fa] text-zinc-600 text-[10px] px-2 py-0.5 rounded-full font-mono font-medium">
+                平均 {audit.avgScore.toFixed(1)} / 10
+              </span>
+            )}
           </div>
-          <p className="text-xs text-zinc-700 text-center mb-3 leading-relaxed">
-            上の 17 項目を読みながら、1 本の動画にまとめて返信してください。
-          </p>
-          <div className="grid grid-cols-2 gap-2.5">
-            {/* ブラウザで録画 (Step 9a でクリック可能、9b で実機能) */}
-            <button
-              onClick={onStartRecording}
-              className="bg-[#00897b] border-[#00897b] text-white border rounded-xl px-3.5 py-4 text-center cursor-pointer transition-all hover:bg-[#00695c] hover:border-[#00695c]"
-            >
-              <span className="block mb-1.5 flex justify-center">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
-                  <polygon points="23 7 16 12 23 17 23 7" />
-                  <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-                </svg>
-              </span>
-              <div className="text-[13px] font-bold mb-0.5">ブラウザで録画する</div>
-              <div className="text-[10px] opacity-80">推奨 ・ 読みながらすぐ撮れる</div>
-            </button>
-            {/* ファイルアップロード (Step 9e で実装) */}
-            <button
-              disabled
-              className="bg-white border-[#e8ebe9] text-zinc-700 border rounded-xl px-3.5 py-4 text-center cursor-not-allowed opacity-60"
-              title="Step 9e で機能実装予定"
-            >
-              <span className="block mb-1.5 flex justify-center">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
-                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-                </svg>
-              </span>
-              <div className="text-[13px] font-bold mb-0.5">ファイルをアップロード</div>
-              <div className="text-[10px] opacity-70">tldv / スタジオ撮影 等</div>
-            </button>
+          <div className="flex flex-col">
+            {AUDIT_QUESTIONS.map((q) => (
+              <QAItem
+                key={q.key}
+                question={q}
+                answer={audit.items[q.key as keyof MonthlyAuditItems]}
+              />
+            ))}
           </div>
         </section>
 
-        {/* 操作バー */}
-        <div className="flex gap-2.5 pt-4 pb-2 sticky bottom-0 bg-[#f8f9fa] border-t border-[#e8ebe9] mt-4">
-          <ActionButton kind="mute" label="下書き保存" />
-          <ActionButton kind="primary" label="送信して終了" />
-          <ActionButton
-            kind="dark"
-            label="送信して次へ"
-            arrow
-            disabledExtra={!nextAuditId ? "(次の未返答なし)" : undefined}
-          />
-        </div>
+        {/* 操作バーは「録画済み」カード内に統合 (2026-05-27 きよむさん要望)
+            録画前は送信ボタンが無意味なため非表示 */}
       </div>
     </>
   );
 }
 
 // =====================================================================
-// 子コンポーネント
+// 録画済みプレビュー (Step 9b で追加)
+// =====================================================================
+
+function RecordedPreview({
+  recorded,
+  nextAuditId,
+  onDiscard,
+  onRetry,
+}: {
+  recorded: RecordedVideo;
+  nextAuditId: string | null;
+  onDiscard: () => void;
+  onRetry: () => void;
+}) {
+  const blobUrl = useMemo(
+    () => URL.createObjectURL(recorded.blob),
+    [recorded.blob]
+  );
+
+  useEffect(() => {
+    return () => {
+      URL.revokeObjectURL(blobUrl);
+    };
+  }, [blobUrl]);
+
+  // NOTE: 録画動画のサムネ (最初のフレームを poster に) は、
+  // MediaRecorder で生成された WebM の duration バグ + ブラウザの autoplay policy の
+  // 組み合わせで安定動作させるのが難しく、Step 9 完了後に再挑戦予定。
+  // 代替案: Vimeo アップロード後は Vimeo が自動でサムネを生成するので、
+  // 「録画済み」表示は Step 9c 以降に Vimeo 側サムネに切り替えるのが現実的。
+
+  const sizeMB = (recorded.blob.size / 1024 / 1024).toFixed(2);
+  const formatName = recorded.mimeType.includes("mp4") ? "MP4" : "WebM";
+
+  return (
+    <div className="bg-white rounded-xl border border-[#e8ebe9] p-4">
+      <div className="flex items-start gap-4">
+        {/* サムネ (video 要素、再生ボタンで動画再生可能。サムネ静止表示は保留中) */}
+        <video
+          src={blobUrl}
+          controls
+          playsInline
+          className="w-48 aspect-[4/3] bg-zinc-900 rounded-lg flex-shrink-0 object-cover"
+        />
+
+        {/* 中: 録画済み情報 + 録り直す/削除 */}
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-bold text-zinc-900 mb-2 flex items-center gap-1.5">
+            <span className="inline-block w-2 h-2 rounded-full bg-[#00897b]" />
+            録画済み
+          </div>
+          <div className="text-xs text-zinc-600 mb-3 font-mono space-y-0.5">
+            <div>長さ: <span className="font-bold text-zinc-900">{formatElapsed(recorded.durationSec)}</span></div>
+            <div>サイズ: <span className="font-bold text-zinc-900">{sizeMB} MB</span></div>
+            <div>形式: <span className="font-bold text-zinc-900">{formatName}</span></div>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={onRetry}
+              className="text-xs px-3 py-1.5 bg-[#f8f9fa] text-zinc-700 border border-[#e8ebe9] rounded-md hover:bg-zinc-100 transition-colors flex items-center gap-1"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+                <polyline points="23 4 23 10 17 10" />
+                <polyline points="1 20 1 14 7 14" />
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+              </svg>
+              録り直す
+            </button>
+            <button
+              onClick={onDiscard}
+              className="text-xs px-3 py-1.5 bg-[#fef5f5] text-[#d32f2f] border border-[#d32f2f]/30 rounded-md hover:bg-[#d32f2f]/10 transition-colors flex items-center gap-1"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
+              削除
+            </button>
+          </div>
+        </div>
+
+        {/* 右: 送信操作ボタン群 (録画済み時のみ表示、Step 9c で機能化) */}
+        <div className="flex flex-col gap-2 w-44 flex-shrink-0">
+          <button
+            disabled
+            className="bg-white text-zinc-500 border-[#e8ebe9] px-4 py-2.5 rounded-lg text-xs font-medium border cursor-not-allowed opacity-60"
+            title="Step 9c-d で機能実装予定"
+          >
+            下書き保存
+          </button>
+          <button
+            disabled
+            className="bg-[#00897b]/50 text-white border-transparent px-4 py-2.5 rounded-lg text-xs font-bold border cursor-not-allowed opacity-60"
+            title="Step 9c-d で機能実装予定"
+          >
+            送信して終了
+          </button>
+          <button
+            disabled
+            className="bg-zinc-900/70 text-white border-transparent px-4 py-2.5 rounded-lg text-xs font-bold border cursor-not-allowed opacity-60 flex items-center justify-center gap-1.5"
+            title="Step 9c-d で機能実装予定"
+          >
+            送信して次へ
+            <span className="text-[#00897b]">→</span>
+            {!nextAuditId && (
+              <span className="text-[9px] opacity-70 ml-0.5">(なし)</span>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// =====================================================================
+// 既存の子コンポーネント (Step 8 から維持)
 // =====================================================================
 
 function ProfileMeta({ label, sub }: { label: string; sub?: string }) {

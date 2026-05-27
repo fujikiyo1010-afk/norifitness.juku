@@ -10,12 +10,15 @@ import { RecordingView } from "./RecordingView";
  * mode state で 4 つの表示モードを切り替える。
  *
  * - normal: Step 8 で実装した通常 UI (17 項目 + 動画返信エリア)
- * - recording_ready: 録画準備中 (Step 9a で UI スケルトン)
- * - recording: 録画中 (Step 9b で実装)
- * - preview: プレビュー (Step 9b で実装)
+ * - recording_ready: 録画準備中 (Step 9b で MediaRecorder 起動)
+ * - recording: 録画中
+ * - preview: プレビュー
  *
  * URL は /admin/monthly-reviews/[id] のまま (mode は state のみで管理、
  * URL は変えない設計 = 「一画面で完結」目的のため、合意 2026-05-27)。
+ *
+ * 録画完了 Blob は normal モードに持ち越して動画返信エリアでプレビュー表示。
+ * Step 9c で「送信」ボタンから Vimeo にアップロードする。
  */
 
 export type DetailMode = "normal" | "recording_ready" | "recording" | "preview";
@@ -48,8 +51,33 @@ export type DetailViewData = {
   adminInitial: string;
 };
 
+export type RecordedVideo = {
+  blob: Blob;
+  mimeType: string;
+  durationSec: number;
+};
+
 export function DetailClient({ data }: { data: DetailViewData }) {
   const [mode, setMode] = useState<DetailMode>("normal");
+  const [recorded, setRecorded] = useState<RecordedVideo | null>(null);
+
+  // 録画モードを採用 (採用ボタン押下時)
+  const handleAccept = (video: RecordedVideo) => {
+    setRecorded(video);
+    setMode("normal");
+  };
+
+  // 録画モード終了 (採用前に「← 録画モードを終了」)
+  const handleExit = () => {
+    setMode("normal");
+    // 録画モード中に録ってあった blob は破棄せず recorded を保持しない
+    // (recorded は「採用」を経由した時のみ更新される)
+  };
+
+  // 通常モードで「録画済み」を破棄 (録り直したい)
+  const handleDiscardRecorded = () => {
+    setRecorded(null);
+  };
 
   return (
     <main className="min-h-screen bg-[#e8ebec] p-6">
@@ -57,14 +85,17 @@ export function DetailClient({ data }: { data: DetailViewData }) {
         {mode === "normal" ? (
           <NormalView
             data={data}
+            recorded={recorded}
             onStartRecording={() => setMode("recording_ready")}
+            onDiscardRecorded={handleDiscardRecorded}
           />
         ) : (
           <RecordingView
             data={data}
             mode={mode}
             onChangeMode={setMode}
-            onExitRecording={() => setMode("normal")}
+            onAccept={handleAccept}
+            onExit={handleExit}
           />
         )}
       </div>
