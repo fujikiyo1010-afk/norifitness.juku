@@ -8,6 +8,9 @@ import type {
   BodyFatOutputs,
   CalorieInputs,
   CalorieOutputs,
+  DietPeriodInputs,
+  DietPeriodOutputs,
+  PaceAdviceLevel,
 } from "./types";
 
 /**
@@ -137,4 +140,85 @@ export function calculateCalorie(inputs: CalorieInputs): CalorieOutputs {
   const bulk = Math.round(maintenanceRaw + 500);
 
   return { bmr, maintenance, diet, bulk };
+}
+
+/**
+ * 減量ペースをアドバイスレベルに分類
+ */
+export function classifyPace(paceKgPerWeek: number): PaceAdviceLevel {
+  if (paceKgPerWeek <= 0.5) return "moderate";
+  if (paceKgPerWeek <= 1.0) return "intense";
+  return "extreme";
+}
+
+/**
+ * 節目週リスト (1ヶ月/3ヶ月/5ヶ月/7ヶ月/9ヶ月) ・ おおよそ 4 週/月
+ * P5 改善: 全週ではなく節目だけ + 開始/到達は別途
+ */
+export const MILESTONE_WEEKS: ReadonlyArray<{ week: number; label: string }> = [
+  { week: 5, label: "1 ヶ月の目安" },
+  { week: 13, label: "3 ヶ月の目安" },
+  { week: 21, label: "5 ヶ月の目安" },
+  { week: 29, label: "7 ヶ月の目安" },
+  { week: 37, label: "9 ヶ月の目安" },
+];
+
+/**
+ * 減量期間を逆算 (目標体重 + ペース + 開始日 → 期間 + 到達日)
+ *
+ * 必要な減量 = 現在体重 − 目標体重 (kg)
+ * 期間 (週) = 減量 / ペース
+ * 期間 (日) = 週 × 7 (整数に切り上げ)
+ * 到達日 = 開始日 + 日数
+ *
+ * 注: このツールは「減量」前提のため、目標体重 < 現在体重を要求。
+ *   目標体重 ≥ 現在体重 はエラー (増量モードは扱わない)。
+ */
+export function calculateDietPeriod(
+  inputs: DietPeriodInputs
+): DietPeriodOutputs {
+  const { current_weight_kg, target_weight_kg, pace_kg_per_week, start_date } =
+    inputs;
+
+  if (current_weight_kg <= 0 || target_weight_kg <= 0) {
+    throw new Error("体重に正の値を入れてください");
+  }
+  if (target_weight_kg >= current_weight_kg) {
+    throw new Error("目標体重は現在体重より小さい値にしてください");
+  }
+  if (pace_kg_per_week <= 0) {
+    throw new Error("ペースに正の値を入れてください");
+  }
+  if (!start_date) {
+    throw new Error("開始日を入れてください");
+  }
+
+  // ISO yyyy-mm-dd を Date に
+  const start = new Date(`${start_date}T00:00:00`);
+  if (isNaN(start.getTime())) {
+    throw new Error("開始日の形式が不正です");
+  }
+
+  const needed_kg = Math.round((current_weight_kg - target_weight_kg) * 10) / 10;
+  const weeksRaw = needed_kg / pace_kg_per_week;
+  const weeks = Math.round(weeksRaw * 10) / 10;
+  const days = Math.ceil(weeksRaw * 7);
+
+  // 到達日 = 開始日 + days
+  const end = new Date(start);
+  end.setDate(end.getDate() + days);
+  const end_date = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, "0")}-${String(end.getDate()).padStart(2, "0")}`;
+
+  // 1 週間あたりの進捗 % = ペース / 必要な減量 × 100
+  const weekly_progress_pct =
+    Math.round((pace_kg_per_week / needed_kg) * 100 * 10) / 10;
+
+  return {
+    needed_kg,
+    weeks,
+    days,
+    end_date,
+    weekly_progress_pct,
+    pace_advice_level: classifyPace(pace_kg_per_week),
+  };
 }

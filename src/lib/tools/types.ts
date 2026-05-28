@@ -66,6 +66,34 @@ export type CalorieOutputs = {
 };
 
 // =====================================================================
+// ツール 3: 減量期間逆算
+// =====================================================================
+
+export type DietPeriodInputs = {
+  current_weight_kg: number;
+  target_weight_kg: number;
+  pace_kg_per_week: number; // デフォルト 0.5 (推奨値)
+  start_date: string; // ISO yyyy-mm-dd
+};
+
+/**
+ * ペース別アドバイスのレベル
+ * - moderate: ≤ 0.5 kg/週 (続けやすい)
+ * - intense: ≤ 1.0 kg/週 (ややしっかりめ)
+ * - extreme: > 1.0 kg/週 (かなり速い)
+ */
+export type PaceAdviceLevel = "moderate" | "intense" | "extreme";
+
+export type DietPeriodOutputs = {
+  needed_kg: number; // 必要な減量 (小数 1 桁)
+  weeks: number; // 期間 (週、小数 1 桁)
+  days: number; // 期間 (日、整数)
+  end_date: string; // 目標到達日 ISO yyyy-mm-dd
+  weekly_progress_pct: number; // 1 週間あたりの進捗 % (小数 1 桁)
+  pace_advice_level: PaceAdviceLevel;
+};
+
+// =====================================================================
 // 共通型: tool_calculations の読み取り結果
 // =====================================================================
 export type ToolCalculation<I = unknown, O = unknown> = {
