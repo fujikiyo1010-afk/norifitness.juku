@@ -32,6 +32,40 @@ export type BodyFatOutputs = {
 };
 
 // =====================================================================
+// ツール 2: 必要カロリー計算 (ハリスベネディクト式 改訂版)
+// =====================================================================
+
+/**
+ * 運動量レベル 5 段階
+ *
+ * 係数は内部のみで管理 (P3 改善: UI には数字を出さない、
+ * 受講生に「× 1.2」等を見せても意味不明なため)
+ */
+export type ActivityLevel =
+  | "sedentary" // ほとんど運動しない (1.2)
+  | "light" // 軽い運動 ・ 週 1〜3 回 (1.375)
+  | "moderate" // 中程度の運動 ・ 週 3〜5 回 (1.55)
+  | "active" // ハードな運動 ・ 週 6〜7 回 (1.725)
+  | "very_active"; // 非常にハード ・ 毎日 2 回など (1.9)
+
+export type CalorieInputs = {
+  gender: Gender;
+  // gender が "other" の時のみ使う (男性式 or 女性式)
+  formula?: "male" | "female";
+  height_cm: number;
+  weight_kg: number;
+  age: number;
+  activity_level: ActivityLevel;
+};
+
+export type CalorieOutputs = {
+  bmr: number; // 基礎代謝 (kcal/日、整数)
+  maintenance: number; // メンテナンス
+  diet: number; // ダイエット時 (maintenance - 500)
+  bulk: number; // 増量時 (maintenance + 500)
+};
+
+// =====================================================================
 // 共通型: tool_calculations の読み取り結果
 // =====================================================================
 export type ToolCalculation<I = unknown, O = unknown> = {

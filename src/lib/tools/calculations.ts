@@ -2,7 +2,13 @@
  * ツール 4 種の計算式 (純粋関数、Server/Client 両方で使える)
  */
 
-import type { BodyFatInputs, BodyFatOutputs } from "./types";
+import type {
+  ActivityLevel,
+  BodyFatInputs,
+  BodyFatOutputs,
+  CalorieInputs,
+  CalorieOutputs,
+} from "./types";
 
 /**
  * 体脂肪率を計算 (アメリカ海軍式)
@@ -68,4 +74,67 @@ export function calculateBodyFat(inputs: BodyFatInputs): BodyFatOutputs {
   }
 
   return output;
+}
+
+/**
+ * 運動量レベル → 係数 (内部のみで使う、UI には数字を出さない)
+ */
+export const ACTIVITY_COEFFICIENTS: Record<ActivityLevel, number> = {
+  sedentary: 1.2,
+  light: 1.375,
+  moderate: 1.55,
+  active: 1.725,
+  very_active: 1.9,
+};
+
+/**
+ * 運動量レベルの表示ラベル
+ */
+export const ACTIVITY_LABELS: Record<ActivityLevel, string> = {
+  sedentary: "ほとんど運動しない",
+  light: "軽い運動 ・ 週 1〜3 回",
+  moderate: "中程度の運動 ・ 週 3〜5 回",
+  active: "ハードな運動 ・ 週 6〜7 回",
+  very_active: "非常にハード ・ 毎日 2 回など",
+};
+
+/**
+ * 必要カロリーを計算 (ハリスベネディクト式 改訂版)
+ *
+ * 男性 BMR = 88.362 + (13.397 × W) + (4.799 × H) − (5.677 × A)
+ * 女性 BMR = 447.593 + (9.247 × W) + (3.098 × H) − (4.330 × A)
+ *
+ * メンテナンス = BMR × 運動量係数
+ * ダイエット時 = メンテナンス − 500
+ * 増量時     = メンテナンス + 500
+ *
+ * W = 体重 (kg)、H = 身長 (cm)、A = 年齢 (歳)
+ */
+export function calculateCalorie(inputs: CalorieInputs): CalorieOutputs {
+  const { gender, formula, height_cm, weight_kg, age, activity_level } = inputs;
+
+  if (height_cm <= 0 || weight_kg <= 0 || age <= 0) {
+    throw new Error("身長・体重・年齢に正の値を入れてください");
+  }
+
+  const useFemale =
+    gender === "female" || (gender === "other" && formula === "female");
+
+  const bmrRaw = useFemale
+    ? 447.593 + 9.247 * weight_kg + 3.098 * height_cm - 4.33 * age
+    : 88.362 + 13.397 * weight_kg + 4.799 * height_cm - 5.677 * age;
+
+  if (!isFinite(bmrRaw) || bmrRaw <= 0) {
+    throw new Error("計算できませんでした。入力値を確認してください");
+  }
+
+  const coefficient = ACTIVITY_COEFFICIENTS[activity_level];
+  const maintenanceRaw = bmrRaw * coefficient;
+
+  const bmr = Math.round(bmrRaw);
+  const maintenance = Math.round(maintenanceRaw);
+  const diet = Math.round(maintenanceRaw - 500);
+  const bulk = Math.round(maintenanceRaw + 500);
+
+  return { bmr, maintenance, diet, bulk };
 }
