@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   MILESTONE_WEEKS,
   calculateDietPeriod,
@@ -33,6 +34,10 @@ export function DietPeriodToolClient({
   previous: ToolCalculation<DietPeriodInputs, DietPeriodOutputs> | null;
   todayISO: string;
 }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const isFromGoalSheet = searchParams.get("return") === "goal-sheet";
+
   const prevInputs = previous?.inputs;
   const prevOutputs = previous?.outputs;
 
@@ -164,9 +169,9 @@ export function DietPeriodToolClient({
       {/* ヘッダー */}
       <header className="bg-white border-b border-[#e8ebe9] px-4 py-3.5 flex items-center sticky top-0 z-10">
         <Link
-          href="/tools"
+          href={isFromGoalSheet ? "/goal-sheet/edit" : "/tools"}
           className="w-8 h-8 flex items-center justify-center text-zinc-900 hover:bg-zinc-100 rounded-full transition-colors"
-          aria-label="ツール一覧に戻る"
+          aria-label={isFromGoalSheet ? "目標シート編集に戻る" : "ツール一覧に戻る"}
         >
           <svg
             viewBox="0 0 24 24"
@@ -175,12 +180,12 @@ export function DietPeriodToolClient({
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="w-5 h-5"
+            className="w-5 h-5 pointer-events-none"
           >
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </Link>
-        <h1 className="flex-1 text-center text-base font-bold text-zinc-900 -ml-8">
+        <h1 className="flex-1 text-center text-base font-bold text-zinc-900 -ml-8 pointer-events-none">
           減量期間逆算
         </h1>
       </header>
@@ -295,6 +300,13 @@ export function DietPeriodToolClient({
         >
           計算する
         </button>
+
+        {/* 計算前の例示 */}
+        {!result && (
+          <p className="-mt-3 mb-4 mx-4 text-center text-[10px] text-[#283593]/70 font-mono leading-relaxed">
+            例: 75 → 68kg・0.5kg/週 → 14 週 (98 日)
+          </p>
+        )}
 
         {result && (
           <>
@@ -414,25 +426,46 @@ export function DietPeriodToolClient({
               到達日 = 開始日 + 日数
             </div>
 
-            {/* 保存ボタン */}
-            <div className="mx-4">
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="w-full py-3.5 bg-white border border-[#3949ab] text-[#3949ab] rounded text-sm font-bold hover:bg-[#3949ab]/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {saving
-                  ? "保存中..."
-                  : savedJustNow
-                    ? "✓ 保存しました"
-                    : "この計算を保存する"}
-              </button>
-              <p className="text-[11px] text-zinc-600 text-center mt-2 leading-relaxed">
-                保存すると次回開いた時に前回値が復元されます
-                <br />
-                (目標シートには反映されません ・ 反映は目標シート編集画面から)
-              </p>
-            </div>
+            {/* 目標シートに適用ボタン (?return=goal-sheet 時のみ) */}
+            {isFromGoalSheet && (
+              <div className="mx-4 mb-3">
+                <button
+                  onClick={() => {
+                    sessionStorage.setItem(
+                      "goal-sheet-reflect-diet-period",
+                      JSON.stringify({ target_date: result.end_date })
+                    );
+                    router.push("/goal-sheet/edit");
+                  }}
+                  className="w-full py-3.5 bg-[#00897b] text-white rounded text-sm font-bold hover:bg-[#00695c] transition-colors"
+                >
+                  目標シートに適用 →
+                </button>
+                <p className="text-[11px] text-zinc-600 text-center mt-2">
+                  到達予定日 {result.end_date} を反映して目標シート編集画面に戻ります
+                </p>
+              </div>
+            )}
+
+            {/* 保存ボタン (単独モードのみ) */}
+            {!isFromGoalSheet && (
+              <div className="mx-4">
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="w-full py-3.5 bg-white border border-[#3949ab] text-[#3949ab] rounded text-sm font-bold hover:bg-[#3949ab]/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {saving
+                    ? "保存中..."
+                    : savedJustNow
+                      ? "✓ 保存しました"
+                      : "この計算を保存する"}
+                </button>
+                <p className="text-[11px] text-zinc-600 text-center mt-2 leading-relaxed">
+                  保存すると次回開いた時に前回値が復元されます
+                </p>
+              </div>
+            )}
           </>
         )}
       </div>

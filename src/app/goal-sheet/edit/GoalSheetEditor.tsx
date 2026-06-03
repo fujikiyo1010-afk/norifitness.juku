@@ -46,6 +46,77 @@ export function GoalSheetEditor({
   const filledCount = countFilledSections(content);
   const audits = content.audits;
 
+  // ===== ツール画面からの反映受信 (案 A: sessionStorage 経由) =====
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    // calorie: メンテナンスカロリーを current_status.maintenance_kcal に反映
+    const calorieRaw = sessionStorage.getItem("goal-sheet-reflect-calorie");
+    if (calorieRaw) {
+      try {
+        const v = JSON.parse(calorieRaw) as { maintenance_kcal?: number };
+        if (typeof v.maintenance_kcal === "number") {
+          setContent((prev) => ({
+            ...prev,
+            current_status: {
+              ...(prev.current_status ?? {}),
+              maintenance_kcal: v.maintenance_kcal,
+            },
+          }));
+          setSavedMessage(
+            `メンテナンスカロリー ${v.maintenance_kcal} kcal を反映しました`
+          );
+          setTimeout(() => setSavedMessage(null), 4000);
+        }
+      } catch {}
+      sessionStorage.removeItem("goal-sheet-reflect-calorie");
+    }
+    // diet-period: 到達予定日を goal_selection.target_date に反映
+    const dietRaw = sessionStorage.getItem("goal-sheet-reflect-diet-period");
+    if (dietRaw) {
+      try {
+        const v = JSON.parse(dietRaw) as { target_date?: string };
+        if (typeof v.target_date === "string") {
+          setContent((prev) => ({
+            ...prev,
+            goal_selection: {
+              ...(prev.goal_selection ?? {}),
+              target_date: v.target_date,
+            },
+          }));
+          setSavedMessage(`到達予定日 ${v.target_date} を反映しました`);
+          setTimeout(() => setSavedMessage(null), 4000);
+        }
+      } catch {}
+      sessionStorage.removeItem("goal-sheet-reflect-diet-period");
+    }
+    // pfc-carb: PFC + カーボサイクルを nutrition に反映
+    const pfcRaw = sessionStorage.getItem("goal-sheet-reflect-pfc-carb");
+    if (pfcRaw) {
+      try {
+        const v = JSON.parse(pfcRaw) as {
+          target_calorie?: number;
+          pfc?: { p?: number; f?: number; c?: number };
+          carb_cycle?: { weekly_pattern?: Array<"low" | "mid" | "high"> };
+        };
+        setContent((prev) => ({
+          ...prev,
+          nutrition: {
+            ...(prev.nutrition ?? {}),
+            target_calorie: v.target_calorie ?? prev.nutrition?.target_calorie,
+            pfc: {
+              ...(prev.nutrition?.pfc ?? {}),
+              ...(v.pfc ?? {}),
+            },
+            carb_cycle: v.carb_cycle ?? prev.nutrition?.carb_cycle,
+          },
+        }));
+        setSavedMessage("PFC・カーボサイクルを反映しました");
+        setTimeout(() => setSavedMessage(null), 4000);
+      } catch {}
+      sessionStorage.removeItem("goal-sheet-reflect-pfc-carb");
+    }
+  }, []);
+
   // ===== 各セクションの更新関数 =====
   const updateCurrentStatus = (patch: Partial<CurrentStatus>) => {
     setContent({
@@ -221,7 +292,7 @@ export function GoalSheetEditor({
             />
           </Field>
 
-          <ToolButton href="/tools/calorie" label="必要カロリー計算ツール" applied={!!content.current_status?.maintenance_kcal} />
+          <ToolButton href="/tools/calorie?return=goal-sheet" label="必要カロリー計算ツール" applied={!!content.current_status?.maintenance_kcal} />
 
           {audits?.section_comments?.current_status && (
             <SectionAudit audit={audits.section_comments.current_status} />
@@ -283,7 +354,7 @@ export function GoalSheetEditor({
             />
           </Field>
 
-          <ToolButton href="/tools/diet-period" label="減量期間逆算ツール" applied={!!content.goal_selection?.target_date} />
+          <ToolButton href="/tools/diet-period?return=goal-sheet" label="減量期間逆算ツール" applied={!!content.goal_selection?.target_date} />
 
           {audits?.section_comments?.goal_selection && (
             <SectionAudit audit={audits.section_comments.goal_selection} />
@@ -294,7 +365,7 @@ export function GoalSheetEditor({
         <SectionWrapper sectionKey="nutrition" filled={!!content.filled_sections?.includes("nutrition")}>
           <NutritionVisualization nutrition={content.nutrition} />
 
-          <ToolButton href="/tools/pfc-carb" label="PFC・カーボサイクル設定" applied={!!content.nutrition?.pfc?.c} />
+          <ToolButton href="/tools/pfc-carb?return=goal-sheet" label="PFC・カーボサイクル設定" applied={!!content.nutrition?.pfc?.c} />
 
           {audits?.section_comments?.nutrition && (
             <SectionAudit audit={audits.section_comments.nutrition} />

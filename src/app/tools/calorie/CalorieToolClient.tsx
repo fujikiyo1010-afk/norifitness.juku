@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ACTIVITY_LABELS,
   calculateCalorie,
@@ -40,6 +41,10 @@ export function CalorieToolClient({
 }: {
   previous: ToolCalculation<CalorieInputs, CalorieOutputs> | null;
 }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const isFromGoalSheet = searchParams.get("return") === "goal-sheet";
+
   const prevInputs = previous?.inputs;
   const prevOutputs = previous?.outputs;
 
@@ -173,9 +178,9 @@ export function CalorieToolClient({
       {/* ヘッダー */}
       <header className="bg-white border-b border-[#e8ebe9] px-4 py-3.5 flex items-center sticky top-0 z-10">
         <Link
-          href="/tools"
+          href={isFromGoalSheet ? "/goal-sheet/edit" : "/tools"}
           className="w-8 h-8 flex items-center justify-center text-zinc-900 hover:bg-zinc-100 rounded-full transition-colors"
-          aria-label="ツール一覧に戻る"
+          aria-label={isFromGoalSheet ? "目標シート編集に戻る" : "ツール一覧に戻る"}
         >
           <svg
             viewBox="0 0 24 24"
@@ -184,12 +189,12 @@ export function CalorieToolClient({
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="w-5 h-5"
+            className="w-5 h-5 pointer-events-none"
           >
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </Link>
-        <h1 className="flex-1 text-center text-base font-bold text-zinc-900 -ml-8">
+        <h1 className="flex-1 text-center text-base font-bold text-zinc-900 -ml-8 pointer-events-none">
           必要カロリー計算
         </h1>
       </header>
@@ -362,6 +367,13 @@ export function CalorieToolClient({
           計算する
         </button>
 
+        {/* 計算前の例示 */}
+        {!result && (
+          <p className="-mt-3 mb-4 mx-4 text-center text-[10px] text-[#283593]/70 font-mono leading-relaxed">
+            例: 75kg・男性35歳 → 2,483 kcal/日
+          </p>
+        )}
+
         {/* 結果カード */}
         {result && (
           <section className="bg-gradient-to-br from-[#e8eaf6] to-[#fffbe6] border border-[rgba(255,235,59,0.4)] rounded-xl mx-4 mb-3 px-5 py-4">
@@ -420,8 +432,29 @@ export function CalorieToolClient({
           </div>
         )}
 
-        {/* 保存ボタン */}
-        {result && (
+        {/* 目標シートに適用ボタン (?return=goal-sheet 時のみ) */}
+        {result && isFromGoalSheet && (
+          <div className="mx-4 mb-3">
+            <button
+              onClick={() => {
+                sessionStorage.setItem(
+                  "goal-sheet-reflect-calorie",
+                  JSON.stringify({ maintenance_kcal: result.maintenance })
+                );
+                router.push("/goal-sheet/edit");
+              }}
+              className="w-full py-3.5 bg-[#00897b] text-white rounded text-sm font-bold hover:bg-[#00695c] transition-colors"
+            >
+              目標シートに適用 →
+            </button>
+            <p className="text-[11px] text-zinc-600 text-center mt-2">
+              メンテナンスカロリー {result.maintenance} kcal を反映して目標シート編集画面に戻ります
+            </p>
+          </div>
+        )}
+
+        {/* 保存ボタン (単独モードのみ) */}
+        {result && !isFromGoalSheet && (
           <div className="mx-4">
             <button
               onClick={handleSave}
@@ -436,8 +469,6 @@ export function CalorieToolClient({
             </button>
             <p className="text-[11px] text-zinc-600 text-center mt-2 leading-relaxed">
               保存すると次回開いた時に前回値が復元されます
-              <br />
-              (目標シートには反映されません ・ 反映は目標シート編集画面から)
             </p>
           </div>
         )}
