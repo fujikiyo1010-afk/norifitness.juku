@@ -312,11 +312,7 @@ export default async function AdminUserHubPage({
         {/* 対応事項 (案 C: カルテフラグ + 受講生リクエストを集約) */}
         {(() => {
           return (
-            <section
-              className={`rounded-[14px] border bg-white p-5 ${
-                totalActions > 0 ? "border-amber-300" : "border-[#e8ebe9]"
-              }`}
-            >
+            <section className="rounded-[14px] border border-[#e8ebe9] bg-white p-5">
               <div className="mb-3 flex items-center gap-2">
                 <span className="h-5 w-1 rounded-full bg-[#00897b]" />
                 <h2 className="text-sm font-semibold text-zinc-900">
@@ -335,21 +331,21 @@ export default async function AdminUserHubPage({
                 </p>
               ) : (
                 <div className="space-y-3">
-                  {/* カルテ変更フラグ (セルフリマインダ) */}
+                  {/* カルテ変更フラグ (セルフリマインダ、緊急度低めなので灰系) */}
                   {hasCarteFlag && (
-                    <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 flex items-center gap-3">
+                    <div className="rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3 flex items-center gap-3">
                       <div className="flex-1">
-                        <div className="text-xs font-bold text-amber-900 mb-0.5">
+                        <div className="text-xs font-bold text-zinc-800 mb-0.5">
                           カルテ変更あり / メニュー要確認
                         </div>
-                        <div className="text-[11px] text-amber-800">
+                        <div className="text-[11px] text-zinc-600">
                           自分でカルテの機械マッチング項目を変更しました。今のメニューが新カルテと合っているか確認してください。
                         </div>
                       </div>
                       <form action={clearReviewFlagAction}>
                         <button
                           type="submit"
-                          className="rounded-[4px] border border-amber-300 bg-white px-3 py-1.5 text-[11px] font-bold text-amber-900 hover:bg-amber-100 whitespace-nowrap"
+                          className="rounded-[4px] border border-zinc-300 bg-white px-3 py-1.5 text-[11px] font-bold text-zinc-700 hover:bg-zinc-100 whitespace-nowrap"
                         >
                           確認済にする
                         </button>
