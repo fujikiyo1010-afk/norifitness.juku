@@ -28,11 +28,14 @@ export const dynamic = "force-dynamic";
  */
 export default async function AdminMonthlyReviewDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ from?: string; user_id?: string }>;
 }) {
   const admin = await requireAdmin();
   const { id } = await params;
+  const sp = await searchParams;
 
   const audit = await getAuditForAdmin(id);
   if (!audit) notFound();
@@ -56,6 +59,20 @@ export default async function AdminMonthlyReviewDetailPage({
     ? Math.floor((Date.now() - submittedAt.getTime()) / 86_400_000)
     : 0;
 
+  // 動線判定: from=hub かつ user_id 指定なら受講生ハブに戻る
+  const fromHub = sp.from === "hub" && sp.user_id;
+  const back = fromHub
+    ? {
+        href: `/admin/users/${sp.user_id}`,
+        label: `${audit.user_id === sp.user_id ? "ハブ画面" : "受講生ハブ"}に戻る`,
+        isHub: true as const,
+      }
+    : {
+        href: "/admin/monthly-reviews",
+        label: "受信箱に戻る",
+        isHub: false as const,
+      };
+
   const data: DetailViewData = {
     audit: {
       id: audit.id,
@@ -65,6 +82,7 @@ export default async function AdminMonthlyReviewDetailPage({
       daysSinceSubmit,
       avgScore: calcAverageScore(audit.items),
     },
+    back,
     user: {
       name: user.name,
       joinedAtLabel: formatDate(user.joinedAt),

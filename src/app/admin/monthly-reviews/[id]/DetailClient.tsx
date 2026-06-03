@@ -32,6 +32,12 @@ export type DetailViewData = {
     daysSinceSubmit: number;
     avgScore: number | null;
   };
+  /** 戻り先 (ハブ or 受信箱)。?from=hub & user_id=xxx で自動判定 */
+  back: {
+    href: string;
+    label: string;
+    isHub: boolean;
+  };
   user: {
     name: string;
     joinedAtLabel: string;

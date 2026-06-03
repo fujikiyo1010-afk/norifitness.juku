@@ -33,7 +33,7 @@ export function NormalView({
   onSelectFile: (video: RecordedVideo) => void;
   onDiscardRecorded: () => void;
 }) {
-  const { audit, user, pastReplied, replyCount, remainingCount, nextAuditId, adminName, adminInitial } =
+  const { audit, user, pastReplied, replyCount, remainingCount, nextAuditId, adminName, adminInitial, back } =
     data;
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -108,12 +108,13 @@ export function NormalView({
 
       {/* === コンテンツ === */}
       <div className="bg-[#f8f9fa] px-7 py-5">
-        {/* 戻るリンク */}
+        {/* 戻るリンク (?from=hub なら受講生ハブへ、なければ受信箱へ) */}
         <Link
-          href="/admin/monthly-reviews"
+          href={back.href}
           className="inline-flex items-center gap-1.5 text-xs text-zinc-600 mb-3.5 hover:text-[#00695c] transition-colors"
         >
-          ← 受信箱に戻る{remainingCount > 0 ? ` (残り ${remainingCount} 件)` : ""}
+          ← {back.label}
+          {!back.isHub && remainingCount > 0 ? ` (残り ${remainingCount} 件)` : ""}
         </Link>
 
         {/* 受講生プロフィールカード */}
@@ -156,6 +157,7 @@ export function NormalView({
               userName={user.name}
               targetMonthLabel={audit.monthLabel}
               nextAuditId={nextAuditId}
+              back={back}
               onDiscard={onDiscardRecorded}
               onRetry={() => {
                 onDiscardRecorded();
@@ -282,6 +284,7 @@ function RecordedPreview({
   userName,
   targetMonthLabel,
   nextAuditId,
+  back,
   onDiscard,
   onRetry,
 }: {
@@ -290,6 +293,7 @@ function RecordedPreview({
   userName: string;
   targetMonthLabel: string;
   nextAuditId: string | null;
+  back: { href: string; label: string; isHub: boolean };
   onDiscard: () => void;
   onRetry: () => void;
 }) {
@@ -307,8 +311,8 @@ function RecordedPreview({
       mimeType: recorded.mimeType,
       durationSec: recorded.durationSec,
     });
-    // 即座に受信箱に戻る (案 B: 裏でアップロード継続)
-    router.push("/admin/monthly-reviews");
+    // 来た道に戻る (ハブ or 受信箱、from クエリで自動判定済み)
+    router.push(back.href);
   };
 
   const handleSendAndNext = () => {
