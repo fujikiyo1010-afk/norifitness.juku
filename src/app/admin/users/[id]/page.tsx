@@ -27,7 +27,6 @@ import {
 import {
   extractWeightSeries,
   extractWaistSeries,
-  extractCategoryAverages,
   getLatestAndPrevious,
   calcBMI,
   classifyBMI,
@@ -130,9 +129,6 @@ export default async function AdminUserHubPage({
   const heightCm = goalSheet?.content.current_status?.height_cm ?? null;
   const currentBMI = calcBMI(latestWeight, heightCm);
   const bmiCategory = currentBMI !== null ? classifyBMI(currentBMI) : null;
-
-  // カテゴリ別スコア平均 (Q3-Q15、4 カテゴリの最新月 / 前月)
-  const categoryAvgs = extractCategoryAverages(recentAudits);
 
   // 達成度 (体重): 開始 (目標シート作成時の体重) → 現在 → 目標
   const startWeight = goalSheet?.content.current_status?.weight_kg ?? null;
@@ -297,53 +293,20 @@ export default async function AdminUserHubPage({
             <BMICell value={currentBMI} category={bmiCategory} height={heightCm} />
           </div>
 
-          {/* 添削スコア (Q3-Q15 カテゴリ平均、4 カテゴリ 2x2 グリッド) */}
+          {/* 達成度 (体重) — 同セクション内、薄い線で区切る */}
           <div className="mt-5 pt-4 border-t border-[#e8ebe9]">
-            <div className="text-[11px] text-zinc-500 font-bold tracking-widest mb-2.5">
-              添削スコア (Q3-Q15 カテゴリ平均)
+            <div className="text-[11px] font-bold text-zinc-500 tracking-widest mb-3">
+              達成度 (体重)
             </div>
-            <div className="grid grid-cols-2 gap-y-2 gap-x-5">
-              <CategoryScoreCell
-                label="食事"
-                latest={categoryAvgs.food.latest}
-                previous={categoryAvgs.food.previous}
-              />
-              <CategoryScoreCell
-                label="運動"
-                latest={categoryAvgs.exercise.latest}
-                previous={categoryAvgs.exercise.previous}
-              />
-              <CategoryScoreCell
-                label="休息"
-                latest={categoryAvgs.rest.latest}
-                previous={categoryAvgs.rest.previous}
-              />
-              <CategoryScoreCell
-                label="マインド"
-                latest={categoryAvgs.mind.latest}
-                previous={categoryAvgs.mind.previous}
-              />
-            </div>
+            <WeightProgressBlock
+              startWeight={startWeight}
+              currentWeight={latestWeight}
+              targetWeight={targetWeight}
+              targetDate={targetDate}
+              progress={weightProgress}
+              hasGoalSheet={!!goalSheet}
+            />
           </div>
-        </section>
-
-        {/* 達成度 (体重: 開始 → 現在 → 目標) */}
-        <section className="rounded-[14px] border border-[#e8ebe9] bg-white p-5">
-          <div className="mb-4 flex items-center gap-2">
-            <span className="h-5 w-1 rounded-full bg-[#00897b]" />
-            <h2 className="text-sm font-semibold text-zinc-900">達成度 (体重)</h2>
-            <span className="text-[10px] text-zinc-500">
-              目標シート + 月次添削から
-            </span>
-          </div>
-          <WeightProgressBlock
-            startWeight={startWeight}
-            currentWeight={latestWeight}
-            targetWeight={targetWeight}
-            targetDate={targetDate}
-            progress={weightProgress}
-            hasGoalSheet={!!goalSheet}
-          />
         </section>
 
         {/* 対応事項 (案 C: カルテフラグ + 受講生リクエストを集約) */}
@@ -750,17 +713,11 @@ function WeightProgressBlock({
   const pct = (progress?.ratio ?? 0) * 100;
   const remainingAbs = Math.abs(progress?.remaining ?? 0);
   const direction = progress?.direction ?? "down";
-  const arrowText =
-    progress && progress.remaining === 0
-      ? "達成"
-      : direction === "down"
-        ? `あと -${remainingAbs.toFixed(1)} kg`
-        : `あと +${remainingAbs.toFixed(1)} kg`;
 
   return (
     <div>
-      {/* 上段: 現在 → 目標 + 距離 */}
-      <div className="mb-3 flex items-baseline justify-between">
+      {/* 上段: 現在 → 目標 + あと N | 残り日数 + N% 達成 を 1 行に */}
+      <div className="mb-3 flex items-baseline flex-wrap gap-x-4 gap-y-1">
         <div className="text-sm">
           現在{" "}
           <span className="font-bold text-zinc-900 font-mono text-base">
@@ -773,7 +730,49 @@ function WeightProgressBlock({
           </span>{" "}
           <span className="text-[10px] text-[#00695c]">kg</span>
         </div>
-        <div className="text-sm font-bold text-zinc-700">
+        <div className="flex items-baseline gap-2 text-xs">
+          {progress && progress.remaining === 0 ? (
+            <span className="text-zinc-700 font-bold text-sm">達成</span>
+          ) : (
+            <span className="text-zinc-700">
+              あと{" "}
+              <span className="text-sm font-bold font-mono">
+                {direction === "down" ? "-" : "+"}
+                {remainingAbs.toFixed(1)} kg
+              </span>
+            </span>
+          )}
+          {targetDate && (
+            <>
+              <span className="text-zinc-300">|</span>
+              <span className="text-zinc-500">
+                目標日{" "}
+                <span className="font-mono">
+                  {formatDistributionDate(targetDate)}
+                </span>
+                {(() => {
+                  const days = Math.floor(
+                    (new Date(targetDate).getTime() - Date.now()) /
+                      86_400_000
+                  );
+                  if (days < 0) {
+                    return (
+                      <span className="ml-1 text-rose-600 font-bold">
+                        期限超過 {-days} 日
+                      </span>
+                    );
+                  }
+                  return (
+                    <span className="ml-1 text-zinc-700">
+                      残り {days} 日
+                    </span>
+                  );
+                })()}
+              </span>
+            </>
+          )}
+        </div>
+        <div className="ml-auto text-sm font-bold text-zinc-700">
           {pct.toFixed(0)}% 達成
         </div>
       </div>
@@ -791,43 +790,9 @@ function WeightProgressBlock({
         />
       </div>
       {/* 開始/目標ラベル */}
-      <div className="flex justify-between text-[10px] text-zinc-500 font-mono mb-3">
+      <div className="flex justify-between text-[10px] text-zinc-500 font-mono">
         <span>開始 {startWeight.toFixed(1)} kg</span>
         <span>目標 {targetWeight.toFixed(1)} kg</span>
-      </div>
-
-      {/* 下段: 残り距離 + 目標日 */}
-      <div className="flex items-center gap-3 text-xs">
-        <span className="text-zinc-700 font-bold">{arrowText}</span>
-        {targetDate && (
-          <>
-            <span className="text-zinc-300">|</span>
-            <span className="text-zinc-500">
-              目標日{" "}
-              <span className="font-mono">
-                {formatDistributionDate(targetDate)}
-              </span>
-              {(() => {
-                const days = Math.floor(
-                  (new Date(targetDate).getTime() - Date.now()) /
-                    86_400_000
-                );
-                if (days < 0) {
-                  return (
-                    <span className="ml-1 text-rose-600 font-bold">
-                      期限超過 {-days} 日
-                    </span>
-                  );
-                }
-                return (
-                  <span className="ml-1 text-zinc-700">
-                    残り {days} 日
-                  </span>
-                );
-              })()}
-            </span>
-          </>
-        )}
       </div>
     </div>
   );
@@ -951,58 +916,6 @@ function BMICell({
           身長 {height} cm を基準
         </div>
       )}
-    </div>
-  );
-}
-
-/**
- * カテゴリスコアセル: 0-10 平均スコア + 前回比。
- */
-function CategoryScoreCell({
-  label,
-  latest,
-  previous,
-}: {
-  label: string;
-  latest: number | null;
-  previous: number | null;
-}) {
-  if (latest === null) {
-    return (
-      <div className="flex items-baseline gap-1.5">
-        <span className="text-[11px] text-zinc-500 font-bold w-16">
-          {label}
-        </span>
-        <span className="text-xs text-zinc-400">未記入</span>
-      </div>
-    );
-  }
-  let diffNode: React.ReactNode = (
-    <span className="text-[10px] text-zinc-400 font-mono">初回</span>
-  );
-  if (previous !== null) {
-    const diff = latest - previous;
-    const isFlat = Math.abs(diff) < 0.05;
-    const color = isFlat
-      ? "text-zinc-500"
-      : diff > 0
-        ? "text-emerald-700"
-        : "text-rose-600";
-    const sign = diff > 0 ? "+" : "";
-    diffNode = (
-      <span className={`text-[11px] font-mono font-bold ${color}`}>
-        {sign}
-        {diff.toFixed(1)}
-      </span>
-    );
-  }
-  return (
-    <div className="flex items-baseline gap-2">
-      <span className="text-[11px] text-zinc-500 font-bold w-16">{label}</span>
-      <span className="text-base font-bold text-zinc-900 font-mono">
-        {latest.toFixed(1)}
-      </span>
-      {diffNode}
     </div>
   );
 }
