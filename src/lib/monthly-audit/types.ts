@@ -267,7 +267,7 @@ export type MonthlyAuditItems = {
 };
 
 // =============================================================
-// 月次添削の状態 (4 状態: A 未記入 / B 記入中 / C 提出済 / D 返信届いた)
+// 月次添削の状態 (4 状態: A 未記入 / B 記入中 / C 提出済 / D 返信あり)
 // =============================================================
 export type AuditStatus =
   | "a_empty"          // A: まだ存在しない (DB レコードなし)
@@ -279,7 +279,19 @@ export const AUDIT_STATUS_LABELS: Record<AuditStatus, string> = {
   a_empty:       "未記入",
   b_in_progress: "記入中",
   c_submitted:   "提出済み・返信待ち",
-  d_replied:     "返信届いた",
+  d_replied:     "返信あり",
+};
+
+/**
+ * 管理者画面 (ハブ / 受信箱) で使う、のり氏視点のラベル。
+ * 受講生画面とは別の文体にして、特に C 状態を「要対応」として強調する。
+ * 2026-06-03 きよむさん合意。
+ */
+export const AUDIT_STATUS_LABELS_ADMIN: Record<AuditStatus, string> = {
+  a_empty:       "受講生未記入",
+  b_in_progress: "受講生が記入中",
+  c_submitted:   "要対応 (動画返信待ち)",
+  d_replied:     "返信済み",
 };
 
 // =============================================================

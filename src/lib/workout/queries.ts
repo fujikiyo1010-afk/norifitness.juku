@@ -443,6 +443,69 @@ export type WorkoutRequestWithUser = UserWorkoutRequestRow & {
 };
 
 /**
+ * ハブ画面用: 特定ユーザーの未対応リクエスト件数を取得。
+ * 件数だけ知りたいので head + count='exact' で軽量化。
+ */
+export async function countPendingRequestsForUser(
+  userId: string
+): Promise<{ carte: number; workout: number; total: number }> {
+  const supabase = await createClient();
+  const [carteRes, workoutRes] = await Promise.all([
+    supabase
+      .from("user_carte_request")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("status", "pending"),
+    supabase
+      .from("user_workout_request")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("status", "pending"),
+  ]);
+  const carte = carteRes.count ?? 0;
+  const workout = workoutRes.count ?? 0;
+  return { carte, workout, total: carte + workout };
+}
+
+/**
+ * ハブ画面用: 特定ユーザーの pending リクエスト本文一覧を取得 (最新 N 件)。
+ * 件数だけでなく本文も見たい場合に使う (ハブで対応事項として引用)。
+ */
+export async function listPendingRequestsForUser(
+  userId: string,
+  limit: number = 3
+): Promise<{
+  carte: UserCarteRequestRow[];
+  workout: UserWorkoutRequestRow[];
+}> {
+  const supabase = await createClient();
+  const [carteRes, workoutRes] = await Promise.all([
+    supabase
+      .from("user_carte_request")
+      .select(CARTE_REQ_COLS)
+      .eq("user_id", userId)
+      .eq("status", "pending")
+      .order("created_at", { ascending: false })
+      .limit(limit),
+    supabase
+      .from("user_workout_request")
+      .select(WORKOUT_REQ_COLS)
+      .eq("user_id", userId)
+      .eq("status", "pending")
+      .order("created_at", { ascending: false })
+      .limit(limit),
+  ]);
+  return {
+    carte: (carteRes.data ?? []).map((d) =>
+      carteRequestRow(d as Record<string, unknown>)
+    ),
+    workout: (workoutRes.data ?? []).map((d) =>
+      workoutRequestRow(d as Record<string, unknown>)
+    ),
+  };
+}
+
+/**
  * 個別対応受信箱用: pending な (未対応) 両リクエストを取得し、
  * 各受講生の表示名 / 性別 / 年齢層を一括取得して合成して返す。
  *

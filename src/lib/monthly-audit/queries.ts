@@ -133,6 +133,49 @@ export async function listPendingAudits(): Promise<MonthlyAuditRow[]> {
 }
 
 /**
+ * 管理者用: 特定ユーザーの最新月次添削を 1 件取得 (ハブ画面用)。
+ * 提出された月次のうち target_month が最も新しいものを返す。
+ * 1 件も無ければ null。
+ */
+export async function getLatestAuditForUser(
+  userId: string
+): Promise<MonthlyAuditRow | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("monthly_audits")
+    .select(
+      "id, user_id, target_month, items, items_filled_count, last_saved_at, submitted_at, nori_video_vimeo_url, nori_video_vimeo_id, nori_video_published_at, nori_video_duration_sec, created_at, updated_at"
+    )
+    .eq("user_id", userId)
+    .order("target_month", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (!data) return null;
+  return rowToRecord(data as Record<string, unknown>);
+}
+
+/**
+ * 管理者用: 特定ユーザーの月次添削履歴を新しい順で取得 (ハブの体組成推移用)。
+ * 取得対象: submitted_at が null でない (= 提出済) もののみ、target_month 降順。
+ */
+export async function listAuditsForUser(
+  userId: string,
+  limit: number = 5
+): Promise<MonthlyAuditRow[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("monthly_audits")
+    .select(
+      "id, user_id, target_month, items, items_filled_count, last_saved_at, submitted_at, nori_video_vimeo_url, nori_video_vimeo_id, nori_video_published_at, nori_video_duration_sec, created_at, updated_at"
+    )
+    .eq("user_id", userId)
+    .not("submitted_at", "is", null)
+    .order("target_month", { ascending: false })
+    .limit(limit);
+  return (data ?? []).map((d) => rowToRecord(d as Record<string, unknown>));
+}
+
+/**
  * 管理者用: 全添削履歴を新しい順で取得 (履歴閲覧用)。
  */
 export async function listAllAudits(

@@ -1,26 +1,41 @@
 import { notFound } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import Link from "next/link";
-import { requireAdmin } from "@/lib/auth/admin";
+import { requireAdmin, getAdminInfo } from "@/lib/auth/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import {
   getCarteForAdmin,
   getCurrentMenuForAdmin,
+  countPendingRequestsForUser,
 } from "@/lib/workout/queries";
 import { calcAge, calcAgeBand } from "@/lib/workout/types";
 import {
   formatDistributionDate,
   formatDistributionDateTime,
 } from "@/lib/workout/menu-display";
+import { getLatestAuditForUser } from "@/lib/monthly-audit/queries";
+import {
+  AUDIT_STATUS_LABELS_ADMIN,
+  formatTargetMonthLabel,
+  getAuditStatus,
+  type AuditStatus,
+} from "@/lib/monthly-audit/types";
+import { getGoalSheetForUser } from "@/lib/goal-sheet/queries";
+import { countFilledSections } from "@/lib/goal-sheet/types";
 
 export const dynamic = "force-dynamic";
 
 /**
  * 管理画面 受講生ハブ画面 (/admin/users/[id])
  *
- * 暫定実装 (Step 2 修正の一環):
- *   - これまで /admin/users/[id] が存在せず、各画面の戻りリンクが 404 になっていた
- *   - Step 4 で本格的なハブ画面 (月次/メトリクス/受信箱集約) を作る予定だが、
- *     先に受講生情報 + 各画面リンクのシンプル版を作って 404 を解消する
+ * Step 4-A: 月次/目標/未対応リクエスト/フラグクリアを追加 (2026-06-03)
+ *   - 月次添削 最新状況 + 個別作業画面リンク
+ *   - 目標シート 進捗 + 最終更新日 (専用画面はまだ無いので閲覧リンクなし)
+ *   - 未対応リクエスト件数 + 受信箱リンク
+ *   - 「カルテ変更あり / メニュー要確認」フラグの確認済化ワンクリック
+ *
+ * Step 4-B 予定: sparkline / 達成度バー / 上部固定ヘッダ整理
  *
  * アクセス制御: requireAdmin
  */
@@ -55,11 +70,15 @@ export default async function AdminUserHubPage({
   const age = birthday ? calcAge(birthday) : null;
   const ageBand = birthday ? calcAgeBand(birthday) : null;
 
-  // カルテ・メニュー取得 (両方とも null 許容)
-  const [carte, currentMenu] = await Promise.all([
-    getCarteForAdmin(userId),
-    getCurrentMenuForAdmin(userId),
-  ]);
+  // 6 リソースを並列取得
+  const [carte, currentMenu, latestAudit, goalSheet, pendingCounts] =
+    await Promise.all([
+      getCarteForAdmin(userId),
+      getCurrentMenuForAdmin(userId),
+      getLatestAuditForUser(userId),
+      getGoalSheetForUser(userId),
+      countPendingRequestsForUser(userId),
+    ]);
 
   const displayName = userRow.nickname || userRow.name;
   const isCarteReady =
@@ -67,6 +86,30 @@ export default async function AdminUserHubPage({
     carte.environments.length > 0 &&
     !!carte.frequency_wish &&
     carte.focus_body_parts.length > 0;
+
+  // 月次添削状態
+  const auditStatus: AuditStatus = getAuditStatus(latestAudit);
+
+  // 目標シート進捗
+  const goalSheetFilled = goalSheet
+    ? countFilledSections(goalSheet.content)
+    : 0;
+
+  /**
+   * Server Action: 「確認済にする」 (menu_review_needed フラグをクリア)
+   * inline で定義 → form action として直接使う
+   */
+  async function clearReviewFlagAction() {
+    "use server";
+    const me = await getAdminInfo();
+    if (!me) return;
+    const supabase = await createClient();
+    await supabase
+      .from("user_workout_carte")
+      .update({ menu_review_needed: false })
+      .eq("user_id", userId);
+    revalidatePath(`/admin/users/${userId}`, "page");
+  }
 
   return (
     <div className="min-h-screen bg-zinc-50">
@@ -111,7 +154,7 @@ export default async function AdminUserHubPage({
       </header>
 
       <main className="mx-auto max-w-3xl px-4 py-6 space-y-5">
-        {/* カルテ状態 */}
+        {/* 筋トレカルテ */}
         <section className="rounded-[14px] border border-[#e8ebe9] bg-white p-5">
           <div className="mb-3 flex items-center gap-2">
             <span className="h-5 w-1 rounded-full bg-[#00897b]" />
@@ -119,9 +162,19 @@ export default async function AdminUserHubPage({
               筋トレカルテ
             </h2>
             {carte?.menu_review_needed && (
-              <span className="ml-auto rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-800">
-                カルテ変更あり / メニュー要確認
-              </span>
+              <div className="ml-auto flex items-center gap-2">
+                <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-800">
+                  カルテ変更あり / メニュー要確認
+                </span>
+                <form action={clearReviewFlagAction}>
+                  <button
+                    type="submit"
+                    className="rounded-[4px] border border-amber-300 bg-white px-2.5 py-0.5 text-[10px] font-medium text-amber-900 hover:bg-amber-100"
+                  >
+                    確認済にする
+                  </button>
+                </form>
+              </div>
             )}
           </div>
 
@@ -165,7 +218,7 @@ export default async function AdminUserHubPage({
           )}
         </section>
 
-        {/* 現在のメニュー */}
+        {/* 配布中のメニュー */}
         <section className="rounded-[14px] border border-[#e8ebe9] bg-white p-5">
           <div className="mb-3 flex items-center gap-2">
             <span className="h-5 w-1 rounded-full bg-[#00897b]" />
@@ -205,7 +258,6 @@ export default async function AdminUserHubPage({
                 </dd>
               </dl>
 
-              {/* メニューに対するアクション (左: 既存編集 / 右: 新規配布) */}
               <div className="flex flex-wrap gap-2">
                 <Link
                   href={`/admin/users/${userId}/menu/new?from_current=1`}
@@ -242,6 +294,147 @@ export default async function AdminUserHubPage({
           )}
         </section>
 
+        {/* 月次添削 */}
+        <section className="rounded-[14px] border border-[#e8ebe9] bg-white p-5">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="h-5 w-1 rounded-full bg-[#00897b]" />
+            <h2 className="text-sm font-semibold text-zinc-900">月次添削</h2>
+            <span
+              className={`ml-auto rounded-full px-2.5 py-0.5 text-[10px] ${auditStatusStyle(
+                auditStatus
+              )}`}
+            >
+              {AUDIT_STATUS_LABELS_ADMIN[auditStatus]}
+            </span>
+          </div>
+
+          {latestAudit ? (
+            <>
+              <dl className="grid grid-cols-[100px_1fr] gap-y-1.5 gap-x-3 text-xs mb-4">
+                <dt className="text-zinc-500">最新月</dt>
+                <dd className="text-zinc-900 font-medium">
+                  {formatTargetMonthLabel(latestAudit.target_month)}
+                </dd>
+                <dt className="text-zinc-500">進捗</dt>
+                <dd className="text-zinc-900 font-medium">
+                  17 項目中 {latestAudit.items_filled_count} 項目記入済
+                </dd>
+                {latestAudit.submitted_at && (
+                  <>
+                    <dt className="text-zinc-500">提出日時</dt>
+                    <dd className="text-zinc-900 font-medium font-mono">
+                      {formatDistributionDateTime(latestAudit.submitted_at)}
+                    </dd>
+                  </>
+                )}
+                {latestAudit.nori_video_published_at && (
+                  <>
+                    <dt className="text-zinc-500">返信日時</dt>
+                    <dd className="text-zinc-900 font-medium font-mono">
+                      {formatDistributionDateTime(
+                        latestAudit.nori_video_published_at
+                      )}
+                    </dd>
+                  </>
+                )}
+              </dl>
+              <Link
+                href={`/admin/monthly-reviews/${latestAudit.id}`}
+                className="inline-block rounded-[4px] border border-zinc-300 bg-white px-4 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+              >
+                添削画面を開く →
+              </Link>
+            </>
+          ) : (
+            <p className="text-sm text-zinc-700">
+              この受講生はまだ月次添削を 1 回も提出していません。
+            </p>
+          )}
+        </section>
+
+        {/* 目標シート */}
+        <section className="rounded-[14px] border border-[#e8ebe9] bg-white p-5">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="h-5 w-1 rounded-full bg-[#00897b]" />
+            <h2 className="text-sm font-semibold text-zinc-900">目標シート</h2>
+            {goalSheet?.reviewed_at && (
+              <span className="ml-auto rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-800">
+                添削済み
+              </span>
+            )}
+          </div>
+
+          {goalSheet ? (
+            <>
+              <dl className="grid grid-cols-[100px_1fr] gap-y-1.5 gap-x-3 text-xs mb-4">
+                <dt className="text-zinc-500">記入セクション</dt>
+                <dd className="text-zinc-900 font-medium">
+                  5 セクション中 {goalSheetFilled} 記入済
+                </dd>
+                <dt className="text-zinc-500">最終更新日時</dt>
+                <dd className="text-zinc-900 font-medium font-mono">
+                  {formatDistributionDateTime(goalSheet.updated_at)}
+                </dd>
+                {goalSheet.reviewed_at && (
+                  <>
+                    <dt className="text-zinc-500">添削日時</dt>
+                    <dd className="text-zinc-900 font-medium font-mono">
+                      {formatDistributionDateTime(goalSheet.reviewed_at)}
+                    </dd>
+                  </>
+                )}
+              </dl>
+              <p className="text-[10px] text-zinc-500">
+                ※ 目標シート専用の管理画面は未実装 (今後追加予定)
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-zinc-700">
+              この受講生はまだ目標シートを作成していません。
+            </p>
+          )}
+        </section>
+
+        {/* 未対応リクエスト */}
+        <section className="rounded-[14px] border border-[#e8ebe9] bg-white p-5">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="h-5 w-1 rounded-full bg-[#00897b]" />
+            <h2 className="text-sm font-semibold text-zinc-900">
+              未対応リクエスト
+            </h2>
+            {pendingCounts.total > 0 && (
+              <span className="ml-auto rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800">
+                計 {pendingCounts.total} 件
+              </span>
+            )}
+          </div>
+
+          {pendingCounts.total > 0 ? (
+            <>
+              <dl className="grid grid-cols-[120px_1fr] gap-y-1.5 gap-x-3 text-xs mb-4">
+                <dt className="text-zinc-500">カルテ更新</dt>
+                <dd className="text-zinc-900 font-medium">
+                  {pendingCounts.carte} 件
+                </dd>
+                <dt className="text-zinc-500">メニュー変更</dt>
+                <dd className="text-zinc-900 font-medium">
+                  {pendingCounts.workout} 件
+                </dd>
+              </dl>
+              <Link
+                href="/admin/requests"
+                className="inline-block rounded-[4px] bg-amber-100 hover:bg-amber-200 px-4 py-2 text-xs font-bold text-amber-800"
+              >
+                受信箱で対応する →
+              </Link>
+            </>
+          ) : (
+            <p className="text-sm text-zinc-700">
+              この受講生からの未対応リクエストはありません 🎉
+            </p>
+          )}
+        </section>
+
         {/* 受講生メタ情報 */}
         <section className="rounded-[14px] border border-[#e8ebe9] bg-white p-5">
           <div className="mb-3 flex items-center gap-2">
@@ -268,12 +461,26 @@ export default async function AdminUserHubPage({
           </dl>
         </section>
 
-        {/* 注記: 本格ハブは Step 4 で */}
+        {/* 注記 */}
         <div className="rounded-[14px] border border-dashed border-zinc-300 bg-white p-4 text-xs text-zinc-500">
-          ※ この画面は Step 2 修正の暫定版です。
-          月次添削履歴 / 体組成推移 / リクエスト集約などは Step 4 で追加します。
+          ※ Step 4-A 完了。Step 4-B で体組成推移 (sparkline) / 達成度バー /
+          上部固定ヘッダ整理を追加予定。
         </div>
       </main>
     </div>
   );
+}
+
+function auditStatusStyle(status: AuditStatus): string {
+  switch (status) {
+    case "a_empty":
+      return "bg-zinc-100 text-zinc-600 font-medium";
+    case "b_in_progress":
+      return "bg-amber-50 text-amber-800 font-medium";
+    // ★ C 状態は「のり氏が一目で見つけられるよう」強調 (赤背景 + 白文字 + 太字 + ピン留めアイコン)
+    case "c_submitted":
+      return "bg-rose-500 text-white font-bold shadow-sm";
+    case "d_replied":
+      return "bg-emerald-50 text-emerald-800 font-medium";
+  }
 }

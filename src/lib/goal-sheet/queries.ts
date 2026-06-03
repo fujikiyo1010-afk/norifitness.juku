@@ -109,3 +109,28 @@ export async function listMyGoalSheetRevisions(): Promise<GoalSheetRevision[]> {
     created_at: r.created_at as string,
   }));
 }
+
+/**
+ * 管理者用: 特定ユーザーの編集履歴を新しい順で取得 (ハブ画面の前回値比較用)。
+ */
+export async function listGoalSheetRevisionsForUser(
+  userId: string,
+  limit: number = 10
+): Promise<GoalSheetRevision[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("goal_sheet_revisions")
+    .select("id, user_id, snapshot, edited_by, reason, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  return (data ?? []).map((r) => ({
+    id: r.id as string,
+    user_id: r.user_id as string,
+    snapshot: (r.snapshot as GoalSheetContent) ?? {},
+    edited_by: (r.edited_by as string | null) ?? null,
+    reason: (r.reason as string | null) ?? null,
+    created_at: r.created_at as string,
+  }));
+}

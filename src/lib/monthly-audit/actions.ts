@@ -146,7 +146,7 @@ export type AttachVideoResult =
 /**
  * 管理者用: のり氏動画 URL を月次添削に紐付ける。
  *   - Vimeo / Supabase Storage のどちらでも対応 (URL 文字列で受ける)
- *   - nori_video_published_at セット = 受講生に「返信届いた」(D 状態) になる
+ *   - nori_video_published_at セット = 受講生に「返信あり」(D 状態) になる
  *   - RLS で管理者のみ実行可能 (受講生からは update 不可)
  */
 export async function attachNoriVideo(

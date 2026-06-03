@@ -291,7 +291,7 @@ function StateCardC({ audit }: { audit: MonthlyAuditRow }) {
   );
 }
 
-// 状態 D: 返信届いた
+// 状態 D: 返信あり
 function StateCardD({ audit }: { audit: MonthlyAuditRow }) {
   const publishedAt = new Date(audit.nori_video_published_at!);
   const publishedLabel = publishedAt.toLocaleDateString("ja-JP", {
