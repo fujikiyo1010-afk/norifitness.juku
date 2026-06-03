@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getMyCurrentMonthAudit } from "@/lib/monthly-audit/queries";
+import { getMyCurrentMonthAudit, listMyAudits } from "@/lib/monthly-audit/queries";
 import {
   getCurrentTargetMonth,
   formatTargetMonthLabel,
@@ -14,12 +14,26 @@ export const dynamic = "force-dynamic";
  * 設計元: /tmp/monthly_review_form.html (Phase 2-7 モック)
  *
  * 構成:
- *   - Server Component で当月の月次添削を取得 (途中保存があれば復元)
+ *   - Server Component で当月の月次添削 + 前月の audit を取得
+ *   - 案 3 (2026-06-03 きよむさん合意):
+ *     - 初回受講生 (前月 audit なし) → Q1/Q2 の「先月」フィールド非表示
+ *     - 2 回目以降 → 前月の「今月値」を今回の「先月」に自動入力 (編集可)
  *   - Client Component (MonthlyReviewForm) でフォーム + 保存処理
  */
 export default async function MonthlyReviewFormPage() {
   const targetMonth = getCurrentTargetMonth();
-  const audit = await getMyCurrentMonthAudit();
+  const [audit, recentAudits] = await Promise.all([
+    getMyCurrentMonthAudit(),
+    listMyAudits(3), // 当月 + 直近 2 件
+  ]);
+
+  // 当月以外で最新の audit を「前月候補」として扱う
+  // (実際には先々月の可能性もあるが、現実運用では大体「前月」になる)
+  const previousAudit = recentAudits.find(
+    (a) => a.target_month !== targetMonth
+  );
+  const prevQ1Weight = previousAudit?.items?.q1?.current_value;
+  const prevQ2Waist = previousAudit?.items?.q2?.current_value;
 
   // 既に提出済 (C 状態以降) なら、フォームは編集不可
   const submitted = !!audit?.submitted_at;
@@ -60,6 +74,8 @@ export default async function MonthlyReviewFormPage() {
             targetMonth={targetMonth}
             initialItems={audit?.items ?? {}}
             initialLastSavedAt={audit?.last_saved_at ?? null}
+            prevQ1Weight={prevQ1Weight}
+            prevQ2Waist={prevQ2Waist}
           />
         )}
       </div>

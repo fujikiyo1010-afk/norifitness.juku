@@ -36,13 +36,35 @@ export function MonthlyReviewForm({
   targetMonth,
   initialItems,
   initialLastSavedAt,
+  prevQ1Weight,
+  prevQ2Waist,
 }: {
   targetMonth: string;
   initialItems: MonthlyAuditItems;
   initialLastSavedAt: string | null;
+  /** 前月の Q1 (体重) current_value、初回受講生は undefined */
+  prevQ1Weight?: number;
+  /** 前月の Q2 (ウエスト) current_value、初回受講生は undefined */
+  prevQ2Waist?: number;
 }) {
   const router = useRouter();
-  const [items, setItems] = useState<MonthlyAuditItems>(initialItems);
+  // 初期化時、前月値を「先月」フィールドに自動セット (既存値があれば優先)
+  const [items, setItems] = useState<MonthlyAuditItems>(() => {
+    const initial: MonthlyAuditItems = { ...initialItems };
+    if (prevQ1Weight !== undefined) {
+      initial.q1 = {
+        ...initial.q1,
+        last_value: initial.q1?.last_value ?? prevQ1Weight,
+      };
+    }
+    if (prevQ2Waist !== undefined) {
+      initial.q2 = {
+        ...initial.q2,
+        last_value: initial.q2?.last_value ?? prevQ2Waist,
+      };
+    }
+    return initial;
+  });
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(
     initialLastSavedAt
   );
@@ -223,15 +245,22 @@ export function MonthlyReviewForm({
                 return (
                   <div key={catKey}>
                     <CategoryBand label={cat.label} count={cat.count} />
-                    {questions.map((q) => (
-                      <ItemCard
-                        key={q.key}
-                        question={q}
-                        answer={items[q.key as keyof MonthlyAuditItems]}
-                        onChange={(patch) => updateAnswer(q.key, patch)}
-                        missing={missingKeys.includes(q.key)}
-                      />
-                    ))}
+                    {questions.map((q) => {
+                      // 「先月」列を出すかは前月 audit の有無で決まる (Q1/Q2 のみ関係)
+                      const hasPrevMonth =
+                        (q.key === "q1" && prevQ1Weight !== undefined) ||
+                        (q.key === "q2" && prevQ2Waist !== undefined);
+                      return (
+                        <ItemCard
+                          key={q.key}
+                          question={q}
+                          answer={items[q.key as keyof MonthlyAuditItems]}
+                          onChange={(patch) => updateAnswer(q.key, patch)}
+                          missing={missingKeys.includes(q.key)}
+                          hasPrevMonth={hasPrevMonth}
+                        />
+                      );
+                    })}
                   </div>
                 );
               })}
@@ -376,11 +405,14 @@ function ItemCard({
   answer,
   onChange,
   missing,
+  hasPrevMonth = false,
 }: {
   question: AuditQuestion;
   answer: BodyMeasureAnswer | ScoreAnswer | TextAnswer | undefined;
   onChange: (patch: Partial<BodyMeasureAnswer | ScoreAnswer | TextAnswer>) => void;
   missing: boolean;
+  /** 案 3: 前月 audit がある場合のみ「先月」列を表示 */
+  hasPrevMonth?: boolean;
 }) {
   const num = question.key.replace("q", "");
   return (
@@ -412,6 +444,7 @@ function ItemCard({
           placeholder={question.numberPlaceholder ?? ""}
           answer={(answer ?? {}) as BodyMeasureAnswer}
           onChange={onChange}
+          showLastMonth={hasPrevMonth}
         />
       )}
       {question.type === "score" && (
@@ -450,6 +483,7 @@ function BodyMeasureInput({
   placeholder,
   answer,
   onChange,
+  showLastMonth,
 }: {
   unit: string;
   step: number;
@@ -459,7 +493,29 @@ function BodyMeasureInput({
   placeholder: string;
   answer: BodyMeasureAnswer;
   onChange: (patch: Partial<BodyMeasureAnswer>) => void;
+  /** 案 3: 「先月」列を出すか。初回受講生は false で「今月」のみ */
+  showLastMonth: boolean;
 }) {
+  // 初回受講生: 「今月」だけ
+  if (!showLastMonth) {
+    return (
+      <div className="grid grid-cols-1">
+        <BodyMeasureColumn
+          label="今月"
+          value={answer.current_value}
+          onChange={(v) => onChange({ current_value: v })}
+          unit={unit}
+          step={step}
+          min={min}
+          max={max}
+          decimals={decimals}
+          placeholder={placeholder}
+        />
+      </div>
+    );
+  }
+
+  // 2 回目以降: 先月 (前月今月値が自動セット済) + 今月
   return (
     <div className="grid grid-cols-2 gap-2.5">
       <BodyMeasureColumn
@@ -648,30 +704,41 @@ function PreviewItem({
         {question.label}
       </div>
 
-      {question.type === "body_measure" && (
-        <div className="grid grid-cols-2 gap-2.5 mb-2">
-          <div className="bg-[#f8f9fa] border border-[#e8ebe9] rounded-lg p-2 text-center">
-            <div className="text-[10px] text-zinc-500 mb-0.5">先月</div>
-            <div className="text-sm font-bold text-zinc-900 font-mono">
-              {(answer as BodyMeasureAnswer | undefined)?.last_value ?? "—"}
-              <span className="text-[10px] text-zinc-500 ml-1 font-normal">
-                {question.unit}
-              </span>
+      {question.type === "body_measure" &&
+        (() => {
+          const bodyAnswer = answer as BodyMeasureAnswer | undefined;
+          const hasLast = bodyAnswer?.last_value !== undefined;
+          return (
+            <div
+              className={`grid gap-2.5 mb-2 ${
+                hasLast ? "grid-cols-2" : "grid-cols-1"
+              }`}
+            >
+              {hasLast && (
+                <div className="bg-[#f8f9fa] border border-[#e8ebe9] rounded-lg p-2 text-center">
+                  <div className="text-[10px] text-zinc-500 mb-0.5">先月</div>
+                  <div className="text-sm font-bold text-zinc-900 font-mono">
+                    {bodyAnswer?.last_value}
+                    <span className="text-[10px] text-zinc-500 ml-1 font-normal">
+                      {question.unit}
+                    </span>
+                  </div>
+                </div>
+              )}
+              <div className="bg-[rgba(0,137,123,0.08)] border border-[#00897b] rounded-lg p-2 text-center">
+                <div className="text-[10px] text-[#00695c] mb-0.5 font-semibold">
+                  今月
+                </div>
+                <div className="text-sm font-bold text-[#00695c] font-mono">
+                  {bodyAnswer?.current_value ?? "—"}
+                  <span className="text-[10px] text-[#00695c] ml-1 font-normal">
+                    {question.unit}
+                  </span>
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="bg-[rgba(0,137,123,0.08)] border border-[#00897b] rounded-lg p-2 text-center">
-            <div className="text-[10px] text-[#00695c] mb-0.5 font-semibold">
-              今月
-            </div>
-            <div className="text-sm font-bold text-[#00695c] font-mono">
-              {(answer as BodyMeasureAnswer | undefined)?.current_value ?? "—"}
-              <span className="text-[10px] text-[#00695c] ml-1 font-normal">
-                {question.unit}
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
+          );
+        })()}
 
       {question.type === "score" && (
         <div className="flex items-center gap-3 mb-2">
