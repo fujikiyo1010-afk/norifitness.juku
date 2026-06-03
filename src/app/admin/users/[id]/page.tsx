@@ -204,12 +204,22 @@ export default async function AdminUserHubPage({
                   種目
                 </dd>
               </dl>
-              <Link
-                href={`/admin/users/${userId}/match`}
-                className="inline-block rounded-[4px] border border-zinc-300 bg-white px-4 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
-              >
-                新しいメニューを配布 →
-              </Link>
+
+              {/* メニューに対するアクション (左: 既存編集 / 右: 新規配布) */}
+              <div className="flex flex-wrap gap-2">
+                <Link
+                  href={`/admin/users/${userId}/menu/new?from_current=1`}
+                  className="inline-block rounded-[4px] border border-[#00897b] bg-[rgba(0,137,123,0.08)] px-4 py-2 text-xs font-bold text-[#00695c] hover:bg-[rgba(0,137,123,0.16)]"
+                >
+                  現メニューを編集して再配布 →
+                </Link>
+                <Link
+                  href={`/admin/users/${userId}/match`}
+                  className="inline-block rounded-[4px] border border-zinc-300 bg-white px-4 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+                >
+                  マッチング検索から新規配布 →
+                </Link>
+              </div>
             </>
           ) : isCarteReady ? (
             <>

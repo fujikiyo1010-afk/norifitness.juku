@@ -35,6 +35,17 @@ export function RequestCard({
   const hubHref = `/admin/users/${userId}`;
 
   function handleDismiss() {
+    // 誤タップ防止: 確認ダイアログ
+    const typeLabel = type === "carte" ? "カルテ更新" : "メニュー変更";
+    const snippet =
+      request.request_text.length > 60
+        ? request.request_text.slice(0, 60) + "…"
+        : request.request_text;
+    const ok = window.confirm(
+      `${user_info.display_name} さんの${typeLabel}リクエストを却下します。\n\n「${snippet}」\n\nよろしいですか？`
+    );
+    if (!ok) return;
+
     startTransition(async () => {
       const result =
         type === "carte"

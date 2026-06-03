@@ -47,6 +47,7 @@ export function MenuComposeClient({
   initialNotes,
   templateId,
   sourceTemplate,
+  backHref,
 }: {
   userId: string;
   userName: string;
@@ -54,6 +55,8 @@ export function MenuComposeClient({
   initialNotes: string;
   templateId: string | null;
   sourceTemplate: WorkoutTemplateRow | null;
+  /** ヘッダ戻るボタンの遷移先。テンプレ採用時は match、現メニュー編集時はハブ */
+  backHref: string;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -174,9 +177,9 @@ export function MenuComposeClient({
       <header className="sticky top-0 z-10 border-b border-[#e8ebe9] bg-white">
         <div className="mx-auto max-w-3xl px-4 py-3 flex items-center gap-3">
           <Link
-            href={`/admin/users/${userId}/match`}
+            href={backHref}
             className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-zinc-100"
-            aria-label="マッチング検索に戻る"
+            aria-label="戻る"
           >
             <svg
               width="20"

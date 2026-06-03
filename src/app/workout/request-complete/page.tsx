@@ -30,13 +30,15 @@ export default async function RequestCompletePage({
       style={{ background: "linear-gradient(135deg, #e0f2f1, #fffbe6)" }}
     >
       <div className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center px-6 py-12">
-        {/* キャラ画像 */}
-        <div className="mb-6">
+        {/* キャラ画像 (140px 円形、scale 1.2 で黒円を枠外に追い出す) */}
+        <div className="w-[140px] h-[140px] rounded-full shadow-lg mb-6 overflow-hidden bg-white relative">
           <Image
             src="/images/nori-character.png"
-            alt=""
+            alt="のりキャラクター"
             width={140}
             height={140}
+            className="w-full h-full object-cover"
+            style={{ transform: "scale(1.2)" }}
             priority
           />
         </div>
