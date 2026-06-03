@@ -32,7 +32,8 @@ export function RequestCard({
 
   const { user_info } = request;
   const userId = user_info.id;
-  const hubHref = `/admin/users/${userId}`;
+  // 受信箱から来たことを ?from=inbox で伝える → ハブ画面の戻り先が受信箱になる
+  const hubHref = `/admin/users/${userId}?from=inbox`;
 
   function handleDismiss() {
     // 誤タップ防止: 確認ダイアログ

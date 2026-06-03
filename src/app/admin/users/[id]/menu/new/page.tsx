@@ -142,10 +142,13 @@ export default async function AdminMenuNewPage({
   }
 
   // 戻り先: 現メニュー編集の場合はハブ、それ以外 (テンプレ採用/ゼロから) はマッチング検索
-  const backHref =
-    sp.from_current === "1"
-      ? `/admin/users/${userId}`
-      : `/admin/users/${userId}/match`;
+  const isFromCurrent = sp.from_current === "1";
+  const backHref = isFromCurrent
+    ? `/admin/users/${userId}`
+    : `/admin/users/${userId}/match`;
+  const backLabel = isFromCurrent
+    ? "受講生ハブに戻る"
+    : "マッチング検索に戻る";
 
   return (
     <MenuComposeClient
@@ -156,6 +159,7 @@ export default async function AdminMenuNewPage({
       templateId={templateId}
       sourceTemplate={sourceTemplate}
       backHref={backHref}
+      backLabel={backLabel}
     />
   );
 }

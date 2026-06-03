@@ -57,11 +57,20 @@ export const dynamic = "force-dynamic";
  */
 export default async function AdminUserHubPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ from?: string }>;
 }) {
   await requireAdmin();
   const { id: userId } = await params;
+  const sp = await searchParams;
+
+  // 動線判定: ?from=inbox なら戻り先を個別対応受信箱に
+  const fromInbox = sp.from === "inbox";
+  const back = fromInbox
+    ? { href: "/admin/requests", label: "受信箱に戻る" }
+    : { href: "/admin/users", label: "受講生一覧に戻る" };
 
   // 受講生情報取得
   const admin = createAdminClient();
@@ -172,9 +181,10 @@ export default async function AdminUserHubPage({
       <header className="sticky top-0 z-10 border-b border-[#e8ebe9] bg-white">
         <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
           <Link
-            href="/admin/users"
+            href={back.href}
             className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-zinc-100"
-            aria-label="受講生一覧に戻る"
+            aria-label={back.label}
+            title={back.label}
           >
             <svg
               width="20"

@@ -48,6 +48,7 @@ export function MenuComposeClient({
   templateId,
   sourceTemplate,
   backHref,
+  backLabel,
 }: {
   userId: string;
   userName: string;
@@ -57,6 +58,7 @@ export function MenuComposeClient({
   sourceTemplate: WorkoutTemplateRow | null;
   /** ヘッダ戻るボタンの遷移先。テンプレ採用時は match、現メニュー編集時はハブ */
   backHref: string;
+  backLabel: string;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -179,7 +181,8 @@ export function MenuComposeClient({
           <Link
             href={backHref}
             className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-zinc-100"
-            aria-label="戻る"
+            aria-label={backLabel}
+            title={backLabel}
           >
             <svg
               width="20"
