@@ -172,9 +172,9 @@ export default async function AdminUserHubPage({
       <header className="sticky top-0 z-10 border-b border-[#e8ebe9] bg-white">
         <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
           <Link
-            href="/"
+            href="/admin/users"
             className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-zinc-100"
-            aria-label="ホームに戻る"
+            aria-label="受講生一覧に戻る"
           >
             <svg
               width="20"
@@ -216,6 +216,27 @@ export default async function AdminUserHubPage({
               )}
             </p>
           </div>
+          {/* 右上: 管理者ホームへ直接戻る (左上 ← は親階層 = 受講生一覧) */}
+          <Link
+            href="/admin"
+            className="inline-flex items-center gap-1.5 rounded-[4px] border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+            title="管理者ホームに戻る"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+            ホームに戻る
+          </Link>
         </div>
       </header>
 
@@ -570,9 +591,12 @@ export default async function AdminUserHubPage({
                   </>
                 )}
               </dl>
-              <p className="text-[10px] text-zinc-500">
-                ※ 目標シート専用の管理画面は未実装 (今後追加予定)
-              </p>
+              <Link
+                href={`/admin/users/${userId}/goal-sheet`}
+                className="inline-block rounded-[4px] border border-zinc-300 bg-white px-4 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+              >
+                添削画面を開く →
+              </Link>
             </>
           ) : (
             <p className="text-sm text-zinc-700">

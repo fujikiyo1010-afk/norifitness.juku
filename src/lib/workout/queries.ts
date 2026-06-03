@@ -442,6 +442,252 @@ export type WorkoutRequestWithUser = UserWorkoutRequestRow & {
   user_info: RequestUserInfo;
 };
 
+// =====================================================================
+// 受講生一覧用 サマリ
+// =====================================================================
+
+export type UserListSummary = {
+  id: string;
+  displayName: string;
+  age: number | null;
+  ageBand: AgeBand | null;
+  gender: Gender | null;
+  joinedAt: string | null;
+
+  latestAuditStatus: "a_empty" | "b_in_progress" | "c_submitted" | "d_replied";
+  latestAuditTargetMonth: string | null;
+
+  hasCurrentMenu: boolean;
+  pendingRequestCount: number;
+  menuReviewNeeded: boolean;
+
+  /** 最終アクション日時 (各ソースの最新の更新日時の最大値) */
+  lastActionAt: string | null;
+};
+
+/**
+ * 受講生一覧 (/admin/users) 用: 全受講生 + 各受講生の状態を集計。
+ *
+ * N+1 を避けるため、ID リストを使って各テーブルから一括取得し、
+ * Map で突合して合成する。
+ *
+ * 50-100 人規模では実用十分。それ以上に増えたら専用ビューを検討。
+ */
+export async function listAllUsersWithStatus(): Promise<UserListSummary[]> {
+  const supabase = await createClient();
+
+  // 1. 全受講生取得
+  const { data: usersData } = await supabase
+    .from("users")
+    .select("id, name, nickname, joined_at")
+    .order("joined_at", { ascending: false });
+  const users = usersData ?? [];
+  if (users.length === 0) return [];
+  const userIds = users.map((u) => u.id as string);
+
+  // 2-7. 関連テーブルを並列取得
+  const [profilesRes, cartesRes, menusRes, auditsRes, carteReqRes, workoutReqRes] =
+    await Promise.all([
+      supabase
+        .from("user_profiles")
+        .select("user_id, birthday")
+        .in("user_id", userIds),
+      supabase
+        .from("user_workout_carte")
+        .select("user_id, gender, menu_review_needed, updated_at")
+        .in("user_id", userIds),
+      supabase
+        .from("user_workout_menu")
+        .select("user_id, created_at")
+        .in("user_id", userIds)
+        .eq("is_current", true),
+      supabase
+        .from("monthly_audits")
+        .select(
+          "id, user_id, target_month, submitted_at, nori_video_published_at, updated_at"
+        )
+        .in("user_id", userIds)
+        .order("target_month", { ascending: false }),
+      supabase
+        .from("user_carte_request")
+        .select("user_id, created_at")
+        .in("user_id", userIds)
+        .eq("status", "pending"),
+      supabase
+        .from("user_workout_request")
+        .select("user_id, created_at")
+        .in("user_id", userIds)
+        .eq("status", "pending"),
+    ]);
+
+  // Map 化
+  const profileMap = new Map<string, string | null>();
+  for (const p of profilesRes.data ?? []) {
+    profileMap.set(p.user_id as string, (p.birthday as string | null) ?? null);
+  }
+  const carteMap = new Map<
+    string,
+    { gender: Gender | null; flag: boolean; updated_at: string }
+  >();
+  for (const c of cartesRes.data ?? []) {
+    carteMap.set(c.user_id as string, {
+      gender: (c.gender as Gender) ?? null,
+      flag: (c.menu_review_needed as boolean) ?? false,
+      updated_at: c.updated_at as string,
+    });
+  }
+  const menuMap = new Map<string, string>(); // user_id -> created_at (現役メニューがあれば)
+  for (const m of menusRes.data ?? []) {
+    menuMap.set(m.user_id as string, m.created_at as string);
+  }
+  // 各 user の「最新の audit」を抽出 (target_month 降順なので最初の出現が最新)
+  const latestAuditMap = new Map<
+    string,
+    {
+      status: "a_empty" | "b_in_progress" | "c_submitted" | "d_replied";
+      targetMonth: string;
+      updated_at: string;
+    }
+  >();
+  for (const a of auditsRes.data ?? []) {
+    const uid = a.user_id as string;
+    if (latestAuditMap.has(uid)) continue;
+    const submitted = (a.submitted_at as string | null) ?? null;
+    const published = (a.nori_video_published_at as string | null) ?? null;
+    const status: "a_empty" | "b_in_progress" | "c_submitted" | "d_replied" =
+      !submitted
+        ? "b_in_progress"
+        : !published
+          ? "c_submitted"
+          : "d_replied";
+    latestAuditMap.set(uid, {
+      status,
+      targetMonth: a.target_month as string,
+      updated_at: a.updated_at as string,
+    });
+  }
+  const reqCountMap = new Map<string, { count: number; latest: string }>();
+  for (const r of [
+    ...(carteReqRes.data ?? []),
+    ...(workoutReqRes.data ?? []),
+  ]) {
+    const uid = r.user_id as string;
+    const created = r.created_at as string;
+    const prev = reqCountMap.get(uid);
+    if (prev) {
+      reqCountMap.set(uid, {
+        count: prev.count + 1,
+        latest: created > prev.latest ? created : prev.latest,
+      });
+    } else {
+      reqCountMap.set(uid, { count: 1, latest: created });
+    }
+  }
+
+  // 合成
+  return users.map((u) => {
+    const id = u.id as string;
+    const name = (u.nickname as string | null) || (u.name as string);
+    const joinedAt = (u.joined_at as string | null) ?? null;
+    const birthday = profileMap.get(id) ?? null;
+    const carte = carteMap.get(id);
+    const menuCreatedAt = menuMap.get(id);
+    const latestAudit = latestAuditMap.get(id);
+    const req = reqCountMap.get(id);
+
+    // 最終アクション = 各ソースの updated_at/created_at の最大値
+    const candidates: string[] = [];
+    if (carte) candidates.push(carte.updated_at);
+    if (menuCreatedAt) candidates.push(menuCreatedAt);
+    if (latestAudit) candidates.push(latestAudit.updated_at);
+    if (req) candidates.push(req.latest);
+    const lastActionAt =
+      candidates.length > 0
+        ? candidates.sort().slice(-1)[0]
+        : joinedAt ?? null;
+
+    return {
+      id,
+      displayName: name,
+      age: birthday ? calcAge(birthday) : null,
+      ageBand: birthday ? calcAgeBand(birthday) : null,
+      gender: carte?.gender ?? null,
+      joinedAt,
+      latestAuditStatus: latestAudit?.status ?? "a_empty",
+      latestAuditTargetMonth: latestAudit?.targetMonth ?? null,
+      hasCurrentMenu: !!menuCreatedAt,
+      pendingRequestCount: req?.count ?? 0,
+      menuReviewNeeded: !!carte?.flag,
+      lastActionAt,
+    };
+  });
+}
+
+// calcAge は types で定義済み (export 済) だが、ファイル内で import 直す
+function calcAge(birthday: string): number {
+  const birth = new Date(birthday);
+  const now = new Date();
+  let age = now.getFullYear() - birth.getFullYear();
+  const m = now.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age;
+}
+
+/**
+ * 管理者ダッシュボード用: 全体メトリクスを 1 関数で集計。
+ *
+ * 取得項目:
+ *   - 受講生総数 (users)
+ *   - 月次未返信件数 (monthly_audits: submitted_at あり かつ nori_video_published_at null)
+ *   - 個別対応 pending 件数 (carte/workout 両方)
+ *   - カルテ変更あり件数 (user_workout_carte.menu_review_needed)
+ *
+ * 各クエリは count: 'exact' / head: true で本文取得を回避。
+ */
+export async function countAdminDashboardMetrics(): Promise<{
+  totalUsers: number;
+  pendingAudits: number;
+  pendingCarteRequests: number;
+  pendingWorkoutRequests: number;
+  pendingTotal: number;
+  carteReviewFlagged: number;
+}> {
+  const supabase = await createClient();
+  const [usersRes, auditRes, carteReqRes, workoutReqRes, flagRes] =
+    await Promise.all([
+      supabase.from("users").select("id", { count: "exact", head: true }),
+      supabase
+        .from("monthly_audits")
+        .select("id", { count: "exact", head: true })
+        .not("submitted_at", "is", null)
+        .is("nori_video_published_at", null),
+      supabase
+        .from("user_carte_request")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "pending"),
+      supabase
+        .from("user_workout_request")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "pending"),
+      supabase
+        .from("user_workout_carte")
+        .select("user_id", { count: "exact", head: true })
+        .eq("menu_review_needed", true),
+    ]);
+  const carteReq = carteReqRes.count ?? 0;
+  const workoutReq = workoutReqRes.count ?? 0;
+  return {
+    totalUsers: usersRes.count ?? 0,
+    pendingAudits: auditRes.count ?? 0,
+    pendingCarteRequests: carteReq,
+    pendingWorkoutRequests: workoutReq,
+    pendingTotal: carteReq + workoutReq,
+    carteReviewFlagged: flagRes.count ?? 0,
+  };
+}
+
 /**
  * ハブ画面用: 特定ユーザーの未対応リクエスト件数を取得。
  * 件数だけ知りたいので head + count='exact' で軽量化。

@@ -32,9 +32,9 @@ export default async function AdminRequestsPage() {
         {/* ページヘッダー */}
         <header className="rounded-[14px] border border-[#e8ebe9] bg-white px-6 py-5 mb-6 flex items-center gap-4">
           <Link
-            href="/"
+            href="/admin"
             className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 hover:bg-zinc-200"
-            aria-label="ホームに戻る"
+            aria-label="管理者ホームに戻る"
           >
             <svg
               width="20"

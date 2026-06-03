@@ -88,12 +88,16 @@ export function NormalView({
       {/* === 管理画面ヘッダー === */}
       <header className="flex items-center justify-between px-6 py-3.5 border-b border-[#e8ebe9] bg-white">
         <div className="flex items-center gap-3">
-          <div className="text-base font-bold text-[#004d40] flex items-center gap-1.5">
+          <a
+            href="/admin"
+            className="text-base font-bold text-[#004d40] flex items-center gap-1.5 hover:opacity-70"
+            title="管理者ホームに戻る"
+          >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[15px] h-[15px]">
               <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
             </svg>
             筋肉塾 管理
-          </div>
+          </a>
           <div className="text-[11px] text-zinc-500 pl-3 border-l border-[#e8ebe9]">
             月次添削 / 個別作業
           </div>
@@ -408,28 +412,37 @@ function RecordedPreview({
             onClick={handleSendAndExit}
             disabled={isUploading}
             className="bg-[#00897b] text-white border-transparent px-4 py-2.5 rounded-lg text-xs font-bold border hover:bg-[#00695c] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            title={isUploading ? "他の動画を送信中" : "送信して受信箱に戻る"}
-          >
-            送信して終了
-          </button>
-          <button
-            onClick={handleSendAndNext}
-            disabled={isUploading || !nextAuditId}
-            className="bg-zinc-900 text-white border-transparent px-4 py-2.5 rounded-lg text-xs font-bold border hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
             title={
               isUploading
                 ? "他の動画を送信中"
-                : !nextAuditId
-                  ? "次の未返答はありません"
-                  : "送信して次の未返答へ"
+                : back.isHub
+                  ? "送信してハブ画面に戻る"
+                  : "送信して受信箱に戻る"
             }
           >
-            送信して次へ
-            <span className="text-[#00897b]">→</span>
-            {!nextAuditId && (
-              <span className="text-[9px] opacity-70 ml-0.5">(なし)</span>
-            )}
+            送信して終了
           </button>
+          {/* 「送信して次へ」ボタンは受信箱動線のみ表示 (ハブ動線では非表示) */}
+          {!back.isHub && (
+            <button
+              onClick={handleSendAndNext}
+              disabled={isUploading || !nextAuditId}
+              className="bg-zinc-900 text-white border-transparent px-4 py-2.5 rounded-lg text-xs font-bold border hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+              title={
+                isUploading
+                  ? "他の動画を送信中"
+                  : !nextAuditId
+                    ? "次の未返答はありません"
+                    : "送信して次の未返答へ"
+              }
+            >
+              送信して次へ
+              <span className="text-[#00897b]">→</span>
+              {!nextAuditId && (
+                <span className="text-[9px] opacity-70 ml-0.5">(なし)</span>
+              )}
+            </button>
+          )}
         </div>
       </div>
     </div>

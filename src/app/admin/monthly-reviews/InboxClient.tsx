@@ -123,12 +123,16 @@ export function InboxClient({
         {/* === 管理画面ヘッダー === */}
         <header className="flex items-center justify-between px-6 py-3.5 border-b border-[#e8ebe9] bg-white">
           <div className="flex items-center gap-3">
-            <div className="text-base font-bold text-[#004d40] flex items-center gap-1.5">
+            <a
+              href="/admin"
+              className="text-base font-bold text-[#004d40] flex items-center gap-1.5 hover:opacity-70"
+              title="管理者ホームに戻る"
+            >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[15px] h-[15px]">
                 <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
               </svg>
               筋肉塾 管理
-            </div>
+            </a>
             <div className="text-[11px] text-zinc-500 pl-3 border-l border-[#e8ebe9]">
               月次添削 / 受信箱
             </div>

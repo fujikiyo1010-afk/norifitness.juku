@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { getAdminInfo } from "@/lib/auth/admin";
 import type { GoalSheetContent, SectionKey } from "./types";
 import {
   countFilledSections,
@@ -74,6 +75,86 @@ function calcFilledSections(content: GoalSheetContent): SectionKey[] {
  *   - 編集が成功したら goal_sheet_revisions に スナップショット保存
  *   - filled_sections は自動再計算
  */
+/**
+ * 管理者: 特定受講生の目標シート添削を保存。
+ *
+ * 動作:
+ *   - content.audits だけ更新 (受講生入力 = current_status / goal_selection 等は触らない)
+ *   - reviewed_at / reviewed_by を更新
+ *   - goal_sheet_revisions に edited_by = 管理者で履歴を残す
+ *
+ * @param userId 添削対象の受講生 ID
+ * @param audits 新しい添削データ
+ */
+export async function saveGoalSheetAuditByAdmin(
+  userId: string,
+  audits: GoalSheetContent["audits"]
+): Promise<SaveGoalSheetResult> {
+  const admin = await getAdminInfo();
+  if (!admin) {
+    return { ok: false, message: "管理者権限が必要です" };
+  }
+
+  const supabase = await createClient();
+
+  // 既存 content を取得 (受講生入力分は維持)
+  const { data: existing } = await supabase
+    .from("goal_sheets")
+    .select("content")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (!existing) {
+    return {
+      ok: false,
+      message: "目標シートが未作成です (受講生が初回入力していません)",
+    };
+  }
+
+  const existingContent = (existing.content as GoalSheetContent | null) ?? {};
+  const contentToSave: GoalSheetContent = {
+    ...existingContent,
+    audits,
+  };
+
+  const now = new Date().toISOString();
+  const { data, error } = await supabase
+    .from("goal_sheets")
+    .update({
+      content: contentToSave,
+      reviewed_by: admin.id,
+      reviewed_at: now,
+    })
+    .eq("user_id", userId)
+    .select("updated_at")
+    .single();
+
+  if (error) {
+    return { ok: false, message: error.message };
+  }
+
+  // 添削履歴を goal_sheet_revisions に残す (失敗時はログのみ)
+  const { error: revError } = await supabase.from("goal_sheet_revisions").insert({
+    user_id: userId,
+    snapshot: contentToSave,
+    edited_by: admin.id,
+    reason: "admin_audit",
+  });
+  if (revError) {
+    console.error("[saveGoalSheetAuditByAdmin] revisions insert failed:", revError.message);
+  }
+
+  revalidatePath(`/admin/users/${userId}`, "page");
+  revalidatePath(`/admin/users/${userId}/goal-sheet`, "page");
+  revalidatePath("/goal-sheet", "page");
+
+  return {
+    ok: true,
+    updated_at: data.updated_at as string,
+    filled_count: countFilledSections(contentToSave),
+  };
+}
+
 export async function saveMyGoalSheet(
   inputContent: GoalSheetContent
 ): Promise<SaveGoalSheetResult> {
