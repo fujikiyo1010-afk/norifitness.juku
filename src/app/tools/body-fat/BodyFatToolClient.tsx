@@ -167,11 +167,11 @@ export function BodyFatToolClient({
           className="w-8 h-8 flex items-center justify-center text-zinc-900 hover:bg-zinc-100 rounded-full transition-colors"
           aria-label="ツール一覧に戻る"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 pointer-events-none">
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </Link>
-        <h1 className="flex-1 text-center text-base font-bold text-zinc-900 -ml-8">
+        <h1 className="flex-1 text-center text-base font-bold text-zinc-900 -ml-8 pointer-events-none">
           体脂肪率計算
         </h1>
       </header>
@@ -343,6 +343,13 @@ export function BodyFatToolClient({
         >
           計算する
         </button>
+
+        {/* 計算前の例示 */}
+        {!result && (
+          <p className="-mt-3 mb-4 mx-4 text-center text-[10px] text-[#283593]/70 font-mono leading-relaxed">
+            例: 75kg・W85cm → BF 18.2%
+          </p>
+        )}
 
         {/* 結果カード */}
         {result && (

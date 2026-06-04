@@ -36,12 +36,12 @@ export default function ToolsIndexPage() {
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="w-5 h-5"
+            className="w-5 h-5 pointer-events-none"
           >
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </Link>
-        <h1 className="flex-1 text-center text-base font-bold text-zinc-900 -ml-8">
+        <h1 className="flex-1 text-center text-base font-bold text-zinc-900 -ml-8 pointer-events-none">
           ツール
         </h1>
       </header>
