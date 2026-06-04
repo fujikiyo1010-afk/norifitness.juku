@@ -75,7 +75,7 @@ export default async function WorkoutCarteCompletePage() {
           <div className="flex items-center justify-between">
             <span className="text-xs text-zinc-600">ステータス</span>
             <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800">
-              メニュー作成中
+              のりfitness がメニュー作成中
             </span>
           </div>
         </div>

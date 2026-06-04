@@ -181,7 +181,7 @@ function CurrentMonthCard({
 function StateCardA() {
   return (
     <div className="bg-white border border-[#e8ebe9] rounded-2xl px-4 py-4">
-      <span className="inline-block text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#f8f9fa] text-zinc-700 border border-[#e8ebe9]">
+      <span className="inline-flex items-center justify-center leading-none text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#f8f9fa] text-zinc-700 border border-[#e8ebe9]">
         今月分
       </span>
       <div className="text-sm font-medium text-zinc-900 mt-2 mb-1.5">
@@ -217,7 +217,7 @@ function StateCardB({ audit }: { audit: MonthlyAuditRow }) {
     : "—";
   return (
     <div className="bg-white border border-[#00897b] rounded-2xl px-4 py-4">
-      <span className="inline-block text-[10px] font-medium px-2 py-0.5 rounded-full bg-[rgba(0,137,123,0.1)] text-[#00695c] border border-[#00897b]">
+      <span className="inline-flex items-center justify-center leading-none text-[10px] font-medium px-2 py-0.5 rounded-full bg-[rgba(0,137,123,0.1)] text-[#00695c] border border-[#00897b]">
         記入中
       </span>
       <div className="text-sm font-medium text-zinc-900 mt-2 mb-2">
@@ -257,7 +257,7 @@ function StateCardC({ audit }: { audit: MonthlyAuditRow }) {
   );
   return (
     <div className="bg-[#fafafa] border border-[#e8ebe9] rounded-2xl px-4 py-4">
-      <span className="inline-block text-[10px] font-medium px-2 py-0.5 rounded-full bg-white text-zinc-500 border border-[#e8ebe9]">
+      <span className="inline-flex items-center justify-center leading-none text-base font-bold px-3 py-1 rounded-full bg-white text-zinc-500 border border-[#e8ebe9]">
         提出済み
       </span>
       <div className="text-sm font-medium text-zinc-900 mt-2 mb-2 flex items-center">
@@ -305,7 +305,7 @@ function StateCardD({ audit }: { audit: MonthlyAuditRow }) {
   );
   return (
     <div className="bg-[rgba(255,235,59,0.12)] border border-[rgba(255,235,59,0.55)] rounded-2xl px-4 py-4">
-      <span className="inline-block text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#b8860b] text-white">
+      <span className="inline-flex items-center justify-center leading-none text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#b8860b] text-white">
         のりfitness から返信
       </span>
       <div className="text-sm font-medium text-zinc-900 mt-2 mb-1.5">
@@ -319,7 +319,7 @@ function StateCardD({ audit }: { audit: MonthlyAuditRow }) {
         href={`/monthly-review/detail/${audit.target_month}`}
         className="flex items-center justify-center gap-2 w-full text-center py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium transition-colors"
       >
-        <span className="text-[#00897b]">▶</span> {monthLabel}を開く
+        <span className="text-[#00897b]">▶</span> {monthLabel} 月次添削動画を開く
       </Link>
       <div className="text-[10px] text-zinc-500 text-center mt-2 font-mono">
         返信 {publishedLabel}
@@ -399,28 +399,28 @@ function PastBadge({
 }) {
   if (status === "d_replied") {
     return (
-      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[rgba(0,137,123,0.1)] text-[#00695c]">
+      <span className="inline-flex items-center justify-center leading-none text-[10px] px-2 py-0.5 rounded-full bg-[rgba(0,137,123,0.1)] text-[#00695c]">
         ✓ 返信あり
       </span>
     );
   }
   if (status === "c_submitted") {
     return (
-      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[rgba(255,235,59,0.18)] text-[#b8860b]">
+      <span className="inline-flex items-center justify-center leading-none text-[10px] px-2 py-0.5 rounded-full bg-[rgba(255,235,59,0.18)] text-[#b8860b]">
         返信待ち
       </span>
     );
   }
   if (status === "b_in_progress") {
     return (
-      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#f8f9fa] text-zinc-500">
+      <span className="inline-flex items-center justify-center leading-none text-[10px] px-2 py-0.5 rounded-full bg-[#f8f9fa] text-zinc-500">
         記入中 ({filledCount}/17)
       </span>
     );
   }
   // a_empty (基本ここには来ない、過去月で未記入は表示されない想定)
   return (
-    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#f8f9fa] text-zinc-500">
+    <span className="inline-flex items-center justify-center leading-none text-[10px] px-2 py-0.5 rounded-full bg-[#f8f9fa] text-zinc-500">
       未記入
     </span>
   );
