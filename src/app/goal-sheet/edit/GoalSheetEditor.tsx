@@ -4,6 +4,7 @@ import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { saveMyGoalSheet } from "@/lib/goal-sheet/actions";
+import { readDraft, writeDraft, clearDraft } from "@/lib/goal-sheet/draft-storage";
 import { normalizeNumberInput } from "@/lib/utils/normalize-number";
 import {
   SECTION_META,
@@ -39,6 +40,7 @@ export function GoalSheetEditor({
 }) {
   const router = useRouter();
   const [content, setContent] = useState<GoalSheetContent>(initialContent);
+  const [hydrated, setHydrated] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
@@ -46,50 +48,58 @@ export function GoalSheetEditor({
   const filledCount = countFilledSections(content);
   const audits = content.audits;
 
-  // ===== ツール画面からの反映受信 (案 A: sessionStorage 経由) =====
+  // ===== マウント時: ドラフト復元 + ツール反映の取り込み =====
+  // - 編集中の draft (sessionStorage) があれば優先 (リロード/タブ往復で消えない)
+  // - ツール画面から戻ってきた場合は reflect キーを上書き適用
   useEffect(() => {
     if (typeof window === "undefined") return;
-    // calorie: メンテナンスカロリーを current_status.maintenance_kcal に反映
+
+    let next: GoalSheetContent = initialContent;
+    let reflectMessage: string | null = null;
+
+    // 1. ドラフト復元
+    const draft = readDraft();
+    if (draft) next = draft;
+
+    // 2. calorie: メンテナンスカロリー
     const calorieRaw = sessionStorage.getItem("goal-sheet-reflect-calorie");
     if (calorieRaw) {
       try {
         const v = JSON.parse(calorieRaw) as { maintenance_kcal?: number };
         if (typeof v.maintenance_kcal === "number") {
-          setContent((prev) => ({
-            ...prev,
+          next = {
+            ...next,
             current_status: {
-              ...(prev.current_status ?? {}),
+              ...(next.current_status ?? {}),
               maintenance_kcal: v.maintenance_kcal,
             },
-          }));
-          setSavedMessage(
-            `メンテナンスカロリー ${v.maintenance_kcal} kcal を反映しました`
-          );
-          setTimeout(() => setSavedMessage(null), 4000);
+          };
+          reflectMessage = `メンテナンスカロリー ${v.maintenance_kcal} kcal を反映しました`;
         }
       } catch {}
       sessionStorage.removeItem("goal-sheet-reflect-calorie");
     }
-    // diet-period: 到達予定日を goal_selection.target_date に反映
+
+    // 3. diet-period: 到達予定日
     const dietRaw = sessionStorage.getItem("goal-sheet-reflect-diet-period");
     if (dietRaw) {
       try {
         const v = JSON.parse(dietRaw) as { target_date?: string };
         if (typeof v.target_date === "string") {
-          setContent((prev) => ({
-            ...prev,
+          next = {
+            ...next,
             goal_selection: {
-              ...(prev.goal_selection ?? {}),
+              ...(next.goal_selection ?? {}),
               target_date: v.target_date,
             },
-          }));
-          setSavedMessage(`到達予定日 ${v.target_date} を反映しました`);
-          setTimeout(() => setSavedMessage(null), 4000);
+          };
+          reflectMessage = `到達予定日 ${v.target_date} を反映しました`;
         }
       } catch {}
       sessionStorage.removeItem("goal-sheet-reflect-diet-period");
     }
-    // pfc-carb: PFC + カーボサイクルを nutrition に反映
+
+    // 4. pfc-carb: PFC + カーボサイクル
     const pfcRaw = sessionStorage.getItem("goal-sheet-reflect-pfc-carb");
     if (pfcRaw) {
       try {
@@ -98,24 +108,38 @@ export function GoalSheetEditor({
           pfc?: { p?: number; f?: number; c?: number };
           carb_cycle?: { weekly_pattern?: Array<"low" | "mid" | "high"> };
         };
-        setContent((prev) => ({
-          ...prev,
+        next = {
+          ...next,
           nutrition: {
-            ...(prev.nutrition ?? {}),
-            target_calorie: v.target_calorie ?? prev.nutrition?.target_calorie,
+            ...(next.nutrition ?? {}),
+            target_calorie: v.target_calorie ?? next.nutrition?.target_calorie,
             pfc: {
-              ...(prev.nutrition?.pfc ?? {}),
+              ...(next.nutrition?.pfc ?? {}),
               ...(v.pfc ?? {}),
             },
-            carb_cycle: v.carb_cycle ?? prev.nutrition?.carb_cycle,
+            carb_cycle: v.carb_cycle ?? next.nutrition?.carb_cycle,
           },
-        }));
-        setSavedMessage("PFC・カーボサイクルを反映しました");
-        setTimeout(() => setSavedMessage(null), 4000);
+        };
+        reflectMessage = "PFC・カーボサイクルを反映しました";
       } catch {}
       sessionStorage.removeItem("goal-sheet-reflect-pfc-carb");
     }
+
+    setContent(next);
+    setHydrated(true);
+    if (reflectMessage) {
+      setSavedMessage(reflectMessage);
+      setTimeout(() => setSavedMessage(null), 4000);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // ===== content 変化のたびに sessionStorage へミラー =====
+  // hydration 前は書かない (initialContent の上書きを避けるため)
+  useEffect(() => {
+    if (!hydrated) return;
+    writeDraft(content);
+  }, [content, hydrated]);
 
   // ===== 各セクションの更新関数 =====
   const updateCurrentStatus = (patch: Partial<CurrentStatus>) => {
@@ -179,7 +203,8 @@ export function GoalSheetEditor({
       if (asDraft) {
         setSavedMessage("下書きを保存しました");
       } else {
-        // 本保存後は閲覧モードへ遷移
+        // 本保存後はドラフト破棄 → 閲覧モードへ遷移
+        clearDraft();
         router.push("/goal-sheet");
         router.refresh();
       }

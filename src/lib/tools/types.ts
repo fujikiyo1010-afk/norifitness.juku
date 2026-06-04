@@ -94,6 +94,55 @@ export type DietPeriodOutputs = {
 };
 
 // =====================================================================
+// ツール 4: PFC・カーボサイクル設定 (統合)
+// =====================================================================
+
+/** 脂質比率 (0.20 / 0.25 / 0.30 の 3 択) */
+export type FatRatio = 0.2 | 0.25 | 0.3;
+
+/** トレーニング強度 */
+export type TrainingIntensity = "high" | "mid" | "low";
+
+/** 曜日 (月曜始まり) */
+export type WeekDay = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
+
+export const WEEK_DAYS: ReadonlyArray<WeekDay> = [
+  "mon",
+  "tue",
+  "wed",
+  "thu",
+  "fri",
+  "sat",
+  "sun",
+];
+
+export type PfcCarbInputs = {
+  weight_kg: number;
+  target_calorie: number; // 摂取カロリー (kcal)
+  fat_ratio: FatRatio; // 脂質比率 (0.20 / 0.25 / 0.30)
+  intensities: Record<WeekDay, TrainingIntensity>;
+};
+
+export type PfcCarbOutputs = {
+  // STEP 1: PFC (各 g 数、kcal、% は構成比 %)
+  protein_g: number;
+  protein_kcal: number;
+  protein_pct: number;
+  fat_g: number;
+  fat_kcal: number;
+  fat_pct: number;
+  carb_g: number;
+  carb_kcal: number;
+  carb_pct: number;
+  // STEP 2: 1 週間の糖質配分 (g)
+  daily_carbs: Record<WeekDay, number>;
+  weekly_carb_total: number;
+  daily_carb_avg: number;
+  // 警告 (空配列 = なし)
+  warnings: string[];
+};
+
+// =====================================================================
 // 共通型: tool_calculations の読み取り結果
 // =====================================================================
 export type ToolCalculation<I = unknown, O = unknown> = {

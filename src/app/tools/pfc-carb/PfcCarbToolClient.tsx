@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { calculatePfcCarb } from "@/lib/tools/calculations";
 import { saveToolCalculation } from "@/lib/tools/actions";
+import { readDraft } from "@/lib/goal-sheet/draft-storage";
 import { WEEK_DAYS } from "@/lib/tools/types";
 import type {
   FatRatio,
@@ -77,6 +78,19 @@ export function PfcCarbToolClient({
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const markTouched = (key: string) =>
     setTouched((t) => (t[key] ? t : { ...t, [key]: true }));
+
+  // 目標シート編集中のドラフトから体重・目標カロリーをプリセット
+  // (?return=goal-sheet で来た時のみ)
+  useEffect(() => {
+    if (!isFromGoalSheet) return;
+    const draft = readDraft();
+    if (!draft) return;
+    const w = draft.current_status?.weight_kg;
+    if (typeof w === "number") setWeight(w.toString());
+    const cal = draft.nutrition?.target_calorie;
+    if (typeof cal === "number") setCalorie(cal.toString());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [result, setResult] = useState<PfcCarbOutputs | null>(
     prevOutputs ?? null

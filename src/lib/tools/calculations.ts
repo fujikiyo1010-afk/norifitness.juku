@@ -11,7 +11,12 @@ import type {
   DietPeriodInputs,
   DietPeriodOutputs,
   PaceAdviceLevel,
+  PfcCarbInputs,
+  PfcCarbOutputs,
+  TrainingIntensity,
+  WeekDay,
 } from "./types";
+import { WEEK_DAYS } from "./types";
 
 /**
  * 体脂肪率を計算 (アメリカ海軍式)
@@ -220,5 +225,122 @@ export function calculateDietPeriod(
     end_date,
     weekly_progress_pct,
     pace_advice_level: classifyPace(pace_kg_per_week),
+  };
+}
+
+/**
+ * カーボサイクル強度ごとの係数
+ * 高 = 1.85倍 / 中 = 1.0倍 / 低 = 0.5倍
+ */
+export const INTENSITY_COEFFICIENTS: Record<TrainingIntensity, number> = {
+  high: 1.85,
+  mid: 1.0,
+  low: 0.5,
+};
+
+/**
+ * PFC + カーボサイクル統合計算
+ *
+ * STEP 1 (PFC):
+ *   P (g) = 体重 × 2 ・ P (kcal) = P × 4   (P9 で たんぱく質係数 = 2 固定)
+ *   F (kcal) = カロリー × 脂質比率 ・ F (g) = F / 9
+ *   C (kcal) = カロリー − (P + F) ・ C (g) = C / 4
+ *
+ * STEP 2 (カーボサイクル配分):
+ *   週合計 = C × 7 (g)
+ *   係数合計 = Σ (各日の係数)
+ *   各日の糖質 (g) = (係数 × C × 7) / 係数合計
+ *
+ * 警告 (順序優先):
+ *   - 高 7 日   → カロリーオーバー
+ *   - 低 7 日   → 筋肉が育たない
+ *   - 高 5 日以上 → ハイカーボ日が多すぎ (週 2-3 日推奨)
+ */
+export function calculatePfcCarb(inputs: PfcCarbInputs): PfcCarbOutputs {
+  const { weight_kg, target_calorie, fat_ratio, intensities } = inputs;
+
+  if (weight_kg <= 0) {
+    throw new Error("体重に正の値を入れてください");
+  }
+  if (target_calorie <= 0) {
+    throw new Error("摂取カロリーに正の値を入れてください");
+  }
+  if (fat_ratio !== 0.2 && fat_ratio !== 0.25 && fat_ratio !== 0.3) {
+    throw new Error("脂質比率は 20%/25%/30% から選んでください");
+  }
+
+  // 強度の未入力チェック (7 日とも選択必須)
+  for (const d of WEEK_DAYS) {
+    if (!intensities[d]) {
+      throw new Error("月〜日 すべての曜日の強度を選んでください");
+    }
+  }
+
+  // ----- STEP 1: PFC -----
+  const proteinG = Math.round(weight_kg * 2);
+  const proteinKcal = proteinG * 4;
+
+  const fatKcal = Math.round(target_calorie * fat_ratio);
+  const fatG = Math.round(fatKcal / 9);
+
+  const carbKcal = target_calorie - proteinKcal - fatKcal;
+  if (carbKcal <= 0) {
+    throw new Error(
+      "カロリーが少なすぎます (糖質分が確保できません)。値を見直してください"
+    );
+  }
+  const carbG = Math.round(carbKcal / 4);
+
+  const pct = (kcal: number) =>
+    Math.round((kcal / target_calorie) * 100 * 10) / 10;
+
+  // ----- STEP 2: カーボサイクル配分 -----
+  let coefSum = 0;
+  for (const d of WEEK_DAYS) {
+    coefSum += INTENSITY_COEFFICIENTS[intensities[d]];
+  }
+  const weeklyTotal = carbG * 7;
+
+  const dailyCarbs = {} as Record<WeekDay, number>;
+  for (const d of WEEK_DAYS) {
+    const g =
+      (INTENSITY_COEFFICIENTS[intensities[d]] * weeklyTotal) / coefSum;
+    dailyCarbs[d] = Math.round(g);
+  }
+  const dailyCarbTotal = WEEK_DAYS.reduce((sum, d) => sum + dailyCarbs[d], 0);
+  const avg = Math.round(dailyCarbTotal / 7);
+
+  // ----- 警告 -----
+  const highCount = WEEK_DAYS.filter(
+    (d) => intensities[d] === "high"
+  ).length;
+  const lowCount = WEEK_DAYS.filter((d) => intensities[d] === "low").length;
+
+  const warnings: string[] = [];
+  if (highCount === 7) {
+    warnings.push("毎日ハイカーボ日です。カロリーオーバーのリスクがあります");
+  } else if (highCount >= 5) {
+    warnings.push(
+      "ハイカーボ日が多すぎます。週 2〜3 日にすると効果が出やすいです"
+    );
+  }
+  if (lowCount === 7) {
+    warnings.push("毎日ローカーボ日です。エネルギー不足で筋肉が育ちにくくなります");
+  }
+
+  return {
+    protein_g: proteinG,
+    protein_kcal: proteinKcal,
+    protein_pct: pct(proteinKcal),
+    fat_g: fatG,
+    fat_kcal: fatKcal,
+    fat_pct: pct(fatKcal),
+    carb_g: carbG,
+    carb_kcal: carbKcal,
+    carb_pct: pct(carbKcal),
+    daily_carbs: dailyCarbs,
+    weekly_carb_total: dailyCarbTotal,
+    daily_carb_avg: avg,
+    warnings,
   };
 }

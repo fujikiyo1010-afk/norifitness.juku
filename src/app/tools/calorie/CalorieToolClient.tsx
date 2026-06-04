@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ACTIVITY_LABELS,
   calculateCalorie,
 } from "@/lib/tools/calculations";
 import { saveToolCalculation } from "@/lib/tools/actions";
+import { readDraft } from "@/lib/goal-sheet/draft-storage";
 import type {
   ActivityLevel,
   CalorieInputs,
@@ -64,6 +65,19 @@ export function CalorieToolClient({
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const markTouched = (key: string) =>
     setTouched((t) => (t[key] ? t : { ...t, [key]: true }));
+
+  // 目標シート編集中のドラフトから体重・身長をプリセット
+  // (?return=goal-sheet で来た時のみ、ユーザーが目標シートで入力中の値を引き継ぐ)
+  useEffect(() => {
+    if (!isFromGoalSheet) return;
+    const draft = readDraft();
+    if (!draft) return;
+    const w = draft.current_status?.weight_kg;
+    if (typeof w === "number") setWeight(w.toString());
+    const h = draft.current_status?.height_cm;
+    if (typeof h === "number") setHeight(h.toString());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 結果 + エラー
   const [result, setResult] = useState<CalorieOutputs | null>(

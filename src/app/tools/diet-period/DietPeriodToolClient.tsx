@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   MILESTONE_WEEKS,
   calculateDietPeriod,
 } from "@/lib/tools/calculations";
 import { saveToolCalculation } from "@/lib/tools/actions";
+import { readDraft } from "@/lib/goal-sheet/draft-storage";
 import type {
   DietPeriodInputs,
   DietPeriodOutputs,
@@ -62,6 +63,19 @@ export function DietPeriodToolClient({
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const markTouched = (key: string) =>
     setTouched((t) => (t[key] ? t : { ...t, [key]: true }));
+
+  // 目標シート編集中のドラフトから現在体重・目標体重をプリセット
+  // (?return=goal-sheet で来た時のみ)
+  useEffect(() => {
+    if (!isFromGoalSheet) return;
+    const draft = readDraft();
+    if (!draft) return;
+    const cur = draft.current_status?.weight_kg;
+    if (typeof cur === "number") setCurrentWeight(cur.toString());
+    const tgt = draft.goal_selection?.target_weight_kg;
+    if (typeof tgt === "number") setTargetWeight(tgt.toString());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 結果 + エラー
   const [result, setResult] = useState<DietPeriodOutputs | null>(
