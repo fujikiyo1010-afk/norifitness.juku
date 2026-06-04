@@ -98,13 +98,13 @@ export function defaultNoriNote(cycleCount: number): string {
   }
   if (cycleCount >= 4) {
     return [
-      "最初のサイクルから順番に取り組んでください。",
-      "1 サイクル 4-6 週間が目安です。",
+      "最初の強度から順番に取り組んでください。",
+      "各強度 4-6 週間が目安です。",
       "気になったことがあれば変更リクエストでお伝えください。",
     ].join("\n");
   }
   return [
-    "まずは「小」(1 サイクル目) から始めてください。",
+    "まずは「小」から始めてください。",
     "フォームが慣れてきたら「中」「大」に進めましょう。",
     "気になったことがあれば変更リクエストでお伝えください。",
   ].join("\n");
@@ -149,7 +149,7 @@ export function formatDistributionDateTime(iso: string): string {
 }
 
 /**
- * 配布前バリデーション。きよむさん合意 (2026-06-02) の 5 項目すべてを検査し、
+ * 配布前バリデーション。きよむさん合意 (2026-06-02) の項目を検査し、
  * 違反があれば具体的な位置情報付きでエラーを返す。
  *
  * チェック項目:
@@ -157,7 +157,8 @@ export function formatDistributionDateTime(iso: string): string {
  *   2. サイクル内の「日」が 0 件
  *   3. 「日」内の種目が 0 件
  *   4. 種目名が空欄
- *   5. のり氏メモが空欄
+ *   5. 種目の狙い (主部位) が空欄  ← 2026-06-04 追加 (受講生側の「狙い」表示が「全身」になる回避)
+ *   6. のり氏メモが空欄
  */
 export type ValidationResult =
   | { ok: true }
@@ -169,12 +170,12 @@ export function validateMenuForDistribution(
 ): ValidationResult {
   const errors: string[] = [];
 
-  // 1. サイクル 0 件
+  // 1. 強度 0 件
   if (!cycles || cycles.length === 0) {
-    errors.push("サイクルが 1 つも登録されていません");
+    errors.push("強度が 1 つも登録されていません");
   } else {
     cycles.forEach((cycle, ci) => {
-      const cycleLabel = cycle["段階"] || `第${ci + 1}サイクル`;
+      const cycleLabel = cycle["段階"] || `第${ci + 1}強度`;
       const days = cycle["週"] ?? [];
 
       // 2. サイクル内の日 0 件
@@ -201,12 +202,21 @@ export function validateMenuForDistribution(
               `${cycleLabel} / ${dayLabel} / ${ei + 1}番目: 種目名が空欄です`
             );
           }
+          // 5. 主部位 (狙い) が空欄
+          const mainParts = (ex["主部位"] ?? []).filter(
+            (p) => (p ?? "").trim() !== ""
+          );
+          if (mainParts.length === 0) {
+            errors.push(
+              `${cycleLabel} / ${dayLabel} / ${ei + 1}番目: 狙い (主部位) が未入力です`
+            );
+          }
         });
       });
     });
   }
 
-  // 5. のり氏メモが空欄
+  // 6. のり氏メモが空欄
   if (!notes || notes.trim() === "") {
     errors.push("のりfitness メモが空欄です");
   }

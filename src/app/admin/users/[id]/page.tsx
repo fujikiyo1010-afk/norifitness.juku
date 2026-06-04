@@ -19,8 +19,6 @@ import {
   listAuditsForUser,
 } from "@/lib/monthly-audit/queries";
 import {
-  AUDIT_STATUS_LABELS_ADMIN,
-  formatTargetMonthLabel,
   getAuditStatus,
   type AuditStatus,
 } from "@/lib/monthly-audit/types";
@@ -38,6 +36,7 @@ import {
 } from "@/lib/goal-sheet/queries";
 import { countFilledSections } from "@/lib/goal-sheet/types";
 import { Sparkline } from "./_components/Sparkline";
+import { MonthlyAuditSection } from "./MonthlyAuditSection";
 
 export const dynamic = "force-dynamic";
 
@@ -382,69 +381,12 @@ export default async function AdminUserHubPage({
         {/* 4 セクション 2x2 グリッド (月次/メニュー/目標/カルテ) */}
         <div className="grid grid-cols-2 gap-5">
 
-        {/* 月次添削 (C 状態の時は枠線を薄い赤で強調) */}
-        <section
-          className={`rounded-[14px] border bg-white p-5 ${
-            auditStatus === "c_submitted"
-              ? "border-rose-300"
-              : "border-[#e8ebe9]"
-          }`}
-        >
-          <div className="mb-3 flex items-center gap-2">
-            <span className="h-5 w-1 rounded-full bg-[#00897b]" />
-            <h2 className="text-sm font-semibold text-zinc-900">月次添削</h2>
-            <span
-              className={`ml-auto rounded-full px-2.5 py-0.5 text-[10px] ${auditStatusStyle(
-                auditStatus
-              )}`}
-            >
-              {AUDIT_STATUS_LABELS_ADMIN[auditStatus]}
-            </span>
-          </div>
-
-          {latestAudit ? (
-            <>
-              <dl className="grid grid-cols-[100px_1fr] gap-y-1.5 gap-x-3 text-xs mb-4">
-                <dt className="text-zinc-500">最新月</dt>
-                <dd className="text-zinc-900 font-medium">
-                  {formatTargetMonthLabel(latestAudit.target_month)}
-                </dd>
-                <dt className="text-zinc-500">進捗</dt>
-                <dd className="text-zinc-900 font-medium">
-                  17 項目中 {latestAudit.items_filled_count} 項目記入済
-                </dd>
-                {latestAudit.submitted_at && (
-                  <>
-                    <dt className="text-zinc-500">提出日時</dt>
-                    <dd className="text-zinc-900 font-medium font-mono">
-                      {formatDistributionDateTime(latestAudit.submitted_at)}
-                    </dd>
-                  </>
-                )}
-                {latestAudit.nori_video_published_at && (
-                  <>
-                    <dt className="text-zinc-500">返信日時</dt>
-                    <dd className="text-zinc-900 font-medium font-mono">
-                      {formatDistributionDateTime(
-                        latestAudit.nori_video_published_at
-                      )}
-                    </dd>
-                  </>
-                )}
-              </dl>
-              <Link
-                href={`/admin/monthly-reviews/${latestAudit.id}?from=hub&user_id=${userId}`}
-                className="inline-block rounded-[4px] border border-zinc-300 bg-white px-4 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
-              >
-                添削画面を開く →
-              </Link>
-            </>
-          ) : (
-            <p className="text-sm text-zinc-700">
-              この受講生はまだ月次添削を 1 回も提出していません。
-            </p>
-          )}
-        </section>
+        {/* 月次添削 (Client: 動画送信中は「反映中」表示にする、メモ #7) */}
+        <MonthlyAuditSection
+          latestAudit={latestAudit}
+          auditStatus={auditStatus}
+          userId={userId}
+        />
 
         {/* 配布中のメニュー (状態 2: 未配布カルテ準備済 = 橙線で「のり氏アクション要」) */}
         <section
@@ -473,9 +415,9 @@ export default async function AdminUserHubPage({
                 <dd className="text-zinc-900 font-medium font-mono">
                   {formatDistributionDateTime(currentMenu.created_at)}
                 </dd>
-                <dt className="text-zinc-500">サイクル数</dt>
+                <dt className="text-zinc-500">強度数</dt>
                 <dd className="text-zinc-900 font-medium">
-                  {currentMenu.cycles?.length ?? 0} サイクル
+                  {currentMenu.cycles?.length ?? 0} 強度
                 </dd>
                 <dt className="text-zinc-500">総種目数</dt>
                 <dd className="text-zinc-900 font-medium">
@@ -914,18 +856,4 @@ function BMICell({
       )}
     </div>
   );
-}
-
-function auditStatusStyle(status: AuditStatus): string {
-  switch (status) {
-    case "a_empty":
-      return "bg-zinc-100 text-zinc-600 font-medium";
-    case "b_in_progress":
-      return "bg-amber-50 text-amber-800 font-medium";
-    // ★ C 状態は「のり氏が一目で見つけられるよう」強調 (赤背景 + 白文字 + 太字 + ピン留めアイコン)
-    case "c_submitted":
-      return "bg-rose-500 text-white font-bold shadow-sm";
-    case "d_replied":
-      return "bg-emerald-50 text-emerald-800 font-medium";
-  }
 }

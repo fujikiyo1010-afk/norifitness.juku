@@ -111,7 +111,7 @@ export function MenuView({
               )}
             </div>
             <div className="text-[10px] text-zinc-500">
-              配布 {formatDistributionDate(menu.effective_from)} / 全 {cycles.length} サイクル
+              配布 {formatDistributionDate(menu.effective_from)} / 全 {cycles.length} 強度
             </div>
           </div>
 
@@ -148,11 +148,11 @@ export function MenuView({
             </div>
           )}
 
-          {/* サイクル選択 (2 つ以上のときだけ) */}
+          {/* 強度選択 (2 つ以上のときだけ) */}
           {cycles.length > 1 && (
             <div className="bg-[#fafafa] border-t border-b border-[#e8ebe9] px-4 pt-2 pb-3">
               <div className="text-[10px] font-bold text-zinc-500 tracking-widest mb-1.5">
-                サイクル
+                強度
               </div>
               <div className="flex gap-1.5">
                 {cycles.map((c, i) => (
@@ -169,7 +169,7 @@ export function MenuView({
                     <span className="font-mono text-[10px] text-zinc-400 mr-1">
                       {i + 1}:
                     </span>
-                    {c["段階"] || `サイクル${i + 1}`}
+                    {c["段階"] || `強度${i + 1}`}
                   </button>
                 ))}
               </div>

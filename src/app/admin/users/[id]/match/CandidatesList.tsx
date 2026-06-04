@@ -118,7 +118,7 @@ export function CandidatesList({
             </div>
             <div className="text-xs text-zinc-900">
               <span className="font-bold">
-                {c.template.cycle_count} サイクル
+                {c.template.cycle_count} 強度
               </span>
               <span className="text-zinc-300 mx-1.5">|</span>
               <span className="font-bold">
@@ -221,7 +221,7 @@ function MenuDetailAccordion({ template }: { template: WorkoutTemplateRow }) {
         onClick={() => setOpen(true)}
         className="mb-4 w-full rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-[11px] font-bold text-zinc-600 hover:bg-zinc-50 flex items-center justify-center gap-1"
       >
-        <span>メニュー詳細を見る (1 サイクル目)</span>
+        <span>メニュー詳細を見る (最初の強度)</span>
         <svg
           width="10"
           height="10"
@@ -250,7 +250,7 @@ function MenuDetailAccordion({ template }: { template: WorkoutTemplateRow }) {
           ▲ 閉じる
         </button>
         <span className="ml-auto text-[10px] text-zinc-500">
-          全 {template.total_exercises} 種目 / {cycles.length} サイクル
+          全 {template.total_exercises} 種目 / {cycles.length} 強度
         </span>
       </div>
 
@@ -258,7 +258,7 @@ function MenuDetailAccordion({ template }: { template: WorkoutTemplateRow }) {
       {firstCycle ? (
         <div>
           <div className="mb-2 border-b border-zinc-200 pb-1.5 text-xs font-bold text-[#00695c] tracking-widest">
-            ━━ 1: {firstCycle["段階"] || "サイクル1"} ━━
+            ━━ 1: {firstCycle["段階"] || "強度1"} ━━
           </div>
           <div className="space-y-3">
             {(firstCycle["週"] ?? []).map((day, di) => (
@@ -267,16 +267,16 @@ function MenuDetailAccordion({ template }: { template: WorkoutTemplateRow }) {
           </div>
         </div>
       ) : (
-        <div className="text-xs text-zinc-500">サイクルが空です</div>
+        <div className="text-xs text-zinc-500">強度が空です</div>
       )}
 
       {/* 残りサイクルの注記 */}
       {remainingCycles > 0 && (
         <div className="mt-3 border-t border-zinc-200 pt-2 text-[10px] text-zinc-500">
-          他に {remainingCycles} サイクル (
+          他に {remainingCycles} 強度 (
           {cycles
             .slice(1)
-            .map((cy, i) => `${i + 2}: ${cy["段階"] || `サイクル${i + 2}`}`)
+            .map((cy, i) => `${i + 2}: ${cy["段階"] || `強度${i + 2}`}`)
             .join(" / ")}
           ) あり。採用後の編集画面で確認できます。
         </div>

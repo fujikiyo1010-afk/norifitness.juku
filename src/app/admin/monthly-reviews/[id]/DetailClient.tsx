@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { MonthlyAuditItems } from "@/lib/monthly-audit/types";
+import type { GoalSheetRow } from "@/lib/goal-sheet/types";
 import { NormalView } from "./NormalView";
 import { RecordingView } from "./RecordingView";
 
@@ -55,6 +56,8 @@ export type DetailViewData = {
   nextAuditId: string | null;
   adminName: string;
   adminInitial: string;
+  /** 受講生の目標シート (録画モードの左パネル参考タブ用、未作成なら null) */
+  goalSheet: GoalSheetRow | null;
 };
 
 export type RecordedVideo = {

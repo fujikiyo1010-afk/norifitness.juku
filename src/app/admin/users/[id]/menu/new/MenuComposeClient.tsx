@@ -72,66 +72,97 @@ export function MenuComposeClient({
   const activeDay: DayMenu | undefined = activeCycle?.["週"]?.[activeDayIdx];
   const exercises: Exercise[] = activeDay?.["種目"] || [];
 
-  // 種目削除
-  function deleteExercise(idx: number) {
+  // 強度間で同期するフィールド (種目名/順番/主部位/補部位 は B/C/D の中で共通、
+  // 回数/インターバル は強度差として個別保持)
+  const SYNC_FIELDS: ReadonlyArray<keyof Exercise> = [
+    "種目名",
+    "順番",
+    "主部位",
+    "補部位",
+  ];
+
+  // すべての強度の同じ日 index に mutation を適用 (該当 day がない強度はスキップ)
+  function applyToAllStrengthsAtSameDay(
+    mutator: (exercises: Exercise[]) => void
+  ) {
     setCycles((cs) => {
       const next = structuredClone(cs);
-      next[activeCycleIdx]["週"][activeDayIdx]["種目"].splice(idx, 1);
+      next.forEach((cycle) => {
+        const day = cycle["週"]?.[activeDayIdx];
+        if (!day || !day["種目"]) return;
+        mutator(day["種目"]);
+      });
       return next;
     });
   }
 
-  // 種目を上に移動
+  // 種目削除 (全強度で同位置を削除)
+  function deleteExercise(idx: number) {
+    applyToAllStrengthsAtSameDay((arr) => {
+      if (idx < arr.length) arr.splice(idx, 1);
+    });
+  }
+
+  // 種目を上に移動 (全強度で同期)
   function moveUp(idx: number) {
     if (idx === 0) return;
-    setCycles((cs) => {
-      const next = structuredClone(cs);
-      const arr = next[activeCycleIdx]["週"][activeDayIdx]["種目"];
-      [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
-      return next;
+    applyToAllStrengthsAtSameDay((arr) => {
+      if (idx > 0 && idx < arr.length) {
+        [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
+      }
     });
   }
 
-  // 種目を下に移動
+  // 種目を下に移動 (全強度で同期)
   function moveDown(idx: number) {
-    setCycles((cs) => {
-      const next = structuredClone(cs);
-      const arr = next[activeCycleIdx]["週"][activeDayIdx]["種目"];
-      if (idx === arr.length - 1) return cs;
-      [arr[idx], arr[idx + 1]] = [arr[idx + 1], arr[idx]];
-      return next;
+    applyToAllStrengthsAtSameDay((arr) => {
+      if (idx >= 0 && idx < arr.length - 1) {
+        [arr[idx], arr[idx + 1]] = [arr[idx + 1], arr[idx]];
+      }
     });
   }
 
-  // 種目を追加 (末尾)
+  // 種目を追加 (末尾、全強度に同じ内容を追加。回数/インターバルは初期値共通、後で個別調整可)
   function addExercise() {
-    setCycles((cs) => {
-      const next = structuredClone(cs);
-      next[activeCycleIdx]["週"][activeDayIdx]["種目"].push({
-        順番: String(
-          next[activeCycleIdx]["週"][activeDayIdx]["種目"].length + 1
-        ),
+    const seedLength =
+      cycles[activeCycleIdx]?.["週"]?.[activeDayIdx]?.["種目"]?.length ?? 0;
+    const orderLabel = String(seedLength + 1);
+    applyToAllStrengthsAtSameDay((arr) => {
+      arr.push({
+        順番: orderLabel,
         種目名: "",
         回数: "10回 3セット",
         インターバル: "2分",
         主部位: [],
         補部位: [],
       });
-      return next;
     });
   }
 
-  // 種目編集 (フィールド単位)
+  // 種目編集 (フィールド単位)。種目名/順番/主部位/補部位 は全強度同期、回数/インターバルは active のみ。
   function updateExercise<K extends keyof Exercise>(
     idx: number,
     key: K,
     value: Exercise[K]
   ) {
-    setCycles((cs) => {
-      const next = structuredClone(cs);
-      next[activeCycleIdx]["週"][activeDayIdx]["種目"][idx][key] = value;
-      return next;
-    });
+    const shouldSync = SYNC_FIELDS.includes(key);
+    if (shouldSync) {
+      applyToAllStrengthsAtSameDay((arr) => {
+        if (idx < arr.length) {
+          arr[idx][key] = value;
+        }
+      });
+    } else {
+      // 回数 / インターバル: 強度差として個別保持
+      setCycles((cs) => {
+        const next = structuredClone(cs);
+        const arr = next[activeCycleIdx]?.["週"]?.[activeDayIdx]?.["種目"];
+        if (arr && idx < arr.length) {
+          arr[idx][key] = value;
+        }
+        return next;
+      });
+    }
   }
 
   // サイクル切替
@@ -240,11 +271,11 @@ export function MenuComposeClient({
           </div>
         </section>
 
-        {/* サイクル選択 */}
+        {/* 強度選択 */}
         {cycles.length > 1 && (
           <section className="rounded-[14px] border border-[#e8ebe9] bg-white p-4">
             <div className="text-[10px] font-bold text-zinc-500 tracking-widest mb-1.5">
-              サイクル
+              強度
             </div>
             <div className="flex gap-1.5">
               {cycles.map((c, i) => (
@@ -261,7 +292,7 @@ export function MenuComposeClient({
                   <span className="font-mono text-[10px] text-zinc-400 mr-1">
                     {i + 1}:
                   </span>
-                  {c["段階"] || `サイクル${i + 1}`}
+                  {c["段階"] || `強度${i + 1}`}
                   <span className="ml-1 text-[10px] text-zinc-400 font-mono">
                     ({c["週"].reduce((s, w) => s + (w["種目"]?.length ?? 0), 0)}種目)
                   </span>
@@ -361,7 +392,7 @@ export function MenuComposeClient({
       <div className="fixed bottom-0 left-0 right-0 border-t border-[#e8ebe9] bg-white px-4 py-3 shadow-[0_-2px_8px_rgba(0,0,0,0.04)]">
         <div className="mx-auto flex max-w-3xl items-center gap-3">
           <div className="flex-1 text-xs text-zinc-600">
-            {userName} に {totalExercises} 種目 / {cycles.length} サイクルで配布
+            {userName} に {totalExercises} 種目 / {cycles.length} 強度で配布
           </div>
           <button
             type="button"

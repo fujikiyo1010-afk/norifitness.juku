@@ -27,7 +27,7 @@ export default async function MenuRequestPage() {
 
   const currentInfo = [
     { label: "配布日", value: formatDistributionDate(menu.effective_from) },
-    { label: "サイクル", value: `全 ${cycleCount} サイクル` },
+    { label: "強度", value: `全 ${cycleCount} 強度` },
     { label: "環境", value: envDisplay },
     { label: "頻度", value: freqDisplay },
   ];

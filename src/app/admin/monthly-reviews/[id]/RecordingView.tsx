@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AUDIT_QUESTIONS,
   type AuditQuestion,
@@ -11,6 +11,10 @@ import {
 } from "@/lib/monthly-audit/types";
 import { useVideoRecorder, formatElapsed } from "@/lib/hooks/useVideoRecorder";
 import type { DetailMode, DetailViewData, RecordedVideo } from "./DetailClient";
+import { GoalSheetReferenceView } from "./GoalSheetReferenceView";
+
+/** 録画モード左パネルの表示切替。録画モード抜けるとリセット (ローカル state) */
+type LeftPanelTab = "monthly" | "goal_sheet";
 
 /**
  * 録画モード (Step 9b で MediaRecorder 統合済)。
@@ -41,10 +45,11 @@ export function RecordingView({
   onAccept: (video: RecordedVideo) => void;
   onExit: () => void;
 }) {
-  const { audit, user } = data;
+  const { audit, user, goalSheet } = data;
   const recorder = useVideoRecorder();
   const liveVideoRef = useRef<HTMLVideoElement>(null);
   const previewVideoRef = useRef<HTMLVideoElement>(null);
+  const [leftTab, setLeftTab] = useState<LeftPanelTab>("monthly");
 
   // 録画モード突入時、自動でカメラ起動
   useEffect(() => {
@@ -148,36 +153,57 @@ export function RecordingView({
 
       {/* === 録画モード本体: 左右 50:50 === */}
       <div className="grid grid-cols-2 min-h-[600px]">
-        {/* === 左: 17 項目スクロール === */}
+        {/* === 左: 月次 / 目標シート 切替パネル (スクロール) === */}
         <div className="bg-[#f8f9fa] px-6 py-5 overflow-y-auto max-h-[700px] border-r border-[#e8ebe9]">
-          <div className="text-[11px] text-zinc-500 mb-1 font-mono">
+          <div className="text-[11px] text-zinc-500 mb-2 font-mono">
             受講生: <span className="font-bold text-zinc-900">{user.name}</span>{" "}
             ・ {audit.monthLabel}
           </div>
-          <h3 className="text-sm font-bold text-zinc-900 mb-3 pb-2 border-b border-[#e8ebe9] flex items-center gap-1.5">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="w-3.5 h-3.5"
-            >
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              <polyline points="14 2 14 8 20 8" />
-            </svg>
-            17 項目の回答
-          </h3>
-          <div className="flex flex-col">
-            {AUDIT_QUESTIONS.map((q) => (
-              <CompactQAItem
-                key={q.key}
-                question={q}
-                answer={audit.items[q.key as keyof MonthlyAuditItems]}
-              />
-            ))}
+
+          {/* タブ: 月次 / 目標シート */}
+          <div className="flex items-center gap-1 border-b border-[#e8ebe9] mb-3">
+            <LeftTabButton
+              label="月次"
+              active={leftTab === "monthly"}
+              onClick={() => setLeftTab("monthly")}
+            />
+            <LeftTabButton
+              label="目標シート"
+              active={leftTab === "goal_sheet"}
+              onClick={() => setLeftTab("goal_sheet")}
+            />
           </div>
+
+          {leftTab === "monthly" ? (
+            <>
+              <h3 className="text-sm font-bold text-zinc-900 mb-3 pb-2 border-b border-[#e8ebe9] flex items-center gap-1.5">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-3.5 h-3.5"
+                >
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+                17 項目の回答
+              </h3>
+              <div className="flex flex-col">
+                {AUDIT_QUESTIONS.map((q) => (
+                  <CompactQAItem
+                    key={q.key}
+                    question={q}
+                    answer={audit.items[q.key as keyof MonthlyAuditItems]}
+                  />
+                ))}
+              </div>
+            </>
+          ) : (
+            <GoalSheetReferenceView sheet={goalSheet} />
+          )}
         </div>
 
         {/* === 右: カメラ/プレビューエリア === */}
@@ -317,6 +343,34 @@ export function RecordingView({
         </div>
       </div>
     </>
+  );
+}
+
+// =====================================================================
+// 左パネル タブボタン
+// =====================================================================
+
+function LeftTabButton({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`px-3 py-2 text-xs font-bold tracking-wide transition-colors -mb-px border-b-2 ${
+        active
+          ? "border-[#00897b] text-[#00695c]"
+          : "border-transparent text-zinc-500 hover:text-zinc-700"
+      }`}
+    >
+      {label}
+    </button>
   );
 }
 

@@ -5,6 +5,7 @@ import {
   getAuditForAdmin,
   listPendingAudits,
 } from "@/lib/monthly-audit/queries";
+import { getGoalSheetForUser } from "@/lib/goal-sheet/queries";
 import {
   AUDIT_QUESTIONS,
   formatTargetMonthLabel,
@@ -40,10 +41,11 @@ export default async function AdminMonthlyReviewDetailPage({
   const audit = await getAuditForAdmin(id);
   if (!audit) notFound();
 
-  const [user, pastReplied, pending] = await Promise.all([
+  const [user, pastReplied, pending, goalSheet] = await Promise.all([
     fetchUser(audit.user_id),
     fetchPastRepliedAudits(audit.user_id, audit.id),
     listPendingAudits(),
+    getGoalSheetForUser(audit.user_id),
   ]);
 
   const pendingIndex = pending.findIndex((a) => a.id === audit.id);
@@ -107,6 +109,7 @@ export default async function AdminMonthlyReviewDetailPage({
     nextAuditId,
     adminName: admin.name,
     adminInitial: admin.name.charAt(0),
+    goalSheet,
   };
 
   return <DetailClient data={data} />;
