@@ -1,0 +1,1112 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>筋肉塾 ・ 全画面スマホモック (最新確定版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root {
+        /* Primary ティール (のり氏ブランド) */
+        --brand-900: #00574d;
+        --brand-700: #00695c;
+        --brand-500: #00897b;
+        --brand-300: #4DB6AC;
+        --brand-100: #B2DFDB;
+        --brand-50:  #E0F2F1;
+        /* Accent オレンジ (のり氏特典LP) */
+        --accent-700: #bf3d00;
+        --accent-600: #e65100;
+        --accent-500: #ff7043;
+        --accent-300: #ff8a50;
+        --accent-100: #ffc299;
+        --accent-50:  #fff8f5;
+        /* CTA LINE 緑 */
+        --line-green: #06c755;
+        /* Ink (深緑グレー) */
+        --ink-900: #1a3326;
+        --ink-700: #3a6050;
+        --ink-500: #6b7d75;
+        --ink-300: #c0d0c8;
+        --ink-100: #f0f5f3;
+        --ink-50:  #fafcfb;
+        /* Background */
+        --bg-base: #ffffff;
+        --bg-warm: #fff8f5;
+        --bg-cool: #f0f5f3;
+        /* Marker (黄色) */
+        --marker: rgba(255, 235, 59, .55);
+        --marker-bg: rgba(255, 235, 59, .15);
+      }
+      body {
+        background:#ececec; font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Helvetica Neue",sans-serif;
+        color:var(--ink-900); padding:32px 16px;
+      }
+      .phone { width:390px; background:#1a1a1a; border-radius:56px; padding:14px; box-shadow:0 24px 60px rgba(0,0,0,.18); }
+      .phone-screen { background:var(--bg-warm); border-radius:44px; overflow:hidden; position:relative; height:780px; display:flex; flex-direction:column; }
+      .status-bar { background:#000; color:#fff; font-size:11px; text-align:center; padding:4px 0; flex-shrink:0; font-family:ui-monospace,monospace; letter-spacing:1.5px; }
+      .phone-body { flex:1; overflow-y:auto; }
+      .phone-body::-webkit-scrollbar { display:none; }
+      .label { display:inline-block; background:var(--brand-500); color:white; padding:8px 20px; border-radius:999px; font-weight:700; font-size:13px; letter-spacing:.5px; }
+      .label-note { font-size:11px; color:var(--ink-500); margin-top:4px; text-align:center; max-width:300px; }
+    </style>
+  </head>
+  <body>
+    <header class="text-center max-w-[1400px] mx-auto mb-2">
+      <h1 class="text-2xl font-bold mb-2" style="color:var(--ink-900)">筋肉塾 ・ 全画面スマホモック (最新確定版)</h1>
+      <p class="text-sm" style="color:var(--ink-700)">
+        パレット: ティール <span style="color:var(--brand-500);font-weight:bold">#00897b</span> +
+        オレンジ <span style="color:var(--accent-600);font-weight:bold">#e65100</span> +
+        LINE 緑 <span style="color:var(--line-green);font-weight:bold">#06c755</span> +
+        黄色マーカー
+      </p>
+      <p class="text-xs mt-1" style="color:var(--ink-500)">
+        典拠: docs/02_research/19_design_spec.md v1.1 + docs/00_premises/_handoff_to_chat8_2026-05-28.md
+      </p>
+    </header>
+
+    <div class="flex justify-center items-start gap-8 flex-wrap max-w-[1400px] mx-auto">
+
+      <!-- ===========================
+           ① ホーム
+           =========================== -->
+      <div class="flex flex-col items-center gap-3">
+        <span class="label">① ホーム</span>
+        <div class="label-note">連続記録 / 続きから学ぶ / 4 数値 / 今日の目標 / 2x2 メニュー</div>
+        <div class="phone mt-2">
+          <div class="phone-screen">
+            <div class="status-bar">●●● iPhone 9:41 ●●●</div>
+            <div class="phone-body">
+              <!-- ヘッダ -->
+              <div class="px-4 py-3 flex items-center justify-between" style="background:#fff;border-bottom:1px solid var(--ink-100)">
+                <div class="flex items-center gap-2">
+                  <div class="w-7 h-7 rounded-full flex items-center justify-center text-white" style="background:var(--brand-500)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><path d="M6 7h12M6 12h12M6 17h12"/></svg>
+                  </div>
+                  <div class="text-base font-bold tracking-tight" style="color:var(--ink-900)">のりfitness 筋肉塾</div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button class="relative w-9 h-9 flex items-center justify-center" style="color:var(--ink-700)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    <span class="absolute top-2 right-2 w-1.5 h-1.5 rounded-full" style="background:var(--accent-600)"></span>
+                  </button>
+                  <button class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm" style="background:var(--brand-50);color:var(--brand-700);border:1px solid var(--brand-100)">き</button>
+                </div>
+              </div>
+
+              <!-- ウェルカム + 連続記録 -->
+              <div class="px-5 pt-5 pb-3">
+                <div class="flex items-end justify-between">
+                  <div>
+                    <h1 class="text-xl font-bold leading-tight" style="color:var(--ink-900)">おはよう、<br/>きよむさん</h1>
+                    <p class="text-xs mt-1" style="color:var(--ink-500)">入会から 12 日目</p>
+                  </div>
+                  <!-- 連続記録 (炎アイコン + 日数) -->
+                  <div class="text-right">
+                    <div class="flex items-center justify-end gap-1">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="color:var(--accent-600)">
+                        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+                      </svg>
+                      <span class="text-lg font-bold font-mono leading-none" style="color:var(--accent-600)">7</span>
+                    </div>
+                    <p class="text-[10px] mt-0.5" style="color:var(--ink-500)">連続記録</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 続きから学ぶ (ティールグラデ + オレンジ Play) -->
+              <div class="mx-4 mb-3">
+                <a href="#" class="block rounded-2xl p-4 relative" style="background:linear-gradient(135deg,var(--brand-500),var(--brand-700));color:#fff">
+                  <div class="text-[11px] opacity-90 mb-1.5 font-medium">続きから学ぶ</div>
+                  <div class="text-base font-bold mb-1">第 3 章 ・ Lesson 4</div>
+                  <div class="text-xs opacity-90">PFC バランスの基礎</div>
+                  <div class="absolute top-1/2 -translate-y-1/2 right-5 w-10 h-10 rounded-full flex items-center justify-center" style="background:var(--accent-600)">
+                    <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  </div>
+                </a>
+              </div>
+
+              <!-- 数値ダッシュボード 4枠 -->
+              <div class="mx-4 grid grid-cols-4 gap-1.5 mb-3">
+                <div class="bg-white rounded-xl p-2.5 text-center" style="border:1px solid var(--ink-100)">
+                  <div class="text-base font-bold font-mono leading-none" style="color:var(--accent-600)">47</div>
+                  <div class="text-[9px] mt-1" style="color:var(--ink-500)">できた!</div>
+                </div>
+                <div class="bg-white rounded-xl p-2.5 text-center" style="border:1px solid var(--ink-100)">
+                  <div class="text-base font-bold font-mono leading-none" style="color:var(--ink-900)">12.5h</div>
+                  <div class="text-[9px] mt-1" style="color:var(--ink-500)">視聴時間</div>
+                </div>
+                <div class="bg-white rounded-xl p-2.5 text-center" style="border:1px solid var(--ink-100)">
+                  <div class="text-base font-bold font-mono leading-none" style="color:var(--ink-900)">7<span class="text-[10px]">日</span></div>
+                  <div class="text-[9px] mt-1" style="color:var(--ink-500)">連続</div>
+                </div>
+                <div class="bg-white rounded-xl p-2.5 text-center" style="border:1px solid var(--ink-100)">
+                  <div class="text-base font-bold font-mono leading-none" style="color:var(--ink-900)">3</div>
+                  <div class="text-[9px] mt-1" style="color:var(--ink-500)">バッジ</div>
+                </div>
+              </div>
+
+              <!-- 今日の目標ウィジェット (黄色マーカー枠) -->
+              <div class="mx-4 mb-3 rounded-2xl p-3.5" style="background:var(--marker-bg);border:1px solid var(--marker)">
+                <div class="flex items-center gap-1.5 mb-1.5">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5" style="color:#b8860b"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                  <div class="text-[10px] font-bold tracking-wide" style="color:#b8860b">今日の目標</div>
+                </div>
+                <p class="text-[12px] leading-relaxed" style="color:var(--ink-900)">朝食でたんぱく質 30g、夕食前にレッスン 1 本見る</p>
+              </div>
+
+              <!-- 2x2 メニュー -->
+              <div class="mx-4 grid grid-cols-2 gap-2.5 mb-3">
+                <a href="#" class="bg-white rounded-2xl p-4" style="border:1px solid var(--ink-100)">
+                  <div class="w-9 h-9 mb-2 rounded-xl flex items-center justify-center" style="background:var(--brand-50);color:var(--brand-700)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                  </div>
+                  <div class="text-[13px] font-bold" style="color:var(--ink-900)">コース一覧</div>
+                  <div class="text-[10px] mt-0.5" style="color:var(--ink-500)">5 コース ・ 217 本</div>
+                </a>
+                <a href="#" class="bg-white rounded-2xl p-4" style="border:1px solid var(--ink-100)">
+                  <div class="w-9 h-9 mb-2 rounded-xl flex items-center justify-center" style="background:var(--accent-50);color:var(--accent-600)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                  </div>
+                  <div class="text-[13px] font-bold" style="color:var(--ink-900)">マイ学習記録</div>
+                  <div class="text-[10px] mt-0.5" style="color:var(--ink-500)">振り返り 12 件</div>
+                </a>
+                <a href="#" class="bg-white rounded-2xl p-4" style="border:1px solid var(--ink-100)">
+                  <div class="w-9 h-9 mb-2 rounded-xl flex items-center justify-center text-white" style="background:var(--line-green)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M21 12c0 3-4 5-9 5l-4 3v-3.5c-2-1.5-5-3-5-4.5C3 7 7 4 12 4s9 3 9 8z"/></svg>
+                  </div>
+                  <div class="text-[13px] font-bold" style="color:var(--ink-900)">LINE サポート</div>
+                  <div class="text-[10px] mt-0.5" style="color:var(--ink-500)">質問・相談</div>
+                </a>
+                <a href="#" class="bg-white rounded-2xl p-4" style="border:1px solid var(--ink-100)">
+                  <div class="w-9 h-9 mb-2 rounded-xl flex items-center justify-center" style="background:var(--brand-50);color:var(--brand-700)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                  </div>
+                  <div class="text-[13px] font-bold" style="color:var(--ink-900)">ツール</div>
+                  <div class="text-[10px] mt-0.5" style="color:var(--ink-500)">PFC・カロリー他</div>
+                </a>
+              </div>
+
+              <!-- 目標管理シート リンク -->
+              <div class="mx-4 mb-4">
+                <a href="#" class="flex items-center justify-between rounded-2xl px-4 py-3 bg-white" style="border:1px solid var(--ink-100)">
+                  <div class="flex items-center gap-2.5">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color:var(--brand-700)"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                    <div class="text-sm font-bold" style="color:var(--ink-900)">目標管理シート</div>
+                  </div>
+                  <span style="color:var(--ink-500)">→</span>
+                </a>
+              </div>
+
+              <!-- 全体進捗 -->
+              <div class="mx-4 mb-4">
+                <div class="flex justify-between text-[11px] mb-1.5" style="color:var(--ink-500)">
+                  <span>全体進捗</span>
+                  <span class="font-mono font-bold" style="color:var(--ink-900)">35% (76 / 217)</span>
+                </div>
+                <div class="h-1.5 rounded-full overflow-hidden" style="background:var(--ink-100)">
+                  <div class="h-full rounded-full" style="background:linear-gradient(90deg,var(--brand-500),var(--brand-700));width:35%"></div>
+                </div>
+              </div>
+
+              <!-- カレンダーヒートマップ (簡易版) -->
+              <div class="mx-4 mb-4">
+                <div class="text-[10px] font-bold tracking-widest mb-2" style="color:var(--ink-500)">過去 30 日のアクティブ</div>
+                <div class="bg-white rounded-xl p-3" style="border:1px solid var(--ink-100)">
+                  <div class="grid gap-0.5" style="grid-template-columns:repeat(15, 1fr)">
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-100)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-500)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-300)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--ink-100)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-700)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-500)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-100)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-300)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-700)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-500)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--ink-100)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-100)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-500)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-700)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-300)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-500)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-700)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-700)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-500)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-300)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--ink-100)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-700)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-500)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-700)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-700)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-500)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-700)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-500)"></div>
+                    <div class="aspect-square rounded-sm" style="background:var(--brand-700)"></div>
+                    <div class="aspect-square rounded-sm ring-1 ring-offset-1" style="background:var(--brand-700);--tw-ring-color:var(--accent-600)"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab bar -->
+            <nav class="flex bg-white" style="border-top:1px solid var(--ink-100)">
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--brand-700)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span class="text-[9px] mt-0.5 font-bold">ホーム</span>
+              </a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                <span class="text-[9px] mt-0.5">コース</span>
+              </a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                <span class="text-[9px] mt-0.5">記録</span>
+              </a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <span class="text-[9px] mt-0.5">検索</span>
+              </a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                <span class="text-[9px] mt-0.5">設定</span>
+              </a>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===========================
+           ② コース一覧
+           =========================== -->
+      <div class="flex flex-col items-center gap-3">
+        <span class="label">② コース一覧</span>
+        <div class="label-note">アコーディオン型 / 章別進捗 / ドリップ公開</div>
+        <div class="phone mt-2">
+          <div class="phone-screen">
+            <div class="status-bar">●●● iPhone 9:41 ●●●</div>
+            <div class="phone-body">
+              <div class="px-4 py-3 flex items-center gap-3" style="background:#fff;border-bottom:1px solid var(--ink-100)">
+                <button style="color:var(--ink-700)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><polyline points="15 18 9 12 15 6"/></svg></button>
+                <div class="text-base font-bold" style="color:var(--ink-900)">コース一覧</div>
+              </div>
+
+              <div class="px-5 py-3 flex items-center justify-between" style="background:#fff;border-bottom:1px solid var(--ink-100)">
+                <div class="text-[11px]" style="color:var(--ink-500)">
+                  <span class="font-bold" style="color:var(--ink-900)">5</span> コース ・
+                  <span class="font-bold" style="color:var(--ink-900)">217</span> レッスン
+                </div>
+                <div class="text-[10px] font-bold px-2 py-0.5 rounded-full" style="color:var(--brand-700);background:var(--brand-50);border:1px solid var(--brand-100)">35% 完了</div>
+              </div>
+
+              <div class="p-4 space-y-3">
+                <!-- コース 1 (進行中、展開済み) -->
+                <div class="bg-white rounded-2xl overflow-hidden" style="border:1px solid var(--brand-100)">
+                  <div class="p-4 flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:var(--brand-50);color:var(--brand-700)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="text-[10px] font-bold tracking-widest mb-0.5" style="color:var(--brand-700)">COURSE 01 ・ 進行中</div>
+                      <div class="text-sm font-bold mb-1" style="color:var(--ink-900)">PFC バランスの基礎</div>
+                      <div class="text-[11px]" style="color:var(--ink-500)">4 章 ・ 48 レッスン</div>
+                      <div class="mt-2 flex items-center gap-2">
+                        <div class="flex-1 h-1 rounded-full overflow-hidden" style="background:var(--ink-100)">
+                          <div class="h-full rounded-full" style="background:var(--brand-500);width:68%"></div>
+                        </div>
+                        <div class="text-[10px] font-mono font-bold" style="color:var(--brand-700)">68%</div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- 章リスト (展開) -->
+                  <div style="border-top:1px solid var(--ink-100);background:var(--bg-cool)">
+                    <a href="#" class="flex items-center justify-between px-4 py-2.5" style="border-bottom:1px solid var(--ink-100)">
+                      <div class="flex items-center gap-2">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5" style="color:var(--brand-700)"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span class="text-[12px] font-medium" style="color:var(--ink-900)">第 1 章 ・ 栄養の基礎</span>
+                      </div>
+                      <span class="text-[10px] font-mono" style="color:var(--brand-700)">完了</span>
+                    </a>
+                    <a href="#" class="flex items-center justify-between px-4 py-2.5" style="border-bottom:1px solid var(--ink-100)">
+                      <div class="flex items-center gap-2">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5" style="color:var(--brand-700)"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span class="text-[12px] font-medium" style="color:var(--ink-900)">第 2 章 ・ たんぱく質</span>
+                      </div>
+                      <span class="text-[10px] font-mono" style="color:var(--brand-700)">完了</span>
+                    </a>
+                    <a href="#" class="flex items-center justify-between px-4 py-2.5" style="border-bottom:1px solid var(--ink-100);background:var(--marker-bg)">
+                      <div class="flex items-center gap-2">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5" style="color:var(--accent-600)"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span class="text-[12px] font-bold" style="color:var(--ink-900)">第 3 章 ・ 脂質と糖質</span>
+                      </div>
+                      <span class="text-[10px] font-mono font-bold" style="color:var(--accent-600)">続きから</span>
+                    </a>
+                    <div class="flex items-center justify-between px-4 py-2.5" style="opacity:.5">
+                      <div class="flex items-center gap-2">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5" style="color:var(--ink-500)"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <span class="text-[12px] font-medium" style="color:var(--ink-500)">第 4 章 ・ PFC 統合</span>
+                      </div>
+                      <span class="text-[10px] font-mono" style="color:var(--ink-500)">6/15 公開</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- コース 2 (進行中、未展開) -->
+                <a href="#" class="block bg-white rounded-2xl p-4" style="border:1px solid var(--ink-100)">
+                  <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:var(--brand-50);color:var(--brand-700)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="text-[10px] font-bold tracking-widest mb-0.5" style="color:var(--brand-700)">COURSE 02</div>
+                      <div class="text-sm font-bold mb-1" style="color:var(--ink-900)">ダイエットの原理</div>
+                      <div class="text-[11px]" style="color:var(--ink-500)">5 章 ・ 52 レッスン</div>
+                      <div class="mt-2 flex items-center gap-2">
+                        <div class="flex-1 h-1 rounded-full overflow-hidden" style="background:var(--ink-100)">
+                          <div class="h-full rounded-full" style="background:var(--brand-500);width:40%"></div>
+                        </div>
+                        <div class="text-[10px] font-mono font-bold" style="color:var(--brand-700)">40%</div>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+
+                <!-- コース 3-5 -->
+                <a href="#" class="block bg-white rounded-2xl p-4" style="border:1px solid var(--ink-100)">
+                  <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:var(--brand-50);color:var(--brand-700)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/></svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="text-[10px] font-bold tracking-widest mb-0.5" style="color:var(--brand-700)">COURSE 03</div>
+                      <div class="text-sm font-bold mb-1" style="color:var(--ink-900)">筋トレフォームの基本</div>
+                      <div class="text-[11px]" style="color:var(--ink-500)">4 章 ・ 38 レッスン</div>
+                      <div class="mt-2 flex items-center gap-2">
+                        <div class="flex-1 h-1 rounded-full overflow-hidden" style="background:var(--ink-100)">
+                          <div class="h-full rounded-full" style="background:var(--brand-500);width:22%"></div>
+                        </div>
+                        <div class="text-[10px] font-mono font-bold" style="color:var(--brand-700)">22%</div>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+
+                <a href="#" class="block bg-white rounded-2xl p-4" style="border:1px solid var(--ink-100);opacity:.6">
+                  <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:var(--ink-100);color:var(--ink-500)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="text-[10px] font-bold tracking-widest mb-0.5" style="color:var(--ink-500)">COURSE 04 ・ 7/1 公開</div>
+                      <div class="text-sm font-bold mb-1" style="color:var(--ink-700)">栄養設計の応用</div>
+                      <div class="text-[11px]" style="color:var(--ink-500)">5 章 ・ 45 レッスン</div>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            </div>
+            <nav class="flex bg-white" style="border-top:1px solid var(--ink-100)">
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="text-[9px] mt-0.5">ホーム</span></a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--brand-700)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span class="text-[9px] mt-0.5 font-bold">コース</span></a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span class="text-[9px] mt-0.5">記録</span></a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span class="text-[9px] mt-0.5">検索</span></a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="text-[9px] mt-0.5">設定</span></a>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===========================
+           ③ マイ学習記録
+           =========================== -->
+      <div class="flex flex-col items-center gap-3">
+        <span class="label">③ マイ学習記録</span>
+        <div class="label-note">月次統計 / 振り返り / バッジ</div>
+        <div class="phone mt-2">
+          <div class="phone-screen">
+            <div class="status-bar">●●● iPhone 9:41 ●●●</div>
+            <div class="phone-body">
+              <div class="px-4 py-3 flex items-center gap-3" style="background:#fff;border-bottom:1px solid var(--ink-100)">
+                <button style="color:var(--ink-700)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><polyline points="15 18 9 12 15 6"/></svg></button>
+                <div class="text-base font-bold" style="color:var(--ink-900)">マイ学習記録</div>
+              </div>
+
+              <div class="px-4 pt-4 pb-3">
+                <div class="text-[10px] font-bold tracking-widest mb-2" style="color:var(--ink-500)">今月の学習</div>
+                <div class="bg-white rounded-2xl p-4" style="border:1px solid var(--ink-100)">
+                  <div class="grid grid-cols-3 gap-3 mb-4">
+                    <div class="text-center">
+                      <div class="text-2xl font-bold font-mono leading-none" style="color:var(--ink-900)">8</div>
+                      <div class="text-[10px] mt-1" style="color:var(--ink-500)">学習日数</div>
+                    </div>
+                    <div class="text-center">
+                      <div class="text-2xl font-bold font-mono leading-none" style="color:var(--ink-900)">12.5<span class="text-xs">h</span></div>
+                      <div class="text-[10px] mt-1" style="color:var(--ink-500)">視聴時間</div>
+                    </div>
+                    <div class="text-center">
+                      <div class="text-2xl font-bold font-mono leading-none" style="color:var(--accent-600)">47</div>
+                      <div class="text-[10px] mt-1" style="color:var(--ink-500)">できた!</div>
+                    </div>
+                  </div>
+                  <div class="pt-3" style="border-top:1px dashed var(--ink-100)">
+                    <div class="flex justify-between text-[10px] mb-1.5" style="color:var(--ink-500)">
+                      <span>累計レッスン</span>
+                      <span class="font-mono font-bold" style="color:var(--ink-900)">76 / 217</span>
+                    </div>
+                    <div class="h-1.5 rounded-full overflow-hidden" style="background:var(--ink-100)">
+                      <div class="h-full rounded-full" style="background:var(--brand-500);width:35%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- バッジ -->
+              <div class="px-4 pt-2 pb-3">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="text-[10px] font-bold tracking-widest" style="color:var(--ink-500)">獲得バッジ</div>
+                  <span class="text-[10px]" style="color:var(--ink-500)">3 / 12</span>
+                </div>
+                <div class="bg-white rounded-2xl p-3 flex items-center gap-3" style="border:1px solid var(--ink-100)">
+                  <div class="text-center">
+                    <div class="w-10 h-10 mx-auto rounded-full flex items-center justify-center" style="background:var(--accent-600);color:#fff">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+                    </div>
+                    <div class="text-[9px] mt-1 font-bold" style="color:var(--ink-900)">初心者</div>
+                  </div>
+                  <div class="text-center">
+                    <div class="w-10 h-10 mx-auto rounded-full flex items-center justify-center" style="background:var(--accent-600);color:#fff">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    </div>
+                    <div class="text-[9px] mt-1 font-bold" style="color:var(--ink-900)">7 日連続</div>
+                  </div>
+                  <div class="text-center">
+                    <div class="w-10 h-10 mx-auto rounded-full flex items-center justify-center" style="background:var(--accent-600);color:#fff">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    </div>
+                    <div class="text-[9px] mt-1 font-bold" style="color:var(--ink-900)">章 1 完了</div>
+                  </div>
+                  <div class="text-center opacity-30">
+                    <div class="w-10 h-10 mx-auto rounded-full flex items-center justify-center" style="background:var(--ink-100);color:var(--ink-500)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                    <div class="text-[9px] mt-1" style="color:var(--ink-500)">？</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 振り返り -->
+              <div class="px-4 pt-2 pb-4">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="text-[10px] font-bold tracking-widest" style="color:var(--ink-500)">振り返り</div>
+                  <span class="text-[10px]" style="color:var(--ink-700)">全 12 件</span>
+                </div>
+
+                <a href="#" class="block bg-white rounded-2xl p-4 mb-2" style="border:1px solid var(--ink-100)">
+                  <div class="flex items-start justify-between gap-3 mb-1">
+                    <div class="text-[10px] font-bold tracking-widest" style="color:var(--brand-700)">COURSE 01 ・ CH 3</div>
+                    <div class="text-[10px] font-mono" style="color:var(--ink-500)">06/03</div>
+                  </div>
+                  <div class="text-sm font-bold mb-2" style="color:var(--ink-900)">Lesson 4 ・ PFC バランスの基礎</div>
+                  <p class="text-[11px] leading-relaxed" style="color:var(--ink-700)">糖質を悪者にしないで、目的に合わせて使い分けるのが大事と理解できた。明日から朝のお米を少し増やしてみる。</p>
+                </a>
+                <a href="#" class="block bg-white rounded-2xl p-4 mb-2" style="border:1px solid var(--ink-100)">
+                  <div class="flex items-start justify-between gap-3 mb-1">
+                    <div class="text-[10px] font-bold tracking-widest" style="color:var(--brand-700)">COURSE 02 ・ CH 2</div>
+                    <div class="text-[10px] font-mono" style="color:var(--ink-500)">06/01</div>
+                  </div>
+                  <div class="text-sm font-bold mb-2" style="color:var(--ink-900)">Lesson 6 ・ 摂取カロリーの考え方</div>
+                  <p class="text-[11px] leading-relaxed" style="color:var(--ink-700)">メンテナンスを起点に、ダイエット時は -300〜-500 が現実的という基準ができた。</p>
+                </a>
+                <a href="#" class="block rounded-2xl p-3 text-center text-[11px] font-bold" style="border:1px dashed var(--ink-300);color:var(--ink-700)">さらに見る (10 件)</a>
+              </div>
+            </div>
+            <nav class="flex bg-white" style="border-top:1px solid var(--ink-100)">
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="text-[9px] mt-0.5">ホーム</span></a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span class="text-[9px] mt-0.5">コース</span></a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--brand-700)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span class="text-[9px] mt-0.5 font-bold">記録</span></a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span class="text-[9px] mt-0.5">検索</span></a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="text-[9px] mt-0.5">設定</span></a>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===========================
+           ④ ツール
+           =========================== -->
+      <div class="flex flex-col items-center gap-3">
+        <span class="label">④ ツール</span>
+        <div class="label-note">4 計算ツール ・ 目標シート連携</div>
+        <div class="phone mt-2">
+          <div class="phone-screen">
+            <div class="status-bar">●●● iPhone 9:41 ●●●</div>
+            <div class="phone-body">
+              <div class="px-4 py-3 flex items-center gap-3" style="background:#fff;border-bottom:1px solid var(--ink-100)">
+                <button style="color:var(--ink-700)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><polyline points="15 18 9 12 15 6"/></svg></button>
+                <div class="text-base font-bold" style="color:var(--ink-900)">ツール</div>
+              </div>
+              <div class="px-4 pt-4 pb-3">
+                <p class="text-[11px] leading-relaxed" style="color:var(--ink-700)">栄養・トレーニングの計算をサポート。<br/>結果は目標管理シートにも反映できます。</p>
+              </div>
+              <div class="px-4 space-y-2.5 mb-4">
+                <a href="#" class="block bg-white rounded-2xl p-4" style="border:1px solid var(--ink-100)">
+                  <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:var(--brand-50);color:var(--brand-700)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    </div>
+                    <div class="flex-1">
+                      <div class="text-sm font-bold mb-1" style="color:var(--ink-900)">体脂肪率 計算</div>
+                      <div class="text-[11px]" style="color:var(--ink-500)">海軍式で、現状の体脂肪率を把握</div>
+                    </div>
+                    <span style="color:var(--ink-500)">→</span>
+                  </div>
+                </a>
+                <a href="#" class="block bg-white rounded-2xl p-4" style="border:1px solid var(--ink-100)">
+                  <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:var(--accent-50);color:var(--accent-600)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    </div>
+                    <div class="flex-1">
+                      <div class="text-sm font-bold mb-1" style="color:var(--ink-900)">必要カロリー 計算</div>
+                      <div class="text-[11px]" style="color:var(--ink-500)">メンテ / ダイエット / 増量の目安</div>
+                    </div>
+                    <span style="color:var(--ink-500)">→</span>
+                  </div>
+                </a>
+                <a href="#" class="block bg-white rounded-2xl p-4" style="border:1px solid var(--ink-100)">
+                  <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:var(--brand-50);color:var(--brand-700)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </div>
+                    <div class="flex-1">
+                      <div class="text-sm font-bold mb-1" style="color:var(--ink-900)">減量期間 逆算</div>
+                      <div class="text-[11px]" style="color:var(--ink-500)">目標体重・ペースから到達日を算出</div>
+                    </div>
+                    <span style="color:var(--ink-500)">→</span>
+                  </div>
+                </a>
+                <a href="#" class="block bg-white rounded-2xl p-4" style="border:1px solid var(--ink-100)">
+                  <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:var(--brand-50);color:var(--brand-700)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                    </div>
+                    <div class="flex-1">
+                      <div class="text-sm font-bold mb-1" style="color:var(--ink-900)">PFC・カーボサイクル設定</div>
+                      <div class="text-[11px]" style="color:var(--ink-500)">PFC g/kcal + 1 週間の糖質配分</div>
+                    </div>
+                    <span style="color:var(--ink-500)">→</span>
+                  </div>
+                </a>
+              </div>
+              <div class="mx-4 mb-4">
+                <div class="rounded-2xl p-3.5 text-center" style="background:var(--marker-bg);border:1px dashed var(--marker)">
+                  <div class="text-[10px] font-bold mb-1" style="color:#b8860b">前回の計算は保存されます</div>
+                  <div class="text-[10px] leading-relaxed" style="color:var(--ink-700)">次回開いた時に前回値が薄色で復元されます</div>
+                </div>
+              </div>
+            </div>
+            <nav class="flex bg-white" style="border-top:1px solid var(--ink-100)">
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="text-[9px] mt-0.5">ホーム</span></a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span class="text-[9px] mt-0.5">コース</span></a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span class="text-[9px] mt-0.5">記録</span></a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span class="text-[9px] mt-0.5">検索</span></a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="text-[9px] mt-0.5">設定</span></a>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===========================
+           ⑤ LINE サポート (LINE 緑前面)
+           =========================== -->
+      <div class="flex flex-col items-center gap-3">
+        <span class="label">⑤ LINE サポート</span>
+        <div class="label-note">CTA 専用 LINE 緑 #06c755</div>
+        <div class="phone mt-2">
+          <div class="phone-screen">
+            <div class="status-bar">●●● iPhone 9:41 ●●●</div>
+            <div class="phone-body">
+              <div class="px-4 py-3 flex items-center gap-3" style="background:#fff;border-bottom:1px solid var(--ink-100)">
+                <button style="color:var(--ink-700)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><polyline points="15 18 9 12 15 6"/></svg></button>
+                <div class="text-base font-bold" style="color:var(--ink-900)">LINE サポート</div>
+              </div>
+
+              <div class="mx-4 mt-5 mb-4 rounded-3xl p-6 text-center text-white" style="background:linear-gradient(135deg,var(--line-green),#04a847)">
+                <div class="w-14 h-14 rounded-full mx-auto mb-3 flex items-center justify-center" style="background:rgba(255,255,255,0.15)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7"><path d="M21 12c0 3-4 5-9 5l-4 3v-3.5c-2-1.5-5-3-5-4.5C3 7 7 4 12 4s9 3 9 8z"/></svg>
+                </div>
+                <div class="text-base font-bold mb-1.5">のりfitness LINE 公式</div>
+                <p class="text-[11px] opacity-90 leading-relaxed">食事 / 筋トレ / 体調 / 疑問<br/>気軽に質問・相談できます</p>
+              </div>
+
+              <div class="px-4 mb-4">
+                <a href="#" class="block rounded-xl px-4 py-3.5 text-center text-sm font-bold tracking-wide text-white" style="background:var(--line-green)">＋ LINE で友だち追加</a>
+                <p class="text-[10px] text-center mt-2" style="color:var(--ink-500)">タップで LINE アプリが開きます</p>
+              </div>
+
+              <div class="px-4 pb-3">
+                <div class="text-[10px] font-bold tracking-widest mb-2" style="color:var(--ink-500)">こんな質問ができます</div>
+                <div class="space-y-2">
+                  <div class="bg-white rounded-2xl p-3.5 flex items-start gap-2.5" style="border:1px solid var(--ink-100)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mt-0.5 flex-shrink-0" style="color:var(--brand-700)"><polyline points="20 6 9 17 4 12"/></svg>
+                    <div>
+                      <div class="text-[13px] font-bold mb-0.5" style="color:var(--ink-900)">食事の写真を送る</div>
+                      <div class="text-[11px] leading-snug" style="color:var(--ink-500)">「これって PFC バランス OK?」</div>
+                    </div>
+                  </div>
+                  <div class="bg-white rounded-2xl p-3.5 flex items-start gap-2.5" style="border:1px solid var(--ink-100)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mt-0.5 flex-shrink-0" style="color:var(--brand-700)"><polyline points="20 6 9 17 4 12"/></svg>
+                    <div>
+                      <div class="text-[13px] font-bold mb-0.5" style="color:var(--ink-900)">トレーニング動画を送る</div>
+                      <div class="text-[11px] leading-snug" style="color:var(--ink-500)">「フォームこれで合ってる?」</div>
+                    </div>
+                  </div>
+                  <div class="bg-white rounded-2xl p-3.5 flex items-start gap-2.5" style="border:1px solid var(--ink-100)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mt-0.5 flex-shrink-0" style="color:var(--brand-700)"><polyline points="20 6 9 17 4 12"/></svg>
+                    <div>
+                      <div class="text-[13px] font-bold mb-0.5" style="color:var(--ink-900)">体調 / 気分の相談</div>
+                      <div class="text-[11px] leading-snug" style="color:var(--ink-500)">「最近モチベ下がってます」</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mx-4 mb-4">
+                <div class="rounded-2xl p-3.5 text-center" style="background:var(--marker-bg);border:1px dashed var(--marker)">
+                  <div class="text-[10px] font-bold mb-1" style="color:#b8860b">返信目安</div>
+                  <div class="text-[11px] leading-relaxed" style="color:var(--ink-700)">平日 1-2 日以内 ・ 休日や深夜は翌営業日<br/>急ぎでない質問・気づきを気軽にどうぞ</div>
+                </div>
+              </div>
+            </div>
+            <nav class="flex bg-white" style="border-top:1px solid var(--ink-100)">
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="text-[9px] mt-0.5">ホーム</span></a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span class="text-[9px] mt-0.5">コース</span></a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span class="text-[9px] mt-0.5">記録</span></a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span class="text-[9px] mt-0.5">検索</span></a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="text-[9px] mt-0.5">設定</span></a>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      <!-- 残り 5 画面は次のセクションへ -->
+    </div>
+
+    <!-- 区切り (画面継続) -->
+    <div class="text-center my-12 max-w-[1400px] mx-auto">
+      <p class="text-sm font-bold" style="color:var(--ink-700)">↓ 続きの 5 画面 (検索 / 設定 / 月次添削 / 目標シート / 筋トレメニュー) ↓</p>
+    </div>
+
+    <div class="flex justify-center items-start gap-8 flex-wrap max-w-[1400px] mx-auto">
+
+      <!-- ⑥ 検索 -->
+      <div class="flex flex-col items-center gap-3">
+        <span class="label">⑥ 検索</span>
+        <div class="label-note">レッスン横断検索 + 最近 + チップ</div>
+        <div class="phone mt-2"><div class="phone-screen">
+          <div class="status-bar">●●● iPhone 9:41 ●●●</div>
+          <div class="phone-body">
+            <div class="px-4 py-3" style="background:#fff;border-bottom:1px solid var(--ink-100)"><div class="text-base font-bold" style="color:var(--ink-900)">検索</div></div>
+            <div class="px-4 pt-3 pb-1">
+              <div class="flex items-center gap-2 bg-white rounded-xl px-3 py-2.5" style="border:1px solid var(--ink-100)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="color:var(--ink-500)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" placeholder="レッスン / コース / 振り返りを検索" class="flex-1 text-[13px] outline-none bg-transparent" style="color:var(--ink-900)"/>
+              </div>
+            </div>
+            <div class="px-4 pt-3 pb-2 flex gap-1.5">
+              <button class="text-[11px] font-bold px-3 py-1 rounded-full text-white" style="background:var(--ink-900)">すべて</button>
+              <button class="text-[11px] px-3 py-1 rounded-full bg-white" style="color:var(--ink-700);border:1px solid var(--ink-100)">コース</button>
+              <button class="text-[11px] px-3 py-1 rounded-full bg-white" style="color:var(--ink-700);border:1px solid var(--ink-100)">レッスン</button>
+              <button class="text-[11px] px-3 py-1 rounded-full bg-white" style="color:var(--ink-700);border:1px solid var(--ink-100)">振り返り</button>
+            </div>
+            <div class="px-4 pt-3">
+              <div class="flex items-center justify-between mb-2">
+                <div class="text-[10px] font-bold tracking-widest" style="color:var(--ink-500)">最近の検索</div>
+                <button class="text-[10px]" style="color:var(--ink-500)">クリア</button>
+              </div>
+              <div class="space-y-1">
+                <a href="#" class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-white">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5" style="color:var(--ink-500)"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <span class="text-[13px]" style="color:var(--ink-900)">PFC</span>
+                </a>
+                <a href="#" class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-white">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5" style="color:var(--ink-500)"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <span class="text-[13px]" style="color:var(--ink-900)">たんぱく質</span>
+                </a>
+                <a href="#" class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-white">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5" style="color:var(--ink-500)"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <span class="text-[13px]" style="color:var(--ink-900)">スクワット</span>
+                </a>
+              </div>
+            </div>
+            <div class="px-4 pt-5 pb-4">
+              <div class="text-[10px] font-bold tracking-widest mb-2" style="color:var(--ink-500)">よく検索される</div>
+              <div class="flex flex-wrap gap-1.5">
+                <a href="#" class="text-[12px] px-3 py-1.5 rounded-full bg-white" style="color:var(--brand-700);border:1px solid var(--brand-100)">減量</a>
+                <a href="#" class="text-[12px] px-3 py-1.5 rounded-full bg-white" style="color:var(--brand-700);border:1px solid var(--brand-100)">基礎代謝</a>
+                <a href="#" class="text-[12px] px-3 py-1.5 rounded-full bg-white" style="color:var(--brand-700);border:1px solid var(--brand-100)">糖質</a>
+                <a href="#" class="text-[12px] px-3 py-1.5 rounded-full bg-white" style="color:var(--brand-700);border:1px solid var(--brand-100)">脂質</a>
+                <a href="#" class="text-[12px] px-3 py-1.5 rounded-full bg-white" style="color:var(--brand-700);border:1px solid var(--brand-100)">プロテイン</a>
+                <a href="#" class="text-[12px] px-3 py-1.5 rounded-full bg-white" style="color:var(--brand-700);border:1px solid var(--brand-100)">フォーム</a>
+                <a href="#" class="text-[12px] px-3 py-1.5 rounded-full bg-white" style="color:var(--brand-700);border:1px solid var(--brand-100)">背中</a>
+              </div>
+            </div>
+          </div>
+          <nav class="flex bg-white" style="border-top:1px solid var(--ink-100)">
+            <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="text-[9px] mt-0.5">ホーム</span></a>
+            <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span class="text-[9px] mt-0.5">コース</span></a>
+            <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span class="text-[9px] mt-0.5">記録</span></a>
+            <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--brand-700)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span class="text-[9px] mt-0.5 font-bold">検索</span></a>
+            <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="text-[9px] mt-0.5">設定</span></a>
+          </nav>
+        </div></div>
+      </div>
+
+      <!-- ⑦ 設定 -->
+      <div class="flex flex-col items-center gap-3">
+        <span class="label">⑦ 設定</span>
+        <div class="label-note">プロフィール / アカウント / 通知 / 各種</div>
+        <div class="phone mt-2"><div class="phone-screen">
+          <div class="status-bar">●●● iPhone 9:41 ●●●</div>
+          <div class="phone-body">
+            <div class="px-4 py-3" style="background:#fff;border-bottom:1px solid var(--ink-100)"><div class="text-base font-bold" style="color:var(--ink-900)">設定</div></div>
+            <div class="px-4 pt-4 pb-2">
+              <a href="#" class="block bg-white rounded-2xl p-4" style="border:1px solid var(--ink-100)">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 rounded-full flex items-center justify-center text-base font-bold" style="background:var(--brand-50);color:var(--brand-700);border:1px solid var(--brand-100)">き</div>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-sm font-bold" style="color:var(--ink-900)">きよむ</div>
+                    <div class="text-[11px] mt-0.5" style="color:var(--ink-500)">kiyomu@example.com</div>
+                  </div>
+                  <span style="color:var(--ink-500)">→</span>
+                </div>
+              </a>
+            </div>
+            <div class="px-4 pt-3 pb-1">
+              <div class="text-[10px] font-bold tracking-widest mb-2" style="color:var(--ink-500)">アカウント</div>
+              <div class="bg-white rounded-2xl overflow-hidden" style="border:1px solid var(--ink-100)">
+                <a href="#" class="flex items-center gap-3 px-4 py-3" style="border-bottom:1px solid var(--ink-100)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="color:var(--ink-700)"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  <span class="flex-1 text-[13px]" style="color:var(--ink-900)">プロフィール編集</span>
+                  <span style="color:var(--ink-500)">→</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3" style="border-bottom:1px solid var(--ink-100)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="color:var(--ink-700)"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  <span class="flex-1 text-[13px]" style="color:var(--ink-900)">パスワード変更</span>
+                  <span style="color:var(--ink-500)">→</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="color:var(--ink-700)"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                  <span class="flex-1 text-[13px]" style="color:var(--ink-900)">メールアドレス変更</span>
+                  <span style="color:var(--ink-500)">→</span>
+                </a>
+              </div>
+            </div>
+            <div class="px-4 pt-4 pb-1">
+              <div class="text-[10px] font-bold tracking-widest mb-2" style="color:var(--ink-500)">通知</div>
+              <div class="bg-white rounded-2xl overflow-hidden" style="border:1px solid var(--ink-100)">
+                <div class="flex items-center gap-3 px-4 py-3" style="border-bottom:1px solid var(--ink-100)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="color:var(--ink-700)"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                  <span class="flex-1 text-[13px]" style="color:var(--ink-900)">アプリ通知</span>
+                  <div class="w-9 h-5 rounded-full flex items-center justify-end px-0.5" style="background:var(--brand-500)"><div class="w-4 h-4 rounded-full bg-white"></div></div>
+                </div>
+                <div class="flex items-center gap-3 px-4 py-3" style="border-bottom:1px solid var(--ink-100)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="color:var(--ink-700)"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                  <span class="flex-1 text-[13px]" style="color:var(--ink-900)">メール通知</span>
+                  <div class="w-9 h-5 rounded-full flex items-center px-0.5" style="background:var(--ink-300)"><div class="w-4 h-4 rounded-full bg-white"></div></div>
+                </div>
+                <a href="#" class="flex items-center gap-3 px-4 py-3">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="color:var(--line-green)"><path d="M21 12c0 3-4 5-9 5l-4 3v-3.5c-2-1.5-5-3-5-4.5C3 7 7 4 12 4s9 3 9 8z"/></svg>
+                  <span class="flex-1 text-[13px]" style="color:var(--ink-900)">LINE 連携</span>
+                  <span class="text-[10px] font-bold" style="color:var(--ink-500)">未連携</span>
+                  <span style="color:var(--ink-500)">→</span>
+                </a>
+              </div>
+            </div>
+            <div class="px-4 pt-4 pb-1">
+              <div class="text-[10px] font-bold tracking-widest mb-2" style="color:var(--ink-500)">その他</div>
+              <div class="bg-white rounded-2xl overflow-hidden" style="border:1px solid var(--ink-100)">
+                <a href="#" class="flex items-center gap-3 px-4 py-3" style="border-bottom:1px solid var(--ink-100)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="color:var(--ink-700)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                  <span class="flex-1 text-[13px]" style="color:var(--ink-900)">ヘルプ</span>
+                  <span style="color:var(--ink-500)">→</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3" style="border-bottom:1px solid var(--ink-100)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="color:var(--ink-700)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <span class="flex-1 text-[13px]" style="color:var(--ink-900)">利用規約</span>
+                  <span style="color:var(--ink-500)">→</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="color:var(--ink-700)"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  <span class="flex-1 text-[13px]" style="color:var(--ink-900)">プライバシーポリシー</span>
+                  <span style="color:var(--ink-500)">→</span>
+                </a>
+              </div>
+            </div>
+            <div class="px-4 pt-4 pb-4">
+              <button class="w-full bg-white rounded-2xl px-4 py-3 text-[13px] font-bold" style="color:#c62828;border:1px solid var(--ink-100)">ログアウト</button>
+            </div>
+            <p class="text-center text-[10px] font-mono mb-4" style="color:var(--ink-500)">のりfitness 筋肉塾 ・ v1.0.0</p>
+          </div>
+          <nav class="flex bg-white" style="border-top:1px solid var(--ink-100)">
+            <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="text-[9px] mt-0.5">ホーム</span></a>
+            <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span class="text-[9px] mt-0.5">コース</span></a>
+            <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span class="text-[9px] mt-0.5">記録</span></a>
+            <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span class="text-[9px] mt-0.5">検索</span></a>
+            <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--brand-700)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="text-[9px] mt-0.5 font-bold">設定</span></a>
+          </nav>
+        </div></div>
+      </div>
+
+      <!-- ⑧ 月次添削履歴 -->
+      <div class="flex flex-col items-center gap-3">
+        <span class="label">⑧ 月次添削履歴</span>
+        <div class="label-note">今月 (動画返信あり) + 過去月</div>
+        <div class="phone mt-2"><div class="phone-screen">
+          <div class="status-bar">●●● iPhone 9:41 ●●●</div>
+          <div class="phone-body">
+            <div class="px-4 py-3 flex items-center justify-between" style="background:#fff;border-bottom:1px solid var(--ink-100)">
+              <button style="color:var(--ink-700)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><polyline points="15 18 9 12 15 6"/></svg></button>
+              <div class="text-sm font-bold" style="color:var(--ink-900)">月次添削 履歴</div>
+              <div class="w-5"></div>
+            </div>
+            <div class="mx-4 my-4 bg-white rounded-2xl overflow-hidden" style="border:1px solid var(--ink-100)">
+              <div class="px-5 pt-4 pb-2 flex items-center gap-1.5">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5" style="color:var(--ink-700)"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+                <div class="text-xs font-bold tracking-wide" style="color:var(--ink-700)">今月の月次添削</div>
+              </div>
+              <div class="px-5 pb-5">
+                <div class="rounded-2xl px-4 py-4" style="background:var(--marker-bg);border:1px solid var(--marker)">
+                  <span class="inline-flex items-center justify-center leading-none text-[10px] font-medium px-2 py-0.5 rounded-full text-white" style="background:#b8860b">のりfitness から返信</span>
+                  <div class="text-sm font-medium mt-2 mb-1.5" style="color:var(--ink-900)">動画返信が届きました</div>
+                  <div class="text-[11px] leading-relaxed mb-3" style="color:var(--ink-700)">2026 年 6 月の添削に動画でお返事しています。記入内容と一緒にご覧ください。</div>
+                  <a href="#" class="flex items-center justify-center gap-2 w-full text-center py-2.5 rounded-lg text-white text-xs font-medium" style="background:var(--ink-900)">
+                    <span style="color:var(--brand-500)">▶</span> 2026 年 6 月 月次添削動画を開く
+                  </a>
+                  <div class="text-[10px] text-center mt-2 font-mono" style="color:var(--ink-500)">返信 06/04</div>
+                </div>
+              </div>
+            </div>
+            <div class="mx-4 mb-4 bg-white rounded-2xl overflow-hidden" style="border:1px solid var(--ink-100)">
+              <div class="px-5 pt-4 pb-2 flex items-center gap-1.5">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5" style="color:var(--ink-700)"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+                <div class="text-xs font-bold tracking-wide" style="color:var(--ink-700)">カテゴリ別スコア</div>
+              </div>
+              <div class="px-5 pb-5">
+                <div class="rounded-lg px-4 py-6 text-center" style="background:var(--bg-cool);border:1px dashed var(--ink-300)">
+                  <div class="text-[11px] leading-relaxed" style="color:var(--ink-500)">過去 3 ヶ月以上の月次添削が揃うと、ここにカテゴリ別の推移が表示されます</div>
+                </div>
+              </div>
+            </div>
+            <div class="mx-4 mb-4 bg-white rounded-2xl overflow-hidden" style="border:1px solid var(--ink-100)">
+              <div class="px-5 pt-4 pb-2 flex items-center justify-between">
+                <div class="flex items-center gap-1.5">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5" style="color:var(--ink-700)"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  <div class="text-xs font-bold tracking-wide" style="color:var(--ink-700)">過去の月次添削</div>
+                </div>
+                <div class="text-[11px]" style="color:var(--ink-500)">タップで詳細</div>
+              </div>
+              <div class="px-5 pb-3">
+                <a href="#" class="flex items-center justify-between py-3" style="border-bottom:1px solid var(--ink-100)">
+                  <div class="flex items-center gap-2.5">
+                    <span class="font-semibold font-mono text-sm" style="color:var(--ink-900)">2026 年 5 月</span>
+                    <span class="inline-flex items-center justify-center leading-none text-[10px] px-2 py-0.5 rounded-full" style="background:var(--brand-50);color:var(--brand-700)">✓ 返信あり</span>
+                  </div>
+                  <span class="text-xs font-mono" style="color:var(--ink-500)">▶</span>
+                </a>
+                <a href="#" class="flex items-center justify-between py-3" style="border-bottom:1px solid var(--ink-100)">
+                  <div class="flex items-center gap-2.5">
+                    <span class="font-semibold font-mono text-sm" style="color:var(--ink-900)">2026 年 4 月</span>
+                    <span class="inline-flex items-center justify-center leading-none text-[10px] px-2 py-0.5 rounded-full" style="background:var(--brand-50);color:var(--brand-700)">✓ 返信あり</span>
+                  </div>
+                  <span class="text-xs font-mono" style="color:var(--ink-500)">▶</span>
+                </a>
+                <a href="#" class="flex items-center justify-between py-3">
+                  <div class="flex items-center gap-2.5">
+                    <span class="font-semibold font-mono text-sm" style="color:var(--ink-900)">2026 年 3 月</span>
+                    <span class="inline-flex items-center justify-center leading-none text-[10px] px-2 py-0.5 rounded-full" style="background:var(--brand-50);color:var(--brand-700)">✓ 返信あり</span>
+                  </div>
+                  <span class="text-xs font-mono" style="color:var(--ink-500)">▶</span>
+                </a>
+              </div>
+            </div>
+          </div>
+          <nav class="flex bg-white" style="border-top:1px solid var(--ink-100)">
+            <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="text-[9px] mt-0.5">ホーム</span></a>
+            <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span class="text-[9px] mt-0.5">コース</span></a>
+            <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span class="text-[9px] mt-0.5">記録</span></a>
+            <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span class="text-[9px] mt-0.5">検索</span></a>
+            <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="text-[9px] mt-0.5">設定</span></a>
+          </nav>
+        </div></div>
+      </div>
+
+      <!-- ⑨ 目標管理シート -->
+      <div class="flex flex-col items-center gap-3">
+        <span class="label">⑨ 目標管理シート</span>
+        <div class="label-note">カルテ風ドキュメント + KPI + 5 セクション</div>
+        <div class="phone mt-2"><div class="phone-screen">
+          <div class="status-bar">●●● iPhone 9:41 ●●●</div>
+          <div class="phone-body">
+            <div class="px-4 py-3 flex items-center gap-3" style="background:#fff;border-bottom:1px solid var(--ink-100)">
+              <button style="color:var(--ink-700)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><polyline points="15 18 9 12 15 6"/></svg></button>
+              <div class="text-base font-bold" style="color:var(--ink-900)">目標管理シート</div>
+            </div>
+            <div class="mx-4 mt-3 mb-4 bg-white rounded-md overflow-hidden" style="border:1px solid var(--ink-300)">
+              <div class="px-4 py-3" style="border-bottom:1px solid var(--ink-100)">
+                <div class="text-base font-bold" style="color:var(--ink-900)">目標管理シート</div>
+                <div class="text-[10px] mt-1" style="color:var(--ink-500)">提出 2026/06/04 ・ 記入 4/5 セクション</div>
+              </div>
+              <div class="px-3 py-3 grid grid-cols-2 gap-2" style="background:var(--bg-cool);border-bottom:1px solid var(--ink-100)">
+                <div class="bg-white rounded-md px-2.5 py-1.5" style="border:1px solid var(--ink-100)">
+                  <div class="text-[9px] mb-0.5" style="color:var(--ink-500)">現状体重</div>
+                  <div class="text-sm font-bold font-mono leading-none" style="color:var(--ink-900)">80.0 <span class="text-[10px] font-normal" style="color:var(--ink-500)">kg</span></div>
+                </div>
+                <div class="bg-white rounded-md px-2.5 py-1.5" style="border:1px solid var(--ink-100)">
+                  <div class="text-[9px] mb-0.5" style="color:var(--ink-500)">目標体重</div>
+                  <div class="text-sm font-bold font-mono leading-none" style="color:var(--ink-900)"><span style="border-bottom:2px solid var(--brand-500);padding-bottom:0.5px">68.0</span> <span class="text-[10px] font-normal" style="color:var(--ink-500)">kg</span></div>
+                </div>
+                <div class="bg-white rounded-md px-2.5 py-1.5" style="border:1px solid var(--ink-100)">
+                  <div class="text-[9px] mb-0.5" style="color:var(--ink-500)">期限</div>
+                  <div class="text-sm font-bold font-mono leading-none" style="color:var(--ink-900)">9/30</div>
+                </div>
+                <div class="bg-white rounded-md px-2.5 py-1.5" style="border:1px solid var(--ink-100)">
+                  <div class="text-[9px] mb-0.5" style="color:var(--ink-500)">目標 kcal</div>
+                  <div class="text-sm font-bold font-mono leading-none" style="color:var(--ink-900)">1,800</div>
+                </div>
+              </div>
+              <div class="px-4 py-2.5" style="background:var(--marker-bg);border-bottom:1px solid var(--ink-100)">
+                <div class="text-[10px] font-medium mb-0.5" style="color:#b8860b">のりfitness 総評 ・ 06/04</div>
+                <div class="text-[11px] leading-relaxed" style="color:var(--ink-700)">全体的に良いスタートです。栄養設計は来月の月次で詰めていきましょう。</div>
+              </div>
+              <div class="text-white px-3 py-1.5 text-[10px] font-semibold tracking-widest" style="background:var(--ink-900)">
+                <span class="font-mono mr-2" style="color:var(--brand-500)">01</span>現状を把握
+              </div>
+              <table class="w-full text-xs">
+                <tr><td class="w-[110px] px-3 py-1.5 text-[10px]" style="background:var(--bg-cool);color:var(--ink-500);border-right:1px solid var(--ink-100);border-bottom:1px solid var(--ink-100)">体重</td><td class="px-3 py-1.5 text-[11px] font-medium" style="color:var(--ink-900);border-bottom:1px solid var(--ink-100)">80.0 kg</td></tr>
+                <tr><td class="w-[110px] px-3 py-1.5 text-[10px]" style="background:var(--bg-cool);color:var(--ink-500);border-right:1px solid var(--ink-100);border-bottom:1px solid var(--ink-100)">ウエスト</td><td class="px-3 py-1.5 text-[11px] font-medium" style="color:var(--ink-900);border-bottom:1px solid var(--ink-100)">82.0 cm</td></tr>
+                <tr><td class="w-[110px] px-3 py-1.5 text-[10px]" style="background:var(--bg-cool);color:var(--ink-500);border-right:1px solid var(--ink-100);border-bottom:1px solid var(--ink-100)">体脂肪率</td><td class="px-3 py-1.5 text-[11px] font-medium" style="color:var(--ink-900);border-bottom:1px solid var(--ink-100)">22.4 %</td></tr>
+                <tr><td class="w-[110px] px-3 py-1.5 text-[10px]" style="background:var(--bg-cool);color:var(--ink-500);border-right:1px solid var(--ink-100);border-bottom:1px solid var(--ink-100)">メンテ kcal</td><td class="px-3 py-1.5 text-[11px] font-medium" style="color:var(--ink-900);border-bottom:1px solid var(--ink-100)">2,200 kcal/日</td></tr>
+              </table>
+              <div class="text-white px-3 py-1.5 text-[10px] font-semibold tracking-widest" style="background:var(--ink-900)">
+                <span class="font-mono mr-2" style="color:var(--brand-500)">02</span>目標の選定
+              </div>
+              <table class="w-full text-xs">
+                <tr><td class="w-[110px] px-3 py-1.5 text-[10px]" style="background:var(--bg-cool);color:var(--ink-500);border-right:1px solid var(--ink-100);border-bottom:1px solid var(--ink-100)">目標体重</td><td class="px-3 py-1.5 text-[11px] font-medium" style="color:var(--ink-900);border-bottom:1px solid var(--ink-100)">80.0 → 68.0 kg <span class="text-[10px]" style="color:var(--ink-500)">(-12.0)</span></td></tr>
+                <tr><td class="w-[110px] px-3 py-1.5 text-[10px]" style="background:var(--bg-cool);color:var(--ink-500);border-right:1px solid var(--ink-100);border-bottom:1px solid var(--ink-100)">短期目標</td><td class="px-3 py-1.5 text-[11px] font-medium" style="color:var(--ink-900);border-bottom:1px solid var(--ink-100)">3 ヶ月で 5 kg 減</td></tr>
+              </table>
+              <div class="px-4 py-3 flex justify-between items-center" style="background:var(--bg-cool);border-top:1px solid var(--ink-100)">
+                <a href="#" class="text-[10px] hover:underline" style="color:var(--ink-700)">編集履歴 ・ 添削履歴 (1)</a>
+                <a href="#" class="text-[11px] font-bold text-white px-3.5 py-1.5 rounded-md" style="background:var(--accent-600)">編集する</a>
+              </div>
+            </div>
+          </div>
+          <nav class="flex bg-white" style="border-top:1px solid var(--ink-100)">
+            <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="text-[9px] mt-0.5">ホーム</span></a>
+            <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span class="text-[9px] mt-0.5">コース</span></a>
+            <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span class="text-[9px] mt-0.5">記録</span></a>
+            <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span class="text-[9px] mt-0.5">検索</span></a>
+            <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="text-[9px] mt-0.5">設定</span></a>
+          </nav>
+        </div></div>
+      </div>
+
+      <!-- ⑩ 筋トレメニュー -->
+      <div class="flex flex-col items-center gap-3">
+        <span class="label">⑩ 筋トレメニュー</span>
+        <div class="label-note">強度切替 + 日タブ + 種目</div>
+        <div class="phone mt-2"><div class="phone-screen">
+          <div class="status-bar">●●● iPhone 9:41 ●●●</div>
+          <div class="phone-body">
+            <div class="px-4 py-3 flex items-center gap-3" style="background:#fff;border-bottom:1px solid var(--ink-100)">
+              <button style="color:var(--ink-700)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><polyline points="15 18 9 12 15 6"/></svg></button>
+              <div class="text-base font-bold" style="color:var(--ink-900)">筋トレメニュー</div>
+            </div>
+            <div class="px-5 pt-4 pb-3" style="background:#fff;border-bottom:1px solid var(--ink-100)">
+              <div class="text-[10px] font-bold tracking-widest mb-1" style="color:var(--brand-700)">あなた専用メニュー</div>
+              <h1 class="text-base font-bold leading-tight mb-2" style="color:var(--ink-900)">背中重点 ・ 週 3 ジム</h1>
+              <div class="text-[10px]" style="color:var(--ink-500)">配布 2026/06/02 ・ 全 3 強度</div>
+            </div>
+            <div class="mx-4 mt-3 mb-3 rounded-2xl p-3.5" style="background:var(--marker-bg);border:1px solid var(--marker)">
+              <div class="text-[10px] font-bold mb-1.5" style="color:#b8860b">のりfitness メモ</div>
+              <ul class="pl-4 text-xs leading-relaxed space-y-1 list-disc" style="color:var(--ink-900)">
+                <li>まずは「小」から始めてください</li>
+                <li>フォームが慣れてきたら「中」「大」に進めましょう</li>
+                <li>気になったら変更リクエストでお伝えください</li>
+              </ul>
+            </div>
+            <div class="px-4 pt-2 pb-3" style="background:var(--bg-cool);border-top:1px solid var(--ink-100);border-bottom:1px solid var(--ink-100)">
+              <div class="text-[10px] font-bold tracking-widest mb-1.5" style="color:var(--ink-500)">強度</div>
+              <div class="flex gap-1.5">
+                <button class="flex-1 py-2 rounded-md text-[11px] font-bold" style="background:var(--brand-50);color:var(--brand-700);border:2px solid var(--brand-500)">
+                  <span class="font-mono text-[10px] mr-1" style="color:var(--ink-500)">1:</span>小
+                </button>
+                <button class="flex-1 py-2 rounded-md text-[11px] font-bold bg-white" style="color:var(--ink-500);border:1px solid var(--ink-100)">
+                  <span class="font-mono text-[10px] mr-1" style="color:var(--ink-500)">2:</span>中
+                </button>
+                <button class="flex-1 py-2 rounded-md text-[11px] font-bold bg-white" style="color:var(--ink-500);border:1px solid var(--ink-100)">
+                  <span class="font-mono text-[10px] mr-1" style="color:var(--ink-500)">3:</span>大
+                </button>
+              </div>
+            </div>
+            <div class="flex bg-white" style="border-bottom:1px solid var(--ink-100)">
+              <button class="flex-1 py-2.5 px-2 text-xs font-bold" style="color:var(--brand-700);border-bottom:2px solid var(--brand-500)">A メニュー</button>
+              <button class="flex-1 py-2.5 px-2 text-xs font-bold" style="color:var(--ink-500);border-bottom:2px solid transparent">B メニュー</button>
+              <button class="flex-1 py-2.5 px-2 text-xs font-bold" style="color:var(--ink-500);border-bottom:2px solid transparent">C メニュー</button>
+            </div>
+            <div class="bg-white">
+              <div class="px-4 py-3" style="border-bottom:1px solid var(--ink-100)">
+                <div class="flex items-baseline gap-2 mb-1">
+                  <span class="text-[10px] font-mono" style="color:var(--ink-500)">1</span>
+                  <span class="text-[13px] font-bold flex-1" style="color:var(--ink-900)">ダンベルベンチプレス</span>
+                  <span class="text-[10px]" style="color:var(--ink-500)">狙い: 胸</span>
+                </div>
+                <div class="text-[11px] ml-4" style="color:var(--ink-500)">10 回 3 セット ・ インターバル 2 分</div>
+              </div>
+              <div class="px-4 py-3" style="border-bottom:1px solid var(--ink-100)">
+                <div class="flex items-baseline gap-2 mb-1">
+                  <span class="text-[10px] font-mono" style="color:var(--ink-500)">2</span>
+                  <span class="text-[13px] font-bold flex-1" style="color:var(--ink-900)">インクラインダンベル</span>
+                  <span class="text-[10px]" style="color:var(--ink-500)">狙い: 胸</span>
+                </div>
+                <div class="text-[11px] ml-4" style="color:var(--ink-500)">10 回 3 セット ・ インターバル 2 分</div>
+              </div>
+              <div class="px-4 py-3" style="border-bottom:1px solid var(--ink-100)">
+                <div class="flex items-baseline gap-2 mb-1">
+                  <span class="text-[10px] font-mono" style="color:var(--ink-500)">3</span>
+                  <span class="text-[13px] font-bold flex-1" style="color:var(--ink-900)">ケーブルフライ</span>
+                  <span class="text-[10px]" style="color:var(--ink-500)">狙い: 胸</span>
+                </div>
+                <div class="text-[11px] ml-4" style="color:var(--ink-500)">12 回 3 セット ・ インターバル 90 秒</div>
+              </div>
+              <div class="px-4 py-3" style="border-bottom:1px solid var(--ink-100)">
+                <div class="flex items-baseline gap-2 mb-1">
+                  <span class="text-[10px] font-mono" style="color:var(--ink-500)">4</span>
+                  <span class="text-[13px] font-bold flex-1" style="color:var(--ink-900)">トライセプスプレスダウン</span>
+                  <span class="text-[10px]" style="color:var(--ink-500)">狙い: 腕</span>
+                </div>
+                <div class="text-[11px] ml-4" style="color:var(--ink-500)">12 回 3 セット ・ インターバル 60 秒</div>
+              </div>
+            </div>
+            <div class="px-4 py-3 bg-white" style="border-top:1px solid var(--ink-100)">
+              <a href="#" class="block text-center w-full px-4 py-3 rounded-2xl text-xs font-bold" style="background:var(--accent-50);color:var(--accent-700);border:1px solid var(--accent-100)">メニュー変更リクエスト</a>
+            </div>
+          </div>
+          <nav class="flex bg-white" style="border-top:1px solid var(--ink-100)">
+            <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="text-[9px] mt-0.5">ホーム</span></a>
+            <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span class="text-[9px] mt-0.5">コース</span></a>
+            <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span class="text-[9px] mt-0.5">記録</span></a>
+            <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span class="text-[9px] mt-0.5">検索</span></a>
+            <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="text-[9px] mt-0.5">設定</span></a>
+          </nav>
+        </div></div>
+      </div>
+
+    </div>
+
+    <footer class="text-center max-w-[1400px] mx-auto mt-12 text-xs leading-relaxed" style="color:var(--ink-500)">
+      最新確定パレット (19_design_spec.md v1.1 + handoff_to_chat8): ティール #00897b + オレンジ #e65100 + LINE 緑 #06c755 + 黄色マーカー + 深緑グレー本文<br/>
+      iPhone 14 Pro 横幅 393px 基準 ・ アイコン: SVG outline (Lucide/Heroicons 風) ・ 絵文字禁止
+    </footer>
+  </body>
+</html>

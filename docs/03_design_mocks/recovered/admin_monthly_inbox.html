@@ -337,6 +337,30 @@
   .annotation h3:first-child { margin-top: 0; }
   .annotation ul { padding-left: 20px; }
   .annotation li { margin-bottom: 4px; font-size: 12px; }
+
+  /* === SVG アイコン (h1/h2/h3 横用) === */
+  .ic {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    vertical-align: -3px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    margin-right: 6px;
+  }
+  h1 .ic, .page-header h1 .ic { width: 22px; height: 22px; vertical-align: -4px; }
+  .feature-icon svg {
+    width: 40px;
+    height: 40px;
+    stroke: var(--primary-darker, #004d40);
+    stroke-width: 1.8;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
 </style>
 </head>
 <body>
@@ -496,7 +520,7 @@
 
   <!-- ============ 注釈 ============ -->
   <div class="annotation">
-    <h3>🗺 全体構成</h3>
+    <h3><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>全体構成</h3>
     <ul>
       <li><b>PC画面想定</b> (管理画面はスマホ非対応で OK の合意あり、スマホでも一覧チェック程度は可能)</li>
       <li><b>ヘッダー</b>: ブランド + ログイン中ユーザー</li>
@@ -505,13 +529,13 @@
       <li><b>リスト</b>: 2 セクション (未返答 古い順 → 返答済)</li>
     </ul>
 
-    <h3>📍 シーン別の使い方</h3>
+    <h3><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>シーン別の使い方</h3>
     <ul>
       <li><b>シーン 1: 月初の集中作業</b> — 「未返答」タブ → 古い順に上から処理 → 行タップで個別作業画面 (3b) へ</li>
       <li><b>シーン 2: 隙間時間の確認</b> — 件数バッジで「未返答 14 件」を一目把握</li>
     </ul>
 
-    <h3>🎨 デザインルール</h3>
+    <h3><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c3.31 0 6-2.69 6-6 0-4.96-4.5-9-10-9z"/></svg>デザインルール</h3>
     <ul>
       <li><b>未返答</b>: 黄 #b8860b (受講生 UI と同じ "添削色")</li>
       <li><b>返答済</b>: ティール緑 + 50% 透明度 (完了感)</li>
@@ -519,7 +543,7 @@
       <li><b>フォント</b>: 数値・日付 = Inter、テキスト = Noto Sans JP</li>
     </ul>
 
-    <h3>⚙ 機能仕様</h3>
+    <h3><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>機能仕様</h3>
     <ul>
       <li><b>並び順</b>: 古い順 (経過日数の大きい順)</li>
       <li><b>件数バッジ</b>: 各タブ右に未読数表示</li>
@@ -527,14 +551,14 @@
       <li><b>判定</b>: シンプルに 提出 → 返信したか / してないか だけ</li>
     </ul>
 
-    <h3>🔄 2026-05-24 変更点</h3>
+    <h3><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>2026-05-24 変更点</h3>
     <ul>
       <li>「危険信号」概念を <b>削除</b> (きよむさん判断: 添削が来て返したかが分かればいい)</li>
       <li>3 セクション → <b>2 セクション</b> に簡略化 (未返答 + 返答済)</li>
       <li>赤色 #d32f2f は CSS に残るが使用箇所なし (Phase 2 で「7日経過のソフト警告」復活する可能性は残す)</li>
     </ul>
 
-    <h3>⚠️ 未確定 / Phase 2 候補</h3>
+    <h3><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>未確定 / Phase 2 候補</h3>
     <ul>
       <li>受講生名タップで <b>個別ダッシュボード (画面 3c)</b> ポップアップ — Phase 2 候補</li>
       <li>月別フィルタ (2026/05 / 2026/04 ...)</li>

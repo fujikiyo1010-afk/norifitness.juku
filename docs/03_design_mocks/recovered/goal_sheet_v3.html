@@ -642,12 +642,36 @@
     border: 1px solid rgba(0,0,0,.1);
     margin-right: 4px;
   }
+
+  /* === SVG アイコン (h1/h2/h3 横用) === */
+  .ic {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    vertical-align: -3px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    margin-right: 6px;
+  }
+  h1 .ic, .page-header h1 .ic { width: 22px; height: 22px; vertical-align: -4px; }
+  .feature-icon svg {
+    width: 40px;
+    height: 40px;
+    stroke: var(--primary-darker, #004d40);
+    stroke-width: 1.8;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
 </style>
 </head>
 <body>
 
 <div class="page-header">
-  <h1>🎯 目標管理シート v3 — Nike 完全準拠</h1>
+  <h1><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>目標管理シート v3 — Nike 完全準拠</h1>
   <p>色 = Nike エッセンス完全踏襲 (明るい緑 + グレー罫線 + 黒文字) / 添削 = 薄黄色 / 5 セクション</p>
 </div>
 
@@ -962,7 +986,7 @@
 
   <!-- 注釈 -->
   <div class="annotation">
-    <h3>✅ 反映した全合意事項</h3>
+    <h3><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>反映した全合意事項</h3>
     <ul>
       <li>色: <b>Nike エッセンス完全準拠</b> (明るい緑 + グレー罫線 + 黒文字)</li>
       <li>5 セクション (1 週間の実行プラン削除)</li>
@@ -977,7 +1001,7 @@
       <li>PFC 数値 = <b>整合修正済</b> (P 150 / F 58 / C 245 で合計 2102 kcal ≒ 目標 2100)</li>
     </ul>
 
-    <h3>🎨 採用色 (Nike + 黄色)</h3>
+    <h3><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c3.31 0 6-2.69 6-6 0-4.96-4.5-9-10-9z"/></svg>採用色 (Nike + 黄色)</h3>
     <ul>
       <li><span class="swatch" style="background:#4ECD5D"></span>明るい緑 <code>#4ECD5D</code> — メイン</li>
       <li><span class="swatch" style="background:#2EA84B"></span>濃緑 <code>#2EA84B</code> — active 文字</li>
@@ -987,7 +1011,7 @@
       <li><span class="swatch" style="background:rgba(255,235,59,0.55)"></span>添削系 黄色 (マーカー同色)</li>
     </ul>
 
-    <h3>📩 添削機能</h3>
+    <h3><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>添削機能</h3>
     <ul>
       <li><b>フィールド単位</b>: 体脂肪率・目標体重に 💬 + 黄色枠コメント</li>
       <li><b>セクション単位</b>: 各セクション下に黄色枠コメント + 日付</li>
@@ -995,7 +1019,7 @@
       <li><b>再添削申請</b>: 「のりに再添削を依頼する」ボタン</li>
     </ul>
 
-    <h3>📝 PFC 数値の正解</h3>
+    <h3><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>PFC 数値の正解</h3>
     <ul>
       <li>目標 2100 kcal、脂質 25% で計算</li>
       <li>P 150g × 4 = 600 kcal (29%)</li>
@@ -1004,7 +1028,7 @@
       <li>合計: 2102 kcal (≒ 2100、g 丸めで誤差 2 kcal)</li>
     </ul>
 
-    <h3>📋 次: PC 一枚ものビュー</h3>
+    <h3><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h6"/></svg>次: PC 一枚ものビュー</h3>
     <ul>
       <li><b>/tmp/goal_sheet_v3_overview.html</b> を別ファイルで作成中</li>
       <li>2 カラム配置で全項目を 1 画面俯瞰</li>

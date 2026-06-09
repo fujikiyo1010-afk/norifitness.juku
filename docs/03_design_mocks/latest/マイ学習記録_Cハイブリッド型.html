@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>筋肉塾 ・ マイ学習記録 (C ハイブリッド型)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root {
+        --brand-900: #00574d;
+        --brand-700: #00695c;
+        --brand-500: #00897b;
+        --brand-300: #4DB6AC;
+        --brand-100: #B2DFDB;
+        --brand-50:  #E0F2F1;
+        --accent-700: #bf3d00;
+        --accent-600: #e65100;
+        --accent-500: #ff7043;
+        --accent-300: #ff8a50;
+        --accent-100: #ffc299;
+        --accent-50:  #fff8f5;
+        --line-green: #06c755;
+        --ink-900: #1a3326;
+        --ink-700: #3a6050;
+        --ink-500: #6b7d75;
+        --ink-300: #c0d0c8;
+        --ink-100: #f0f5f3;
+        --ink-50:  #fafcfb;
+        --bg-base: #ffffff;
+        --bg-warm: #fff8f5;
+        --bg-cool: #f0f5f3;
+        --marker: rgba(255, 235, 59, .55);
+        --marker-bg: rgba(255, 235, 59, .15);
+      }
+      body {
+        background:#ececec; font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Helvetica Neue",sans-serif;
+        color:var(--ink-900); padding:32px 16px;
+      }
+      .phone { width:390px; background:#1a1a1a; border-radius:56px; padding:14px; box-shadow:0 24px 60px rgba(0,0,0,.18); }
+      .phone-screen { background:var(--bg-warm); border-radius:44px; overflow:hidden; position:relative; height:780px; display:flex; flex-direction:column; }
+      .status-bar { background:#000; color:#fff; font-size:11px; text-align:center; padding:4px 0; flex-shrink:0; font-family:ui-monospace,monospace; letter-spacing:1.5px; }
+      .phone-body { flex:1; overflow-y:auto; }
+      .phone-body::-webkit-scrollbar { display:none; }
+      .label { display:inline-block; background:var(--brand-500); color:white; padding:8px 20px; border-radius:999px; font-weight:700; font-size:13px; letter-spacing:.5px; }
+      .label-note { font-size:11px; color:var(--ink-500); margin-top:4px; text-align:center; max-width:340px; }
+      .compare-label { font-size:11px; font-weight:700; padding:3px 10px; border-radius:999px; }
+      .compare-old { background:var(--ink-100); color:var(--ink-500); }
+      .compare-new { background:var(--brand-50); color:var(--brand-700); }
+      .annotation { max-width:780px; margin:32px auto 0; background:#fff; border:1px solid var(--ink-100); border-radius:16px; padding:24px; font-size:13px; line-height:1.7; color:var(--ink-700); }
+      .annotation h2 { font-size:15px; color:var(--ink-900); font-weight:700; margin:0 0 12px; padding-bottom:8px; border-bottom:1px solid var(--ink-100); }
+      .annotation h3 { font-size:13px; color:var(--ink-900); font-weight:700; margin:16px 0 6px; }
+      .annotation ul { padding-left:18px; }
+      .annotation li { margin-bottom:4px; }
+      .annotation table { width:100%; border-collapse:collapse; font-size:12px; margin:8px 0; }
+      .annotation th, .annotation td { padding:6px 8px; text-align:left; border-bottom:1px solid var(--ink-100); }
+      .annotation th { background:var(--ink-50); color:var(--ink-900); font-weight:700; }
+      .hl { background:var(--brand-50); padding:10px 12px; border-radius:8px; margin:8px 0; }
+    </style>
+  </head>
+  <body>
+    <header class="text-center max-w-[1400px] mx-auto mb-2">
+      <h1 class="text-2xl font-bold mb-2" style="color:var(--ink-900)">マイ学習記録 ・ C ハイブリッド型 (新案)</h1>
+      <p class="text-sm" style="color:var(--ink-700)">
+        フラッシュバック (実装継承) + 今月の学習統計 (本日モック新規) + 振り返り直接 3 件 (本日モック新規) + ハブカード 3 (将来機能)
+      </p>
+      <p class="text-xs mt-1" style="color:var(--ink-500)">
+        作成: 2026-06-09 ・ パレット = screens_all_latest.html 統一
+      </p>
+    </header>
+
+    <div class="flex justify-center items-start gap-8 flex-wrap max-w-[1400px] mx-auto">
+
+      <!-- ===========================
+           マイ学習記録 (C ハイブリッド型)
+           =========================== -->
+      <div class="flex flex-col items-center gap-3">
+        <span class="label">マイ学習記録 (C ハイブリッド型)</span>
+        <div class="label-note">フラッシュバック + 今月統計 + 振り返り直接 3 件 + ハブ 3</div>
+
+        <div class="phone mt-2">
+          <div class="phone-screen">
+            <div class="status-bar">●●● iPhone 9:41 ●●●</div>
+            <div class="phone-body">
+
+              <!-- ヘッダー -->
+              <div class="px-4 py-3 flex items-center gap-3" style="background:#fff;border-bottom:1px solid var(--ink-100)">
+                <button style="color:var(--ink-700)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                    <polyline points="15 18 9 12 15 6"/>
+                  </svg>
+                </button>
+                <div class="text-base font-bold" style="color:var(--ink-900)">マイ学習記録</div>
+              </div>
+
+              <!-- フラッシュバック (継承、黄マーカー) -->
+              <div class="px-4 pt-4 pb-2">
+                <div class="text-[10px] font-bold tracking-widest mb-2" style="color:var(--ink-500)">前回の振り返り</div>
+                <a href="#" class="block rounded-2xl p-4" style="background:var(--marker-bg);border:1px solid var(--marker)">
+                  <div class="flex items-start gap-2 mb-2">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 flex-shrink-0 mt-0.5" style="color:#b8860b">
+                      <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                    </svg>
+                    <div class="flex-1 min-w-0">
+                      <div class="text-[10px] font-bold mb-1" style="color:#b8860b">6 日前のあなたの振り返り</div>
+                      <div class="text-sm font-bold" style="color:var(--ink-900)">Lesson 4 ・ PFC バランスの基礎</div>
+                    </div>
+                  </div>
+                  <div class="text-[11px] leading-relaxed pl-6" style="color:var(--ink-700)">
+                    <div class="mb-1"><span class="text-[10px] font-bold mr-1" style="color:#b8860b">学んだ:</span>糖質を悪者にしない、目的別の使い分け</div>
+                    <div><span class="text-[10px] font-bold mr-1" style="color:#b8860b">次やる:</span>朝のお米を少し増やしてみる</div>
+                  </div>
+                  <div class="flex items-center justify-between mt-3 pl-6">
+                    <span class="text-[10px] underline" style="color:#b8860b">→ このレッスンに戻る</span>
+                    <span class="text-[10px]" style="color:#b8860b">実践できてますか?</span>
+                  </div>
+                </a>
+              </div>
+
+              <!-- 今月の学習 (新規) -->
+              <div class="px-4 pt-3 pb-2">
+                <div class="text-[10px] font-bold tracking-widest mb-2" style="color:var(--ink-500)">今月の学習</div>
+                <div class="bg-white rounded-2xl p-4" style="border:1px solid var(--ink-100)">
+                  <div class="grid grid-cols-3 gap-3 mb-3">
+                    <div class="text-center">
+                      <div class="text-2xl font-bold font-mono leading-none" style="color:var(--ink-900)">8</div>
+                      <div class="text-[10px] mt-1" style="color:var(--ink-500)">学習日数</div>
+                    </div>
+                    <div class="text-center">
+                      <div class="text-2xl font-bold font-mono leading-none" style="color:var(--ink-900)">12.5<span class="text-xs">h</span></div>
+                      <div class="text-[10px] mt-1" style="color:var(--ink-500)">視聴時間</div>
+                    </div>
+                    <div class="text-center">
+                      <div class="text-2xl font-bold font-mono leading-none" style="color:var(--brand-700)">47</div>
+                      <div class="text-[10px] mt-1" style="color:var(--ink-500)">できた!</div>
+                    </div>
+                  </div>
+                  <div class="pt-3 border-t border-dashed" style="border-color:var(--ink-100)">
+                    <div class="flex justify-between text-[10px] mb-1.5" style="color:var(--ink-500)">
+                      <span>累計レッスン</span>
+                      <span class="font-mono font-bold" style="color:var(--ink-700)">76 / 217</span>
+                    </div>
+                    <div class="h-1.5 rounded-full overflow-hidden" style="background:var(--ink-100)">
+                      <div class="h-full rounded-full" style="width:35%;background:var(--brand-500)"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 振り返り (直接 3 件) -->
+              <div class="px-4 mt-3">
+                <div class="text-[10px] font-bold tracking-widest mb-2 flex items-center justify-between" style="color:var(--ink-500)">
+                  <span>振り返り</span>
+                  <span class="text-[10px] font-normal" style="color:var(--ink-700)">全 12 件</span>
+                </div>
+
+                <a href="#" class="block bg-white rounded-2xl p-3 mb-2" style="border:1px solid var(--ink-100)">
+                  <div class="flex items-start justify-between gap-3 mb-1">
+                    <div class="text-[10px] font-bold tracking-widest" style="color:var(--brand-700)">COURSE 01 ・ CH 3</div>
+                    <div class="text-[10px] font-mono" style="color:var(--ink-500)">06/03</div>
+                  </div>
+                  <div class="text-sm font-bold mb-1" style="color:var(--ink-900)">Lesson 4 ・ PFC バランスの基礎</div>
+                  <p class="text-[11px] leading-relaxed line-clamp-2" style="color:var(--ink-700)">糖質を悪者にしないで、目的に合わせて使い分けるのが大事と理解できた。明日から朝のお米を少し増やしてみる。</p>
+                </a>
+
+                <a href="#" class="block bg-white rounded-2xl p-3 mb-2" style="border:1px solid var(--ink-100)">
+                  <div class="flex items-start justify-between gap-3 mb-1">
+                    <div class="text-[10px] font-bold tracking-widest" style="color:var(--brand-700)">COURSE 02 ・ CH 2</div>
+                    <div class="text-[10px] font-mono" style="color:var(--ink-500)">06/01</div>
+                  </div>
+                  <div class="text-sm font-bold mb-1" style="color:var(--ink-900)">Lesson 6 ・ 摂取カロリーの考え方</div>
+                  <p class="text-[11px] leading-relaxed line-clamp-2" style="color:var(--ink-700)">メンテナンスを起点に、ダイエット時は -300〜-500 が現実的という基準ができた。</p>
+                </a>
+
+                <a href="#" class="block bg-white rounded-2xl p-3 mb-2" style="border:1px solid var(--ink-100)">
+                  <div class="flex items-start justify-between gap-3 mb-1">
+                    <div class="text-[10px] font-bold tracking-widest" style="color:var(--brand-700)">COURSE 01 ・ CH 2</div>
+                    <div class="text-[10px] font-mono" style="color:var(--ink-500)">05/30</div>
+                  </div>
+                  <div class="text-sm font-bold mb-1" style="color:var(--ink-900)">Lesson 3 ・ たんぱく質の重要性</div>
+                  <p class="text-[11px] leading-relaxed line-clamp-2" style="color:var(--ink-700)">体重 × 2g という基準を初めて知った。今までは全然足りていなかったので、まず鶏むね肉を週 3 回入れる。</p>
+                </a>
+
+                <a href="#" class="block text-center text-[11px] font-bold py-3" style="color:var(--brand-700)">
+                  振り返りをすべて見る (9 件) →
+                </a>
+              </div>
+
+              <!-- 将来機能 ハブ 3 (Coming Soon) -->
+              <div class="px-4 mt-3 mb-4">
+                <div class="text-[10px] font-bold tracking-widest mb-2" style="color:var(--ink-500)">学びを深める (準備中)</div>
+                <div class="grid grid-cols-3 gap-2">
+                  <div class="bg-white rounded-2xl p-3 text-center opacity-60" style="border:1px solid var(--ink-100)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mx-auto mb-1" style="color:var(--ink-500)">
+                      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    <div class="text-[10px] font-bold" style="color:var(--ink-700)">ブックマーク</div>
+                    <div class="text-[9px]" style="color:var(--ink-500)">Coming Soon</div>
+                  </div>
+                  <div class="bg-white rounded-2xl p-3 text-center opacity-60" style="border:1px solid var(--ink-100)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mx-auto mb-1" style="color:var(--ink-500)">
+                      <path d="M14.5 8 8 14.5l1.5 1.5L16 9.5z"/>
+                      <path d="M2 12c0-1 .9-2 2-2h2v4H4c-1.1 0-2-.9-2-2"/>
+                      <path d="M18 14h2c1.1 0 2-.9 2-2s-.9-2-2-2h-2v4"/>
+                    </svg>
+                    <div class="text-[10px] font-bold" style="color:var(--ink-700)">実践リスト</div>
+                    <div class="text-[9px]" style="color:var(--ink-500)">Coming Soon</div>
+                  </div>
+                  <div class="bg-white rounded-2xl p-3 text-center opacity-60" style="border:1px solid var(--ink-100)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mx-auto mb-1" style="color:var(--ink-500)">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <div class="text-[10px] font-bold" style="color:var(--ink-700)">完了履歴</div>
+                    <div class="text-[9px]" style="color:var(--ink-500)">Coming Soon</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab bar -->
+            <nav class="flex border-t bg-white flex-shrink-0" style="border-color:var(--ink-100)">
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                  <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                  <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                <span class="text-[9px] mt-0.5">ホーム</span>
+              </a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                </svg>
+                <span class="text-[9px] mt-0.5">コース</span>
+              </a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--brand-700)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                  <path d="M12 20h9"/>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/>
+                </svg>
+                <span class="text-[9px] mt-0.5 font-bold">記録</span>
+              </a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center" style="color:var(--ink-500)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <span class="text-[9px] mt-0.5">検索</span>
+              </a>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 注釈 -->
+    <section class="annotation">
+      <h2>C ハイブリッド型の設計意図</h2>
+
+      <h3>背景</h3>
+      <ul>
+        <li><b>2026-05-19 wireframe v2.1</b> で「ハブ型」(4 カードで他ページへ) として決定</li>
+        <li><b>2026-05-20 実装</b>: Phase 2-5b で /my-log としてハブ型 + フラッシュバック + 振り返り一覧サブページ で完成</li>
+        <li><b>2026-06-09 モック更新</b>: 「集約型」(統計 + 振り返り 12 件を 1 画面に直接表示) に揺れて、きよむさん的には指示なく構造が変わった状態</li>
+        <li>→ きよむさん判断: <b>「C ハイブリッド型」で行く</b>。両方の良い部分を採用</li>
+      </ul>
+
+      <h3>採用した要素</h3>
+      <table>
+        <tr><th>要素</th><th>出典</th><th>状態</th></tr>
+        <tr><td>フラッシュバックカード (黄マーカー)</td><td>2026-05-20 実装継承</td><td>採用</td></tr>
+        <tr><td>今月の学習統計 3 数値 (学習日数 / 視聴時間 / できた!)</td><td>2026-06-09 モック新規</td><td>採用</td></tr>
+        <tr><td>累計レッスン進捗バー (35% 等)</td><td>2026-06-09 モック新規</td><td>採用</td></tr>
+        <tr><td>振り返り 3 件 直接表示 + 「すべて見る」リンク</td><td>2026-06-09 モック (12 件 → 3 件 + リンクに変更)</td><td>採用 (折衷)</td></tr>
+        <tr><td>ハブカード 3 つ (ブクマ / 実践 / 完了履歴)</td><td>2026-05-20 実装継承</td><td>採用 (Coming Soon、3 つに整理)</td></tr>
+      </table>
+
+      <h3>破棄した要素</h3>
+      <ul>
+        <li>XP 表示 (リサーチで議論、ゲーム感を避けるため不採用)</li>
+        <li>ランキング (比較ストレス回避)</li>
+        <li>カレンダーヒートマップ (プレッシャー源)</li>
+      </ul>
+
+      <h3>未確定 / Phase 4 候補</h3>
+      <ul>
+        <li>マイノート (検討余地、最初は振り返りに含める)</li>
+        <li>バッジ表示 (12 個程度に絞った後、別画面 or プロフィール画面?)</li>
+        <li>下部タブ「記録」と本画面 (ホーム 4 機能ブロックの「マイ学習記録」) の <b>動線重複問題</b> — 本画面に両方からアクセスする設計 OK? それとも下部タブは別画面 (体組成 + 月次添削 のハブ) にする?</li>
+      </ul>
+
+      <h3>実装との差分 (今後の改修対象)</h3>
+      <div class="hl">
+        実装は現状「ハブ型」のままなので、本モック確定後、 <code>src/app/my-log/page.tsx</code> を C ハイブリッド型に改修する必要あり。Phase 4 で対応 (現状は提案フェーズなので即時改修不要)。
+      </div>
+    </section>
+
+  </body>
+</html>

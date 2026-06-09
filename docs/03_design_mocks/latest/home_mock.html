@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>筋肉塾 ・ ホーム (スマホモック)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        background: #e8ebec;
+        font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans",
+          "Helvetica Neue", sans-serif;
+      }
+      .frame {
+        max-width: 390px;
+        margin: 0 auto;
+        min-height: 100vh;
+        background: #fafbfa;
+      }
+      /* スクロールバー非表示 (タブ用) */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <!-- ===== ヘッダ ===== -->
+      <header
+        class="sticky top-0 z-10 bg-white border-b border-[#e8ebe9] px-4 py-3 flex items-center justify-between"
+      >
+        <div class="flex items-center gap-2">
+          <!-- ロゴ (線画 SVG) -->
+          <div
+            class="w-8 h-8 rounded-full bg-[#00897b] flex items-center justify-center text-white"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="w-4 h-4"
+            >
+              <path d="M6 7h12M6 12h12M6 17h12" />
+            </svg>
+          </div>
+          <div class="text-base font-bold text-zinc-900 tracking-tight">
+            のりfitness
+          </div>
+        </div>
+        <button
+          class="w-9 h-9 rounded-full bg-[#f8f9fa] text-zinc-700 flex items-center justify-center font-bold text-sm border border-[#e8ebe9]"
+          aria-label="マイページ"
+        >
+          太
+        </button>
+      </header>
+
+      <!-- ===== ウェルカム ===== -->
+      <section class="px-4 pt-5 pb-4">
+        <div class="text-[11px] text-zinc-500 tracking-wide mb-1">
+          こんにちは
+        </div>
+        <h1 class="text-xl font-bold text-zinc-900 tracking-tight">
+          テスト太郎 さん
+        </h1>
+        <p class="text-xs text-zinc-600 mt-1">今月もコツコツ続けましょう</p>
+      </section>
+
+      <!-- ===== 今やるべきこと (橙アクセント、対応必要時のみ表示) ===== -->
+      <section class="mx-4 mb-4">
+        <div class="text-[10px] font-bold text-zinc-500 tracking-widest mb-2">
+          今やるべきこと
+        </div>
+
+        <!-- アクション 1: 月次添削 (返信あり) -->
+        <a
+          href="#"
+          class="block bg-[rgba(255,235,59,0.12)] border border-[rgba(255,235,59,0.55)] rounded-2xl p-4 mb-2"
+        >
+          <div class="flex items-start gap-3">
+            <div
+              class="w-9 h-9 rounded-full bg-[#b8860b] text-white flex items-center justify-center flex-shrink-0"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="w-4 h-4"
+              >
+                <polygon points="23 7 16 12 23 17 23 7" />
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="text-xs font-bold text-[#b8860b] tracking-wide mb-1">
+                のりfitness から動画返信
+              </div>
+              <div class="text-[13px] font-medium text-zinc-900 leading-snug">
+                2026 年 6 月 月次添削動画が届きました
+              </div>
+              <div class="text-[10px] text-zinc-500 font-mono mt-1.5">
+                返信 06/04
+              </div>
+            </div>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="w-4 h-4 text-zinc-400 flex-shrink-0 mt-1"
+            >
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </div>
+        </a>
+
+        <!-- アクション 2: 来月の月次添削 (記入時期) -->
+        <a
+          href="#"
+          class="block bg-white border border-[#e8ebe9] rounded-2xl p-4"
+        >
+          <div class="flex items-start gap-3">
+            <div
+              class="w-9 h-9 rounded-full bg-[#00897b] text-white flex items-center justify-center flex-shrink-0"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="w-4 h-4"
+              >
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div
+                class="text-[10px] font-bold text-[#00695c] tracking-wide mb-1"
+              >
+                月末まで残り 12 日
+              </div>
+              <div class="text-[13px] font-medium text-zinc-900 leading-snug">
+                2026 年 6 月の月次振り返りを記入する
+              </div>
+              <div class="text-[10px] text-zinc-500 mt-1.5">17 項目 ・ 途中保存 OK</div>
+            </div>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="w-4 h-4 text-zinc-400 flex-shrink-0 mt-1"
+            >
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </div>
+        </a>
+      </section>
+
+      <!-- ===== 体組成サマリ ===== -->
+      <section class="mx-4 mb-4">
+        <div
+          class="text-[10px] font-bold text-zinc-500 tracking-widest mb-2 flex items-center gap-1.5"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="w-3 h-3"
+          >
+            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+            <polyline points="16 7 22 7 22 13" />
+          </svg>
+          体の状態
+        </div>
+        <div class="bg-white border border-[#e8ebe9] rounded-2xl p-4">
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <div class="text-[10px] text-zinc-500 mb-0.5">体重</div>
+              <div class="text-base font-bold text-zinc-900 font-mono leading-none">
+                80.0
+              </div>
+              <div class="text-[10px] text-zinc-500 mt-0.5">kg</div>
+            </div>
+            <div>
+              <div class="text-[10px] text-zinc-500 mb-0.5">体脂肪率</div>
+              <div class="text-base font-bold text-zinc-900 font-mono leading-none">
+                22.4
+              </div>
+              <div class="text-[10px] text-zinc-500 mt-0.5">%</div>
+            </div>
+            <div>
+              <div class="text-[10px] text-zinc-500 mb-0.5">ウエスト</div>
+              <div class="text-base font-bold text-zinc-900 font-mono leading-none">
+                82.0
+              </div>
+              <div class="text-[10px] text-zinc-500 mt-0.5">cm</div>
+            </div>
+          </div>
+          <div
+            class="mt-3 pt-3 border-t border-dashed border-[#e8ebe9] flex items-center justify-between"
+          >
+            <div class="text-[11px] text-zinc-700">
+              目標体重まで <b class="font-mono text-[#00695c]">-12.0</b> kg
+            </div>
+            <div class="text-[10px] text-zinc-500">最終 06/01</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 主要メニュー (2x2 グリッド) ===== -->
+      <section class="mx-4 mb-4">
+        <div class="text-[10px] font-bold text-zinc-500 tracking-widest mb-2">
+          メニュー
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <!-- 筋トレ -->
+          <a
+            href="#"
+            class="bg-white border border-[#e8ebe9] rounded-2xl p-4 flex flex-col items-start gap-2"
+          >
+            <div
+              class="w-8 h-8 rounded-lg bg-[rgba(0,137,123,0.08)] text-[#00695c] flex items-center justify-center"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="w-4 h-4"
+              >
+                <path d="m6.5 6.5 11 11" />
+                <path d="m21 21-1-1" />
+                <path d="m3 3 1 1" />
+                <path d="m18 22 4-4" />
+                <path d="m2 6 4-4" />
+                <path d="m3 10 7-7" />
+                <path d="m14 21 7-7" />
+              </svg>
+            </div>
+            <div class="text-[13px] font-bold text-zinc-900">筋トレメニュー</div>
+            <div class="text-[10px] text-zinc-500 leading-snug">
+              のりfitness 配布の<br />あなた専用メニュー
+            </div>
+          </a>
+
+          <!-- 月次添削 -->
+          <a
+            href="#"
+            class="bg-white border border-[#e8ebe9] rounded-2xl p-4 flex flex-col items-start gap-2 relative"
+          >
+            <span
+              class="absolute top-3 right-3 w-2 h-2 rounded-full bg-[#b8860b]"
+              title="未読の返信あり"
+            ></span>
+            <div
+              class="w-8 h-8 rounded-lg bg-[rgba(0,137,123,0.08)] text-[#00695c] flex items-center justify-center"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="w-4 h-4"
+              >
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+            </div>
+            <div class="text-[13px] font-bold text-zinc-900">月次添削</div>
+            <div class="text-[10px] text-zinc-500 leading-snug">
+              毎月 17 項目 振り返り<br />動画返信で添削
+            </div>
+          </a>
+
+          <!-- 目標シート -->
+          <a
+            href="#"
+            class="bg-white border border-[#e8ebe9] rounded-2xl p-4 flex flex-col items-start gap-2"
+          >
+            <div
+              class="w-8 h-8 rounded-lg bg-[rgba(0,137,123,0.08)] text-[#00695c] flex items-center justify-center"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="w-4 h-4"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <circle cx="12" cy="12" r="6" />
+                <circle cx="12" cy="12" r="2" />
+              </svg>
+            </div>
+            <div class="text-[13px] font-bold text-zinc-900">目標管理シート</div>
+            <div class="text-[10px] text-zinc-500 leading-snug">
+              現状と目標を<br />5 セクションで整理
+            </div>
+          </a>
+
+          <!-- ツール -->
+          <a
+            href="#"
+            class="bg-white border border-[#e8ebe9] rounded-2xl p-4 flex flex-col items-start gap-2"
+          >
+            <div
+              class="w-8 h-8 rounded-lg bg-[rgba(0,137,123,0.08)] text-[#00695c] flex items-center justify-center"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="w-4 h-4"
+              >
+                <path
+                  d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"
+                />
+              </svg>
+            </div>
+            <div class="text-[13px] font-bold text-zinc-900">計算ツール</div>
+            <div class="text-[10px] text-zinc-500 leading-snug">
+              体脂肪率 / カロリー /<br />PFC / 減量期間
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <!-- ===== ノートカード (のりfitness からのお知らせ) ===== -->
+      <section class="mx-4 mb-6">
+        <div
+          class="bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] border border-[#e8ebe9] rounded-2xl p-4"
+        >
+          <div
+            class="text-[10px] font-bold text-[#00695c] tracking-widest mb-1.5"
+          >
+            のりfitness から
+          </div>
+          <div class="text-[13px] text-zinc-900 leading-relaxed">
+            7 月の月次添削 から、目標シートも一緒に見直す予定です。今月のうちに記入を進めておくとスムーズです。
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== フッタ (バージョン情報) ===== -->
+      <footer class="px-4 pb-8 text-center">
+        <p class="text-[10px] text-zinc-400 font-mono">公開予定: 2026 年 8 月末</p>
+      </footer>
+    </div>
+  </body>
+</html>

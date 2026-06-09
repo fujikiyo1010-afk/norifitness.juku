@@ -1,0 +1,1089 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>筋肉塾 ・ メイン 4 画面 (スマホモック)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        background: #ececec;
+        font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans",
+          "Helvetica Neue", sans-serif;
+        padding: 32px 16px;
+      }
+      .phone {
+        width: 390px;
+        background: #1a1a1a;
+        border-radius: 56px;
+        padding: 14px;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+      }
+      .phone-screen {
+        background: #fafbfa;
+        border-radius: 44px;
+        overflow: hidden;
+        position: relative;
+        height: 780px;
+        display: flex;
+        flex-direction: column;
+      }
+      .status-bar {
+        background: #000;
+        color: #fff;
+        font-size: 11px;
+        text-align: center;
+        padding: 4px 0;
+        flex-shrink: 0;
+        font-family: ui-monospace, monospace;
+        letter-spacing: 1.5px;
+      }
+      .phone-body {
+        flex: 1;
+        overflow-y: auto;
+      }
+      .phone-body::-webkit-scrollbar {
+        display: none;
+      }
+      .label {
+        display: inline-block;
+        background: #00897b;
+        color: white;
+        padding: 8px 20px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 13px;
+        letter-spacing: 0.5px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="text-center max-w-[1200px] mx-auto mb-8">
+      <h1 class="text-2xl font-bold text-zinc-900 mb-2">
+        筋肉塾 ・ メイン 4 画面
+      </h1>
+      <p class="text-sm text-zinc-600 leading-relaxed">
+        ホーム / コース一覧 / マイ学習記録 / ツール
+      </p>
+    </header>
+
+    <div
+      class="flex justify-center items-start gap-10 flex-wrap max-w-[1200px] mx-auto"
+    >
+      <!-- ========================================================== -->
+      <!-- 1. ホーム                                                   -->
+      <!-- ========================================================== -->
+      <div class="flex flex-col items-center gap-3">
+        <span class="label">① ホーム</span>
+        <div class="phone mt-2">
+          <div class="phone-screen">
+            <div class="status-bar">●●● iPhone 9:41 ●●●</div>
+            <div class="phone-body">
+              <div
+                class="px-4 py-3 flex items-center justify-between bg-white border-b border-[#e8ebe9]"
+              >
+                <div class="text-base font-bold text-zinc-900 tracking-tight">
+                  のりfitness 筋肉塾
+                </div>
+                <div class="flex items-center gap-2">
+                  <button
+                    class="relative w-9 h-9 flex items-center justify-center text-zinc-700"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="w-5 h-5"
+                    >
+                      <path
+                        d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+                      />
+                      <polyline points="22,6 12,13 2,6" />
+                    </svg>
+                    <span
+                      class="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-rose-500"
+                    ></span>
+                  </button>
+                  <button
+                    class="w-9 h-9 flex items-center justify-center text-zinc-700"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="w-5 h-5"
+                    >
+                      <path
+                        d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                      />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="px-5 pt-5 pb-3">
+                <h1 class="text-xl font-bold text-zinc-900 leading-tight">
+                  こんにちは、<br />きよむさん
+                </h1>
+                <p class="text-xs text-zinc-500 mt-1">入会から 12 日目</p>
+              </div>
+
+              <!-- 続きから学ぶ -->
+              <div class="mx-4 mb-3">
+                <a
+                  href="#"
+                  class="block bg-gradient-to-br from-[#00897b] to-[#00695c] text-white rounded-2xl p-4 relative"
+                >
+                  <div class="text-[11px] opacity-90 mb-1.5 font-medium">
+                    続きから学ぶ
+                  </div>
+                  <div class="text-base font-bold mb-1">
+                    第 3 章 ・ Lesson 4
+                  </div>
+                  <div class="text-xs opacity-90">PFC バランスの基礎</div>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="w-6 h-6 absolute top-1/2 -translate-y-1/2 right-5"
+                  >
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                </a>
+              </div>
+
+              <!-- 2x2 メニュー -->
+              <div class="mx-4 grid grid-cols-2 gap-2.5 mb-3">
+                <a
+                  href="#"
+                  class="bg-white border border-[#e8ebe9] rounded-2xl p-4 text-center"
+                >
+                  <div class="w-9 h-9 mx-auto mb-2 text-zinc-700">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="w-full h-full"
+                    >
+                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                      <path
+                        d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"
+                      />
+                    </svg>
+                  </div>
+                  <div class="text-[13px] font-bold text-zinc-900">
+                    コース一覧
+                  </div>
+                  <div class="text-[10px] text-zinc-500 mt-0.5">
+                    5 コース ・ 217 本
+                  </div>
+                </a>
+                <a
+                  href="#"
+                  class="bg-white border border-[#e8ebe9] rounded-2xl p-4 text-center"
+                >
+                  <div class="w-9 h-9 mx-auto mb-2 text-zinc-700">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="w-full h-full"
+                    >
+                      <path d="M12 20h9" />
+                      <path
+                        d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
+                      />
+                    </svg>
+                  </div>
+                  <div class="text-[13px] font-bold text-zinc-900">
+                    マイ学習記録
+                  </div>
+                  <div class="text-[10px] text-zinc-500 mt-0.5">
+                    振り返り 12 件
+                  </div>
+                </a>
+                <a
+                  href="#"
+                  class="bg-white border border-[#e8ebe9] rounded-2xl p-4 text-center"
+                >
+                  <div class="w-9 h-9 mx-auto mb-2 text-zinc-700">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="w-full h-full"
+                    >
+                      <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+                      <path
+                        d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"
+                      />
+                    </svg>
+                  </div>
+                  <div class="text-[13px] font-bold text-zinc-900">
+                    LINE サポート
+                  </div>
+                  <div class="text-[10px] text-zinc-500 mt-0.5">質問・相談</div>
+                </a>
+                <a
+                  href="#"
+                  class="bg-white border border-[#e8ebe9] rounded-2xl p-4 text-center"
+                >
+                  <div class="w-9 h-9 mx-auto mb-2 text-zinc-700">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="w-full h-full"
+                    >
+                      <path
+                        d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"
+                      />
+                    </svg>
+                  </div>
+                  <div class="text-[13px] font-bold text-zinc-900">ツール</div>
+                  <div class="text-[10px] text-zinc-500 mt-0.5">
+                    PFC・カロリー他
+                  </div>
+                </a>
+              </div>
+
+              <!-- 目標管理シート -->
+              <div class="mx-4 mb-4">
+                <a
+                  href="#"
+                  class="flex items-center justify-between bg-white border border-[#e8ebe9] rounded-2xl px-4 py-3"
+                >
+                  <div class="flex items-center gap-2.5">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="w-5 h-5 text-zinc-700"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <circle cx="12" cy="12" r="6" />
+                      <circle cx="12" cy="12" r="2" />
+                    </svg>
+                    <div class="text-sm font-bold text-zinc-900">
+                      目標管理シート
+                    </div>
+                  </div>
+                  <span class="text-zinc-400 text-sm">→</span>
+                </a>
+              </div>
+
+              <!-- 進捗 -->
+              <div class="mx-4 mb-3">
+                <div class="flex justify-between text-[11px] text-zinc-500 mb-1.5">
+                  <span>全体進捗</span>
+                  <span class="font-mono font-bold text-zinc-700">35%</span>
+                </div>
+                <div class="h-1.5 bg-zinc-100 rounded-full overflow-hidden">
+                  <div
+                    class="h-full bg-[#00897b] rounded-full"
+                    style="width: 35%"
+                  ></div>
+                </div>
+              </div>
+
+              <div class="mx-4 grid grid-cols-3 gap-2 mb-5">
+                <div
+                  class="bg-white border border-[#e8ebe9] rounded-xl p-3 text-center"
+                >
+                  <div
+                    class="text-lg font-bold text-zinc-900 font-mono leading-none"
+                  >
+                    47
+                  </div>
+                  <div class="text-[10px] text-zinc-500 mt-1">できた!</div>
+                </div>
+                <div
+                  class="bg-white border border-[#e8ebe9] rounded-xl p-3 text-center"
+                >
+                  <div
+                    class="text-lg font-bold text-zinc-900 font-mono leading-none"
+                  >
+                    12.5h
+                  </div>
+                  <div class="text-[10px] text-zinc-500 mt-1">視聴時間</div>
+                </div>
+                <div
+                  class="bg-white border border-[#e8ebe9] rounded-xl p-3 text-center"
+                >
+                  <div
+                    class="text-lg font-bold text-zinc-900 font-mono leading-none"
+                  >
+                    8 日
+                  </div>
+                  <div class="text-[10px] text-zinc-500 mt-1">学習日数</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab bar -->
+            <nav class="flex border-t border-[#e8ebe9] bg-white">
+              <a
+                href="#"
+                class="flex-1 py-2 flex flex-col items-center text-[#00695c]"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="w-4 h-4"
+                >
+                  <path
+                    d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+                  />
+                  <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+                <span class="text-[9px] mt-0.5 font-bold">ホーム</span>
+              </a>
+              <a
+                href="#"
+                class="flex-1 py-2 flex flex-col items-center text-zinc-500"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="w-4 h-4"
+                >
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                  <path
+                    d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"
+                  />
+                </svg>
+                <span class="text-[9px] mt-0.5">コース</span>
+              </a>
+              <a
+                href="#"
+                class="flex-1 py-2 flex flex-col items-center text-zinc-500"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="w-4 h-4"
+                >
+                  <path d="M12 20h9" />
+                  <path
+                    d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
+                  />
+                </svg>
+                <span class="text-[9px] mt-0.5">記録</span>
+              </a>
+              <a
+                href="#"
+                class="flex-1 py-2 flex flex-col items-center text-zinc-500"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="w-4 h-4"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <span class="text-[9px] mt-0.5">検索</span>
+              </a>
+              <a
+                href="#"
+                class="flex-1 py-2 flex flex-col items-center text-zinc-500"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="w-4 h-4"
+                >
+                  <circle cx="12" cy="12" r="3" />
+                  <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+                  />
+                </svg>
+                <span class="text-[9px] mt-0.5">設定</span>
+              </a>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================== -->
+      <!-- 2. コース一覧                                               -->
+      <!-- ========================================================== -->
+      <div class="flex flex-col items-center gap-3">
+        <span class="label">② コース一覧</span>
+        <div class="phone mt-2">
+          <div class="phone-screen">
+            <div class="status-bar">●●● iPhone 9:41 ●●●</div>
+            <div class="phone-body">
+              <!-- ヘッダ -->
+              <div
+                class="px-4 py-3 flex items-center gap-3 bg-white border-b border-[#e8ebe9]"
+              >
+                <button class="text-zinc-700">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="w-5 h-5"
+                  >
+                    <polyline points="15 18 9 12 15 6" />
+                  </svg>
+                </button>
+                <div class="text-base font-bold text-zinc-900">コース一覧</div>
+              </div>
+
+              <!-- 上部統計バー -->
+              <div
+                class="px-5 py-3 bg-white border-b border-[#e8ebe9] flex items-center justify-between"
+              >
+                <div class="text-[11px] text-zinc-500">
+                  <span class="font-bold text-zinc-900">5</span> コース ・
+                  <span class="font-bold text-zinc-900">217</span> レッスン
+                </div>
+                <div
+                  class="text-[10px] text-[#00695c] font-bold bg-[rgba(0,137,123,0.08)] px-2 py-0.5 rounded-full"
+                >
+                  35% 完了
+                </div>
+              </div>
+
+              <!-- コース一覧 -->
+              <div class="p-4 space-y-3">
+                <!-- コース 1 -->
+                <a
+                  href="#"
+                  class="block bg-white border border-[#e8ebe9] rounded-2xl p-4"
+                >
+                  <div class="flex items-start gap-3">
+                    <div
+                      class="w-10 h-10 rounded-xl bg-[rgba(0,137,123,0.08)] flex items-center justify-center text-[#00695c] flex-shrink-0"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="w-5 h-5"
+                      >
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                        <path
+                          d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"
+                        />
+                      </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div
+                        class="text-[10px] font-bold text-[#00695c] tracking-widest mb-0.5"
+                      >
+                        COURSE 01
+                      </div>
+                      <div class="text-sm font-bold text-zinc-900 mb-1">
+                        PFC バランスの基礎
+                      </div>
+                      <div class="text-[11px] text-zinc-500">
+                        4 章 ・ 48 レッスン
+                      </div>
+                      <div class="mt-2 flex items-center gap-2">
+                        <div
+                          class="flex-1 h-1 bg-zinc-100 rounded-full overflow-hidden"
+                        >
+                          <div
+                            class="h-full bg-[#00897b] rounded-full"
+                            style="width: 68%"
+                          ></div>
+                        </div>
+                        <div
+                          class="text-[10px] font-mono font-bold text-zinc-700"
+                        >
+                          68%
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+
+                <!-- コース 2 -->
+                <a
+                  href="#"
+                  class="block bg-white border border-[#e8ebe9] rounded-2xl p-4"
+                >
+                  <div class="flex items-start gap-3">
+                    <div
+                      class="w-10 h-10 rounded-xl bg-[rgba(0,137,123,0.08)] flex items-center justify-center text-[#00695c] flex-shrink-0"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="w-5 h-5"
+                      >
+                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+                      </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div
+                        class="text-[10px] font-bold text-[#00695c] tracking-widest mb-0.5"
+                      >
+                        COURSE 02
+                      </div>
+                      <div class="text-sm font-bold text-zinc-900 mb-1">
+                        ダイエットの原理
+                      </div>
+                      <div class="text-[11px] text-zinc-500">
+                        5 章 ・ 52 レッスン
+                      </div>
+                      <div class="mt-2 flex items-center gap-2">
+                        <div
+                          class="flex-1 h-1 bg-zinc-100 rounded-full overflow-hidden"
+                        >
+                          <div
+                            class="h-full bg-[#00897b] rounded-full"
+                            style="width: 40%"
+                          ></div>
+                        </div>
+                        <div
+                          class="text-[10px] font-mono font-bold text-zinc-700"
+                        >
+                          40%
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+
+                <!-- コース 3 -->
+                <a
+                  href="#"
+                  class="block bg-white border border-[#e8ebe9] rounded-2xl p-4"
+                >
+                  <div class="flex items-start gap-3">
+                    <div
+                      class="w-10 h-10 rounded-xl bg-[rgba(0,137,123,0.08)] flex items-center justify-center text-[#00695c] flex-shrink-0"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="w-5 h-5"
+                      >
+                        <path d="m6.5 6.5 11 11" />
+                        <path d="m21 21-1-1" />
+                        <path d="m3 3 1 1" />
+                        <path d="m18 22 4-4" />
+                        <path d="m2 6 4-4" />
+                      </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div
+                        class="text-[10px] font-bold text-[#00695c] tracking-widest mb-0.5"
+                      >
+                        COURSE 03
+                      </div>
+                      <div class="text-sm font-bold text-zinc-900 mb-1">
+                        筋トレフォームの基本
+                      </div>
+                      <div class="text-[11px] text-zinc-500">
+                        4 章 ・ 38 レッスン
+                      </div>
+                      <div class="mt-2 flex items-center gap-2">
+                        <div
+                          class="flex-1 h-1 bg-zinc-100 rounded-full overflow-hidden"
+                        >
+                          <div
+                            class="h-full bg-[#00897b] rounded-full"
+                            style="width: 22%"
+                          ></div>
+                        </div>
+                        <div
+                          class="text-[10px] font-mono font-bold text-zinc-700"
+                        >
+                          22%
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+
+                <!-- コース 4 -->
+                <a
+                  href="#"
+                  class="block bg-white border border-[#e8ebe9] rounded-2xl p-4"
+                >
+                  <div class="flex items-start gap-3">
+                    <div
+                      class="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-500 flex-shrink-0"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="w-5 h-5"
+                      >
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 6v6l4 2" />
+                      </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div
+                        class="text-[10px] font-bold text-zinc-400 tracking-widest mb-0.5"
+                      >
+                        COURSE 04
+                      </div>
+                      <div class="text-sm font-bold text-zinc-700 mb-1">
+                        栄養設計の応用
+                      </div>
+                      <div class="text-[11px] text-zinc-500">
+                        5 章 ・ 45 レッスン
+                      </div>
+                      <div class="mt-2 flex items-center gap-2">
+                        <div
+                          class="flex-1 h-1 bg-zinc-100 rounded-full overflow-hidden"
+                        >
+                          <div
+                            class="h-full bg-zinc-300 rounded-full"
+                            style="width: 0%"
+                          ></div>
+                        </div>
+                        <div class="text-[10px] font-mono text-zinc-500">
+                          未着手
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+
+                <!-- コース 5 -->
+                <a
+                  href="#"
+                  class="block bg-white border border-[#e8ebe9] rounded-2xl p-4"
+                >
+                  <div class="flex items-start gap-3">
+                    <div
+                      class="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-500 flex-shrink-0"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="w-5 h-5"
+                      >
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                      </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div
+                        class="text-[10px] font-bold text-zinc-400 tracking-widest mb-0.5"
+                      >
+                        COURSE 05
+                      </div>
+                      <div class="text-sm font-bold text-zinc-700 mb-1">
+                        メンタル & 継続力
+                      </div>
+                      <div class="text-[11px] text-zinc-500">
+                        4 章 ・ 34 レッスン
+                      </div>
+                      <div class="mt-2 flex items-center gap-2">
+                        <div
+                          class="flex-1 h-1 bg-zinc-100 rounded-full overflow-hidden"
+                        >
+                          <div
+                            class="h-full bg-zinc-300 rounded-full"
+                            style="width: 0%"
+                          ></div>
+                        </div>
+                        <div class="text-[10px] font-mono text-zinc-500">
+                          未着手
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            </div>
+
+            <!-- Tab bar -->
+            <nav class="flex border-t border-[#e8ebe9] bg-white">
+              <a href="#" class="flex-1 py-2 flex flex-col items-center text-zinc-500">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                  <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                <span class="text-[9px] mt-0.5">ホーム</span>
+              </a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center text-[#00695c]">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                </svg>
+                <span class="text-[9px] mt-0.5 font-bold">コース</span>
+              </a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center text-zinc-500">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                  <path d="M12 20h9"/>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+                <span class="text-[9px] mt-0.5">記録</span>
+              </a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center text-zinc-500">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <span class="text-[9px] mt-0.5">検索</span>
+              </a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center text-zinc-500">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+                <span class="text-[9px] mt-0.5">設定</span>
+              </a>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================== -->
+      <!-- 3. マイ学習記録                                             -->
+      <!-- ========================================================== -->
+      <div class="flex flex-col items-center gap-3">
+        <span class="label">③ マイ学習記録</span>
+        <div class="phone mt-2">
+          <div class="phone-screen">
+            <div class="status-bar">●●● iPhone 9:41 ●●●</div>
+            <div class="phone-body">
+              <div class="px-4 py-3 flex items-center gap-3 bg-white border-b border-[#e8ebe9]">
+                <button class="text-zinc-700">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                    <polyline points="15 18 9 12 15 6"/>
+                  </svg>
+                </button>
+                <div class="text-base font-bold text-zinc-900">マイ学習記録</div>
+              </div>
+
+              <!-- 今月の統計 -->
+              <div class="px-4 pt-4 pb-3">
+                <div class="text-[10px] font-bold text-zinc-500 tracking-widest mb-2">今月の学習</div>
+                <div class="bg-white border border-[#e8ebe9] rounded-2xl p-4">
+                  <div class="grid grid-cols-3 gap-3 mb-4">
+                    <div class="text-center">
+                      <div class="text-2xl font-bold text-zinc-900 font-mono leading-none">8</div>
+                      <div class="text-[10px] text-zinc-500 mt-1">学習日数</div>
+                    </div>
+                    <div class="text-center">
+                      <div class="text-2xl font-bold text-zinc-900 font-mono leading-none">12.5<span class="text-xs">h</span></div>
+                      <div class="text-[10px] text-zinc-500 mt-1">視聴時間</div>
+                    </div>
+                    <div class="text-center">
+                      <div class="text-2xl font-bold text-[#00695c] font-mono leading-none">47</div>
+                      <div class="text-[10px] text-zinc-500 mt-1">できた!</div>
+                    </div>
+                  </div>
+                  <div class="pt-3 border-t border-dashed border-[#e8ebe9]">
+                    <div class="flex justify-between text-[10px] text-zinc-500 mb-1.5">
+                      <span>累計レッスン</span>
+                      <span class="font-mono font-bold text-zinc-700">76 / 217</span>
+                    </div>
+                    <div class="h-1.5 bg-zinc-100 rounded-full overflow-hidden">
+                      <div class="h-full bg-[#00897b] rounded-full" style="width:35%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 振り返り (タブ + リスト) -->
+              <div class="px-4 mt-2">
+                <div class="text-[10px] font-bold text-zinc-500 tracking-widest mb-2 flex items-center justify-between">
+                  <span>振り返り</span>
+                  <span class="text-[10px] text-zinc-700 font-normal">全 12 件</span>
+                </div>
+
+                <!-- 振り返り 1 -->
+                <a href="#" class="block bg-white border border-[#e8ebe9] rounded-2xl p-4 mb-2">
+                  <div class="flex items-start justify-between gap-3 mb-1">
+                    <div class="text-[10px] font-bold text-[#00695c] tracking-widest">COURSE 01 ・ CH 3</div>
+                    <div class="text-[10px] text-zinc-500 font-mono">06/03</div>
+                  </div>
+                  <div class="text-sm font-bold text-zinc-900 mb-2">Lesson 4 ・ PFC バランスの基礎</div>
+                  <p class="text-[11px] text-zinc-600 leading-relaxed line-clamp-2">糖質を悪者にしないで、目的に合わせて使い分けるのが大事と理解できた。明日から朝のお米を少し増やしてみる。</p>
+                </a>
+
+                <a href="#" class="block bg-white border border-[#e8ebe9] rounded-2xl p-4 mb-2">
+                  <div class="flex items-start justify-between gap-3 mb-1">
+                    <div class="text-[10px] font-bold text-[#00695c] tracking-widest">COURSE 02 ・ CH 2</div>
+                    <div class="text-[10px] text-zinc-500 font-mono">06/01</div>
+                  </div>
+                  <div class="text-sm font-bold text-zinc-900 mb-2">Lesson 6 ・ 摂取カロリーの考え方</div>
+                  <p class="text-[11px] text-zinc-600 leading-relaxed line-clamp-2">メンテナンスを起点に、ダイエット時は -300〜-500 が現実的という基準ができた。</p>
+                </a>
+
+                <a href="#" class="block bg-white border border-[#e8ebe9] rounded-2xl p-4 mb-2">
+                  <div class="flex items-start justify-between gap-3 mb-1">
+                    <div class="text-[10px] font-bold text-[#00695c] tracking-widest">COURSE 01 ・ CH 2</div>
+                    <div class="text-[10px] text-zinc-500 font-mono">05/30</div>
+                  </div>
+                  <div class="text-sm font-bold text-zinc-900 mb-2">Lesson 3 ・ たんぱく質の重要性</div>
+                  <p class="text-[11px] text-zinc-600 leading-relaxed line-clamp-2">体重 × 2g という基準を初めて知った。今までは全然足りていなかったので、まず鶏むね肉を週 3 回入れる。</p>
+                </a>
+
+                <a href="#" class="block bg-white border border-[#e8ebe9] rounded-2xl p-4 mb-4 text-center text-[11px] text-zinc-500 font-bold">
+                  さらに見る (9 件)
+                </a>
+              </div>
+            </div>
+
+            <!-- Tab bar -->
+            <nav class="flex border-t border-[#e8ebe9] bg-white">
+              <a href="#" class="flex-1 py-2 flex flex-col items-center text-zinc-500">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                  <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                <span class="text-[9px] mt-0.5">ホーム</span>
+              </a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center text-zinc-500">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                </svg>
+                <span class="text-[9px] mt-0.5">コース</span>
+              </a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center text-[#00695c]">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                  <path d="M12 20h9"/>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+                <span class="text-[9px] mt-0.5 font-bold">記録</span>
+              </a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center text-zinc-500">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <span class="text-[9px] mt-0.5">検索</span>
+              </a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center text-zinc-500">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+                <span class="text-[9px] mt-0.5">設定</span>
+              </a>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================== -->
+      <!-- 4. ツール                                                   -->
+      <!-- ========================================================== -->
+      <div class="flex flex-col items-center gap-3">
+        <span class="label">④ ツール</span>
+        <div class="phone mt-2">
+          <div class="phone-screen">
+            <div class="status-bar">●●● iPhone 9:41 ●●●</div>
+            <div class="phone-body">
+              <div class="px-4 py-3 flex items-center gap-3 bg-white border-b border-[#e8ebe9]">
+                <button class="text-zinc-700">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                    <polyline points="15 18 9 12 15 6"/>
+                  </svg>
+                </button>
+                <div class="text-base font-bold text-zinc-900">ツール</div>
+              </div>
+
+              <div class="px-4 pt-4">
+                <p class="text-[11px] text-zinc-600 leading-relaxed mb-4">
+                  栄養・トレーニングの計算をサポートします。<br />結果は目標管理シートにも反映できます。
+                </p>
+              </div>
+
+              <!-- 4 ツール -->
+              <div class="px-4 space-y-2.5">
+                <a href="#" class="block bg-white border border-[#e8ebe9] rounded-2xl p-4">
+                  <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-[rgba(0,137,123,0.08)] text-[#00695c] flex items-center justify-center flex-shrink-0">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                      </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="text-sm font-bold text-zinc-900 mb-1">体脂肪率 計算</div>
+                      <div class="text-[11px] text-zinc-500 leading-snug">海軍式で、現状の体脂肪率を把握</div>
+                    </div>
+                    <span class="text-zinc-400 text-sm flex-shrink-0">→</span>
+                  </div>
+                </a>
+
+                <a href="#" class="block bg-white border border-[#e8ebe9] rounded-2xl p-4">
+                  <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-[rgba(0,137,123,0.08)] text-[#00695c] flex items-center justify-center flex-shrink-0">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                      </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="text-sm font-bold text-zinc-900 mb-1">必要カロリー 計算</div>
+                      <div class="text-[11px] text-zinc-500 leading-snug">メンテ / ダイエット / 増量の目安</div>
+                    </div>
+                    <span class="text-zinc-400 text-sm flex-shrink-0">→</span>
+                  </div>
+                </a>
+
+                <a href="#" class="block bg-white border border-[#e8ebe9] rounded-2xl p-4">
+                  <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-[rgba(0,137,123,0.08)] text-[#00695c] flex items-center justify-center flex-shrink-0">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                      </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="text-sm font-bold text-zinc-900 mb-1">減量期間 逆算</div>
+                      <div class="text-[11px] text-zinc-500 leading-snug">目標体重 / ペースから到達日を算出</div>
+                    </div>
+                    <span class="text-zinc-400 text-sm flex-shrink-0">→</span>
+                  </div>
+                </a>
+
+                <a href="#" class="block bg-white border border-[#e8ebe9] rounded-2xl p-4">
+                  <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-[rgba(0,137,123,0.08)] text-[#00695c] flex items-center justify-center flex-shrink-0">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                        <circle cx="12" cy="12" r="10"/>
+                        <circle cx="12" cy="12" r="6"/>
+                        <circle cx="12" cy="12" r="2"/>
+                      </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="text-sm font-bold text-zinc-900 mb-1">PFC・カーボサイクル設定</div>
+                      <div class="text-[11px] text-zinc-500 leading-snug">PFC g/kcal + 1 週間の糖質配分</div>
+                    </div>
+                    <span class="text-zinc-400 text-sm flex-shrink-0">→</span>
+                  </div>
+                </a>
+              </div>
+
+              <!-- 補足カード -->
+              <div class="px-4 mt-4 mb-4">
+                <div class="bg-[#f8f9fa] border border-dashed border-[#e8ebe9] rounded-2xl p-3.5 text-center">
+                  <div class="text-[10px] font-bold text-zinc-600 mb-1">前回の計算は保存されます</div>
+                  <div class="text-[10px] text-zinc-500 leading-relaxed">次回開いた時に前回値が薄色で復元されます</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab bar (固定じゃない、ツールはホームから飛んできた画面) -->
+            <nav class="flex border-t border-[#e8ebe9] bg-white">
+              <a href="#" class="flex-1 py-2 flex flex-col items-center text-zinc-500">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                  <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                <span class="text-[9px] mt-0.5">ホーム</span>
+              </a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center text-zinc-500">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                </svg>
+                <span class="text-[9px] mt-0.5">コース</span>
+              </a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center text-zinc-500">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                  <path d="M12 20h9"/>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+                <span class="text-[9px] mt-0.5">記録</span>
+              </a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center text-zinc-500">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <span class="text-[9px] mt-0.5">検索</span>
+              </a>
+              <a href="#" class="flex-1 py-2 flex flex-col items-center text-zinc-500">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+                <span class="text-[9px] mt-0.5">設定</span>
+              </a>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="text-center max-w-[1200px] mx-auto mt-10 text-xs text-zinc-500 leading-relaxed">
+      Phase 2-7 デザイン統一 ・ iPhone 14 Pro 横幅 393px 基準<br />
+      次に作る画面: 検索 / 設定 / LINE サポート / 月次添削 / 目標シート / 筋トレメニュー
+    </footer>
+  </body>
+</html>
