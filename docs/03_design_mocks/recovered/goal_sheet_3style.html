@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — 目標管理シート 3 スタイル比較</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #e8ebec;
+    line-height: 1.6;
+    padding: 24px;
+    color: #1a3326;
+  }
+  .page-header {
+    max-width: 1500px;
+    margin: 0 auto 32px;
+    text-align: center;
+  }
+  .page-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .page-header p {
+    color: #6b7d75;
+    font-size: 13px;
+  }
+  .compare {
+    max-width: 1500px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+  }
+  .label-pill {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 6px;
+    color: #fff;
+  }
+  .va-label { background: #4ECD5D; }
+  .vb-label { background: #2a2a2a; }
+  .vc-label { background: #2c4d3e; }
+  .sub-label {
+    font-size: 12px;
+    color: #6b7d75;
+    margin-bottom: 12px;
+  }
+  .phone {
+    width: 100%;
+    max-width: 460px;
+    margin: 0 auto;
+    background: #fff;
+    border: 8px solid #2a2a2a;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+  }
+  .phone-status {
+    background: #2a2a2a;
+    color: #fff;
+    text-align: center;
+    font-size: 11px;
+    padding: 4px;
+    font-family: 'Inter', sans-serif;
+  }
+  .ico-svg {
+    width: 20px; height: 20px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    display: inline-block;
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+  .ico-svg-sm { width: 16px; height: 16px; }
+  .ico-svg-md { width: 22px; height: 22px; }
+
+  /* ===== 共通: ヘッダー骨格 ===== */
+  .app-header {
+    background: #fff;
+    padding: 12px 14px;
+    display: grid;
+    grid-template-columns: 28px 1fr 28px;
+    align-items: center;
+    gap: 6px;
+  }
+  .app-header .center-title {
+    text-align: center;
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .body-scroll {
+    padding: 12px;
+    flex: 1;
+  }
+  .tab-nav {
+    display: flex;
+    padding: 6px 0;
+  }
+  .tab-nav .tab {
+    flex: 1;
+    text-align: center;
+    font-size: 10px;
+    padding: 3px 2px;
+    position: relative;
+  }
+  .tab-nav .tab .ico-svg-sm {
+    margin: 0 auto 2px;
+    display: block;
+  }
+
+  /* ============================================
+     A: 現状 v3 スタイル (明るい緑 + 親しみ)
+     ============================================ */
+  .va { background: #f7faf8; }
+  .va .app-header { border-bottom: 1px solid #d4ead9; }
+  .va .app-header .back, .va .app-header .menu { color: #3a6050; }
+  .va .app-header .center-title { color: #1f6b3e; }
+  .va .body-scroll { background: #f7faf8; }
+  .va .status-bar {
+    background: #ECFAF0;
+    padding: 12px 14px;
+    border-bottom: 1px solid #d4ead9;
+  }
+  .va .status-bar .lbl {
+    font-size: 11px; color: #6b7d75;
+    display: flex; justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .va .status-bar .lbl b { color: #1f6b3e; font-weight: 700; }
+  .va .status-bar .bar { background: #fff; height: 6px; border-radius: 9999px; overflow: hidden; }
+  .va .status-bar .bar > div { width: 83%; height: 100%; background: #4ECD5D; border-radius: 9999px; }
+
+  .va .section {
+    background: #fff;
+    border: 1px solid #d4ead9;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+  }
+  .va .section-head {
+    background: #ECFAF0;
+    padding: 10px 12px;
+    border-bottom: 1px solid #d4ead9;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .va .section-head .num {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    background: #1f6b3e;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Inter', sans-serif;
+  }
+  .va .section-head .title { font-size: 12px; font-weight: 700; color: #1f6b3e; flex: 1; }
+  .va .section-head .mark {
+    font-size: 10px; font-weight: 700;
+    padding: 2px 6px; border-radius: 4px;
+    background: #4ECD5D; color: #fff;
+  }
+  .va .section-head .mark.todo { background: #fff3cd; color: #c2410c; border: 1px solid #fbd38d; }
+  .va .section-body { padding: 12px; }
+  .va .field { margin-bottom: 10px; }
+  .va .field:last-child { margin-bottom: 0; }
+  .va .field-label {
+    font-size: 11px; font-weight: 600;
+    color: #3a6050; margin-bottom: 5px;
+    display: flex; justify-content: space-between;
+  }
+  .va .field-label .req { color: #e63b3b; }
+  .va .field-label .auto {
+    font-size: 9px; color: #6b7d75;
+    background: #D8F3E1; padding: 1px 5px; border-radius: 3px;
+    font-weight: 600;
+  }
+  .va .input {
+    width: 100%; padding: 8px 10px;
+    font-size: 12px;
+    border: 1px solid #d4ead9;
+    border-radius: 8px;
+    background: #fff;
+    color: #1a3326;
+    font-family: inherit;
+  }
+  .va .input.readonly {
+    background: #f7faf8;
+    color: #1f6b3e;
+    font-weight: 700;
+  }
+  .va .field-row { display: flex; gap: 6px; align-items: center; }
+  .va .unit { font-size: 11px; color: #6b7d75; }
+  .va .tool-btn {
+    width: 100%; padding: 10px 12px;
+    background: #1f6b3e; color: #fff;
+    border: none; border-radius: 8px;
+    font-size: 11px; font-weight: 700;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 6px;
+  }
+  .va .tool-btn .tag {
+    font-size: 9px;
+    background: rgba(255,255,255,.25);
+    padding: 1px 5px; border-radius: 3px;
+  }
+  .va .nori-comment {
+    background: linear-gradient(135deg, #fff8f5, #ffe5d5);
+    border: 1px solid #ffd0b0;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  .va .nori-comment .h {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+  }
+  .va .nori-comment .h .avatar {
+    width: 28px; height: 28px;
+    border-radius: 9999px;
+    background: #ff8a4c; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+  }
+  .va .nori-comment .h .name { font-size: 11px; font-weight: 700; color: #c2410c; }
+  .va .nori-comment .h .date { font-size: 9px; color: #6b7d75; margin-left: auto; }
+  .va .nori-comment .text { font-size: 12px; color: #3a6050; line-height: 1.6; }
+  .va .nori-comment .video-link {
+    display: flex; align-items: center; gap: 6px;
+    margin-top: 8px; padding: 8px 10px;
+    background: rgba(255,255,255,.7);
+    border-radius: 6px;
+    color: #1f6b3e; font-size: 11px; font-weight: 600;
+  }
+  .va .bottom-links {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px; margin-bottom: 10px;
+  }
+  .va .bottom-link {
+    background: #fff;
+    border: 1px solid #d4ead9;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    font-size: 11px; font-weight: 600;
+    color: #1f6b3e;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+  }
+  .va .save-bar {
+    background: #fff;
+    border-top: 1px solid #d4ead9;
+    padding: 10px 12px;
+    display: flex; gap: 6px;
+  }
+  .va .save-bar .draft {
+    padding: 12px 14px;
+    background: #fff;
+    color: #3a6050;
+    border: 1px solid #d4ead9;
+    border-radius: 12px;
+    font-size: 11px; font-weight: 600;
+  }
+  .va .save-bar .save {
+    flex: 1; padding: 12px;
+    background: linear-gradient(135deg, #4ECD5D, #2EA84B);
+    color: #fff;
+    border: none; border-radius: 12px;
+    font-size: 13px; font-weight: 700;
+    box-shadow: 0 4px 0 #2EA84B;
+  }
+  .va .tab-nav { background: #fff; border-top: 1px solid #d4ead9; }
+  .va .tab { color: #6b7d75; }
+  .va .tab.active { color: #1f6b3e; font-weight: 700; }
+  .va .week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+    margin-top: 6px;
+  }
+  .va .day-cell {
+    aspect-ratio: 1;
+    border: 1px solid #d4ead9;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px;
+    color: #6b7d75;
+    font-weight: 600;
+  }
+  .va .day-cell.h { background: #1f6b3e; color: #fff; border-color: #1f6b3e; }
+  .va .day-cell.m { background: #4ECD5D; color: #fff; border-color: #4ECD5D; }
+  .va .day-cell.l { background: #D8F3E1; color: #1f6b3e; }
+  .va .slider-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+  .va .slider-row input[type=range] { width: 100%; accent-color: #4ECD5D; }
+
+  /* ============================================
+     B: Nike エッセンス (線画黒 + 余白増)
+     ============================================ */
+  .vb { background: #fff; }
+  .vb .app-header { border-bottom: 1px solid #e8ebe9; padding: 14px 18px; }
+  .vb .app-header .back, .vb .app-header .menu { color: #1a1a1a; }
+  .vb .app-header .center-title { color: #1a1a1a; font-size: 16px; }
+  .vb .body-scroll { background: #fff; padding: 16px; }
+  .vb .status-bar {
+    padding: 14px 18px;
+    background: #fff;
+    border-bottom: 1px solid #e8ebe9;
+  }
+  .vb .status-bar .lbl {
+    font-size: 10px; color: #888;
+    display: flex; justify-content: space-between;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+  .vb .status-bar .lbl b { color: #1a1a1a; font-weight: 700; font-family: 'Inter', sans-serif; text-transform: none; letter-spacing: 0; }
+  .vb .status-bar .bar { background: #f0f0f0; height: 4px; border-radius: 9999px; overflow: hidden; }
+  .vb .status-bar .bar > div { width: 83%; height: 100%; background: #4ECD5D; }
+
+  .vb .section {
+    background: #fff;
+    border: 1px solid #e8ebe9;
+    border-radius: 14px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .vb .section-head {
+    background: #fff;
+    padding: 14px 16px;
+    border-bottom: 1px solid #e8ebe9;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .vb .section-head .num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: #1a1a1a;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Inter', sans-serif;
+  }
+  .vb .section-head .title { font-size: 13px; font-weight: 700; color: #1a1a1a; flex: 1; }
+  .vb .section-head .mark {
+    font-size: 10px; font-weight: 700;
+    padding: 3px 7px; border-radius: 4px;
+    border: 1px solid #4ECD5D; color: #2EA84B; background: #fff;
+  }
+  .vb .section-head .mark.todo { color: #888; border-color: #ccc; }
+  .vb .section-body { padding: 16px; }
+  .vb .field { margin-bottom: 14px; }
+  .vb .field:last-child { margin-bottom: 0; }
+  .vb .field-label {
+    font-size: 11px; font-weight: 600;
+    color: #888; margin-bottom: 6px;
+    display: flex; justify-content: space-between;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .vb .field-label .req { color: #c44; text-transform: none; }
+  .vb .field-label .auto {
+    font-size: 9px; color: #888;
+    background: #f0f0f0; padding: 2px 5px; border-radius: 3px;
+    font-weight: 500;
+    text-transform: none;
+  }
+  .vb .input {
+    width: 100%; padding: 10px 12px;
+    font-size: 13px;
+    border: 1px solid #e8ebe9;
+    border-radius: 10px;
+    background: #fff;
+    color: #1a1a1a;
+    font-family: inherit;
+  }
+  .vb .input.readonly {
+    background: #f8f9fa;
+    color: #1a1a1a;
+    font-weight: 700;
+  }
+  .vb .field-row { display: flex; gap: 6px; align-items: center; }
+  .vb .unit { font-size: 11px; color: #888; }
+  .vb .tool-btn {
+    width: 100%; padding: 14px 14px;
+    background: #4ECD5D; color: #fff;
+    border: none; border-radius: 14px;
+    font-size: 12px; font-weight: 700;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 10px;
+  }
+  .vb .tool-btn .tag {
+    font-size: 9px;
+    background: rgba(255,255,255,.25);
+    padding: 2px 6px; border-radius: 3px;
+  }
+  .vb .nori-comment {
+    background: #fff;
+    border: 1px solid #e8ebe9;
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+  }
+  .vb .nori-comment .h {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+  }
+  .vb .nori-comment .h .avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: #1a1a1a; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+  }
+  .vb .nori-comment .h .name { font-size: 12px; font-weight: 700; color: #1a1a1a; }
+  .vb .nori-comment .h .date { font-size: 10px; color: #888; margin-left: auto; }
+  .vb .nori-comment .text { font-size: 13px; color: #1a1a1a; line-height: 1.7; }
+  .vb .nori-comment .video-link {
+    display: flex; align-items: center; gap: 6px;
+    margin-top: 10px; padding: 10px 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    color: #1a1a1a; font-size: 12px; font-weight: 600;
+  }
+  .vb .bottom-links {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin-bottom: 14px;
+  }
+  .vb .bottom-link {
+    background: #fff;
+    border: 1px solid #e8ebe9;
+    border-radius: 14px;
+    padding: 14px;
+    text-align: center;
+    font-size: 11px; font-weight: 600;
+    color: #1a1a1a;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .vb .save-bar {
+    background: #fff;
+    border-top: 1px solid #e8ebe9;
+    padding: 14px 16px;
+    display: flex; gap: 10px;
+  }
+  .vb .save-bar .draft {
+    padding: 14px 16px;
+    background: #fff;
+    color: #1a1a1a;
+    border: 1px solid #e8ebe9;
+    border-radius: 14px;
+    font-size: 12px; font-weight: 600;
+  }
+  .vb .save-bar .save {
+    flex: 1; padding: 14px;
+    background: #4ECD5D;
+    color: #fff;
+    border: none; border-radius: 14px;
+    font-size: 13px; font-weight: 700;
+  }
+  .vb .tab-nav { background: #fff; border-top: 1px solid #e8ebe9; padding: 10px 0; }
+  .vb .tab { color: #888; }
+  .vb .tab.active { color: #2EA84B; font-weight: 700; }
+  .vb .tab.active::after {
+    content: ""; position: absolute; bottom: -10px;
+    left: 50%; transform: translateX(-50%);
+    width: 22px; height: 3px;
+    background: #4ECD5D; border-radius: 9999px;
+  }
+  .vb .week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-top: 8px;
+  }
+  .vb .day-cell {
+    aspect-ratio: 1;
+    border: 1px solid #e8ebe9;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    color: #888;
+    font-weight: 600;
+  }
+  .vb .day-cell.h { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+  .vb .day-cell.m { background: #4ECD5D; color: #fff; border-color: #4ECD5D; }
+  .vb .day-cell.l { background: #fff; color: #1a1a1a; border-color: #e8ebe9; }
+  .vb .slider-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+  .vb .slider-row input[type=range] { width: 100%; accent-color: #4ECD5D; }
+
+  /* ============================================
+     C: シンプル真面目 (深緑単色 + 罫線 + 角丸極小)
+     ============================================ */
+  .vc {
+    background: #fafbfa;
+    --vc-pr: #1f6b3e;
+    --vc-prd: #145430;
+    --vc-ink: #1a3326;
+    --vc-ink2: #4a5f56;
+    --vc-ink3: #8a9690;
+    --vc-line: #e5e7eb;
+  }
+  .vc .app-header {
+    border-bottom: 1px solid var(--vc-line);
+    padding: 14px 16px;
+  }
+  .vc .app-header .back, .vc .app-header .menu { color: var(--vc-ink2); }
+  .vc .app-header .center-title { color: var(--vc-ink); letter-spacing: .04em; font-size: 14px; }
+  .vc .body-scroll { background: #fafbfa; padding: 16px; }
+  .vc .status-bar {
+    padding: 12px 16px;
+    background: #fff;
+    border-bottom: 1px solid var(--vc-line);
+  }
+  .vc .status-bar .lbl {
+    font-size: 10px; color: var(--vc-ink3);
+    display: flex; justify-content: space-between;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+  .vc .status-bar .lbl b { color: var(--vc-ink); font-weight: 700; font-family: 'Inter', sans-serif; text-transform: none; letter-spacing: 0; }
+  .vc .status-bar .bar { background: var(--vc-line); height: 3px; border-radius: 0; overflow: hidden; }
+  .vc .status-bar .bar > div { width: 83%; height: 100%; background: var(--vc-pr); }
+
+  .vc .section {
+    background: #fff;
+    border: 1px solid var(--vc-line);
+    border-radius: 2px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .vc .section-head {
+    background: #fff;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--vc-line);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .vc .section-head .num {
+    width: 22px; height: 22px;
+    border-radius: 2px;
+    background: var(--vc-pr);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Inter', sans-serif;
+  }
+  .vc .section-head .title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--vc-ink);
+    flex: 1;
+    letter-spacing: .03em;
+  }
+  .vc .section-head .mark {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 3px 7px;
+    border-radius: 2px;
+    background: var(--vc-pr);
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+  .vc .section-head .mark.todo {
+    background: #fff;
+    color: var(--vc-ink3);
+    border: 1px solid var(--vc-line);
+  }
+  .vc .section-body { padding: 14px; }
+  .vc .field { margin-bottom: 12px; }
+  .vc .field:last-child { margin-bottom: 0; }
+  .vc .field-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--vc-ink3);
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+  .vc .field-label .req { color: #c44; text-transform: none; letter-spacing: 0; }
+  .vc .field-label .auto {
+    font-size: 9px;
+    color: var(--vc-ink2);
+    background: #f0f3f1;
+    padding: 1px 5px;
+    border-radius: 2px;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .vc .input {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 12px;
+    border: 1px solid var(--vc-line);
+    border-radius: 2px;
+    background: #fff;
+    color: var(--vc-ink);
+    font-family: inherit;
+  }
+  .vc .input.readonly {
+    background: #f0f3f1;
+    color: var(--vc-ink);
+    font-weight: 700;
+  }
+  .vc .field-row { display: flex; gap: 6px; align-items: center; }
+  .vc .unit { font-size: 11px; color: var(--vc-ink3); }
+  .vc .tool-btn {
+    width: 100%; padding: 10px 12px;
+    background: var(--vc-pr); color: #fff;
+    border: none; border-radius: 2px;
+    font-size: 11px; font-weight: 700;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 6px;
+    letter-spacing: .03em;
+  }
+  .vc .tool-btn .tag {
+    font-size: 9px;
+    background: rgba(255,255,255,.2);
+    padding: 1px 5px;
+    border-radius: 2px;
+  }
+  .vc .nori-comment {
+    background: #fff;
+    border: 1px solid var(--vc-line);
+    border-radius: 2px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+  .vc .nori-comment .h {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+  }
+  .vc .nori-comment .h .avatar {
+    width: 28px; height: 28px;
+    border-radius: 2px;
+    background: var(--vc-pr); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+  }
+  .vc .nori-comment .h .name {
+    font-size: 11px; font-weight: 700;
+    color: var(--vc-ink);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+  .vc .nori-comment .h .date {
+    font-size: 9px;
+    color: var(--vc-ink3);
+    margin-left: auto;
+    font-family: 'Inter', sans-serif;
+  }
+  .vc .nori-comment .text { font-size: 12px; color: var(--vc-ink); line-height: 1.7; }
+  .vc .nori-comment .video-link {
+    display: flex; align-items: center; gap: 6px;
+    margin-top: 10px; padding: 8px 10px;
+    background: #fafbfa;
+    border: 1px solid var(--vc-line);
+    border-radius: 2px;
+    color: var(--vc-pr); font-size: 11px; font-weight: 600;
+  }
+  .vc .bottom-links {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    margin-bottom: 12px;
+    background: var(--vc-line);
+    border: 1px solid var(--vc-line);
+    border-radius: 2px;
+  }
+  .vc .bottom-link {
+    background: #fff;
+    padding: 12px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--vc-ink);
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+  .vc .save-bar {
+    background: #fff;
+    border-top: 1px solid var(--vc-line);
+    padding: 12px 14px;
+    display: flex; gap: 6px;
+  }
+  .vc .save-bar .draft {
+    padding: 12px 14px;
+    background: #fff;
+    color: var(--vc-ink);
+    border: 1px solid var(--vc-line);
+    border-radius: 2px;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: .03em;
+  }
+  .vc .save-bar .save {
+    flex: 1; padding: 12px;
+    background: var(--vc-pr);
+    color: #fff;
+    border: none; border-radius: 2px;
+    font-size: 12px; font-weight: 700;
+    letter-spacing: .04em;
+  }
+  .vc .tab-nav { background: #fff; border-top: 1px solid var(--vc-line); padding: 8px 0; }
+  .vc .tab { color: var(--vc-ink3); }
+  .vc .tab.active {
+    color: var(--vc-pr);
+    font-weight: 700;
+  }
+  .vc .tab.active::before {
+    content: "";
+    position: absolute;
+    top: -8px; left: 0; right: 0;
+    height: 2px;
+    background: var(--vc-pr);
+  }
+  .vc .week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    margin-top: 6px;
+    background: var(--vc-line);
+    border: 1px solid var(--vc-line);
+  }
+  .vc .day-cell {
+    aspect-ratio: 1;
+    background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    color: var(--vc-ink3);
+    font-weight: 600;
+  }
+  .vc .day-cell.h { background: var(--vc-pr); color: #fff; }
+  .vc .day-cell.m { background: #4ECD5D; color: #fff; }
+  .vc .day-cell.l { background: #f0f3f1; color: var(--vc-ink); }
+  .vc .slider-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+  .vc .slider-row input[type=range] { width: 100%; accent-color: var(--vc-pr); }
+
+  /* ===== 注釈 ===== */
+  .annotation {
+    max-width: 1500px;
+    margin: 32px auto 0;
+    background: #fff;
+    border: 1px solid #d4ead9;
+    border-radius: 12px;
+    padding: 24px 28px;
+    font-size: 13px;
+    color: #3a6050;
+  }
+  .annotation h3 {
+    font-size: 15px;
+    color: #1a3326;
+    margin: 14px 0 8px;
+  }
+  .annotation h3:first-child { margin-top: 0; }
+  .annotation table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 8px;
+  }
+  .annotation th, .annotation td {
+    padding: 8px 10px;
+    text-align: left;
+    border-bottom: 1px solid #e8ebe9;
+  }
+  .annotation th { background: #f7faf8; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>目標管理シート画面 — 3 スタイル比較</h1>
+  <p>A: 現状 v3 (明るい緑・親しみ) / B: Nike エッセンス (洗練・余白) / C: シンプル真面目 (深緑・罫線・業務感)<br>
+  最新構造: ③栄養設計 → ④1週間の実行プラン (カーボサイクル統合)</p>
+</div>
+
+<div class="compare">
+
+<!-- ============================================
+     A: 現状 v3 スタイル
+============================================ -->
+<div>
+  <span class="label-pill va-label">A. 現状 v3</span>
+  <div class="sub-label">明るい緑 + サイポン風カード + 影あり + 角丸 12px</div>
+  <div class="phone">
+    <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+    <div class="va" style="display: flex; flex-direction: column; flex: 1;">
+      <div class="app-header">
+        <svg class="ico-svg back" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+        <div class="center-title">目標管理シート</div>
+        <svg class="ico-svg menu" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+      </div>
+      <div class="status-bar">
+        <div class="lbl"><span>記入状況</span><b>5 / 6</b></div>
+        <div class="bar"><div></div></div>
+      </div>
+      <div class="body-scroll">
+
+        <!-- ① -->
+        <div class="section">
+          <div class="section-head">
+            <div class="num">1</div>
+            <div class="title">現状を把握</div>
+            <div class="mark">✓ 済</div>
+          </div>
+          <div class="section-body">
+            <div class="field"><div class="field-label">体重 <span class="req">★</span></div><div class="field-row"><input class="input" value="75.0"><span class="unit">kg</span></div></div>
+            <div class="field"><div class="field-label">体脂肪率 <span class="auto">自動</span></div><div class="field-row"><input class="input readonly" value="22.4" readonly><span class="unit">%</span></div></div>
+            <div class="field"><div class="field-label">メンテ kcal <span class="auto">ツール反映</span></div><div class="field-row"><input class="input readonly" value="2604" readonly><span class="unit">kcal</span></div></div>
+            <button class="tool-btn">🧮 必要カロリー計算ツール<span class="tag">反映済</span></button>
+          </div>
+        </div>
+
+        <!-- ② -->
+        <div class="section">
+          <div class="section-head">
+            <div class="num">2</div>
+            <div class="title">目標の選定</div>
+            <div class="mark">✓ 済</div>
+          </div>
+          <div class="section-body">
+            <div class="field"><div class="field-label">目標体重 <span class="req">★</span></div><div class="field-row"><input class="input" value="68.0"><span class="unit">kg</span></div></div>
+            <div class="field"><div class="field-label">到達予定 <span class="auto">自動</span></div><input class="input readonly" value="2026/08/23" readonly></div>
+            <div class="field"><div class="field-label">短期目標 <span class="req">★</span></div><input class="input" value="3 ヶ月で -5kg"></div>
+            <button class="tool-btn">📅 減量期間逆算ツール<span class="tag">反映済</span></button>
+          </div>
+        </div>
+
+        <!-- ③ -->
+        <div class="section">
+          <div class="section-head">
+            <div class="num">3</div>
+            <div class="title">栄養設計</div>
+            <div class="mark">✓ 済</div>
+          </div>
+          <div class="section-body">
+            <div class="field"><div class="field-label">目標 kcal <span class="auto">ツール反映</span></div><div class="field-row"><input class="input readonly" value="2100" readonly><span class="unit">kcal</span></div></div>
+            <div class="field"><div class="field-label">PFC (g)</div><div class="field-row" style="gap:4px;"><input class="input readonly" value="150" readonly style="font-size:11px;"><input class="input readonly" value="58" readonly style="font-size:11px;"><input class="input readonly" value="225" readonly style="font-size:11px;"></div></div>
+            <button class="tool-btn">🍱 PFC・カーボサイクル設定<span class="tag">反映済</span></button>
+          </div>
+        </div>
+
+        <!-- ④ 1週間の実行プラン -->
+        <div class="section">
+          <div class="section-head">
+            <div class="num">4</div>
+            <div class="title">1 週間の実行プラン</div>
+            <div class="mark">✓ 済</div>
+          </div>
+          <div class="section-body">
+            <div class="field"><div class="field-label">いつ / どこで / 何をする <span class="req">★</span></div><input class="input" value="夕方 7 時 / 家 / 筋トレ" style="font-size: 11px;"></div>
+            <div class="field">
+              <div class="field-label">週間トレ強度 <span class="auto">タップ編集可</span></div>
+              <div class="week-grid">
+                <div class="day-cell h">高</div>
+                <div class="day-cell l">低</div>
+                <div class="day-cell m">中</div>
+                <div class="day-cell l">低</div>
+                <div class="day-cell h">高</div>
+                <div class="day-cell l">低</div>
+                <div class="day-cell l">低</div>
+              </div>
+            </div>
+            <div class="field"><div class="field-label">週糖質配分 <span class="auto">自動再計算</span></div><div class="field-row"><input class="input readonly" value="週 1575g / 平均 225g/日" readonly style="font-size: 11px;"></div></div>
+          </div>
+        </div>
+
+        <!-- ⑤ -->
+        <div class="section">
+          <div class="section-head">
+            <div class="num">5</div>
+            <div class="title">プラスの感情を含むゴール</div>
+            <div class="mark">✓ 済</div>
+          </div>
+          <div class="section-body">
+            <div class="field"><div class="field-label">達成時の気持ち <span class="req">★</span></div><input class="input" value="自信がついて毎朝鏡を見るのが楽しい" style="font-size: 11px;"></div>
+          </div>
+        </div>
+
+        <!-- ⑥ -->
+        <div class="section">
+          <div class="section-head">
+            <div class="num">6</div>
+            <div class="title">セルフイメージ改善</div>
+            <div class="mark todo">未記入</div>
+          </div>
+          <div class="section-body">
+            <div style="font-size: 11px; color: #6b7d75; margin-bottom: 6px;">1. 自分の体への思考を変える</div>
+            <div class="slider-row">
+              <input type="range" min="0" max="10" value="3">
+              <input type="range" min="0" max="10" value="8">
+            </div>
+            <div style="font-size: 10px; color: #b0c0b8; margin-top: 8px; font-style: italic;">他 7 項目...</div>
+          </div>
+        </div>
+
+        <!-- のり社長コメント -->
+        <div class="nori-comment">
+          <div class="h">
+            <div class="avatar">の</div>
+            <div class="name">のり社長</div>
+            <div class="date">5/21</div>
+          </div>
+          <div class="text">きよむさん、初回提出ありがとう! 現実的なペースで素晴らしいです。動画でアドバイス送りました ↓</div>
+          <div class="video-link">▶ 動画コメント (3:24)</div>
+        </div>
+
+        <!-- ボトムリンク -->
+        <div class="bottom-links">
+          <div class="bottom-link">
+            <svg class="ico-svg-md" viewBox="0 0 24 24" style="stroke: #1f6b3e; fill: none; stroke-width: 2;"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+            編集履歴
+          </div>
+          <div class="bottom-link">
+            <svg class="ico-svg-md" viewBox="0 0 24 24" style="stroke: #1f6b3e; fill: none; stroke-width: 2;"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            変化を見る
+          </div>
+        </div>
+      </div>
+      <div class="save-bar">
+        <button class="draft">下書き</button>
+        <button class="save">保存する</button>
+      </div>
+      <div class="tab-nav">
+        <div class="tab"><svg class="ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>ホーム</div>
+        <div class="tab"><svg class="ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/></svg>コース</div>
+        <div class="tab"><svg class="ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>記録</div>
+        <div class="tab"><svg class="ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><circle cx="11" cy="11" r="8"/></svg>検索</div>
+        <div class="tab"><svg class="ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><circle cx="12" cy="12" r="3"/></svg>設定</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     B: Nike エッセンス スタイル
+============================================ -->
+<div>
+  <span class="label-pill vb-label">B. Nike エッセンス</span>
+  <div class="sub-label">線画黒 + 余白広め + 影なし + 角丸 14px</div>
+  <div class="phone">
+    <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+    <div class="vb" style="display: flex; flex-direction: column; flex: 1;">
+      <div class="app-header">
+        <svg class="ico-svg back" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+        <div class="center-title">目標管理シート</div>
+        <svg class="ico-svg menu" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+      </div>
+      <div class="status-bar">
+        <div class="lbl"><span>Progress</span><b>5 / 6</b></div>
+        <div class="bar"><div></div></div>
+      </div>
+      <div class="body-scroll">
+
+        <div class="section">
+          <div class="section-head">
+            <div class="num">1</div>
+            <div class="title">現状を把握</div>
+            <div class="mark">DONE</div>
+          </div>
+          <div class="section-body">
+            <div class="field"><div class="field-label">体重 <span class="req">★</span></div><div class="field-row"><input class="input" value="75.0"><span class="unit">kg</span></div></div>
+            <div class="field"><div class="field-label">体脂肪率 <span class="auto">自動</span></div><div class="field-row"><input class="input readonly" value="22.4" readonly><span class="unit">%</span></div></div>
+            <div class="field"><div class="field-label">メンテ kcal <span class="auto">ツール</span></div><div class="field-row"><input class="input readonly" value="2604" readonly><span class="unit">kcal</span></div></div>
+            <button class="tool-btn">🧮 必要カロリー計算<span class="tag">反映済</span></button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head">
+            <div class="num">2</div>
+            <div class="title">目標の選定</div>
+            <div class="mark">DONE</div>
+          </div>
+          <div class="section-body">
+            <div class="field"><div class="field-label">目標体重 <span class="req">★</span></div><div class="field-row"><input class="input" value="68.0"><span class="unit">kg</span></div></div>
+            <div class="field"><div class="field-label">到達予定 <span class="auto">自動</span></div><input class="input readonly" value="2026/08/23" readonly></div>
+            <div class="field"><div class="field-label">短期目標 <span class="req">★</span></div><input class="input" value="3 ヶ月で -5kg"></div>
+            <button class="tool-btn">📅 減量期間逆算<span class="tag">反映済</span></button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head">
+            <div class="num">3</div>
+            <div class="title">栄養設計</div>
+            <div class="mark">DONE</div>
+          </div>
+          <div class="section-body">
+            <div class="field"><div class="field-label">目標 kcal <span class="auto">ツール</span></div><div class="field-row"><input class="input readonly" value="2100" readonly><span class="unit">kcal</span></div></div>
+            <div class="field"><div class="field-label">PFC (g)</div><div class="field-row" style="gap:6px;"><input class="input readonly" value="150" readonly style="font-size:11px;"><input class="input readonly" value="58" readonly style="font-size:11px;"><input class="input readonly" value="225" readonly style="font-size:11px;"></div></div>
+            <button class="tool-btn">🍱 PFC・カーボサイクル<span class="tag">反映済</span></button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head">
+            <div class="num">4</div>
+            <div class="title">1 週間の実行プラン</div>
+            <div class="mark">DONE</div>
+          </div>
+          <div class="section-body">
+            <div class="field"><div class="field-label">いつ / どこで / 何 <span class="req">★</span></div><input class="input" value="夕方 7 時 / 家 / 筋トレ" style="font-size: 12px;"></div>
+            <div class="field">
+              <div class="field-label">週間トレ強度 <span class="auto">タップ編集可</span></div>
+              <div class="week-grid">
+                <div class="day-cell h">高</div>
+                <div class="day-cell l">低</div>
+                <div class="day-cell m">中</div>
+                <div class="day-cell l">低</div>
+                <div class="day-cell h">高</div>
+                <div class="day-cell l">低</div>
+                <div class="day-cell l">低</div>
+              </div>
+            </div>
+            <div class="field"><div class="field-label">週糖質配分 <span class="auto">自動</span></div><input class="input readonly" value="週 1575g / 平均 225g/日" readonly style="font-size: 12px;"></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head">
+            <div class="num">5</div>
+            <div class="title">プラスの感情を含むゴール</div>
+            <div class="mark">DONE</div>
+          </div>
+          <div class="section-body">
+            <div class="field"><div class="field-label">達成時の気持ち <span class="req">★</span></div><input class="input" value="自信がついて毎朝鏡を見るのが楽しい" style="font-size: 12px;"></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head">
+            <div class="num">6</div>
+            <div class="title">セルフイメージ改善</div>
+            <div class="mark todo">TODO</div>
+          </div>
+          <div class="section-body">
+            <div style="font-size: 11px; color: #888; margin-bottom: 6px;">1. 自分の体への思考を変える</div>
+            <div class="slider-row">
+              <input type="range" min="0" max="10" value="3">
+              <input type="range" min="0" max="10" value="8">
+            </div>
+            <div style="font-size: 10px; color: #ccc; margin-top: 10px; font-style: italic;">他 7 項目...</div>
+          </div>
+        </div>
+
+        <div class="nori-comment">
+          <div class="h">
+            <div class="avatar">N</div>
+            <div class="name">のり社長</div>
+            <div class="date">5/21</div>
+          </div>
+          <div class="text">きよむさん、初回提出ありがとう! 現実的なペースで素晴らしいです。動画でアドバイス送りました ↓</div>
+          <div class="video-link">▶ 動画コメント (3:24)</div>
+        </div>
+
+        <div class="bottom-links">
+          <div class="bottom-link">
+            <svg class="ico-svg-md" viewBox="0 0 24 24" style="stroke: #1a1a1a; fill: none; stroke-width: 2;"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+            編集履歴
+          </div>
+          <div class="bottom-link">
+            <svg class="ico-svg-md" viewBox="0 0 24 24" style="stroke: #1a1a1a; fill: none; stroke-width: 2;"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            変化を見る
+          </div>
+        </div>
+      </div>
+      <div class="save-bar">
+        <button class="draft">下書き</button>
+        <button class="save">SAVE</button>
+      </div>
+      <div class="tab-nav">
+        <div class="tab"><svg class="ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>ホーム</div>
+        <div class="tab"><svg class="ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/></svg>コース</div>
+        <div class="tab"><svg class="ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>記録</div>
+        <div class="tab"><svg class="ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><circle cx="11" cy="11" r="8"/></svg>検索</div>
+        <div class="tab"><svg class="ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><circle cx="12" cy="12" r="3"/></svg>設定</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     C: シンプル真面目 スタイル
+============================================ -->
+<div>
+  <span class="label-pill vc-label">C. シンプル真面目</span>
+  <div class="sub-label">深緑単色 + 罫線 + 影なし + 角丸 2-4px + UPPERCASE</div>
+  <div class="phone">
+    <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+    <div class="vc" style="display: flex; flex-direction: column; flex: 1;">
+      <div class="app-header">
+        <svg class="ico-svg back" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+        <div class="center-title">目標管理シート</div>
+        <svg class="ico-svg menu" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+      </div>
+      <div class="status-bar">
+        <div class="lbl"><span>STATUS</span><b>5 / 6</b></div>
+        <div class="bar"><div></div></div>
+      </div>
+      <div class="body-scroll">
+
+        <div class="section">
+          <div class="section-head">
+            <div class="num">1</div>
+            <div class="title">現状を把握</div>
+            <div class="mark">DONE</div>
+          </div>
+          <div class="section-body">
+            <div class="field"><div class="field-label">体重 <span class="req">★</span></div><div class="field-row"><input class="input" value="75.0"><span class="unit">kg</span></div></div>
+            <div class="field"><div class="field-label">体脂肪率 <span class="auto">自動</span></div><div class="field-row"><input class="input readonly" value="22.4" readonly><span class="unit">%</span></div></div>
+            <div class="field"><div class="field-label">メンテ kcal <span class="auto">ツール</span></div><div class="field-row"><input class="input readonly" value="2604" readonly><span class="unit">kcal</span></div></div>
+            <button class="tool-btn">🧮 必要カロリー計算<span class="tag">反映済</span></button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head">
+            <div class="num">2</div>
+            <div class="title">目標の選定</div>
+            <div class="mark">DONE</div>
+          </div>
+          <div class="section-body">
+            <div class="field"><div class="field-label">目標体重 <span class="req">★</span></div><div class="field-row"><input class="input" value="68.0"><span class="unit">kg</span></div></div>
+            <div class="field"><div class="field-label">到達予定 <span class="auto">自動</span></div><input class="input readonly" value="2026/08/23" readonly></div>
+            <div class="field"><div class="field-label">短期目標 <span class="req">★</span></div><input class="input" value="3 ヶ月で -5kg"></div>
+            <button class="tool-btn">📅 減量期間逆算<span class="tag">反映済</span></button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head">
+            <div class="num">3</div>
+            <div class="title">栄養設計</div>
+            <div class="mark">DONE</div>
+          </div>
+          <div class="section-body">
+            <div class="field"><div class="field-label">目標 kcal <span class="auto">ツール</span></div><div class="field-row"><input class="input readonly" value="2100" readonly><span class="unit">kcal</span></div></div>
+            <div class="field"><div class="field-label">PFC (g)</div><div class="field-row" style="gap:4px;"><input class="input readonly" value="150" readonly style="font-size:11px;"><input class="input readonly" value="58" readonly style="font-size:11px;"><input class="input readonly" value="225" readonly style="font-size:11px;"></div></div>
+            <button class="tool-btn">🍱 PFC・カーボサイクル<span class="tag">反映済</span></button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head">
+            <div class="num">4</div>
+            <div class="title">1 週間の実行プラン</div>
+            <div class="mark">DONE</div>
+          </div>
+          <div class="section-body">
+            <div class="field"><div class="field-label">いつ / どこで / 何 <span class="req">★</span></div><input class="input" value="夕方 7 時 / 家 / 筋トレ" style="font-size: 11px;"></div>
+            <div class="field">
+              <div class="field-label">週間トレ強度 <span class="auto">タップ編集可</span></div>
+              <div class="week-grid">
+                <div class="day-cell h">高</div>
+                <div class="day-cell l">低</div>
+                <div class="day-cell m">中</div>
+                <div class="day-cell l">低</div>
+                <div class="day-cell h">高</div>
+                <div class="day-cell l">低</div>
+                <div class="day-cell l">低</div>
+              </div>
+            </div>
+            <div class="field"><div class="field-label">週糖質配分 <span class="auto">自動</span></div><input class="input readonly" value="週 1575g / 平均 225g/日" readonly style="font-size: 11px;"></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head">
+            <div class="num">5</div>
+            <div class="title">プラスの感情を含むゴール</div>
+            <div class="mark">DONE</div>
+          </div>
+          <div class="section-body">
+            <div class="field"><div class="field-label">達成時の気持ち <span class="req">★</span></div><input class="input" value="自信がついて毎朝鏡を見るのが楽しい" style="font-size: 11px;"></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head">
+            <div class="num">6</div>
+            <div class="title">セルフイメージ改善</div>
+            <div class="mark todo">PENDING</div>
+          </div>
+          <div class="section-body">
+            <div style="font-size: 11px; color: #4a5f56; margin-bottom: 6px;">1. 自分の体への思考を変える</div>
+            <div class="slider-row">
+              <input type="range" min="0" max="10" value="3">
+              <input type="range" min="0" max="10" value="8">
+            </div>
+            <div style="font-size: 10px; color: #8a9690; margin-top: 8px;">他 7 項目...</div>
+          </div>
+        </div>
+
+        <div class="nori-comment">
+          <div class="h">
+            <div class="avatar">N</div>
+            <div class="name">のり社長</div>
+            <div class="date">2026/05/21</div>
+          </div>
+          <div class="text">きよむさん、初回提出ありがとう! 現実的なペースで素晴らしいです。動画でアドバイス送りました ↓</div>
+          <div class="video-link">▶ VIDEO COMMENT (3:24)</div>
+        </div>
+
+        <div class="bottom-links">
+          <div class="bottom-link">
+            <svg class="ico-svg-md" viewBox="0 0 24 24" style="stroke: #1f6b3e; fill: none; stroke-width: 2;"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+            HISTORY
+          </div>
+          <div class="bottom-link">
+            <svg class="ico-svg-md" viewBox="0 0 24 24" style="stroke: #1f6b3e; fill: none; stroke-width: 2;"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            ANALYTICS
+          </div>
+        </div>
+      </div>
+      <div class="save-bar">
+        <button class="draft">DRAFT</button>
+        <button class="save">SAVE</button>
+      </div>
+      <div class="tab-nav">
+        <div class="tab"><svg class="ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>ホーム</div>
+        <div class="tab"><svg class="ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/></svg>コース</div>
+        <div class="tab"><svg class="ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>記録</div>
+        <div class="tab"><svg class="ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><circle cx="11" cy="11" r="8"/></svg>検索</div>
+        <div class="tab"><svg class="ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><circle cx="12" cy="12" r="3"/></svg>設定</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="annotation">
+  <h3>📊 3 案の特徴 (目標管理シート画面)</h3>
+  <table>
+    <thead>
+      <tr><th>要素</th><th>A: 現状 v3</th><th>B: Nike エッセンス</th><th>C: シンプル真面目</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>セクション枠</td><td>白 + 薄緑罫線 + 影あり</td><td>白 + 細線 + 影なし</td><td>白 + 罫線のみ + 角丸 2px</td></tr>
+      <tr><td>セクションヘッダー</td><td>薄パステル緑背景</td><td>白背景 + 黒文字</td><td>白背景 + 深緑文字</td></tr>
+      <tr><td>番号バッジ</td><td>深緑塗り 角丸 6px</td><td>黒塗り 丸型</td><td>深緑塗り 角丸 2px</td></tr>
+      <tr><td>完了/未記入マーク</td><td>「✓ 済」「未記入」(日本語)</td><td>「DONE」「TODO」(英大文字)</td><td>「DONE」「PENDING」(英大文字)</td></tr>
+      <tr><td>入力フォーム</td><td>角丸 8px + 薄緑罫線</td><td>角丸 10px + 細線 + 余白広</td><td>角丸 2px + 罫線 + シャープ</td></tr>
+      <tr><td>ツール起動ボタン</td><td>深緑単色 + 角丸 8px</td><td>緑単色 + 角丸 14px + 余白広</td><td>深緑 + 角丸 2px (シャープ)</td></tr>
+      <tr><td>週間トレ強度</td><td>独立マス + 角丸 4px</td><td>独立マス + 角丸 6px</td><td>罫線連結 (グリッド一体型)</td></tr>
+      <tr><td>のり社長コメント</td><td>薄オレンジグラデ (温度感)</td><td>白背景 + 細線 (ミニマル)</td><td>白 + 罫線 + 業務的</td></tr>
+      <tr><td>ボトムリンク</td><td>独立カード + 影</td><td>独立カード + 細線</td><td>罫線連結 + UPPERCASE</td></tr>
+      <tr><td>保存ボタン</td><td>緑グラデ + 影 + 「保存する」</td><td>緑単色 + 「SAVE」</td><td>深緑 + 角丸極小 + 「SAVE」</td></tr>
+      <tr><td>進捗バー</td><td>パステル背景 + 6px 緑</td><td>白背景 + 4px 緑</td><td>罫線 + 3px 緑</td></tr>
+      <tr><td>全体印象</td><td>温度・親しみ・サイポン風</td><td>洗練・余白・集中環境</td><td>業務システム・本気・銀行アプリ風</td></tr>
+    </tbody>
+  </table>
+
+  <h3>💡 使い分けイメージ</h3>
+  <ul>
+    <li><b>A 案</b>: ホームと統一感、温度ある「初心を残す装置」感</li>
+    <li><b>B 案</b>: 集中して目標を立てる環境、ジムで自分と向き合う雰囲気</li>
+    <li><b>C 案</b>: 本気の自己管理ツール、KPI ダッシュボード的、業務感</li>
+  </ul>
+
+  <h3>⚠️ 注意</h3>
+  <ul>
+    <li>すべて静的、クリック動作なし、見た目のみ確認</li>
+    <li>セクション ⑥ は 1 項目だけ表示、実際は 8 項目</li>
+    <li>絵文字 (🧮 📅 🍱 ★) は仮置き</li>
+    <li>C 案で UPPERCASE 多用は議論余地あり (日本語ベースなら和文中心に戻す選択肢)</li>
+  </ul>
+</div>
+
+</body>
+</html>

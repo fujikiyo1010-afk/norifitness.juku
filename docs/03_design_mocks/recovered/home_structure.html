@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — ホーム構造比較</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* 明るい緑ベース (Dekitore 寄り、Tokuten 深緑とのハイブリッド) */
+    --primary: #4ECD5D;       /* メイン: 明るい緑 */
+    --primary-dark: #2EA84B;  /* 濃いめ: ボタンhover・強調 */
+    --primary-darker: #1f6b3e; /* 深緑: 見出し・スポット使用 */
+    --pastel: #D8F3E1;        /* パステル: セクション背景 */
+    --pastel-lighter: #ECFAF0; /* もっと薄い: カード背景 */
+    --line-green: #06c755;    /* LINE 緑: 外部 CTA 専用 */
+    --accent-yellow: #f5c842; /* アクセント黄 */
+    --accent-orange: #ff8a4c; /* New バッジ等 */
+    --accent-red: #e63b3b;    /* PRO限定・重要バッジ */
+
+    --ink: #1a3326;
+    --ink2: #3a6050;
+    --ink3: #6b7d75;
+    --ink4: #b0c0b8;
+    --border: #d4ead9;
+    --bg: #fff;
+    --bg-soft: #f7faf8;
+    --marker: rgba(255,235,59,.55);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #e8ebec;
+    color: var(--ink);
+    line-height: 1.6;
+    padding: 24px;
+  }
+  .page-header {
+    max-width: 1100px;
+    margin: 0 auto 32px;
+    text-align: center;
+  }
+  .page-header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .page-header p {
+    color: var(--ink3);
+    font-size: 13px;
+  }
+  .compare {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .version-label {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 12px;
+    background: var(--primary);
+    color: #fff;
+  }
+  .version-b .version-label { background: var(--primary-darker); }
+  .version-sub {
+    font-size: 12px;
+    color: var(--ink3);
+    margin: -8px 0 12px;
+  }
+  .phone {
+    width: 100%;
+    max-width: 440px;
+    margin: 0 auto;
+    background: var(--bg);
+    border: 8px solid #2a2a2a;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    font-size: 14px;
+  }
+  .phone-status {
+    background: #2a2a2a;
+    color: #fff;
+    text-align: center;
+    font-size: 11px;
+    padding: 4px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* App Header */
+  .app-header {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .app-header .logo {
+    font-weight: 700;
+    color: var(--primary-darker);
+    font-size: 16px;
+  }
+  .app-header .icons {
+    display: flex;
+    gap: 14px;
+    color: var(--ink3);
+    font-size: 18px;
+  }
+  .app-header .icons .ico-note {
+    font-size: 9px;
+    color: var(--ink3);
+    margin-left: 4px;
+    border: 1px dashed var(--ink4);
+    padding: 2px 4px;
+    border-radius: 4px;
+  }
+
+  .home-body { padding: 18px 16px; background: var(--bg-soft); }
+
+  /* 挨拶 */
+  .greet {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .greet-sub {
+    font-size: 13px;
+    color: var(--ink3);
+    margin-bottom: 18px;
+  }
+
+  /* 続きから学ぶ CTA */
+  .cta-continue {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    box-shadow: 0 6px 18px rgba(78,205,93,.30);
+    position: relative;
+  }
+  .cta-continue .label {
+    font-size: 12px;
+    opacity: .9;
+    margin-bottom: 4px;
+  }
+  .cta-continue .title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .cta-continue .sub {
+    font-size: 12px;
+    opacity: .85;
+  }
+  .cta-continue .play {
+    position: absolute;
+    top: 14px; right: 16px;
+    font-size: 32px;
+  }
+
+  .see-all-link {
+    text-align: right;
+    margin-bottom: 24px;
+  }
+  .see-all-link a {
+    color: var(--primary-darker);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  /* コース横スクロール (パターン B) */
+  .courses-section {
+    margin-bottom: 24px;
+  }
+  .courses-section .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 0 4px;
+  }
+  .courses-section .head h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .courses-section .head a {
+    font-size: 12px;
+    color: var(--primary-darker);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .courses-scroll {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 4px 4px 12px;
+    margin: 0 -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+    scroll-snap-type: x mandatory;
+  }
+  .courses-scroll::-webkit-scrollbar { height: 6px; }
+  .courses-scroll::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 9999px;
+  }
+  .course-card {
+    flex: 0 0 200px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    scroll-snap-align: start;
+    box-shadow: 0 2px 8px rgba(0,0,0,.04);
+  }
+  .course-card .thumb {
+    aspect-ratio: 16/9;
+    background: var(--pastel);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    position: relative;
+  }
+  .course-card .thumb .new {
+    position: absolute;
+    top: 8px; left: 8px;
+    background: var(--accent-orange);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .course-card .body {
+    padding: 10px 12px;
+  }
+  .course-card .body .title {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 6px;
+    color: var(--ink);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .course-card .body .meta {
+    font-size: 11px;
+    color: var(--ink3);
+    display: flex;
+    justify-content: space-between;
+  }
+  .course-card .body .bar {
+    background: var(--border);
+    height: 4px;
+    border-radius: 9999px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .course-card .body .bar > div {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 9999px;
+  }
+
+  /* 進捗 + 数値 */
+  .progress-section {
+    background: var(--pastel-lighter);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .progress-section .label {
+    font-size: 12px;
+    color: var(--ink3);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress-section .label b { color: var(--primary-darker); font-weight: 700; }
+  .bar {
+    background: #fff;
+    height: 8px;
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+  .bar > div {
+    width: 35%;
+    height: 100%;
+    background: var(--primary);
+    border-radius: 9999px;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .stat {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 8px;
+    text-align: center;
+  }
+  .stat .num {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary-darker);
+    font-family: 'Inter', sans-serif;
+  }
+  .stat .lbl {
+    font-size: 11px;
+    color: var(--ink3);
+    margin-top: 4px;
+  }
+
+  /* お知らせ */
+  .notice {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent-yellow);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13px;
+    margin-bottom: 18px;
+  }
+  .notice .head {
+    font-size: 12px;
+    color: var(--ink3);
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  .marker {
+    background: linear-gradient(transparent 60%, var(--marker) 60%);
+    font-weight: 700;
+  }
+
+  /* 下部タブ (4タブ - 漢字、カートゥーンアイコン想定) */
+  .tab-nav {
+    background: #fff;
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 8px 0;
+  }
+  .tab-nav .tab {
+    flex: 1;
+    text-align: center;
+    font-size: 11px;
+    color: var(--ink3);
+    padding: 4px;
+    position: relative;
+  }
+  .tab-nav .tab.active {
+    color: var(--primary-darker);
+    font-weight: 700;
+  }
+  .tab-nav .tab .ico {
+    font-size: 22px;
+    display: block;
+    margin-bottom: 2px;
+    /* 本実装ではカートゥーンPNG/SVGに差し替え */
+  }
+  .tab-nav .tab .ico-note {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    color: var(--ink4);
+    background: #fff;
+    padding: 1px 4px;
+    border-radius: 3px;
+    border: 1px dashed var(--ink4);
+    white-space: nowrap;
+  }
+
+  /* 注釈 */
+  .annotation {
+    margin: 24px auto 0;
+    max-width: 1100px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    font-size: 13px;
+    color: var(--ink2);
+  }
+  .annotation h3 {
+    font-size: 15px;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+  .annotation ul { padding-left: 20px; }
+  .annotation li { margin-bottom: 4px; }
+  .annotation .swatch {
+    display: inline-block;
+    width: 14px; height: 14px;
+    vertical-align: middle;
+    border-radius: 3px;
+    border: 1px solid rgba(0,0,0,.1);
+    margin-right: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>ホーム構造比較 — A: 軽量誘導型 / B: 一覧並置型</h1>
+  <p>共通ベース: 明るい緑 + 漢字 4 タブ + 右上設定 + 「コース」タブ名<br>
+  ※ 絵文字は仮置き、本実装ではカートゥーン風カラーアイコンに差し替え（点線枠内に注記）</p>
+</div>
+
+<div class="compare">
+  <!-- ========== パターン A ========== -->
+  <div class="version-a">
+    <span class="version-label">A: 軽量誘導型</span>
+    <div class="version-sub">続きから学ぶ + 「すべてのコース →」リンクで誘導</div>
+    <div class="phone">
+      <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+
+      <div class="app-header">
+        <div class="logo">のりfitness 筋肉塾</div>
+        <div class="icons">
+          🔔 ⚙️ 👤
+          <span class="ico-note">右上に通知/設定/プロフ</span>
+        </div>
+      </div>
+
+      <div class="home-body">
+        <div class="greet">こんにちは、きよむさん</div>
+        <div class="greet-sub">入会から 12 日目</div>
+
+        <div class="cta-continue">
+          <div class="play">▶</div>
+          <div class="label">続きから学ぶ</div>
+          <div class="title">第 3 章 ・ Lesson 4</div>
+          <div class="sub">PFC バランスの基礎</div>
+        </div>
+
+        <div class="see-all-link">
+          <a>📚 すべてのコースを見る →</a>
+        </div>
+
+        <div class="progress-section">
+          <div class="label"><span>全体進捗</span><b>35% (76 / 217)</b></div>
+          <div class="bar"><div></div></div>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><div class="num">47</div><div class="lbl">できた!</div></div>
+          <div class="stat"><div class="num">12.5h</div><div class="lbl">視聴時間</div></div>
+          <div class="stat"><div class="num">8日</div><div class="lbl">学習日数</div></div>
+        </div>
+
+        <div class="notice">
+          <div class="head">📢 お知らせ</div>
+          <span class="marker">6 月から新章追加予定</span>です。お楽しみに。
+        </div>
+      </div>
+
+      <div class="tab-nav">
+        <div class="tab active">
+          <span class="ico-note">家(カートゥーン)</span>
+          <span class="ico">🏠</span>ホーム
+        </div>
+        <div class="tab">
+          <span class="ico-note">本(カートゥーン)</span>
+          <span class="ico">📖</span>コース
+        </div>
+        <div class="tab">
+          <span class="ico-note">ノート(カートゥーン)</span>
+          <span class="ico">📝</span>記録
+        </div>
+        <div class="tab">
+          <span class="ico-note">虫眼鏡(カートゥーン)</span>
+          <span class="ico">🔍</span>検索
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== パターン B ========== -->
+  <div class="version-b">
+    <span class="version-label">B: 一覧並置型</span>
+    <div class="version-sub">続きから学ぶ + コース 5 つ横スクロールでホームに置く</div>
+    <div class="phone">
+      <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+
+      <div class="app-header">
+        <div class="logo">のりfitness 筋肉塾</div>
+        <div class="icons">
+          🔔 ⚙️ 👤
+          <span class="ico-note">右上に通知/設定/プロフ</span>
+        </div>
+      </div>
+
+      <div class="home-body">
+        <div class="greet">こんにちは、きよむさん</div>
+        <div class="greet-sub">入会から 12 日目</div>
+
+        <div class="cta-continue">
+          <div class="play">▶</div>
+          <div class="label">続きから学ぶ</div>
+          <div class="title">第 3 章 ・ Lesson 4</div>
+          <div class="sub">PFC バランスの基礎</div>
+        </div>
+
+        <div class="courses-section">
+          <div class="head">
+            <h3>📚 すべてのコース (5)</h3>
+            <a>一覧 →</a>
+          </div>
+          <div class="courses-scroll">
+            <div class="course-card">
+              <div class="thumb">🏃
+                <span class="new">New</span>
+              </div>
+              <div class="body">
+                <div class="title">限定ボディメイク完全ロードマップ</div>
+                <div class="meta"><span>7章 79本</span><span>45%</span></div>
+                <div class="bar"><div style="width:45%"></div></div>
+              </div>
+            </div>
+            <div class="course-card">
+              <div class="thumb">🎥</div>
+              <div class="body">
+                <div class="title">筋肉塾限定講義 live アーカイブ</div>
+                <div class="meta"><span>5章 55本</span><span>22%</span></div>
+                <div class="bar"><div style="width:22%"></div></div>
+              </div>
+            </div>
+            <div class="course-card">
+              <div class="thumb">🧠</div>
+              <div class="body">
+                <div class="title">マインドセット コンテンツ</div>
+                <div class="meta"><span>2章 21本</span><span>67%</span></div>
+                <div class="bar"><div style="width:67%"></div></div>
+              </div>
+            </div>
+            <div class="course-card">
+              <div class="thumb">💪</div>
+              <div class="body">
+                <div class="title">筋トレのフォーム解説</div>
+                <div class="meta"><span>7章 40本</span><span>15%</span></div>
+                <div class="bar"><div style="width:15%"></div></div>
+              </div>
+            </div>
+            <div class="course-card">
+              <div class="thumb">🥗</div>
+              <div class="body">
+                <div class="title">ダイエットレシピ 動画解説版</div>
+                <div class="meta"><span>1章 22本</span><span>0%</span></div>
+                <div class="bar"><div style="width:0%"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="progress-section">
+          <div class="label"><span>全体進捗</span><b>35% (76 / 217)</b></div>
+          <div class="bar"><div></div></div>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><div class="num">47</div><div class="lbl">できた!</div></div>
+          <div class="stat"><div class="num">12.5h</div><div class="lbl">視聴時間</div></div>
+          <div class="stat"><div class="num">8日</div><div class="lbl">学習日数</div></div>
+        </div>
+
+        <div class="notice">
+          <div class="head">📢 お知らせ</div>
+          <span class="marker">6 月から新章追加予定</span>です
+        </div>
+      </div>
+
+      <div class="tab-nav">
+        <div class="tab active">
+          <span class="ico-note">家(カートゥーン)</span>
+          <span class="ico">🏠</span>ホーム
+        </div>
+        <div class="tab">
+          <span class="ico-note">本(カートゥーン)</span>
+          <span class="ico">📖</span>コース
+        </div>
+        <div class="tab">
+          <span class="ico-note">ノート(カートゥーン)</span>
+          <span class="ico">📝</span>記録
+        </div>
+        <div class="tab">
+          <span class="ico-note">虫眼鏡(カートゥーン)</span>
+          <span class="ico">🔍</span>検索
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="annotation">
+  <h3>📋 比較メモ</h3>
+
+  <p><b>A: 軽量誘導型</b></p>
+  <ul>
+    <li>✅ ホームが短くて速い（スクロール 1-2 回で全部見える）</li>
+    <li>✅ 「続きから学ぶ」の一点突破、迷いが少ない</li>
+    <li>⚠️ コース全体像はタブ移動が必要、初回ユーザーが「どこに教材が?」と一瞬迷う可能性</li>
+    <li>🔧 軽減策: CTA 直下に「📚 すべてのコースを見る →」の目立つテキストリンク常駐</li>
+  </ul>
+
+  <p style="margin-top: 12px;"><b>B: 一覧並置型</b></p>
+  <ul>
+    <li>✅ コンテンツの全体像が一目で見える（5 コースを横スクロールで一望）</li>
+    <li>✅ 各コースの進捗バーがホームで分かる、次のコース選択も自然</li>
+    <li>⚠️ ホームが縦長になる、CTA とコース一覧の視線競合あり</li>
+    <li>⚠️ 既存「学ぶ→章→レッスン」の階層とホーム表示の役割分担が曖昧化</li>
+    <li>🔧 軽減策: コースカードは小さめ・横スクロールに留め、「縦に積まない」</li>
+  </ul>
+
+  <p style="margin-top: 16px;">🎨 <b>採用した色味（場所別使い分け）</b></p>
+  <ul>
+    <li><span class="swatch" style="background:#4ECD5D"></span>明るい緑 <code>#4ECD5D</code> — メイン CTA・進捗バー・active 強調</li>
+    <li><span class="swatch" style="background:#2EA84B"></span>濃いめ緑 <code>#2EA84B</code> — ボタン hover・グラデの下色</li>
+    <li><span class="swatch" style="background:#1f6b3e"></span>深緑 <code>#1f6b3e</code> — 見出し・active ラベル文字（読み応え担保）</li>
+    <li><span class="swatch" style="background:#D8F3E1"></span>パステル <code>#D8F3E1</code> — コースサムネ背景</li>
+    <li><span class="swatch" style="background:#ECFAF0"></span>薄パステル <code>#ECFAF0</code> — 進捗ボックス背景</li>
+    <li><span class="swatch" style="background:#f5c842"></span>黄アクセント <code>#f5c842</code> — お知らせ縁・マーカー</li>
+    <li><span class="swatch" style="background:#ff8a4c"></span>橙 <code>#ff8a4c</code> — New バッジ</li>
+    <li><span class="swatch" style="background:#1a3326"></span>文字最濃 <code>#1a3326</code> — 純黒回避</li>
+  </ul>
+
+  <p style="margin-top: 16px;">🎯 <b>反映した決定事項</b></p>
+  <ul>
+    <li>下部タブ: <b>4 タブ + 右上設定アイコン</b>（ホーム/コース/記録/検索）</li>
+    <li>「学ぶ」→ <b>「コース」</b>に改名（コンテンツがどこにあるか直感的に）</li>
+    <li>アイコンは現状絵文字仮置き → 本実装で<b>カートゥーン風カラーイラスト</b>に差し替え</li>
+    <li>設定画面（別画面）では絵文字を使わず、機能アイコン中心で硬派寄りに</li>
+    <li>キャラクター（添付画像のトレーナー）はホームに常駐させず、起動画面/空状態/章末祝福の 2-3 箇所に限定</li>
+  </ul>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — 月次添削 送信完了</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --ink4: #ccc;
+    --border: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f8f9fa;
+    --bg-warm: linear-gradient(135deg, #e0f2f1, #fffbe6);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #e8ebec;
+    color: var(--ink);
+    line-height: 1.6;
+    padding: 24px;
+  }
+  .page-header {
+    max-width: 900px;
+    margin: 0 auto 32px;
+    text-align: center;
+  }
+  .page-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .page-header p {
+    color: #6b7d75;
+    font-size: 13px;
+  }
+  .stage {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 440px 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  .phone {
+    width: 100%;
+    max-width: 440px;
+    background: var(--bg);
+    border: 8px solid #2a2a2a;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    min-height: 700px;
+  }
+  .phone-status {
+    background: #2a2a2a;
+    color: #fff;
+    text-align: center;
+    font-size: 11px;
+    padding: 4px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* 送信完了画面の本体 */
+  .complete-screen {
+    flex: 1;
+    background: var(--bg-warm);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 28px;
+    text-align: center;
+  }
+
+  /* キャラ画像 (実画像、scale で黒円を枠外に追い出す) */
+  .character {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+    background: #fff;
+    animation: charPopIn 0.6s ease-out;
+  }
+  .character img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transform: scale(1.2);
+  }
+  @keyframes charPopIn {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .character-note {
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    color: var(--ink3);
+    background: #fff;
+    padding: 1px 6px;
+    border-radius: 4px;
+    border: 1px dashed var(--ink4);
+    white-space: nowrap;
+  }
+
+  /* チェックマーク */
+  .check {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    animation: checkPopIn 0.5s ease-out 0.3s both;
+    box-shadow: 0 4px 12px rgba(0,137,123,.25);
+  }
+  @keyframes checkPopIn {
+    0% { transform: scale(0) rotate(-90deg); opacity: 0; }
+    60% { transform: scale(1.15) rotate(0deg); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .check svg {
+    width: 28px; height: 28px;
+    stroke: #fff;
+    fill: none;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .title-main {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 8px;
+    animation: fadeUp 0.5s ease-out 0.5s both;
+  }
+  .title-sub {
+    font-size: 14px;
+    color: var(--ink2);
+    margin-bottom: 32px;
+    animation: fadeUp 0.5s ease-out 0.6s both;
+  }
+  @keyframes fadeUp {
+    from { transform: translateY(8px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  /* ステータスカード */
+  .status-card {
+    background: rgba(255,255,255,.85);
+    border: 1px solid rgba(0,137,123,.15);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 28px;
+    width: 100%;
+    max-width: 340px;
+    animation: fadeUp 0.5s ease-out 0.7s both;
+  }
+  .status-card .status-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--ink2);
+    margin-bottom: 8px;
+  }
+  .status-card .status-row:last-child { margin-bottom: 0; }
+  .status-card .status-row .ico {
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .status-card .status-row .text {
+    flex: 1;
+    text-align: left;
+  }
+  .status-card .status-row .text b {
+    color: var(--primary-dark);
+    font-weight: 700;
+  }
+  .status-card .status-row .timestamp {
+    font-size: 10px;
+    color: var(--ink3);
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* CTA ボタン */
+  .cta-btn {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    padding: 14px 24px;
+    font-size: 13px;
+    font-weight: 700;
+    width: 100%;
+    max-width: 340px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(0,137,123,.25);
+    animation: fadeUp 0.5s ease-out 0.8s both;
+  }
+  .cta-btn .arr { font-size: 16px; }
+
+  .secondary-link {
+    margin-top: 14px;
+    font-size: 11px;
+    color: var(--ink3);
+    text-decoration: none;
+    animation: fadeUp 0.5s ease-out 0.9s both;
+  }
+
+  /* 注釈 */
+  .annotation {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    font-size: 13px;
+    color: #555;
+    position: sticky;
+    top: 24px;
+  }
+  .annotation h3 {
+    font-size: 14px;
+    color: var(--ink);
+    margin: 14px 0 8px;
+  }
+  .annotation h3:first-child { margin-top: 0; }
+  .annotation ul { padding-left: 20px; }
+  .annotation li { margin-bottom: 4px; font-size: 12px; }
+  .annotation code {
+    background: var(--bg-soft);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>📋 月次添削 — 送信完了画面 (1.5/3)</h1>
+  <p>フォーム送信後の表示 ・ A+B ハイブリッド (シンプル完了 + キャラ + ステータス + 履歴遷移)</p>
+</div>
+
+<div class="stage">
+  <div class="phone">
+    <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+
+    <div class="complete-screen">
+      <!-- キャラ画像 -->
+      <div class="character">
+        <img src="images/nori-character.png" alt="のりキャラクター">
+      </div>
+
+      <!-- チェックマーク -->
+      <div class="check">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+
+      <!-- メイン文言 -->
+      <div class="title-main">送信完了!</div>
+      <div class="title-sub">今月もお疲れさまでした</div>
+
+      <!-- ステータスカード -->
+      <div class="status-card">
+        <div class="status-row">
+          <span class="ico">✓</span>
+          <span class="text"><b>送信完了</b></span>
+          <span class="timestamp">2026/05/01 09:30</span>
+        </div>
+        <div class="status-row">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:middle;"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>
+          <span class="text">のりfitness が <b>確認中</b>…</span>
+        </div>
+        <div class="status-row">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:middle;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+          <span class="text">返信は <b>数日以内</b> にお届けします</span>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <button class="cta-btn">
+        月次添削履歴を見る
+        <span class="arr">→</span>
+      </button>
+
+      <a class="secondary-link">ホームに戻る</a>
+    </div>
+  </div>
+
+  <div class="annotation">
+    <h3>🗺 構成</h3>
+    <ul>
+      <li><b>背景</b>: ヘッダー統合ブロックと同じ温かグラデ (E 案: #e0f2f1 → #fffbe6)</li>
+      <li><b>キャラ画像</b>: 中央上、円形、白枠 + 影 (現在は 🏋️ プレースホルダー、実装時にトレーナーキャラ差し替え)</li>
+      <li><b>✓ チェックマーク</b>: ティール緑円、白チェック (達成感)</li>
+      <li><b>メイン文言</b>: 「送信完了!」(22px 太字) + 「今月もお疲れさまでした」(14px)</li>
+      <li><b>ステータスカード</b>: 3 行 (送信完了 + 確認中 + 返信予定)</li>
+      <li><b>CTA</b>: 「月次添削履歴を見る →」(ティール緑)</li>
+      <li><b>サブリンク</b>: 「ホームに戻る」(小さく)</li>
+    </ul>
+
+    <h3>🎬 アニメーション</h3>
+    <ul>
+      <li>キャラ画像: スケールアップ (0.6s)</li>
+      <li>チェック: 回転 + スケール (0.5s, 0.3s 遅延)</li>
+      <li>文言・カード・ボタン: 順次フェードアップ (0.5s 間隔)</li>
+      <li>→ 「ご褒美感」「達成感」を演出</li>
+    </ul>
+
+    <h3>🔄 表示後の挙動 (実装時)</h3>
+    <ul>
+      <li>5-10 秒くらいで自動的に <code>月次添削履歴画面</code> へ遷移 (任意)</li>
+      <li>または、ユーザーが「月次添削履歴を見る」or「ホームに戻る」をタップして遷移</li>
+      <li>履歴画面では「⏳ 2026/05/01 提出 ・ のりfitness 確認中」として表示</li>
+    </ul>
+
+    <h3>✅ 反映した合意事項</h3>
+    <ul>
+      <li><b>A 案 (シンプル完了)</b>: ✓ アイコン + 「送信完了」</li>
+      <li><b>B 案 (キャラ + 感謝)</b>: キャラ + 「今月もお疲れさまでした」</li>
+      <li><b>C 案 (時系列ステータス)</b>: 確認中 + 返信予定</li>
+      <li><b>履歴遷移</b>: メイン CTA で誘導</li>
+    </ul>
+
+    <h3>⚠️ 未確定</h3>
+    <ul>
+      <li>キャラ画像の実差し替え (添付トレーナーキャラのパス・配置先)</li>
+      <li>キャラのポーズ (普通版 vs 親指立てる祝福ポーズ等)</li>
+      <li>自動遷移 vs 手動遷移 のどちらか</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

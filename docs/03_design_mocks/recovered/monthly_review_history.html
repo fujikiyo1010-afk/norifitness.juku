@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — 月次添削 履歴 (2/3)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --ink4: #ccc;
+    --border: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f8f9fa;
+    --bg-warm: linear-gradient(135deg, #e0f2f1, #fffbe6);
+    --yellow-bg: rgba(255,235,59,.12);
+    --yellow-strong: rgba(255,235,59,.55);
+    --yellow-name: #b8860b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #e8ebec;
+    color: var(--ink);
+    line-height: 1.6;
+    padding: 24px;
+  }
+  .page-header {
+    max-width: 1200px;
+    margin: 0 auto 32px;
+    text-align: center;
+  }
+  .page-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .page-header p {
+    color: #6b7d75;
+    font-size: 13px;
+  }
+  .stage {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 440px 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  .phone {
+    width: 100%;
+    max-width: 440px;
+    background: var(--bg);
+    border: 8px solid #2a2a2a;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    min-height: 800px;
+  }
+  .phone-status {
+    background: #2a2a2a;
+    color: #fff;
+    text-align: center;
+    font-size: 11px;
+    padding: 4px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* === ヘッダー === */
+  .app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    background: #fff;
+  }
+  .app-header .back {
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink);
+  }
+  .app-header .title-h {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .app-header .spacer { width: 24px; }
+
+  /* === スクロール本体 === */
+  .scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 80px;
+    background: #fafbfa;
+  }
+
+  /* === ブロック共通 === */
+  .block {
+    background: #fff;
+    margin: 16px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .block-head {
+    padding: 14px 18px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .block-head .ttl {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink2);
+    letter-spacing: .04em;
+  }
+  .block-head .hint {
+    font-size: 11px;
+    color: var(--ink3);
+  }
+  .block-body {
+    padding: 0 18px 18px;
+  }
+
+  /* === ブロック A: 最新月ステータス (4 状態カード) === */
+  .state-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .state-card {
+    border-radius: 14px;
+    padding: 14px 16px;
+  }
+  .state-card-a { background: #fff; border: 0.5px solid var(--border); }
+  .state-card-b { background: #fff; border: 1px solid var(--primary); }
+  .state-card-c { background: #fafafa; border: 0.5px solid var(--border); }
+  .state-card-d {
+    background: var(--yellow-bg);
+    border: 1px solid var(--yellow-strong);
+  }
+  .s-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 9999px;
+  }
+  .s-badge-a { background: #f8f9fa; color: var(--ink2); border: 0.5px solid var(--border); }
+  .s-badge-b { background: rgba(0,137,123,.1); color: var(--primary-dark); border: 0.5px solid var(--primary); }
+  .s-badge-c { background: #fff; color: var(--ink3); border: 0.5px solid var(--ink4); }
+  .s-badge-d { background: var(--yellow-name); color: #fff; }
+  .s-head {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    margin: 8px 0 6px;
+    display: flex;
+    align-items: center;
+  }
+  .s-desc {
+    font-size: 11px;
+    color: var(--ink2);
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+  .s-cta {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .s-cta-primary { background: var(--primary); color: #fff; }
+  .s-cta-mute { background: #fff; color: var(--ink2); border: 0.5px solid var(--border); }
+  .s-cta-dark {
+    background: var(--ink); color: #fff;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .s-cta-dark .play-arr { color: var(--primary); }
+  .s-progress {
+    height: 4px;
+    background: #f0f2f1;
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 0 0 10px;
+  }
+  .s-progress > div {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 2px;
+  }
+  .s-blink {
+    display: inline-flex;
+    gap: 3px;
+    margin-left: 8px;
+  }
+  .s-blink span {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--ink3);
+    animation: sBlink 1.4s infinite;
+  }
+  .s-blink span:nth-child(2) { animation-delay: .2s; }
+  .s-blink span:nth-child(3) { animation-delay: .4s; }
+  @keyframes sBlink {
+    0%, 60%, 100% { opacity: .25; }
+    30% { opacity: 1; }
+  }
+  .s-meta {
+    font-size: 10px;
+    color: var(--ink3);
+    text-align: center;
+    margin-top: 8px;
+    font-family: 'Inter', sans-serif;
+  }
+  /* モック比較用ラベル (状態区切り) */
+  .state-mock-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--ink3);
+    letter-spacing: .08em;
+    margin-bottom: -6px;
+    padding-left: 4px;
+  }
+
+  /* === ブロック B: 推移ビジュアライズ === */
+  /* レーダー版 */
+  .radar-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0;
+  }
+  .radar-svg { width: 240px; height: 240px; }
+  .radar-legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--ink2);
+  }
+  .radar-legend .dot {
+    display: inline-block;
+    width: 10px; height: 2px;
+    vertical-align: middle;
+    margin-right: 4px;
+  }
+  .radar-legend .now { background: var(--primary); }
+  .radar-legend .past { background: var(--ink4); border-top: 1px dashed var(--ink3); }
+
+  /* バー版 */
+  .bar-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 4px 0;
+  }
+  .bar-row {
+    display: grid;
+    grid-template-columns: 76px 1fr 32px;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+  }
+  .bar-row .lbl { color: var(--ink2); }
+  .bar-row .track {
+    height: 8px;
+    background: #f0f2f1;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+  .bar-row .fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 4px;
+  }
+  .bar-row .num {
+    font-family: 'Inter', sans-serif;
+    color: var(--primary-dark);
+    font-weight: 600;
+    text-align: right;
+  }
+  .bar-row .past-mark {
+    position: absolute;
+    top: -3px;
+    width: 2px;
+    height: 14px;
+    background: var(--ink3);
+    border-radius: 1px;
+  }
+  .bar-note {
+    margin-top: 8px;
+    font-size: 10px;
+    color: var(--ink3);
+  }
+  .scoreboard-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 16px 0;
+  }
+
+  /* 折れ線グラフ */
+  .line-wrap { padding: 8px 0; }
+  .line-svg { width: 100%; height: 120px; }
+  .line-axis {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 10px;
+    color: var(--ink3);
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* === ブロック C: 月別ログ一覧 === */
+  .log-list { padding: 4px 0; }
+  .log-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .log-row:last-child { border-bottom: none; }
+  .log-row .left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .log-row .month {
+    font-weight: 600;
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+  }
+  .log-row .badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--bg-soft);
+    color: var(--ink2);
+  }
+  .log-row .badge.replied {
+    background: rgba(0,137,123,.1);
+    color: var(--primary-dark);
+  }
+  .log-row .badge.waiting {
+    background: rgba(255,235,59,.18);
+    color: var(--yellow-name);
+  }
+  .log-row .arr {
+    color: var(--ink3);
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* === コンパレ用ラベル === */
+  .compare-label {
+    display: inline-block;
+    background: #fff3cd;
+    color: #8b6914;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 3px;
+    letter-spacing: .04em;
+  }
+
+  /* === 下部タブ === */
+  .tabbar {
+    display: flex;
+    border-top: 1px solid var(--border);
+    background: #fff;
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px 4px 8px;
+    font-size: 10px;
+    color: var(--ink3);
+  }
+  .tab.active { color: var(--primary); font-weight: 700; }
+  .tab .icon {
+    display: block;
+    margin: 0 auto 2px;
+    width: 20px;
+    height: 20px;
+  }
+  .tab .icon svg {
+    width: 100%;
+    height: 100%;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* === 注釈 === */
+  .annotation {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    font-size: 13px;
+    color: #555;
+    position: sticky;
+    top: 24px;
+  }
+  .annotation h3 {
+    font-size: 14px;
+    color: var(--ink);
+    margin: 18px 0 8px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 4px;
+  }
+  .annotation h3:first-child { margin-top: 0; }
+  .annotation h4 {
+    font-size: 12px;
+    color: var(--primary-dark);
+    margin: 10px 0 4px;
+  }
+  .annotation ul { padding-left: 20px; }
+  .annotation li { margin-bottom: 4px; font-size: 12px; }
+  .annotation .vs {
+    background: var(--bg-soft);
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin: 8px 0;
+    font-size: 11px;
+  }
+  .annotation .vs b { color: var(--primary-dark); }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>📋 月次添削 — 履歴閲覧画面 (2/3)</h1>
+  <p>ブロック A (最新月) + ブロック B (推移、レーダー vs バー 比較) + ブロック C (月別ログ)</p>
+</div>
+
+<div class="stage">
+
+  <!-- ============ スマホモック ============ -->
+  <div class="phone">
+    <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+
+    <!-- ヘッダー -->
+    <div class="app-header">
+      <div class="back">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </div>
+      <div class="title-h">月次添削 履歴</div>
+      <div class="spacer"></div>
+    </div>
+
+    <div class="scroll">
+
+      <!-- ====== ブロック A: 最新月ステータス (4 状態カード) ====== -->
+      <div class="block">
+        <div class="block-head">
+          <div class="ttl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:middle;margin-right:5px;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>今月の月次添削</div>
+          <span class="hint">実装時は状態に応じて 1 つだけ表示</span>
+        </div>
+        <div class="block-body">
+          <div class="state-stack">
+
+            <!-- 状態 A: 未記入 -->
+            <div class="state-mock-label">状態 A ・ 未記入</div>
+            <div class="state-card state-card-a">
+              <span class="s-badge s-badge-a">今月分</span>
+              <div class="s-head">月次添削が届いています</div>
+              <div class="s-desc">17 項目を振り返り、のりfitness に提出すると動画で返信が届きます。途中保存もできるので無理せずに。</div>
+              <button class="s-cta s-cta-primary">記入を始める</button>
+            </div>
+
+            <!-- 状態 B: 記入中 -->
+            <div class="state-mock-label">状態 B ・ 記入中 (途中保存中)</div>
+            <div class="state-card state-card-b">
+              <span class="s-badge s-badge-b">記入中</span>
+              <div class="s-head">8 / 17 項目まで進んでいます</div>
+              <div class="s-progress"><div style="width: 47%"></div></div>
+              <div class="s-desc">最後に保存: 2026/05/15 21:34<br>提出するまで、のりfitness には届きません。</div>
+              <button class="s-cta s-cta-primary">続きから記入する</button>
+            </div>
+
+            <!-- 状態 C: 提出済み・返信待ち -->
+            <div class="state-mock-label">状態 C ・ 提出済み (返信待ち)</div>
+            <div class="state-card state-card-c">
+              <span class="s-badge s-badge-c">提出済み</span>
+              <div class="s-head">のりfitness が動画返信を準備中<span class="s-blink"><span></span><span></span><span></span></span></div>
+              <div class="s-desc">提出いただきありがとうございました。動画返信は通常 数日以内 にお届けします。届いたらこの画面に表示されます。</div>
+              <button class="s-cta s-cta-mute">提出した内容を見直す</button>
+              <div class="s-meta">提出 2026/05/01 ・ 経過 3 日</div>
+            </div>
+
+            <!-- 状態 D: 返信届いた -->
+            <div class="state-mock-label">状態 D ・ 返信届いた</div>
+            <div class="state-card state-card-d">
+              <span class="s-badge s-badge-d">のりfitness から返信</span>
+              <div class="s-head">動画返信が届きました</div>
+              <div class="s-desc">5 月分の添削に動画でお返事しています。記入内容と一緒にご覧ください。</div>
+              <button class="s-cta s-cta-dark"><span class="play-arr">▶</span> 5 月分を開く</button>
+              <div class="s-meta">返信 2026/05/04 ・ 視聴 2 回</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== ブロック B-1: カテゴリ別スコア (レーダー + バー 統合) ====== -->
+      <div class="block">
+        <div class="block-head">
+          <div class="ttl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:middle;margin-right:5px;"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>カテゴリ別スコア</div>
+        </div>
+        <div class="block-body">
+          <!-- レーダー (全体バランス) -->
+          <div class="radar-wrap">
+            <svg class="radar-svg" viewBox="-130 -130 260 260">
+              <!-- グリッド (5段階) -->
+              <g stroke="#e8ebe9" fill="none" stroke-width="1">
+                <polygon points="0,-100 86.6,-50 86.6,50 0,100 -86.6,50 -86.6,-50"/>
+                <polygon points="0,-80 69.3,-40 69.3,40 0,80 -69.3,40 -69.3,-40"/>
+                <polygon points="0,-60 52,-30 52,30 0,60 -52,30 -52,-30"/>
+                <polygon points="0,-40 34.6,-20 34.6,20 0,40 -34.6,20 -34.6,-20"/>
+                <polygon points="0,-20 17.3,-10 17.3,10 0,20 -17.3,10 -17.3,-10"/>
+              </g>
+              <!-- 軸線 -->
+              <g stroke="#e8ebe9" stroke-width="1">
+                <line x1="0" y1="0" x2="0" y2="-100"/>
+                <line x1="0" y1="0" x2="86.6" y2="-50"/>
+                <line x1="0" y1="0" x2="86.6" y2="50"/>
+                <line x1="0" y1="0" x2="0" y2="100"/>
+                <line x1="0" y1="0" x2="-86.6" y2="50"/>
+                <line x1="0" y1="0" x2="-86.6" y2="-50"/>
+              </g>
+              <!-- 3 ヶ月前 (点線・グレー) -->
+              <polygon points="0,-60 52,-30 60.6,35 0,70 -60.6,35 -52,-30"
+                fill="rgba(136,136,136,.08)" stroke="#888" stroke-width="1.5" stroke-dasharray="4 3"/>
+              <!-- 最新月 (実線・ティール) -->
+              <polygon points="0,-80 69.3,-40 78,45 0,80 -52,30 -69.3,-40"
+                fill="rgba(0,137,123,.15)" stroke="#00897b" stroke-width="2"/>
+              <!-- ラベル -->
+              <g fill="#555" font-size="10" font-family="Noto Sans JP" text-anchor="middle">
+                <text x="0" y="-110">体・体型</text>
+                <text x="100" y="-55">食事</text>
+                <text x="100" y="60">運動</text>
+                <text x="0" y="118">休息</text>
+                <text x="-100" y="60">学習</text>
+                <text x="-100" y="-55">振り返り</text>
+              </g>
+            </svg>
+            <div class="radar-legend">
+              <span><span class="dot now"></span>2026年5月</span>
+              <span><span class="dot past"></span>3ヶ月前</span>
+            </div>
+          </div>
+
+          <!-- 区切り線 -->
+          <div class="scoreboard-divider"></div>
+
+          <!-- バー (数値詳細) -->
+          <div class="bar-list">
+            <div class="bar-row">
+              <div class="lbl">体・体型</div>
+              <div class="track"><div class="fill" style="width:80%"></div><div class="past-mark" style="left:60%"></div></div>
+              <div class="num">8.0</div>
+            </div>
+            <div class="bar-row">
+              <div class="lbl">食事</div>
+              <div class="track"><div class="fill" style="width:85%"></div><div class="past-mark" style="left:65%"></div></div>
+              <div class="num">8.5</div>
+            </div>
+            <div class="bar-row">
+              <div class="lbl">運動</div>
+              <div class="track"><div class="fill" style="width:75%"></div><div class="past-mark" style="left:70%"></div></div>
+              <div class="num">7.5</div>
+            </div>
+            <div class="bar-row">
+              <div class="lbl">休息</div>
+              <div class="track"><div class="fill" style="width:55%"></div><div class="past-mark" style="left:50%"></div></div>
+              <div class="num">5.5</div>
+            </div>
+            <div class="bar-row">
+              <div class="lbl">学習</div>
+              <div class="track"><div class="fill" style="width:70%"></div><div class="past-mark" style="left:55%"></div></div>
+              <div class="num">7.0</div>
+            </div>
+            <div class="bar-row">
+              <div class="lbl">振り返り</div>
+              <div class="track"><div class="fill" style="width:65%"></div><div class="past-mark" style="left:50%"></div></div>
+              <div class="num">6.5</div>
+            </div>
+          </div>
+          <div class="bar-note">縦線 | は 3 ヶ月前の位置 ・ 数値は 10 点満点</div>
+        </div>
+      </div>
+
+      <!-- ====== ブロック B-2: 月次推移グラフ ====== -->
+      <div class="block">
+        <div class="block-head">
+          <div class="ttl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:middle;margin-right:5px;"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>月次推移 (17 項目 平均)</div>
+        </div>
+        <div class="block-body">
+          <div class="line-wrap">
+            <svg class="line-svg" viewBox="0 0 340 120" preserveAspectRatio="none">
+              <!-- グリッド線 -->
+              <g stroke="#e8ebe9" stroke-width="1">
+                <line x1="0" y1="20" x2="340" y2="20"/>
+                <line x1="0" y1="60" x2="340" y2="60"/>
+                <line x1="0" y1="100" x2="340" y2="100"/>
+              </g>
+              <!-- 折れ線 -->
+              <polyline
+                fill="none"
+                stroke="#00897b"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                points="20,80 75,72 130,68 185,50 240,55 295,40"
+              />
+              <!-- ポイント -->
+              <g fill="#00897b">
+                <circle cx="20" cy="80" r="3.5"/>
+                <circle cx="75" cy="72" r="3.5"/>
+                <circle cx="130" cy="68" r="3.5"/>
+                <circle cx="185" cy="50" r="3.5"/>
+                <circle cx="240" cy="55" r="3.5"/>
+                <circle cx="295" cy="40" r="4.5" stroke="#fff" stroke-width="2"/>
+              </g>
+            </svg>
+            <div class="line-axis">
+              <span>12月</span><span>1月</span><span>2月</span><span>3月</span><span>4月</span><span>5月</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== ブロック C: 月別ログ一覧 ====== -->
+      <div class="block">
+        <div class="block-head">
+          <div class="ttl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:middle;margin-right:5px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>過去の月次添削</div>
+          <span class="hint">タップで詳細</span>
+        </div>
+        <div class="block-body">
+          <div class="log-list">
+            <div class="log-row">
+              <div class="left">
+                <span class="month">2026 年 4 月</span>
+                <span class="badge replied">✓ 返信あり</span>
+              </div>
+              <span class="arr">▶</span>
+            </div>
+            <div class="log-row">
+              <div class="left">
+                <span class="month">2026 年 3 月</span>
+                <span class="badge replied">✓ 返信あり</span>
+              </div>
+              <span class="arr">▶</span>
+            </div>
+            <div class="log-row">
+              <div class="left">
+                <span class="month">2026 年 2 月</span>
+                <span class="badge replied">✓ 返信あり</span>
+              </div>
+              <span class="arr">▶</span>
+            </div>
+            <div class="log-row">
+              <div class="left">
+                <span class="month">2026 年 1 月</span>
+                <span class="badge replied">✓ 返信あり</span>
+              </div>
+              <span class="arr">▶</span>
+            </div>
+            <div class="log-row">
+              <div class="left">
+                <span class="month">2025 年 12 月</span>
+                <span class="badge replied">✓ 返信あり</span>
+              </div>
+              <span class="arr">▶</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 下部タブ -->
+    <div class="tabbar">
+      <div class="tab"><span class="icon"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>ホーム</div>
+      <div class="tab"><span class="icon"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>コース</div>
+      <div class="tab active"><span class="icon"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>記録</div>
+      <div class="tab"><span class="icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>検索</div>
+      <div class="tab"><span class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>設定</div>
+    </div>
+  </div>
+
+  <!-- ============ 注釈 ============ -->
+  <div class="annotation">
+    <h3>🗺 全体構成</h3>
+    <ul>
+      <li><b>ヘッダー</b>: ← 戻る + 「月次添削 履歴」 (シンプル)</li>
+      <li><b>ブロック A</b>: 最新月の 4 状態カード (A 未記入 / B 記入中 / C 提出済み・返信待ち / D 返信届いた) ← 別チャット指示反映</li>
+      <li><b>ブロック B</b>: 推移ビジュアライズ
+        <ul>
+          <li>B-1: <b>カテゴリ別スコア</b> = レーダー (全体バランス) + バー (数値詳細) を 1 ブロックに統合</li>
+          <li>B-2: 月次推移グラフ (折れ線)</li>
+        </ul>
+      </li>
+      <li><b>ブロック C</b>: 月別ログ一覧 (タップで詳細遷移)</li>
+    </ul>
+    <p style="font-size: 11px; color: var(--ink3); margin-top: 8px;">※ ブロック A は 4 状態を比較できるよう縦並びで全部見せています。実装時は受講生の現在状態に応じて 1 つだけ表示。</p>
+
+    <h3>📋 ブロック A: 4 状態カードの判定</h3>
+    <table style="font-size: 11px; width: 100%; border-collapse: collapse;">
+      <tr><th style="text-align:left;padding:4px;border-bottom:1px solid var(--border);">状態</th><th style="text-align:left;padding:4px;border-bottom:1px solid var(--border);">条件</th></tr>
+      <tr><td style="padding:4px;">A 未記入</td><td style="padding:4px;">monthly_audits レコードなし、または items_filled_count = 0</td></tr>
+      <tr><td style="padding:4px;">B 記入中</td><td style="padding:4px;">submitted_at IS NULL かつ items_filled_count > 0</td></tr>
+      <tr><td style="padding:4px;">C 提出済み</td><td style="padding:4px;">submitted_at IS NOT NULL かつ nori_video_published_at IS NULL</td></tr>
+      <tr><td style="padding:4px;">D 返信届</td><td style="padding:4px;">nori_video_published_at IS NOT NULL</td></tr>
+    </table>
+    <p style="font-size: 11px; color: var(--ink3); margin-top: 6px;"><b>重要原則</b>: 「提出ボタンを押した瞬間が、初めて のりfitness に通知される境界線」。記入中 (状態 B) は受講生個人の作業領域、のりfitness 側からは一切見えない。</p>
+
+    <h3>⚖️ レーダー + バー 併用の役割分担</h3>
+    <div class="vs">
+      <b>レーダー (上)</b>: 全体バランスを直感的に把握。月の傾向を一目で。<br>
+      <b>バー (下)</b>: 個別カテゴリの正確な数値 + 前回値との比較 (縦線 |)。
+    </div>
+    <p style="font-size: 11px; margin-top: 8px; color: var(--ink2);">→ <b>「ざっくり概観 → 詳細数値」</b> の流れで自然に読める。同じデータの 2 つの見方として並列。</p>
+
+    <h3>🎨 デザイン採用ルール</h3>
+    <ul>
+      <li>ブロック A の背景 = E案グラデ + 薄黄縁取り (のりfitnessコメント = 黄色 のブランド一貫)</li>
+      <li>動画返信カード = 黄マーカー背景 + 名前色 #b8860b</li>
+      <li>カテゴリ別スコア = ティール緑 #00897b 統一</li>
+      <li>折れ線グラフ = 最新月のポイントだけ大きめ + 白縁</li>
+      <li>月別ログ = シンプル list 行 (overview と同じノリ)</li>
+    </ul>
+
+    <h3>⚠️ 現状の前提・未確定</h3>
+    <ul>
+      <li>動画サムネ画像 = 黒プレースホルダー (実装時は実動画から自動生成)</li>
+      <li>のりfitness返信テキスト = 仮文言</li>
+      <li>3 ヶ月前の比較値 = 仮ダミー値</li>
+      <li>レーダー軸の最小値 = 0 (案 a: 最小 5 にして凹みを緩和 / 未採用)</li>
+      <li>ブロック C をタップした先の <b>月詳細画面 = 別ファイル</b> (monthly_review_detail.html) で並列提示</li>
+    </ul>
+
+    <h3>🗳 きよむさんに判断してほしいこと</h3>
+    <ul>
+      <li>B-1 = レーダー / バー のどちら採用?</li>
+      <li>月詳細画面 (別ファイル参照) を画面構成に追加するか?</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

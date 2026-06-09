@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — ツール 4: PFC・カーボサイクル設定</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #3949ab;
+    --primary-dark: #283593;
+    --primary-darker: #1a237e;
+    --primary-soft: #e8eaf6;
+    --teal: #00897b;
+    --teal-dark: #00695c;
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --ink4: #ccc;
+    --border: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f8f9fa;
+    --bg-warm: linear-gradient(135deg, #e8eaf6, #fffbe6);
+    --yellow-bg: rgba(255,235,59,.12);
+    --yellow-strong: rgba(255,235,59,.55);
+    --yellow-name: #b8860b;
+    --p-color: #004d40;
+    --f-color: #e65100;
+    --c-color: #b45309;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: #e8ebec; color: var(--ink); line-height: 1.6; padding: 24px; }
+  .page-header { max-width: 900px; margin: 0 auto 32px; text-align: center; }
+  .page-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .page-header p { color: #6b7d75; font-size: 13px; }
+  .stage { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: 440px 1fr; gap: 32px; align-items: start; }
+
+  .phone {
+    width: 100%; max-width: 440px;
+    background: var(--bg); border: 8px solid #2a2a2a; border-radius: 28px;
+    overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    font-size: 14px; display: flex; flex-direction: column; min-height: 800px;
+  }
+  .phone-status { background: #2a2a2a; color: #fff; text-align: center; font-size: 11px; padding: 4px; font-family: 'Inter', sans-serif; }
+
+  .app-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); background: #fff; }
+  .app-header .back { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--ink); }
+  .app-header .title-h { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .app-header .spacer { width: 24px; }
+
+  .scroll { flex: 1; overflow-y: auto; padding-bottom: 80px; background: #fafbfa; }
+
+  .hero { background: var(--bg-warm); padding: 18px 22px 20px; border-bottom: 1px solid var(--border); }
+  .hero .num { display: inline-block; background: var(--primary); color: #fff; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 9999px; margin-bottom: 8px; }
+  .hero .ttl { font-size: 20px; font-weight: 700; color: var(--primary-darker); margin-bottom: 4px; }
+  .hero .sub { font-size: 11px; color: var(--ink3); line-height: 1.6; }
+  .hero .last-calc { font-size: 10px; color: var(--ink3); margin-top: 8px; font-family: 'Inter', sans-serif; }
+  .hero .last-calc b { color: var(--primary-dark); font-weight: 600; }
+
+  /* STEP 見出し */
+  .step-label { display: flex; align-items: center; gap: 9px; margin: 18px 16px 12px; }
+  .step-num { width: 26px; height: 26px; border-radius: 50%; background: var(--primary); color: #fff; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .step-title { font-size: 14px; font-weight: 700; color: var(--primary-darker); letter-spacing: .02em; }
+  .step-line { flex: 1; height: 1px; background: linear-gradient(to right, var(--primary-soft), transparent); }
+
+  .card { background: #fff; margin: 0 16px 14px; border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; }
+  .card-head { font-size: 12px; font-weight: 700; color: var(--ink2); letter-spacing: .04em; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+
+  .input-row { margin-bottom: 14px; }
+  .input-row:last-child { margin-bottom: 0; }
+  .input-row .lbl { display: block; font-size: 11px; font-weight: 600; color: var(--ink2); margin-bottom: 6px; }
+  .input-wrap { display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); border-radius: 8px; padding: 0 12px; background: #fff; }
+  .input-wrap:focus-within { border-color: var(--primary); }
+  .input-wrap input { flex: 1; border: none; outline: none; padding: 11px 0; font-size: 15px; font-family: 'Inter', sans-serif; color: var(--ink); background: transparent; }
+  .input-wrap .unit { font-size: 12px; color: var(--ink3); flex-shrink: 0; }
+
+  /* 脂質比率 3 ボタン */
+  .fat-btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .fat-btn { padding: 11px 4px; background: #fff; border: 1px solid var(--border); border-radius: 3px; font-family: inherit; font-size: 13px; font-weight: 700; color: var(--ink2); cursor: pointer; }
+  .fat-btn.selected { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .fat-btn:hover:not(.selected) { border-color: var(--primary); }
+
+  .calc-btn { width: calc(100% - 32px); margin: 4px 16px 16px; padding: 14px; background: var(--primary); color: #fff; border: none; border-radius: 3px; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .calc-btn:hover { background: var(--primary-dark); }
+
+  /* PFC 結果 */
+  .pfc-result { background: var(--bg-warm); border: 1px solid rgba(255,235,59,.4); }
+  .pfc-row { display: flex; align-items: center; justify-content: space-between; padding: 11px 12px; background: rgba(255,255,255,.65); border-radius: 8px; margin-bottom: 8px; }
+  .pfc-row:last-of-type { margin-bottom: 0; }
+  .pfc-left { display: flex; align-items: center; gap: 10px; }
+  .pfc-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; color: #fff; background: var(--primary); }
+  .pfc-name { font-size: 11px; color: var(--ink3); margin-bottom: 1px; }
+  .pfc-gram { font-size: 17px; font-weight: 700; color: var(--ink); font-family: 'Inter', sans-serif; }
+  .pfc-right { text-align: right; }
+  .pfc-kcal { font-size: 11px; color: var(--ink3); margin-bottom: 1px; font-family: 'Inter', sans-serif; }
+  .pfc-pct { font-size: 14px; font-weight: 700; color: var(--primary-dark); font-family: 'Inter', sans-serif; }
+  .pfc-total { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--primary-soft); border: 1px solid rgba(57,73,171,.2); border-radius: 8px; margin-top: 10px; }
+  .pfc-total .lbl { font-size: 12px; font-weight: 700; color: var(--ink2); }
+  .pfc-total .val { font-size: 16px; font-weight: 700; color: var(--primary-darker); font-family: 'Inter', sans-serif; }
+
+  /* STEP 2 区切り */
+  .bridge { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 16px 0 8px; color: var(--primary); font-size: 11px; font-weight: 700; }
+  .bridge .arrow { font-size: 16px; opacity: 0.7; }
+
+  /* カーボサイクル 強度ボタン */
+  .strength-grid { display: flex; flex-direction: column; gap: 6px; }
+  .strength-row { display: grid; grid-template-columns: 32px 1fr 1fr 1fr; gap: 6px; align-items: center; }
+  .strength-day { font-size: 12px; color: var(--ink2); font-weight: 700; text-align: center; }
+  .strength-btn { padding: 9px 0; background: #fff; border: 1px solid var(--border); border-radius: 3px; font-family: inherit; font-size: 12px; font-weight: 700; color: var(--ink3); cursor: pointer; }
+  .strength-btn.sel-h { background: var(--f-color); border-color: var(--f-color); color: #fff; }
+  .strength-btn.sel-m { background: var(--c-color); border-color: var(--c-color); color: #fff; }
+  .strength-btn.sel-l { background: var(--ink3); border-color: var(--ink3); color: #fff; }
+  .strength-btn:hover:not([class*="sel-"]) { border-color: var(--primary); }
+
+  .strength-guide { margin-top: 12px; padding: 10px 12px; background: var(--bg-soft); border-radius: 8px; font-size: 11px; color: var(--ink2); line-height: 1.7; }
+  .strength-guide b { font-weight: 700; }
+  .strength-guide .h-color { color: var(--f-color); }
+  .strength-guide .m-color { color: var(--c-color); }
+  .strength-guide .l-color { color: var(--ink3); }
+
+  /* カーボサイクル結果テーブル */
+  .cycle-result { margin-top: 4px; }
+  .cycle-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; background: #fff; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; table-layout: fixed; }
+  .cycle-table th, .cycle-table td { padding: 8px 2px; text-align: center; border: 1px solid #f0f2f1; font-size: 11px; font-family: 'Inter', sans-serif; }
+  .cycle-table thead th { background: var(--bg-soft); color: var(--ink2); font-weight: 700; }
+  .cycle-table .row-lbl { font-size: 10px; color: var(--ink2); font-weight: 700; background: var(--bg-soft); }
+  .cycle-table .c-h { background: rgba(230,81,0,.1); color: var(--f-color); font-weight: 700; }
+  .cycle-table .c-m { background: rgba(180,83,9,.1); color: var(--c-color); font-weight: 700; }
+  .cycle-table .c-l { background: rgba(136,136,136,.1); color: var(--ink3); font-weight: 700; }
+
+  .cycle-summary { display: flex; gap: 8px; margin-top: 10px; }
+  .cycle-summary .sm { flex: 1; background: var(--primary-soft); border: 1px solid rgba(57,73,171,.2); border-radius: 8px; padding: 10px; text-align: center; }
+  .cycle-summary .sm-lbl { font-size: 10px; color: var(--ink2); margin-bottom: 2px; }
+  .cycle-summary .sm-val { font-size: 15px; font-weight: 700; color: var(--primary-darker); font-family: 'Inter', sans-serif; }
+
+  .warning-box { margin: 10px 0 0; padding: 10px 12px; background: rgba(230,81,0,.08); border-left: 3px solid var(--f-color); border-radius: 4px; font-size: 11px; color: #7a3700; line-height: 1.55; }
+
+  .apply-area { margin: 16px; }
+  .apply-btn { width: 100%; padding: 14px; background: var(--teal); color: #fff; border: none; border-radius: 3px; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .apply-btn:hover { background: var(--teal-dark); }
+  .apply-btn .arr { font-size: 16px; }
+  .apply-note { font-size: 10px; color: var(--ink3); text-align: center; margin-top: 8px; line-height: 1.6; }
+
+  .tabbar { display: flex; border-top: 1px solid var(--border); background: #fff; }
+  .tab { flex: 1; text-align: center; padding: 10px 4px 8px; font-size: 10px; color: var(--ink3); }
+  .tab.active { color: var(--primary); font-weight: 700; }
+  .tab .icon { display: block; margin: 0 auto 2px; width: 20px; height: 20px; }
+  .tab .icon svg { width: 100%; height: 100%; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .annotation { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; font-size: 13px; color: #555; position: sticky; top: 24px; }
+  .annotation h3 { font-size: 14px; color: var(--ink); margin: 18px 0 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+  .annotation h3:first-child { margin-top: 0; }
+  .annotation ul { padding-left: 20px; }
+  .annotation li { margin-bottom: 4px; font-size: 12px; }
+  .annotation code { background: var(--bg-soft); padding: 1px 5px; border-radius: 3px; font-family: 'Inter', monospace; font-size: 10px; }
+  .annotation .highlight { background: var(--primary-soft); border-left: 3px solid var(--primary); padding: 8px 12px; margin: 6px 0; font-size: 11px; color: var(--ink); }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🛠 ツール 4 — PFC・カーボサイクル設定 (統合)</h1>
+  <p>STEP 1 PFC 計算 → STEP 2 週次糖質配分 ・ 1 つの完成されたツール</p>
+</div>
+
+<div class="stage">
+
+  <div class="phone">
+    <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+
+    <div class="app-header">
+      <div class="back">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </div>
+      <div class="title-h">PFC・カーボサイクル設定</div>
+      <div class="spacer"></div>
+    </div>
+
+    <div class="scroll">
+
+      <div class="hero">
+        <div class="ttl">PFC・カーボサイクル設定</div>
+        <div class="sub">栄養素の数値 + 1 週間の糖質配分 (統合ツール)</div>
+        <div class="last-calc">✓ 前回 <b>2026/05/12</b> 計算</div>
+      </div>
+
+      <!-- STEP 1 -->
+      <div class="step-label">
+        <div class="step-num">1</div>
+        <div class="step-title">PFC を計算</div>
+        <div class="step-line"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:middle;margin-right:5px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>入力</div>
+
+        <div class="input-row">
+          <label class="lbl">体重</label>
+          <div class="input-wrap"><input type="number" value="75"><span class="unit">kg</span></div>
+        </div>
+
+        <div class="input-row">
+          <label class="lbl">摂取カロリー</label>
+          <div class="input-wrap"><input type="number" value="2000"><span class="unit">kcal</span></div>
+        </div>
+
+        <div class="input-row">
+          <label class="lbl">脂質比率</label>
+          <div class="fat-btns">
+            <button class="fat-btn">20%</button>
+            <button class="fat-btn selected">25%</button>
+            <button class="fat-btn">30%</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="calc-btn">計算する</button>
+
+      <!-- PFC 結果 -->
+      <div class="card pfc-result">
+        <div class="card-head" style="color: var(--primary-dark);">✓ STEP 1 結果</div>
+
+        <div class="pfc-row">
+          <div class="pfc-left">
+            <div class="pfc-icon p">P</div>
+            <div>
+              <div class="pfc-name">たんぱく質</div>
+              <div class="pfc-gram">150 g</div>
+            </div>
+          </div>
+          <div class="pfc-right">
+            <div class="pfc-kcal">600 kcal</div>
+            <div class="pfc-pct">30 %</div>
+          </div>
+        </div>
+
+        <div class="pfc-row">
+          <div class="pfc-left">
+            <div class="pfc-icon f">F</div>
+            <div>
+              <div class="pfc-name">脂質</div>
+              <div class="pfc-gram">56 g</div>
+            </div>
+          </div>
+          <div class="pfc-right">
+            <div class="pfc-kcal">500 kcal</div>
+            <div class="pfc-pct">25 %</div>
+          </div>
+        </div>
+
+        <div class="pfc-row">
+          <div class="pfc-left">
+            <div class="pfc-icon c">C</div>
+            <div>
+              <div class="pfc-name">糖質</div>
+              <div class="pfc-gram">225 g</div>
+            </div>
+          </div>
+          <div class="pfc-right">
+            <div class="pfc-kcal">900 kcal</div>
+            <div class="pfc-pct">45 %</div>
+          </div>
+        </div>
+
+        <div class="pfc-total">
+          <div class="lbl">合計カロリー</div>
+          <div class="val">2,000 kcal</div>
+        </div>
+      </div>
+
+      <!-- ブリッジ -->
+      <div class="bridge">
+        <span class="arrow">↓</span>
+        <span>糖質 225g を 1 週間に配分</span>
+        <span class="arrow">↓</span>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="step-label">
+        <div class="step-num">2</div>
+        <div class="step-title">カーボサイクル配分</div>
+        <div class="step-line"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:middle;margin-right:5px;"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>トレーニング強度を選択</div>
+
+        <div class="strength-grid">
+          <div class="strength-row">
+            <div class="strength-day">月</div>
+            <button class="strength-btn sel-h">高</button>
+            <button class="strength-btn">中</button>
+            <button class="strength-btn">低</button>
+          </div>
+          <div class="strength-row">
+            <div class="strength-day">火</div>
+            <button class="strength-btn">高</button>
+            <button class="strength-btn sel-m">中</button>
+            <button class="strength-btn">低</button>
+          </div>
+          <div class="strength-row">
+            <div class="strength-day">水</div>
+            <button class="strength-btn">高</button>
+            <button class="strength-btn">中</button>
+            <button class="strength-btn sel-l">低</button>
+          </div>
+          <div class="strength-row">
+            <div class="strength-day">木</div>
+            <button class="strength-btn sel-h">高</button>
+            <button class="strength-btn">中</button>
+            <button class="strength-btn">低</button>
+          </div>
+          <div class="strength-row">
+            <div class="strength-day">金</div>
+            <button class="strength-btn">高</button>
+            <button class="strength-btn sel-m">中</button>
+            <button class="strength-btn">低</button>
+          </div>
+          <div class="strength-row">
+            <div class="strength-day">土</div>
+            <button class="strength-btn">高</button>
+            <button class="strength-btn">中</button>
+            <button class="strength-btn sel-l">低</button>
+          </div>
+          <div class="strength-row">
+            <div class="strength-day">日</div>
+            <button class="strength-btn">高</button>
+            <button class="strength-btn">中</button>
+            <button class="strength-btn sel-l">低</button>
+          </div>
+        </div>
+
+        <div class="strength-guide">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:middle;margin-right:5px;color:var(--primary-dark);"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg><b>強度の目安</b><br>
+          <span class="h-color">高</span> → 脚・背中・全身トレなど (疲労大)<br>
+          <span class="m-color">中</span> → 腕・肩・有酸素・体幹 (疲労中)<br>
+          <span class="l-color">低</span> → 休み・ストレッチ・散歩 (疲労なし)
+        </div>
+      </div>
+
+      <!-- カーボサイクル結果 -->
+      <div class="card pfc-result">
+        <div class="card-head" style="color: var(--primary-dark);">✓ STEP 2 結果 (1 週間の糖質配分)</div>
+
+        <div class="cycle-result">
+          <table class="cycle-table">
+            <thead>
+              <tr><th></th><th>月</th><th>火</th><th>水</th><th>木</th><th>金</th><th>土</th><th>日</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="row-lbl">強度</td>
+                <td class="c-h">高</td>
+                <td class="c-m">中</td>
+                <td class="c-l">低</td>
+                <td class="c-h">高</td>
+                <td class="c-m">中</td>
+                <td class="c-l">低</td>
+                <td class="c-l">低</td>
+              </tr>
+              <tr>
+                <td class="row-lbl">糖質</td>
+                <td class="c-h">393g</td>
+                <td class="c-m">212g</td>
+                <td class="c-l">106g</td>
+                <td class="c-h">393g</td>
+                <td class="c-m">212g</td>
+                <td class="c-l">106g</td>
+                <td class="c-l">106g</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="cycle-summary">
+            <div class="sm">
+              <div class="sm-lbl">週合計</div>
+              <div class="sm-val">1,528 g</div>
+            </div>
+            <div class="sm">
+              <div class="sm-lbl">平均</div>
+              <div class="sm-val">218 g/日</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 反映ボタン -->
+      <div class="apply-area">
+        <button class="apply-btn">
+          目標管理シートに反映する <span class="arr">→</span>
+        </button>
+        <div class="apply-note">
+          PFC (P/F/C) を ③ 栄養設計に反映<br>
+          週次糖質配分も ③ 内アコーディオンとして格納
+        </div>
+      </div>
+
+    </div>
+
+    <div class="tabbar">
+      <div class="tab"><span class="icon"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>ホーム</div>
+      <div class="tab"><span class="icon"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>コース</div>
+      <div class="tab"><span class="icon"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>記録</div>
+      <div class="tab"><span class="icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>検索</div>
+      <div class="tab"><span class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>設定</div>
+    </div>
+  </div>
+
+  <div class="annotation">
+    <h3>🗺 画面の役割 — 完成された統合ツール</h3>
+    <ul>
+      <li>ツール一覧 → 「④ PFC・カーボサイクル設定」タップ → このページ</li>
+      <li><b>STEP 1 (PFC 計算)</b> と <b>STEP 2 (週次糖質配分)</b> が連動する一体型ツール</li>
+      <li>反映 → 目標シート ③ 栄養設計 PFC + 週次糖質配分アコーディオン</li>
+    </ul>
+
+    <h3>📐 構成 (上から)</h3>
+    <ul>
+      <li><b>STEP 1: PFC 計算</b>
+        <ul>
+          <li>入力: 体重 / 摂取カロリー / 脂質比率 (3 択)</li>
+          <li>結果: P/F/C それぞれの g・kcal・% + 合計カロリー</li>
+        </ul>
+      </li>
+      <li><b>ブリッジ</b>: 「糖質 225g を 1 週間に配分」のつなぎ表示</li>
+      <li><b>STEP 2: カーボサイクル配分</b>
+        <ul>
+          <li>入力: 月〜日のトレ強度 (高/中/低 ボタン)</li>
+          <li>結果: 7 日分の糖質配分テーブル + 週合計 + 平均</li>
+        </ul>
+      </li>
+      <li><b>反映ボタン</b>: ティール緑 + 注釈 (PFC + 週次配分の両方反映)</li>
+    </ul>
+
+    <h3>🧮 計算ロジック</h3>
+    <ul>
+      <li><b>STEP 1 (PFC)</b>:
+        <ul>
+          <li>P (g) = 体重 × 2 / P (kcal) = P × 4</li>
+          <li>F (kcal) = カロリー × 脂質比率 / 100 / F (g) = F / 9</li>
+          <li>C (kcal) = カロリー − (P + F) / C (g) = C / 4</li>
+        </ul>
+      </li>
+      <li><b>STEP 2 (カーボサイクル)</b>:
+        <ul>
+          <li>係数: HIGH = 1.85倍 / MID = 1.0倍 / LOW = 0.5倍</li>
+          <li>週合計を 7C (週ベース) に正規化して再配分</li>
+        </ul>
+      </li>
+    </ul>
+
+    <h3>⚠️ 警告ロジック (特典 26 継承)</h3>
+    <ul>
+      <li>高 7 日 → 「カロリーオーバー」</li>
+      <li>高 5 日以上 → 「ハイカーボ日が多すぎ、週 2-3 日推奨」</li>
+      <li>低 7 日 → 「筋肉が育たない」</li>
+    </ul>
+
+    <h3>📤 反映内容</h3>
+    <div class="highlight">
+      <b>目標シート ③ 栄養設計</b>:<br>
+      ・PFC (P/F/C) の g 数を反映<br>
+      ・週次糖質配分は <b>アコーディオン (デフォルト閉じる)</b> として格納<br>
+      ・カーボサイクル <b>未設定の人</b> はアコーディオン自体非表示 (ごちゃつき回避)<br>
+      <br>
+      <b>体組成記録ページ</b>:<br>
+      ・「今日 (火) の目安: 212g」を上部に表示 (設定済の人だけ)
+    </div>
+
+    <h3>🎨 配色ルール</h3>
+    <ul>
+      <li>メイン = インディゴ #3949ab (ツール群統一)</li>
+      <li>P / F / C アイコン = 特典 26 継承 (P=深緑、F=オレンジ、C=ブラウン)</li>
+      <li>強度ボタン: 高=オレンジ / 中=ブラウン / 低=グレー (特典 26 継承)</li>
+      <li>反映ボタンのみティール緑</li>
+    </ul>
+
+    <h3>💾 DB 保存 (案 3 確定)</h3>
+    <ul>
+      <li><code>tool_calculations</code> テーブルに <code>tool_id='pfc_carb'</code> で最新値を保存</li>
+      <li>保存内容: STEP 1 入力 (体重/カロリー/脂質比率) + STEP 2 強度 (7 日分)</li>
+      <li>次回開いた時、両 STEP の入力 + 結果が復元される</li>
+    </ul>
+
+    <h3>⚠️ 未確定 / 議論ポイント</h3>
+    <ul>
+      <li>「STEP 1 と STEP 2 を別ツールに分けるべきか?」 → きよむさん判断「統合 OK」で決着済</li>
+      <li>反映後の遷移先 = 目標シート overview 推奨</li>
+      <li>STEP 2 のみ使う人 (PFC は既に決まってる) の動線 → STEP 1 を折りたたみ可能にする?</li>
+      <li>強度ボタンが全部未選択の時 = 「強度を選んでください」エラー</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

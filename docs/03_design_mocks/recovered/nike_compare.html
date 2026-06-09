@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — Nike エッセンス取り入れ比較</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #4ECD5D;
+    --primary-dark: #2EA84B;
+    --primary-darker: #1f6b3e;
+    --pastel: #D8F3E1;
+    --pastel-lighter: #ECFAF0;
+    --accent-yellow: #f5c842;
+    --accent-orange: #ff8a4c;
+    --accent-red: #e63b3b;
+
+    --ink: #1a3326;
+    --ink2: #3a6050;
+    --ink3: #6b7d75;
+    --ink4: #b0c0b8;
+    --ink5: #e0e6e2;
+    --border: #d4ead9;
+    --border-mono: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f7faf8;
+    --marker: rgba(255,235,59,.55);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #e8ebec;
+    color: var(--ink);
+    line-height: 1.6;
+    padding: 24px;
+  }
+  .page-header {
+    max-width: 1200px;
+    margin: 0 auto 32px;
+    text-align: center;
+  }
+  .page-header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .page-header p {
+    color: var(--ink3);
+    font-size: 13px;
+  }
+  .compare {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+  .version-label {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 8px;
+    background: var(--primary);
+    color: #fff;
+  }
+  .version-b .version-label { background: #2a2a2a; }
+  .version-sub {
+    font-size: 12px;
+    color: var(--ink3);
+    margin-bottom: 14px;
+  }
+  .phone {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    background: var(--bg);
+    border: 8px solid #2a2a2a;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    font-size: 14px;
+  }
+  .phone-status {
+    background: #2a2a2a;
+    color: #fff;
+    text-align: center;
+    font-size: 11px;
+    padding: 4px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* SVG icon util */
+  .ico-svg {
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    display: block;
+    margin: 0 auto;
+  }
+  .ico-svg-sm { width: 18px; height: 18px; }
+  .ico-svg-lg { width: 28px; height: 28px; }
+
+  /* ====== 共通: ヘッダー ====== */
+  .app-header {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .app-header .logo {
+    font-weight: 700;
+    color: var(--primary-darker);
+    font-size: 15px;
+  }
+  .app-header .icons {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    color: var(--ink2);
+  }
+  .app-header .icons .badge-dot {
+    position: absolute;
+    top: -2px; right: -2px;
+    width: 8px; height: 8px;
+    background: var(--accent-red);
+    border-radius: 9999px;
+    border: 2px solid #fff;
+  }
+  .app-header .icons .ico-wrap { position: relative; }
+
+  .home-body { padding: 16px; }
+
+  .greet {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .greet-sub {
+    font-size: 12px;
+    color: var(--ink3);
+    margin-bottom: 16px;
+  }
+
+  /* ====== A: 現状 v2 (カラフル) ====== */
+  .a .app-header { border-bottom: 1px solid var(--border); }
+  .a .home-body { background: var(--bg-soft); padding: 16px; }
+  .a .cta-continue {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    border-radius: 16px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 6px 18px rgba(78,205,93,.28);
+    position: relative;
+  }
+  .a .cta-continue .label {
+    font-size: 11px;
+    opacity: .9;
+    margin-bottom: 4px;
+  }
+  .a .cta-continue .title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .a .cta-continue .sub {
+    font-size: 12px;
+    opacity: .85;
+  }
+  .a .cta-continue .play {
+    position: absolute;
+    top: 14px; right: 14px;
+    color: #fff;
+  }
+  .a .feature-blocks {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .a .fb {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 10px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+  }
+  .a .fb .ico-bg {
+    width: 44px;
+    height: 44px;
+    margin: 0 auto 6px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .a .fb.course .ico-bg { background: #d8ecf3; color: #1565c0; }
+  .a .fb.log .ico-bg    { background: #fff3cd; color: #e65100; }
+  .a .fb.line .ico-bg   { background: #d4f5dc; color: #06c755; }
+  .a .fb.tool .ico-bg   { background: #f0e0f5; color: #6a1b9a; }
+  .a .fb .label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+  .a .fb .sub-label {
+    font-size: 10px;
+    color: var(--ink3);
+    margin-top: 2px;
+  }
+  .a .goal-block {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    gap: 12px;
+  }
+  .a .goal-block .ico-bg {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--pastel);
+    color: var(--primary-darker);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .a .goal-block .body { flex: 1; }
+  .a .goal-block .label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .a .progress-section {
+    background: var(--pastel-lighter);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  .a .progress-section .label {
+    font-size: 11px;
+    color: var(--ink3);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .a .progress-section .label b { color: var(--primary-darker); font-weight: 700; }
+  .a .bar {
+    background: #fff;
+    height: 8px;
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+  .a .bar > div {
+    width: 35%;
+    height: 100%;
+    background: var(--primary);
+    border-radius: 9999px;
+  }
+  .a .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .a .stat {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 6px;
+    text-align: center;
+  }
+  .a .stat .num {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--primary-darker);
+    font-family: 'Inter', sans-serif;
+  }
+  .a .stat .lbl {
+    font-size: 10px;
+    color: var(--ink3);
+    margin-top: 2px;
+  }
+  .a .tab-nav {
+    background: #fff;
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 8px 0;
+  }
+  .a .tab-nav .tab {
+    flex: 1;
+    text-align: center;
+    font-size: 10px;
+    color: var(--ink3);
+    padding: 4px 2px;
+  }
+  .a .tab-nav .tab.active {
+    color: var(--primary-darker);
+    font-weight: 700;
+  }
+
+  /* ====== B: Nike エッセンス版 (ミニマル) ====== */
+  .b .app-header {
+    background: #fff;
+    border-bottom: 1px solid var(--border-mono);
+    padding: 14px 18px;
+  }
+  .b .app-header .logo {
+    color: #1a1a1a;
+  }
+  .b .app-header .icons { color: #1a1a1a; }
+  .b .home-body { background: #fff; padding: 20px 18px; }
+
+  .b .greet { font-size: 22px; color: #1a1a1a; margin-bottom: 4px; line-height: 1.3; }
+  .b .greet-sub { color: #888; font-size: 12px; margin-bottom: 28px; }
+
+  .b .cta-continue {
+    background: var(--primary);
+    color: #fff;
+    border-radius: 14px;
+    padding: 22px 22px;
+    margin-bottom: 28px;
+    position: relative;
+    box-shadow: 0 8px 24px rgba(78,205,93,.20);
+  }
+  .b .cta-continue .label {
+    font-size: 11px;
+    opacity: .9;
+    margin-bottom: 6px;
+    font-weight: 600;
+    letter-spacing: .5px;
+  }
+  .b .cta-continue .title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .b .cta-continue .sub {
+    font-size: 12px;
+    opacity: .85;
+  }
+  .b .cta-continue .play {
+    position: absolute;
+    top: 18px; right: 18px;
+    color: #fff;
+  }
+
+  .b .feature-blocks {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .b .fb {
+    background: #fff;
+    border: 1px solid var(--border-mono);
+    border-radius: 14px;
+    padding: 18px 12px;
+    text-align: center;
+  }
+  .b .fb .ico-bg {
+    width: 44px;
+    height: 44px;
+    margin: 0 auto 8px;
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a1a1a;
+  }
+  .b .fb .label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1a1a1a;
+    line-height: 1.3;
+  }
+  .b .fb .sub-label {
+    font-size: 10px;
+    color: #888;
+    margin-top: 2px;
+  }
+  .b .goal-block {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--border-mono);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 24px;
+    gap: 12px;
+    color: #1a1a1a;
+  }
+  .b .goal-block .label { font-size: 13px; font-weight: 700; }
+  .b .progress-section {
+    background: #fff;
+    border: 1px solid var(--border-mono);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  .b .progress-section .label {
+    font-size: 11px;
+    color: #888;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .b .progress-section .label b { color: #1a1a1a; font-weight: 700; }
+  .b .bar {
+    background: #f0f0f0;
+    height: 6px;
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+  .b .bar > div {
+    width: 35%;
+    height: 100%;
+    background: var(--primary);
+    border-radius: 9999px;
+  }
+  .b .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .b .stat {
+    background: #fff;
+    border: 1px solid var(--border-mono);
+    border-radius: 12px;
+    padding: 14px 8px;
+    text-align: center;
+  }
+  .b .stat .num {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a1a1a;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -.5px;
+  }
+  .b .stat .lbl {
+    font-size: 10px;
+    color: #888;
+    margin-top: 4px;
+  }
+  .b .tab-nav {
+    background: #fff;
+    border-top: 1px solid var(--border-mono);
+    display: flex;
+    padding: 10px 0;
+  }
+  .b .tab-nav .tab {
+    flex: 1;
+    text-align: center;
+    font-size: 10px;
+    color: #888;
+    padding: 4px 2px;
+    position: relative;
+  }
+  .b .tab-nav .tab.active {
+    color: var(--primary-dark);
+    font-weight: 700;
+  }
+  .b .tab-nav .tab.active::after {
+    content: "";
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 3px;
+    background: var(--primary);
+    border-radius: 9999px;
+  }
+  .a .tab-nav .tab .ico-svg,
+  .b .tab-nav .tab .ico-svg {
+    margin: 0 auto 2px;
+  }
+
+  /* ====== 注釈エリア ====== */
+  .annotation {
+    margin: 32px auto 0;
+    max-width: 1200px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    font-size: 13px;
+    color: var(--ink2);
+  }
+  .annotation h3 {
+    font-size: 15px;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+  .annotation table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 8px;
+  }
+  .annotation th, .annotation td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid #e8ebe9;
+  }
+  .annotation th { background: #f7faf8; font-weight: 700; }
+  .annotation td.col-a { color: var(--primary-darker); }
+  .annotation td.col-b { color: #1a1a1a; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Nike エッセンス取り入れ比較</h1>
+  <p>左: 現状 v2（カラフル / 機能別色分け）<br>
+  右: Nike エッセンス取り入れ版（線画黒一色 / 白統一ブロック / 緑スポット / 余白増）</p>
+</div>
+
+<div class="compare">
+  <!-- ============ A: 現状 v2 ============ -->
+  <div class="version-a">
+    <span class="version-label">A: 現状 v2 (カラフル)</span>
+    <div class="version-sub">機能別色分け + 中程度の余白</div>
+    <div class="phone">
+      <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+      <div class="a">
+        <div class="app-header">
+          <div class="logo">のりfitness 筋肉塾</div>
+          <div class="icons">
+            <div class="ico-wrap">
+              <svg class="ico-svg" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+              <div class="badge-dot"></div>
+            </div>
+            <svg class="ico-svg" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+        </div>
+
+        <div class="home-body">
+          <div class="greet">こんにちは、きよむさん</div>
+          <div class="greet-sub">入会から 12 日目</div>
+
+          <div class="cta-continue">
+            <svg class="ico-svg ico-svg-lg play" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+            <div class="label">続きから学ぶ</div>
+            <div class="title">第 3 章 ・ Lesson 4</div>
+            <div class="sub">PFC バランスの基礎</div>
+          </div>
+
+          <div class="feature-blocks">
+            <div class="fb course">
+              <div class="ico-bg">
+                <svg class="ico-svg" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              </div>
+              <div class="label">コース一覧</div>
+              <div class="sub-label">5 コース ・ 217 本</div>
+            </div>
+            <div class="fb log">
+              <div class="ico-bg">
+                <svg class="ico-svg" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+              </div>
+              <div class="label">マイ学習記録</div>
+              <div class="sub-label">振り返り 12 件</div>
+            </div>
+            <div class="fb line">
+              <div class="ico-bg">
+                <svg class="ico-svg" viewBox="0 0 24 24"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H4a1 1 0 0 1-1-1v-9a9 9 0 0 1 18 0v9a1 1 0 0 1-1 1h-2a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/></svg>
+              </div>
+              <div class="label">LINE サポート</div>
+              <div class="sub-label">質問・相談</div>
+            </div>
+            <div class="fb tool">
+              <div class="ico-bg">
+                <svg class="ico-svg" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              </div>
+              <div class="label">ツール</div>
+              <div class="sub-label">PFC・カロリー他</div>
+            </div>
+          </div>
+
+          <div class="goal-block">
+            <div class="ico-bg">
+              <svg class="ico-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            </div>
+            <div class="body">
+              <div class="label">🎯 目標管理シート →</div>
+            </div>
+          </div>
+
+          <div class="progress-section">
+            <div class="label"><span>全体進捗</span><b>35% (76 / 217)</b></div>
+            <div class="bar"><div></div></div>
+          </div>
+
+          <div class="stats">
+            <div class="stat"><div class="num">47</div><div class="lbl">できた!</div></div>
+            <div class="stat"><div class="num">12.5h</div><div class="lbl">視聴時間</div></div>
+            <div class="stat"><div class="num">8日</div><div class="lbl">学習日数</div></div>
+          </div>
+        </div>
+
+        <div class="tab-nav">
+          <div class="tab active">
+            <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            ホーム
+          </div>
+          <div class="tab">
+            <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            コース
+          </div>
+          <div class="tab">
+            <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            記録
+          </div>
+          <div class="tab">
+            <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            検索
+          </div>
+          <div class="tab">
+            <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            設定
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ B: Nike エッセンス版 ============ -->
+  <div class="version-b">
+    <span class="version-label">B: Nike エッセンス版 (ミニマル)</span>
+    <div class="version-sub">線画黒一色 / 白統一 / 緑スポット / 余白増</div>
+    <div class="phone">
+      <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+      <div class="b">
+        <div class="app-header">
+          <div class="logo">のりfitness 筋肉塾</div>
+          <div class="icons">
+            <div class="ico-wrap">
+              <svg class="ico-svg" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+              <div class="badge-dot"></div>
+            </div>
+            <svg class="ico-svg" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+        </div>
+
+        <div class="home-body">
+          <div class="greet">こんにちは、<br>きよむさん</div>
+          <div class="greet-sub">入会から 12 日目</div>
+
+          <div class="cta-continue">
+            <svg class="ico-svg ico-svg-lg play" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+            <div class="label">続きから学ぶ</div>
+            <div class="title">第 3 章 ・ Lesson 4</div>
+            <div class="sub">PFC バランスの基礎</div>
+          </div>
+
+          <div class="feature-blocks">
+            <div class="fb">
+              <div class="ico-bg">
+                <svg class="ico-svg" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              </div>
+              <div class="label">コース一覧</div>
+              <div class="sub-label">5 コース ・ 217 本</div>
+            </div>
+            <div class="fb">
+              <div class="ico-bg">
+                <svg class="ico-svg" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+              </div>
+              <div class="label">マイ学習記録</div>
+              <div class="sub-label">振り返り 12 件</div>
+            </div>
+            <div class="fb">
+              <div class="ico-bg">
+                <svg class="ico-svg" viewBox="0 0 24 24"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H4a1 1 0 0 1-1-1v-9a9 9 0 0 1 18 0v9a1 1 0 0 1-1 1h-2a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/></svg>
+              </div>
+              <div class="label">LINE サポート</div>
+              <div class="sub-label">質問・相談</div>
+            </div>
+            <div class="fb">
+              <div class="ico-bg">
+                <svg class="ico-svg" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              </div>
+              <div class="label">ツール</div>
+              <div class="sub-label">PFC・カロリー他</div>
+            </div>
+          </div>
+
+          <div class="goal-block">
+            <svg class="ico-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            <div class="body">
+              <div class="label">目標管理シート →</div>
+            </div>
+          </div>
+
+          <div class="progress-section">
+            <div class="label"><span>全体進捗</span><b>35%</b></div>
+            <div class="bar"><div></div></div>
+          </div>
+
+          <div class="stats">
+            <div class="stat"><div class="num">47</div><div class="lbl">できた!</div></div>
+            <div class="stat"><div class="num">12.5h</div><div class="lbl">視聴時間</div></div>
+            <div class="stat"><div class="num">8日</div><div class="lbl">学習日数</div></div>
+          </div>
+        </div>
+
+        <div class="tab-nav">
+          <div class="tab active">
+            <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            ホーム
+          </div>
+          <div class="tab">
+            <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            コース
+          </div>
+          <div class="tab">
+            <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            記録
+          </div>
+          <div class="tab">
+            <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            検索
+          </div>
+          <div class="tab">
+            <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            設定
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="annotation">
+  <h3>📊 要素別差分マトリクス</h3>
+  <table>
+    <thead>
+      <tr><th>要素</th><th>A: 現状 v2</th><th>B: Nike エッセンス版</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>アイコン</td>
+        <td class="col-a">線画黒（既に統一済）</td>
+        <td class="col-b">線画黒（同じ、共通方針）</td>
+      </tr>
+      <tr>
+        <td>ブロック背景</td>
+        <td class="col-a">機能別色分け（青/橙/緑/紫）</td>
+        <td class="col-b">白統一 + 細線囲み</td>
+      </tr>
+      <tr>
+        <td>ブロックアイコン</td>
+        <td class="col-a">色付き丸背景 + 色付き線</td>
+        <td class="col-b">背景なし + 黒線</td>
+      </tr>
+      <tr>
+        <td>CTA</td>
+        <td class="col-a">緑グラデ + 装飾影</td>
+        <td class="col-b">緑単色 + 余白大きく</td>
+      </tr>
+      <tr>
+        <td>挨拶</td>
+        <td class="col-a">1 行 17px</td>
+        <td class="col-b">2 行 22px（大きく Nike 風）</td>
+      </tr>
+      <tr>
+        <td>余白</td>
+        <td class="col-a">標準（要素間 14-16px）</td>
+        <td class="col-b">余裕（要素間 24-28px）</td>
+      </tr>
+      <tr>
+        <td>進捗ボックス</td>
+        <td class="col-a">パステル背景</td>
+        <td class="col-b">白背景 + 線</td>
+      </tr>
+      <tr>
+        <td>進捗バー</td>
+        <td class="col-a">緑（8px厚）</td>
+        <td class="col-b">緑（6px厚、繊細）</td>
+      </tr>
+      <tr>
+        <td>下部タブ active</td>
+        <td class="col-a">文字色濃緑 + 太字</td>
+        <td class="col-b">文字色濃緑 + 太字 + <b>下に緑バー</b></td>
+      </tr>
+      <tr>
+        <td>緑の出現箇所</td>
+        <td class="col-a">CTA / 進捗 / バナー / 数値色 / タグ</td>
+        <td class="col-b">CTA / 進捗バー fill / タブ active のみ</td>
+      </tr>
+      <tr>
+        <td>全体印象</td>
+        <td class="col-a">親しみ・温度・カラフル</td>
+        <td class="col-b">硬派・洗練・ミニマル</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 style="margin-top: 20px;">🎯 ハイブリッド提案（私の見立て）</h3>
+  <p style="margin-bottom: 8px;">どちらか 100% じゃなく、<b>B をベースにしつつ A の良いとこを残す</b>のが最適と判断します:</p>
+  <ul style="padding-left: 20px;">
+    <li><b>採用したい B の要素</b>: 線画黒一色 / ブロック白統一 / 余白増 / 緑をスポット化 / タブ active 下バー</li>
+    <li><b>残したい A の要素</b>: 数値カードの緑数字（読み応え + ブランド色維持）/ パステル背景の進捗ボックス（温度のスポット） / マーカー文字強調</li>
+    <li><b>キャラ登場箇所</b>: 起動 / 空状態 / 章末祝福のみ（既存合意）— ホームには出さない</li>
+    <li><b>"ここぞ" の緑</b>: CTA / 進捗バー fill / 下部タブ active 下バー / 一部数値 — それ以外は黒+白でミニマル</li>
+  </ul>
+
+  <h3 style="margin-top: 20px;">⚠️ 検討ポイント</h3>
+  <ul style="padding-left: 20px;">
+    <li>B 版は <b>「冷たい」と感じる人もいる</b> — のり氏ブランドの "温度" をどこで確保するかが論点</li>
+    <li>挨拶を 2 行大きく（Nike 風）するか 1 行小さく（情報密度優先）するか</li>
+    <li>進捗ボックスを白か薄緑か（B は白だが、A の薄緑も "温度のスポット" として機能している）</li>
+    <li>本実装では、Lucide / Heroicons の outline を SVG で読み込む（無料・即調達可）</li>
+  </ul>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>受講生リクエスト送信 モック</title>
+<style>
+  :root {
+    --teal: #00897b;
+    --teal-dark: #00695c;
+    --teal-soft: rgba(0,137,123,0.08);
+    --border: #e8ebe9;
+    --gray-50: #fafafa;
+    --gray-100: #f4f4f5;
+    --gray-300: #d4d4d8;
+    --gray-500: #71717a;
+    --gray-700: #3f3f46;
+    --gray-900: #18181b;
+    --warm-grad: linear-gradient(135deg, #e0f2f1, #fffbe6);
+    --highlight: rgba(255,235,59,0.12);
+    --highlight-border: rgba(255,235,59,0.55);
+    --gold: #b8860b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #ececec;
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+    color: var(--gray-900);
+    padding: 32px 16px 100px;
+  }
+  .page-title { max-width: 600px; margin: 0 auto 32px; text-align: center; }
+  .page-title h1 { font-size: 18px; margin: 0 0 8px; }
+  .page-title p { font-size: 12px; color: var(--gray-500); margin: 0; line-height: 1.7; }
+  .pattern { max-width: 480px; margin: 0 auto 48px; }
+  .pattern-header { text-align: center; margin-bottom: 12px; }
+  .pattern-num { font-size: 11px; color: var(--gray-500); letter-spacing: 1px; font-weight: 700; }
+  .pattern-title { font-size: 14px; font-weight: 700; margin-top: 2px; }
+  .phone {
+    max-width: 390px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  }
+
+  .app-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .back-btn { background: none; border: none; padding: 0; cursor: pointer; color: var(--gray-900); }
+  .app-title { flex: 1; text-align: center; font-size: 14px; font-weight: 700; }
+
+  .hero {
+    padding: 20px 16px;
+    background: var(--warm-grad);
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+  }
+  .hero-icon {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid var(--border);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    color: var(--teal-dark);
+  }
+  .hero-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--gray-900);
+    line-height: 1.4;
+    margin-bottom: 8px;
+  }
+  .hero-sub {
+    font-size: 11px;
+    color: var(--gray-700);
+    line-height: 1.7;
+  }
+
+  /* 現状情報カード */
+  .current-info {
+    margin: 16px;
+    padding: 12px 14px;
+    background: var(--gray-50);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .current-info-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--gray-500);
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .current-info-list {
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 4px 12px;
+    font-size: 12px;
+  }
+  .current-info-list dt { color: var(--gray-500); font-size: 11px; }
+  .current-info-list dd { margin: 0; color: var(--gray-900); font-weight: 600; }
+
+  /* テキストエリア */
+  .input-section {
+    padding: 16px;
+  }
+  .input-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .input-label .required {
+    color: #d32f2f;
+    font-size: 11px;
+  }
+  .input-hint {
+    font-size: 11px;
+    color: var(--gray-500);
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+  textarea {
+    width: 100%;
+    min-height: 140px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.6;
+    resize: vertical;
+    background: white;
+    color: var(--gray-900);
+  }
+  textarea:focus { outline: none; border-color: var(--teal); }
+  textarea::placeholder { color: var(--gray-300); }
+
+  /* 例文 */
+  .example {
+    margin: 12px 16px 16px;
+    padding: 12px 14px;
+    background: var(--highlight);
+    border: 1px solid var(--highlight-border);
+    border-radius: 8px;
+  }
+  .example-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+  .example-list {
+    margin: 0;
+    padding-left: 16px;
+    font-size: 11px;
+    color: var(--gray-900);
+    line-height: 1.7;
+  }
+  .example-list li { margin-bottom: 2px; }
+
+  /* フッタ */
+  .footer {
+    padding: 12px 16px;
+    background: white;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+  }
+  .footer-btn {
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: white;
+    color: var(--gray-900);
+  }
+  .footer-btn.primary {
+    flex: 1;
+    background: var(--teal);
+    color: white;
+    border-color: var(--teal);
+  }
+
+  .divider { max-width: 600px; margin: 32px auto; border-top: 1px dashed #ccc; }
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  <h1>📋 受講生リクエスト送信 - 2 種類モック</h1>
+  <p>
+    カルテ更新リクエスト (案 A) と メニュー変更リクエスト (案 B) を比較<br>
+    どちらも自由記入テキストエリア、現状情報表示、例文ヒント付き
+  </p>
+</div>
+
+<!-- =============== 案 A: カルテ更新リクエスト =============== -->
+<section class="pattern">
+  <div class="pattern-header">
+    <div class="pattern-num">案 A</div>
+    <div class="pattern-title">カルテ更新リクエスト</div>
+  </div>
+  <div class="phone">
+    <div class="app-header">
+      <button class="back-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <div class="app-title">カルテ更新リクエスト</div>
+      <div style="width:20px"></div>
+    </div>
+
+    <div class="hero">
+      <div class="hero-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M16 13H8M16 17H8"/></svg>
+      </div>
+      <div class="hero-title">カルテを変更したい</div>
+      <div class="hero-sub">
+        環境や目的が変わった時に、<br>
+        のりfitness にお知らせください。
+      </div>
+    </div>
+
+    <div class="current-info">
+      <div class="current-info-label">提出済のカルテ</div>
+      <dl class="current-info-list">
+        <dt>性別</dt><dd>男</dd>
+        <dt>使える環境</dt><dd>ダンベル・ジム</dd>
+        <dt>理想の頻度</dt><dd>週3</dd>
+        <dt>鍛えたい部位</dt><dd>胸・背中</dd>
+      </dl>
+    </div>
+
+    <div class="input-section">
+      <div class="input-label">
+        変更したい内容
+        <span class="required">必須</span>
+      </div>
+      <div class="input-hint">
+        どこをどう変えたいか、自由にお書きください。<br>
+        のりfitness が確認してカルテを更新します。
+      </div>
+      <textarea placeholder="例: ジムを退会したので「ジム」を環境から外したいです。代わりに自宅でダンベルだけでできるメニューにしたいです。"></textarea>
+    </div>
+
+    <div class="example">
+      <div class="example-label">こんな時にどうぞ</div>
+      <ul class="example-list">
+        <li>環境が変わった (ジム入会・退会、引っ越し)</li>
+        <li>頻度を変えたい (週3 → 週5 に増やしたい)</li>
+        <li>鍛えたい部位が変わった</li>
+        <li>体の不調が出た (腰痛になった等)</li>
+      </ul>
+    </div>
+
+    <div class="footer">
+      <button class="footer-btn">キャンセル</button>
+      <button class="footer-btn primary">送信する</button>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- =============== 案 B: メニュー変更リクエスト =============== -->
+<section class="pattern">
+  <div class="pattern-header">
+    <div class="pattern-num">案 B</div>
+    <div class="pattern-title">メニュー変更リクエスト</div>
+  </div>
+  <div class="phone">
+    <div class="app-header">
+      <button class="back-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <div class="app-title">メニュー変更リクエスト</div>
+      <div style="width:20px"></div>
+    </div>
+
+    <div class="hero">
+      <div class="hero-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </div>
+      <div class="hero-title">メニューを変更したい</div>
+      <div class="hero-sub">
+        今のメニューで気になる点があれば、<br>
+        のりfitness にお伝えください。
+      </div>
+    </div>
+
+    <div class="current-info">
+      <div class="current-info-label">現在のメニュー</div>
+      <dl class="current-info-list">
+        <dt>配布日</dt><dd>2026/06/02</dd>
+        <dt>サイクル</dt><dd>全 3 サイクル</dd>
+        <dt>環境</dt><dd>ダンベル+懸垂機</dd>
+        <dt>頻度</dt><dd>週2</dd>
+      </dl>
+    </div>
+
+    <div class="input-section">
+      <div class="input-label">
+        変更したい内容
+        <span class="required">必須</span>
+      </div>
+      <div class="input-hint">
+        どの種目をどう変えたいか、自由にお書きください。<br>
+        のりfitness が確認してメニューを調整します。
+      </div>
+      <textarea placeholder="例: 懸垂が今の自分には難しすぎるので、別の背中種目に変えてほしいです。フォームが安定しなくて怪我しそうです。"></textarea>
+    </div>
+
+    <div class="example">
+      <div class="example-label">こんな時にどうぞ</div>
+      <ul class="example-list">
+        <li>特定の種目が合わない・きつすぎる</li>
+        <li>強度を上げたい / 下げたい</li>
+        <li>苦手な動作がある</li>
+        <li>もっと別の種目を試してみたい</li>
+      </ul>
+    </div>
+
+    <div class="footer">
+      <button class="footer-btn">キャンセル</button>
+      <button class="footer-btn primary">送信する</button>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
