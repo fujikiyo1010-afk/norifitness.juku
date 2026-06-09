@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — 管理画面 / 月次添削 受信箱 (3a/3)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --ink4: #ccc;
+    --border: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f8f9fa;
+    --bg-warm: linear-gradient(135deg, #e0f2f1, #fffbe6);
+    --yellow-bg: rgba(255,235,59,.12);
+    --yellow-strong: rgba(255,235,59,.55);
+    --yellow-name: #b8860b;
+    --danger: #d32f2f;
+    --danger-bg: #fef5f5;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #e8ebec;
+    color: var(--ink);
+    line-height: 1.6;
+    padding: 24px;
+  }
+  .page-header {
+    max-width: 1300px;
+    margin: 0 auto 32px;
+    text-align: center;
+  }
+  .page-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .page-header p {
+    color: #6b7d75;
+    font-size: 13px;
+  }
+  .stage {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 720px 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  /* === デスクトップフレーム (管理画面はPC前提) === */
+  .desk {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,.08);
+    min-height: 800px;
+    display: flex;
+    flex-direction: column;
+  }
+  .desk-chrome {
+    background: #f1f3f4;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .desk-chrome .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #d0d0d0;
+  }
+  .desk-chrome .url {
+    flex: 1;
+    margin-left: 12px;
+    background: #fff;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--ink3);
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* === 管理画面ヘッダー === */
+  .admin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    background: #fff;
+  }
+  .admin-header .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .admin-header .brand .ttl {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary-darker);
+  }
+  .admin-header .brand .sub {
+    font-size: 11px;
+    color: var(--ink3);
+    padding-left: 12px;
+    border-left: 1px solid var(--border);
+  }
+  .admin-header .user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--ink2);
+  }
+  .admin-header .user .avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  /* === コンテンツ === */
+  .content {
+    flex: 1;
+    padding: 20px 24px;
+    background: var(--bg-soft);
+    overflow-y: auto;
+  }
+
+  /* === ページタイトルバー === */
+  .page-title-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .page-title-bar h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .page-title-bar .actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  /* === 検索バー === */
+  .search-bar {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .search-bar svg { width: 16px; height: 16px; color: var(--ink3); flex-shrink: 0; }
+  .search-bar input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--ink);
+    background: transparent;
+  }
+  .search-bar input::placeholder { color: var(--ink3); }
+  .search-bar .sort {
+    font-size: 11px;
+    color: var(--ink2);
+    border-left: 1px solid var(--border);
+    padding-left: 12px;
+    cursor: pointer;
+  }
+
+  /* === フィルタタブ === */
+  .filter-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .ftab {
+    padding: 10px 16px;
+    font-size: 13px;
+    color: var(--ink2);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ftab:hover { color: var(--ink); }
+  .ftab.active {
+    color: var(--primary-dark);
+    border-bottom-color: var(--primary);
+    font-weight: 700;
+  }
+  .ftab .count {
+    font-size: 11px;
+    background: var(--bg-soft);
+    padding: 1px 8px;
+    border-radius: 9999px;
+    color: var(--ink2);
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+  }
+  .ftab.active .count {
+    background: var(--primary);
+    color: #fff;
+  }
+  .ftab.danger .count {
+    background: var(--danger-bg);
+    color: var(--danger);
+  }
+  .ftab.active.danger .count {
+    background: var(--danger);
+    color: #fff;
+  }
+
+  /* === リスト === */
+  .inbox-list {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .inbox-row {
+    display: grid;
+    grid-template-columns: 32px 1fr 160px 100px 24px;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .inbox-row:hover { background: var(--bg-soft); }
+  .inbox-row:last-child { border-bottom: none; }
+  .inbox-row.replied { opacity: 0.6; }
+
+  .row-icon {
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .row-icon.danger { color: var(--danger); }
+  .row-icon.waiting { color: var(--yellow-name); }
+  .row-icon.done { color: var(--primary); }
+
+  .row-main .name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 2px;
+  }
+  .row-main .meta {
+    font-size: 11px;
+    color: var(--ink3);
+    font-family: 'Inter', sans-serif;
+  }
+
+  .row-status {
+    font-size: 12px;
+    color: var(--ink2);
+  }
+  .row-status .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 10px;
+    font-weight: 500;
+  }
+  .row-status .badge.danger { background: var(--danger-bg); color: var(--danger); }
+  .row-status .badge.waiting { background: var(--yellow-bg); color: var(--yellow-name); }
+  .row-status .badge.done { background: rgba(0,137,123,.1); color: var(--primary-dark); }
+
+  .row-days {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: var(--ink2);
+    text-align: right;
+  }
+  .row-days b { font-size: 16px; color: var(--ink); font-weight: 600; }
+  .row-days.danger b { color: var(--danger); }
+
+  .row-arr {
+    color: var(--ink3);
+    font-family: 'Inter', sans-serif;
+    text-align: right;
+  }
+
+  /* === セクション区切り === */
+  .section-label {
+    font-size: 11px;
+    color: var(--ink3);
+    margin: 18px 0 8px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-weight: 700;
+    padding-left: 4px;
+  }
+
+  /* === 注釈 === */
+  .annotation {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    font-size: 13px;
+    color: #555;
+    position: sticky;
+    top: 24px;
+  }
+  .annotation h3 {
+    font-size: 14px;
+    color: var(--ink);
+    margin: 18px 0 8px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 4px;
+  }
+  .annotation h3:first-child { margin-top: 0; }
+  .annotation ul { padding-left: 20px; }
+  .annotation li { margin-bottom: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🛠 管理画面 — 月次添削 受信箱 (3a/3)</h1>
+  <p>のりfitness 運営側・PC画面想定 ・ シンプル未返答管理</p>
+</div>
+
+<div class="stage">
+
+  <!-- ============ デスクトップ画面 ============ -->
+  <div class="desk">
+
+    <!-- ブラウザクローム -->
+    <div class="desk-chrome">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <div class="url">https://admin.juku.norifitness.com/monthly-review/inbox</div>
+    </div>
+
+    <!-- 管理画面ヘッダー -->
+    <div class="admin-header">
+      <div class="brand">
+        <div class="ttl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:middle;margin-right:6px;"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>筋肉塾 管理</div>
+        <div class="sub">月次添削 / 受信箱</div>
+      </div>
+      <div class="user">
+        <div class="avatar">の</div>
+        のりfitness
+      </div>
+    </div>
+
+    <!-- コンテンツ -->
+    <div class="content">
+
+      <!-- ページタイトル -->
+      <div class="page-title-bar">
+        <h2>月次添削 受信箱</h2>
+      </div>
+
+      <!-- 検索バー -->
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="受講生名で検索...">
+        <span class="sort">▼ 古い順</span>
+      </div>
+
+      <!-- フィルタタブ -->
+      <div class="filter-tabs">
+        <div class="ftab">全て<span class="count">25</span></div>
+        <div class="ftab active">未返答<span class="count">14</span></div>
+        <div class="ftab">返答済<span class="count">11</span></div>
+      </div>
+
+      <!-- ====== 未返答 (古い順) ====== -->
+      <div class="section-label"><svg viewBox="0 0 24 24" style="width:10px;height:10px;vertical-align:middle;margin-right:5px;"><circle cx="12" cy="12" r="9" fill="#b8860b"/></svg>未返答 (古い順)</div>
+      <div class="inbox-list">
+
+        <div class="inbox-row">
+          <div class="row-icon waiting">●</div>
+          <div class="row-main">
+            <div class="name">山田 太郎</div>
+            <div class="meta">入会 2025/09 ・ 過去返信 7 回</div>
+          </div>
+          <div class="row-status"><span class="badge waiting">未返答</span></div>
+          <div class="row-days"><b>9</b> 日経過</div>
+          <div class="row-arr">▶</div>
+        </div>
+
+        <div class="inbox-row">
+          <div class="row-icon waiting">●</div>
+          <div class="row-main">
+            <div class="name">伊藤 美咲</div>
+            <div class="meta">入会 2025/11 ・ 過去返信 5 回</div>
+          </div>
+          <div class="row-status"><span class="badge waiting">未返答</span></div>
+          <div class="row-days"><b>8</b> 日経過</div>
+          <div class="row-arr">▶</div>
+        </div>
+
+        <div class="inbox-row">
+          <div class="row-icon waiting">●</div>
+          <div class="row-main">
+            <div class="name">鈴木 花子</div>
+            <div class="meta">入会 2025/12 ・ 過去返信 4 回</div>
+          </div>
+          <div class="row-status"><span class="badge waiting">未返答</span></div>
+          <div class="row-days"><b>3</b> 日経過</div>
+          <div class="row-arr">▶</div>
+        </div>
+
+        <div class="inbox-row">
+          <div class="row-icon waiting">●</div>
+          <div class="row-main">
+            <div class="name">佐藤 次郎</div>
+            <div class="meta">入会 2026/01 ・ 過去返信 3 回</div>
+          </div>
+          <div class="row-status"><span class="badge waiting">未返答</span></div>
+          <div class="row-days"><b>2</b> 日経過</div>
+          <div class="row-arr">▶</div>
+        </div>
+
+        <div class="inbox-row">
+          <div class="row-icon waiting">●</div>
+          <div class="row-main">
+            <div class="name">中村 健太</div>
+            <div class="meta">入会 2026/02 ・ 過去返信 2 回</div>
+          </div>
+          <div class="row-status"><span class="badge waiting">未返答</span></div>
+          <div class="row-days"><b>2</b> 日経過</div>
+          <div class="row-arr">▶</div>
+        </div>
+
+        <div class="inbox-row">
+          <div class="row-icon waiting">●</div>
+          <div class="row-main">
+            <div class="name">小林 真理</div>
+            <div class="meta">入会 2025/10 ・ 過去返信 6 回</div>
+          </div>
+          <div class="row-status"><span class="badge waiting">未返答</span></div>
+          <div class="row-days"><b>1</b> 日経過</div>
+          <div class="row-arr">▶</div>
+        </div>
+
+      </div>
+
+      <!-- ====== 返答済 (薄表示) ====== -->
+      <div class="section-label">✓ 返答済 (直近)</div>
+      <div class="inbox-list">
+
+        <div class="inbox-row replied">
+          <div class="row-icon done">✓</div>
+          <div class="row-main">
+            <div class="name">田中 三郎</div>
+            <div class="meta">返信 2026/05/04 ・ 動画 3:24</div>
+          </div>
+          <div class="row-status"><span class="badge done">返答済</span></div>
+          <div class="row-days"><b>—</b></div>
+          <div class="row-arr">▶</div>
+        </div>
+
+        <div class="inbox-row replied">
+          <div class="row-icon done">✓</div>
+          <div class="row-main">
+            <div class="name">渡辺 由美</div>
+            <div class="meta">返信 2026/05/03 ・ 動画 2:48</div>
+          </div>
+          <div class="row-status"><span class="badge done">返答済</span></div>
+          <div class="row-days"><b>—</b></div>
+          <div class="row-arr">▶</div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ 注釈 ============ -->
+  <div class="annotation">
+    <h3>🗺 全体構成</h3>
+    <ul>
+      <li><b>PC画面想定</b> (管理画面はスマホ非対応で OK の合意あり、スマホでも一覧チェック程度は可能)</li>
+      <li><b>ヘッダー</b>: ブランド + ログイン中ユーザー</li>
+      <li><b>検索バー</b>: 受講生名で絞り込み</li>
+      <li><b>フィルタタブ</b>: 全て / 未返答 / 返答済 (シンプル 3 分類)</li>
+      <li><b>リスト</b>: 2 セクション (未返答 古い順 → 返答済)</li>
+    </ul>
+
+    <h3>📍 シーン別の使い方</h3>
+    <ul>
+      <li><b>シーン 1: 月初の集中作業</b> — 「未返答」タブ → 古い順に上から処理 → 行タップで個別作業画面 (3b) へ</li>
+      <li><b>シーン 2: 隙間時間の確認</b> — 件数バッジで「未返答 14 件」を一目把握</li>
+    </ul>
+
+    <h3>🎨 デザインルール</h3>
+    <ul>
+      <li><b>未返答</b>: 黄 #b8860b (受講生 UI と同じ "添削色")</li>
+      <li><b>返答済</b>: ティール緑 + 50% 透明度 (完了感)</li>
+      <li><b>角丸 8-12px</b>: 受講生 UI (14px) より少しシャープ (情報密度高い)</li>
+      <li><b>フォント</b>: 数値・日付 = Inter、テキスト = Noto Sans JP</li>
+    </ul>
+
+    <h3>⚙ 機能仕様</h3>
+    <ul>
+      <li><b>並び順</b>: 古い順 (経過日数の大きい順)</li>
+      <li><b>件数バッジ</b>: 各タブ右に未読数表示</li>
+      <li><b>クリック</b>: 行タップで画面 3b へ遷移</li>
+      <li><b>判定</b>: シンプルに 提出 → 返信したか / してないか だけ</li>
+    </ul>
+
+    <h3>🔄 2026-05-24 変更点</h3>
+    <ul>
+      <li>「危険信号」概念を <b>削除</b> (きよむさん判断: 添削が来て返したかが分かればいい)</li>
+      <li>3 セクション → <b>2 セクション</b> に簡略化 (未返答 + 返答済)</li>
+      <li>赤色 #d32f2f は CSS に残るが使用箇所なし (Phase 2 で「7日経過のソフト警告」復活する可能性は残す)</li>
+    </ul>
+
+    <h3>⚠️ 未確定 / Phase 2 候補</h3>
+    <ul>
+      <li>受講生名タップで <b>個別ダッシュボード (画面 3c)</b> ポップアップ — Phase 2 候補</li>
+      <li>月別フィルタ (2026/05 / 2026/04 ...)</li>
+      <li>キーボードショートカット (j/k で上下移動、Enter で開く) — 集中作業時の効率化</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,478 @@
+#!/usr/bin/env node
+// 受講生メニュー閲覧 モック v5 (確定版レイアウト)
+// 5 パターン全部を案 B-2 (ワンライン型 + 狙い末尾) で表示
+
+const fs = require("fs");
+const samples = JSON.parse(fs.readFileSync("/tmp/menu_samples.json", "utf8"));
+
+const PATTERN_TITLES = [
+  "AB 2日制 × 3サイクル進化 (王道その1)",
+  "6日制 × 3サイクル進化 (毎日コツコツ型)",
+  "3日制 × 3サイクル進化",
+  "1サイクル完結型 (シンプル)",
+  "女性向け 6日制 × 3サイクル",
+];
+
+const NORI_NOTES = [
+  ["まずは「小」から始めてください。", "フォームが慣れてきたら「中」「大」に進めましょう。", "毎日コツコツ続けるのがコツです。"],
+  ["毎日違う部位を鍛えるので無理なく続けられます。", "重さよりフォームを優先してください。", "睡眠 7 時間以上を確保しましょう。"],
+  ["週 3 回でしっかり追い込むメニューです。", "セット間の休憩はしっかり取りましょう。"],
+  ["まずはこのメニューに 2 週間取り組んでみてください。", "終わったらフィードバックをください。"],
+  ["女性に多い悩み (引き締め・むくみ) を意識した構成です。", "脚と背中をしっかり鍛えれば代謝が上がります。"],
+];
+
+// 主部位 → 一般名称 (狙い表示用)
+const PART_MAP = {
+  "大胸筋": "胸",
+  "三角筋": "肩",
+  "三角筋前部": "肩",
+  "三角筋後部": "肩",
+  "二頭筋": "腕",
+  "三頭筋": "腕",
+  "広背筋": "背中",
+  "僧帽筋": "背中",
+  "脚": "脚",
+  "脚全体": "脚",
+  "大腿四頭筋": "脚",
+  "ハムストリングス": "脚",
+  "大殿筋": "脚",
+  "腹直筋": "腹筋",
+  "腹筋": "腹筋",
+  "全身": "全身",
+};
+
+function escape(s) {
+  if (s === null || s === undefined) return "";
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function cleanExerciseName(name) {
+  // 種目名から【部位】タグを除去
+  return name.replace(/【[^】]+】/g, "").trim();
+}
+
+function getTarget(mainParts) {
+  if (!mainParts || mainParts.length === 0) return "全身";
+  // 主部位の最初を一般名称に変換 (重複を除いてユニーク化)
+  const generic = mainParts.map(p => PART_MAP[p] || p);
+  const unique = [...new Set(generic)];
+  return unique.slice(0, 2).join("・"); // 最大 2 つまで
+}
+
+function cleanReps(s) {
+  if (!s) return "—";
+  if (s.startsWith("http") || s.includes("youtube") || s.toLowerCase().includes("youtube")) return "(動画参照)";
+  // 「10回±2、2セット」 → 「10回×2セット」風に簡潔化
+  return s.replace(/±\d+、?/, "").replace(/、/g, " / ").trim();
+}
+
+function cleanInterval(s) {
+  if (!s) return "—";
+  return s.replace(/分$/, "分");
+}
+
+function renderExercises(exercises) {
+  return exercises.map((ex, i) => {
+    const name = cleanExerciseName(ex["種目名"] || "");
+    const reps = cleanReps(ex["回数"]);
+    const interval = cleanInterval(ex["インターバル"] || "");
+    const target = getTarget(ex["主部位"]);
+
+    return `
+      <div class="b-row">
+        <div class="b-num">${i + 1}</div>
+        <div class="b-body">
+          <div class="b-name">${escape(name)}</div>
+          <div class="b-meta">
+            ${escape(reps)}<span class="sep">｜</span>休憩 ${escape(interval)}<span class="sep">｜</span><span class="target-label">狙い:</span><span class="target">${escape(target)}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderDayTabs(weeks, activeIdx) {
+  return weeks.map((w, i) => {
+    let dayLabel = (w["日"] || `${i + 1}日目`).replace(/\n/g, " ").trim();
+    // 「Bメニュー オフでも 可」みたいな冗長な表記を簡潔化
+    dayLabel = dayLabel.replace(/オフでも.*$/, "").replace(/\s+/g, "").trim();
+    if (dayLabel.length > 6) dayLabel = dayLabel.slice(0, 6);
+    const cls = i === activeIdx ? "day-tab active" : "day-tab";
+    return `<div class="${cls}">${escape(dayLabel)}</div>`;
+  }).join("");
+}
+
+function renderPattern(sample, idx) {
+  const title = PATTERN_TITLES[idx];
+  const notes = NORI_NOTES[idx];
+  const cycles = sample.cycles || [];
+  const firstCycle = cycles[0] || { 週: [], 段階: "", シート名: "" };
+  const firstDay = firstCycle["週"]?.[0];
+  const exercises = firstDay?.["種目"] || [];
+  const dayCount = firstCycle["週"]?.length ?? 0;
+
+  const instrumentDisp = sample.instrument === "汎用名 (中身要確認)" || sample.instrument === "不明 (中身要確認)" ? "用器具混合" : (sample.instrument || "—");
+  const frequencyDisp = sample.frequency === "不明 (中身要確認)" ? "—" : (sample.frequency || "—");
+
+  return `
+    <section class="pattern">
+      <div class="pattern-header">
+        <div class="pattern-num">パターン ${idx + 1}</div>
+        <div class="pattern-title">${escape(title)}</div>
+      </div>
+
+      <div class="phone">
+        <div class="app-header">
+          <button class="back-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <div class="app-title">あなたのメニュー</div>
+          <div style="width:20px"></div>
+        </div>
+
+        <div class="hero">
+          <div class="hero-tag">${escape(sample.source_name)} さんの今月のメニュー</div>
+          <div class="hero-title">
+            ${escape(instrumentDisp)}<br>
+            ${escape(frequencyDisp)} ${sample.primary_body ? "・" + escape(sample.primary_body) + "重点" : ""}
+          </div>
+          <div class="hero-meta">配布 2026/06/02 / 全 ${cycles.length} サイクル</div>
+        </div>
+
+        <details class="karte-summary">
+          <summary>提出したカルテ ▾</summary>
+          <dl class="karte-list">
+            <dt>性別</dt><dd>${escape(sample.gender)}</dd>
+            <dt>年齢層</dt><dd>${escape(sample.age_band)}</dd>
+            <dt>使える環境</dt><dd>${escape(instrumentDisp)}</dd>
+            <dt>理想の頻度</dt><dd>${escape(frequencyDisp)}</dd>
+            <dt>重点部位</dt><dd>${escape(sample.primary_body || "—")}</dd>
+          </dl>
+        </details>
+
+        <div class="nori-note">
+          <div class="nori-note-label">のりfitness より</div>
+          <ul class="nori-note-list">
+            ${notes.map(n => `<li>${escape(n)}</li>`).join("")}
+          </ul>
+        </div>
+
+        ${cycles.length > 1 ? `
+        <div class="cycle-tabs-wrap">
+          <div class="cycle-label">サイクル</div>
+          <div class="cycle-tabs">
+            ${cycles.map((c, i) => `<div class="cycle-tab ${i === 0 ? 'active' : ''}">${escape(c["段階"] || `第${i+1}`)}</div>`).join("")}
+          </div>
+        </div>
+        ` : ""}
+
+        ${firstCycle["シート名"] ? `<div class="stage-name">${escape(firstCycle["シート名"].replace(/【.*?】/g, "").trim())}</div>` : ""}
+
+        ${dayCount > 1 ? `<div class="day-tabs">${renderDayTabs(firstCycle["週"], 0)}</div>` : ""}
+
+        <div class="b-list">
+          ${renderExercises(exercises)}
+        </div>
+
+        <div class="tc-note">実行記録は <a href="#">トレーナークラウド</a></div>
+        <div class="footer"><button class="footer-btn">メニュー変更リクエスト</button></div>
+      </div>
+    </section>
+  `;
+}
+
+const html = `<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>受講生メニュー閲覧 5 パターン (確定レイアウト B-2)</title>
+<style>
+  :root {
+    --teal: #00897b;
+    --teal-dark: #00695c;
+    --teal-soft: rgba(0,137,123,0.08);
+    --border: #e8ebe9;
+    --gray-50: #fafafa;
+    --gray-100: #f4f4f5;
+    --gray-300: #d4d4d8;
+    --gray-500: #71717a;
+    --gray-700: #3f3f46;
+    --gray-900: #18181b;
+    --warm-grad: linear-gradient(135deg, #e0f2f1, #fffbe6);
+    --highlight: rgba(255,235,59,0.12);
+    --highlight-border: rgba(255,235,59,0.55);
+    --gold: #b8860b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #ececec;
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+    color: var(--gray-900);
+    padding: 32px 16px 100px;
+  }
+  .page-title { max-width: 600px; margin: 0 auto 32px; text-align: center; }
+  .page-title h1 { font-size: 18px; margin: 0 0 8px; }
+  .page-title p { font-size: 12px; color: var(--gray-500); margin: 0; line-height: 1.7; }
+  .pattern { max-width: 480px; margin: 0 auto 48px; }
+  .pattern-header { text-align: center; margin-bottom: 12px; }
+  .pattern-num { font-size: 11px; color: var(--gray-500); letter-spacing: 1px; font-weight: 700; }
+  .pattern-title { font-size: 14px; font-weight: 700; margin-top: 2px; }
+  .phone {
+    max-width: 390px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  }
+
+  /* ヘッダー */
+  .app-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .back-btn { background: none; border: none; padding: 0; cursor: pointer; color: var(--gray-900); }
+  .app-title { flex: 1; text-align: center; font-size: 14px; font-weight: 700; }
+
+  /* ヒーロー */
+  .hero {
+    padding: 20px 16px;
+    background: var(--warm-grad);
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+  }
+  .hero-tag {
+    font-size: 11px;
+    color: var(--teal-dark);
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+  .hero-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--gray-900);
+    line-height: 1.5;
+    margin-bottom: 6px;
+  }
+  .hero-meta {
+    font-size: 10px;
+    color: var(--gray-500);
+  }
+
+  /* カルテサマリ (1 列縦並び) */
+  .karte-summary {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: white;
+  }
+  .karte-summary summary {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gray-500);
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+  }
+  .karte-summary summary::-webkit-details-marker { display: none; }
+  .karte-list {
+    margin: 12px 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 6px 12px;
+    font-size: 12px;
+  }
+  .karte-list dt { color: var(--gray-500); font-size: 11px; }
+  .karte-list dd { margin: 0; color: var(--gray-900); font-weight: 600; }
+
+  /* のり氏メモ (箇条書き) */
+  .nori-note {
+    margin: 16px;
+    padding: 12px 14px;
+    background: var(--highlight);
+    border: 1px solid var(--highlight-border);
+    border-radius: 8px;
+  }
+  .nori-note-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .nori-note-list {
+    margin: 0;
+    padding-left: 16px;
+    font-size: 12px;
+    color: var(--gray-900);
+    line-height: 1.7;
+  }
+  .nori-note-list li { margin-bottom: 2px; }
+  .nori-note-list li:last-child { margin-bottom: 0; }
+
+  /* サイクル選択 */
+  .cycle-tabs-wrap {
+    background: var(--gray-50);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 16px 12px;
+  }
+  .cycle-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--gray-500);
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .cycle-tabs { display: flex; gap: 6px; }
+  .cycle-tab {
+    flex: 1;
+    padding: 8px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gray-500);
+  }
+  .cycle-tab.active {
+    background: var(--teal-soft);
+    border-color: var(--teal);
+    color: var(--teal-dark);
+    border-width: 2px;
+  }
+
+  .stage-name {
+    padding: 10px 16px;
+    font-size: 11px;
+    color: var(--gray-500);
+    text-align: center;
+    background: white;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* 日タブ */
+  .day-tabs {
+    display: flex;
+    background: white;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .day-tab {
+    flex: 1;
+    min-width: 60px;
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gray-500);
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+  }
+  .day-tab.active {
+    color: var(--teal-dark);
+    border-bottom-color: var(--teal);
+  }
+
+  /* ★ ワンライン型 (確定レイアウト) */
+  .b-list { padding: 0; background: white; }
+  .b-row {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 12px;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .b-row:last-child { border-bottom: none; }
+  .b-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--gray-100);
+    color: var(--gray-700);
+    font-weight: 700;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .b-body { min-width: 0; }
+  .b-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gray-900);
+    line-height: 1.3;
+  }
+  .b-meta {
+    font-size: 11px;
+    color: var(--gray-500);
+    margin-top: 4px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    line-height: 1.6;
+  }
+  .b-meta .target { color: var(--teal-dark); font-weight: 700; }
+  .b-meta .target-label { color: var(--gray-500); font-weight: 500; }
+  .b-meta .sep { color: var(--gray-300); margin: 0 4px; }
+
+  .tc-note {
+    padding: 10px 16px;
+    background: var(--gray-50);
+    border-top: 1px solid var(--border);
+    font-size: 10px;
+    color: var(--gray-500);
+    line-height: 1.6;
+    text-align: center;
+  }
+  .tc-note a { color: var(--teal-dark); font-weight: 700; text-decoration: underline; }
+
+  .footer {
+    padding: 12px 16px;
+    background: white;
+    border-top: 1px solid var(--border);
+  }
+  .footer-btn {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--teal);
+    background: white;
+    color: var(--teal-dark);
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .divider { max-width: 600px; margin: 32px auto; border-top: 1px dashed #ccc; }
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  <h1>📋 受講生メニュー閲覧 - 5 パターン (確定レイアウト B-2)</h1>
+  <p>
+    実データ 5 パターンを、案 B-2 (ワンライン型 + 狙い末尾) で表示<br>
+    各パターンとも 1 サイクル目の 1 日目だけ表示
+  </p>
+</div>
+
+${samples.map((s, i) => renderPattern(s, i) + (i < samples.length - 1 ? '<div class="divider"></div>' : '')).join("\n")}
+
+</body>
+</html>
+`;
+
+fs.writeFileSync("/tmp/workout_menu_view_v5.html", html);
+console.log("✅ /tmp/workout_menu_view_v5.html を生成 (" + html.length + " バイト)");

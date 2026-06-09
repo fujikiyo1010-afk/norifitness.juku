@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — ツール一覧</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --ink4: #ccc;
+    --border: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f8f9fa;
+    --bg-warm: linear-gradient(135deg, #e0f2f1, #fffbe6);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #e8ebec;
+    color: var(--ink);
+    line-height: 1.6;
+    padding: 24px;
+  }
+  .page-header {
+    max-width: 900px;
+    margin: 0 auto 32px;
+    text-align: center;
+  }
+  .page-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .page-header p { color: #6b7d75; font-size: 13px; }
+
+  .stage {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 440px 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  .phone {
+    width: 100%;
+    max-width: 440px;
+    background: var(--bg);
+    border: 8px solid #2a2a2a;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    min-height: 800px;
+  }
+  .phone-status {
+    background: #2a2a2a;
+    color: #fff;
+    text-align: center;
+    font-size: 11px;
+    padding: 4px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* ヘッダー */
+  .app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    background: #fff;
+  }
+  .app-header .back {
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink);
+  }
+  .app-header .title-h { font-size: 15px; font-weight: 700; color: var(--ink); }
+  .app-header .spacer { width: 24px; }
+
+  /* スクロール本体 */
+  .scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 80px;
+    background: #fafbfa;
+  }
+
+  /* ヒーロー帯 */
+  .hero {
+    background: var(--bg-warm);
+    padding: 20px 22px;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero .ttl {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary-darker);
+    margin-bottom: 6px;
+  }
+  .hero .sub {
+    font-size: 12px;
+    color: var(--ink2);
+    line-height: 1.7;
+  }
+
+  /* ツール 4 カード */
+  .tools-list {
+    padding: 18px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .tool-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    cursor: pointer;
+    transition: border-color .15s;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .tool-card:hover {
+    border-color: var(--primary);
+  }
+  .tool-num {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .tool-main {
+    flex: 1;
+    min-width: 0;
+  }
+  .tool-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 3px;
+  }
+  .tool-desc {
+    font-size: 11px;
+    color: var(--ink3);
+    line-height: 1.5;
+  }
+  .tool-link {
+    font-size: 13px;
+    color: var(--primary);
+    font-family: 'Inter', sans-serif;
+    flex-shrink: 0;
+  }
+
+  /* 自然な順序の案内 */
+  .flow-tip {
+    margin: 20px 16px;
+    padding: 14px 16px;
+    background: var(--bg-soft);
+    border-radius: 10px;
+    font-size: 11px;
+    color: var(--ink2);
+    line-height: 1.7;
+  }
+  .flow-tip b { color: var(--primary-dark); }
+
+  /* 下部タブ */
+  .tabbar {
+    display: flex;
+    border-top: 1px solid var(--border);
+    background: #fff;
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px 4px 8px;
+    font-size: 10px;
+    color: var(--ink3);
+  }
+  .tab.active { color: var(--primary); font-weight: 700; }
+  .tab .icon { font-size: 18px; display: block; margin-bottom: 2px; }
+
+  /* 注釈 */
+  .annotation {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    font-size: 13px;
+    color: #555;
+    position: sticky;
+    top: 24px;
+  }
+  .annotation h3 {
+    font-size: 14px;
+    color: var(--ink);
+    margin: 18px 0 8px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 4px;
+  }
+  .annotation h3:first-child { margin-top: 0; }
+  .annotation ul { padding-left: 20px; }
+  .annotation li { margin-bottom: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🛠 ツール一覧画面</h1>
+  <p>ホーム → 機能ブロック「ツール」から遷移 ・ 4 ツール (順序固定)</p>
+</div>
+
+<div class="stage">
+
+  <div class="phone">
+    <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+
+    <div class="app-header">
+      <div class="back">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </div>
+      <div class="title-h">ツール</div>
+      <div class="spacer"></div>
+    </div>
+
+    <div class="scroll">
+
+      <div class="hero">
+        <div class="ttl">🛠 計算ツール</div>
+        <div class="sub">目標管理シートのための計算ツール。<br>順番に使うとシートが埋まります。</div>
+      </div>
+
+      <div class="tools-list">
+
+        <div class="tool-card">
+          <div class="tool-num">1</div>
+          <div class="tool-main">
+            <div class="tool-name">体脂肪率計算</div>
+            <div class="tool-desc">現状把握を埋める ・ アメリカ海軍式</div>
+          </div>
+          <div class="tool-link">→</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-num">2</div>
+          <div class="tool-main">
+            <div class="tool-name">必要カロリー計算</div>
+            <div class="tool-desc">基礎代謝 / メンテ / ダイエット / 増量</div>
+          </div>
+          <div class="tool-link">→</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-num">3</div>
+          <div class="tool-main">
+            <div class="tool-name">減量期間逆算</div>
+            <div class="tool-desc">目標体重までの期間と到達予定日</div>
+          </div>
+          <div class="tool-link">→</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-num">4</div>
+          <div class="tool-main">
+            <div class="tool-name">PFC・カーボサイクル設定</div>
+            <div class="tool-desc">栄養素の数値 + 1 週間の糖質配分 (統合)</div>
+          </div>
+          <div class="tool-link">→</div>
+        </div>
+
+      </div>
+
+      <div class="flow-tip">
+        💡 <b>はじめての方へ</b><br>
+        ① 体脂肪率 → ② カロリー → ③ 期間 → ④ PFC の順で使うと、目標管理シートが自然に埋まります。
+      </div>
+
+    </div>
+
+    <div class="tabbar">
+      <div class="tab"><span class="icon">🏠</span>ホーム</div>
+      <div class="tab"><span class="icon">📚</span>コース</div>
+      <div class="tab"><span class="icon">📝</span>記録</div>
+      <div class="tab"><span class="icon">🔍</span>検索</div>
+      <div class="tab"><span class="icon">⚙</span>設定</div>
+    </div>
+  </div>
+
+  <div class="annotation">
+    <h3>🗺 画面の役割</h3>
+    <ul>
+      <li>ホーム画面 → 機能ブロック「ツール」をタップ → このページに遷移</li>
+      <li><b>4 ツール</b>を順序固定で並べる (番号付きカード)</li>
+      <li>タップで各ツールの個別画面へ</li>
+    </ul>
+
+    <h3>📐 構成</h3>
+    <ul>
+      <li><b>ヒーロー帯</b>: E案グラデ (温かい) + タイトル「🛠 計算ツール」</li>
+      <li><b>ツールカード</b>: 番号 + ツール名 + 短い説明 + →</li>
+      <li><b>flow-tip</b>: 「はじめての方へ」順序ガイダンス</li>
+    </ul>
+
+    <h3>🎨 デザイン方針</h3>
+    <ul>
+      <li>ティール緑 #00897b (受講生 UI 共通)</li>
+      <li>カード角丸 <b>14px</b> (一般カードに揃える)</li>
+      <li>※ Phase 2-7 メモリの「ツールボタンのみ 3px (シャープ)」は <b>個別ツール画面内の計算ボタン</b> に適用する想定 (一覧画面のカード自体は 14px)</li>
+      <li>ホーム画面の機能ブロック (3px) との視覚的連続性 = 別途検討</li>
+    </ul>
+
+    <h3>📋 採用したツール 4 つ</h3>
+    <ul>
+      <li><b>① 体脂肪率計算</b> (特典 25 ベース、男女両対応 ← 拡張)</li>
+      <li><b>② 必要カロリー計算</b> (特典 23 ベース)</li>
+      <li><b>③ 減量期間逆算</b> (特典 24 ベース)</li>
+      <li><b>④ PFC・カーボサイクル設定</b> (特典 26 ベース、STEP 1+2 統合)</li>
+    </ul>
+
+    <h3>🔄 目標管理シート連携</h3>
+    <ul>
+      <li>全 4 ツールに「目標管理シートに反映 →」ボタンを配置</li>
+      <li>① は body_metrics (体組成記録) にも自動転記オプションあり</li>
+      <li>④ のカーボサイクル配分 = 条件付き + アコーディオン表示 (合意済)</li>
+      <li>② の反映時 = 案 γ ハイブリッド (推奨マーク付き選択ダイアログ、合意済)</li>
+    </ul>
+
+    <h3>⚠️ 未確定</h3>
+    <ul>
+      <li>ツールカードの並び順 = 固定で OK (現状) / ドラッグ並び替え可能にするか</li>
+      <li>各ツールの「使用済み / 未使用」ステータス表示するか (前回計算した日付など)</li>
+      <li>Phase 2 で追加候補 (チートデイ / 1RM / 水分量) はこの一覧の下に積む</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

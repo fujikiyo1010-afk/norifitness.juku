@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — 目標管理シート 閲覧モード</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+    --ink: #1a1a1a;
+    --ink2: #444;
+    --ink3: #888;
+    --ink4: #bbb;
+    --border: #e8ebe9;
+    --border-strong: #d4d4d4;
+    --bg: #fff;
+    --bg-soft: #fafafa;
+    --bg-soft2: #f5f5f5;
+    --audit-bg: rgba(255,235,59,0.12);
+    --audit-border: rgba(255,235,59,0.55);
+    --audit-name: #b8860b;
+    --accent-red: #c44;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #e8ebec;
+    color: var(--ink);
+    line-height: 1.6;
+    padding: 24px;
+    font-size: 13px;
+  }
+  .page-header {
+    max-width: 980px;
+    margin: 0 auto 20px;
+    text-align: center;
+  }
+  .page-header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .page-header p {
+    color: #888;
+    font-size: 12px;
+  }
+
+  /* ============================================
+     ドキュメントフレーム
+     ============================================ */
+  .doc {
+    max-width: 980px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.06);
+    overflow: hidden;
+    font-size: 12px;
+  }
+
+  /* ① ヘッダー帯 */
+  .doc-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--border);
+    background: #fff;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 16px;
+  }
+  .doc-header .title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: .01em;
+  }
+  .doc-header .title .name {
+    color: var(--ink3);
+    font-size: 14px;
+    font-weight: 500;
+    margin-left: 6px;
+  }
+  .doc-header .meta {
+    text-align: right;
+    font-size: 10px;
+    color: var(--ink3);
+    line-height: 1.6;
+  }
+
+  /* ② KPI サマリーバー */
+  .kpi-bar {
+    padding: 14px 22px;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .kpi {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+  }
+  .kpi .lbl {
+    font-size: 10px;
+    color: var(--ink3);
+    margin-bottom: 4px;
+    letter-spacing: .03em;
+  }
+  .kpi .val {
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    line-height: 1;
+  }
+  .kpi .val .unit {
+    font-size: 11px;
+    color: var(--ink3);
+    font-weight: 400;
+    margin-left: 1px;
+  }
+  /* 目標体重カード - v5 強調 */
+  .kpi.target .val {
+    font-weight: 700;
+  }
+  .kpi.target .val .num {
+    display: inline-block;
+    padding-bottom: 2px;
+    line-height: 1;
+    border-bottom: 2px solid #00897b;
+  }
+
+  /* ③ 総評バー */
+  .summary-bar {
+    padding: 12px 22px;
+    background: var(--audit-bg);
+    border-bottom: 1px solid var(--border);
+  }
+  .summary-bar .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  .summary-bar .who {
+    font-size: 10px;
+    color: var(--audit-name);
+    font-weight: 500;
+    letter-spacing: .03em;
+  }
+  .summary-bar .date {
+    font-size: 10px;
+    color: var(--ink3);
+    font-family: 'Inter', sans-serif;
+  }
+  .summary-bar .text {
+    font-size: 11px;
+    color: var(--ink2);
+    line-height: 1.65;
+  }
+
+  /* ④ カルテ表 */
+  .karte {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .karte tr.section-band td {
+    background: #1a1a1a;
+    color: #fff;
+    padding: 7px 14px;
+    font-size: 10px;
+    letter-spacing: .15em;
+    font-weight: 600;
+  }
+  .karte tr.section-band td .num {
+    color: var(--primary);
+    font-family: 'Inter', sans-serif;
+    margin-right: 8px;
+  }
+  .karte tr.data-row td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .karte tr.data-row td.lbl {
+    width: 150px;
+    background: var(--bg-soft);
+    color: var(--ink3);
+    border-right: 1px solid var(--border);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: .03em;
+  }
+  .karte tr.data-row td.val {
+    font-size: 11px;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  .karte tr.data-row td.val b {
+    font-weight: 500;
+  }
+  .karte tr.data-row td.val .muted {
+    color: var(--ink3);
+    font-size: 10px;
+    margin-left: 4px;
+  }
+  .karte tr.data-row td.val .audit-tag {
+    display: inline-block;
+    background: var(--audit-bg);
+    color: var(--audit-name);
+    border: 1px solid var(--audit-border);
+    padding: 1px 7px;
+    font-size: 9px;
+    border-radius: 9999px;
+    font-weight: 600;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .karte tr.data-row td.val .pfc-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+  }
+  .karte tr.data-row td.val .pfc-line .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--primary);
+    flex-shrink: 0;
+  }
+  .karte tr.data-row td.val .pfc-line .name {
+    color: var(--ink);
+    font-weight: 500;
+    min-width: 90px;
+  }
+  .karte tr.data-row td.val .pfc-line .gram {
+    color: var(--ink);
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    min-width: 50px;
+  }
+  .karte tr.data-row td.val .pfc-line .extra {
+    color: var(--ink3);
+    font-size: 10px;
+  }
+  .karte tr.audit-row td.lbl {
+    background: var(--bg-soft);
+    color: var(--ink3);
+    border-right: 1px solid var(--border);
+    padding: 9px 14px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: .03em;
+    vertical-align: top;
+  }
+  .karte tr.audit-row td.val {
+    background: var(--audit-bg);
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .karte tr.audit-row td.val .who {
+    font-size: 10px;
+    color: var(--audit-name);
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+  .karte tr.audit-row td.val .text {
+    font-size: 11px;
+    color: var(--ink2);
+    line-height: 1.55;
+  }
+
+  /* ⑤ フッター */
+  .doc-footer {
+    background: var(--bg-soft);
+    border-top: 1px solid var(--border);
+    padding: 12px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+  .doc-footer .links {
+    display: flex;
+    gap: 18px;
+  }
+  .doc-footer .links a {
+    font-size: 10px;
+    color: #555;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color .2s;
+  }
+  .doc-footer .links a:hover {
+    border-bottom-color: #555;
+  }
+  .doc-footer .edit-btn {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 6px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: .03em;
+  }
+  .doc-footer .edit-btn:hover {
+    background: var(--primary-dark);
+  }
+
+  /* 注釈エリア (印刷時 非表示) */
+  .annotation {
+    max-width: 980px;
+    margin: 20px auto 0;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 22px;
+    font-size: 12px;
+    color: #555;
+  }
+  .annotation h3 {
+    font-size: 13px;
+    color: var(--ink);
+    margin: 12px 0 6px;
+  }
+  .annotation h3:first-child { margin-top: 0; }
+  .annotation ul { padding-left: 20px; }
+  .annotation li { margin-bottom: 3px; font-size: 11px; }
+  .annotation code {
+    background: var(--bg-soft2);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+  }
+
+  /* ============================================
+     印刷スタイル
+     ============================================ */
+  @media print {
+    body { background: #fff; padding: 0; font-size: 11px; }
+    .page-header { display: none; }
+    .annotation { display: none; }
+    .doc { box-shadow: none; border: 0; max-width: 100%; }
+    .doc-footer .edit-btn { display: none; }
+    .doc-footer .links a { color: #888; }
+    @page { size: A4 portrait; margin: 10mm; }
+  }
+
+  /* ============================================
+     スマホ対応
+     ============================================ */
+  @media (max-width: 720px) {
+    body { padding: 12px; }
+    .doc-header {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .doc-header .meta { text-align: left; }
+    .kpi-bar {
+      grid-template-columns: 1fr 1fr;
+    }
+    .karte tr.data-row td.lbl { width: 100px; font-size: 9px; }
+    .karte tr.data-row td.val { font-size: 10px; }
+    .doc-footer {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+    }
+    .doc-footer .links { flex-wrap: wrap; gap: 12px; justify-content: center; }
+    .doc-footer .edit-btn { width: 100%; padding: 10px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>📄 目標管理シート — 閲覧モード (一枚もの)</h1>
+  <p>編集モード (v3 スマホ版) と併存 ・ デフォルトはこちら、編集ボタンで編集モードへ</p>
+</div>
+
+<div class="doc">
+
+  <!-- ① ヘッダー帯 -->
+  <div class="doc-header">
+    <div class="title">
+      目標管理シート
+      <span class="name">— きよむ 様</span>
+    </div>
+    <div class="meta">
+      提出 2026/05/21 ・ 入会 13 日目<br>
+      記入状況 4 / 5 セクション
+    </div>
+  </div>
+
+  <!-- ② KPI サマリーバー -->
+  <div class="kpi-bar">
+    <div class="kpi">
+      <div class="lbl">現状体重</div>
+      <div class="val"><span class="num">75.0</span><span class="unit">kg</span></div>
+    </div>
+    <div class="kpi target">
+      <div class="lbl">目標体重</div>
+      <div class="val"><span class="num">68.0</span><span class="unit">kg</span></div>
+    </div>
+    <div class="kpi">
+      <div class="lbl">期限</div>
+      <div class="val"><span class="num">8/23</span></div>
+    </div>
+    <div class="kpi">
+      <div class="lbl">目標 kcal</div>
+      <div class="val"><span class="num">2,102</span></div>
+    </div>
+  </div>
+
+  <!-- ③ 総評バー -->
+  <div class="summary-bar">
+    <div class="head">
+      <div class="who">のりfitness 総評</div>
+      <div class="date">2026/05/21</div>
+    </div>
+    <div class="text">きよむさんの初回提出確認しました。各セクションに添削を残しました。まずは 1 週間、③ の PFC を意識した食事から始めてみてください。</div>
+  </div>
+
+  <!-- ④ 本体カルテ表 -->
+  <table class="karte">
+
+    <!-- セクション 01 -->
+    <tr class="section-band"><td colspan="2"><span class="num">01</span>現状を把握</td></tr>
+
+    <tr class="data-row">
+      <td class="lbl">体重</td>
+      <td class="val"><b>75.0 kg</b></td>
+    </tr>
+    <tr class="data-row">
+      <td class="lbl">身長</td>
+      <td class="val"><b>170 cm</b> <span class="muted">(プロフィール連動)</span></td>
+    </tr>
+    <tr class="data-row">
+      <td class="lbl">ウエスト</td>
+      <td class="val"><b>82.0 cm</b></td>
+    </tr>
+    <tr class="data-row">
+      <td class="lbl">首回り</td>
+      <td class="val"><b>38.5 cm</b></td>
+    </tr>
+    <tr class="data-row">
+      <td class="lbl">体脂肪率</td>
+      <td class="val"><b>22.4 %</b> <span class="audit-tag">添削 1</span></td>
+    </tr>
+    <tr class="data-row">
+      <td class="lbl">メンテ kcal</td>
+      <td class="val"><b>2,604 kcal/日</b></td>
+    </tr>
+    <tr class="audit-row">
+      <td class="lbl">添削</td>
+      <td class="val">
+        <div class="who">のりfitness</div>
+        <div class="text">数値、しっかり計測してくれてありがとう。基準値は十分です。</div>
+      </td>
+    </tr>
+
+    <!-- セクション 02 -->
+    <tr class="section-band"><td colspan="2"><span class="num">02</span>目標の選定</td></tr>
+
+    <tr class="data-row">
+      <td class="lbl">目標体重</td>
+      <td class="val"><b>75.0 kg → 68.0 kg</b> <span class="muted">(−7.0 kg)</span> <span class="audit-tag">添削 1</span></td>
+    </tr>
+    <tr class="data-row">
+      <td class="lbl">到達予定日</td>
+      <td class="val"><b>2026/08/23 ごろ</b></td>
+    </tr>
+    <tr class="data-row">
+      <td class="lbl">短期目標</td>
+      <td class="val">3 ヶ月で体重を 5kg 落とす</td>
+    </tr>
+    <tr class="data-row">
+      <td class="lbl">長期目標</td>
+      <td class="val">1 年後に体脂肪率 15% 以下</td>
+    </tr>
+    <tr class="data-row">
+      <td class="lbl">プロセス</td>
+      <td class="val">毎日食事を記録、週 3 回筋トレ</td>
+    </tr>
+    <tr class="audit-row">
+      <td class="lbl">添削</td>
+      <td class="val">
+        <div class="who">のりfitness</div>
+        <div class="text">「週 3 回」が習慣化のキー。最初の 2 週間がふんばりどころです、頑張りすぎないこと。</div>
+      </td>
+    </tr>
+
+    <!-- セクション 03 -->
+    <tr class="section-band"><td colspan="2"><span class="num">03</span>栄養設計</td></tr>
+
+    <tr class="data-row">
+      <td class="lbl">目標カロリー</td>
+      <td class="val"><b>2,102 kcal/日</b></td>
+    </tr>
+    <tr class="data-row">
+      <td class="lbl">たんぱく質 (P)</td>
+      <td class="val">
+        <div class="pfc-line">
+          <div class="dot"></div>
+          <div class="gram">150 g</div>
+          <div class="extra">/ 600 kcal / 29 %</div>
+        </div>
+      </td>
+    </tr>
+    <tr class="data-row">
+      <td class="lbl">脂質 (F)</td>
+      <td class="val">
+        <div class="pfc-line">
+          <div class="dot"></div>
+          <div class="gram">58 g</div>
+          <div class="extra">/ 522 kcal / 25 %</div>
+        </div>
+      </td>
+    </tr>
+    <tr class="data-row">
+      <td class="lbl">糖質 (C)</td>
+      <td class="val">
+        <div class="pfc-line">
+          <div class="dot"></div>
+          <div class="gram">245 g</div>
+          <div class="extra">/ 980 kcal / 46 %</div>
+        </div>
+      </td>
+    </tr>
+    <tr class="data-row">
+      <td class="lbl">合計</td>
+      <td class="val"><b>2,102 kcal</b></td>
+    </tr>
+    <tr class="audit-row">
+      <td class="lbl">添削</td>
+      <td class="val">
+        <div class="who">のりfitness</div>
+        <div class="text">P が体重 × 2 倍、しっかり摂れていて理想的。F も 25% で安定、C は減量フェーズなのでこのままで OK。</div>
+      </td>
+    </tr>
+
+    <!-- セクション 04 -->
+    <tr class="section-band"><td colspan="2"><span class="num">04</span>プラスの感情を含むゴール</td></tr>
+
+    <tr class="data-row">
+      <td class="lbl">達成時の気持ち</td>
+      <td class="val">自信がついて、家族と思いっきり遊べる体になりたい</td>
+    </tr>
+    <tr class="audit-row">
+      <td class="lbl">添削</td>
+      <td class="val">
+        <div class="who">のりfitness</div>
+        <div class="text">家族と遊べる体、いいですね。途中つらくなったら、このページに戻ってきてください。</div>
+      </td>
+    </tr>
+
+    <!-- セクション 05 -->
+    <tr class="section-band"><td colspan="2"><span class="num">05</span>セルフイメージ改善</td></tr>
+
+    <tr class="data-row">
+      <td class="lbl">状態</td>
+      <td class="val"><span class="muted">未記入 (8 項目)</span></td>
+    </tr>
+
+  </table>
+
+  <!-- ⑤ フッター -->
+  <div class="doc-footer">
+    <div class="links">
+      <a href="#">編集履歴</a>
+      <a href="#">変化を見る</a>
+      <a href="#">過去の添削履歴 (0)</a>
+    </div>
+    <button class="edit-btn">編集する</button>
+  </div>
+</div>
+
+<div class="annotation">
+  <h3>🗺 構成 (上から順)</h3>
+  <ul>
+    <li><b>① ヘッダー帯</b>: タイトル + 提出日 + 入会日数 + 記入状況</li>
+    <li><b>② KPI サマリーバー</b>: 4 カード (現状体重 / 目標体重 ★ / 期限 / 目標 kcal)</li>
+    <li><b>③ 総評バー</b>: のりfitness の全体総評 (薄黄背景)</li>
+    <li><b>④ 本体カルテ表</b>: 5 セクション、左列ラベル + 右列値 + 各セクション末尾に添削行</li>
+    <li><b>⑤ フッター</b>: 編集履歴/変化を見る/過去の添削履歴 リンク + 編集するボタン</li>
+  </ul>
+
+  <h3>🎨 デザイン特徴</h3>
+  <ul>
+    <li><b>契約書/カルテ的</b> なドキュメント感 (フォーム入力 UI ではなく、結果一覧として読ませる)</li>
+    <li>セクション帯 = 黒背景 + 白文字 + 「01 02...」(2桁) + 文字小さめ + letter-spacing で業務感</li>
+    <li>左列ラベル = 薄灰背景 + グレー文字、右列値 = 白背景 + 黒文字</li>
+    <li>添削行 = 黄背景セル (v3 と統一)</li>
+    <li>目標体重カードのみ <b>v5 強調</b> (数値の下にティール緑下線、背景・文字色は他と同じ)</li>
+    <li>編集するボタン = ティール緑 + 角丸 3px (シャープ)</li>
+  </ul>
+
+  <h3>🔗 動線 (実装時)</h3>
+  <ul>
+    <li>ホーム「🎯 目標管理シート」横長ブロック → <b>このページ (閲覧モード) がデフォルト</b></li>
+    <li>「編集する」ボタン → 編集モード (v3 スマホ版) へ遷移</li>
+    <li>「編集履歴」→ goal_sheet_revisions の履歴画面</li>
+    <li>「変化を見る」→ マイ学習ログの 5 枚目カード</li>
+    <li>「過去の添削履歴」→ goal_sheet_comments の履歴一覧</li>
+    <li>URL: <code>/goal-sheet</code> (閲覧) / <code>/goal-sheet/edit</code> (編集)</li>
+  </ul>
+
+  <h3>🖨 印刷対応</h3>
+  <ul>
+    <li><b>Cmd+P (Mac) / Ctrl+P (Win)</b> で印刷ダイアログ</li>
+    <li>A4 縦 1-2 枚に収まるよう <code>@media print</code> で調整済</li>
+    <li>印刷時は注釈・ページヘッダー・編集するボタンは非表示</li>
+  </ul>
+
+  <h3>📱 スマホ対応</h3>
+  <ul>
+    <li>720px 以下で KPI バーは 2×2 グリッドに</li>
+    <li>ヘッダーは縦並びに</li>
+    <li>カルテ表のラベル列は狭く、フォントサイズ縮小</li>
+    <li>フッターは縦並びで編集ボタンは全幅</li>
+  </ul>
+
+  <h3>✅ v3 編集モードとの統一</h3>
+  <ul>
+    <li>色: ティール緑 (#00897b / #00695c / #004d40) 完全統一</li>
+    <li>添削: 薄黄色 (黄マーカー同色) 統一</li>
+    <li>のりfitness 名: #b8860b (黄/茶) 統一</li>
+    <li>同じデータソース (<code>goal_sheets</code> + <code>goal_sheet_comments</code>) を参照</li>
+  </ul>
+</div>
+
+</body>
+</html>

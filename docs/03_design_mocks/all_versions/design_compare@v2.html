@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — デザイン比較モック</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* 緑基調抑制版 (Tokuten LP 系) */
+    --a-primary: #1f6b3e;
+    --a-primary-dark: #165230;
+    --a-line: #06c755;
+    --a-line-dark: #04a847;
+    --a-accent: #f5c842;
+    --a-ink: #1a3326;
+    --a-ink2: #3a6050;
+    --a-ink3: #6b7d75;
+    --a-bg: #fff8f5;
+    --a-bg2: #f0f5f3;
+    --a-border: #d4ead9;
+    --a-marker: rgba(255,235,59,.55);
+
+    /* リサーチ全力版 */
+    --b-primary: #00897b;
+    --b-primary-dark: #00574d;
+    --b-primary-100: #B2DFDB;
+    --b-primary-50: #E0F2F1;
+    --b-accent: #ff7043;
+    --b-accent-dark: #e65100;
+    --b-line: #06c755;
+    --b-ink: #1a3326;
+    --b-ink2: #3a6050;
+    --b-ink3: #6b7d75;
+    --b-bg: #fff8f5;
+    --b-bg2: #f0f5f3;
+    --b-marker: rgba(255,235,59,.55);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #e8ebec;
+    color: #1a3326;
+    line-height: 1.6;
+    padding: 24px;
+  }
+  .page-header {
+    max-width: 1400px;
+    margin: 0 auto 32px;
+    text-align: center;
+  }
+  .page-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a3326;
+    margin-bottom: 8px;
+  }
+  .page-header p {
+    color: #6b7d75;
+    font-size: 14px;
+  }
+  .section-title {
+    max-width: 1400px;
+    margin: 32px auto 16px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a3326;
+    padding-left: 8px;
+    border-left: 6px solid #1f6b3e;
+  }
+  .compare {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .version-label {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 12px;
+  }
+  .version-a .version-label {
+    background: #1f6b3e;
+    color: #fff;
+  }
+  .version-b .version-label {
+    background: #00897b;
+    color: #fff;
+  }
+  .phone {
+    width: 100%;
+    max-width: 440px;
+    margin: 0 auto;
+    background: #fff8f5;
+    border: 8px solid #2a2a2a;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    font-size: 14px;
+  }
+  .phone-status {
+    background: #2a2a2a;
+    color: #fff;
+    text-align: center;
+    font-size: 11px;
+    padding: 4px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* ==========================
+     版A: 緑基調抑制版
+     ========================== */
+  .a {
+    background: var(--a-bg);
+    color: var(--a-ink);
+  }
+  .a .app-header {
+    background: #fff;
+    border-bottom: 1px solid var(--a-border);
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .a .app-header .logo {
+    font-weight: 700;
+    color: var(--a-primary);
+    font-size: 16px;
+  }
+  .a .app-header .avatar {
+    width: 32px; height: 32px;
+    border-radius: 9999px;
+    background: var(--a-primary);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .a .home-body { padding: 20px 16px; }
+  .a .greet {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--a-ink);
+    margin-bottom: 4px;
+  }
+  .a .greet-sub {
+    font-size: 13px;
+    color: var(--a-ink3);
+    margin-bottom: 20px;
+  }
+  .a .cta-continue {
+    background: var(--a-primary);
+    color: #fff;
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 14px rgba(31,107,62,.18);
+    cursor: pointer;
+  }
+  .a .cta-continue .label {
+    font-size: 12px;
+    opacity: .85;
+    margin-bottom: 4px;
+  }
+  .a .cta-continue .title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .a .cta-continue .sub {
+    font-size: 12px;
+    opacity: .8;
+  }
+  .a .cta-continue .play {
+    font-size: 32px;
+    float: right;
+    margin-top: -8px;
+  }
+  .a .progress-section {
+    background: #fff;
+    border: 1px solid var(--a-border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+  .a .progress-section .label {
+    font-size: 12px;
+    color: var(--a-ink3);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .a .progress-section .label b { color: var(--a-primary); font-weight: 700; }
+  .a .bar {
+    background: var(--a-bg2);
+    height: 8px;
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+  .a .bar > div {
+    width: 35%;
+    height: 100%;
+    background: var(--a-primary);
+    border-radius: 9999px;
+  }
+  .a .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .a .stat {
+    background: #fff;
+    border: 1px solid var(--a-border);
+    border-radius: 12px;
+    padding: 12px 8px;
+    text-align: center;
+  }
+  .a .stat .num {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--a-primary);
+    font-family: 'Inter', sans-serif;
+  }
+  .a .stat .lbl {
+    font-size: 11px;
+    color: var(--a-ink3);
+    margin-top: 4px;
+  }
+  .a .notice {
+    background: #fff;
+    border: 1px solid var(--a-border);
+    border-left: 4px solid var(--a-accent);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13px;
+  }
+  .a .notice .head {
+    font-size: 12px;
+    color: var(--a-ink3);
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  .a .marker {
+    background: linear-gradient(transparent 60%, var(--a-marker) 60%);
+    font-weight: 700;
+  }
+
+  /* レッスン詳細 A */
+  .a .crumb {
+    padding: 12px 16px;
+    font-size: 12px;
+    color: var(--a-ink3);
+    background: #fff;
+    border-bottom: 1px solid var(--a-border);
+  }
+  .a .crumb b { color: var(--a-ink); }
+  .a .video {
+    aspect-ratio: 16/9;
+    background: #2a2a2a;
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+  }
+  .a .lesson-body { padding: 16px; }
+  .a .lesson-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .a .lesson-meta {
+    font-size: 12px;
+    color: var(--a-ink3);
+    margin-bottom: 20px;
+  }
+  .a .done-btn {
+    background: var(--a-line);
+    color: #fff;
+    width: 100%;
+    padding: 18px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    box-shadow: 0 4px 0 var(--a-line-dark);
+    margin-bottom: 24px;
+    cursor: pointer;
+  }
+  .a .accordion {
+    background: #fff;
+    border: 1px solid var(--a-border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+  .a .accordion .head {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .a .accordion .head .opt {
+    font-size: 11px;
+    color: var(--a-ink3);
+    font-weight: 400;
+  }
+  .a .tab-nav {
+    background: #fff;
+    border-top: 1px solid var(--a-border);
+    display: flex;
+    padding: 8px 0;
+  }
+  .a .tab-nav .tab {
+    flex: 1;
+    text-align: center;
+    font-size: 10px;
+    color: var(--a-ink3);
+    padding: 4px;
+  }
+  .a .tab-nav .tab.active { color: var(--a-primary); font-weight: 700; }
+  .a .tab-nav .tab .ico { font-size: 18px; display: block; margin-bottom: 2px; }
+
+  /* ==========================
+     版B: リサーチ全力版
+     ========================== */
+  .b {
+    background: var(--b-bg);
+    color: var(--b-ink);
+  }
+  .b .app-header {
+    background: #fff;
+    border-bottom: 1px solid #c0d0c8;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+  .b .app-header .logo {
+    font-weight: 700;
+    color: var(--b-primary-dark);
+    font-size: 16px;
+  }
+  .b .header-right { display: flex; align-items: center; gap: 8px; }
+  .b .streak {
+    background: linear-gradient(135deg, #ff9800, #ff5722);
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .b .rank-badge {
+    background: var(--b-primary);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 9999px;
+  }
+  .b .avatar-b {
+    width: 32px; height: 32px;
+    border-radius: 9999px;
+    background: var(--b-primary);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    border: 2px solid var(--b-accent);
+  }
+  .b .home-body { padding: 16px; }
+  .b .greet {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .b .greet-sub {
+    font-size: 12px;
+    color: var(--b-ink3);
+    margin-bottom: 14px;
+  }
+  .b .cta-continue {
+    background: linear-gradient(135deg, var(--b-primary), var(--b-primary-dark));
+    color: #fff;
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 6px 18px rgba(0,137,123,.30);
+    position: relative;
+  }
+  .b .cta-continue .label {
+    font-size: 12px;
+    opacity: .9;
+    margin-bottom: 4px;
+  }
+  .b .cta-continue .title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .b .cta-continue .sub {
+    font-size: 12px;
+    opacity: .85;
+  }
+  .b .cta-continue .xp {
+    position: absolute;
+    top: 12px; right: 16px;
+    background: var(--b-accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 9999px;
+  }
+  .b .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .b .stat {
+    background: #fff;
+    border: 1px solid #c0d0c8;
+    border-radius: 12px;
+    padding: 10px 4px;
+    text-align: center;
+  }
+  .b .stat .num {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--b-primary);
+    font-family: 'Inter', sans-serif;
+  }
+  .b .stat.fire .num { color: #ff5722; }
+  .b .stat.badge .num { color: var(--b-accent); }
+  .b .stat .lbl {
+    font-size: 10px;
+    color: var(--b-ink3);
+    margin-top: 2px;
+  }
+  .b .progress-box {
+    background: #fff;
+    border: 1px solid #c0d0c8;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+  .b .progress-box .label {
+    font-size: 12px;
+    color: var(--b-ink3);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .b .progress-box .label b { color: var(--b-primary); font-weight: 700; }
+  .b .bar {
+    background: var(--b-primary-50);
+    height: 10px;
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+  .b .bar > div {
+    width: 35%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--b-primary), var(--b-accent));
+  }
+  .b .heatmap {
+    background: #fff;
+    border: 1px solid #c0d0c8;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+  .b .heatmap .head {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--b-ink3);
+    margin-bottom: 8px;
+  }
+  .b .heatmap .head b { color: var(--b-ink); font-weight: 700; }
+  .b .grid-heat {
+    display: grid;
+    grid-template-columns: repeat(15, 1fr);
+    gap: 3px;
+  }
+  .b .grid-heat .cell {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    background: #e8f5f3;
+  }
+  .b .grid-heat .cell.l1 { background: #B2DFDB; }
+  .b .grid-heat .cell.l2 { background: #4DB6AC; }
+  .b .grid-heat .cell.l3 { background: #00897b; }
+  .b .grid-heat .cell.l4 { background: #00574d; }
+  .b .rank-list {
+    background: #fff;
+    border: 1px solid #c0d0c8;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+  .b .rank-list .head {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .b .rank-list .row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 13px;
+    border-bottom: 1px dashed #c0d0c8;
+  }
+  .b .rank-list .row:last-child { border-bottom: 0; }
+  .b .rank-list .row .pos {
+    width: 24px;
+    font-weight: 700;
+    color: var(--b-accent);
+    font-family: 'Inter', sans-serif;
+  }
+  .b .rank-list .row .name { flex: 1; }
+  .b .rank-list .row .xp {
+    font-size: 11px;
+    color: var(--b-ink3);
+    font-family: 'Inter', sans-serif;
+  }
+  .b .senior {
+    background: linear-gradient(135deg, #fff8f5, #ffe5d5);
+    border: 1px solid #ffd0b0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .b .senior .head {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--b-accent-dark);
+    margin-bottom: 6px;
+  }
+  .b .senior .quote {
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+  .b .senior .by {
+    font-size: 11px;
+    color: var(--b-ink3);
+    text-align: right;
+  }
+  .b .badges-row {
+    background: #fff;
+    border: 1px solid #c0d0c8;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+  .b .badges-row .head {
+    font-size: 12px;
+    color: var(--b-ink3);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .b .badges-row .head b {color: var(--b-ink); font-weight: 700;}
+  .b .badges-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+  }
+  .b .badge-pic {
+    aspect-ratio: 1;
+    border: 2px solid var(--b-primary);
+    border-radius: 9999px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  .b .badge-pic.locked {
+    border-color: #c0d0c8;
+    filter: grayscale(1);
+    opacity: .3;
+  }
+  .b .notice {
+    background: #fff;
+    border: 1px solid #c0d0c8;
+    border-left: 4px solid var(--b-accent);
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  .b .notice .head {
+    font-size: 12px;
+    color: var(--b-ink3);
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  .b .marker {
+    background: linear-gradient(transparent 60%, var(--b-marker) 60%);
+    font-weight: 700;
+  }
+
+  /* レッスン詳細 B */
+  .b .crumb {
+    padding: 12px 16px;
+    font-size: 12px;
+    color: var(--b-ink3);
+    background: #fff;
+    border-bottom: 1px solid #c0d0c8;
+  }
+  .b .crumb b { color: var(--b-ink); }
+  .b .video-wrap { position: relative; }
+  .b .video {
+    aspect-ratio: 16/9;
+    background: #2a2a2a;
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+  }
+  .b .scrap-btn {
+    position: absolute;
+    bottom: 10px; right: 10px;
+    background: rgba(0,0,0,.7);
+    color: #fff;
+    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: 9999px;
+    font-weight: 600;
+  }
+  .b .lesson-body { padding: 16px; }
+  .b .lesson-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .b .lesson-meta {
+    font-size: 12px;
+    color: var(--b-ink3);
+    margin-bottom: 16px;
+  }
+  .b .done-btn {
+    background: var(--b-accent);
+    color: #fff;
+    width: 100%;
+    padding: 18px;
+    border-radius: 28px;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    box-shadow: 0 4px 0 var(--b-accent-dark);
+    margin-bottom: 14px;
+    position: relative;
+  }
+  .b .done-btn .xp {
+    position: absolute;
+    top: 8px; right: 14px;
+    background: #fff;
+    color: var(--b-accent-dark);
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 9999px;
+    font-weight: 700;
+  }
+  .b .confetti-hint {
+    text-align: center;
+    font-size: 11px;
+    color: var(--b-ink3);
+    margin-bottom: 18px;
+  }
+  .b .accordion {
+    background: #fff;
+    border: 1px solid #c0d0c8;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .b .accordion .head {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .b .accordion .head .opt {
+    font-size: 11px;
+    color: var(--b-ink3);
+    font-weight: 400;
+  }
+  .b .comments {
+    background: #fff;
+    border: 1px solid #c0d0c8;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .b .comments .head {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .b .comments .head .count {
+    font-size: 11px;
+    color: var(--b-ink3);
+    font-weight: 400;
+  }
+  .b .comments .pin {
+    background: #fff8f5;
+    border-left: 4px solid var(--b-accent);
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+  }
+  .b .comments .pin .by {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--b-accent-dark);
+    margin-bottom: 2px;
+  }
+  .b .comments .pin .by::before { content: "📌 "; }
+  .b .comments .pin .text { font-size: 12px; }
+  .b .comments .reply {
+    padding: 6px 0;
+    border-bottom: 1px dashed #c0d0c8;
+    font-size: 12px;
+    color: var(--b-ink2);
+  }
+  .b .comments .reply .by {
+    font-weight: 600;
+    color: var(--b-ink);
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  .b .comments .reply .like {
+    font-size: 11px;
+    color: var(--b-ink3);
+    margin-top: 2px;
+  }
+  .b .challenge {
+    background: linear-gradient(135deg, #fff8f5, #ffe5d5);
+    border: 1px solid #ffd0b0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .b .challenge .head {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--b-accent-dark);
+    margin-bottom: 6px;
+  }
+  .b .challenge .body {
+    font-size: 12px;
+    color: var(--b-ink2);
+  }
+  .b .reverse-link {
+    display: block;
+    background: var(--b-primary-50);
+    border: 1px dashed var(--b-primary);
+    color: var(--b-primary-dark);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .b .tab-nav {
+    background: #fff;
+    border-top: 1px solid #c0d0c8;
+    display: flex;
+    padding: 8px 0;
+  }
+  .b .tab-nav .tab {
+    flex: 1;
+    text-align: center;
+    font-size: 10px;
+    color: var(--b-ink3);
+    padding: 4px;
+    position: relative;
+  }
+  .b .tab-nav .tab.active {
+    color: var(--b-primary-dark);
+    font-weight: 700;
+  }
+  .b .tab-nav .tab.active::after {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px; height: 4px;
+    border-radius: 9999px;
+    background: var(--b-primary-dark);
+  }
+  .b .tab-nav .tab .ico { font-size: 18px; display: block; margin-bottom: 2px; }
+
+  /* ==========================
+     差分マトリクス
+     ========================== */
+  .matrix-wrap {
+    max-width: 1400px;
+    margin: 48px auto 0;
+    background: #fff;
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.06);
+  }
+  .matrix-wrap h2 {
+    font-size: 20px;
+    margin-bottom: 16px;
+    color: #1a3326;
+  }
+  table.matrix {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  table.matrix th, table.matrix td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid #e8ebec;
+  }
+  table.matrix th {
+    background: #f0f5f3;
+    font-weight: 700;
+    color: #1a3326;
+  }
+  table.matrix td.col-a { color: var(--a-primary); font-weight: 600; }
+  table.matrix td.col-b { color: var(--b-primary); font-weight: 600; }
+  .legend {
+    max-width: 1400px;
+    margin: 24px auto 0;
+    background: #fff8f5;
+    border: 1px solid #ffd0b0;
+    border-radius: 12px;
+    padding: 16px 20px;
+    font-size: 13px;
+    color: #3a6050;
+  }
+  .legend b { color: #1a3326; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>のりfitness 筋肉塾 — デザイン比較モック</h1>
+  <p>左: 緑基調抑制版（決定済み方針） / 右: リサーチ全力版（リサーチ Claude の理想形）<br>
+  ※ 静的モック、クリック操作なし、見た目のみ確認用 / ダミー文言 + 架空数値</p>
+</div>
+
+<!-- ============================================
+     セクション 1: ホーム画面
+============================================ -->
+<div class="section-title">① ホーム画面（ダッシュボード）</div>
+
+<div class="compare">
+  <!-- ===== 版A ホーム ===== -->
+  <div class="version-a">
+    <span class="version-label">緑基調抑制版</span>
+    <div class="phone">
+      <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+
+      <div class="a">
+        <div class="app-header">
+          <div class="logo">のりfitness 筋肉塾</div>
+          <div class="avatar">き</div>
+        </div>
+
+        <div class="home-body">
+          <div class="greet">こんにちは、きよむさん</div>
+          <div class="greet-sub">入会から 12 日目</div>
+
+          <div class="cta-continue">
+            <div class="play">▶</div>
+            <div class="label">続きから学ぶ</div>
+            <div class="title">第 3 章 ・ Lesson 4</div>
+            <div class="sub">PFC バランスの基礎</div>
+          </div>
+
+          <div class="progress-section">
+            <div class="label"><span>全体進捗</span><b>35% (76 / 217)</b></div>
+            <div class="bar"><div></div></div>
+          </div>
+
+          <div class="stats">
+            <div class="stat">
+              <div class="num">47</div>
+              <div class="lbl">できた!</div>
+            </div>
+            <div class="stat">
+              <div class="num">12.5h</div>
+              <div class="lbl">視聴時間</div>
+            </div>
+            <div class="stat">
+              <div class="num">8日</div>
+              <div class="lbl">学習日数</div>
+            </div>
+          </div>
+
+          <div class="notice">
+            <div class="head">📢 お知らせ</div>
+            <span class="marker">6 月から新章追加予定</span>です。お楽しみに。
+          </div>
+        </div>
+
+        <div class="tab-nav">
+          <div class="tab active"><span class="ico">🏠</span>ホーム</div>
+          <div class="tab"><span class="ico">📚</span>学ぶ</div>
+          <div class="tab"><span class="ico">📝</span>マイ学習</div>
+          <div class="tab"><span class="ico">🔍</span>検索</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 版B ホーム ===== -->
+  <div class="version-b">
+    <span class="version-label">リサーチ全力版</span>
+    <div class="phone">
+      <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+
+      <div class="b">
+        <div class="app-header">
+          <div class="logo">のりfitness 筋肉塾</div>
+          <div class="header-right">
+            <div class="streak">🔥 8</div>
+            <div class="rank-badge">Lv.3 探求者</div>
+            <div class="avatar-b">き</div>
+          </div>
+        </div>
+
+        <div class="home-body">
+          <div class="greet">こんにちは、きよむさん</div>
+          <div class="greet-sub">入会から 12 日目 ・ 連続 8 日継続中 🔥</div>
+
+          <div class="cta-continue">
+            <div class="xp">+10 XP</div>
+            <div class="label">▶ 続きから学ぶ</div>
+            <div class="title">第 3 章 ・ Lesson 4</div>
+            <div class="sub">PFC バランスの基礎</div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat">
+              <div class="num">47</div>
+              <div class="lbl">できた!</div>
+            </div>
+            <div class="stat">
+              <div class="num">12.5h</div>
+              <div class="lbl">視聴</div>
+            </div>
+            <div class="stat fire">
+              <div class="num">8日</div>
+              <div class="lbl">🔥 連続</div>
+            </div>
+            <div class="stat badge">
+              <div class="num">5</div>
+              <div class="lbl">🏆 バッジ</div>
+            </div>
+          </div>
+
+          <div class="progress-box">
+            <div class="label"><span>全体進捗 ・ 850 XP / 2000</span><b>35%</b></div>
+            <div class="bar"><div></div></div>
+          </div>
+
+          <div class="heatmap">
+            <div class="head"><span>過去 30 日の学習</span><b>22 日達成</b></div>
+            <div class="grid-heat">
+              <div class="cell l2"></div><div class="cell l3"></div><div class="cell l1"></div>
+              <div class="cell"></div><div class="cell l2"></div><div class="cell l3"></div>
+              <div class="cell l4"></div><div class="cell l2"></div><div class="cell l1"></div>
+              <div class="cell l3"></div><div class="cell l2"></div><div class="cell"></div>
+              <div class="cell l1"></div><div class="cell l2"></div><div class="cell l3"></div>
+              <div class="cell l4"></div><div class="cell l3"></div><div class="cell l2"></div>
+              <div class="cell l1"></div><div class="cell"></div><div class="cell l2"></div>
+              <div class="cell l3"></div><div class="cell l2"></div><div class="cell l4"></div>
+              <div class="cell l3"></div><div class="cell l3"></div><div class="cell l2"></div>
+              <div class="cell l3"></div><div class="cell l4"></div><div class="cell l3"></div>
+            </div>
+          </div>
+
+          <div class="badges-row">
+            <div class="head"><span>獲得バッジ</span><b>5 / 30</b></div>
+            <div class="badges-grid">
+              <div class="badge-pic">🥇</div>
+              <div class="badge-pic">📝</div>
+              <div class="badge-pic">🔥</div>
+              <div class="badge-pic">💬</div>
+              <div class="badge-pic">⭐</div>
+              <div class="badge-pic locked">?</div>
+            </div>
+          </div>
+
+          <div class="rank-list">
+            <div class="head">🏆 今週の同期ランキング (TOP 5)</div>
+            <div class="row"><div class="pos">1</div><div class="name">田中さん</div><div class="xp">320 XP</div></div>
+            <div class="row"><div class="pos">2</div><div class="name">山田さん</div><div class="xp">280 XP</div></div>
+            <div class="row"><div class="pos">3</div><div class="name">きよむさん</div><div class="xp">240 XP</div></div>
+            <div class="row"><div class="pos">4</div><div class="name">佐藤さん</div><div class="xp">210 XP</div></div>
+            <div class="row"><div class="pos">5</div><div class="name">鈴木さん</div><div class="xp">180 XP</div></div>
+          </div>
+
+          <div class="senior">
+            <div class="head">🌟 先輩からの一言</div>
+            <div class="quote">「<span class="marker">3 ヶ月続けて、人生が変わりました</span>。最初は週 3 で十分です」</div>
+            <div class="by">— 2025 年卒業 田中さん</div>
+          </div>
+
+          <div class="notice">
+            <div class="head">📢 お知らせ</div>
+            6 月から新章追加予定です
+          </div>
+        </div>
+
+        <div class="tab-nav">
+          <div class="tab active"><span class="ico">🏠</span>ホーム</div>
+          <div class="tab"><span class="ico">📚</span>学ぶ</div>
+          <div class="tab"><span class="ico">🎯</span>目標</div>
+          <div class="tab"><span class="ico">💬</span>仲間</div>
+          <div class="tab"><span class="ico">👤</span>マイ</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     セクション 2: 学習画面 (レッスン詳細)
+============================================ -->
+<div class="section-title">② 学習画面（レッスン詳細）</div>
+
+<div class="compare">
+  <!-- ===== 版A レッスン ===== -->
+  <div class="version-a">
+    <span class="version-label">緑基調抑制版</span>
+    <div class="phone">
+      <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+
+      <div class="a">
+        <div class="crumb">
+          学ぶ &gt; <b>限定ボディメイク完全ロードマップ</b> &gt; 第 3 章 &gt; Lesson 4
+        </div>
+
+        <div class="video">▶</div>
+
+        <div class="lesson-body">
+          <div class="lesson-title">PFC バランスの基礎</div>
+          <div class="lesson-meta">第 3 章「正しい食事のリズム」 ・ 12 分</div>
+
+          <div class="done-btn">✓ できた!</div>
+
+          <div class="accordion">
+            <div class="head">
+              <span>📝 3 行で振り返る</span>
+              <span class="opt">(任意) ▼</span>
+            </div>
+          </div>
+
+          <div class="accordion">
+            <div class="head">
+              <span>📎 配布資料</span>
+              <span class="opt">(1 件) ▼</span>
+            </div>
+          </div>
+
+          <div class="accordion" style="background: var(--a-bg2); border-color: var(--a-primary);">
+            <div class="head" style="color: var(--a-primary);">
+              <span>→ 次のレッスンへ</span>
+              <span class="opt" style="color: var(--a-primary);">L5「タンパク質の摂り方」</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-nav">
+          <div class="tab"><span class="ico">🏠</span>ホーム</div>
+          <div class="tab active"><span class="ico">📚</span>学ぶ</div>
+          <div class="tab"><span class="ico">📝</span>マイ学習</div>
+          <div class="tab"><span class="ico">🔍</span>検索</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 版B レッスン ===== -->
+  <div class="version-b">
+    <span class="version-label">リサーチ全力版</span>
+    <div class="phone">
+      <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+
+      <div class="b">
+        <div class="crumb">
+          学ぶ &gt; <b>限定ボディメイク完全ロードマップ</b> &gt; 第 3 章 &gt; Lesson 4
+        </div>
+
+        <div class="video-wrap">
+          <div class="video">▶</div>
+          <div class="scrap-btn">🔖 この瞬間をスクラップ</div>
+        </div>
+
+        <div class="lesson-body">
+          <div class="lesson-title">PFC バランスの基礎</div>
+          <div class="lesson-meta">第 3 章「正しい食事のリズム」 ・ 12 分</div>
+
+          <div class="done-btn">
+            <span class="xp">+10 XP</span>
+            ⭐ できた!
+          </div>
+          <div class="confetti-hint">押下時 🎉 紙吹雪 + バッジ獲得演出</div>
+
+          <div class="accordion">
+            <div class="head">
+              <span>📝 3 行で振り返る</span>
+              <span class="opt">+5 XP ▼</span>
+            </div>
+          </div>
+
+          <div class="accordion">
+            <div class="head">
+              <span>✏️ プライベートノート</span>
+              <span class="opt">(2 件) ▼</span>
+            </div>
+          </div>
+
+          <div class="challenge">
+            <div class="head">💪 今週、実生活でどう試す?</div>
+            <div class="body">→ 目標シートに自動追加されます (+5 XP)</div>
+          </div>
+
+          <div class="comments">
+            <div class="head">💬 コメント <span class="count">(12 件)</span></div>
+            <div class="pin">
+              <div class="by">のり (運営)</div>
+              <div class="text">PFC は <span class="marker">体重 × 1.5g</span> から始めるのが安全です</div>
+            </div>
+            <div class="reply">
+              <div class="by">田中さん ・ 2 時間前</div>
+              実践してみました! お腹いっぱいでも続けられそうです 💪
+              <div class="like">👍 8</div>
+            </div>
+            <div class="reply">
+              <div class="by">山田さん ・ 5 時間前</div>
+              質問です、寝る前 2 時間以内でも OK ですか?
+              <div class="like">👍 3</div>
+            </div>
+          </div>
+
+          <a class="reverse-link">🔄 逆向き学習 ・ 試験を先に受けて苦手を見つける</a>
+        </div>
+
+        <div class="tab-nav">
+          <div class="tab"><span class="ico">🏠</span>ホーム</div>
+          <div class="tab active"><span class="ico">📚</span>学ぶ</div>
+          <div class="tab"><span class="ico">🎯</span>目標</div>
+          <div class="tab"><span class="ico">💬</span>仲間</div>
+          <div class="tab"><span class="ico">👤</span>マイ</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     差分マトリクス
+============================================ -->
+<div class="matrix-wrap">
+  <h2>📊 13 領域の差分（左右で見比べた要素）</h2>
+  <table class="matrix">
+    <thead>
+      <tr>
+        <th style="width: 18%;">領域</th>
+        <th style="width: 38%;">緑基調抑制版（左）</th>
+        <th style="width: 38%;">リサーチ全力版（右）</th>
+        <th style="width: 6%;">差</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>緑の色味</td><td class="col-a">深緑 #1f6b3e</td><td class="col-b">ティール #00897b</td><td>🎨</td></tr>
+      <tr><td>Streak</td><td class="col-a">表示なし</td><td class="col-b">ヘッダー常時固定 🔥8</td><td>🔥</td></tr>
+      <tr><td>バッジ</td><td class="col-a">なし</td><td class="col-b">5/30 カタログ表示</td><td>🏆</td></tr>
+      <tr><td>XP / レベル</td><td class="col-a">なし</td><td class="col-b">Lv.3 探求者 ・ 850 XP</td><td>⚡</td></tr>
+      <tr><td>ランキング</td><td class="col-a">なし</td><td class="col-b">同期 TOP 5 表示</td><td>🏆</td></tr>
+      <tr><td>ヒートマップ</td><td class="col-a">なし</td><td class="col-b">GitHub 風 30 日</td><td>📅</td></tr>
+      <tr><td>紙吹雪</td><td class="col-a">章末・試験のみ</td><td class="col-b">+ Lv アップ + 卒業</td><td>🎉</td></tr>
+      <tr><td>下部タブ</td><td class="col-a">4 項目</td><td class="col-b">5 項目（目標 + 仲間追加）</td><td>📱</td></tr>
+      <tr><td>動画スクラップ</td><td class="col-a">なし</td><td class="col-b">🔖 ボタン搭載</td><td>🔖</td></tr>
+      <tr><td>コメント機能</td><td class="col-a">なし</td><td class="col-b">スレッド + 👍 + ピン留め</td><td>💬</td></tr>
+      <tr><td>先輩から一言</td><td class="col-a">なし</td><td class="col-b">ホーム必須</td><td>🌟</td></tr>
+      <tr><td>逆向き学習</td><td class="col-a">なし</td><td class="col-b">レッスン下に導線</td><td>🔄</td></tr>
+      <tr><td>今週の挑戦</td><td class="col-a">なし</td><td class="col-b">目標シート連動カード</td><td>💪</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="legend">
+  <b>※ 注記:</b><br>
+  ・ 数値・名前・コース章名はすべて架空のダミー。実コンテンツの「PFC バランスの基礎」も配置確認用<br>
+  ・ クリック動作なし、見た目の確認のみ<br>
+  ・ 紙吹雪・スクロール挙動・アニメーションは静止状態で表現（ヒント文言のみ）<br>
+  ・ 両版とも Noto Sans JP + 4px グリッド + 角丸 4 段 + 黄マーカー + 純黒禁止 (#1a3326) は共通採用<br>
+  ・ 違いは「ゲーミフィケーション装置」と「メインカラー」が中心
+</div>
+
+</body>
+</html>

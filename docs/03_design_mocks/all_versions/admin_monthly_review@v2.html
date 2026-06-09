@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — 管理画面 / 月次添削 個別作業 (3b/3)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --ink4: #ccc;
+    --border: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f8f9fa;
+    --bg-warm: linear-gradient(135deg, #e0f2f1, #fffbe6);
+    --yellow-bg: rgba(255,235,59,.12);
+    --yellow-strong: rgba(255,235,59,.55);
+    --yellow-name: #b8860b;
+    --danger: #d32f2f;
+    --danger-bg: #fef5f5;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #e8ebec;
+    color: var(--ink);
+    line-height: 1.6;
+    padding: 24px;
+  }
+  .page-header {
+    max-width: 1400px;
+    margin: 0 auto 32px;
+    text-align: center;
+  }
+  .page-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .page-header p { color: #6b7d75; font-size: 13px; }
+
+  .stage {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 880px 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  /* === デスクトップフレーム === */
+  .desk {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,.08);
+    min-height: 900px;
+    display: flex;
+    flex-direction: column;
+  }
+  .desk-chrome {
+    background: #f1f3f4;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .desk-chrome .dot { width: 10px; height: 10px; border-radius: 50%; background: #d0d0d0; }
+  .desk-chrome .url {
+    flex: 1;
+    margin-left: 12px;
+    background: #fff;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--ink3);
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* === 管理画面ヘッダー === */
+  .admin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    background: #fff;
+  }
+  .admin-header .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .admin-header .brand .ttl { font-size: 16px; font-weight: 700; color: var(--primary-darker); }
+  .admin-header .brand .sub {
+    font-size: 11px;
+    color: var(--ink3);
+    padding-left: 12px;
+    border-left: 1px solid var(--border);
+  }
+  .admin-header .user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--ink2);
+  }
+  .admin-header .user .avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  /* === コンテンツ === */
+  .content {
+    flex: 1;
+    padding: 20px 28px;
+    background: var(--bg-soft);
+    overflow-y: auto;
+  }
+
+  /* === 戻るリンク === */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--ink2);
+    margin-bottom: 14px;
+    cursor: pointer;
+  }
+  .back-link:hover { color: var(--primary-dark); }
+
+  /* === 受講生プロフィールカード === */
+  .student-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .student-card .stud-avatar {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--bg-soft);
+    color: var(--ink2);
+    font-size: 18px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .student-card .stud-info { flex: 1; }
+  .student-card .stud-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .student-card .stud-meta {
+    font-size: 12px;
+    color: var(--ink3);
+    font-family: 'Inter', sans-serif;
+  }
+  .student-card .stud-meta span + span { margin-left: 12px; padding-left: 12px; border-left: 1px solid var(--border); }
+  .student-card .stud-flags {
+    display: flex;
+    gap: 6px;
+  }
+  .danger-flag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--danger-bg);
+    color: var(--danger);
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  /* === セクションカード === */
+  .sec {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 14px;
+  }
+  .sec-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sec-head h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink2);
+    letter-spacing: .04em;
+  }
+  .sec-head .toggle {
+    font-size: 11px;
+    color: var(--ink3);
+    cursor: pointer;
+  }
+  .sec-head .badge {
+    background: var(--bg-soft);
+    color: var(--ink2);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+  }
+
+  /* === 17 項目回答 === */
+  .qa-cats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 24px;
+  }
+  .qa-cat .cat-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 6px;
+    letter-spacing: .04em;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .qa-cat .cat-label .avg {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: var(--ink3);
+    font-weight: 400;
+  }
+  .qa-cat .qa-row {
+    display: grid;
+    grid-template-columns: 1fr 32px;
+    padding: 4px 0;
+    font-size: 12px;
+    color: var(--ink2);
+    border-bottom: 1px solid var(--border);
+  }
+  .qa-cat .qa-row:last-child { border-bottom: none; }
+  .qa-cat .qa-row .score {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    color: var(--primary);
+    text-align: right;
+  }
+  .qa-cat .qa-row .score.low { color: var(--danger); }
+  .qa-cat .free-text {
+    grid-column: 1 / -1;
+    margin-top: 6px;
+    padding: 8px 10px;
+    background: var(--bg-soft);
+    border-radius: 6px;
+    font-size: 11px;
+    color: var(--ink);
+    line-height: 1.55;
+  }
+
+  /* === 過去履歴 === */
+  .past-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .past-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: var(--bg-soft);
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--ink2);
+    cursor: pointer;
+  }
+  .past-item:hover { background: #f0f2f1; }
+  .past-item .month { font-family: 'Inter', sans-serif; font-weight: 600; color: var(--ink); }
+  .past-item .play-mini {
+    margin-left: auto;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px;
+  }
+
+  /* === 動画アップロード === */
+  .upload-area {
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    padding: 24px 20px;
+    text-align: center;
+    background: var(--bg-soft);
+    transition: all 0.15s;
+  }
+  .upload-area:hover {
+    border-color: var(--primary);
+    background: rgba(0,137,123,.04);
+  }
+  .upload-area .ico {
+    font-size: 32px;
+    margin-bottom: 8px;
+  }
+  .upload-area .lead {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .upload-area .sub {
+    font-size: 11px;
+    color: var(--ink3);
+    margin-bottom: 12px;
+  }
+  .upload-area .choose-btn {
+    display: inline-block;
+    background: var(--primary);
+    color: #fff;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .upload-rules {
+    margin-top: 10px;
+    font-size: 10px;
+    color: var(--ink3);
+    text-align: center;
+  }
+
+  /* === コメント入力 === */
+  .template-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .template-row label { font-size: 11px; color: var(--ink2); }
+  .template-row select {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--ink);
+    font-family: inherit;
+  }
+  .comment-input {
+    width: 100%;
+    min-height: 80px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--ink);
+    line-height: 1.6;
+    resize: vertical;
+  }
+  .comment-input:focus { outline: none; border-color: var(--primary); }
+  .comment-note {
+    margin-top: 6px;
+    font-size: 10px;
+    color: var(--ink3);
+    text-align: right;
+  }
+
+  /* === 操作ボタン === */
+  .action-bar {
+    display: flex;
+    gap: 10px;
+    padding: 16px 0 8px;
+    position: sticky;
+    bottom: 0;
+    background: var(--bg-soft);
+    border-top: 1px solid var(--border);
+    margin-top: 16px;
+  }
+  .btn {
+    padding: 11px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-mute { background: #fff; color: var(--ink2); border-color: var(--border); }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-dark {
+    background: var(--ink); color: #fff;
+    margin-left: auto;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-dark .arr { color: var(--primary); }
+
+  /* === 注釈 === */
+  .annotation {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    font-size: 13px;
+    color: #555;
+    position: sticky;
+    top: 24px;
+  }
+  .annotation h3 {
+    font-size: 14px;
+    color: var(--ink);
+    margin: 18px 0 8px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 4px;
+  }
+  .annotation h3:first-child { margin-top: 0; }
+  .annotation h4 {
+    font-size: 12px;
+    color: var(--primary-dark);
+    margin: 10px 0 4px;
+  }
+  .annotation ul { padding-left: 20px; }
+  .annotation li { margin-bottom: 4px; font-size: 12px; }
+  .annotation .highlight {
+    background: rgba(0,137,123,.08);
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin: 6px 0;
+    font-size: 11px;
+    color: var(--primary-darker);
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🛠 管理画面 — 月次添削 個別作業 (3b/3)</h1>
+  <p>のりfitness 運営側・PC画面 ・ 受信箱から 1 件選んで動画返信を作る画面</p>
+</div>
+
+<div class="stage">
+
+  <!-- ============ デスクトップ画面 ============ -->
+  <div class="desk">
+
+    <!-- ブラウザクローム -->
+    <div class="desk-chrome">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <div class="url">https://admin.juku.norifitness.com/monthly-review/inbox/1234</div>
+    </div>
+
+    <!-- 管理画面ヘッダー -->
+    <div class="admin-header">
+      <div class="brand">
+        <div class="ttl">🛠 筋肉塾 管理</div>
+        <div class="sub">月次添削 / 個別作業</div>
+      </div>
+      <div class="user">
+        <div class="avatar">の</div>
+        のりfitness
+      </div>
+    </div>
+
+    <!-- コンテンツ -->
+    <div class="content">
+
+      <!-- 戻る -->
+      <div class="back-link">← 受信箱に戻る (残り 11 件)</div>
+
+      <!-- 受講生プロフィール -->
+      <div class="student-card">
+        <div class="stud-avatar">山</div>
+        <div class="stud-info">
+          <div class="stud-name">山田 太郎 さん</div>
+          <div class="stud-meta">
+            <span>入会 2025/09/01 (8 ヶ月目)</span>
+            <span>過去返信 7 回</span>
+            <span>2026/04 月次報告</span>
+          </div>
+        </div>
+        <div class="stud-flags">
+          <span class="danger-flag">⚠ 危険信号 (9 日経過)</span>
+        </div>
+      </div>
+
+      <!-- ====== 17 項目回答 ====== -->
+      <div class="sec">
+        <div class="sec-head">
+          <h3>📝 提出された内容 (17 項目)</h3>
+          <span class="badge">平均 7.2 / 10</span>
+        </div>
+
+        <div class="qa-cats">
+
+          <div class="qa-cat">
+            <div class="cat-label">体・体型 <span class="avg">平均 6.5</span></div>
+            <div class="qa-row">Q1. 体重納得感<span class="score">8</span></div>
+            <div class="qa-row">Q2. 体型満足度<span class="score">5</span></div>
+          </div>
+
+          <div class="qa-cat">
+            <div class="cat-label">食事 <span class="avg">平均 7.8</span></div>
+            <div class="qa-row">Q3. PFC バランス<span class="score">9</span></div>
+            <div class="qa-row">Q4. 食事記録<span class="score">8</span></div>
+            <div class="qa-row">Q5. 間食制御<span class="score">7</span></div>
+            <div class="qa-row">Q6. 飲み物<span class="score">8</span></div>
+            <div class="qa-row">Q7. 外食選択<span class="score">7</span></div>
+          </div>
+
+          <div class="qa-cat">
+            <div class="cat-label">運動 <span class="avg">平均 7.3</span></div>
+            <div class="qa-row">Q8. 運動頻度<span class="score">7</span></div>
+            <div class="qa-row">Q9. 歩数<span class="score">8</span></div>
+            <div class="qa-row">Q10. 筋トレ強度<span class="score">6</span></div>
+            <div class="qa-row">Q11. 運動後達成感<span class="score">8</span></div>
+          </div>
+
+          <div class="qa-cat">
+            <div class="cat-label">休息 <span class="avg">平均 5.5</span></div>
+            <div class="qa-row">Q12. 睡眠時間<span class="score low">5</span></div>
+            <div class="qa-row">Q13. 起床スッキリ感<span class="score">6</span></div>
+          </div>
+
+          <div class="qa-cat">
+            <div class="cat-label">マインド・学習 <span class="avg">平均 7.0</span></div>
+            <div class="qa-row">Q14. レッスン視聴<span class="score">7</span></div>
+            <div class="qa-row">Q15. 実践<span class="score">7</span></div>
+          </div>
+
+          <div class="qa-cat">
+            <div class="cat-label">振り返り</div>
+            <div class="qa-row">Q16. 自由記述
+              <div class="free-text">
+                先月から睡眠時間が乱れがちです。仕事が忙しく、22 時帰宅 → ご飯 → 1 時就寝になる日が多い。来月は 23:30 までに寝る工夫をしたい。
+              </div>
+            </div>
+            <div class="qa-row">Q17. 自己採点<span class="score">7</span></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ====== 過去の返信履歴 ====== -->
+      <div class="sec">
+        <div class="sec-head">
+          <h3>🎬 過去の返信動画 (この受講生)</h3>
+          <span class="toggle">▼ 表示</span>
+        </div>
+        <div class="past-list">
+          <div class="past-item">
+            <span class="month">2026/03</span>
+            <span>動画 3:12</span>
+            <span style="color: var(--ink3); font-size: 11px;">「食事面が安定」</span>
+            <div class="play-mini">▶</div>
+          </div>
+          <div class="past-item">
+            <span class="month">2026/02</span>
+            <span>動画 2:48</span>
+            <span style="color: var(--ink3); font-size: 11px;">「運動の習慣化」</span>
+            <div class="play-mini">▶</div>
+          </div>
+          <div class="past-item">
+            <span class="month">2026/01</span>
+            <span>動画 4:05</span>
+            <span style="color: var(--ink3); font-size: 11px;">「目標見直し」</span>
+            <div class="play-mini">▶</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== 動画アップロード ====== -->
+      <div class="sec">
+        <div class="sec-head">
+          <h3>🎥 返信動画</h3>
+        </div>
+        <div class="upload-area">
+          <div class="ico">📹</div>
+          <div class="lead">動画ファイルをドラッグ &amp; ドロップ</div>
+          <div class="sub">または</div>
+          <div class="choose-btn">ファイルを選択</div>
+        </div>
+        <div class="upload-rules">
+          対応形式: mp4 / mov / webm ・ 推奨: 5 分以内、80MB 以下 (超過時は警告のみ)
+        </div>
+      </div>
+
+      <!-- ====== コメント入力 ====== -->
+      <div class="sec">
+        <div class="sec-head">
+          <h3>💬 コメント (1〜2 行)</h3>
+        </div>
+        <div class="template-row">
+          <label>テンプレ:</label>
+          <select>
+            <option>選択してください...</option>
+            <option>食事面の評価 (高スコア)</option>
+            <option>食事面のアドバイス (低スコア)</option>
+            <option>休息改善の提案</option>
+            <option>運動継続の励まし</option>
+            <option>目標見直しの提案</option>
+            <option>(新しいテンプレを保存)</option>
+          </select>
+        </div>
+        <textarea class="comment-input" placeholder="動画の内容を補足するコメントを入力...">今月もよく頑張りました！食事面の改善が素晴らしいです。来月は休息のスコアを意識してみましょう。睡眠時間 30 分早めるところから。</textarea>
+        <div class="comment-note">62 / 200 文字</div>
+      </div>
+
+      <!-- ====== 操作ボタン ====== -->
+      <div class="action-bar">
+        <button class="btn btn-mute">下書き保存</button>
+        <button class="btn btn-primary">送信して終了</button>
+        <button class="btn btn-dark">送信して次へ <span class="arr">→</span></button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ 注釈 ============ -->
+  <div class="annotation">
+    <h3>🗺 画面の役割</h3>
+    <ul>
+      <li>受信箱 (3a) で 1 件選択した後の <b>個別作業画面</b></li>
+      <li>受講生 1 人の月次報告を確認 → 動画録画 → コメント → 送信、を完結させる</li>
+      <li>シーン 1 (月初の集中作業) で 10 件まとめ返信する時の主役画面</li>
+    </ul>
+
+    <h3>📐 構成 (上から)</h3>
+    <ul>
+      <li><b>受講生プロフィール</b>: 名前 + 入会日 + 過去回数 + 危険信号フラグ</li>
+      <li><b>17 項目回答</b>: カテゴリ別 2 列レイアウト (PC 横幅活用)</li>
+      <li><b>過去返信履歴</b>: この受講生に過去何を言ったか (繰り返し回避)</li>
+      <li><b>動画アップロード</b>: ドラッグ&ドロップ + ファイル選択</li>
+      <li><b>コメント入力</b>: テンプレ選択 + 自由入力 + 文字数カウント</li>
+      <li><b>操作バー</b>: 下書き保存 / 送信終了 / 送信して次へ (sticky bottom)</li>
+    </ul>
+
+    <h3>🎬 動画アップロード仕様</h3>
+    <ul>
+      <li>形式: mp4 / mov / webm</li>
+      <li><b>5 分以内、80MB 以下</b> 推奨 (超過時は警告のみ、ブロックはしない)</li>
+      <li>解像度の自動圧縮なし (案 γ: 運用ルールで縛る)</li>
+      <li>保存先: Supabase Storage (Pro プラン契約後)</li>
+      <li>Phase 2 で MediaRecorder API による <b>ブラウザ録画</b> も追加 (両対応)</li>
+    </ul>
+
+    <h3>🔘 「送信して次へ」併用ボタン (確定)</h3>
+    <div class="highlight">
+      <b>論点 1 対応</b>: 2 ボタン併置で、リズム良く回したい時は「次へ」、1 件で休憩なら「終了」を選べる。
+    </div>
+    <ul>
+      <li>「送信して次へ」: 送信 → 受信箱 (3a) の次の未返答に自動遷移</li>
+      <li>「送信して終了」: 送信 → 受信箱 (3a) に戻る</li>
+      <li>「下書き保存」: 送信せず保存 (途中保存)</li>
+    </ul>
+
+    <h3>💬 コメントテンプレート (MVP 含む)</h3>
+    <ul>
+      <li>過去のコメントから自動分類 (食事/運動/休息など)</li>
+      <li>テンプレ選択 → テキスト挿入 → 編集</li>
+      <li>「新しいテンプレを保存」で運用しながら蓄積</li>
+    </ul>
+
+    <h3>🎨 受講生 UI との関係</h3>
+    <ul>
+      <li><b>色</b>: ティール緑 #00897b を共通</li>
+      <li><b>添削色</b>: 黄 (受講生 UI と同じ)、危険信号は赤を追加 (運営側のみ)</li>
+      <li><b>角丸</b>: 8-12px (受講生 14px より少しシャープ、情報密度高い PC 想定)</li>
+      <li><b>レイアウト</b>: 17 項目を 2 列にして 1 画面に収める (PC 横幅活用)</li>
+    </ul>
+
+    <h3>⚠️ 未確定 / 議論ポイント</h3>
+    <ul>
+      <li>動画ブラウザ録画 UI (案 β、MediaRecorder API) は Phase 2 か MVP か</li>
+      <li>下書き保存後、いつ自動破棄するか (7 日? 永久?)</li>
+      <li>送信後の受講生通知方法 (LINE 配信? アプリ内のみ? 両方?)</li>
+      <li>キーボードショートカット (Cmd+Enter で送信、Esc で戻る等)</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

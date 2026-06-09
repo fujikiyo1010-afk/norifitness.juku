@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — 体組成記録画面 v2 (案2-D ハイブリッド)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --ink4: #ccc;
+    --border: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f8f9fa;
+    --bg-warm: linear-gradient(135deg, #e0f2f1, #fffbe6);
+    --accent-red: #c44;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #e8ebec;
+    color: var(--ink);
+    line-height: 1.6;
+    padding: 24px;
+  }
+  .page-header {
+    max-width: 900px;
+    margin: 0 auto 32px;
+    text-align: center;
+  }
+  .page-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .page-header p {
+    color: #6b7d75;
+    font-size: 13px;
+  }
+  .stage {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 440px 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  .phone {
+    width: 100%;
+    max-width: 440px;
+    background: var(--bg);
+    border: 8px solid #2a2a2a;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+  }
+  .phone-status {
+    background: #2a2a2a;
+    color: #fff;
+    text-align: center;
+    font-size: 11px;
+    padding: 4px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .ico-svg {
+    width: 20px; height: 20px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    display: inline-block;
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+  .ico-svg-sm { width: 14px; height: 14px; }
+
+  /* ヘッダー */
+  .app-header {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 14px 18px;
+    display: grid;
+    grid-template-columns: 28px 1fr 28px;
+    align-items: center;
+    gap: 6px;
+  }
+  .app-header .back, .app-header .menu { color: var(--ink); }
+  .app-header .center-title {
+    text-align: center;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--ink);
+  }
+
+  /* ヘッダー帯 (温かグラデ) */
+  .hero {
+    background: var(--bg-warm);
+    padding: 20px 18px 18px;
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+  }
+  .hero .title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 6px;
+    letter-spacing: .02em;
+  }
+  .hero .date-picker {
+    font-size: 13px;
+    color: var(--primary-dark);
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    margin-bottom: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,.7);
+    padding: 4px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(0,137,123,.15);
+    cursor: pointer;
+  }
+  .hero .date-picker .ico-svg-sm {
+    color: var(--primary);
+  }
+  .hero .message {
+    font-size: 11px;
+    color: var(--ink2);
+    line-height: 1.6;
+  }
+
+  .body-scroll {
+    background: var(--bg);
+    padding: 16px;
+    flex: 1;
+  }
+
+  /* カード */
+  .card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .card-head {
+    background: #fff;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-head .title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink);
+    flex: 1;
+  }
+  .card-head .sub {
+    font-size: 10px;
+    color: var(--ink3);
+  }
+  .card-body {
+    padding: 16px;
+  }
+
+  /* 入力ブロック (案 2-D ハイブリッド) */
+  .input-block {
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+    border-bottom: 1px dashed var(--border);
+  }
+  .input-block:last-of-type {
+    border-bottom: 0;
+    margin-bottom: 6px;
+    padding-bottom: 6px;
+  }
+  .input-block .label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .input-block .lbl {
+    font-size: 12px;
+    color: var(--ink2);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .input-block .info {
+    cursor: pointer;
+    color: var(--ink3);
+    position: relative;
+  }
+  .input-block .info:hover .tooltip { display: block; }
+  .tooltip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: #fff;
+    font-size: 10px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    font-weight: 500;
+    line-height: 1.4;
+    z-index: 100;
+  }
+  .tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: var(--ink);
+  }
+
+  /* 大表示エリア */
+  .big-display {
+    text-align: center;
+    padding: 14px 0 12px;
+    background: var(--bg-soft);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    cursor: text;
+  }
+  .big-display .num {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -.02em;
+    line-height: 1;
+  }
+  .big-display .unit {
+    font-size: 14px;
+    color: var(--ink3);
+    font-weight: 500;
+    margin-left: 4px;
+  }
+  .big-display.computed .num { color: var(--primary-dark); }
+
+  /* ステッパーボタン */
+  .stepper {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .stepper button {
+    padding: 10px 0;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+  }
+  .stepper button:hover { border-color: var(--primary); }
+  .stepper button.minus { color: var(--primary-dark); }
+  .stepper button.plus { color: var(--accent-red); }
+
+  /* 前回比 (グレー統一) */
+  .prev-diff {
+    text-align: center;
+    font-size: 11px;
+    color: var(--ink3);
+    font-weight: 500;
+  }
+  .prev-diff .num {
+    font-family: 'Inter', sans-serif;
+    color: var(--ink3);
+  }
+
+  /* 自動算出ラベル */
+  .auto-note {
+    font-size: 10px;
+    color: var(--ink3);
+    text-align: center;
+    margin-top: 4px;
+  }
+
+  /* 保存ボタン */
+  .save-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(0,137,123,.25);
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+
+  .auto-reflect {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: var(--bg-soft);
+    border-radius: 8px;
+    font-size: 10px;
+    color: var(--ink3);
+    text-align: center;
+    line-height: 1.7;
+  }
+  .auto-reflect b { color: var(--primary-dark); font-weight: 700; }
+
+  /* ミニ折れ線グラフ */
+  .mini-chart {
+    padding: 14px 16px 10px;
+  }
+  .mini-chart .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .mini-chart .head .lbl {
+    font-size: 11px;
+    color: var(--ink3);
+    font-weight: 600;
+  }
+  .mini-chart .head .range {
+    font-size: 10px;
+    color: var(--ink3);
+    font-family: 'Inter', sans-serif;
+  }
+  .mini-chart svg {
+    width: 100%;
+    height: 80px;
+    display: block;
+  }
+  .mini-chart .xaxis {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    font-size: 9px;
+    color: var(--ink3);
+    text-align: center;
+    margin-top: 4px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* 履歴リスト */
+  .recent-list {
+    list-style: none;
+  }
+  .recent-item {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    align-items: center;
+    gap: 12px;
+  }
+  .recent-item:first-child { border-top: 0; }
+  .recent-item .date {
+    font-size: 11px;
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+  }
+  .recent-item .vals {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 14px;
+    font-size: 12px;
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    align-items: center;
+  }
+  .recent-item .vals .val {
+    font-weight: 700;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+  }
+  .recent-item .vals .lbl-mini {
+    color: var(--ink3);
+    font-size: 9px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 400;
+  }
+  .recent-item .vals .delta {
+    font-size: 10px;
+    color: var(--ink3);
+    font-weight: 500;
+  }
+
+  /* リンクボタン */
+  .link-btn {
+    display: block;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+    text-decoration: none;
+    margin-bottom: 10px;
+  }
+  .link-btn .ico { color: var(--primary-dark); margin-right: 6px; }
+
+  /* タブ */
+  .tab-nav {
+    background: #fff;
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 10px 0;
+  }
+  .tab {
+    flex: 1; text-align: center;
+    font-size: 10px;
+    color: var(--ink3);
+    padding: 3px 2px;
+    position: relative;
+  }
+  .tab.active {
+    color: var(--primary-dark);
+    font-weight: 700;
+  }
+  .tab.active::after {
+    content: "";
+    position: absolute;
+    bottom: -12px;
+    left: 50%; transform: translateX(-50%);
+    width: 22px; height: 3px;
+    background: var(--primary);
+    border-radius: 9999px;
+  }
+  .tab .ico-svg-sm {
+    margin: 0 auto 2px;
+    display: block;
+    width: 16px; height: 16px;
+  }
+
+  /* 注釈 */
+  .annotation {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    font-size: 13px;
+    color: #555;
+    position: sticky;
+    top: 24px;
+  }
+  .annotation h3 {
+    font-size: 14px;
+    color: var(--ink);
+    margin: 14px 0 8px;
+  }
+  .annotation h3:first-child { margin-top: 0; }
+  .annotation ul { padding-left: 20px; }
+  .annotation li { margin-bottom: 4px; font-size: 12px; }
+  .annotation code {
+    background: var(--bg-soft);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>📊 体組成記録画面 v2 (案 2-D ハイブリッド)</h1>
+  <p>大表示 + ステッパー + 直接タップ入力 / 体脂肪率自動算出 / 過去日遡及対応 / 責めない自己管理</p>
+</div>
+
+<div class="stage">
+  <div class="phone">
+    <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+
+    <div class="app-header">
+      <svg class="ico-svg back" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+      <div class="center-title">体組成記録</div>
+      <svg class="ico-svg menu" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+    </div>
+
+    <!-- ヘッダー帯 (日付ピッカー含む) -->
+    <div class="hero">
+      <div class="title">体組成を記録</div>
+      <div class="date-picker">
+        <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        2026 / 05 / 22 (金)
+        <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+      <div class="message">無理なく続けましょう。<br>記録は目標管理シートに自動で反映されます。</div>
+    </div>
+
+    <div class="body-scroll">
+
+      <!-- 入力カード (案 2-D ハイブリッド) -->
+      <div class="card">
+        <div class="card-head">
+          <div class="title">📝 今日の数値</div>
+        </div>
+        <div class="card-body">
+
+          <!-- 体重 -->
+          <div class="input-block">
+            <div class="label-row">
+              <div class="lbl">体重</div>
+            </div>
+            <div class="big-display">
+              <span class="num">75.0</span><span class="unit">kg</span>
+            </div>
+            <div class="stepper">
+              <button class="minus">−0.5</button>
+              <button class="minus">−0.1</button>
+              <button class="plus">+0.1</button>
+              <button class="plus">+0.5</button>
+            </div>
+            <div class="prev-diff">前回から <span class="num">−0.2 kg</span></div>
+          </div>
+
+          <!-- ウエスト -->
+          <div class="input-block">
+            <div class="label-row">
+              <div class="lbl">ウエスト</div>
+            </div>
+            <div class="big-display">
+              <span class="num">82.0</span><span class="unit">cm</span>
+            </div>
+            <div class="stepper">
+              <button class="minus">−1.0</button>
+              <button class="minus">−0.5</button>
+              <button class="plus">+0.5</button>
+              <button class="plus">+1.0</button>
+            </div>
+            <div class="prev-diff">前回から <span class="num">−0.5 cm</span></div>
+          </div>
+
+          <!-- 首回り -->
+          <div class="input-block">
+            <div class="label-row">
+              <div class="lbl">首回り</div>
+            </div>
+            <div class="big-display">
+              <span class="num">38.5</span><span class="unit">cm</span>
+            </div>
+            <div class="stepper">
+              <button class="minus">−1.0</button>
+              <button class="minus">−0.5</button>
+              <button class="plus">+0.5</button>
+              <button class="plus">+1.0</button>
+            </div>
+            <div class="prev-diff">前回から <span class="num">±0.0 cm</span></div>
+          </div>
+
+          <!-- 体脂肪率 (自動算出) -->
+          <div class="input-block">
+            <div class="label-row">
+              <div class="lbl">
+                体脂肪率
+                <span class="info">
+                  <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                  <span class="tooltip">アメリカ海軍式で算出</span>
+                </span>
+              </div>
+            </div>
+            <div class="big-display computed">
+              <span class="num">22.4</span><span class="unit">%</span>
+            </div>
+            <div class="auto-note">ウエスト・首・身長から自動算出</div>
+          </div>
+
+          <button class="save-btn">
+            <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            記録する
+          </button>
+
+          <div class="auto-reflect">
+            記録は<br>
+            <b>目標管理シート ・ ① 現状を把握 ・ 変化を見る</b><br>
+            に自動反映されます
+          </div>
+        </div>
+      </div>
+
+      <!-- ミニ折れ線グラフ -->
+      <div class="card">
+        <div class="card-head">
+          <div class="title">📈 直近 7 日の体重</div>
+          <div class="sub">75.0 - 75.8 kg</div>
+        </div>
+        <div class="mini-chart">
+          <svg viewBox="0 0 280 80" preserveAspectRatio="none">
+            <!-- 軸 (横線) -->
+            <line x1="0" y1="40" x2="280" y2="40" stroke="#f0f0f0" stroke-width="1" stroke-dasharray="2,2"/>
+            <!-- 折れ線 (記録のあった 6 日を等間隔・連続接続、A 案) -->
+            <polyline
+              points="0,55 56,35 112,15 168,40 224,30 280,5"
+              fill="none"
+              stroke="#00897b"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <!-- データポイント -->
+            <circle cx="0" cy="55" r="3" fill="#00897b"/>
+            <circle cx="56" cy="35" r="3" fill="#00897b"/>
+            <circle cx="112" cy="15" r="3" fill="#00897b"/>
+            <circle cx="168" cy="40" r="3" fill="#00897b"/>
+            <circle cx="224" cy="30" r="3" fill="#00897b"/>
+            <circle cx="280" cy="5" r="4" fill="#00897b" stroke="#fff" stroke-width="2"/>
+          </svg>
+          <div class="xaxis">
+            <span>5/16</span>
+            <span>5/17</span>
+            <span>5/19</span>
+            <span>5/20</span>
+            <span>5/21</span>
+            <span>今日</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 履歴リスト -->
+      <div class="card">
+        <div class="card-head">
+          <div class="title">📅 履歴</div>
+          <div class="sub">直近の記録</div>
+        </div>
+        <ul class="recent-list">
+          <li class="recent-item">
+            <div class="date">今日 5/22</div>
+            <div class="vals">
+              <span class="val"><span class="lbl-mini">体重</span>75.0kg <span class="delta">−0.2</span></span>
+              <span class="val"><span class="lbl-mini">体脂肪</span>22.4%</span>
+            </div>
+          </li>
+          <li class="recent-item">
+            <div class="date">昨日 5/21</div>
+            <div class="vals">
+              <span class="val"><span class="lbl-mini">体重</span>75.2kg <span class="delta">−0.2</span></span>
+              <span class="val"><span class="lbl-mini">体脂肪</span>22.5%</span>
+            </div>
+          </li>
+          <li class="recent-item">
+            <div class="date">5/20</div>
+            <div class="vals">
+              <span class="val"><span class="lbl-mini">体重</span>75.4kg <span class="delta">−0.2</span></span>
+              <span class="val"><span class="lbl-mini">体脂肪</span>22.6%</span>
+            </div>
+          </li>
+          <li class="recent-item">
+            <div class="date">5/19</div>
+            <div class="vals">
+              <span class="val"><span class="lbl-mini">体重</span>75.6kg <span class="delta">+0.1</span></span>
+              <span class="val"><span class="lbl-mini">体脂肪</span>22.8%</span>
+            </div>
+          </li>
+          <li class="recent-item">
+            <div class="date">5/17</div>
+            <div class="vals">
+              <span class="val"><span class="lbl-mini">体重</span>75.5kg <span class="delta">−0.3</span></span>
+              <span class="val"><span class="lbl-mini">体脂肪</span>22.9%</span>
+            </div>
+          </li>
+          <li class="recent-item">
+            <div class="date">5/16</div>
+            <div class="vals">
+              <span class="val"><span class="lbl-mini">体重</span>75.8kg</span>
+              <span class="val"><span class="lbl-mini">体脂肪</span>23.0%</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 遷移リンク -->
+      <a class="link-btn">
+        <span class="ico">📈</span>変化を見る で詳しい推移をチェック →
+      </a>
+      <a class="link-btn">
+        <span class="ico">🎯</span>目標管理シートで目標と比較 →
+      </a>
+
+    </div>
+
+    <div class="tab-nav">
+      <div class="tab"><svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>ホーム</div>
+      <div class="tab"><svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>コース</div>
+      <div class="tab active"><svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>記録</div>
+      <div class="tab"><svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>検索</div>
+      <div class="tab"><svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><circle cx="12" cy="12" r="3"/></svg>設定</div>
+    </div>
+  </div>
+
+  <div class="annotation">
+    <h3>✅ 反映した仕様</h3>
+    <ul>
+      <li><b>入力 UI = 案 2-D ハイブリッド</b>: 大表示 (中央 32px Inter) + ステッパー 4 ボタン + 大表示タップで直接入力モード</li>
+      <li><b>増減ステッパー</b>: 体重 −0.5/−0.1/+0.1/+0.5、ウエスト/首回り −1.0/−0.5/+0.5/+1.0</li>
+      <li><b>前回比</b>: 「前回から −0.2 kg」グレー #888 (変動方向問わず同色)</li>
+      <li><b>体脂肪率</b>: 自動算出 (入力不可)、ウエスト/首/身長から</li>
+      <li><b>ⓘ ツールチップ</b>: 体脂肪率の補足「アメリカ海軍式で算出」(ホバー表示)</li>
+      <li><b>日付選択</b>: ヘッダー帯の日付がタップ可 (カレンダーUIで過去日遡及)</li>
+      <li><b>「今日」の文字色</b>: 緑 → 黒 #1a1a1a (静かなトーン統一)</li>
+      <li><b>delta 色</b>: 全部グレー (責めない、催促しない)</li>
+    </ul>
+
+    <h3>📊 ミニ折れ線グラフ (新規)</h3>
+    <ul>
+      <li>SVG で軽量に描画 (外部ライブラリ不要)</li>
+      <li><b>A 案</b>: 未記録日は表示せず、記録のあった日だけを等間隔で配置 → 点間を直接結ぶ</li>
+      <li>今日のポイントは少し大きめ + 白枠</li>
+    </ul>
+
+    <h3>📅 履歴リスト</h3>
+    <ul>
+      <li>直近の記録 (実装時は 30 日分の記録まで)</li>
+      <li>体重と体脂肪率を縦揃え (130px 固定幅)</li>
+      <li><b>A 案 (2026-05-24 確定)</b>: 未記録日は表示せず、記録のあった日だけ表示。Why: 「前日値引き継ぎ」は (a) 測定行為が消える (b) のりfitness のコーチング判断材料が汚染される (c) グラフが嘘をつく ため不採用。A 案は責めない & 嘘をつかない両立</li>
+      <li>delta は前回比、サイン (+/−) で増減を示すが色は統一グレー</li>
+    </ul>
+
+    <h3>🔗 連動の流れ</h3>
+    <ul>
+      <li>記録するボタン → <code>body_metrics</code> テーブルに保存</li>
+      <li>保存後、トースト「✓ 保存しました」のみ表示 (励まし文言なし)</li>
+      <li>目標シート ① は最新日付の <code>recorded_at</code> 行を参照、リアルタイム反映</li>
+      <li>変化を見る画面でグラフのデータ源として使用</li>
+    </ul>
+
+    <h3>🗄 DB スキーマ (新規)</h3>
+    <ul>
+      <li><code>body_metrics</code>: id / user_id / recorded_at / submitted_at / weight / waist / neck / body_fat_pct / created_at / updated_at</li>
+      <li>UNIQUE 制約 (user_id, recorded_at) で同日重複防止 (上書き更新)</li>
+      <li>身長は users / profiles の既存値を参照</li>
+    </ul>
+
+    <h3>🚫 実装しないもの (責めない方針)</h3>
+    <ul>
+      <li>ホーム CTA「今日の体組成を記録する」リマインダー</li>
+      <li>プッシュ通知</li>
+      <li>朝の挨拶への組み込み</li>
+      <li>連続記録 (Streak) 演出</li>
+      <li>節目演出 (10 日連続! 等)</li>
+      <li>励まし文言 (「ナイス減量!」等)</li>
+      <li>遡及入力ラベル (「事後入力」マーク等) ※ submitted_at は内部メタデータのみ</li>
+    </ul>
+
+    <h3>📋 配置</h3>
+    <ul>
+      <li>下部タブ「記録」内に「📊 体組成記録」を新設</li>
+      <li>記録タブのトップ or サブメニュー 1 項目として配置</li>
+      <li>受講生は自発的にここを開く動線のみ</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

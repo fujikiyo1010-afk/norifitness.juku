@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — エラー画面 (共通テンプレート)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --ink4: #ccc;
+    --border: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f8f9fa;
+    --bg-warm: linear-gradient(135deg, #e0f2f1, #fffbe6);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: #e8ebec; color: var(--ink); line-height: 1.6; padding: 24px; }
+  .page-header { max-width: 1300px; margin: 0 auto 32px; text-align: center; }
+  .page-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .page-header p { color: #6b7d75; font-size: 13px; }
+
+  .multi-stage {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr) 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .scene { display: flex; flex-direction: column; align-items: center; }
+  .scene-label { text-align: center; margin-bottom: 12px; }
+  .scene-label .step {
+    display: inline-block;
+    background: var(--primary);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    margin-bottom: 6px;
+    letter-spacing: .04em;
+  }
+  .scene-label h2 { font-size: 14px; color: var(--ink); font-weight: 700; }
+  .scene-label p { font-size: 11px; color: var(--ink2); margin-top: 3px; }
+
+  .phone {
+    width: 100%;
+    max-width: 320px;
+    background: var(--bg);
+    border: 6px solid #2a2a2a;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 6px 24px rgba(0,0,0,.15);
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    min-height: 600px;
+  }
+  .phone-status { background: #2a2a2a; color: #fff; text-align: center; font-size: 10px; padding: 3px; font-family: 'Inter', sans-serif; }
+
+  /* エラー画面本体 */
+  .error {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 50px 28px;
+    text-align: center;
+  }
+
+  .character {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: #fff;
+    border: 3px solid #fff;
+    box-shadow: 0 4px 14px rgba(0,0,0,.08);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 26px;
+    position: relative;
+  }
+  .character .ico { font-size: 48px; }
+  .character-note {
+    position: absolute;
+    bottom: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    color: var(--ink3);
+    background: #fff;
+    padding: 1px 6px;
+    border-radius: 4px;
+    border: 1px dashed var(--ink4);
+    white-space: nowrap;
+  }
+
+  .err-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+  .err-msg {
+    font-size: 11px;
+    color: var(--ink2);
+    line-height: 1.8;
+    margin-bottom: 28px;
+  }
+
+  .retry-btn {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 11px 28px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 3px 10px rgba(0,137,123,.22);
+    font-family: inherit;
+  }
+  .retry-btn:hover { background: var(--primary-dark); }
+
+  /* === 注釈 === */
+  .annotation { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; font-size: 13px; color: #555; position: sticky; top: 24px; }
+  .annotation h3 { font-size: 14px; color: var(--ink); margin: 18px 0 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+  .annotation h3:first-child { margin-top: 0; }
+  .annotation ul { padding-left: 20px; }
+  .annotation li { margin-bottom: 4px; font-size: 12px; }
+  .annotation .template-card { background: var(--bg-warm); padding: 12px 14px; border-radius: 8px; margin: 8px 0; font-size: 11px; color: var(--ink); line-height: 1.7; }
+  .annotation .template-card b { color: var(--primary-darker); }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>⚠️ エラー画面 (共通テンプレート)</h1>
+  <p>1 つの画面構造で C-1 / C-2 / C-3 を吸収 ・ メッセージと CTA のみ差し替え</p>
+</div>
+
+<div class="multi-stage">
+
+  <!-- C-1: 通信エラー -->
+  <div class="scene">
+    <div class="scene-label">
+      <span class="step">C-1</span>
+      <h2>通信エラー</h2>
+      <p>電波不調・オフライン</p>
+    </div>
+    <div class="phone">
+      <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+      <div class="error">
+        <div class="character">
+          <span class="ico">😅</span>
+          <span class="character-note">困り顔キャラ</span>
+        </div>
+        <div class="err-title">うまく繋がらないみたい<br>です</div>
+        <div class="err-msg">
+          電波の届く場所で<br>
+          もう一度試してみてください
+        </div>
+        <button class="retry-btn">🔄 再読み込みする</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- C-2: サーバーエラー -->
+  <div class="scene">
+    <div class="scene-label">
+      <span class="step">C-2</span>
+      <h2>サーバーエラー (500)</h2>
+      <p>システム側の障害</p>
+    </div>
+    <div class="phone">
+      <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+      <div class="error">
+        <div class="character">
+          <span class="ico">🙇</span>
+          <span class="character-note">申し訳キャラ</span>
+        </div>
+        <div class="err-title">ただいまシステムに<br>不具合があります</div>
+        <div class="err-msg">
+          しばらく待ってから<br>
+          もう一度お試しください
+        </div>
+        <button class="retry-btn">🔄 再読み込みする</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- C-3: 404 -->
+  <div class="scene">
+    <div class="scene-label">
+      <span class="step">C-3</span>
+      <h2>ページが見つからない (404)</h2>
+      <p>リンク切れ・URL 誤り</p>
+    </div>
+    <div class="phone">
+      <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+      <div class="error">
+        <div class="character">
+          <span class="ico">🤔</span>
+          <span class="character-note">首傾げキャラ</span>
+        </div>
+        <div class="err-title">お探しのページが<br>見つかりませんでした</div>
+        <div class="err-msg">
+          リンクが古い<br>
+          可能性があります
+        </div>
+        <button class="retry-btn">🏠 ホームに戻る</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 注釈 -->
+  <div class="annotation">
+    <h3>🗺 画面の役割</h3>
+    <ul>
+      <li>通信失敗・サーバーダウン・404 等の異常時に表示</li>
+      <li><b>焦らせず、寄り添う口調で「もう一回試してね」</b></li>
+      <li>1 つの画面構造で 3 状態を吸収 (実装シンプル)</li>
+    </ul>
+
+    <h3>📐 共通構造</h3>
+    <ul>
+      <li><b>キャラ画像</b>: 96px、状況に応じてポーズ違い</li>
+      <li><b>タイトル</b>: 1-2 行、状況の説明 (フラットに)</li>
+      <li><b>メッセージ</b>: 1-2 行、次の行動の案内</li>
+      <li><b>CTA</b>: 1 ボタン (再読み込み or ホームに戻る)</li>
+      <li>ヘッダー・下部タブはなし (集中させる)</li>
+    </ul>
+
+    <h3>📝 メッセージテンプレート集</h3>
+
+    <div class="template-card">
+      <b>C-1: 通信エラー</b><br>
+      キャラ: 困り顔 😅<br>
+      タイトル: 「うまく繋がらないみたいです」<br>
+      メッセージ: 「電波の届く場所でもう一度試してみてください」<br>
+      CTA: 🔄 再読み込みする
+    </div>
+
+    <div class="template-card">
+      <b>C-2: サーバーエラー (500)</b><br>
+      キャラ: 申し訳なさそう 🙇<br>
+      タイトル: 「ただいまシステムに不具合があります」<br>
+      メッセージ: 「しばらく待ってからもう一度お試しください」<br>
+      CTA: 🔄 再読み込みする
+    </div>
+
+    <div class="template-card">
+      <b>C-3: 404</b><br>
+      キャラ: 首傾げ 🤔<br>
+      タイトル: 「お探しのページが見つかりませんでした」<br>
+      メッセージ: 「リンクが古い可能性があります」<br>
+      CTA: 🏠 ホームに戻る
+    </div>
+
+    <h3>🎨 デザイン方針</h3>
+    <ul>
+      <li>背景: 白 (装飾なし、シンプル)</li>
+      <li>赤色は使わない (責めない、不安にさせない)</li>
+      <li>キャラ 96px (空状態より少し小さめ、控えめ)</li>
+      <li>CTA = ティール緑 + 角丸 12px</li>
+      <li>下部タブ非表示 (このエラーから抜ける動線は CTA 1 つだけ)</li>
+    </ul>
+
+    <h3>📝 メッセージのトーン (共通)</h3>
+    <ul>
+      <li>「エラー」「失敗」のような硬い言葉を避ける</li>
+      <li>「みたい」「ようです」で柔らかく</li>
+      <li>「申し訳ございません」より「うまくいかないみたいです」</li>
+      <li>受講生のせいにしない (「電波が悪い」とは言わず「繋がらない」と中立に)</li>
+    </ul>
+
+    <h3>🤖 実装ルール</h3>
+    <ul>
+      <li>1 つの React コンポーネント <code>&lt;ErrorScreen type="connection|server|notfound" /&gt;</code></li>
+      <li>type に応じてキャラポーズ + メッセージ + CTA が切り替わる</li>
+      <li>キャラポーズ画像のパスは type ベースで自動選択</li>
+      <li>MVP では絵文字でプレースホルダー、Phase 2 で実画像差し替え</li>
+    </ul>
+
+    <h3>⚠️ 未確定</h3>
+    <ul>
+      <li>キャラの 3 ポーズ (困り顔 / 申し訳 / 首傾げ) はいつ実画像化するか</li>
+      <li>MVP は通常ポーズ 1 種類で全エラー画面共通でも可</li>
+      <li>404 のメッセージは「リンクが古い」以外のパターンもありえる (検討)</li>
+      <li>サーバーエラー時、エラーコード番号を表示するか (デバッグ用に小さく表示する案も)</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

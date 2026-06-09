@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — 検索画面</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --ink4: #ccc;
+    --border: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f8f9fa;
+    --bg-warm: linear-gradient(135deg, #e0f2f1, #fffbe6);
+    --yellow-marker: rgba(255,235,59,.55);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: #e8ebec; color: var(--ink); line-height: 1.6; padding: 24px; }
+  .page-header { max-width: 900px; margin: 0 auto 32px; text-align: center; }
+  .page-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .page-header p { color: #6b7d75; font-size: 13px; }
+
+  .stage { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: 440px 1fr; gap: 32px; align-items: start; }
+
+  .phone {
+    width: 100%; max-width: 440px;
+    background: var(--bg); border: 8px solid #2a2a2a; border-radius: 28px;
+    overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    font-size: 14px; display: flex; flex-direction: column; min-height: 800px;
+  }
+  .phone-status { background: #2a2a2a; color: #fff; text-align: center; font-size: 11px; padding: 4px; font-family: 'Inter', sans-serif; }
+
+  .app-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); background: #fff; }
+  .app-header .back { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--ink); }
+  .app-header .title-h { font-size: 15px; font-weight: 700; color: var(--ink); }
+  .app-header .spacer { width: 24px; }
+
+  .scroll { flex: 1; overflow-y: auto; padding-bottom: 80px; background: #fafbfa; }
+
+  /* 検索ボックス */
+  .search-wrap {
+    padding: 14px 16px;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+  }
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    transition: border-color .15s;
+  }
+  .search-box:focus-within { border-color: var(--primary); background: #fff; }
+  .search-box svg { width: 18px; height: 18px; color: var(--ink3); flex-shrink: 0; }
+  .search-box input {
+    flex: 1; border: none; outline: none; background: transparent;
+    font-size: 14px; font-family: inherit; color: var(--ink);
+  }
+  .search-box input::placeholder { color: var(--ink3); }
+  .clear-btn {
+    color: var(--ink3); font-size: 16px; cursor: pointer; padding: 2px 4px;
+    background: none; border: none; font-family: inherit;
+  }
+
+  /* セクション */
+  .section { padding: 18px 16px 8px; }
+  .section-label {
+    font-size: 11px;
+    color: var(--ink3);
+    font-weight: 700;
+    letter-spacing: .06em;
+    margin-bottom: 10px;
+    padding-left: 4px;
+  }
+
+  /* 履歴・候補リスト */
+  .keyword-list {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .keyword-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--ink);
+    transition: background .12s;
+  }
+  .keyword-item:last-child { border-bottom: none; }
+  .keyword-item:hover { background: var(--bg-soft); }
+  .keyword-item .ico { color: var(--ink3); font-size: 14px; flex-shrink: 0; }
+  .keyword-item .word { flex: 1; }
+  .keyword-item .remove { color: var(--ink4); font-size: 14px; padding: 4px; }
+
+  /* 区切り (検索前 vs 結果) */
+  .mock-divider {
+    margin: 24px 16px 8px;
+    padding: 8px 14px;
+    background: #fff3cd;
+    color: #8b6914;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 6px;
+    text-align: center;
+    letter-spacing: .04em;
+  }
+
+  /* 結果リスト */
+  .result-group { margin-bottom: 14px; }
+  .result-head {
+    font-size: 11px;
+    color: var(--primary-dark);
+    font-weight: 700;
+    margin-bottom: 8px;
+    padding-left: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .result-head .count {
+    font-family: 'Inter', sans-serif;
+    color: var(--ink3);
+    font-weight: 500;
+    font-size: 10px;
+  }
+  .result-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 6px;
+    cursor: pointer;
+  }
+  .result-card:hover { border-color: var(--primary); }
+  .result-card .ttl {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .result-card .ttl mark {
+    background: var(--yellow-marker);
+    color: var(--ink);
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+  .result-card .breadcrumb {
+    font-size: 10px;
+    color: var(--ink3);
+    font-family: 'Inter', sans-serif;
+  }
+  .result-card .snippet {
+    font-size: 11px;
+    color: var(--ink2);
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+  .result-card .snippet mark {
+    background: var(--yellow-marker);
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+
+  /* 下部タブ */
+  .tabbar { display: flex; border-top: 1px solid var(--border); background: #fff; }
+  .tab { flex: 1; text-align: center; padding: 10px 4px 8px; font-size: 10px; color: var(--ink3); }
+  .tab.active { color: var(--primary); font-weight: 700; }
+  .tab .icon { font-size: 18px; display: block; margin-bottom: 2px; }
+
+  /* 注釈 */
+  .annotation { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; font-size: 13px; color: #555; position: sticky; top: 24px; }
+  .annotation h3 { font-size: 14px; color: var(--ink); margin: 18px 0 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+  .annotation h3:first-child { margin-top: 0; }
+  .annotation ul { padding-left: 20px; }
+  .annotation li { margin-bottom: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🔍 検索画面</h1>
+  <p>下部タブの「検索」 ・ 検索前 (履歴・候補) と 検索後 (結果) を 1 ファイルに併記</p>
+</div>
+
+<div class="stage">
+
+  <div class="phone">
+    <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+
+    <div class="app-header">
+      <div class="back">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </div>
+      <div class="title-h">検索</div>
+      <div class="spacer"></div>
+    </div>
+
+    <div class="scroll">
+
+      <!-- 検索ボックス -->
+      <div class="search-wrap">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="レッスン・コース・章を検索...">
+        </div>
+      </div>
+
+      <!-- 検索前の表示: 最近の検索 + よく検索される -->
+      <div class="section">
+        <div class="section-label">🕐 最近の検索</div>
+        <div class="keyword-list">
+          <div class="keyword-item">
+            <span class="ico">🕐</span>
+            <span class="word">PFC バランス</span>
+            <span class="remove">✕</span>
+          </div>
+          <div class="keyword-item">
+            <span class="ico">🕐</span>
+            <span class="word">カーボサイクル</span>
+            <span class="remove">✕</span>
+          </div>
+          <div class="keyword-item">
+            <span class="ico">🕐</span>
+            <span class="word">睡眠</span>
+            <span class="remove">✕</span>
+          </div>
+          <div class="keyword-item">
+            <span class="ico">🕐</span>
+            <span class="word">基礎代謝</span>
+            <span class="remove">✕</span>
+          </div>
+          <div class="keyword-item">
+            <span class="ico">🕐</span>
+            <span class="word">タンパク質</span>
+            <span class="remove">✕</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">🔥 よく検索される</div>
+        <div class="keyword-list">
+          <div class="keyword-item">
+            <span class="ico">🔍</span>
+            <span class="word">基礎代謝</span>
+          </div>
+          <div class="keyword-item">
+            <span class="ico">🔍</span>
+            <span class="word">プロテイン</span>
+          </div>
+          <div class="keyword-item">
+            <span class="ico">🔍</span>
+            <span class="word">ダイエット</span>
+          </div>
+          <div class="keyword-item">
+            <span class="ico">🔍</span>
+            <span class="word">脂質</span>
+          </div>
+          <div class="keyword-item">
+            <span class="ico">🔍</span>
+            <span class="word">糖質制限</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 区切り -->
+      <div class="mock-divider">↓ 「PFC」と入力した時の結果表示 (モック上の併記) ↓</div>
+
+      <!-- 検索後の結果 -->
+      <div class="section">
+        <div class="result-group">
+          <div class="result-head">📚 コース <span class="count">1 件</span></div>
+          <div class="result-card">
+            <div class="ttl"><mark>PFC</mark> バランスの基礎</div>
+            <div class="breadcrumb">コース 1 / 第 3 章</div>
+            <div class="snippet"><mark>PFC</mark> (タンパク質・脂質・炭水化物) のバランスを学ぶ章...</div>
+          </div>
+        </div>
+
+        <div class="result-group">
+          <div class="result-head">📖 章 <span class="count">2 件</span></div>
+          <div class="result-card">
+            <div class="ttl">第 3 章: <mark>PFC</mark> バランスの基礎</div>
+            <div class="breadcrumb">コース 1 / 全 5 レッスン</div>
+          </div>
+          <div class="result-card">
+            <div class="ttl">第 7 章: <mark>PFC</mark> の応用</div>
+            <div class="breadcrumb">コース 2 / 全 4 レッスン</div>
+          </div>
+        </div>
+
+        <div class="result-group">
+          <div class="result-head">🎬 レッスン <span class="count">5 件</span></div>
+          <div class="result-card">
+            <div class="ttl">レッスン 1: <mark>PFC</mark> とは何か</div>
+            <div class="breadcrumb">第 3 章 ・ 6 分 24 秒</div>
+            <div class="snippet">「<mark>PFC</mark>」というのは、Protein (タンパク質)、Fat (脂質)、Carbohydrate (炭水化物) の頭文字...</div>
+          </div>
+          <div class="result-card">
+            <div class="ttl">レッスン 5: <mark>PFC</mark> バランスの取り方</div>
+            <div class="breadcrumb">第 3 章 ・ 8 分 12 秒</div>
+            <div class="snippet">体重 × タンパク質 2g を目安にして、<mark>PFC</mark> を決めていきましょう...</div>
+          </div>
+          <div class="result-card">
+            <div class="ttl">レッスン 2: <mark>PFC</mark> の応用編</div>
+            <div class="breadcrumb">第 7 章 ・ 5 分 48 秒</div>
+            <div class="snippet"><mark>PFC</mark> の比率を変えることで、ダイエット効果を最大化...</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="tabbar">
+      <div class="tab"><span class="icon">🏠</span>ホーム</div>
+      <div class="tab"><span class="icon">📚</span>コース</div>
+      <div class="tab"><span class="icon">📝</span>記録</div>
+      <div class="tab active"><span class="icon">🔍</span>検索</div>
+      <div class="tab"><span class="icon">⚙</span>設定</div>
+    </div>
+  </div>
+
+  <div class="annotation">
+    <h3>🗺 画面の役割</h3>
+    <ul>
+      <li>下部タブ「🔍 検索」から遷移</li>
+      <li>レッスン (217 個) / コース (5 個) / 章 (22 個) を横断検索</li>
+      <li>「あの話どこだっけ?」を解決する場所</li>
+    </ul>
+
+    <h3>📐 構成 (上から)</h3>
+    <ul>
+      <li><b>ヘッダー</b>: シンプル「検索」</li>
+      <li><b>検索ボックス</b>: フォーカス済み (画面遷移時に自動フォーカス)</li>
+      <li><b>検索前</b>: 最近の検索 (5 件) + よく検索される (5 件、運営側設定)</li>
+      <li><b>検索後</b>: 結果リスト (コース / 章 / レッスン の 3 グループ)</li>
+      <li>※ モック上は両方併記、実装時は検索状態で切り替え</li>
+    </ul>
+
+    <h3>🎯 検索結果の構造</h3>
+    <ul>
+      <li><b>3 グループ</b>: コース / 章 / レッスン (上から重要度順)</li>
+      <li>各カードに <b>パンくず</b> (どのコース・章に属するか)</li>
+      <li>レッスンには <b>スニペット</b> (本文の抜粋)</li>
+      <li>検索語は <b>黄色マーカー</b> でハイライト (添削色と同じ色)</li>
+    </ul>
+
+    <h3>🔄 動的挙動</h3>
+    <ul>
+      <li>入力ボックスが空 → 「最近の検索」+「よく検索される」を表示</li>
+      <li>入力開始 → リアルタイムで結果リスト表示 (デバウンス 300ms)</li>
+      <li>結果ゼロ → empty_state B-4 (作成済) に切り替え</li>
+      <li>履歴の ✕ で個別削除</li>
+    </ul>
+
+    <h3>🎨 デザイン方針</h3>
+    <ul>
+      <li>シンプル、リスト形式</li>
+      <li>カード角丸 12px (一般カードと同等)</li>
+      <li>検索ボックスは focus 時に枠色変更 (ティール緑)</li>
+      <li>結果カードの hover で枠色変更</li>
+    </ul>
+
+    <h3>⚠️ 未確定 / Phase 2 候補</h3>
+    <ul>
+      <li>検索フィルタ (コース絞り込み等) は MVP に入れるか</li>
+      <li>「よく検索される」リスト = 運営側 (のりfitness 管理画面) で編集可能にするか</li>
+      <li>全文検索の精度: MVP は LIKE 検索 (簡易) / Phase 2 で形態素解析 (Elasticsearch 等)</li>
+      <li>結果ゼロ時の挙動: empty_state を使う / 検索ヒントを別途出す</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

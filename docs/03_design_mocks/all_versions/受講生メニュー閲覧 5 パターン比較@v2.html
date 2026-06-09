@@ -1,0 +1,516 @@
+#!/usr/bin/env node
+// 受講生メニュー閲覧 モック v2
+// 5 パターン (実データ風) を 1 ページに並べる、エクセル風表形式
+
+const fs = require("fs");
+const samples = JSON.parse(fs.readFileSync("/tmp/menu_samples.json", "utf8"));
+
+const PATTERN_TITLES = [
+  "AB 2日制 × 3サイクル進化 (王道その1)",
+  "6日制 × 3サイクル進化 (毎日コツコツ型)",
+  "3日制 × 3サイクル進化",
+  "1サイクル完結型 (シンプル)",
+  "女性向け 6日制 × 3サイクル",
+];
+
+const NORI_NOTES = [
+  ["まずは「小」から始めてください。", "フォームが慣れてきたら「中」「大」に進めましょう。", "毎日コツコツ続けるのがコツです。"],
+  ["毎日違う部位を鍛えるので無理なく続けられます。", "重さよりフォームを優先してください。", "睡眠 7 時間以上を確保しましょう。"],
+  ["週 3 回でしっかり追い込むメニューです。", "セット間の休憩はしっかり取りましょう。"],
+  ["まずはこのメニューに 2 週間取り組んでみてください。", "終わったらフィードバックをください。"],
+  ["女性に多い悩み (引き締め・むくみ) を意識した構成です。", "脚と背中をしっかり鍛えれば代謝が上がります。"],
+];
+
+function escape(s) {
+  if (s === null || s === undefined) return "";
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function cleanExerciseName(name) {
+  // 種目名から【部位】タグを分離
+  const match = name.match(/^(.+?)【(.+?)】(.*)$/);
+  if (match) {
+    return { name: (match[1] + (match[3] || "")).trim(), part: match[2] };
+  }
+  return { name: name.trim(), part: null };
+}
+
+function cleanReps(s) {
+  if (!s) return "—";
+  if (s.startsWith("http") || s.includes("youtube") || s.includes("YouTube")) return "(動画)";
+  return s.replace(/、/g, " / ");
+}
+
+function renderExerciseTable(exercises) {
+  const rows = exercises.map((ex, i) => {
+    const { name, part } = cleanExerciseName(ex["種目名"] || "");
+    const reps = cleanReps(ex["回数"]);
+    const interval = ex["インターバル"] || "—";
+    return `
+      <tr>
+        <td class="num">${i + 1}</td>
+        <td class="ex">
+          <div class="ex-name">${escape(name)}</div>
+          ${part ? `<div class="ex-part">${escape(part)}</div>` : ""}
+        </td>
+        <td class="reps">${escape(reps)}</td>
+        <td class="iv">${escape(interval)}</td>
+      </tr>
+    `;
+  }).join("");
+  return `
+    <table class="menu-table">
+      <thead>
+        <tr>
+          <th class="num">#</th>
+          <th class="ex">種目</th>
+          <th class="reps">回数</th>
+          <th class="iv">休憩</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+function renderDayTabs(weeks, activeIdx) {
+  return weeks.map((w, i) => {
+    const dayLabel = (w["日"] || `${i + 1}日目`).replace(/\n/g, " ").trim();
+    const cls = i === activeIdx ? "day-tab active" : "day-tab";
+    return `<div class="${cls}">${escape(dayLabel)}</div>`;
+  }).join("");
+}
+
+function renderPattern(sample, idx) {
+  const title = PATTERN_TITLES[idx];
+  const notes = NORI_NOTES[idx];
+  const cycles = sample.cycles || [];
+  const firstCycle = cycles[0] || { 週: [], 段階: "", シート名: "" };
+  const firstDay = firstCycle["週"]?.[0];
+  const exercises = firstDay?.["種目"] || [];
+
+  // タイトル文字列
+  const instrumentDisp = sample.instrument === "汎用名 (中身要確認)" || sample.instrument === "不明 (中身要確認)" ? "用器具混合" : (sample.instrument || "—");
+  const frequencyDisp = sample.frequency === "不明 (中身要確認)" ? "—" : (sample.frequency || "—");
+
+  return `
+    <section class="pattern">
+      <!-- パターン見出し -->
+      <div class="pattern-header">
+        <div class="pattern-num">パターン ${idx + 1}</div>
+        <div class="pattern-title">${escape(title)}</div>
+      </div>
+
+      <!-- スマホサイズの「メニュー画面」-->
+      <div class="phone">
+        <!-- ヘッダー -->
+        <div class="app-header">
+          <button class="back-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+          </button>
+          <div class="app-title">あなたのメニュー</div>
+          <div style="width:20px"></div>
+        </div>
+
+        <!-- ヒーロー: 個別感を出す -->
+        <div class="hero">
+          <div class="hero-tag">${escape(sample.source_name)} さんの今月のメニュー</div>
+          <div class="hero-title">
+            ${escape(instrumentDisp)}<br>
+            ${escape(frequencyDisp)} ${sample.primary_body ? "・" + escape(sample.primary_body) + "重点" : ""}
+          </div>
+          <div class="hero-meta">配布 2026/06/02 / 全 ${cycles.length} サイクル</div>
+        </div>
+
+        <!-- カルテサマリ (修正: 1 列縦並び) -->
+        <details class="karte-summary">
+          <summary>提出したカルテ ▾</summary>
+          <dl class="karte-list">
+            <dt>性別</dt><dd>${escape(sample.gender)}</dd>
+            <dt>年齢層</dt><dd>${escape(sample.age_band)}</dd>
+            <dt>使える環境</dt><dd>${escape(instrumentDisp)}</dd>
+            <dt>理想の頻度</dt><dd>${escape(frequencyDisp)}</dd>
+            <dt>重点部位</dt><dd>${escape(sample.primary_body || "—")}</dd>
+          </dl>
+        </details>
+
+        <!-- のり氏メモ (修正: 箇条書き) -->
+        <div class="nori-note">
+          <div class="nori-note-label">のりfitness より</div>
+          <ul class="nori-note-list">
+            ${notes.map(n => `<li>${escape(n)}</li>`).join("")}
+          </ul>
+        </div>
+
+        <!-- サイクル選択 -->
+        <div class="cycle-tabs-wrap">
+          <div class="cycle-label">サイクル</div>
+          <div class="cycle-tabs">
+            ${cycles.map((c, i) => `
+              <div class="cycle-tab ${i === 0 ? 'active' : ''}">${escape(c["段階"] || `第${i+1}`)}</div>
+            `).join("")}
+          </div>
+        </div>
+
+        <!-- 段階名 -->
+        ${firstCycle["シート名"] ? `<div class="stage-name">${escape(firstCycle["シート名"].replace(/【.*?】/g, "").trim())}</div>` : ""}
+
+        <!-- 日タブ -->
+        ${firstCycle["週"]?.length > 1 ? `
+        <div class="day-tabs">
+          ${renderDayTabs(firstCycle["週"], 0)}
+        </div>
+        ` : ""}
+
+        <!-- 種目表 -->
+        <div class="table-wrap">
+          ${renderExerciseTable(exercises)}
+        </div>
+
+        <!-- 注釈 -->
+        <div class="tc-note">
+          実行記録は <a href="#">トレーナークラウド</a> でつけてください
+        </div>
+
+        <!-- フッタ -->
+        <div class="footer">
+          <button class="footer-btn primary">メニュー変更リクエスト</button>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+const html = `<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>受講生メニュー閲覧 5 パターン比較</title>
+<style>
+  :root {
+    --teal: #00897b;
+    --teal-dark: #00695c;
+    --teal-soft: rgba(0,137,123,0.08);
+    --border: #e8ebe9;
+    --gray-50: #fafafa;
+    --gray-100: #f4f4f5;
+    --gray-500: #71717a;
+    --gray-900: #18181b;
+    --warm-grad: linear-gradient(135deg, #e0f2f1, #fffbe6);
+    --highlight: rgba(255,235,59,0.12);
+    --highlight-border: rgba(255,235,59,0.55);
+    --gold: #b8860b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #ececec;
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+    color: var(--gray-900);
+    padding: 32px 16px 100px;
+  }
+  .page-title {
+    max-width: 600px;
+    margin: 0 auto 32px;
+    text-align: center;
+  }
+  .page-title h1 { font-size: 18px; margin: 0 0 8px; }
+  .page-title p { font-size: 12px; color: var(--gray-500); margin: 0; line-height: 1.7; }
+
+  .pattern { max-width: 480px; margin: 0 auto 48px; }
+  .pattern-header {
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  .pattern-num {
+    font-size: 11px;
+    color: var(--gray-500);
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+  .pattern-title {
+    font-size: 14px;
+    color: var(--gray-900);
+    font-weight: 700;
+    margin-top: 2px;
+  }
+
+  .phone {
+    max-width: 390px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  .app-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .back-btn { background: none; border: none; padding: 0; cursor: pointer; color: var(--gray-900); }
+  .app-title { flex: 1; text-align: center; font-size: 14px; font-weight: 700; }
+
+  .hero {
+    padding: 20px 16px;
+    background: var(--warm-grad);
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+  }
+  .hero-tag {
+    font-size: 11px;
+    color: var(--teal-dark);
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+  .hero-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--gray-900);
+    line-height: 1.5;
+    margin-bottom: 6px;
+  }
+  .hero-meta {
+    font-size: 10px;
+    color: var(--gray-500);
+  }
+
+  .karte-summary {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: white;
+  }
+  .karte-summary summary {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gray-500);
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+  }
+  .karte-summary summary::-webkit-details-marker { display: none; }
+  .karte-list {
+    margin: 12px 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 6px 12px;
+    font-size: 12px;
+  }
+  .karte-list dt { color: var(--gray-500); font-size: 11px; }
+  .karte-list dd { margin: 0; color: var(--gray-900); font-weight: 600; }
+
+  .nori-note {
+    margin: 16px;
+    padding: 12px 14px;
+    background: var(--highlight);
+    border: 1px solid var(--highlight-border);
+    border-radius: 8px;
+  }
+  .nori-note-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .nori-note-list {
+    margin: 0;
+    padding-left: 16px;
+    font-size: 12px;
+    color: var(--gray-900);
+    line-height: 1.7;
+  }
+  .nori-note-list li { margin-bottom: 2px; }
+  .nori-note-list li:last-child { margin-bottom: 0; }
+
+  .cycle-tabs-wrap {
+    background: var(--gray-50);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 16px 12px;
+  }
+  .cycle-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--gray-500);
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .cycle-tabs {
+    display: flex;
+    gap: 6px;
+  }
+  .cycle-tab {
+    flex: 1;
+    padding: 8px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gray-500);
+  }
+  .cycle-tab.active {
+    background: var(--teal-soft);
+    border-color: var(--teal);
+    color: var(--teal-dark);
+    border-width: 2px;
+  }
+
+  .stage-name {
+    padding: 10px 16px;
+    font-size: 11px;
+    color: var(--gray-500);
+    text-align: center;
+    background: white;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .day-tabs {
+    display: flex;
+    background: white;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .day-tab {
+    flex: 1;
+    min-width: 60px;
+    padding: 10px 8px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gray-500);
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+  }
+  .day-tab.active {
+    color: var(--teal-dark);
+    border-bottom-color: var(--teal);
+  }
+
+  /* ★ エクセル風 表組み (本命) */
+  .table-wrap {
+    background: white;
+    padding: 0;
+  }
+  .menu-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    color: var(--gray-900);
+  }
+  .menu-table thead th {
+    background: var(--gray-50);
+    color: var(--gray-500);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+  .menu-table tbody td {
+    padding: 10px 6px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .menu-table tbody tr:last-child td { border-bottom: none; }
+  .menu-table th.num, .menu-table td.num {
+    width: 28px;
+    text-align: center;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  .menu-table td.num {
+    color: var(--teal-dark);
+    font-weight: 700;
+  }
+  .menu-table .ex { width: auto; }
+  .menu-table .ex-name {
+    font-weight: 700;
+    line-height: 1.35;
+  }
+  .menu-table .ex-part {
+    color: var(--teal-dark);
+    font-size: 10px;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+  .menu-table th.reps, .menu-table td.reps {
+    width: 100px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .menu-table th.iv, .menu-table td.iv {
+    width: 40px;
+    text-align: right;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px;
+    color: var(--gray-500);
+  }
+
+  .tc-note {
+    padding: 12px 16px;
+    background: var(--gray-50);
+    border-top: 1px solid var(--border);
+    font-size: 10px;
+    color: var(--gray-500);
+    line-height: 1.6;
+  }
+  .tc-note a { color: var(--teal-dark); font-weight: 700; text-decoration: underline; }
+
+  .footer {
+    padding: 12px 16px;
+    background: white;
+    border-top: 1px solid var(--border);
+  }
+  .footer-btn {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--teal);
+    background: white;
+    color: var(--teal-dark);
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* 区切り */
+  .divider {
+    max-width: 600px;
+    margin: 32px auto;
+    border-top: 1px dashed #ccc;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  <h1>📋 受講生メニュー閲覧 - 5 パターン比較モック</h1>
+  <p>
+    実データ (workout_templates の 193 件から代表) を元に、エクセル風表形式で表示。<br>
+    各パターンとも 1 サイクル目 (小) の 1 日目だけ表示しています。
+  </p>
+</div>
+
+${samples.map((s, i) => renderPattern(s, i) + (i < samples.length - 1 ? '<div class="divider"></div>' : '')).join("\n")}
+
+</body>
+</html>
+`;
+
+fs.writeFileSync("/tmp/workout_menu_view_v2.html", html);
+console.log("✅ /tmp/workout_menu_view_v2.html を生成 (" + html.length + " バイト)");

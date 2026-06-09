@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — ホーム画面 v4 (ティール緑統一版)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --ink4: #ccc;
+    --border: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f8f9fa;
+    --bg-warm: linear-gradient(135deg, #e0f2f1, #fffbe6);
+    --yellow-bg: rgba(255,235,59,.18);
+    --yellow-strong: rgba(255,235,59,.55);
+    --yellow-name: #b8860b;
+    --notice-bg: linear-gradient(135deg, rgba(255,235,59,.18), rgba(255,235,59,.10));
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #e8ebec;
+    color: var(--ink);
+    line-height: 1.6;
+    padding: 24px;
+  }
+  .page-header {
+    max-width: 900px;
+    margin: 0 auto 32px;
+    text-align: center;
+  }
+  .page-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .page-header p { color: #6b7d75; font-size: 13px; }
+
+  .stage {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 440px 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  .phone {
+    width: 100%;
+    max-width: 440px;
+    background: var(--bg);
+    border: 8px solid #2a2a2a;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    min-height: 800px;
+  }
+  .phone-status {
+    background: #2a2a2a;
+    color: #fff;
+    text-align: center;
+    font-size: 11px;
+    padding: 4px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* === ヘッダー === */
+  .app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    background: #fff;
+  }
+  .app-header .logo {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--primary-darker);
+    letter-spacing: 0.04em;
+  }
+  .app-header .right-icons {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .header-icon {
+    width: 26px; height: 26px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink);
+    position: relative;
+    cursor: pointer;
+  }
+  .header-icon .red-dot {
+    position: absolute;
+    top: 2px; right: 2px;
+    width: 7px; height: 7px;
+    background: #d32f2f;
+    border-radius: 50%;
+    border: 1.5px solid #fff;
+  }
+  .header-icon .profile-circle {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  /* === スクロール === */
+  .scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 80px;
+    background: #fafbfa;
+  }
+
+  /* === ヒーロー帯 === */
+  .hero {
+    background: var(--bg-warm);
+    padding: 22px 20px 24px;
+  }
+  .hero .greet {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .hero .meta {
+    font-size: 11px;
+    color: var(--ink3);
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* === 黄バナー (目標シート未記入時) === */
+  .notice-banner {
+    margin: 14px 16px 0;
+    padding: 12px 14px;
+    background: var(--notice-bg);
+    border: 1px solid var(--yellow-strong);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--ink);
+  }
+  .notice-banner .ico { font-size: 18px; flex-shrink: 0; }
+  .notice-banner .text { flex: 1; }
+  .notice-banner .text b { color: var(--yellow-name); font-weight: 700; }
+  .notice-banner .arr { color: var(--yellow-name); font-family: 'Inter', sans-serif; font-weight: 700; }
+
+  /* === 続きから学ぶ CTA === */
+  .continue-cta {
+    margin: 14px 16px 0;
+    padding: 16px 18px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    border-radius: 14px;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,137,123,.22);
+    position: relative;
+    overflow: hidden;
+  }
+  .continue-cta .lbl {
+    font-size: 11px;
+    opacity: 0.9;
+    margin-bottom: 4px;
+    letter-spacing: 0.03em;
+  }
+  .continue-cta .ttl {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .continue-cta .sub {
+    font-size: 11px;
+    opacity: 0.85;
+  }
+  .continue-cta .play-icon {
+    position: absolute;
+    right: 16px; top: 50%;
+    transform: translateY(-50%);
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.18);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+
+  /* === セクションラベル === */
+  .section-label {
+    font-size: 11px;
+    color: var(--ink3);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    margin: 18px 16px 8px;
+    padding-left: 4px;
+  }
+
+  /* === 4 機能ブロック (角丸 4px、シャープ) === */
+  .blocks-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: 0 16px;
+  }
+  .feature-block {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px 12px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .15s, transform .15s;
+    position: relative;
+  }
+  .feature-block:hover {
+    border-color: var(--primary);
+    transform: translateY(-1px);
+  }
+  .feature-block .icon-wrap {
+    width: 40px; height: 40px;
+    margin: 0 auto 10px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .feature-block .icon-wrap svg {
+    width: 24px; height: 24px;
+    stroke: var(--ink);
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .feature-block .name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 3px;
+  }
+  .feature-block .desc {
+    font-size: 9px;
+    color: var(--ink3);
+    line-height: 1.4;
+  }
+  .feature-block .badge {
+    position: absolute;
+    top: 6px; right: 6px;
+    background: #d32f2f;
+    color: #fff;
+    font-size: 9px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 9999px;
+    min-width: 16px;
+    text-align: center;
+  }
+
+  /* === 横長: 目標管理シート (角丸 14px) === */
+  .goal-wide {
+    margin: 8px 16px 0;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .goal-wide:hover { border-color: var(--primary); }
+  .goal-wide .icon-circle {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: rgba(0,137,123,.08);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 18px;
+  }
+  .goal-wide .info { flex: 1; }
+  .goal-wide .ttl {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 2px;
+  }
+  .goal-wide .meta {
+    font-size: 10px;
+    color: var(--ink3);
+  }
+  .goal-wide .arr {
+    color: var(--ink3);
+    font-family: 'Inter', sans-serif;
+  }
+  .goal-wide .reply-mark {
+    background: var(--yellow-name);
+    color: #fff;
+    font-size: 9px;
+    padding: 1px 6px;
+    border-radius: 9999px;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+
+  /* === 全体進捗バー === */
+  .overall-progress {
+    margin: 18px 16px 0;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .overall-progress .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+  .overall-progress .head .lbl {
+    font-size: 11px;
+    color: var(--ink2);
+    font-weight: 600;
+  }
+  .overall-progress .head .num {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary-dark);
+  }
+  .overall-progress .head .num .total {
+    font-size: 10px;
+    color: var(--ink3);
+    margin-left: 4px;
+  }
+  .overall-progress .bar {
+    height: 6px;
+    background: #f0f2f1;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .overall-progress .bar > div {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+    border-radius: 3px;
+    transition: width .4s ease;
+  }
+
+  /* === 数値 3 枠 (案 C 横 1 行) === */
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin: 12px 16px 0;
+  }
+  .stat-cell {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 6px;
+    text-align: center;
+  }
+  .stat-cell .num {
+    font-family: 'Inter', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary-darker);
+    line-height: 1;
+  }
+  .stat-cell .unit {
+    font-size: 10px;
+    color: var(--ink3);
+    margin-top: 3px;
+  }
+  .stat-cell .lbl {
+    font-size: 10px;
+    color: var(--ink2);
+    margin-top: 5px;
+  }
+
+  /* === 下部タブ === */
+  .tabbar {
+    display: flex;
+    border-top: 1px solid var(--border);
+    background: #fff;
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px 4px 8px;
+    font-size: 10px;
+    color: var(--ink3);
+  }
+  .tab.active { color: var(--primary); font-weight: 700; }
+  .tab svg {
+    width: 18px; height: 18px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    display: block;
+    margin: 0 auto 2px;
+  }
+
+  /* === 注釈 === */
+  .annotation { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; font-size: 13px; color: #555; position: sticky; top: 24px; }
+  .annotation h3 { font-size: 14px; color: var(--ink); margin: 18px 0 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+  .annotation h3:first-child { margin-top: 0; }
+  .annotation ul { padding-left: 20px; }
+  .annotation li { margin-bottom: 4px; font-size: 12px; }
+  .annotation .highlight {
+    background: rgba(0,137,123,.06);
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin: 8px 0;
+    font-size: 11px;
+    color: var(--primary-darker);
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🏠 ホーム画面 v4 (最新合意反映版)</h1>
+  <p>ティール緑 #00897b 統一 ・ 続きから学ぶ + 4 機能 + 横長 + 進捗 + 数値 3 ・ 黄バナー表示中 (目標シート未記入想定)</p>
+</div>
+
+<div class="stage">
+
+  <div class="phone">
+    <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+
+    <!-- ヘッダー -->
+    <div class="app-header">
+      <div class="logo">筋肉塾</div>
+      <div class="right-icons">
+        <div class="header-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <span class="red-dot"></span>
+        </div>
+        <div class="header-icon">
+          <div class="profile-circle">山</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll">
+
+      <!-- ヒーロー帯 -->
+      <div class="hero">
+        <div class="greet">こんにちは、山田 さん</div>
+        <div class="meta">入会 2025/09/01 ・ 12 日目</div>
+      </div>
+
+      <!-- 黄バナー (目標シート未記入) -->
+      <div class="notice-banner">
+        <span class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        </span>
+        <div class="text"><b>目標管理シートが未記入</b>です。タップして設定しましょう</div>
+        <span class="arr">→</span>
+      </div>
+
+      <!-- 続きから学ぶ CTA -->
+      <div class="continue-cta">
+        <div class="lbl">▶ 続きから学ぶ</div>
+        <div class="ttl">PFC バランスの基礎</div>
+        <div class="sub">第 3 章 ・ Lesson 4</div>
+        <div class="play-icon">▶</div>
+      </div>
+
+      <!-- 4 機能ブロック -->
+      <div class="section-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:middle;margin-right:6px;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>機能
+      </div>
+      <div class="blocks-grid">
+        <div class="feature-block">
+          <div class="icon-wrap">
+            <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          </div>
+          <div class="name">コース一覧</div>
+          <div class="desc">動画レッスンを見る</div>
+        </div>
+        <div class="feature-block">
+          <div class="icon-wrap">
+            <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+          </div>
+          <div class="name">学習記録</div>
+          <div class="desc">自分の進捗を確認</div>
+        </div>
+        <div class="feature-block">
+          <div class="icon-wrap">
+            <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          </div>
+          <div class="name">LINE サポート</div>
+          <div class="desc">のりfitness に質問</div>
+          <span class="badge">2</span>
+        </div>
+        <div class="feature-block">
+          <div class="icon-wrap">
+            <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          </div>
+          <div class="name">ツール</div>
+          <div class="desc">計算ツール</div>
+        </div>
+      </div>
+
+      <!-- 横長: 目標管理シート -->
+      <div class="goal-wide">
+        <div class="icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;color:var(--primary);"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        </div>
+        <div class="info">
+          <div class="ttl">目標管理シート<span class="reply-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:10px;height:10px;vertical-align:middle;margin-right:3px;"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>1</span></div>
+          <div class="meta">のりfitness から添削が届いています</div>
+        </div>
+        <div class="arr">→</div>
+      </div>
+
+      <!-- 全体進捗 -->
+      <div class="overall-progress">
+        <div class="head">
+          <div class="lbl">全体進捗</div>
+          <div class="num">35% <span class="total">(76 / 217)</span></div>
+        </div>
+        <div class="bar"><div style="width: 35%;"></div></div>
+      </div>
+
+      <!-- 数値 3 枠 -->
+      <div class="stats-row">
+        <div class="stat-cell">
+          <div class="num">76</div>
+          <div class="unit">レッスン</div>
+          <div class="lbl">完了</div>
+        </div>
+        <div class="stat-cell">
+          <div class="num">24.5</div>
+          <div class="unit">時間</div>
+          <div class="lbl">視聴時間</div>
+        </div>
+        <div class="stat-cell">
+          <div class="num">12</div>
+          <div class="unit">日</div>
+          <div class="lbl">入会から</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="tabbar">
+      <div class="tab active">
+        <svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        ホーム
+      </div>
+      <div class="tab">
+        <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        コース
+      </div>
+      <div class="tab">
+        <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+        記録
+      </div>
+      <div class="tab">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        検索
+      </div>
+      <div class="tab">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        設定
+      </div>
+    </div>
+  </div>
+
+  <div class="annotation">
+    <h3>🗺 ホーム画面 v4 (最新合意反映版)</h3>
+    <ul>
+      <li>旧 home_v3.html (明るい緑 #4ECD5D) を ティール緑 #00897b に統一</li>
+      <li>Phase 2-7 メモリの全合意事項を反映</li>
+      <li>受講生 UI の中核、毎日見る画面</li>
+    </ul>
+
+    <h3>📐 構成 (上から)</h3>
+    <ul>
+      <li><b>ヘッダー</b>: 筋肉塾 ロゴ + ✉ お知らせ (赤ドット) + 👤 プロフィール</li>
+      <li><b>ヒーロー</b>: 「こんにちは、◯◯ さん」+ 入会日 + 経過日数 (E案グラデ)</li>
+      <li><b>黄バナー</b>: 目標管理シート未記入時のみ表示 (フラット文言、閉じれない、タップで遷移)</li>
+      <li><b>続きから学ぶ CTA</b>: 緑グラデ + 章/レッスン名 + ▶ アイコン (一番目立つ)</li>
+      <li><b>4 機能ブロック</b>: コース / 学習記録 / LINE / ツール (角丸 4px シャープ、線画黒一色)</li>
+      <li><b>横長</b>: 目標管理シート (角丸 14px、のり社長返信時は 📩 バッジ)</li>
+      <li><b>全体進捗</b>: 35% + 76 / 217、進捗バー</li>
+      <li><b>数値 3 枠</b>: 完了レッスン / 視聴時間 / 入会日数</li>
+      <li><b>下部 5 タブ</b>: ホーム (active) / コース / 記録 / 検索 / 設定</li>
+    </ul>
+
+    <h3>🎨 デザイン適用 (Phase 2-7 メモリ)</h3>
+    <ul>
+      <li><b>メイン色</b>: ティール緑 #00897b (旧 #4ECD5D から変更)</li>
+      <li><b>機能ブロック</b>: 角丸 <b>4px</b> (シャープ、Nike エッセンス)</li>
+      <li><b>その他カード</b>: 角丸 12-14px (CTA, 横長, 進捗, 数値カード)</li>
+      <li><b>影</b>: A 版基準 (CTA のみ強め、他は薄め)</li>
+      <li><b>アイコン</b>: 線画黒一色 (Lucide / Heroicons outline)</li>
+      <li><b>フォント</b>: Noto Sans JP + Inter (数値・日付)</li>
+    </ul>
+
+    <h3>🔔 ヘッダーアイコン挙動</h3>
+    <ul>
+      <li>✉ お知らせ → 赤ドット = 未読あり、タップで通知一覧</li>
+      <li>👤 プロフィール → タップで profile_screen へ遷移</li>
+    </ul>
+
+    <h3>🎯 黄バナーの仕様 (合意済)</h3>
+    <div class="highlight">
+      <b>表示条件</b>: 目標管理シートが未記入の時のみ<br>
+      <b>文言</b>: 「目標管理シートが未記入です。タップして設定しましょう」<br>
+      <b>挙動</b>: 閉じれない (毎ログイン視覚的催促)、タップで目標シート編集画面へ<br>
+      <b>記入完了後</b>: バナー自動非表示<br>
+      <b>色</b>: 添削色 (黄) + ダークゴールド = 注意喚起だが柔らかい
+    </div>
+
+    <h3>📩 横長ブロックの動的バッジ</h3>
+    <ul>
+      <li>のり社長から添削が届いている時に 📩 1 のバッジ表示</li>
+      <li>未読数を数字で表示</li>
+      <li>タップで目標シート閲覧モード → 添削箇所にハイライト</li>
+    </ul>
+
+    <h3>📊 数値 3 枠の指標</h3>
+    <ul>
+      <li>完了レッスン (76 / 全 217 のうち)</li>
+      <li>視聴時間 (累計、ポジティブ指標)</li>
+      <li>入会から日数 (経過日数、自然な指標)</li>
+      <li>※ 「サボった日数」「未完了レッスン数」など否定的指標は出さない (責めない方針)</li>
+    </ul>
+
+    <h3>📍 下部タブ 5 個 (確定)</h3>
+    <ul>
+      <li>🏠 ホーム (active)</li>
+      <li>📚 コース</li>
+      <li>📝 記録 (体組成記録 + 月次添削)</li>
+      <li>🔍 検索</li>
+      <li>⚙ 設定</li>
+    </ul>
+
+    <h3>🔄 状態バリエーション (実装時)</h3>
+    <ul>
+      <li><b>状態 1</b>: 入会直後 (黄バナー表示、「続きから学ぶ」は「最初のレッスンへ」に変化)</li>
+      <li><b>状態 2</b>: 目標シート記入済 (黄バナー非表示)</li>
+      <li><b>状態 3</b>: 添削届いた (横長に 📩 バッジ + ヘッダー ✉ に赤ドット)</li>
+      <li><b>状態 4</b>: 通常 (現在のモック表示)</li>
+    </ul>
+
+    <h3>⚠️ Phase 2 候補</h3>
+    <ul>
+      <li>キャラ画像をホームに入れた場合の見た目 (「こんにちは」の右に小キャラ)</li>
+      <li>下部タブのアイコン微調整 (線画統一の徹底)</li>
+      <li>進捗バー / 数値カードのインタラクション (タップで詳細画面)</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

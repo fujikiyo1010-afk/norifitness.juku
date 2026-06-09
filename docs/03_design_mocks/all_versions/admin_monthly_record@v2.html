@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — 管理画面 / 動画録画モード</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --ink4: #ccc;
+    --border: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f8f9fa;
+    --bg-warm: linear-gradient(135deg, #e0f2f1, #fffbe6);
+    --yellow-bg: rgba(255,235,59,.12);
+    --yellow-strong: rgba(255,235,59,.55);
+    --yellow-name: #b8860b;
+    --rec: #d32f2f;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #e8ebec;
+    color: var(--ink);
+    line-height: 1.6;
+    padding: 24px;
+  }
+  .page-header {
+    max-width: 1400px;
+    margin: 0 auto 32px;
+    text-align: center;
+  }
+  .page-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .page-header p { color: #6b7d75; font-size: 13px; }
+
+  .modes-stack {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  /* === モードラベル === */
+  .mode-label {
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  .mode-label .step {
+    display: inline-block;
+    background: var(--primary);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    margin-bottom: 6px;
+    letter-spacing: .04em;
+  }
+  .mode-label h2 {
+    font-size: 16px;
+    color: var(--ink);
+    font-weight: 700;
+  }
+  .mode-label p {
+    font-size: 12px;
+    color: var(--ink2);
+    margin-top: 4px;
+  }
+
+  /* === デスクトップフレーム === */
+  .desk {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,.08);
+    display: flex;
+    flex-direction: column;
+  }
+  .desk-chrome {
+    background: #f1f3f4;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .desk-chrome .dot { width: 10px; height: 10px; border-radius: 50%; background: #d0d0d0; }
+  .desk-chrome .url {
+    flex: 1;
+    margin-left: 12px;
+    background: #fff;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--ink3);
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* === 録画モードヘッダー === */
+  .rec-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--ink);
+    color: #fff;
+  }
+  .rec-header .ttl {
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .rec-header .exit {
+    font-size: 12px;
+    color: rgba(255,255,255,.7);
+    cursor: pointer;
+  }
+  .rec-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 9999px;
+  }
+  .rec-status.ready { background: rgba(255,255,255,.1); color: rgba(255,255,255,.8); }
+  .rec-status.recording { background: var(--rec); color: #fff; }
+  .rec-status.recording .dot-rec {
+    width: 8px; height: 8px;
+    background: #fff;
+    border-radius: 50%;
+    animation: recBlink 1s infinite;
+  }
+  .rec-status.preview { background: var(--primary); color: #fff; }
+  @keyframes recBlink {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  /* === 録画モード レイアウト === */
+  .rec-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 600px;
+  }
+  .rec-left {
+    padding: 20px 24px;
+    background: var(--bg-soft);
+    overflow-y: auto;
+    max-height: 700px;
+    border-right: 1px solid var(--border);
+  }
+  .rec-right {
+    background: var(--ink);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    position: relative;
+  }
+
+  /* === 左側: 17 項目 === */
+  .stud-tiny {
+    font-size: 11px;
+    color: var(--ink3);
+    margin-bottom: 4px;
+    font-family: 'Inter', sans-serif;
+  }
+  .stud-tiny b { color: var(--ink); font-weight: 600; }
+  .rec-left h3 {
+    font-size: 14px;
+    color: var(--ink);
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .qa-tiny { padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .qa-tiny:last-child { border-bottom: none; }
+  .qa-tiny .q {
+    font-size: 12px;
+    color: var(--ink);
+    font-weight: 500;
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .qa-tiny .q-num {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    color: var(--ink3);
+    margin-right: 4px;
+  }
+  .qa-tiny .score {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary);
+    flex-shrink: 0;
+  }
+  .qa-tiny .a {
+    font-size: 11px;
+    color: var(--ink2);
+    padding: 6px 10px;
+    background: #fff;
+    border-radius: 6px;
+    border-left: 2px solid var(--primary);
+    line-height: 1.55;
+  }
+
+  /* === 右側: カメラエリア === */
+  .cam-frame {
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: #0a0a0a;
+    border-radius: 12px;
+    margin-bottom: 18px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(255,255,255,.08);
+  }
+  .cam-frame.recording {
+    border-color: var(--rec);
+    box-shadow: 0 0 0 4px rgba(211,47,47,.18);
+  }
+  .cam-placeholder {
+    color: rgba(255,255,255,.4);
+    font-size: 13px;
+    text-align: center;
+  }
+  .cam-placeholder .big {
+    font-size: 56px;
+    margin-bottom: 8px;
+    display: block;
+  }
+  .cam-self {
+    color: rgba(255,255,255,.6);
+    font-size: 12px;
+    text-align: center;
+    padding: 20px;
+  }
+  .cam-self .face {
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.08);
+    margin: 0 auto 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 40px;
+  }
+  .cam-timer {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(0,0,0,.6);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .cam-timer .red-dot {
+    width: 8px; height: 8px;
+    background: var(--rec);
+    border-radius: 50%;
+    animation: recBlink 1s infinite;
+  }
+
+  /* === 録画コントロール === */
+  .cam-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+  }
+  .cam-btn {
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .cam-btn-rec {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: var(--rec);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 4px 16px rgba(211,47,47,.4);
+  }
+  .cam-btn-rec:hover { transform: scale(1.05); }
+  .cam-btn-stop {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--rec);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+  }
+  .cam-btn-stop .square {
+    width: 20px; height: 20px;
+    background: var(--rec);
+    border-radius: 3px;
+  }
+  .cam-btn-pause {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.15);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .cam-btn-text {
+    font-size: 11px;
+    color: rgba(255,255,255,.6);
+    margin-top: 8px;
+    text-align: center;
+  }
+
+  /* === プレビューモード === */
+  .preview-video {
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: #0a0a0a;
+    border-radius: 12px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,.7);
+    position: relative;
+    overflow: hidden;
+  }
+  .preview-video .play-big {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.9);
+    color: var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+  }
+  .preview-info {
+    color: rgba(255,255,255,.7);
+    font-size: 12px;
+    text-align: center;
+    margin-bottom: 18px;
+    font-family: 'Inter', sans-serif;
+  }
+  .preview-info b { color: #fff; font-weight: 600; }
+  .preview-actions {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+  }
+  .preview-btn {
+    flex: 1;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .preview-btn-mute {
+    background: rgba(255,255,255,.1);
+    color: #fff;
+    border-color: rgba(255,255,255,.2);
+  }
+  .preview-btn-primary {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  /* === 注釈 === */
+  .annotation-wrap {
+    max-width: 1400px;
+    margin: 32px auto 0;
+  }
+  .annotation {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    font-size: 13px;
+    color: #555;
+  }
+  .annotation h3 {
+    font-size: 14px;
+    color: var(--ink);
+    margin: 18px 0 8px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 4px;
+  }
+  .annotation h3:first-child { margin-top: 0; }
+  .annotation ul { padding-left: 20px; }
+  .annotation li { margin-bottom: 4px; font-size: 12px; }
+  .annotation .highlight {
+    background: rgba(0,137,123,.08);
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin: 8px 0;
+    font-size: 12px;
+    color: var(--primary-darker);
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🎥 管理画面 — 動画録画モード (3b-rec)</h1>
+  <p>個別作業画面 (3b) で「ブラウザで録画する」を押した後の画面 ・ 3 つの状態を併記</p>
+</div>
+
+<div class="modes-stack">
+
+  <!-- ============ 状態 1: 録画準備中 ============ -->
+  <div>
+    <div class="mode-label">
+      <span class="step">状態 1 / 3</span>
+      <h2>録画準備中</h2>
+      <p>カメラ・マイクの許可後、録画ボタン押下を待つ状態</p>
+    </div>
+    <div class="desk">
+      <div class="desk-chrome">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <div class="url">https://admin.juku.norifitness.com/monthly-review/inbox/1234/record</div>
+      </div>
+      <div class="rec-header">
+        <div class="ttl">🎥 動画録画モード
+          <span class="rec-status ready">⚪ 待機中</span>
+        </div>
+        <div class="exit">← 録画モードを終了</div>
+      </div>
+      <div class="rec-body">
+        <div class="rec-left">
+          <div class="stud-tiny">受講生: <b>山田 太郎</b> ・ 2026/04 月次報告</div>
+          <h3>📝 17 項目の回答</h3>
+          <div class="qa-tiny">
+            <div class="q"><span><span class="q-num">Q1</span>体重納得感</span><span class="score">8</span></div>
+            <div class="a">先月から 1.2kg 落とせて満足です。停滞期もなく、コツコツ続けられています。</div>
+          </div>
+          <div class="qa-tiny">
+            <div class="q"><span><span class="q-num">Q2</span>体型満足度</span><span class="score">5</span></div>
+            <div class="a">数字は減ってきましたが、お腹周りはまだ気になります。</div>
+          </div>
+          <div class="qa-tiny">
+            <div class="q"><span><span class="q-num">Q3</span>PFC バランス</span><span class="score">9</span></div>
+            <div class="a">完璧に近いです。タンパク質 150g / 脂質 60g / 炭水化物 240g キープ。</div>
+          </div>
+          <div class="qa-tiny" style="opacity: 0.6;">
+            <div class="q"><span><span class="q-num">Q4</span>食事記録</span><span class="score">8</span></div>
+            <div class="a">あすけんに毎食記録...</div>
+          </div>
+          <div style="text-align: center; color: var(--ink3); font-size: 11px; padding: 12px;">↓ Q5〜Q17 はスクロールで読める</div>
+        </div>
+        <div class="rec-right">
+          <div class="cam-frame">
+            <div class="cam-self">
+              <div class="face">📷</div>
+              のりさんの顔が映ります<br>
+              <span style="font-size: 11px; opacity: 0.6;">(カメラプレビュー)</span>
+            </div>
+          </div>
+          <div class="cam-controls">
+            <button class="cam-btn cam-btn-rec">●</button>
+          </div>
+          <div class="cam-btn-text">録画開始 (クリック後 3 秒カウントダウン)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 状態 2: 録画中 ============ -->
+  <div>
+    <div class="mode-label">
+      <span class="step">状態 2 / 3</span>
+      <h2>録画中</h2>
+      <p>17 項目を読みながら話している状態 ・ 左側はスクロール可能</p>
+    </div>
+    <div class="desk">
+      <div class="desk-chrome">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <div class="url">https://admin.juku.norifitness.com/monthly-review/inbox/1234/record</div>
+      </div>
+      <div class="rec-header">
+        <div class="ttl">🎥 動画録画モード
+          <span class="rec-status recording"><span class="dot-rec"></span> REC</span>
+        </div>
+        <div class="exit">⚠ 録画中: 中断するには停止ボタン</div>
+      </div>
+      <div class="rec-body">
+        <div class="rec-left">
+          <div class="stud-tiny">受講生: <b>山田 太郎</b> ・ 2026/04 月次報告</div>
+          <h3>📝 17 項目の回答</h3>
+          <div class="qa-tiny" style="opacity: 0.5;">
+            <div class="q"><span><span class="q-num">Q1</span>体重納得感</span><span class="score">8</span></div>
+            <div class="a">先月から 1.2kg 落とせて満足です。停滞期もなく...</div>
+          </div>
+          <div class="qa-tiny" style="opacity: 0.7;">
+            <div class="q"><span><span class="q-num">Q2</span>体型満足度</span><span class="score">5</span></div>
+            <div class="a">数字は減ってきましたが、お腹周りはまだ気になります。</div>
+          </div>
+          <div class="qa-tiny" style="background: var(--yellow-bg); padding: 10px; border-radius: 6px; margin: 4px -4px;">
+            <div class="q"><span><span class="q-num">Q3</span>PFC バランス</span><span class="score">9</span></div>
+            <div class="a">完璧に近いです。タンパク質 150g / 脂質 60g / 炭水化物 240g キープ。</div>
+          </div>
+          <div class="qa-tiny">
+            <div class="q"><span><span class="q-num">Q4</span>食事記録</span><span class="score">8</span></div>
+            <div class="a">あすけんに毎食記録しています。</div>
+          </div>
+          <div style="text-align: center; color: var(--ink3); font-size: 11px; padding: 12px;">↓ スクロールしながら話せる</div>
+        </div>
+        <div class="rec-right">
+          <div class="cam-frame recording">
+            <div class="cam-timer"><span class="red-dot"></span>02:34</div>
+            <div class="cam-self">
+              <div class="face">🎙</div>
+              録画中...<br>
+              <span style="font-size: 11px; opacity: 0.6;">(のりさんの顔がライブ表示)</span>
+            </div>
+          </div>
+          <div class="cam-controls">
+            <button class="cam-btn cam-btn-pause">⏸</button>
+            <button class="cam-btn cam-btn-stop">
+              <div class="square"></div>
+            </button>
+          </div>
+          <div class="cam-btn-text">⏸ 一時停止 ・ ⏹ 録画停止</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 状態 3: プレビュー ============ -->
+  <div>
+    <div class="mode-label">
+      <span class="step">状態 3 / 3</span>
+      <h2>プレビュー (送信前確認)</h2>
+      <p>録画停止後、再生確認 → 送信 or 録り直し</p>
+    </div>
+    <div class="desk">
+      <div class="desk-chrome">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <div class="url">https://admin.juku.norifitness.com/monthly-review/inbox/1234/record/preview</div>
+      </div>
+      <div class="rec-header">
+        <div class="ttl">🎥 動画録画モード
+          <span class="rec-status preview">✓ 録画完了</span>
+        </div>
+        <div class="exit">← 録画モードを終了</div>
+      </div>
+      <div class="rec-body">
+        <div class="rec-left">
+          <div class="stud-tiny">受講生: <b>山田 太郎</b> ・ 2026/04 月次報告</div>
+          <h3>📝 17 項目の回答</h3>
+          <div class="qa-tiny">
+            <div class="q"><span><span class="q-num">Q1</span>体重納得感</span><span class="score">8</span></div>
+            <div class="a">先月から 1.2kg 落とせて満足です。</div>
+          </div>
+          <div class="qa-tiny">
+            <div class="q"><span><span class="q-num">Q2</span>体型満足度</span><span class="score">5</span></div>
+            <div class="a">数字は減ってきましたが...</div>
+          </div>
+          <div style="text-align: center; color: var(--ink3); font-size: 11px; padding: 12px;">(参考用に表示継続)</div>
+        </div>
+        <div class="rec-right">
+          <div class="preview-video">
+            <div class="play-big">▶</div>
+          </div>
+          <div class="preview-info">
+            <b>録画完了</b><br>
+            長さ: <b>3:24</b> ・ サイズ: <b>42MB</b> (推奨内 ✓)
+          </div>
+          <div class="preview-actions">
+            <button class="preview-btn preview-btn-mute">🔄 録り直す</button>
+            <button class="preview-btn preview-btn-primary">✓ この動画を採用</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============ 注釈 ============ -->
+<div class="annotation-wrap">
+  <div class="annotation">
+    <h3>🗺 録画モードの 3 状態</h3>
+    <ul>
+      <li><b>状態 1: 録画準備中</b> — カメラ許可後、録画開始待ち。左に 17 項目、右に自分のプレビュー</li>
+      <li><b>状態 2: 録画中</b> — 録画中インジケータ + タイマー、左をスクロールしながら話せる</li>
+      <li><b>状態 3: プレビュー</b> — 録画完了後、再生確認 → 採用 or 録り直し</li>
+    </ul>
+
+    <h3>🎬 状態遷移フロー</h3>
+    <div class="highlight">
+      <b>個別画面 (3b)</b> 「🎥 ブラウザで録画する」<br>
+      → <b>状態 1: 録画準備中</b> (このページ、カメラ許可ダイアログ → 待機)<br>
+      → 録画ボタン押下 + 3 秒カウントダウン<br>
+      → <b>状態 2: 録画中</b> (REC マーク + タイマー)<br>
+      → 停止ボタン押下<br>
+      → <b>状態 3: プレビュー</b> (確認 → 採用)<br>
+      → 個別画面 (3b) に戻る + Supabase Storage に自動アップロード開始<br>
+      → 「送信して終了」or「送信して次へ」を押下
+    </div>
+
+    <h3>📐 レイアウト設計</h3>
+    <ul>
+      <li><b>左右 50:50</b> 分割</li>
+      <li><b>左側 (テキスト)</b>: 受講生プロフィール + 17 項目、スクロール可能</li>
+      <li><b>右側 (カメラ)</b>: ダーク背景でカメラに集中、録画コントロール</li>
+      <li><b>ヘッダー</b>: 状態バッジ (待機 / REC / 完了) + 終了リンク</li>
+    </ul>
+
+    <h3>🎥 録画中の挙動 (実装仕様)</h3>
+    <ul>
+      <li><b>カメラ枠</b>: 録画中は赤縁取り + 影、視覚的に「録画中」と分かる</li>
+      <li><b>タイマー</b>: カメラ枠左上に赤ドット点滅 + 経過時間 (mm:ss)</li>
+      <li><b>左側ハイライト</b>: 現在話している項目を黄色背景で示す? (オプション、未確定)</li>
+      <li><b>一時停止</b>: 録画を一時停止できる (誤動作対策)</li>
+      <li><b>5 分超過警告</b>: タイマーが赤くなる、強制停止はしない</li>
+    </ul>
+
+    <h3>💾 録画完了後の保存フロー</h3>
+    <ul>
+      <li>状態 3 で「採用」押下 → 個別画面 (3b) に戻る</li>
+      <li>戻った後、3b の動画返信エリアに「録画済み」プレビューが表示される</li>
+      <li>Supabase Storage へのアップロードは <b>バックグラウンドで非同期実行</b></li>
+      <li>「送信して終了 / 次へ」押下時にアップロード完了を待つ</li>
+    </ul>
+
+    <h3>⚠️ 未確定 / 議論ポイント</h3>
+    <ul>
+      <li>カメラ位置: PC 内蔵カメラ / 外部 Web カメラ どちらも対応</li>
+      <li>マイク選択: 複数マイク接続時に選べる UI</li>
+      <li>画質設定: 720p 固定 / 1080p 選択可 (Supabase ストレージとのバランス)</li>
+      <li>録画中にページ離れた時の警告 (beforeunload)</li>
+      <li>左側ハイライト (話してる項目を強調) はオプション機能か必須か</li>
+      <li>「録り直す」時、既存動画は破棄? 確認ダイアログ要?</li>
+    </ul>
+
+    <h3>🛠 技術仕様 (実装メモ)</h3>
+    <ul>
+      <li>録画 API: <b>MediaRecorder API</b> (ブラウザネイティブ)</li>
+      <li>対応ブラウザ: Chrome 49+ / Safari 14.1+ / Edge / Firefox</li>
+      <li>録画形式: webm (Chrome/Edge/Firefox) / mp4 (Safari)</li>
+      <li>解像度: 720p デフォルト (constraints で指定)</li>
+      <li>アップロード: Supabase Storage <code>upload()</code> または chunked upload</li>
+      <li>非同期処理: useEffect でカメラ起動、useRef で MediaRecorder インスタンス保持</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

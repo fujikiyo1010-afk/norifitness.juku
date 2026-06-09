@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — 第1弾モック (学習動線)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #4ECD5D;
+    --primary-dark: #2EA84B;
+    --primary-darker: #1f6b3e;
+    --pastel: #D8F3E1;
+    --pastel-lighter: #ECFAF0;
+    --line-green: #06c755;
+    --line-green-dark: #04a847;
+    --accent-yellow: #f5c842;
+    --accent-orange: #ff8a4c;
+    --accent-red: #e63b3b;
+
+    --ink: #1a3326;
+    --ink2: #3a6050;
+    --ink3: #6b7d75;
+    --ink4: #b0c0b8;
+    --ink5: #e0e6e2;
+    --border: #d4ead9;
+    --bg: #fff;
+    --bg-soft: #f7faf8;
+    --marker: rgba(255,235,59,.55);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #e8ebec;
+    color: var(--ink);
+    line-height: 1.6;
+    padding: 24px;
+  }
+  .page-header {
+    max-width: 1400px;
+    margin: 0 auto 32px;
+    text-align: center;
+  }
+  .page-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .page-header p {
+    color: var(--ink3);
+    font-size: 13px;
+  }
+  .compare {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+  }
+  .version-label {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 8px;
+    background: var(--primary);
+    color: #fff;
+  }
+  .v2 .version-label { background: var(--primary-dark); }
+  .v3 .version-label { background: var(--primary-darker); }
+  .version-sub {
+    font-size: 12px;
+    color: var(--ink3);
+    margin-bottom: 12px;
+  }
+  .phone {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    background: var(--bg);
+    border: 8px solid #2a2a2a;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+  }
+  .phone-status {
+    background: #2a2a2a;
+    color: #fff;
+    text-align: center;
+    font-size: 11px;
+    padding: 4px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* SVG icon util */
+  .ico-svg {
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    display: inline-block;
+    vertical-align: middle;
+  }
+  .ico-svg-sm { width: 18px; height: 18px; }
+  .ico-svg-lg { width: 28px; height: 28px; }
+  .ico-svg-xl { width: 48px; height: 48px; }
+
+  /* ====== 共通: アプリヘッダー ====== */
+  .app-header {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    display: grid;
+    grid-template-columns: 32px 1fr auto;
+    align-items: center;
+    gap: 8px;
+  }
+  .app-header .back {
+    color: var(--ink2);
+    cursor: pointer;
+  }
+  .app-header .center-title {
+    text-align: center;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--primary-darker);
+  }
+  .app-header .icons {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    color: var(--ink2);
+  }
+  .app-header .ico-wrap { position: relative; }
+  .app-header .badge-dot {
+    position: absolute;
+    top: -2px; right: -2px;
+    width: 8px; height: 8px;
+    background: var(--accent-red);
+    border-radius: 9999px;
+    border: 2px solid #fff;
+  }
+  .app-header.simple {
+    grid-template-columns: 32px 1fr 32px;
+  }
+
+  .body-scroll {
+    background: var(--bg-soft);
+    padding: 16px;
+    flex: 1;
+  }
+
+  /* ====== 下部タブ ====== */
+  .tab-nav {
+    background: #fff;
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 8px 0;
+  }
+  .tab-nav .tab {
+    flex: 1;
+    text-align: center;
+    font-size: 10px;
+    color: var(--ink3);
+    padding: 4px 2px;
+  }
+  .tab-nav .tab.active {
+    color: var(--primary-darker);
+    font-weight: 700;
+  }
+  .tab-nav .tab .ico-svg {
+    margin: 0 auto 2px;
+    display: block;
+  }
+
+  /* ====== ② コース一覧 ====== */
+  .search-bar {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    color: var(--ink4);
+    font-size: 13px;
+  }
+  .filter-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+    overflow-x: auto;
+  }
+  .filter-tab {
+    padding: 6px 14px;
+    border-radius: 9999px;
+    border: 1px solid var(--border);
+    background: #fff;
+    font-size: 12px;
+    color: var(--ink2);
+    white-space: nowrap;
+  }
+  .filter-tab.active {
+    background: var(--primary-darker);
+    color: #fff;
+    border-color: var(--primary-darker);
+    font-weight: 700;
+  }
+  .course-row {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+  }
+  .course-row .thumb {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    background: var(--pastel);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    flex-shrink: 0;
+  }
+  .course-row .info { flex: 1; min-width: 0; }
+  .course-row .info .title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.4;
+    margin-bottom: 4px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .course-row .info .meta {
+    font-size: 11px;
+    color: var(--ink3);
+    margin-bottom: 6px;
+  }
+  .course-row .info .bar {
+    background: var(--ink5);
+    height: 5px;
+    border-radius: 9999px;
+    overflow: hidden;
+    margin-bottom: 4px;
+  }
+  .course-row .info .bar > div {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 9999px;
+  }
+  .course-row .info .progress-text {
+    font-size: 10px;
+    color: var(--primary-darker);
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+  }
+  .course-row .info .progress-text.zero {
+    color: var(--ink4);
+  }
+
+  /* ====== ③ コース詳細 ====== */
+  .course-hero {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    padding: 20px 16px;
+    margin: -16px -16px 16px;
+  }
+  .course-hero .thumb-large {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: 12px;
+    background: rgba(255,255,255,.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    margin-bottom: 14px;
+  }
+  .course-hero .title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+  .course-hero .meta {
+    font-size: 12px;
+    opacity: .9;
+    margin-bottom: 12px;
+  }
+  .course-hero .bar-wrap {
+    background: rgba(255,255,255,.25);
+    height: 6px;
+    border-radius: 9999px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .course-hero .bar-wrap > div {
+    height: 100%;
+    background: #fff;
+    border-radius: 9999px;
+  }
+  .course-hero .continue {
+    background: #fff;
+    color: var(--primary-darker);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    box-shadow: 0 4px 0 var(--primary-darker);
+  }
+  .chapter-row {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+  }
+  .chapter-head {
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 10px;
+    align-items: center;
+  }
+  .chapter-head .num {
+    width: 28px;
+    height: 28px;
+    border-radius: 9999px;
+    background: var(--pastel);
+    color: var(--primary-darker);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+  }
+  .chapter-head.done .num {
+    background: var(--primary);
+    color: #fff;
+  }
+  .chapter-head .ch-info {
+    min-width: 0;
+  }
+  .chapter-head .ch-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .chapter-head .ch-meta {
+    font-size: 11px;
+    color: var(--ink3);
+  }
+  .chapter-head.done .ch-meta {
+    color: var(--primary-darker);
+  }
+  .chapter-head .arr {
+    color: var(--ink4);
+  }
+  .lessons {
+    border-top: 1px solid var(--border);
+    background: var(--bg-soft);
+  }
+  .lesson-item {
+    padding: 12px 16px;
+    display: grid;
+    grid-template-columns: 24px 1fr auto;
+    gap: 10px;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .lesson-item:last-child { border-bottom: 0; }
+  .lesson-item .status {
+    width: 20px; height: 20px;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 11px;
+  }
+  .lesson-item.done .status {
+    background: var(--primary);
+    color: #fff;
+  }
+  .lesson-item.current .status {
+    background: var(--accent-yellow);
+    color: var(--ink);
+  }
+  .lesson-item.todo .status {
+    background: #fff;
+    border: 1.5px solid var(--ink5);
+    color: var(--ink4);
+  }
+  .lesson-item .l-title { color: var(--ink); }
+  .lesson-item.current .l-title { font-weight: 700; color: var(--primary-darker); }
+  .lesson-item.todo .l-title { color: var(--ink3); }
+  .lesson-item .duration {
+    font-size: 10px;
+    color: var(--ink3);
+    font-family: 'Inter', sans-serif;
+  }
+  .lesson-item.current .badge-now {
+    font-size: 10px;
+    background: var(--accent-yellow);
+    color: var(--ink);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+  }
+
+  /* ====== ④ レッスン詳細 ====== */
+  .crumb {
+    padding: 10px 16px;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--ink3);
+  }
+  .crumb b { color: var(--ink2); }
+  .video-wrap {
+    background: #000;
+    aspect-ratio: 16/9;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+  }
+  .video-wrap .play-circle {
+    width: 64px; height: 64px;
+    border-radius: 9999px;
+    background: rgba(255,255,255,.2);
+    border: 2px solid rgba(255,255,255,.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .video-wrap .progress-track {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    right: 8px;
+    height: 3px;
+    background: rgba(255,255,255,.3);
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+  .video-wrap .progress-track > div {
+    width: 0%;
+    height: 100%;
+    background: #fff;
+  }
+  .video-wrap .time {
+    position: absolute;
+    bottom: 14px;
+    right: 12px;
+    font-size: 10px;
+    font-family: 'Inter', sans-serif;
+    color: rgba(255,255,255,.85);
+  }
+  .lesson-body {
+    background: var(--bg-soft);
+    padding: 16px;
+  }
+  .lesson-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .lesson-meta {
+    font-size: 12px;
+    color: var(--ink3);
+    margin-bottom: 20px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .lesson-meta .author {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .lesson-meta .author .avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 9999px;
+    background: var(--primary-darker);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .done-btn {
+    background: var(--line-green);
+    color: #fff;
+    width: 100%;
+    padding: 18px;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    box-shadow: 0 4px 0 var(--line-green-dark);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .accordion {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+  }
+  .accordion .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--ink);
+  }
+  .accordion .head .right {
+    font-size: 11px;
+    color: var(--ink3);
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .next-link {
+    background: var(--pastel-lighter);
+    border: 1px solid var(--primary);
+    color: var(--primary-darker);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .next-link .left .lbl {
+    font-size: 11px;
+    color: var(--ink3);
+    font-weight: 400;
+    margin-bottom: 2px;
+  }
+
+  /* ====== 注釈 ====== */
+  .annotation {
+    margin: 32px auto 0;
+    max-width: 1400px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    font-size: 13px;
+    color: var(--ink2);
+  }
+  .annotation h3 {
+    font-size: 15px;
+    color: var(--ink);
+    margin: 14px 0 8px;
+  }
+  .annotation h3:first-child { margin-top: 0; }
+  .annotation ul { padding-left: 20px; }
+  .annotation li { margin-bottom: 4px; }
+  .flow {
+    background: var(--pastel-lighter);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 13px;
+    line-height: 1.9;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>第 1 弾 — 学習動線モック</h1>
+  <p>② コース一覧 → ③ コース詳細 → ④ レッスン詳細 の遷移を可視化<br>
+  5 訂正反映: ロゴ「筋肉塾」/ CTA テキスト統一 / ブロック白統一+A 版影 / 数値案 C / 「学習記録」</p>
+</div>
+
+<div class="flow" style="max-width: 1400px; margin: 0 auto 24px; text-align: center;">
+  📍 <b>学習動線</b>: ホーム「コース一覧」ブロック または 下部タブ「コース」
+  → <b>② コース一覧</b> → 1 つ選択
+  → <b>③ コース詳細</b>（章・レッスン一覧）→ 1 つ選択
+  → <b>④ レッスン詳細</b>（動画視聴 → できた! → 振り返り）
+</div>
+
+<div class="compare">
+
+  <!-- ====================================
+       ② コース一覧
+  ==================================== -->
+  <div class="v1">
+    <span class="version-label">② コース一覧</span>
+    <div class="version-sub">下部タブ「コース」 or ホームブロックから</div>
+    <div class="phone">
+      <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+
+      <div class="app-header">
+        <svg class="ico-svg back" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+        <div class="center-title">コース</div>
+        <div class="icons">
+          <div class="ico-wrap">
+            <svg class="ico-svg" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            <div class="badge-dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="body-scroll">
+        <div class="search-bar">
+          <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          コース・章を検索
+        </div>
+
+        <div class="filter-tabs">
+          <div class="filter-tab active">すべて (5)</div>
+          <div class="filter-tab">進行中 (3)</div>
+          <div class="filter-tab">未着手 (1)</div>
+          <div class="filter-tab">完了 (1)</div>
+        </div>
+
+        <div class="course-row">
+          <div class="thumb">🏃</div>
+          <div class="info">
+            <div class="title">限定ボディメイク完全ロードマップ動画</div>
+            <div class="meta">7 章 ・ 79 レッスン</div>
+            <div class="bar"><div style="width: 45%"></div></div>
+            <div class="progress-text">進行中 45% (36/79)</div>
+          </div>
+        </div>
+
+        <div class="course-row">
+          <div class="thumb">🎥</div>
+          <div class="info">
+            <div class="title">筋肉塾限定講義 live アーカイブ</div>
+            <div class="meta">5 章 ・ 55 レッスン</div>
+            <div class="bar"><div style="width: 22%"></div></div>
+            <div class="progress-text">進行中 22% (12/55)</div>
+          </div>
+        </div>
+
+        <div class="course-row">
+          <div class="thumb">🧠</div>
+          <div class="info">
+            <div class="title">マインドセット コンテンツ</div>
+            <div class="meta">2 章 ・ 21 レッスン</div>
+            <div class="bar"><div style="width: 67%"></div></div>
+            <div class="progress-text">進行中 67% (14/21)</div>
+          </div>
+        </div>
+
+        <div class="course-row">
+          <div class="thumb">💪</div>
+          <div class="info">
+            <div class="title">筋トレのフォーム解説</div>
+            <div class="meta">7 章 ・ 40 レッスン</div>
+            <div class="bar"><div style="width: 15%"></div></div>
+            <div class="progress-text">進行中 15% (6/40)</div>
+          </div>
+        </div>
+
+        <div class="course-row">
+          <div class="thumb">🥗</div>
+          <div class="info">
+            <div class="title">ダイエットレシピ 動画解説版</div>
+            <div class="meta">1 章 ・ 22 レッスン</div>
+            <div class="bar"><div style="width: 0%"></div></div>
+            <div class="progress-text zero">未着手</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-nav">
+        <div class="tab">
+          <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          ホーム
+        </div>
+        <div class="tab active">
+          <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          コース
+        </div>
+        <div class="tab">
+          <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          記録
+        </div>
+        <div class="tab">
+          <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          検索
+        </div>
+        <div class="tab">
+          <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          設定
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================
+       ③ コース詳細
+  ==================================== -->
+  <div class="v2">
+    <span class="version-label">③ コース詳細</span>
+    <div class="version-sub">②から「限定ボディメイク…」を選択</div>
+    <div class="phone">
+      <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+
+      <div class="app-header simple">
+        <svg class="ico-svg back" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+        <div class="center-title">コース詳細</div>
+        <div></div>
+      </div>
+
+      <div class="body-scroll">
+        <div class="course-hero">
+          <div class="thumb-large">🏃</div>
+          <div class="title">限定ボディメイク完全ロードマップ動画</div>
+          <div class="meta">7 章 ・ 79 レッスン ・ 全体 45% (36/79)</div>
+          <div class="bar-wrap"><div style="width: 45%;"></div></div>
+          <div class="continue">▶ 続きから ・ 第 3 章 L4「PFC バランスの基礎」</div>
+        </div>
+
+        <div class="chapter-row">
+          <div class="chapter-head done">
+            <div class="num">1</div>
+            <div class="ch-info">
+              <div class="ch-title">第 1 章 ・ 食事の基礎</div>
+              <div class="ch-meta">10 / 10 完了 ✓</div>
+            </div>
+            <svg class="ico-svg ico-svg-sm arr" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+          </div>
+        </div>
+
+        <div class="chapter-row">
+          <div class="chapter-head done">
+            <div class="num">2</div>
+            <div class="ch-info">
+              <div class="ch-title">第 2 章 ・ 栄養素を知る</div>
+              <div class="ch-meta">12 / 12 完了 ✓</div>
+            </div>
+            <svg class="ico-svg ico-svg-sm arr" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+          </div>
+        </div>
+
+        <div class="chapter-row">
+          <div class="chapter-head">
+            <div class="num">3</div>
+            <div class="ch-info">
+              <div class="ch-title">第 3 章 ・ 正しい食事のリズム</div>
+              <div class="ch-meta">3 / 15 ・ 進行中 ・ 開いた状態</div>
+            </div>
+            <svg class="ico-svg ico-svg-sm arr" style="transform: rotate(90deg);" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+          </div>
+          <div class="lessons">
+            <div class="lesson-item done">
+              <div class="status">✓</div>
+              <div class="l-title">L1 ・ 食事の基本ルール</div>
+              <div class="duration">8 分</div>
+            </div>
+            <div class="lesson-item done">
+              <div class="status">✓</div>
+              <div class="l-title">L2 ・ 食べるタイミング</div>
+              <div class="duration">10 分</div>
+            </div>
+            <div class="lesson-item done">
+              <div class="status">✓</div>
+              <div class="l-title">L3 ・ 食事量の決め方</div>
+              <div class="duration">11 分</div>
+            </div>
+            <div class="lesson-item current">
+              <div class="status">▶</div>
+              <div class="l-title">L4 ・ PFC バランスの基礎</div>
+              <div class="badge-now">続きから</div>
+            </div>
+            <div class="lesson-item todo">
+              <div class="status">○</div>
+              <div class="l-title">L5 ・ タンパク質の摂り方</div>
+              <div class="duration">9 分</div>
+            </div>
+            <div class="lesson-item todo">
+              <div class="status">○</div>
+              <div class="l-title">L6 ・ 脂質との付き合い方</div>
+              <div class="duration">11 分</div>
+            </div>
+            <div class="lesson-item todo" style="border: 0; color: var(--ink4); font-style: italic; padding: 8px 16px;">
+              <div></div>
+              <div>他 9 レッスン...</div>
+              <div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chapter-row">
+          <div class="chapter-head">
+            <div class="num">4</div>
+            <div class="ch-info">
+              <div class="ch-title">第 4 章 ・ トレーニング基礎</div>
+              <div class="ch-meta">0 / 11 ・ 未着手</div>
+            </div>
+            <svg class="ico-svg ico-svg-sm arr" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+          </div>
+        </div>
+
+        <div class="chapter-row">
+          <div class="chapter-head">
+            <div class="num">5</div>
+            <div class="ch-info">
+              <div class="ch-title">第 5 章 ・ 部位別メニュー</div>
+              <div class="ch-meta">0 / 10 ・ 未着手</div>
+            </div>
+            <svg class="ico-svg ico-svg-sm arr" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+          </div>
+        </div>
+
+        <div class="chapter-row">
+          <div class="chapter-head">
+            <div class="num">6</div>
+            <div class="ch-info">
+              <div class="ch-title">第 6 章 ・ 停滞期の乗り越え方</div>
+              <div class="ch-meta">0 / 10 ・ 未着手</div>
+            </div>
+            <svg class="ico-svg ico-svg-sm arr" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+          </div>
+        </div>
+
+        <div class="chapter-row">
+          <div class="chapter-head">
+            <div class="num">7</div>
+            <div class="ch-info">
+              <div class="ch-title">第 7 章 ・ 維持と継続</div>
+              <div class="ch-meta">0 / 11 ・ 未着手</div>
+            </div>
+            <svg class="ico-svg ico-svg-sm arr" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-nav">
+        <div class="tab">
+          <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          ホーム
+        </div>
+        <div class="tab active">
+          <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          コース
+        </div>
+        <div class="tab">
+          <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          記録
+        </div>
+        <div class="tab">
+          <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          検索
+        </div>
+        <div class="tab">
+          <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          設定
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================
+       ④ レッスン詳細
+  ==================================== -->
+  <div class="v3">
+    <span class="version-label">④ レッスン詳細</span>
+    <div class="version-sub">③からL4「PFCバランスの基礎」を選択</div>
+    <div class="phone">
+      <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+
+      <div class="app-header simple">
+        <svg class="ico-svg back" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+        <div class="center-title">レッスン</div>
+        <svg class="ico-svg" viewBox="0 0 24 24" style="color: var(--ink3);"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+      </div>
+
+      <div class="crumb">
+        限定ボディメイク &gt; <b>第 3 章 ・ 正しい食事のリズム</b> &gt; L4
+      </div>
+
+      <div class="video-wrap">
+        <div class="play-circle">
+          <svg class="ico-svg ico-svg-lg" viewBox="0 0 24 24" style="color: #fff;"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+        </div>
+        <div class="progress-track"><div></div></div>
+        <div class="time">0:00 / 12:00</div>
+      </div>
+
+      <div class="lesson-body">
+        <div class="lesson-title">PFC バランスの基礎</div>
+        <div class="lesson-meta">
+          <div class="author"><div class="avatar">の</div>のり社長</div>
+          <span>・</span>
+          <span>12 分</span>
+        </div>
+
+        <div class="done-btn">
+          <svg class="ico-svg" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          できた!
+        </div>
+
+        <div class="accordion">
+          <div class="head">
+            <span>📝 3 行で振り返る</span>
+            <span class="right">(任意)
+              <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+            </span>
+          </div>
+        </div>
+
+        <div class="accordion">
+          <div class="head">
+            <span>📎 配布資料</span>
+            <span class="right">(1 件)
+              <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+            </span>
+          </div>
+        </div>
+
+        <div class="next-link">
+          <div class="left">
+            <div class="lbl">次のレッスン →</div>
+            <div>L5 ・ タンパク質の摂り方</div>
+          </div>
+          <svg class="ico-svg" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+        </div>
+      </div>
+
+      <div class="tab-nav">
+        <div class="tab">
+          <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          ホーム
+        </div>
+        <div class="tab active">
+          <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 0 3-3h7z"/></svg>
+          コース
+        </div>
+        <div class="tab">
+          <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          記録
+        </div>
+        <div class="tab">
+          <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          検索
+        </div>
+        <div class="tab">
+          <svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          設定
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="annotation">
+  <h3>② コース一覧の構成要素</h3>
+  <ul>
+    <li><b>ヘッダー</b>: 戻る← / 「コース」/ ヘッダー右上 ✉（赤ドット付き）</li>
+    <li><b>検索バー</b>: コース・章を検索（タップで検索画面 or インライン絞り込み）</li>
+    <li><b>フィルタタブ</b>: すべて / 進行中 / 未着手 / 完了 — 数字付き、横スクロール可能</li>
+    <li><b>コースカード横並び</b>: サムネ + タイトル + 章/レッスン数 + 進捗バー + 「進行中 45% (36/79)」明示</li>
+    <li><b>状態色分け</b>: 未着手はグレー文字、進行中は緑、完了は ✓ 表示</li>
+  </ul>
+
+  <h3>③ コース詳細の構成要素</h3>
+  <ul>
+    <li><b>ヒーロー</b>: 緑グラデ背景 + 大サムネ + タイトル + 進捗バー + 「続きから」白 CTA</li>
+    <li><b>章ロウ</b>: 章番号バッジ（完了は緑塗り、進行中は薄緑、未着手は淡） + 章名 + 進捗</li>
+    <li><b>章を開くとレッスン一覧表示</b>:
+      <ul>
+        <li>✓ 完了 (緑丸)</li>
+        <li>▶ 続きから (黄丸 + 「続きから」黄バッジ)</li>
+        <li>○ 未着手 (グレー枠)</li>
+      </ul>
+    </li>
+    <li><b>第 3 章だけ開いた状態</b>を表示（実際はタップで開閉、他の章は閉じた状態）</li>
+  </ul>
+
+  <h3>④ レッスン詳細の構成要素</h3>
+  <ul>
+    <li><b>ヘッダー</b>: 戻る← / 「レッスン」/ 右上 ⋯（ブックマーク / 共有等の予備領域）</li>
+    <li><b>パンくず</b>: 「限定ボディメイク &gt; 第 3 章 &gt; L4」で現在地を明示</li>
+    <li><b>動画プレイヤー</b>: 16:9、Vimeo 埋め込み、再生バー + 時間表示</li>
+    <li><b>レッスン情報</b>: タイトル + 講師（のり社長アバター）+ 時間</li>
+    <li><b>できた! ボタン</b>: LINE 緑 #06c755 + 太く目立つ + ✓ アイコン付き</li>
+    <li><b>アコーディオン 2 つ</b>: 振り返り（任意）/ 配布資料（件数表示）</li>
+    <li><b>次のレッスンへ</b>: 薄緑カードで自然な誘導（自動再生はしない）</li>
+  </ul>
+
+  <h3>⚠️ 未確定 / 検討点</h3>
+  <ul>
+    <li>フィルタタブの設計: 「すべて/進行中/未着手/完了」で OK か、カテゴリ別（食事/筋トレ等）が良いか</li>
+    <li>コース詳細のヒーロー: 緑グラデ強めだが、これは "中庸寄り" の温度。落ち着かせるなら白背景+線の選択肢もあり</li>
+    <li>章ロウのアコーディオン: デフォルト全閉 or 進行中の章だけ開く（モックは後者を採用）</li>
+    <li>レッスン詳細の右上 ⋯ メニュー: ブックマーク（Phase 4）等の予備領域として確保。今は機能なし</li>
+    <li>動画下に "完了マーク" を出すか / "できた!" ボタン押した後の見た目（押下後のロック状態）</li>
+  </ul>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — オンボーディングフロー (5 ステップ)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --ink4: #ccc;
+    --border: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f8f9fa;
+    --bg-warm: linear-gradient(135deg, #e0f2f1, #fffbe6);
+    --yellow-name: #b8860b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: #e8ebec; color: var(--ink); line-height: 1.6; padding: 24px; }
+  .page-header { max-width: 1800px; margin: 0 auto 32px; text-align: center; }
+  .page-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .page-header p { color: #6b7d75; font-size: 13px; }
+
+  .multi-stage {
+    max-width: 1800px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    align-items: start;
+  }
+
+  .scene { display: flex; flex-direction: column; align-items: center; }
+  .scene-label { text-align: center; margin-bottom: 12px; }
+  .scene-label .step-badge {
+    display: inline-block;
+    background: var(--primary);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 12px;
+    border-radius: 9999px;
+    margin-bottom: 6px;
+    letter-spacing: .04em;
+  }
+  .scene-label h2 { font-size: 13px; color: var(--ink); font-weight: 700; }
+  .scene-label p { font-size: 11px; color: var(--ink2); margin-top: 3px; }
+
+  .phone {
+    width: 100%;
+    max-width: 320px;
+    background: var(--bg);
+    border: 6px solid #2a2a2a;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 6px 24px rgba(0,0,0,.15);
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    min-height: 640px;
+  }
+  .phone-status { background: #2a2a2a; color: #fff; text-align: center; font-size: 10px; padding: 3px; font-family: 'Inter', sans-serif; }
+
+  /* オンボーディング画面本体 */
+  .onboard {
+    flex: 1;
+    background: var(--bg-warm);
+    display: flex;
+    flex-direction: column;
+    padding: 22px 18px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* 装飾円 (背景) */
+  .onboard::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(0,137,123,.04);
+    pointer-events: none;
+  }
+
+  /* ステップインジケータ (5 個) */
+  .step-indicator {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin-bottom: 20px;
+    z-index: 1;
+  }
+  .step-indicator .dot {
+    width: 20px;
+    height: 4px;
+    background: rgba(0,137,123,.18);
+    border-radius: 2px;
+    transition: background .2s;
+  }
+  .step-indicator .dot.active { background: var(--primary); }
+  .step-indicator .dot.done { background: var(--primary-dark); }
+
+  .content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    z-index: 1;
+    padding-bottom: 16px;
+  }
+
+  /* キャラ */
+  .character {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    box-shadow: 0 8px 24px rgba(0,137,123,.18);
+    margin-bottom: 20px;
+    overflow: hidden;
+    background: #fff;
+  }
+  .character img { width: 100%; height: 100%; object-fit: cover; display: block; transform: scale(1.2); }
+
+  /* タイトル */
+  .ob-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary-darker);
+    line-height: 1.4;
+    margin-bottom: 10px;
+  }
+  .ob-msg {
+    font-size: 11px;
+    color: var(--ink2);
+    line-height: 1.8;
+    margin-bottom: 6px;
+  }
+  .ob-msg b { color: var(--primary-darker); font-weight: 700; }
+
+  .feature-icon {
+    width: 76px;
+    height: 76px;
+    border-radius: 14px;
+    background: rgba(255,235,59,.15);
+    border: 1px solid rgba(255,235,59,.4);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+    color: var(--yellow-name);
+  }
+  .feature-icon svg {
+    width: 36px;
+    height: 36px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* ===== ホーム画面ミニ図 (Step 3) ===== */
+  .home-mini {
+    width: 100%;
+    max-width: 220px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px;
+    background: #fff;
+    margin: 0 auto 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.04);
+  }
+  .home-mini .h-greet {
+    font-size: 8px;
+    color: var(--ink2);
+    margin-bottom: 4px;
+    text-align: left;
+    padding: 0 2px;
+  }
+  .home-mini .h-cta {
+    background: var(--primary);
+    color: #fff;
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-size: 8px;
+    margin-bottom: 6px;
+    text-align: center;
+    font-weight: 700;
+  }
+  .home-mini .h-blocks-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+  .home-mini .h-block,
+  .home-mini .h-wide {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 12px 4px 6px;
+    font-size: 8px;
+    color: var(--ink2);
+    text-align: center;
+    position: relative;
+  }
+  .home-mini .h-wide {
+    padding: 10px 4px 8px;
+  }
+  .home-mini .h-num {
+    width: 14px; height: 14px;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 8px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    position: absolute;
+    top: 3px; left: 3px;
+    font-family: 'Inter', sans-serif;
+  }
+  .home-mini .h-progress {
+    font-size: 7px;
+    color: var(--ink3);
+    text-align: center;
+    margin-top: 5px;
+    padding: 0 2px;
+  }
+
+  /* ===== Step 3: 実物画面 + スクロール解説スタイル ===== */
+  .content-scroll {
+    overflow-y: auto;
+    padding-bottom: 12px;
+    align-items: stretch !important;
+    text-align: left !important;
+  }
+  .ob-title.small { font-size: 17px; margin-bottom: 4px; text-align: center; }
+  .ob-msg.small { font-size: 10px; margin-bottom: 14px; text-align: center; color: var(--ink3); }
+
+  .home-real { width: 100%; }
+  .real-greet {
+    font-size: 12px;
+    color: var(--ink);
+    margin-bottom: 8px;
+    padding: 0 2px;
+  }
+  .real-greet b { color: var(--primary-darker); font-weight: 700; }
+  .real-cta {
+    width: 100%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    padding: 11px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    border: none;
+    margin-bottom: 14px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0,137,123,.2);
+  }
+  .real-cta .sub {
+    font-size: 9px;
+    opacity: .85;
+    font-weight: 400;
+    display: block;
+    margin-top: 2px;
+  }
+  .real-blocks {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .real-block {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px 4px 10px;
+    font-size: 10px;
+    text-align: center;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+  .real-block .ico { display: block; margin: 0 auto 4px; width: 18px; height: 18px; }
+  .real-block .ico svg { width: 100%; height: 100%; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .real-wide {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px 12px;
+    font-size: 11px;
+    text-align: center;
+    color: var(--ink);
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+  .real-progress {
+    font-size: 10px;
+    color: var(--ink2);
+    text-align: center;
+    margin-bottom: 14px;
+    padding: 10px;
+    background: #fff;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+  .real-progress .bar {
+    height: 4px;
+    background: #f0f2f1;
+    border-radius: 2px;
+    margin-top: 5px;
+    overflow: hidden;
+  }
+  .real-progress .bar > div {
+    height: 100%;
+    width: 35%;
+    background: var(--primary);
+    border-radius: 2px;
+  }
+  .real-tabs {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    margin-bottom: 14px;
+    padding: 8px 4px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+  .real-tabs > div {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .real-tabs > div svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .real-tabs > div .lbl {
+    font-size: 7px;
+    color: var(--ink3);
+    margin-top: 2px;
+    display: block;
+  }
+
+  /* 説明カード (実物画面と区別、薄黄背景・添削色と統一) */
+  .explain-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: rgba(255,235,59,.18);
+    border: 1px solid rgba(255,235,59,.55);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  /* 上の実物を指す ↑ 矢印 */
+  .explain-card::before {
+    content: '↑';
+    position: absolute;
+    top: -11px;
+    left: 16px;
+    font-size: 14px;
+    color: var(--yellow-name);
+    background: var(--bg-warm);
+    padding: 0 5px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .explain-num {
+    width: 20px; height: 20px;
+    background: var(--yellow-name);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-family: 'Inter', sans-serif;
+    margin-top: 1px;
+    box-shadow: 0 2px 4px rgba(184,134,11,.25);
+  }
+  .explain-text { flex: 1; font-size: 11px; color: var(--ink2); line-height: 1.6; }
+  .explain-text b { color: var(--yellow-name); display: block; font-size: 12px; margin-bottom: 3px; font-weight: 700; }
+
+  /* スクロール下端の「↓ もう少し」ヒント */
+  .scroll-hint {
+    text-align: center;
+    font-size: 9px;
+    color: var(--ink4);
+    margin-top: -6px;
+    margin-bottom: 4px;
+  }
+
+  /* 通知許可 (Step 4) */
+  .permission-area { margin-top: 14px; width: 100%; }
+  .permit-btn {
+    width: 100%;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 4px 12px rgba(0,137,123,.22);
+    margin-bottom: 10px;
+  }
+  .permit-skip {
+    text-align: center;
+    font-size: 11px;
+    color: var(--ink4);
+    text-decoration: none;
+    padding: 6px;
+    display: block;
+  }
+
+  /* ボタンエリア */
+  .footer-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-top: 12px;
+    z-index: 1;
+  }
+  .back-btn {
+    background: none; border: none;
+    color: var(--ink3);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 8px 12px;
+  }
+  .back-btn:disabled { visibility: hidden; }
+  .next-btn {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 11px 20px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 3px 10px rgba(0,137,123,.22);
+  }
+  .next-btn:hover { background: var(--primary-dark); }
+  .next-btn.large {
+    flex: 1;
+    padding: 13px;
+    font-size: 14px;
+  }
+
+  /* 注釈 */
+  .annotation-wrap { max-width: 1800px; margin: 32px auto 0; }
+  .annotation { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; font-size: 13px; color: #555; }
+  .annotation h3 { font-size: 14px; color: var(--ink); margin: 18px 0 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+  .annotation h3:first-child { margin-top: 0; }
+  .annotation ul { padding-left: 20px; }
+  .annotation li { margin-bottom: 4px; font-size: 12px; }
+  .annotation .highlight {
+    background: rgba(0,137,123,.06);
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin: 8px 0;
+    font-size: 12px;
+    color: var(--primary-darker);
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>👋 オンボーディングフロー (5 ステップ)</h1>
+  <p>初回起動時のみ ・ Step 3 にホーム画面の使い方を追加 ・ ボタンナビ</p>
+</div>
+
+<div class="multi-stage">
+
+  <!-- ============ Step 1: ウェルカム ============ -->
+  <div class="scene">
+    <div class="scene-label">
+      <span class="step-badge">STEP 1 / 5</span>
+      <h2>ウェルカム</h2>
+      <p>第一印象</p>
+    </div>
+    <div class="phone">
+      <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+      <div class="onboard">
+        <div class="step-indicator">
+          <div class="dot active"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+        <div class="content">
+          <div class="character"><img src="images/nori-character.png" alt="のりキャラクター"></div>
+          <div class="ob-title">ようこそ<br>筋肉塾へ</div>
+          <div class="ob-msg">
+            のりfitness が運営する<br>
+            ダイエット学習サービスです
+          </div>
+        </div>
+        <div class="footer-actions">
+          <button class="back-btn" disabled>← 戻る</button>
+          <button class="next-btn">次へ →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Step 2: 月次添削 ============ -->
+  <div class="scene">
+    <div class="scene-label">
+      <span class="step-badge">STEP 2 / 5</span>
+      <h2>月次添削の説明</h2>
+      <p>差別化の中核</p>
+    </div>
+    <div class="phone">
+      <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+      <div class="onboard">
+        <div class="step-indicator">
+          <div class="dot done"></div>
+          <div class="dot active"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+        <div class="content">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg></div>
+          <div class="ob-title">月に 1 回の<br>動画返信</div>
+          <div class="ob-msg">
+            あなたの月次振り返りに<br>
+            <b>のりfitness が動画で返信</b>します<br><br>
+            <span style="color: var(--ink3); font-size: 10px;">これが筋肉塾の最大の特徴です</span>
+          </div>
+        </div>
+        <div class="footer-actions">
+          <button class="back-btn">← 戻る</button>
+          <button class="next-btn">次へ →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Step 3: ホーム画面の使い方 (NEW) ============ -->
+  <div class="scene">
+    <div class="scene-label">
+      <span class="step-badge">STEP 3 / 5</span>
+      <h2>ホーム画面の使い方</h2>
+      <p>4 機能ブロック + 横長</p>
+    </div>
+    <div class="phone">
+      <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+      <div class="onboard">
+        <div class="step-indicator">
+          <div class="dot done"></div>
+          <div class="dot done"></div>
+          <div class="dot active"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+        <div class="content content-scroll">
+          <div class="ob-title small">ホーム画面の使い方</div>
+          <div class="ob-msg small">スクロールしながらご確認ください ↓</div>
+
+          <div class="home-real">
+
+            <!-- 挨拶 + 続きから -->
+            <div class="real-greet">こんにちは、<b>きよむ</b>さん!</div>
+            <button class="real-cta">
+              ▶ 続きから学ぶ
+              <span class="sub">第 3 章 ・ PFC バランスの基礎</span>
+            </button>
+
+            <div class="explain-card">
+              <div class="explain-num">1</div>
+              <div class="explain-text">
+                <b>続きから学ぶ</b>
+                前回の続きから、すぐ学習を再開できます
+              </div>
+            </div>
+
+            <!-- 4 機能ブロック -->
+            <div class="real-blocks">
+              <div class="real-block"><span class="ico"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>コース一覧</div>
+              <div class="real-block"><span class="ico"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>学習記録</div>
+              <div class="real-block"><span class="ico"><svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg></span>LINE サポート</div>
+              <div class="real-block"><span class="ico"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>ツール</div>
+            </div>
+
+            <div class="explain-card">
+              <div class="explain-num">2</div>
+              <div class="explain-text">
+                <b>4 機能ブロック</b>
+                コース・学習記録・LINE 質問・計算ツールに 1 タップでアクセス
+              </div>
+            </div>
+
+            <!-- 横長 -->
+            <div class="real-wide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:middle;margin-right:5px;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>目標管理シート →</div>
+
+            <div class="explain-card">
+              <div class="explain-num">3</div>
+              <div class="explain-text">
+                <b>目標管理シート</b>
+                あなたの目標を保存。タップで開いて、見直し・更新できます
+              </div>
+            </div>
+
+            <!-- 進捗 -->
+            <div class="real-progress">
+              全体進捗 35% (76 / 217)
+              <div class="bar"><div></div></div>
+            </div>
+
+            <div class="explain-card">
+              <div class="explain-num">4</div>
+              <div class="explain-text">
+                <b>全体進捗</b>
+                コース全体の進み具合が一目で分かります
+              </div>
+            </div>
+
+            <!-- 下部タブ風 -->
+            <div class="real-tabs">
+              <div><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="lbl">ホーム</span></div>
+              <div><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span class="lbl">コース</span></div>
+              <div><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg><span class="lbl">記録</span></div>
+              <div><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span class="lbl">検索</span></div>
+              <div><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="lbl">設定</span></div>
+            </div>
+
+            <div class="explain-card" style="margin-bottom: 8px;">
+              <div class="explain-num">5</div>
+              <div class="explain-text">
+                <b>下部タブ</b>
+                どこからでも、ホームや他の画面に戻れます
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <div class="footer-actions">
+          <button class="back-btn">← 戻る</button>
+          <button class="next-btn">次へ →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Step 4: 通知許可 ============ -->
+  <div class="scene">
+    <div class="scene-label">
+      <span class="step-badge">STEP 4 / 5</span>
+      <h2>通知許可</h2>
+      <p>後で設定OK (案A)</p>
+    </div>
+    <div class="phone">
+      <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+      <div class="onboard">
+        <div class="step-indicator">
+          <div class="dot done"></div>
+          <div class="dot done"></div>
+          <div class="dot done"></div>
+          <div class="dot active"></div>
+          <div class="dot"></div>
+        </div>
+        <div class="content">
+          <div class="feature-icon" style="background: rgba(0,137,123,.08); border-color: rgba(0,137,123,.2); color: var(--primary-dark);"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div>
+          <div class="ob-title">お知らせを<br>受け取る</div>
+          <div class="ob-msg">
+            のりfitness からの<br>
+            大切なお知らせを受け取るため<br>
+            通知を有効にしてください
+          </div>
+          <div class="permission-area">
+            <button class="permit-btn">通知を許可する</button>
+            <a class="permit-skip">後で設定する</a>
+          </div>
+        </div>
+        <div class="footer-actions">
+          <button class="back-btn">← 戻る</button>
+          <button class="next-btn" style="opacity: 0.5;">次へ →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Step 5: 完了 ============ -->
+  <div class="scene">
+    <div class="scene-label">
+      <span class="step-badge">STEP 5 / 5</span>
+      <h2>完了</h2>
+      <p>ホームへの誘い</p>
+    </div>
+    <div class="phone">
+      <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+      <div class="onboard">
+        <div class="step-indicator">
+          <div class="dot done"></div>
+          <div class="dot done"></div>
+          <div class="dot done"></div>
+          <div class="dot done"></div>
+          <div class="dot active"></div>
+        </div>
+        <div class="content">
+          <div class="character"><img src="images/nori-character.png" alt="のりキャラクター"></div>
+          <div class="ob-title">準備完了!</div>
+          <div class="ob-msg">
+            さあ、学びを<br>
+            <b>はじめましょう</b>
+          </div>
+        </div>
+        <div class="footer-actions" style="gap: 0;">
+          <button class="next-btn large">筋肉塾を始める →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 注釈 -->
+<div class="annotation-wrap">
+  <div class="annotation">
+    <h3>🗺 5 ステップ構成 (Step 3 追加)</h3>
+    <ul>
+      <li><b>Step 1 ウェルカム</b>: キャラ + 「ようこそ筋肉塾へ」</li>
+      <li><b>Step 2 月次添削</b>: 📩 + 「月に 1 回の動画返信」</li>
+      <li><b>Step 3 ホーム画面の使い方</b>: ミニ図 + 番号別説明 (← 今回追加)</li>
+      <li><b>Step 4 通知許可</b>: 🔔 + [通知を許可する] + [後で設定]</li>
+      <li><b>Step 5 完了</b>: キャラ + [筋肉塾を始める →]</li>
+    </ul>
+
+    <h3>📐 Step 3 の構成詳細</h3>
+    <ul>
+      <li><b>タイトル</b>: 「ホーム画面の使い方」</li>
+      <li><b>サブ</b>: 「5 つの場所からすべての機能にアクセス」</li>
+      <li><b>ホーム画面ミニ図</b>:
+        <ul>
+          <li>挨拶 + 続きから学ぶ CTA</li>
+          <li>4 機能ブロック (2×2 グリッド): 1.コース / 2.学習記録 / 3.LINE / 4.ツール</li>
+          <li>横長ブロック: 5.目標管理シート</li>
+          <li>全体進捗バー</li>
+          <li>各ブロックに番号バッジ (ティール緑円)</li>
+        </ul>
+      </li>
+      <li><b>番号別説明</b>: 5 個の項目を 2 列レイアウトで配置</li>
+    </ul>
+
+    <h3>🎨 デザイン方針 (Step 3)</h3>
+    <ul>
+      <li>ミニ図は実物の <b>~60% サイズ</b>、薄い影でカード感を出す</li>
+      <li>番号バッジはティール緑円 (オンボーディング配色と統一)</li>
+      <li>各ブロックはグレー背景 + 番号 + ラベルだけ (シンプル)</li>
+      <li>実物と同じ配置 (4 機能ブロック + 横長 1 ブロック)</li>
+    </ul>
+
+    <h3>📝 Step 3 の効果</h3>
+    <ul>
+      <li>受講生が <b>「ホームに戻れば全部ある」</b> と早期に理解</li>
+      <li>4 機能ブロック + 横長の役割を最初に印象づけ</li>
+      <li>下部タブとの違い (機能ハブ vs ナビゲーション) も自然に理解</li>
+    </ul>
+
+    <h3>📊 ステップ数のトレードオフ</h3>
+    <div class="highlight">
+      4 → 5 ステップに増やした理由:<br>
+      ・ホーム画面の構造理解 = 早期に伝えると迷子防止<br>
+      ・離脱リスクは少し上がるが、機能理解の効果のほうが大きい (きよむさん判断)<br>
+      ・もし離脱率が高ければ、Phase 2 で Step 3 をスキップ可能にする検討
+    </div>
+
+    <h3>🔄 動的挙動 (実装時)</h3>
+    <ul>
+      <li>ホーム画面ミニ図の <b>各ブロックをタップで詳細説明ポップアップ</b> (任意機能、Phase 2 候補)</li>
+      <li>番号バッジ Hover で対応するブロックがハイライト</li>
+      <li>静的表示 (現状) で十分かもしれない</li>
+    </ul>
+
+    <h3>⚠️ 未確定</h3>
+    <ul>
+      <li>Step 3 のミニ図 = 静的画像 / インタラクティブ (タップで説明展開) のどちらか</li>
+      <li>番号 1〜5 の順序 = 現状で OK か (ホームの実配置と整合)</li>
+      <li>ホーム画面のレイアウト変更時、Step 3 のミニ図も追従して更新する運用ルール</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

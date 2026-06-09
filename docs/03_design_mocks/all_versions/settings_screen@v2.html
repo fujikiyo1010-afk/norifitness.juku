@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — 設定画面</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --ink4: #ccc;
+    --border: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f8f9fa;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: #e8ebec; color: var(--ink); line-height: 1.6; padding: 24px; }
+  .page-header { max-width: 900px; margin: 0 auto 32px; text-align: center; }
+  .page-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .page-header p { color: #6b7d75; font-size: 13px; }
+
+  .stage { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: 440px 1fr; gap: 32px; align-items: start; }
+
+  .phone {
+    width: 100%; max-width: 440px;
+    background: var(--bg); border: 8px solid #2a2a2a; border-radius: 28px;
+    overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    font-size: 14px; display: flex; flex-direction: column; min-height: 800px;
+  }
+  .phone-status { background: #2a2a2a; color: #fff; text-align: center; font-size: 11px; padding: 4px; font-family: 'Inter', sans-serif; }
+
+  .app-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); background: #fff; }
+  .app-header .back { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--ink); }
+  .app-header .title-h { font-size: 15px; font-weight: 700; color: var(--ink); }
+  .app-header .spacer { width: 24px; }
+
+  .scroll { flex: 1; overflow-y: auto; padding-bottom: 80px; background: #fafbfa; }
+
+  /* セクション */
+  .section { margin: 16px; }
+  .section-label {
+    font-size: 11px;
+    color: var(--ink3);
+    font-weight: 700;
+    letter-spacing: .06em;
+    margin-bottom: 8px;
+    padding-left: 4px;
+  }
+
+  /* リスト */
+  .setting-list {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .setting-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background .12s;
+  }
+  .setting-row:last-child { border-bottom: none; }
+  .setting-row:hover { background: var(--bg-soft); }
+  .setting-row .main {
+    flex: 1;
+    font-size: 13px;
+    color: var(--ink);
+  }
+  .setting-row .meta {
+    font-size: 11px;
+    color: var(--ink3);
+    margin-top: 2px;
+  }
+  .setting-row .right {
+    color: var(--ink3);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* スイッチ */
+  .switch {
+    width: 38px; height: 22px;
+    background: var(--ink4);
+    border-radius: 9999px;
+    position: relative;
+    transition: background .15s;
+    flex-shrink: 0;
+  }
+  .switch.on { background: var(--primary); }
+  .switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    transition: left .15s;
+    box-shadow: 0 1px 3px rgba(0,0,0,.15);
+  }
+  .switch.on::after { left: 18px; }
+
+  /* ログアウトボタン */
+  .logout-section { margin: 32px 16px 24px; }
+  .logout-btn {
+    width: 100%;
+    background: #fff;
+    color: var(--ink2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .logout-btn:hover { background: var(--bg-soft); color: var(--ink); }
+
+  .footer-info {
+    text-align: center;
+    font-size: 10px;
+    color: var(--ink3);
+    margin: 16px 0 0;
+    line-height: 1.7;
+  }
+  .footer-info b {
+    color: var(--ink2);
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* 下部タブ */
+  .tabbar { display: flex; border-top: 1px solid var(--border); background: #fff; }
+  .tab { flex: 1; text-align: center; padding: 10px 4px 8px; font-size: 10px; color: var(--ink3); }
+  .tab.active { color: var(--primary); font-weight: 700; }
+  .tab .icon { font-size: 18px; display: block; margin-bottom: 2px; }
+
+  /* 注釈 */
+  .annotation { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; font-size: 13px; color: #555; position: sticky; top: 24px; }
+  .annotation h3 { font-size: 14px; color: var(--ink); margin: 18px 0 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+  .annotation h3:first-child { margin-top: 0; }
+  .annotation ul { padding-left: 20px; }
+  .annotation li { margin-bottom: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>⚙ 設定画面</h1>
+  <p>下部タブの「設定」 ・ 4 セクション (アカウント / 通知 / 連携 / サービス) ・ 退会はお問い合わせ経由のみ</p>
+</div>
+
+<div class="stage">
+
+  <div class="phone">
+    <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+
+    <div class="app-header">
+      <div class="back">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </div>
+      <div class="title-h">設定</div>
+      <div class="spacer"></div>
+    </div>
+
+    <div class="scroll">
+
+      <!-- アカウント -->
+      <div class="section">
+        <div class="section-label">アカウント</div>
+        <div class="setting-list">
+          <div class="setting-row">
+            <div class="main">プロフィール</div>
+            <div class="right">→</div>
+          </div>
+          <div class="setting-row">
+            <div class="main">
+              メールアドレス
+              <div class="meta">yamada@example.com</div>
+            </div>
+            <div class="right">→</div>
+          </div>
+          <div class="setting-row">
+            <div class="main">パスワード変更</div>
+            <div class="right">→</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 通知 -->
+      <div class="section">
+        <div class="section-label">通知</div>
+        <div class="setting-list">
+          <div class="setting-row">
+            <div class="main">
+              プッシュ通知
+              <div class="meta">月次添削の返信などをお知らせ</div>
+            </div>
+            <div class="right">
+              <div class="switch on"></div>
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="main">
+              LINE 配信
+              <div class="meta">のりfitness からの定期配信</div>
+            </div>
+            <div class="right">
+              <div class="switch on"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 連携 -->
+      <div class="section">
+        <div class="section-label">連携</div>
+        <div class="setting-list">
+          <div class="setting-row">
+            <div class="main">
+              LINE 連携
+              <div class="meta">連携済み (山田太郎)</div>
+            </div>
+            <div class="right">→</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- サービス -->
+      <div class="section">
+        <div class="section-label">サービス</div>
+        <div class="setting-list">
+          <div class="setting-row">
+            <div class="main">利用規約</div>
+            <div class="right">→</div>
+          </div>
+          <div class="setting-row">
+            <div class="main">プライバシーポリシー</div>
+            <div class="right">→</div>
+          </div>
+          <div class="setting-row">
+            <div class="main">ヘルプ</div>
+            <div class="right">→</div>
+          </div>
+          <div class="setting-row">
+            <div class="main">お問い合わせ</div>
+            <div class="right">→</div>
+          </div>
+          <div class="setting-row">
+            <div class="main">
+              アプリ情報
+              <div class="meta">バージョン 1.0.0</div>
+            </div>
+            <div class="right">→</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ログアウト -->
+      <div class="logout-section">
+        <button class="logout-btn">ログアウト</button>
+        <div class="footer-info">
+          のりfitness 筋肉塾 ・ <b>v1.0.0</b><br>
+          退会をご希望の方は「お問い合わせ」より
+        </div>
+      </div>
+
+    </div>
+
+    <div class="tabbar">
+      <div class="tab"><span class="icon">🏠</span>ホーム</div>
+      <div class="tab"><span class="icon">📚</span>コース</div>
+      <div class="tab"><span class="icon">📝</span>記録</div>
+      <div class="tab"><span class="icon">🔍</span>検索</div>
+      <div class="tab active"><span class="icon">⚙</span>設定</div>
+    </div>
+  </div>
+
+  <div class="annotation">
+    <h3>🗺 画面の役割</h3>
+    <ul>
+      <li>下部タブ「⚙ 設定」から遷移</li>
+      <li>アカウント情報・通知・連携・規約・ログアウト等の集約</li>
+      <li>シンプル 4 セクション (追加候補のプラン情報/学習設定/表示設定 は不採用、きよむさん判断)</li>
+    </ul>
+
+    <h3>📐 構成</h3>
+    <ul>
+      <li><b>【アカウント】</b>: プロフィール / メールアドレス / パスワード変更</li>
+      <li><b>【通知】</b>: プッシュ通知 (Switch) / LINE 配信 (Switch)</li>
+      <li><b>【連携】</b>: LINE 連携 (アカウント結合)</li>
+      <li><b>【サービス】</b>: 利用規約 / プライバシー / ヘルプ / お問い合わせ / アプリ情報</li>
+      <li><b>[ログアウト]</b>: 白背景・グレー文字 (赤は使わない)</li>
+      <li><b>退会はお問い合わせ経由のみ</b> (画面にボタンなし、フッターに案内)</li>
+    </ul>
+
+    <h3>🔄 動的挙動</h3>
+    <ul>
+      <li>スイッチは <b>即時反映</b> (保存ボタンなし)</li>
+      <li>各項目タップで詳細画面 or アクション</li>
+      <li>「プロフィール」タップ → プロフィール画面へ遷移</li>
+      <li>「ログアウト」タップ → 確認モーダル → ログイン画面へ</li>
+    </ul>
+
+    <h3>🎨 デザイン方針</h3>
+    <ul>
+      <li>シンプル list 形式、カード角丸 12px</li>
+      <li>セクション間に余白</li>
+      <li>スイッチは ティール緑 (On 時) / グレー (Off 時)</li>
+      <li><b>赤色は使わない</b> (ログアウトもグレー、責めない・不安にさせない)</li>
+    </ul>
+
+    <h3>📝 退会フロー (お問い合わせ経由のみ)</h3>
+    <ul>
+      <li>受講生が「お問い合わせ」をタップ</li>
+      <li>お問い合わせフォーム (メール or LINE)</li>
+      <li>のりfitness 側で対応 (理由ヒアリング + データ削除手続き)</li>
+      <li><b>退会ボタンを置かない</b> = 衝動的な退会を防ぐ + 引き止めの機会</li>
+    </ul>
+
+    <h3>⚠️ 未確定</h3>
+    <ul>
+      <li>「アプリ情報」の中身 (バージョン以外に何を入れるか)</li>
+      <li>「ヘルプ」の中身 (FAQ / マニュアル / 動画ガイド 等)</li>
+      <li>「お問い合わせ」の遷移先 (アプリ内フォーム / LINE / メーラー起動 のどれか)</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

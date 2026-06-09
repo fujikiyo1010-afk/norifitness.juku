@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — 月次添削 記入フォーム</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --ink4: #ccc;
+    --border: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f8f9fa;
+    --accent-red: #c44;
+    --accent-warn: #ff8a4c;
+    --accent-warn-bg: #fff8f0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #e8ebec;
+    color: var(--ink);
+    line-height: 1.6;
+    padding: 24px;
+  }
+  .page-header {
+    max-width: 900px;
+    margin: 0 auto 32px;
+    text-align: center;
+  }
+  .page-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .page-header p {
+    color: #6b7d75;
+    font-size: 13px;
+  }
+  .stage {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 440px 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  .phone {
+    width: 100%;
+    max-width: 440px;
+    background: var(--bg);
+    border: 8px solid #2a2a2a;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+  }
+  .phone-status {
+    background: #2a2a2a;
+    color: #fff;
+    text-align: center;
+    font-size: 11px;
+    padding: 4px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .ico-svg {
+    width: 20px; height: 20px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    display: inline-block;
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+  .ico-svg-sm { width: 16px; height: 16px; }
+
+  /* ヘッダー */
+  .app-header {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 14px 18px;
+    display: grid;
+    grid-template-columns: 28px 1fr 28px;
+    align-items: center;
+    gap: 6px;
+  }
+  .app-header .back, .app-header .menu { color: var(--ink); }
+  .app-header .center-title {
+    text-align: center;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--ink);
+  }
+
+  /* ヘッダー統合ブロック (受付バー + フォームタイトル 一体型) */
+  .header-block {
+    padding: 18px 18px 16px;
+    background: linear-gradient(135deg, #e0f2f1, #fffbe6);
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+  }
+  .header-block .brand {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 10px;
+    letter-spacing: .02em;
+  }
+  .header-block .report-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 8px;
+    letter-spacing: .02em;
+    line-height: 1.3;
+  }
+  .header-block .meta {
+    font-size: 12px;
+    color: var(--ink2);
+    margin-bottom: 12px;
+    line-height: 1.6;
+  }
+  .header-block .lead {
+    font-size: 11px;
+    color: var(--ink3);
+    line-height: 1.6;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .header-block .lead b {
+    color: var(--primary-dark);
+    font-weight: 700;
+  }
+
+  /* 進捗 */
+  .progress {
+    padding: 12px 18px;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border);
+  }
+  .progress .lbl {
+    font-size: 11px; color: var(--ink3);
+    display: flex; justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .progress .lbl b {
+    color: var(--ink); font-weight: 700;
+    font-family: 'Inter', sans-serif;
+  }
+  .progress .bar {
+    background: #fff; height: 5px;
+    border-radius: 9999px; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .progress .bar > div {
+    width: 35%; height: 100%;
+    background: var(--primary);
+  }
+
+  .body-scroll {
+    background: var(--bg);
+    flex: 1;
+  }
+
+  /* カテゴリ見出し */
+  .category {
+    background: #1a1a1a;
+    color: #fff;
+    padding: 10px 18px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .category .ico {
+    font-size: 14px;
+  }
+  .category .count {
+    margin-left: auto;
+    font-family: 'Inter', sans-serif;
+    color: var(--primary);
+    letter-spacing: 0;
+  }
+
+  /* 項目カード */
+  .item {
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .item .num {
+    font-size: 11px;
+    color: var(--ink3);
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    margin-bottom: 2px;
+  }
+  .item .question {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.5;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 8px;
+  }
+  .item .question .req {
+    color: var(--accent-red);
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+  .item .question .opt {
+    color: var(--ink4);
+    font-size: 10px;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  /* 0-10 スコア入力 (11 ボタン横並び) */
+  .score-block { margin-bottom: 10px; }
+  .score-buttons {
+    display: grid;
+    grid-template-columns: repeat(11, 1fr);
+    gap: 3px;
+    margin-bottom: 6px;
+  }
+  .score-btn {
+    aspect-ratio: 1;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--ink2);
+    font-size: 11px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+  }
+  .score-btn:hover { border-color: var(--primary); }
+  .score-btn.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+    font-weight: 700;
+  }
+  .score-hint {
+    display: flex; justify-content: space-between;
+    font-size: 9px;
+    color: var(--ink3);
+    padding: 0 4px;
+  }
+
+  /* 数値入力 (体重/ウエスト用) */
+  .number-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .number-compare .col .col-lbl {
+    font-size: 10px;
+    color: var(--ink3);
+    text-align: center;
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  .number-compare .col .input-row {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .number-compare .col .input-row input {
+    flex: 1;
+    padding: 8px 10px;
+    font-size: 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    text-align: center;
+    font-weight: 700;
+  }
+  .number-compare .col .input-row .unit {
+    font-size: 11px;
+    color: var(--ink3);
+  }
+  .number-compare .arrow {
+    text-align: center;
+    color: var(--primary);
+    font-size: 16px;
+    grid-column: 1 / -1;
+    display: none;
+  }
+
+  /* 自由記述 */
+  .free-text {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--ink);
+    font-family: inherit;
+    resize: vertical;
+    min-height: 60px;
+    outline: none;
+  }
+  .free-text:focus { border-color: var(--primary); }
+  .free-text::placeholder { color: var(--ink4); }
+
+  /* 下書き自動保存通知 */
+  .auto-save {
+    padding: 10px 18px;
+    background: var(--bg-soft);
+    font-size: 10px;
+    color: var(--ink3);
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* 保存バー */
+  .save-bar {
+    background: #fff;
+    border-top: 1px solid var(--border);
+    padding: 12px 18px;
+    display: flex; gap: 8px;
+  }
+  .save-bar .draft {
+    padding: 12px 16px;
+    background: #fff;
+    color: var(--ink);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    font-size: 12px; font-weight: 600;
+  }
+  .save-bar .send {
+    flex: 1; padding: 12px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-size: 13px; font-weight: 700;
+  }
+
+  /* タブ */
+  .tab-nav {
+    background: #fff;
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 10px 0;
+  }
+  .tab {
+    flex: 1; text-align: center;
+    font-size: 10px;
+    color: var(--ink3);
+    padding: 3px 2px;
+    position: relative;
+  }
+  .tab.active {
+    color: var(--primary-dark);
+    font-weight: 700;
+  }
+  .tab.active::after {
+    content: "";
+    position: absolute;
+    bottom: -12px;
+    left: 50%; transform: translateX(-50%);
+    width: 22px; height: 3px;
+    background: var(--primary);
+    border-radius: 9999px;
+  }
+  .tab .ico-svg-sm {
+    margin: 0 auto 2px;
+    display: block;
+  }
+
+  /* 注釈 */
+  .annotation {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    font-size: 13px;
+    color: #555;
+    position: sticky;
+    top: 24px;
+  }
+  .annotation h3 {
+    font-size: 14px;
+    color: var(--ink);
+    margin: 14px 0 8px;
+  }
+  .annotation h3:first-child { margin-top: 0; }
+  .annotation ul { padding-left: 20px; }
+  .annotation li { margin-bottom: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>📋 月次添削 — 記入フォーム (1/3)</h1>
+  <p>軸: Nike エッセンス + ティール緑 / 17 項目 / 途中保存 OK / カテゴリ別グループ</p>
+</div>
+
+<div class="stage">
+  <div class="phone">
+    <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+
+    <div class="app-header">
+      <svg class="ico-svg back" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+      <div class="center-title">月次添削</div>
+      <svg class="ico-svg menu" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+    </div>
+
+    <!-- ヘッダー統合ブロック -->
+    <div class="header-block">
+      <div class="brand">📩 のりfitness の月次添削</div>
+      <div class="report-title">2026 年 5 月 月次報告</div>
+      <div class="meta">
+        受付中 ・ 毎月 1 日が、振り返りの日です。
+      </div>
+      <div class="lead">
+        0〜10 点で各自評価をお願いします。<br>
+        <b>0</b> = 全然できなかった ・ <b>10</b> = よくできた<br>
+        毎月振り返ることで、自己モニタリングできます。
+      </div>
+    </div>
+
+    <!-- 進捗 -->
+    <div class="progress">
+      <div class="lbl">記入状況<b>6 / 17 項目</b></div>
+      <div class="bar"><div></div></div>
+    </div>
+
+    <div class="auto-save">💾 自動下書き保存しました ・ 1 分前</div>
+
+    <div class="body-scroll">
+
+      <!-- カテゴリ: 体・体型 -->
+      <div class="category">
+        <span class="ico">⚖️</span>体・体型<span class="count">2</span>
+      </div>
+
+      <div class="item">
+        <div class="num">Q1 / 17</div>
+        <div class="question">体重の変化 <span class="req">★</span></div>
+        <div class="number-compare">
+          <div class="col">
+            <div class="col-lbl">先月</div>
+            <div class="input-row"><input value="76.5"><span class="unit">kg</span></div>
+          </div>
+          <div class="col">
+            <div class="col-lbl">今月</div>
+            <div class="input-row"><input value="75.0"><span class="unit">kg</span></div>
+          </div>
+        </div>
+        <textarea class="free-text" placeholder="変化や感想を自由に">先月から -1.5kg 落ちました。週 3 回の筋トレが効いていると思います。</textarea>
+      </div>
+
+      <div class="item">
+        <div class="num">Q2 / 17</div>
+        <div class="question">ウエストの変化 <span class="req">★</span></div>
+        <div class="number-compare">
+          <div class="col">
+            <div class="col-lbl">先月</div>
+            <div class="input-row"><input value="83.0"><span class="unit">cm</span></div>
+          </div>
+          <div class="col">
+            <div class="col-lbl">今月</div>
+            <div class="input-row"><input value="82.0"><span class="unit">cm</span></div>
+          </div>
+        </div>
+        <textarea class="free-text" placeholder="変化や感想を自由に">-1cm。ベルトの穴が 1 つ余裕ができました。</textarea>
+      </div>
+
+      <!-- カテゴリ: 食事 -->
+      <div class="category">
+        <span class="ico">🥗</span>食事<span class="count">5</span>
+      </div>
+
+      <div class="item">
+        <div class="num">Q3 / 17</div>
+        <div class="question">食生活の変化について <span class="req">★</span></div>
+        <div class="score-block">
+          <div class="score-buttons">
+            <button class="score-btn">0</button>
+            <button class="score-btn">1</button>
+            <button class="score-btn">2</button>
+            <button class="score-btn">3</button>
+            <button class="score-btn">4</button>
+            <button class="score-btn">5</button>
+            <button class="score-btn">6</button>
+            <button class="score-btn active">7</button>
+            <button class="score-btn">8</button>
+            <button class="score-btn">9</button>
+            <button class="score-btn">10</button>
+          </div>
+          <div class="score-hint"><span>0 全然できなかった</span><span>10 よくできた</span></div>
+        </div>
+        <textarea class="free-text" placeholder="0-10 点の評価をお願いします">先月よりかなり改善。野菜中心の食事に切り替えました。</textarea>
+      </div>
+
+      <div class="item">
+        <div class="num">Q4 / 17</div>
+        <div class="question">加工品の摂取頻度について <span class="req">★</span></div>
+        <div class="score-block">
+          <div class="score-buttons">
+            <button class="score-btn">0</button>
+            <button class="score-btn">1</button>
+            <button class="score-btn">2</button>
+            <button class="score-btn">3</button>
+            <button class="score-btn">4</button>
+            <button class="score-btn">5</button>
+            <button class="score-btn active">6</button>
+            <button class="score-btn">7</button>
+            <button class="score-btn">8</button>
+            <button class="score-btn">9</button>
+            <button class="score-btn">10</button>
+          </div>
+          <div class="score-hint"><span>0 全然できなかった</span><span>10 よくできた</span></div>
+        </div>
+        <textarea class="free-text" placeholder="0-10 点の評価をお願いします">コンビニ食を減らせたが、まだ週 2 回くらい食べている。</textarea>
+      </div>
+
+      <div class="item">
+        <div class="num">Q5 / 17</div>
+        <div class="question">食欲コントロールについて <span class="req">★</span></div>
+        <div class="score-block">
+          <div class="score-buttons">
+            <button class="score-btn">0</button>
+            <button class="score-btn">1</button>
+            <button class="score-btn">2</button>
+            <button class="score-btn">3</button>
+            <button class="score-btn">4</button>
+            <button class="score-btn active">5</button>
+            <button class="score-btn">6</button>
+            <button class="score-btn">7</button>
+            <button class="score-btn">8</button>
+            <button class="score-btn">9</button>
+            <button class="score-btn">10</button>
+          </div>
+          <div class="score-hint"><span>0 全然できなかった</span><span>10 よくできた</span></div>
+        </div>
+        <textarea class="free-text" placeholder="0-10 点の評価をお願いします"></textarea>
+      </div>
+
+      <div class="item">
+        <div class="num">Q6 / 17</div>
+        <div class="question">PFC バランスは守れたか? <span class="req">★</span></div>
+        <div class="score-block">
+          <div class="score-buttons">
+            <button class="score-btn">0</button>
+            <button class="score-btn">1</button>
+            <button class="score-btn">2</button>
+            <button class="score-btn">3</button>
+            <button class="score-btn">4</button>
+            <button class="score-btn active">5</button>
+            <button class="score-btn">6</button>
+            <button class="score-btn">7</button>
+            <button class="score-btn">8</button>
+            <button class="score-btn">9</button>
+            <button class="score-btn">10</button>
+          </div>
+          <div class="score-hint"><span>0 全然できなかった</span><span>10 よくできた</span></div>
+        </div>
+        <textarea class="free-text" placeholder="0-10 点の評価をお願いします"></textarea>
+      </div>
+
+      <div class="item">
+        <div class="num">Q7 / 17</div>
+        <div class="question">自炊やダイエットレシピに挑戦できましたか? <span class="req">★</span></div>
+        <div class="score-block">
+          <div class="score-buttons">
+            <button class="score-btn">0</button>
+            <button class="score-btn">1</button>
+            <button class="score-btn">2</button>
+            <button class="score-btn">3</button>
+            <button class="score-btn">4</button>
+            <button class="score-btn active">5</button>
+            <button class="score-btn">6</button>
+            <button class="score-btn">7</button>
+            <button class="score-btn">8</button>
+            <button class="score-btn">9</button>
+            <button class="score-btn">10</button>
+          </div>
+          <div class="score-hint"><span>0 全然できなかった</span><span>10 よくできた</span></div>
+        </div>
+        <textarea class="free-text" placeholder="0-10 点の評価をお願いします"></textarea>
+      </div>
+
+      <!-- カテゴリ: 運動 -->
+      <div class="category">
+        <span class="ico">💪</span>運動<span class="count">4</span>
+      </div>
+
+      <div class="item">
+        <div class="num">Q8 / 17</div>
+        <div class="question">筋トレは実施できましたか? <span class="req">★</span></div>
+        <div class="score-block">
+          <div class="score-buttons">
+            <button class="score-btn">0</button>
+            <button class="score-btn">1</button>
+            <button class="score-btn">2</button>
+            <button class="score-btn">3</button>
+            <button class="score-btn">4</button>
+            <button class="score-btn active">5</button>
+            <button class="score-btn">6</button>
+            <button class="score-btn">7</button>
+            <button class="score-btn">8</button>
+            <button class="score-btn">9</button>
+            <button class="score-btn">10</button>
+          </div>
+          <div class="score-hint"><span>0 全然できなかった</span><span>10 よくできた</span></div>
+        </div>
+        <textarea class="free-text" placeholder="0-10 点の評価をお願いします"></textarea>
+      </div>
+
+      <div class="item">
+        <div class="num">Q9 / 17</div>
+        <div class="question">筋トレの総負荷量は増えていますか? <span class="req">★</span></div>
+        <div class="score-block">
+          <div class="score-buttons">
+            <button class="score-btn">0</button>
+            <button class="score-btn">1</button>
+            <button class="score-btn">2</button>
+            <button class="score-btn">3</button>
+            <button class="score-btn">4</button>
+            <button class="score-btn active">5</button>
+            <button class="score-btn">6</button>
+            <button class="score-btn">7</button>
+            <button class="score-btn">8</button>
+            <button class="score-btn">9</button>
+            <button class="score-btn">10</button>
+          </div>
+          <div class="score-hint"><span>0 全然できなかった</span><span>10 よくできた</span></div>
+        </div>
+        <textarea class="free-text" placeholder="0-10 点の評価をお願いします"></textarea>
+      </div>
+
+      <div class="item">
+        <div class="num">Q10 / 17</div>
+        <div class="question">筋トレのフォーム改善 <span class="req">★</span></div>
+        <div class="score-block">
+          <div class="score-buttons">
+            <button class="score-btn">0</button>
+            <button class="score-btn">1</button>
+            <button class="score-btn">2</button>
+            <button class="score-btn">3</button>
+            <button class="score-btn">4</button>
+            <button class="score-btn active">5</button>
+            <button class="score-btn">6</button>
+            <button class="score-btn">7</button>
+            <button class="score-btn">8</button>
+            <button class="score-btn">9</button>
+            <button class="score-btn">10</button>
+          </div>
+          <div class="score-hint"><span>0 全然できなかった</span><span>10 よくできた</span></div>
+        </div>
+        <textarea class="free-text" placeholder="0-10 点の評価をお願いします"></textarea>
+      </div>
+
+      <div class="item">
+        <div class="num">Q11 / 17</div>
+        <div class="question">有酸素運動 or 歩数はどうですか? <span class="req">★</span></div>
+        <div class="score-block">
+          <div class="score-buttons">
+            <button class="score-btn">0</button>
+            <button class="score-btn">1</button>
+            <button class="score-btn">2</button>
+            <button class="score-btn">3</button>
+            <button class="score-btn">4</button>
+            <button class="score-btn active">5</button>
+            <button class="score-btn">6</button>
+            <button class="score-btn">7</button>
+            <button class="score-btn">8</button>
+            <button class="score-btn">9</button>
+            <button class="score-btn">10</button>
+          </div>
+          <div class="score-hint"><span>0 全然できなかった</span><span>10 よくできた</span></div>
+        </div>
+        <textarea class="free-text" placeholder="0-10 点の評価をお願いします"></textarea>
+      </div>
+
+      <!-- カテゴリ: 休息 -->
+      <div class="category">
+        <span class="ico">😴</span>休息<span class="count">2</span>
+      </div>
+
+      <div class="item">
+        <div class="num">Q12 / 17</div>
+        <div class="question">睡眠の質について <span class="req">★</span></div>
+        <div class="score-block">
+          <div class="score-buttons">
+            <button class="score-btn">0</button>
+            <button class="score-btn">1</button>
+            <button class="score-btn">2</button>
+            <button class="score-btn">3</button>
+            <button class="score-btn">4</button>
+            <button class="score-btn active">5</button>
+            <button class="score-btn">6</button>
+            <button class="score-btn">7</button>
+            <button class="score-btn">8</button>
+            <button class="score-btn">9</button>
+            <button class="score-btn">10</button>
+          </div>
+          <div class="score-hint"><span>0 全然できなかった</span><span>10 よくできた</span></div>
+        </div>
+        <textarea class="free-text" placeholder="0-10 点の評価をお願いします"></textarea>
+      </div>
+
+      <div class="item">
+        <div class="num">Q13 / 17</div>
+        <div class="question">睡眠時間について <span class="req">★</span></div>
+        <div class="score-block">
+          <div class="score-buttons">
+            <button class="score-btn">0</button>
+            <button class="score-btn">1</button>
+            <button class="score-btn">2</button>
+            <button class="score-btn">3</button>
+            <button class="score-btn">4</button>
+            <button class="score-btn active">5</button>
+            <button class="score-btn">6</button>
+            <button class="score-btn">7</button>
+            <button class="score-btn">8</button>
+            <button class="score-btn">9</button>
+            <button class="score-btn">10</button>
+          </div>
+          <div class="score-hint"><span>0 全然できなかった</span><span>10 よくできた</span></div>
+        </div>
+        <textarea class="free-text" placeholder="0-10 点の評価をお願いします"></textarea>
+      </div>
+
+      <!-- カテゴリ: マインド・学習 -->
+      <div class="category">
+        <span class="ico">🧠</span>マインド・学習<span class="count">2</span>
+      </div>
+
+      <div class="item">
+        <div class="num">Q14 / 17</div>
+        <div class="question">マインドセットの変化について <span class="req">★</span></div>
+        <div class="score-block">
+          <div class="score-buttons">
+            <button class="score-btn">0</button>
+            <button class="score-btn">1</button>
+            <button class="score-btn">2</button>
+            <button class="score-btn">3</button>
+            <button class="score-btn">4</button>
+            <button class="score-btn active">5</button>
+            <button class="score-btn">6</button>
+            <button class="score-btn">7</button>
+            <button class="score-btn">8</button>
+            <button class="score-btn">9</button>
+            <button class="score-btn">10</button>
+          </div>
+          <div class="score-hint"><span>0 全然できなかった</span><span>10 よくできた</span></div>
+        </div>
+        <textarea class="free-text" placeholder="0-10 点の評価をお願いします"></textarea>
+      </div>
+
+      <div class="item">
+        <div class="num">Q15 / 17</div>
+        <div class="question">特典動画は視聴できましたか? <span class="req">★</span></div>
+        <div class="score-block">
+          <div class="score-buttons">
+            <button class="score-btn">0</button>
+            <button class="score-btn">1</button>
+            <button class="score-btn">2</button>
+            <button class="score-btn">3</button>
+            <button class="score-btn">4</button>
+            <button class="score-btn active">5</button>
+            <button class="score-btn">6</button>
+            <button class="score-btn">7</button>
+            <button class="score-btn">8</button>
+            <button class="score-btn">9</button>
+            <button class="score-btn">10</button>
+          </div>
+          <div class="score-hint"><span>0 全然できなかった</span><span>10 よくできた</span></div>
+        </div>
+        <textarea class="free-text" placeholder="0-10 点の評価をお願いします"></textarea>
+      </div>
+
+      <!-- カテゴリ: 振り返り -->
+      <div class="category">
+        <span class="ico">📝</span>振り返り<span class="count">2</span>
+      </div>
+
+      <div class="item">
+        <div class="num">Q16 / 17</div>
+        <div class="question">今月学べたことと成長を感じた点 <span class="opt">(任意)</span></div>
+        <textarea class="free-text" placeholder="自由にお書きください" style="min-height: 80px;"></textarea>
+      </div>
+
+      <div class="item" style="border-bottom: 0;">
+        <div class="num">Q17 / 17</div>
+        <div class="question">今ある課題と悩んでいる点など <span class="req">★</span></div>
+        <textarea class="free-text" placeholder="自由にお書きください" style="min-height: 80px;"></textarea>
+      </div>
+    </div>
+
+    <div class="save-bar">
+      <button class="draft">下書き保存</button>
+      <button class="send">プレビューを確認する</button>
+    </div>
+
+    <div class="tab-nav">
+      <div class="tab"><svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>ホーム</div>
+      <div class="tab"><svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>コース</div>
+      <div class="tab active"><svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>記録</div>
+      <div class="tab"><svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>検索</div>
+      <div class="tab"><svg class="ico-svg ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><circle cx="12" cy="12" r="3"/></svg>設定</div>
+    </div>
+  </div>
+
+  <div class="annotation">
+    <h3>🗺 構成 (上から)</h3>
+    <ul>
+      <li><b>ヘッダー</b>: ← / 月次添削 / ⋯</li>
+      <li><b>カウントダウン帯</b>: 終了まであと N 日 N 時間</li>
+      <li><b>フォームタイトル</b>: 「2026 年 5 月 月次報告」+ 説明</li>
+      <li><b>進捗バー</b>: 記入状況 6/17 項目</li>
+      <li><b>自動下書き保存通知</b></li>
+      <li><b>カテゴリ 6 つ</b>: 体・体型 (2) / 食事 (5) / 運動 (4) / 休息 (2) / マインド・学習 (2) / 振り返り (2)</li>
+      <li>カテゴリ見出しは黒帯 (目標シートと同じ流儀)</li>
+      <li><b>項目カード</b>: Q1/17 + 質問 + 入力 + 自由記述</li>
+      <li><b>保存バー</b>: 下書き保存 + 送信する</li>
+      <li><b>下部 5 タブ</b>: 記録 active</li>
+    </ul>
+
+    <h3>📝 17 項目の入力 UI</h3>
+    <ul>
+      <li>Q1-2 (体重・ウエスト): <b>先月/今月の 2 列数値入力</b> + 自由記述</li>
+      <li>Q3-15 (13 問): <b>0-10 スライダー</b> + 自由記述</li>
+      <li>Q16 (任意): 自由記述のみ (大きめ)</li>
+      <li>Q17 (必須): 自由記述のみ (大きめ)</li>
+    </ul>
+
+    <h3>✅ 反映した改善</h3>
+    <ul>
+      <li><b>A. 途中保存・中断 OK</b>: 自動下書き保存通知 + 下書きボタン</li>
+      <li><b>カウントダウン表示</b>: 締切までの可視化 (添付画像の表記を踏襲)</li>
+      <li><b>カテゴリ分け</b>: 17 項目をフラットに並べず、6 カテゴリで区切る (集中しやすい)</li>
+      <li><b>進捗バー</b>: どこまで進んだか可視化</li>
+    </ul>
+
+    <h3>🎨 デザイン (目標シートと統一)</h3>
+    <ul>
+      <li>軸: Nike エッセンス (影なし、グレー罫線、余白広め)</li>
+      <li>色: ティール緑 (#00897b / #00695c / #004d40)</li>
+      <li>カテゴリ見出し: 黒帯 (目標シートの「01 現状把握」と同じ流儀)</li>
+      <li>スコア値: ティール緑、大きめ Inter フォント</li>
+      <li>送信ボタン: ティール緑</li>
+    </ul>
+
+    <h3>🤔 検討余地</h3>
+    <ul>
+      <li>0-10 スライダー vs 数字ボタン 11 個並び (UI どちらが入力しやすいか)</li>
+      <li>カテゴリ折りたたみ機能 (現状フラット表示、長いスクロール)</li>
+      <li>記入完了後の確認画面 (送信前にプレビュー?)</li>
+      <li>未記入で「送信する」を押した時の挙動</li>
+      <li>送信後のフィードバック (「のりfitness が確認中です」表示)</li>
+    </ul>
+
+    <h3>📋 次のステップ</h3>
+    <ul>
+      <li>2. 履歴閲覧画面 (受講生・過去の自分を振り返る)</li>
+      <li>3. のり管理画面 (運営側・未返答管理 + 動画返信)</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — モック一覧 (絵文字 SVG 化済)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+    --indigo: #3949ab;
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --border: #e8ebe9;
+    --bg-warm: linear-gradient(135deg, #e0f2f1, #fffbe6);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #fafbfa;
+    color: var(--ink);
+    line-height: 1.6;
+    padding: 32px 24px;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  header { text-align: center; margin-bottom: 40px; }
+  header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary-darker);
+    margin-bottom: 8px;
+  }
+  header p { color: var(--ink2); font-size: 14px; }
+  header .meta {
+    display: inline-block;
+    background: var(--bg-warm);
+    padding: 6px 16px;
+    border-radius: 9999px;
+    font-size: 12px;
+    color: var(--primary-dark);
+    margin-top: 12px;
+  }
+
+  .group { margin-bottom: 36px; }
+  .group-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--primary);
+  }
+  .group-head .label {
+    background: var(--primary);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 12px;
+    border-radius: 9999px;
+    letter-spacing: 0.04em;
+  }
+  .group-head h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .group-head .count {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: var(--ink3);
+    margin-left: auto;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+  .card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    text-decoration: none;
+    color: var(--ink);
+    transition: border-color .15s, transform .15s, box-shadow .15s;
+    display: block;
+  }
+  .card:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,137,123,.12);
+  }
+  .card.indigo:hover { border-color: var(--indigo); box-shadow: 0 6px 16px rgba(57,73,171,.12); }
+
+  .card .filename {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: var(--ink3);
+    margin-bottom: 4px;
+  }
+  .card .title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .card .desc {
+    font-size: 11px;
+    color: var(--ink2);
+    line-height: 1.55;
+  }
+  .card .arr {
+    display: inline-block;
+    margin-top: 8px;
+    color: var(--primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .card.indigo .arr { color: var(--indigo); }
+
+  .tip {
+    background: var(--bg-warm);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 32px;
+    font-size: 13px;
+    color: var(--ink);
+    line-height: 1.7;
+  }
+  .tip b { color: var(--primary-darker); }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <h1>のりfitness 筋肉塾 — モック一覧</h1>
+    <p>絵文字 → 線画 SVG アイコン置換 完了 (2026-05-25)</p>
+    <div class="meta">全 25 ファイル ・ 各ファイルをクリックで開く</div>
+  </header>
+
+  <div class="tip">
+    <b>確認のポイント</b>: 各画面でアイコンが <b>線画黒一色</b> になっているか、レイアウトが崩れていないか。<br>
+    例外で残しているのは <b>✓ (チェック)</b> と <b>▶ (再生・矢印)</b> のみ。
+  </div>
+
+  <!-- ホーム -->
+  <div class="group">
+    <div class="group-head">
+      <span class="label">A</span>
+      <h2>ホーム画面</h2>
+      <span class="count">1 ファイル</span>
+    </div>
+    <div class="grid">
+      <a class="card" href="home_v4.html" target="_blank">
+        <div class="filename">home_v4.html</div>
+        <div class="title">ホーム画面 v4 (最新)</div>
+        <div class="desc">ティール緑統一 + 黄バナー + 4 機能 + 横長 + 進捗 + 数値3</div>
+        <span class="arr">開く →</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- 目標シート -->
+  <div class="group">
+    <div class="group-head">
+      <span class="label">B</span>
+      <h2>目標管理シート</h2>
+      <span class="count">2 ファイル</span>
+    </div>
+    <div class="grid">
+      <a class="card" href="goal_sheet_v3.html" target="_blank">
+        <div class="filename">goal_sheet_v3.html</div>
+        <div class="title">編集モード v3</div>
+        <div class="desc">5 セクション + 添削バッジ + のりfitness コメント</div>
+        <span class="arr">開く →</span>
+      </a>
+      <a class="card" href="goal_sheet_overview.html" target="_blank">
+        <div class="filename">goal_sheet_overview.html</div>
+        <div class="title">閲覧モード (overview)</div>
+        <div class="desc">一枚もの・PC 印刷対応</div>
+        <span class="arr">開く →</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- 月次添削 (受講生側) -->
+  <div class="group">
+    <div class="group-head">
+      <span class="label">C</span>
+      <h2>月次添削 (受講生側)</h2>
+      <span class="count">4 ファイル</span>
+    </div>
+    <div class="grid">
+      <a class="card" href="monthly_review_form.html" target="_blank">
+        <div class="filename">monthly_review_form.html</div>
+        <div class="title">記入フォーム (1/3)</div>
+        <div class="desc">17 項目 + 6 カテゴリ (体・体型/食事/運動/休息/学習/振り返り)</div>
+        <span class="arr">開く →</span>
+      </a>
+      <a class="card" href="monthly_review_complete.html" target="_blank">
+        <div class="filename">monthly_review_complete.html</div>
+        <div class="title">送信完了画面 (1.5/3)</div>
+        <div class="desc">キャラ画像 + ステータスカード</div>
+        <span class="arr">開く →</span>
+      </a>
+      <a class="card" href="monthly_review_history.html" target="_blank">
+        <div class="filename">monthly_review_history.html</div>
+        <div class="title">履歴閲覧画面 (2/3)</div>
+        <div class="desc">4 状態カード + レーダー/バー + 月別ログ</div>
+        <span class="arr">開く →</span>
+      </a>
+      <a class="card" href="monthly_review_detail.html" target="_blank">
+        <div class="filename">monthly_review_detail.html</div>
+        <div class="title">月詳細画面 (2.5/3)</div>
+        <div class="desc">過去 1 月分の単票 (動画 + 17 項目回答)</div>
+        <span class="arr">開く →</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- 管理画面 -->
+  <div class="group">
+    <div class="group-head">
+      <span class="label">D</span>
+      <h2>管理画面 (運営側・PC)</h2>
+      <span class="count">3 ファイル</span>
+    </div>
+    <div class="grid">
+      <a class="card" href="admin_monthly_inbox.html" target="_blank">
+        <div class="filename">admin_monthly_inbox.html</div>
+        <div class="title">受信箱 (3a/3)</div>
+        <div class="desc">未返答管理 (シンプル化済)</div>
+        <span class="arr">開く →</span>
+      </a>
+      <a class="card" href="admin_monthly_review.html" target="_blank">
+        <div class="filename">admin_monthly_review.html</div>
+        <div class="title">個別作業 (3b/3)</div>
+        <div class="desc">17 項目 + テキスト回答 + 動画返信 2 ボタン</div>
+        <span class="arr">開く →</span>
+      </a>
+      <a class="card" href="admin_monthly_record.html" target="_blank">
+        <div class="filename">admin_monthly_record.html</div>
+        <div class="title">動画録画モード (3b-rec)</div>
+        <div class="desc">録画準備 → 録画中 → プレビュー の 3 状態</div>
+        <span class="arr">開く →</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- 体組成記録 -->
+  <div class="group">
+    <div class="group-head">
+      <span class="label">E</span>
+      <h2>体組成記録</h2>
+      <span class="count">1 ファイル</span>
+    </div>
+    <div class="grid">
+      <a class="card" href="body_metrics.html" target="_blank">
+        <div class="filename">body_metrics.html</div>
+        <div class="title">体組成記録 (案 2-D)</div>
+        <div class="desc">ステッパー入力 + 折れ線グラフ + 履歴</div>
+        <span class="arr">開く →</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- ツール (インディゴ配色) -->
+  <div class="group">
+    <div class="group-head">
+      <span class="label">F</span>
+      <h2>ツール (インディゴ配色)</h2>
+      <span class="count">5 ファイル</span>
+    </div>
+    <div class="grid">
+      <a class="card indigo" href="tools_index.html" target="_blank">
+        <div class="filename">tools_index.html</div>
+        <div class="title">ツール一覧</div>
+        <div class="desc">4 ツール順序固定</div>
+        <span class="arr">開く →</span>
+      </a>
+      <a class="card indigo" href="tools_body_fat.html" target="_blank">
+        <div class="filename">tools_body_fat.html</div>
+        <div class="title">ツール 1: 体脂肪率計算</div>
+        <div class="desc">海軍式 (男女両対応、性別 3 択)</div>
+        <span class="arr">開く →</span>
+      </a>
+      <a class="card indigo" href="tools_calorie.html" target="_blank">
+        <div class="filename">tools_calorie.html</div>
+        <div class="title">ツール 2: 必要カロリー計算</div>
+        <div class="desc">基礎代謝 / メンテ / ダイエット / 増量 + 反映ダイアログ</div>
+        <span class="arr">開く →</span>
+      </a>
+      <a class="card indigo" href="tools_diet_period.html" target="_blank">
+        <div class="filename">tools_diet_period.html</div>
+        <div class="title">ツール 3: 減量期間逆算</div>
+        <div class="desc">タイムライン + 節目ラベル + ペース別アドバイス</div>
+        <span class="arr">開く →</span>
+      </a>
+      <a class="card indigo" href="tools_pfc_carb.html" target="_blank">
+        <div class="filename">tools_pfc_carb.html</div>
+        <div class="title">ツール 4: PFC・カーボサイクル (統合)</div>
+        <div class="desc">STEP 1 PFC + STEP 2 週次糖質配分</div>
+        <span class="arr">開く →</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- オンボーディング系 -->
+  <div class="group">
+    <div class="group-head">
+      <span class="label">G</span>
+      <h2>オンボーディング系</h2>
+      <span class="count">4 ファイル</span>
+    </div>
+    <div class="grid">
+      <a class="card" href="boot_loading.html" target="_blank">
+        <div class="filename">boot_loading.html</div>
+        <div class="title">起動ローディング</div>
+        <div class="desc">キャラ + 筋肉塾ロゴ + プログレスドット</div>
+        <span class="arr">開く →</span>
+      </a>
+      <a class="card" href="empty_state.html" target="_blank">
+        <div class="filename">empty_state.html</div>
+        <div class="title">空状態 (B-1 学習記録)</div>
+        <div class="desc">キャラ + 「ありません」+ CTA</div>
+        <span class="arr">開く →</span>
+      </a>
+      <a class="card" href="error_screen.html" target="_blank">
+        <div class="filename">error_screen.html</div>
+        <div class="title">エラー画面 (C-1/2/3)</div>
+        <div class="desc">通信 / サーバー / 404 の 3 状態併記</div>
+        <span class="arr">開く →</span>
+      </a>
+      <a class="card" href="onboarding.html" target="_blank">
+        <div class="filename">onboarding.html</div>
+        <div class="title">オンボーディングフロー (5 ステップ)</div>
+        <div class="desc">ウェルカム / 月次添削 / ホーム使い方 / 通知 / 完了</div>
+        <span class="arr">開く →</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- 祝福演出 -->
+  <div class="group">
+    <div class="group-head">
+      <span class="label">H</span>
+      <h2>祝福演出</h2>
+      <span class="count">2 ファイル</span>
+    </div>
+    <div class="grid">
+      <a class="card" href="chapter_complete.html" target="_blank">
+        <div class="filename">chapter_complete.html</div>
+        <div class="title">章末モーダル (ささやか)</div>
+        <div class="desc">モーダル形式 + キャラ + ✓ 順次表示</div>
+        <span class="arr">開く →</span>
+      </a>
+      <a class="card" href="course_complete.html" target="_blank">
+        <div class="filename">course_complete.html</div>
+        <div class="title">コース完了 (派手)</div>
+        <div class="desc">紙吹雪 + キャラ大 + サマリ 3 セル</div>
+        <span class="arr">開く →</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- 第3弾 -->
+  <div class="group">
+    <div class="group-head">
+      <span class="label">I</span>
+      <h2>第 3 弾 (検索 / 設定 / プロフィール)</h2>
+      <span class="count">3 ファイル</span>
+    </div>
+    <div class="grid">
+      <a class="card" href="search_screen.html" target="_blank">
+        <div class="filename">search_screen.html</div>
+        <div class="title">検索画面</div>
+        <div class="desc">履歴 + 候補 + 結果 (コース/章/レッスン 3 グループ)</div>
+        <span class="arr">開く →</span>
+      </a>
+      <a class="card" href="settings_screen.html" target="_blank">
+        <div class="filename">settings_screen.html</div>
+        <div class="title">設定画面 (3 セクション)</div>
+        <div class="desc">アカウント / 連携 / サービス (通知強制送信)</div>
+        <span class="arr">開く →</span>
+      </a>
+      <a class="card" href="profile_screen.html" target="_blank">
+        <div class="filename">profile_screen.html</div>
+        <div class="title">プロフィール画面</div>
+        <div class="desc">アバター + 統計 + コース進捗 + 最近の活動</div>
+        <span class="arr">開く →</span>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
