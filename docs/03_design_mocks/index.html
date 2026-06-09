@@ -78,12 +78,12 @@ h1 { font-size:26px; margin-bottom:6px; }
 <div class="summary-box">
   <h3>📊 全画面 状態サマリー</h3>
   <div class="stats">
-    <div class="stat"><b>31</b> ✅ 確定</div>
+    <div class="stat"><b>32</b> ✅ 確定</div>
     <div class="stat"><b>5</b> 🟡 未確定</div>
     <div class="stat"><b>19</b> ❓ モック未作成</div>
     <div class="stat"><b>17</b> 🔵 比較用 (recovered/ に温存)</div>
   </div>
-  <p style="margin-top:10px; font-size:12px; color:var(--ink-700);">合計 55 画面想定 (実装 route + 必要なモック)。比較用 17 ファイルは別カウント。最終更新: 2026-06-09 (オンボ 7 ステップ + 全課程完了 確定)</p>
+  <p style="margin-top:10px; font-size:12px; color:var(--ink-700);">合計 56 画面想定 (実装 route + 必要なモック)。比較用 17 ファイルは別カウント。最終更新: 2026-06-09 (オンボ + 全課程完了 + 記録ハブ 確定)</p>
 </div>
 
 <!-- ===================================== -->
@@ -109,11 +109,12 @@ h1 { font-size:26px; margin-bottom:6px; }
 
 <!-- ============================================ -->
 <div class="section">
-<h2>2. ホーム / ナビゲーション <span class="count">(2 画面)</span></h2>
+<h2>2. ホーム / ナビゲーション <span class="count">(3 画面)</span></h2>
 <table class="table">
 <thead><tr><th class="col-name">画面</th><th class="col-status">状態</th><th class="col-mock">モック</th><th class="col-route">実装 route</th><th class="col-note">備考</th></tr></thead>
 <tbody>
 <tr><td class="col-name">ホーム</td><td><span class="status ok">✅ 確定</span></td><td class="col-mock"><a href="recovered/ホーム画面_v4_(ティール緑統一版).html" target="_blank">ホーム画面 v4 (ティール緑統一版)</a></td><td class="col-route">/</td><td class="col-note">2026-05-25</td></tr>
+<tr><td class="col-name">記録ハブ (体組成 + 月次添削)</td><td><span class="status ok">✅ 確定</span></td><td class="col-mock"><a href="recovered/記録ハブ画面.html" target="_blank">記録ハブ画面</a></td><td class="col-route">/record (未実装、route 名は仮)</td><td class="col-note"><b>2026-06-09 確定</b> ・ 下部タブ「記録」の遷移先 ・ マイ学習記録とは別画面</td></tr>
 <tr><td class="col-name">お知らせ一覧</td><td><span class="status todo">❓ 未作成</span></td><td class="col-mock"><span class="none">モックなし</span></td><td class="col-route">(未実装)</td><td class="col-note">ヘッダー右上の✉ アイコンから開く想定</td></tr>
 </tbody></table>
 </div>
@@ -361,7 +362,7 @@ h1 { font-size:26px; margin-bottom:6px; }
   <li><b>マイ学習記録</b> のハブ型 / 集約型 / C ハイブリッド型 → 確定する</li>
   <li><s><b>オンボーディング</b> 4 ステップ / 5 ステップ → 確定する</s> ✅ <b>2026-06-09 確定: 7 ステップ版 (Step 3-5 必須化)</b></li>
   <li><s><b>全課程完了画面</b> と <b>卒業画面 (全 5 コース完了)</b> → 統合する or 別役割で残す</s> ✅ <b>2026-06-09 確定: 全課程完了画面 を採用 ・ 卒業画面は archive へ</b></li>
-  <li><b>下部タブ「記録」</b> の遷移先 → マイ学習記録 (新) or 体組成 + 月次添削 のハブ (旧) → 確定する</li>
+  <li><s><b>下部タブ「記録」</b> の遷移先 → マイ学習記録 (新) or 体組成 + 月次添削 のハブ (旧) → 確定する</s> ✅ <b>2026-06-09 確定: 体組成 + 月次添削 のハブ画面 (新規モック作成済)</b></li>
   <li><b>19 画面の未作成</b> のうち何を作る? (優先度ベース)</li>
 </ol>
 </div>

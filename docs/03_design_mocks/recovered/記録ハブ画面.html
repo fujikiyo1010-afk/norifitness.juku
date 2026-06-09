@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — 記録ハブ画面 (体組成 + 月次添削)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --ink4: #ccc;
+    --border: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f8f9fa;
+    --bg-warm: linear-gradient(135deg, #e0f2f1, #fffbe6);
+    --yellow-name: #b8860b;
+    --yellow-bg: rgba(255,235,59,.12);
+    --yellow-border: rgba(255,235,59,.5);
+    --accent-red: #c44;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: #e8ebec; color: var(--ink); line-height: 1.6; padding: 24px; }
+  .page-header { max-width: 900px; margin: 0 auto 32px; text-align: center; }
+  .page-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .page-header p { color: #6b7d75; font-size: 13px; }
+
+  .stage { max-width: 360px; margin: 0 auto; }
+
+  .phone {
+    width: 100%;
+    background: var(--bg);
+    border: 6px solid #2a2a2a;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 6px 24px rgba(0,0,0,.15);
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    min-height: 720px;
+  }
+  .phone-status { background: #2a2a2a; color: #fff; text-align: center; font-size: 10px; padding: 3px; font-family: 'Inter', sans-serif; }
+
+  /* アプリヘッダー */
+  .app-header {
+    padding: 12px 14px;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .app-header .back-btn {
+    background: none;
+    border: none;
+    color: var(--ink2);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+  }
+  .app-header .back-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .app-header .title { font-size: 15px; font-weight: 700; }
+  .app-header .sub { font-size: 10px; color: var(--ink3); margin-top: 1px; }
+
+  /* スクロールエリア */
+  .scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px 14px 18px;
+    background: var(--bg-soft);
+  }
+
+  /* セクションラベル */
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--ink3);
+    letter-spacing: .12em;
+    margin: 14px 4px 6px;
+  }
+  .section-label:first-child { margin-top: 0; }
+
+  /* カード共通 */
+  .card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 14px 12px;
+    margin-bottom: 8px;
+  }
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .card-head .ttl {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .card-head .ttl svg {
+    width: 14px;
+    height: 14px;
+    stroke: var(--primary);
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .card-head .badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .card-head .badge.audit-yellow {
+    background: var(--yellow-bg);
+    color: var(--yellow-name);
+    border: 1px solid var(--yellow-border);
+  }
+  .card-head .badge.audit-replied {
+    background: rgba(0,137,123,.08);
+    color: var(--primary-dark);
+    border: 1px solid rgba(0,137,123,.3);
+  }
+
+  /* 体組成 数値 3 枠 */
+  .body-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .body-stats .stat {
+    background: var(--bg-soft);
+    border-radius: 8px;
+    padding: 8px 4px;
+    text-align: center;
+  }
+  .body-stats .stat .lbl {
+    font-size: 9.5px;
+    color: var(--ink3);
+    margin-bottom: 3px;
+  }
+  .body-stats .stat .num {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.2;
+  }
+  .body-stats .stat .num .unit { font-size: 10px; font-weight: 500; color: var(--ink3); margin-left: 2px; }
+  .body-stats .stat .delta {
+    font-size: 9.5px;
+    margin-top: 2px;
+    font-weight: 600;
+  }
+  .body-stats .stat .delta.down { color: var(--primary); }
+  .body-stats .stat .delta.up { color: var(--accent-red); }
+  .body-stats .stat .delta.none { color: var(--ink3); }
+
+  /* 月次添削 状態カード */
+  .audit-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+  }
+  .audit-row .month {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    min-width: 70px;
+  }
+  .audit-row .desc {
+    flex: 1;
+    font-size: 11.5px;
+    color: var(--ink2);
+    line-height: 1.5;
+  }
+  .audit-row .desc b { color: var(--ink); }
+
+  /* CTA + リンク行 */
+  .actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .cta-btn {
+    flex: 1;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 2px 6px rgba(0,137,123,.18);
+  }
+  .cta-btn:hover { background: var(--primary-dark); }
+  .cta-btn.outline {
+    background: #fff;
+    color: var(--primary-dark);
+    border: 1px solid var(--primary);
+    box-shadow: none;
+  }
+  .cta-btn.full { flex: 1; }
+  .link-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0 0;
+    margin-top: 8px;
+    border-top: 1px dashed var(--border);
+  }
+  .link-row a {
+    color: var(--primary-dark);
+    font-size: 11.5px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .link-row a:hover { color: var(--primary-darker); }
+
+  /* 黄バナー (返信届 ハイライト) */
+  .reply-banner {
+    background: var(--yellow-bg);
+    border: 1px solid var(--yellow-border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .reply-banner svg {
+    width: 18px;
+    height: 18px;
+    stroke: var(--yellow-name);
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
+  }
+  .reply-banner .reply-text {
+    flex: 1;
+    font-size: 11.5px;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  .reply-banner .reply-text b { color: var(--yellow-name); }
+
+  /* 下部タブ */
+  .tab-nav {
+    display: flex;
+    background: #fff;
+    border-top: 1px solid var(--border);
+    padding: 6px 0 4px;
+    flex-shrink: 0;
+  }
+  .tab-nav .tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    font-size: 9.5px;
+    color: var(--ink3);
+    cursor: pointer;
+    padding: 4px 0;
+  }
+  .tab-nav .tab svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .tab-nav .tab.active { color: var(--primary-dark); font-weight: 700; }
+  .tab-nav .tab.active svg { stroke-width: 2.4; }
+
+  /* === SVG アイコン (h1/h2/h3 横用) === */
+  .ic {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    vertical-align: -3px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    margin-right: 6px;
+  }
+  .page-header h1 .ic { width: 22px; height: 22px; vertical-align: -4px; }
+
+  /* === 注釈 === */
+  .annotation-wrap { max-width: 900px; margin: 32px auto 0; }
+  .annotation { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; font-size: 13px; color: #555; }
+  .annotation h3 { font-size: 14px; color: var(--ink); margin: 18px 0 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; display: flex; align-items: center; }
+  .annotation h3:first-child { margin-top: 0; }
+  .annotation ul { padding-left: 20px; }
+  .annotation li { margin-bottom: 4px; font-size: 12px; }
+  .annotation .highlight {
+    background: rgba(0,137,123,.06);
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin: 8px 0;
+    font-size: 12px;
+    color: var(--primary-darker);
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1><svg class="ic" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>記録ハブ画面 (体組成 + 月次添削)</h1>
+  <p>下部タブ「記録」をタップした時の遷移先 ・ 2 セクション (体組成記録 + 月次添削) を集約</p>
+</div>
+
+<div class="stage">
+  <div class="phone">
+    <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+
+    <!-- アプリヘッダー -->
+    <div class="app-header">
+      <button class="back-btn">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div>
+        <div class="title">記録</div>
+        <div class="sub">体組成 ・ 月次添削</div>
+      </div>
+    </div>
+
+    <!-- スクロール内容 -->
+    <div class="scroll-area">
+
+      <!-- 黄バナー: のり社長から返信届 -->
+      <div class="reply-banner">
+        <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+        <div class="reply-text">
+          のりfitness から<b>2026 年 5 月の動画返信</b>が届きました
+        </div>
+      </div>
+
+      <!-- ============ 体組成記録 セクション ============ -->
+      <div class="section-label">体組成記録</div>
+      <div class="card">
+        <div class="card-head">
+          <div class="ttl">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/><line x1="3" y1="20" x2="21" y2="20"/></svg>
+            今日 5/22
+          </div>
+        </div>
+        <div class="body-stats">
+          <div class="stat">
+            <div class="lbl">体重</div>
+            <div class="num">75.0<span class="unit">kg</span></div>
+            <div class="delta down">−0.2</div>
+          </div>
+          <div class="stat">
+            <div class="lbl">体脂肪率</div>
+            <div class="num">22.4<span class="unit">%</span></div>
+            <div class="delta down">−0.1</div>
+          </div>
+          <div class="stat">
+            <div class="lbl">ウエスト</div>
+            <div class="num">78.5<span class="unit">cm</span></div>
+            <div class="delta none">─</div>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="cta-btn full">今日の数値を記録する</button>
+        </div>
+        <div class="link-row">
+          <a>← 履歴を見る</a>
+          <a>変化を見る (推移グラフ) →</a>
+        </div>
+      </div>
+
+      <!-- ============ 月次添削 セクション ============ -->
+      <div class="section-label">月次添削</div>
+      <div class="card">
+        <div class="card-head">
+          <div class="ttl">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            2026 年 6 月
+          </div>
+          <span class="badge audit-yellow">記入中 3 / 17</span>
+        </div>
+        <div class="audit-row">
+          <div class="desc">
+            <b>記入期限まで残り 12 日</b><br>
+            毎月 1 日が、振り返りの日です
+          </div>
+        </div>
+        <div class="actions">
+          <button class="cta-btn full">続きから記入する →</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="ttl">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            2026 年 5 月
+          </div>
+          <span class="badge audit-replied">返信届</span>
+        </div>
+        <div class="audit-row">
+          <div class="desc">
+            <b>のりfitness から動画返信が届きました</b><br>
+            提出: 5/30 ・ 返信: 6/8
+          </div>
+        </div>
+        <div class="link-row">
+          <a>動画返信を見る →</a>
+        </div>
+      </div>
+
+      <div class="link-row" style="border-top: 0; padding-top: 4px; justify-content: center;">
+        <a>← 月次添削 履歴をすべて見る</a>
+      </div>
+
+    </div>
+
+    <!-- 下部タブ -->
+    <div class="tab-nav">
+      <div class="tab"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>ホーム</div>
+      <div class="tab"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>コース</div>
+      <div class="tab active"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>記録</div>
+      <div class="tab"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>検索</div>
+      <div class="tab"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/></svg>設定</div>
+    </div>
+  </div>
+</div>
+
+<!-- 注釈 -->
+<div class="annotation-wrap">
+  <div class="annotation">
+    <h3><svg class="ic" viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>画面の役割</h3>
+    <ul>
+      <li>下部タブ「記録」をタップ → この画面に遷移</li>
+      <li>受講生が「数値・月次の記録」を一つの場所で確認・操作できるハブ</li>
+      <li>「マイ学習記録」(振り返りメモ・統計) はホーム 4 機能ブロックから別動線 = この画面とは被らない</li>
+    </ul>
+
+    <h3><svg class="ic" viewBox="0 0 24 24"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0Z"/></svg>構成 (上から)</h3>
+    <ol style="margin-left:20px; font-size: 12px; line-height: 1.8;">
+      <li><b>ヘッダー</b>: 戻る + 「記録」+ サブ「体組成 ・ 月次添削」</li>
+      <li><b>黄バナー (条件付)</b>: のり社長から動画返信が届いた時のみ表示</li>
+      <li><b>体組成 セクション</b>: 今日の数値 (体重/体脂肪率/ウエスト) + 増減色付き + CTA + 履歴/推移リンク</li>
+      <li><b>月次添削 セクション</b>: 今月 (記入中状態) + 先月 (返信届) のカード + 履歴をすべて見るリンク</li>
+      <li><b>下部タブ</b>: 「記録」active</li>
+    </ol>
+
+    <h3><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>2 セクションの整理</h3>
+    <table style="width: 100%; font-size: 12px; border-collapse: collapse;">
+      <tr><th style="text-align: left; padding: 6px 8px; background: var(--bg-soft); border-bottom: 1px solid var(--border);">セクション</th><th style="text-align: left; padding: 6px 8px; background: var(--bg-soft); border-bottom: 1px solid var(--border);">主な要素</th><th style="text-align: left; padding: 6px 8px; background: var(--bg-soft); border-bottom: 1px solid var(--border);">遷移先</th></tr>
+      <tr><td style="padding: 6px 8px; border-bottom: 1px solid var(--border);">体組成記録</td><td style="padding: 6px 8px; border-bottom: 1px solid var(--border);">今日の数値 3 枠 + CTA「記録する」 + 履歴/推移リンク</td><td style="padding: 6px 8px; border-bottom: 1px solid var(--border);">体組成記録画面 / 推移グラフ</td></tr>
+      <tr><td style="padding: 6px 8px;">月次添削</td><td style="padding: 6px 8px;">今月 (記入中・記入期限) + 先月 (返信届) + 履歴リンク</td><td style="padding: 6px 8px;">月次添削 記入フォーム / 月次添削 履歴 / 月次添削 月詳細</td></tr>
+    </table>
+
+    <h3><svg class="ic" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>議論ポイント 3 の結論 (2026-06-09 確定)</h3>
+    <div class="highlight">
+      <b>下部タブ「記録」の遷移先</b> = <b>この画面 (体組成 + 月次添削 ハブ)</b><br><br>
+      理由:<br>
+      ・「記録」という言葉が「数値・月次の記録」と意味が明確になる<br>
+      ・ホーム 4 機能ブロックの「マイ学習記録」(振り返りメモ・統計) と動線が被らない<br>
+      ・「マイ学習記録」「記録 (体組成 + 月次)」の使い分けが UI 上で明確に
+    </div>
+
+    <h3><svg class="ic" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>未確定 / 議論ポイント</h3>
+    <ul>
+      <li>黄バナー (動画返信届) の表示優先度: 「記録」画面に出すか、ホームの目標管理シート横長ブロックの隣に出すか</li>
+      <li>体組成セクションの 3 数値の選び方 (体重/体脂肪率/ウエスト で固定 or 受講生が選択可)</li>
+      <li>月次添削 セクションに過去 3 ヶ月分まで出すか、今月 + 先月だけにするか</li>
+    </ul>
+
+    <h3><svg class="ic" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>実装メモ</h3>
+    <ul>
+      <li>route 候補: <code>/record</code> or <code>/log</code> (実装未着手、今後決める)</li>
+      <li>体組成カード: 今日の最新記録を取得、なければ「まだ記録がありません」CTA に切替</li>
+      <li>月次添削カード: 状態 (A 未記入 / B 記入中 / C 提出済 / D 返信届) に応じてバッジ色とメッセージ切替</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>
