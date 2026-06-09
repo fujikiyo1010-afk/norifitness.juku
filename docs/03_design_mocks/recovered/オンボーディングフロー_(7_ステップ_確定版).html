@@ -56,6 +56,80 @@
   }
   .scene-label h2 { font-size: 13px; color: var(--ink); font-weight: 700; }
   .scene-label p { font-size: 11px; color: var(--ink2); margin-top: 3px; }
+  .scene-label .group-tag {
+    display: inline-block;
+    background: var(--yellow-bg);
+    color: var(--yellow-name);
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 3px;
+    border: 1px solid var(--yellow-border);
+    margin-bottom: 6px;
+    letter-spacing: .04em;
+  }
+
+  /* === 開始後にまずやること グループ バナー === */
+  .task-group-banner {
+    max-width: 1700px;
+    margin: 0 auto 24px;
+    background: var(--bg-warm);
+    border: 2px solid var(--yellow-border);
+    border-radius: 14px;
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    box-shadow: 0 2px 12px rgba(184,134,11,.08);
+  }
+  .task-group-banner .tg-tag {
+    background: var(--yellow-name);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    letter-spacing: .06em;
+    flex-shrink: 0;
+  }
+  .task-group-banner .tg-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--primary-darker);
+    flex-shrink: 0;
+  }
+  .task-group-banner .tg-list {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+    font-size: 12px;
+    color: var(--ink2);
+    line-height: 1.6;
+  }
+  .task-group-banner .tg-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .task-group-banner .tg-num {
+    background: var(--primary);
+    color: #fff;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+  }
+  .task-group-banner .tg-item b {
+    color: var(--primary-darker);
+    font-weight: 700;
+  }
 
   .phone {
     width: 100%;
@@ -397,6 +471,17 @@
   <p>初回起動時のみ ・ 高額サービス前提で<b>初期 3 タスク (カルテ / 目標 / 体組成) を必須化</b> ・ 紹介 + ミニフォーム + 要約 の 3 層構造</p>
 </div>
 
+<!-- ★ 開始後にまずやること バナー (Step 3-5 のグループ表示) -->
+<section class="task-group-banner">
+  <span class="tg-tag">★ 必須</span>
+  <span class="tg-title">開始後にまずやること</span>
+  <div class="tg-list">
+    <span class="tg-item"><span class="tg-num">1</span><b>カルテ</b> <span style="color:var(--ink3);font-size:11px;">(Step 3)</span></span>
+    <span class="tg-item"><span class="tg-num">2</span><b>目標管理シート</b> <span style="color:var(--ink3);font-size:11px;">(Step 4)</span></span>
+    <span class="tg-item"><span class="tg-num">3</span><b>体組成</b> <span style="color:var(--ink3);font-size:11px;">(Step 5)</span></span>
+  </div>
+</section>
+
 <div class="multi-stage">
 
   <!-- ============ STEP 1: ウェルカム ============ -->
@@ -475,8 +560,9 @@
   <!-- ============ STEP 3: カルテ記入 (必須) ============ -->
   <div class="scene">
     <div class="scene-label">
+      <span class="group-tag">開始後にまずやること ①</span>
       <span class="step-badge must">STEP 3 / 7 ・ 必須</span>
-      <h2>カルテ記入</h2>
+      <h2>カルテ</h2>
       <p>筋トレメニュー作成の基礎情報</p>
     </div>
     <div class="phone">
@@ -543,8 +629,9 @@
   <!-- ============ STEP 4: 目標管理シート (必須) ============ -->
   <div class="scene">
     <div class="scene-label">
+      <span class="group-tag">開始後にまずやること ②</span>
       <span class="step-badge must">STEP 4 / 7 ・ 必須</span>
-      <h2>目標管理シート 記入</h2>
+      <h2>目標管理シート</h2>
       <p>ゴールの言語化</p>
     </div>
     <div class="phone">
@@ -599,8 +686,9 @@
   <!-- ============ STEP 5: 体組成 初回入力 (必須) ============ -->
   <div class="scene">
     <div class="scene-label">
+      <span class="group-tag">開始後にまずやること ③</span>
       <span class="step-badge must">STEP 5 / 7 ・ 必須</span>
-      <h2>体組成 初回入力</h2>
+      <h2>体組成</h2>
       <p>基準値の記録</p>
     </div>
     <div class="phone">
