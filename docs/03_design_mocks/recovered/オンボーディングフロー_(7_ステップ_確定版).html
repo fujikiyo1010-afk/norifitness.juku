@@ -157,6 +157,54 @@
     overflow: hidden;
   }
 
+  /* スマホ画面内 グループバー (Step 3-5) */
+  .in-phone-group-bar {
+    background: var(--yellow-bg);
+    border: 1px solid var(--yellow-border);
+    border-radius: 8px;
+    padding: 6px 10px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    z-index: 1;
+  }
+  .in-phone-group-bar .gb-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+  }
+  .in-phone-group-bar .gb-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    stroke: var(--yellow-name);
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .in-phone-group-bar .gb-title {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--yellow-name);
+    letter-spacing: .02em;
+  }
+  .in-phone-group-bar .gb-num {
+    background: var(--yellow-name);
+    color: #fff;
+    font-size: 9.5px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 9999px;
+    flex-shrink: 0;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: .04em;
+  }
+
   .onboard::before {
     content: '';
     position: absolute;
@@ -471,17 +519,6 @@
   <p>初回起動時のみ ・ 高額サービス前提で<b>初期 3 タスク (カルテ / 目標 / 体組成) を必須化</b> ・ 紹介 + ミニフォーム + 要約 の 3 層構造</p>
 </div>
 
-<!-- ★ 開始後にまずやること バナー (Step 3-5 のグループ表示) -->
-<section class="task-group-banner">
-  <span class="tg-tag">★ 必須</span>
-  <span class="tg-title">開始後にまずやること</span>
-  <div class="tg-list">
-    <span class="tg-item"><span class="tg-num">1</span><b>カルテ</b> <span style="color:var(--ink3);font-size:11px;">(Step 3)</span></span>
-    <span class="tg-item"><span class="tg-num">2</span><b>目標管理シート</b> <span style="color:var(--ink3);font-size:11px;">(Step 4)</span></span>
-    <span class="tg-item"><span class="tg-num">3</span><b>体組成</b> <span style="color:var(--ink3);font-size:11px;">(Step 5)</span></span>
-  </div>
-</section>
-
 <div class="multi-stage">
 
   <!-- ============ STEP 1: ウェルカム ============ -->
@@ -568,6 +605,13 @@
     <div class="phone">
       <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
       <div class="onboard">
+        <div class="in-phone-group-bar">
+          <div class="gb-left">
+            <svg class="gb-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            <span class="gb-title">開始後にまずやること</span>
+          </div>
+          <span class="gb-num">1 / 3</span>
+        </div>
         <div class="step-indicator">
           <div class="dot done"></div>
           <div class="dot done"></div>
@@ -637,6 +681,13 @@
     <div class="phone">
       <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
       <div class="onboard">
+        <div class="in-phone-group-bar">
+          <div class="gb-left">
+            <svg class="gb-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            <span class="gb-title">開始後にまずやること</span>
+          </div>
+          <span class="gb-num">2 / 3</span>
+        </div>
         <div class="step-indicator">
           <div class="dot done"></div>
           <div class="dot done"></div>
@@ -694,6 +745,13 @@
     <div class="phone">
       <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
       <div class="onboard">
+        <div class="in-phone-group-bar">
+          <div class="gb-left">
+            <svg class="gb-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            <span class="gb-title">開始後にまずやること</span>
+          </div>
+          <span class="gb-num">3 / 3</span>
+        </div>
         <div class="step-indicator">
           <div class="dot done"></div>
           <div class="dot done"></div>
