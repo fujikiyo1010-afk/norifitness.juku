@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — 目標管理シート v3 (Nike 完全準拠)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Nike エッセンス形 + 特典 26 ティール色 */
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --ink4: #ccc;
+    --border: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f8f9fa;
+
+    /* 添削系 (薄い黄色) */
+    --audit-bg: rgba(255,235,59,0.12);
+    --audit-border: rgba(255,235,59,0.55);
+    --audit-name: #b8860b;
+
+    --accent-red: #c44;
+    --marker: rgba(255,235,59,0.55);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #e8ebec;
+    color: var(--ink);
+    line-height: 1.6;
+    padding: 24px;
+  }
+  .page-header {
+    max-width: 1100px;
+    margin: 0 auto 32px;
+    text-align: center;
+  }
+  .page-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .page-header p {
+    color: #6b7d75;
+    font-size: 13px;
+  }
+  .stage {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 460px 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  .phone {
+    width: 100%;
+    max-width: 460px;
+    background: var(--bg);
+    border: 8px solid #2a2a2a;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+  }
+  .phone-status {
+    background: #2a2a2a;
+    color: #fff;
+    text-align: center;
+    font-size: 11px;
+    padding: 4px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .ico-svg {
+    width: 20px; height: 20px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    display: inline-block;
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+  .ico-svg-sm { width: 16px; height: 16px; }
+  .ico-svg-md { width: 22px; height: 22px; }
+
+  /* ヘッダー */
+  .app-header {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 14px 18px;
+    display: grid;
+    grid-template-columns: 28px 1fr 28px;
+    align-items: center;
+    gap: 6px;
+  }
+  .app-header .back, .app-header .menu { color: var(--ink); }
+  .app-header .center-title {
+    text-align: center;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--ink);
+  }
+
+  /* 進捗バー */
+  .status-bar {
+    padding: 14px 18px;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+  }
+  .status-bar .lbl {
+    font-size: 11px; color: var(--ink3);
+    display: flex; justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .status-bar .lbl b {
+    color: var(--ink); font-weight: 700;
+    font-family: 'Inter', sans-serif;
+  }
+  .status-bar .bar {
+    background: #f0f0f0; height: 5px;
+    border-radius: 9999px; overflow: hidden;
+  }
+  .status-bar .bar > div {
+    width: 80%; height: 100%;
+    background: var(--primary);
+    border-radius: 9999px;
+  }
+
+  .body-scroll {
+    background: var(--bg);
+    padding: 16px;
+    flex: 1;
+  }
+
+  /* セクション */
+  .section {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .section-head {
+    background: #fff;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-head .num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Inter', sans-serif;
+  }
+  .section-head .title { font-size: 13px; font-weight: 700; color: var(--ink); flex: 1; }
+  .section-head .mark {
+    font-size: 10px; font-weight: 700;
+    padding: 3px 8px; border-radius: 4px;
+    border: 1px solid var(--primary);
+    color: var(--primary-dark);
+    background: #fff;
+  }
+  .section-head .mark.todo {
+    color: var(--ink3);
+    border-color: var(--ink4);
+  }
+  .section-body { padding: 16px; }
+
+  /* フィールド */
+  .field { margin-bottom: 14px; position: relative; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label {
+    font-size: 11px; font-weight: 600;
+    color: var(--ink3);
+    margin-bottom: 6px;
+    display: flex; justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+  }
+  .field-label .req { color: var(--accent-red); }
+  .field-label .auto {
+    font-size: 9px; color: var(--ink3);
+    background: var(--bg-soft);
+    padding: 2px 6px; border-radius: 3px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+  }
+  .field-label .comment-mark {
+    font-size: 10px;
+    color: var(--audit-name);
+    background: var(--audit-bg);
+    padding: 2px 7px;
+    border-radius: 9999px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    border: 1px solid var(--audit-border);
+  }
+  .input {
+    width: 100%; padding: 10px 12px;
+    font-size: 13px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--ink);
+    font-family: inherit;
+  }
+  .input.readonly {
+    background: var(--bg-soft);
+    color: var(--ink);
+    font-weight: 700;
+  }
+  .field-row { display: flex; gap: 6px; align-items: center; }
+  .unit { font-size: 11px; color: var(--ink3); }
+
+  /* フィールドコメント (薄黄色) */
+  .field-comment {
+    margin-top: 6px;
+    background: var(--audit-bg);
+    border-left: 3px solid var(--audit-border);
+    padding: 8px 10px;
+    border-radius: 0 6px 6px 0;
+    font-size: 11px;
+    color: var(--ink2);
+    line-height: 1.6;
+  }
+  .field-comment .who {
+    font-weight: 700;
+    color: var(--audit-name);
+    font-size: 10px;
+    margin-bottom: 3px;
+  }
+
+  /* ツール起動ボタン (Nike 緑単色 + 角丸 3px) */
+  .tool-btn {
+    width: 100%; padding: 12px 14px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    font-size: 12px; font-weight: 700;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 10px;
+    letter-spacing: .02em;
+    cursor: pointer;
+  }
+  .tool-btn .tag {
+    font-size: 9px;
+    background: rgba(255,255,255,.25);
+    padding: 2px 7px; border-radius: 3px;
+    font-weight: 600;
+  }
+
+  /* セクション総評コメント (薄黄色) */
+  .section-comment {
+    background: var(--audit-bg);
+    border: 1px solid var(--audit-border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-top: 14px;
+    font-size: 12px;
+  }
+  .section-comment .head {
+    display: flex; align-items: center;
+    gap: 8px; margin-bottom: 6px;
+  }
+  .section-comment .name {
+    font-weight: 700;
+    color: var(--audit-name);
+    font-size: 11px;
+  }
+  .section-comment .date {
+    font-size: 10px; color: var(--ink3);
+    margin-left: auto;
+    font-family: 'Inter', sans-serif;
+  }
+  .section-comment .text {
+    color: var(--ink);
+    line-height: 1.7;
+  }
+
+  /* 目標カード (深緑→明るい緑グラデ) */
+  .goal-card {
+    background: linear-gradient(135deg, var(--primary-darker), var(--primary));
+    color: #fff;
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+  }
+  .goal-card .head {
+    font-size: 11px;
+    opacity: .9;
+    margin-bottom: 10px;
+    font-weight: 600;
+    letter-spacing: .03em;
+  }
+  .goal-card .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .goal-card .item {
+    background: rgba(255,255,255,.12);
+    padding: 8px 10px;
+    border-radius: 6px;
+  }
+  .goal-card .item .lbl {
+    font-size: 9px;
+    opacity: .85;
+    margin-bottom: 2px;
+  }
+  .goal-card .item .val {
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+  }
+  .goal-card .item .unit { font-size: 11px; opacity: .9; }
+
+  /* PFC 凡例チップ (全部緑) */
+  .pfc-legend {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .pfc-legend .chip {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .pfc-legend .chip .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--primary);
+  }
+
+  /* PFC 計算結果カード (3 つ同じ緑ドット) */
+  .pfc-cards { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+  .pfc-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: grid;
+    grid-template-columns: 12px 1fr auto;
+    gap: 10px;
+    align-items: center;
+  }
+  .pfc-card .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--primary);
+  }
+  .pfc-card .name { font-size: 11px; color: var(--ink3); }
+  .pfc-card .value {
+    font-size: 17px; font-weight: 700;
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+  }
+  .pfc-card .right {
+    text-align: right;
+    font-size: 11px;
+    color: var(--ink3);
+    line-height: 1.4;
+  }
+  .pfc-card .right .kcal { font-weight: 600; color: var(--ink); }
+  .pfc-card .right .pct {
+    font-weight: 700;
+    color: var(--primary-dark);
+    font-family: 'Inter', sans-serif;
+  }
+
+  .pfc-total {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .pfc-total .lbl { font-size: 11px; color: var(--ink3); font-weight: 600; }
+  .pfc-total .val { font-size: 17px; font-weight: 700; color: var(--ink); font-family: 'Inter', sans-serif; }
+
+  .pfc-formula {
+    font-size: 10px;
+    color: var(--ink3);
+    text-align: center;
+    margin-bottom: 12px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .pfc-read {
+    background: var(--bg-soft);
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 12px;
+    color: var(--ink2);
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  .pfc-read .head {
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 8px;
+    text-align: left;
+  }
+  .pfc-read .read-text { font-size: 13px; }
+  .pfc-read b {
+    color: var(--primary-dark);
+    font-size: 22px;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    display: inline-block;
+    padding: 0 4px;
+    vertical-align: middle;
+  }
+
+  /* スライダー (⑤ セルフイメージ) */
+  .compare-header {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-bottom: 10px;
+  }
+  .compare-col-label {
+    font-size: 10px; font-weight: 700;
+    text-align: center; padding: 4px 8px;
+    border-radius: 6px;
+  }
+  .compare-col-label.before { background: #fff; color: var(--ink3); border: 1px solid var(--border); }
+  .compare-col-label.after { background: var(--bg-soft); color: var(--primary-dark); border: 1px solid var(--primary); }
+  .slider-item { padding: 10px 0; border-bottom: 1px dashed var(--border); }
+  .slider-item:last-child { border-bottom: 0; }
+  .slider-item .label { font-size: 11px; color: var(--ink2); line-height: 1.4; margin-bottom: 8px; }
+  .slider-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .slider-pair input[type=range] { width: 100%; accent-color: var(--primary); }
+  .slider-pair .val { text-align: center; font-size: 13px; font-weight: 700; color: var(--primary-dark); font-family: 'Inter', sans-serif; }
+
+  /* のりfitness 全体コメント (薄黄色) */
+  .nori-summary {
+    background: var(--audit-bg);
+    border: 1px solid var(--audit-border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+  }
+  .nori-summary .head {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 10px;
+  }
+  .nori-summary .name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--audit-name);
+  }
+  .nori-summary .date {
+    font-size: 10px;
+    color: var(--ink3);
+    margin-left: auto;
+    font-family: 'Inter', sans-serif;
+  }
+  .nori-summary .text {
+    font-size: 13px;
+    color: var(--ink);
+    line-height: 1.7;
+    margin-bottom: 8px;
+  }
+  .arrow-bouncy {
+    display: inline-block;
+    animation: bounceDown 1.5s ease-in-out infinite;
+    font-size: 16px;
+    color: var(--audit-name);
+  }
+  @keyframes bounceDown {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(6px); }
+  }
+  .history-toggle {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid var(--audit-border);
+    font-size: 11px;
+    color: var(--ink2);
+    cursor: pointer;
+  }
+
+  /* 再添削申請ボタン */
+  .reaudit {
+    background: var(--bg-soft);
+    border: 1px dashed var(--primary);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  .reaudit .msg {
+    font-size: 11px;
+    color: var(--ink2);
+    margin-bottom: 8px;
+  }
+  .reaudit .btn {
+    background: var(--primary);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-block;
+    letter-spacing: .03em;
+  }
+
+  /* ボトムリンク */
+  .bottom-links {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-bottom: 14px;
+  }
+  .bottom-link {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink);
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+
+  /* 保存バー */
+  .save-bar {
+    background: #fff;
+    border-top: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex; gap: 8px;
+  }
+  .save-bar .draft {
+    padding: 12px 14px;
+    background: #fff;
+    color: var(--ink);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    font-size: 11px; font-weight: 600;
+  }
+  .save-bar .save {
+    flex: 1; padding: 12px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-size: 13px; font-weight: 700;
+  }
+
+  /* タブ */
+  .tab-nav {
+    background: #fff;
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 10px 0;
+  }
+  .tab {
+    flex: 1; text-align: center;
+    font-size: 10px;
+    color: var(--ink3);
+    padding: 3px 2px;
+    position: relative;
+  }
+  .tab.active {
+    color: var(--primary-dark);
+    font-weight: 700;
+  }
+  .tab.active::after {
+    content: "";
+    position: absolute;
+    bottom: -12px;
+    left: 50%; transform: translateX(-50%);
+    width: 22px; height: 3px;
+    background: var(--primary);
+    border-radius: 9999px;
+  }
+  .tab .ico-svg-sm {
+    margin: 0 auto 2px;
+    display: block;
+  }
+
+  /* 注釈 */
+  .annotation {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    font-size: 13px;
+    color: #555;
+    position: sticky;
+    top: 24px;
+  }
+  .annotation h3 {
+    font-size: 14px;
+    color: var(--ink);
+    margin: 14px 0 8px;
+  }
+  .annotation h3:first-child { margin-top: 0; }
+  .annotation ul { padding-left: 20px; }
+  .annotation li { margin-bottom: 4px; font-size: 12px; }
+  .annotation code {
+    background: var(--bg-soft);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+  }
+  .swatch {
+    display: inline-block;
+    width: 12px; height: 12px;
+    vertical-align: middle;
+    border-radius: 2px;
+    border: 1px solid rgba(0,0,0,.1);
+    margin-right: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🎯 目標管理シート v3 — Nike 完全準拠</h1>
+  <p>色 = Nike エッセンス完全踏襲 (明るい緑 + グレー罫線 + 黒文字) / 添削 = 薄黄色 / 5 セクション</p>
+</div>
+
+<div class="stage">
+  <div class="phone">
+    <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+
+    <div class="app-header">
+      <svg class="ico-svg back" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+      <div class="center-title">目標管理シート</div>
+      <svg class="ico-svg menu" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+    </div>
+
+    <div class="status-bar">
+      <div class="lbl"><span>記入状況</span><b>4 / 5 セクション</b></div>
+      <div class="bar"><div></div></div>
+    </div>
+
+    <div class="body-scroll">
+
+      <!-- ① 現状を把握 -->
+      <div class="section">
+        <div class="section-head">
+          <div class="num">1</div>
+          <div class="title">現状を把握</div>
+          <div class="mark">✓ 記入済</div>
+        </div>
+        <div class="section-body">
+          <div class="field">
+            <div class="field-label">体重 <span class="req">★</span></div>
+            <div class="field-row"><input class="input" value="75.0"><span class="unit">kg</span></div>
+          </div>
+          <div class="field">
+            <div class="field-label">身長 <span class="auto">プロフィール</span></div>
+            <div class="field-row"><input class="input readonly" value="170" readonly><span class="unit">cm</span></div>
+          </div>
+          <div class="field">
+            <div class="field-label">ウエスト <span class="req">★</span></div>
+            <div class="field-row"><input class="input" value="82.0"><span class="unit">cm</span></div>
+          </div>
+          <div class="field">
+            <div class="field-label">首回り <span class="req">★</span></div>
+            <div class="field-row"><input class="input" value="38.5"><span class="unit">cm</span></div>
+          </div>
+          <div class="field">
+            <div class="field-label">
+              体脂肪率 <span class="auto">自動計算</span>
+              <span class="comment-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;vertical-align:middle;margin-right:3px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>1</span>
+            </div>
+            <div class="field-row"><input class="input readonly" value="22.4" readonly><span class="unit">%</span></div>
+            <div class="field-comment">
+              <div class="who">のりfitness</div>
+              やや高めですが、ペース 0.5kg/週なら 3 ヶ月で 19% 程度まで改善できる範囲です。
+            </div>
+          </div>
+          <div class="field">
+            <div class="field-label">メンテ kcal <span class="auto">ツール反映</span></div>
+            <div class="field-row"><input class="input readonly" value="2604" readonly><span class="unit">kcal</span></div>
+          </div>
+
+          <button class="tool-btn">🧮 必要カロリー計算ツール<span class="tag">反映済</span></button>
+
+          <div class="section-comment">
+            <div class="head">
+              <div class="name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:middle;margin-right:5px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>のりfitness の添削</div>
+              <div class="date">2026/05/21</div>
+            </div>
+            <div class="text">数値、しっかり計測してくれてありがとう。基準値は十分です。これをスタートラインに、3 ヶ月で動かしていきましょう。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ② 目標の選定 -->
+      <div class="section">
+        <div class="section-head">
+          <div class="num">2</div>
+          <div class="title">目標の選定</div>
+          <div class="mark">✓ 記入済</div>
+        </div>
+        <div class="section-body">
+          <div class="field">
+            <div class="field-label">
+              目標体重 <span class="req">★</span>
+              <span class="comment-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;vertical-align:middle;margin-right:3px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>1</span>
+            </div>
+            <div class="field-row"><input class="input" value="68.0"><span class="unit">kg</span></div>
+            <div class="field-comment">
+              <div class="who">のりfitness</div>
+              -7kg は十分達成可能です。リバウンドしにくい現実的なゴール設定。
+            </div>
+          </div>
+          <div class="field">
+            <div class="field-label">到達予定日 <span class="auto">自動</span></div>
+            <input class="input readonly" value="2026 年 8 月 23 日 ごろ" readonly>
+          </div>
+          <div class="field">
+            <div class="field-label">短期目標 <span class="req">★</span></div>
+            <input class="input" value="3 ヶ月で体重を 5kg 落とす">
+          </div>
+          <div class="field">
+            <div class="field-label">長期目標 <span class="req">★</span></div>
+            <input class="input" value="1 年後に体脂肪率 15% 以下">
+          </div>
+          <div class="field">
+            <div class="field-label">プロセス (行動の目標) <span class="req">★</span></div>
+            <input class="input" value="毎日食事を記録、週 3 回筋トレ">
+          </div>
+
+          <button class="tool-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:middle;margin-right:6px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>減量期間逆算ツール<span class="tag">反映済</span></button>
+
+          <div class="section-comment">
+            <div class="head">
+              <div class="name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:middle;margin-right:5px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>のりfitness の添削</div>
+              <div class="date">2026/05/21</div>
+            </div>
+            <div class="text">「週 3 回」が習慣化のキー。最初の 2 週間がふんばりどころです、頑張りすぎないこと。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ③ 栄養設計 -->
+      <div class="section">
+        <div class="section-head">
+          <div class="num">3</div>
+          <div class="title">栄養設計</div>
+          <div class="mark">✓ 記入済</div>
+        </div>
+        <div class="section-body">
+
+          <div class="goal-card">
+            <div class="head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:middle;margin-right:6px;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>私が目指す 1 日の数字</div>
+            <div class="grid">
+              <div class="item">
+                <div class="lbl">カロリー</div>
+                <div class="val">2102 <span class="unit">kcal</span></div>
+              </div>
+              <div class="item">
+                <div class="lbl">P (たんぱく質)</div>
+                <div class="val">150 <span class="unit">g</span></div>
+              </div>
+              <div class="item">
+                <div class="lbl">F (脂質)</div>
+                <div class="val">58 <span class="unit">g</span></div>
+              </div>
+              <div class="item">
+                <div class="lbl">C (糖質)</div>
+                <div class="val">245 <span class="unit">g</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pfc-cards">
+            <div class="pfc-card">
+              <div class="dot"></div>
+              <div>
+                <div class="name">たんぱく質 (P)</div>
+                <div class="value">150 g</div>
+              </div>
+              <div class="right">
+                <div class="kcal">600 kcal</div>
+                <div class="pct">29 %</div>
+              </div>
+            </div>
+            <div class="pfc-card">
+              <div class="dot"></div>
+              <div>
+                <div class="name">脂質 (F)</div>
+                <div class="value">58 g</div>
+              </div>
+              <div class="right">
+                <div class="kcal">522 kcal</div>
+                <div class="pct">25 %</div>
+              </div>
+            </div>
+            <div class="pfc-card">
+              <div class="dot"></div>
+              <div>
+                <div class="name">糖質 (C)</div>
+                <div class="value">245 g</div>
+              </div>
+              <div class="right">
+                <div class="kcal">980 kcal</div>
+                <div class="pct">46 %</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pfc-total">
+            <div class="lbl">合計カロリー</div>
+            <div class="val">2102 kcal</div>
+          </div>
+
+          <div class="pfc-formula">
+            P = 4 kcal/g  /  F = 9 kcal/g  /  C = 4 kcal/g
+          </div>
+
+          <div class="pfc-read">
+            <div class="head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:middle;margin-right:6px;"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>結果の読み方</div>
+            <div class="read-text">あなたは1日に <b>C = 245g</b> の糖質が必要です。</div>
+          </div>
+
+          <button class="tool-btn">🍱 PFC・カーボサイクル設定<span class="tag">反映済</span></button>
+
+          <div class="section-comment">
+            <div class="head">
+              <div class="name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:middle;margin-right:5px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>のりfitness の添削</div>
+              <div class="date">2026/05/21</div>
+            </div>
+            <div class="text">P が体重 × 2 倍、しっかり摂れていて理想的。F も 25% で安定、C は減量フェーズなのでこのままで OK。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ④ プラスの感情を含むゴール -->
+      <div class="section">
+        <div class="section-head">
+          <div class="num">4</div>
+          <div class="title">プラスの感情を含むゴール</div>
+          <div class="mark">✓ 記入済</div>
+        </div>
+        <div class="section-body">
+          <div class="field">
+            <div class="field-label">達成時の気持ち <span class="req">★</span></div>
+            <input class="input" value="自信がついて、家族と思いっきり遊べる体になりたい" style="font-size: 12px;">
+          </div>
+
+          <div class="section-comment">
+            <div class="head">
+              <div class="name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:middle;margin-right:5px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>のりfitness の添削</div>
+              <div class="date">2026/05/21</div>
+            </div>
+            <div class="text">家族と遊べる体、いいですね。途中つらくなったら、このページに戻ってきてください。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ⑤ セルフイメージ改善 -->
+      <div class="section">
+        <div class="section-head">
+          <div class="num">5</div>
+          <div class="title">セルフイメージ改善</div>
+          <div class="mark todo">未記入</div>
+        </div>
+        <div class="section-body">
+          <div style="font-size: 11px; color: var(--ink3); margin-bottom: 10px;">
+            8 項目それぞれを「今」と「目標」で 0-10 点で評価
+          </div>
+
+          <div class="compare-header">
+            <div class="compare-col-label before">改善前 (今)</div>
+            <div class="compare-col-label after">改善後 (目標)</div>
+          </div>
+
+          <div class="slider-item">
+            <div class="label">1. 自分の体に対して批判的な思考を減らし、ありのままの自分を受け入れる</div>
+            <div class="slider-pair">
+              <div><input type="range" min="0" max="10" value="3"><div class="val">3</div></div>
+              <div><input type="range" min="0" max="10" value="8"><div class="val">8</div></div>
+            </div>
+          </div>
+
+          <div style="font-size: 10px; color: var(--ink4); margin-top: 8px; font-style: italic; text-align: center;">他 7 項目...</div>
+        </div>
+      </div>
+
+      <div class="nori-summary">
+        <div class="head">
+          <div class="name">のりfitness</div>
+          <div class="date">2026/05/21</div>
+        </div>
+        <div class="text">
+          きよむさんの初回提出確認しました!<br>
+          添削をお返しさせていただきました <span class="arrow-bouncy">↓</span>
+        </div>
+        <div class="text" style="font-size: 12px; color: var(--ink2);">
+          各セクションに 1 ずつ、気になる場所にはコメントマークでコメントを残しました。
+          まずは 1 週間、③ の PFC を意識した食事から始めてみてください。
+        </div>
+        <div class="history-toggle">▼ 過去の添削履歴 (0 件)</div>
+      </div>
+
+      <div class="reaudit">
+        <div class="msg">目標を更新したら、のりに見てもらえます</div>
+        <div class="btn">のりに再添削を依頼する</div>
+      </div>
+
+      <div class="bottom-links">
+        <div class="bottom-link">
+          <svg class="ico-svg-md" viewBox="0 0 24 24" style="stroke: var(--ink); fill: none; stroke-width: 2;"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+          編集履歴
+        </div>
+        <div class="bottom-link">
+          <svg class="ico-svg-md" viewBox="0 0 24 24" style="stroke: var(--ink); fill: none; stroke-width: 2;"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          変化を見る
+        </div>
+      </div>
+    </div>
+
+    <div class="save-bar">
+      <button class="draft">下書き保存</button>
+      <button class="save">保存する</button>
+    </div>
+
+    <div class="tab-nav">
+      <div class="tab"><svg class="ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>ホーム</div>
+      <div class="tab"><svg class="ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>コース</div>
+      <div class="tab active"><svg class="ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>記録</div>
+      <div class="tab"><svg class="ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>検索</div>
+      <div class="tab"><svg class="ico-svg-sm" viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 2;"><circle cx="12" cy="12" r="3"/></svg>設定</div>
+    </div>
+  </div>
+
+  <!-- 注釈 -->
+  <div class="annotation">
+    <h3>✅ 反映した全合意事項</h3>
+    <ul>
+      <li>色: <b>Nike エッセンス完全準拠</b> (明るい緑 + グレー罫線 + 黒文字)</li>
+      <li>5 セクション (1 週間の実行プラン削除)</li>
+      <li>ヘッダー・タイトル文字 = 黒 <code>#1a1a1a</code></li>
+      <li>入力欄枠線 = グレー <code>#e8ebe9</code></li>
+      <li>セクション番号バッジ = 黒丸 (Nike 風)</li>
+      <li>PFC ドット = <b>3 つ全部 #4ECD5D</b> (緑統一)</li>
+      <li>目標カードグラデ = <code>#1f6b3e → #4ECD5D</code> (深緑→明るい緑)</li>
+      <li>ツール起動ボタン = #4ECD5D + 角丸 3px (シャープ)</li>
+      <li>添削系 = <b>全部 薄い黄色</b> (黄マーカー系)</li>
+      <li>↓ 矢印 = バウンドアニメ (1.5s 反復)</li>
+      <li>PFC 数値 = <b>整合修正済</b> (P 150 / F 58 / C 245 で合計 2102 kcal ≒ 目標 2100)</li>
+    </ul>
+
+    <h3>🎨 採用色 (Nike + 黄色)</h3>
+    <ul>
+      <li><span class="swatch" style="background:#4ECD5D"></span>明るい緑 <code>#4ECD5D</code> — メイン</li>
+      <li><span class="swatch" style="background:#2EA84B"></span>濃緑 <code>#2EA84B</code> — active 文字</li>
+      <li><span class="swatch" style="background:#1f6b3e"></span>深緑 <code>#1f6b3e</code> — 目標カード暗色</li>
+      <li><span class="swatch" style="background:#1a1a1a"></span>黒 <code>#1a1a1a</code> — 文字主</li>
+      <li><span class="swatch" style="background:#e8ebe9"></span>グレー罫線 <code>#e8ebe9</code></li>
+      <li><span class="swatch" style="background:rgba(255,235,59,0.55)"></span>添削系 黄色 (マーカー同色)</li>
+    </ul>
+
+    <h3>📩 添削機能</h3>
+    <ul>
+      <li><b>フィールド単位</b>: 体脂肪率・目標体重に 💬 + 黄色枠コメント</li>
+      <li><b>セクション単位</b>: 各セクション下に黄色枠コメント + 日付</li>
+      <li><b>全体総評</b>: ⑤ の下に「のりfitness」枠 + バウンド矢印 + 履歴トグル</li>
+      <li><b>再添削申請</b>: 「のりに再添削を依頼する」ボタン</li>
+    </ul>
+
+    <h3>📝 PFC 数値の正解</h3>
+    <ul>
+      <li>目標 2100 kcal、脂質 25% で計算</li>
+      <li>P 150g × 4 = 600 kcal (29%)</li>
+      <li>F 58g × 9 = 522 kcal (25%)</li>
+      <li>C 245g × 4 = 980 kcal (46%)</li>
+      <li>合計: 2102 kcal (≒ 2100、g 丸めで誤差 2 kcal)</li>
+    </ul>
+
+    <h3>📋 次: PC 一枚ものビュー</h3>
+    <ul>
+      <li><b>/tmp/goal_sheet_v3_overview.html</b> を別ファイルで作成中</li>
+      <li>2 カラム配置で全項目を 1 画面俯瞰</li>
+      <li>同じ配色で統一</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

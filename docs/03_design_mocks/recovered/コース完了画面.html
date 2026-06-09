@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — コース完了画面</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --ink4: #ccc;
+    --border: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f8f9fa;
+    --bg-warm: linear-gradient(135deg, #e0f2f1, #fffbe6);
+    --yellow-name: #b8860b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: #e8ebec; color: var(--ink); line-height: 1.6; padding: 24px; }
+  .page-header { max-width: 900px; margin: 0 auto 32px; text-align: center; }
+  .page-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .page-header p { color: #6b7d75; font-size: 13px; }
+
+  .stage { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: 440px 1fr; gap: 32px; align-items: start; }
+
+  .phone {
+    width: 100%; max-width: 440px;
+    background: var(--bg); border: 8px solid #2a2a2a; border-radius: 28px;
+    overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    font-size: 14px; display: flex; flex-direction: column; min-height: 800px;
+    position: relative;
+  }
+  .phone-status { background: #2a2a2a; color: #fff; text-align: center; font-size: 11px; padding: 4px; font-family: 'Inter', sans-serif; }
+
+  /* コース完了画面本体 */
+  .complete-screen {
+    flex: 1;
+    background: var(--bg-warm);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 28px 30px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* 装飾円 (背景) */
+  .complete-screen::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 240px; height: 240px;
+    border-radius: 50%;
+    background: rgba(0,137,123,.06);
+    pointer-events: none;
+  }
+  .complete-screen::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: -100px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: rgba(255,235,59,.08);
+    pointer-events: none;
+  }
+
+  /* 紙吹雪コンテナ */
+  .confetti {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+  }
+  .confetti span {
+    position: absolute;
+    top: -20px;
+    width: 8px;
+    height: 8px;
+    opacity: 0.9;
+    animation: confettiFall linear infinite;
+  }
+  /* 紙吹雪を 20 個、ランダムな位置・色・遅延 */
+  .confetti span:nth-child(1) { left: 5%; background: #00897b; animation-duration: 3.2s; animation-delay: 0.0s; }
+  .confetti span:nth-child(2) { left: 12%; background: #ffeb3b; border-radius: 50%; animation-duration: 4.1s; animation-delay: 0.3s; }
+  .confetti span:nth-child(3) { left: 20%; background: #ff8f00; animation-duration: 3.5s; animation-delay: 0.6s; transform: rotate(45deg); }
+  .confetti span:nth-child(4) { left: 28%; background: #00897b; border-radius: 50%; animation-duration: 4.5s; animation-delay: 0.1s; }
+  .confetti span:nth-child(5) { left: 35%; background: #b8860b; animation-duration: 3.8s; animation-delay: 0.5s; }
+  .confetti span:nth-child(6) { left: 42%; background: #ffeb3b; animation-duration: 3.3s; animation-delay: 0.8s; }
+  .confetti span:nth-child(7) { left: 50%; background: #00695c; border-radius: 50%; animation-duration: 4.2s; animation-delay: 0.2s; }
+  .confetti span:nth-child(8) { left: 58%; background: #ff8f00; animation-duration: 3.7s; animation-delay: 0.9s; transform: rotate(20deg); }
+  .confetti span:nth-child(9) { left: 65%; background: #00897b; animation-duration: 4.0s; animation-delay: 0.4s; }
+  .confetti span:nth-child(10) { left: 72%; background: #ffeb3b; border-radius: 50%; animation-duration: 3.6s; animation-delay: 0.7s; }
+  .confetti span:nth-child(11) { left: 80%; background: #b8860b; animation-duration: 4.3s; animation-delay: 0.0s; }
+  .confetti span:nth-child(12) { left: 88%; background: #00897b; animation-duration: 3.4s; animation-delay: 1.0s; transform: rotate(60deg); }
+  .confetti span:nth-child(13) { left: 8%; background: #ff8f00; border-radius: 50%; animation-duration: 4.4s; animation-delay: 1.3s; }
+  .confetti span:nth-child(14) { left: 18%; background: #ffeb3b; animation-duration: 3.9s; animation-delay: 1.5s; }
+  .confetti span:nth-child(15) { left: 32%; background: #00695c; animation-duration: 4.1s; animation-delay: 1.7s; transform: rotate(30deg); }
+  .confetti span:nth-child(16) { left: 45%; background: #b8860b; border-radius: 50%; animation-duration: 3.8s; animation-delay: 1.2s; }
+  .confetti span:nth-child(17) { left: 60%; background: #00897b; animation-duration: 4.2s; animation-delay: 1.6s; }
+  .confetti span:nth-child(18) { left: 75%; background: #ffeb3b; animation-duration: 3.5s; animation-delay: 1.4s; transform: rotate(45deg); }
+  .confetti span:nth-child(19) { left: 90%; background: #ff8f00; border-radius: 50%; animation-duration: 4.0s; animation-delay: 1.8s; }
+  .confetti span:nth-child(20) { left: 95%; background: #00897b; animation-duration: 3.7s; animation-delay: 2.0s; }
+  @keyframes confettiFall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 0.9; }
+    100% { transform: translateY(900px) rotate(720deg); opacity: 0.4; }
+  }
+
+  /* キャラ */
+  .character {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    box-shadow: 0 12px 40px rgba(0,137,123,.22), 0 4px 14px rgba(0,0,0,.06);
+    margin-bottom: 24px;
+    overflow: hidden;
+    background: #fff;
+    animation: charPop 0.6s ease-out 0.1s both;
+    position: relative;
+    z-index: 1;
+  }
+  .character img { width: 100%; height: 100%; object-fit: cover; display: block; transform: scale(1.2); }
+  @keyframes charPop {
+    0% { opacity: 0; transform: scale(0.85); }
+    60% { transform: scale(1.08); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  /* メッセージ */
+  .complete-headline {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary-darker);
+    margin-bottom: 8px;
+    z-index: 1;
+    animation: fadeUp 0.5s ease-out 0.3s both;
+    letter-spacing: 0.02em;
+  }
+  .complete-course {
+    text-align: center;
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.7;
+    margin-bottom: 30px;
+    z-index: 1;
+    animation: fadeUp 0.5s ease-out 0.45s both;
+  }
+  .complete-course b {
+    color: var(--primary-darker);
+    font-weight: 700;
+    display: block;
+    font-size: 16px;
+    margin: 4px 0;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* サマリ 3 セル */
+  .summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+    margin-bottom: 28px;
+    z-index: 1;
+    animation: fadeUp 0.5s ease-out 0.6s both;
+  }
+  .summary-cell {
+    background: rgba(255,255,255,.75);
+    border-radius: 10px;
+    padding: 12px 6px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,.9);
+  }
+  .summary-cell .lbl {
+    font-size: 9px;
+    color: var(--ink3);
+    margin-bottom: 4px;
+    letter-spacing: .04em;
+  }
+  .summary-cell .num {
+    font-family: 'Inter', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary-darker);
+    line-height: 1;
+  }
+  .summary-cell .u {
+    font-size: 9px;
+    color: var(--ink3);
+    margin-top: 2px;
+  }
+
+  /* CTA */
+  .cta-btn {
+    width: 100%;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 6px 18px rgba(0,137,123,.28);
+    animation: fadeUp 0.5s ease-out 0.75s both;
+    margin-bottom: 10px;
+    z-index: 1;
+  }
+  .cta-btn:hover { background: var(--primary-dark); }
+  .home-link {
+    display: block;
+    text-align: center;
+    font-size: 12px;
+    color: var(--ink3);
+    text-decoration: none;
+    padding: 6px;
+    animation: fadeUp 0.5s ease-out 0.85s both;
+    z-index: 1;
+  }
+  .home-link:hover { color: var(--ink); }
+
+  /* 注釈 */
+  .annotation { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; font-size: 13px; color: #555; position: sticky; top: 24px; }
+  .annotation h3 { font-size: 14px; color: var(--ink); margin: 18px 0 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+  .annotation h3:first-child { margin-top: 0; }
+  .annotation ul { padding-left: 20px; }
+  .annotation li { margin-bottom: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🎉 コース完了画面 (派手めの祝福)</h1>
+  <p>1 コース全部の章を終えた時 ・ 全画面遷移 + 紙吹雪 ・ 5 回のみ</p>
+</div>
+
+<div class="stage">
+
+  <div class="phone">
+    <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+
+    <div class="complete-screen">
+      <!-- 紙吹雪 -->
+      <div class="confetti">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+
+      <div class="character">
+        <img src="images/nori-character.png" alt="のりキャラクター">
+      </div>
+
+      <div class="complete-headline">コース 1 完了!</div>
+      <div class="complete-course">
+        <b>「ダイエットの基礎」</b>
+        全 5 章を学び終えました
+      </div>
+
+      <div class="summary">
+        <div class="summary-cell">
+          <div class="lbl">学習日数</div>
+          <div class="num">28</div>
+          <div class="u">日</div>
+        </div>
+        <div class="summary-cell">
+          <div class="lbl">視聴時間</div>
+          <div class="num">4.5</div>
+          <div class="u">時間</div>
+        </div>
+        <div class="summary-cell">
+          <div class="lbl">完了レッスン</div>
+          <div class="num">32</div>
+          <div class="u">個</div>
+        </div>
+      </div>
+
+      <button class="cta-btn">次のコースへ →</button>
+      <a href="#" class="home-link">ホームに戻る</a>
+    </div>
+  </div>
+
+  <div class="annotation">
+    <h3>🗺 画面の役割</h3>
+    <ul>
+      <li>1 コース全部の章を終えた瞬間に表示</li>
+      <li><b>派手めの祝福</b>: 5 回しかないので特別感を出す</li>
+      <li>受講生が「節目」を実感、次のコースへの誘い</li>
+    </ul>
+
+    <h3>📐 構成 (上から)</h3>
+    <ul>
+      <li><b>背景</b>: E案グラデ + 装飾円 2 つ + 紙吹雪アニメ</li>
+      <li><b>紙吹雪</b>: 20 粒、5 色 (ティール / 黄 / オレンジ / 深緑 / ダークゴールド) + 円/四角混在</li>
+      <li><b>キャラ</b>: 160px (起動と同じサイズ、主役感)</li>
+      <li><b>見出し</b>: 「コース 1 完了!」(28px 太字、深緑)</li>
+      <li><b>コース名</b>: 中央に強調表示</li>
+      <li><b>サマリ 3 セル</b>: 学習日数 / 視聴時間 / 完了レッスン</li>
+      <li><b>CTA</b>: 「次のコースへ →」(ティール緑、影強め)</li>
+      <li><b>サブリンク</b>: 「ホームに戻る」(薄く、控えめ)</li>
+    </ul>
+
+    <h3>🎬 紙吹雪アニメーション仕様</h3>
+    <ul>
+      <li>CSS のみで実装 (JS 不要、軽量)</li>
+      <li>20 粒、それぞれ <code>animation-duration</code> と <code>animation-delay</code> がランダム</li>
+      <li>3.2s〜4.5s で落下、ランダム遅延 0〜2.0s</li>
+      <li>落下 + 720度回転 + 透明度 0.9 → 0.4</li>
+      <li><b>infinite ループ</b> = 継続的に降り続ける (ユーザーが画面を閉じるまで)</li>
+      <li>※ 実装時は「最初の 5 秒だけ」など制御可能</li>
+    </ul>
+
+    <h3>📝 メッセージのトーン</h3>
+    <ul>
+      <li><b>「完了!」は許容</b> (5 回しかない節目なので "!" 使ってもOK)</li>
+      <li><b>「学び終えました」</b> = 事実を肯定</li>
+      <li>「すごい!天才!」は使わない</li>
+      <li>サマリ数値はポジティブな指標のみ (学習日数 / 視聴時間 / 完了レッスン)</li>
+      <li>「サボった日数」「未完了レッスン数」など否定的な数値は出さない</li>
+    </ul>
+
+    <h3>📊 サマリ数値 (合意済仕様)</h3>
+    <ul>
+      <li><b>学習日数</b>: コース開始日からの累計 (例: 28 日)</li>
+      <li><b>視聴時間</b>: コース内全レッスンの動画視聴時間 (例: 4.5 時間)</li>
+      <li><b>完了レッスン</b>: 「できた!」を押したレッスン数 (例: 32 個)</li>
+      <li>※ 全部「✓ 達成したこと」だけを示す</li>
+    </ul>
+
+    <h3>🎨 デザイン方針</h3>
+    <ul>
+      <li>章末モーダルとの差別化: <b>紙吹雪あり</b> ・ <b>キャラ大きめ</b> ・ <b>サマリあり</b></li>
+      <li>背景: E案グラデ (温かい、起動・章末と統一)</li>
+      <li>装飾円 2 つで深さ感</li>
+      <li>サマリセル背景は白で透過感</li>
+    </ul>
+
+    <h3>🔄 遷移</h3>
+    <ul>
+      <li>[次のコースへ →] → 次のコースの章一覧に遷移</li>
+      <li>[ホームに戻る] → ホーム画面へ</li>
+      <li>「次のコース」が存在しない場合 (5 コース目完了) → <b>全コース完了画面</b> (Phase 2 検討)</li>
+    </ul>
+
+    <h3>⚠️ 未確定 / Phase 2 候補</h3>
+    <ul>
+      <li>紙吹雪の継続時間 = ずっと降り続ける / 5 秒で止まる / ループ → 実装時調整</li>
+      <li><b>全コース完了 (5 コース全部終えた)</b> 画面 = 別途設計 (卒業祝福、最大級演出)</li>
+      <li>「コース 1 のバッジ」を保存・表示するか = 「バッジ多用 NG」方針と相談</li>
+      <li>のり社長からの動画メッセージを差し込むか? (コース完了限定特典的に)</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

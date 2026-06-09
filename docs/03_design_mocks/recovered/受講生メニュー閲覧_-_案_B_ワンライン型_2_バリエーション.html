@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>受講生メニュー閲覧 - 案 B ワンライン型 2 バリエーション</title>
+<style>
+  :root {
+    --teal: #00897b;
+    --teal-dark: #00695c;
+    --teal-soft: rgba(0,137,123,0.08);
+    --border: #e8ebe9;
+    --gray-50: #fafafa;
+    --gray-100: #f4f4f5;
+    --gray-300: #d4d4d8;
+    --gray-500: #71717a;
+    --gray-700: #3f3f46;
+    --gray-900: #18181b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #ececec;
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+    color: var(--gray-900);
+    padding: 32px 16px 100px;
+  }
+  .page-title { max-width: 600px; margin: 0 auto 32px; text-align: center; }
+  .page-title h1 { font-size: 18px; margin: 0 0 8px; }
+  .page-title p { font-size: 12px; color: var(--gray-500); margin: 0; line-height: 1.7; }
+  .pattern { max-width: 480px; margin: 0 auto 48px; }
+  .pattern-header { text-align: center; margin-bottom: 12px; }
+  .pattern-num { font-size: 11px; color: var(--gray-500); letter-spacing: 1px; font-weight: 700; }
+  .pattern-title { font-size: 14px; font-weight: 700; margin-top: 2px; }
+  .pattern-note { font-size: 11px; color: var(--gray-500); margin-top: 4px; }
+  .phone {
+    max-width: 390px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  }
+
+  /* 共通: ヘッダー */
+  .app-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .back-btn { background: none; border: none; padding: 0; cursor: pointer; color: var(--gray-900); }
+  .app-title { flex: 1; text-align: center; font-size: 14px; font-weight: 700; }
+
+  /* 共通: 日タブ */
+  .day-tabs {
+    display: flex;
+    background: white;
+    border-bottom: 1px solid var(--border);
+  }
+  .day-tab {
+    flex: 1;
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gray-500);
+    border-bottom: 2px solid transparent;
+  }
+  .day-tab.active {
+    color: var(--teal-dark);
+    border-bottom-color: var(--teal);
+  }
+  .day-tab .sub {
+    font-size: 9px;
+    color: var(--gray-500);
+    font-weight: 500;
+    margin-top: 2px;
+  }
+  .day-tab.active .sub { color: var(--teal-dark); }
+
+  /* ワンライン型 共通 */
+  .b-list { padding: 0; background: white; }
+  .b-row {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 12px;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .b-row:last-child { border-bottom: none; }
+  .b-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--gray-100);
+    color: var(--gray-700);
+    font-weight: 700;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .b-body { min-width: 0; }
+  .b-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gray-900);
+    line-height: 1.3;
+  }
+  .b-meta {
+    font-size: 11px;
+    color: var(--gray-500);
+    margin-top: 4px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    line-height: 1.6;
+  }
+  /* B-1 用: 部位を先頭で強調 */
+  .b-meta .part-lead {
+    color: var(--teal-dark);
+    font-weight: 700;
+    margin-right: 6px;
+  }
+  /* B-2 用: 狙いラベルを末尾 */
+  .b-meta .target {
+    color: var(--teal-dark);
+    font-weight: 700;
+  }
+  .b-meta .target-label {
+    color: var(--gray-500);
+    font-weight: 500;
+  }
+  /* 縦線セパレータ (全角) */
+  .b-meta .sep {
+    color: var(--gray-300);
+    margin: 0 4px;
+  }
+
+  /* フッタ */
+  .footer {
+    padding: 12px 16px;
+    background: white;
+    border-top: 1px solid var(--border);
+  }
+  .footer-btn {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--teal);
+    background: white;
+    color: var(--teal-dark);
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .tc-note {
+    padding: 10px 16px;
+    background: var(--gray-50);
+    border-top: 1px solid var(--border);
+    font-size: 10px;
+    color: var(--gray-500);
+    line-height: 1.6;
+    text-align: center;
+  }
+  .tc-note a { color: var(--teal-dark); font-weight: 700; text-decoration: underline; }
+
+  .divider {
+    max-width: 600px;
+    margin: 32px auto;
+    border-top: 1px dashed #ccc;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  <h1>📋 受講生メニュー閲覧 - 案 B (ワンライン型) 2 バリエーション</h1>
+  <p>
+    同じ実データ (HIRO さん 1 サイクル目 C メニュー、4 種目)<br>
+    メタ情報の並び順だけ違う 2 案を比較
+  </p>
+</div>
+
+<!-- =============== 案 B-1: 部位を先頭で強調 =============== -->
+<section class="pattern">
+  <div class="pattern-header">
+    <div class="pattern-num">案 B-1</div>
+    <div class="pattern-title">部位を先頭で強調</div>
+    <div class="pattern-note">「胸 ｜ 10回×2セット ｜ 休憩 3分」</div>
+  </div>
+  <div class="phone">
+    <div class="app-header">
+      <button class="back-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <div class="app-title">あなたのメニュー</div>
+      <div style="width:20px"></div>
+    </div>
+    <div class="day-tabs">
+      <div class="day-tab active">A<div class="sub">胸・背中・脚</div></div>
+      <div class="day-tab">B<div class="sub">肩・腕</div></div>
+    </div>
+    <div class="b-list">
+      <div class="b-row">
+        <div class="b-num">1</div>
+        <div class="b-body">
+          <div class="b-name">インクラインダンベルフライ</div>
+          <div class="b-meta">
+            <span class="part-lead">胸</span><span class="sep">｜</span>10回×2セット<span class="sep">｜</span>休憩 3分
+          </div>
+        </div>
+      </div>
+      <div class="b-row">
+        <div class="b-num">2</div>
+        <div class="b-body">
+          <div class="b-name">懸垂</div>
+          <div class="b-meta">
+            <span class="part-lead">背中</span><span class="sep">｜</span>10回×2セット<span class="sep">｜</span>休憩 3分
+          </div>
+        </div>
+      </div>
+      <div class="b-row">
+        <div class="b-num">3</div>
+        <div class="b-body">
+          <div class="b-name">バーベルスクワット</div>
+          <div class="b-meta">
+            <span class="part-lead">脚</span><span class="sep">｜</span>10回×2セット<span class="sep">｜</span>休憩 3分
+          </div>
+        </div>
+      </div>
+      <div class="b-row">
+        <div class="b-num">4</div>
+        <div class="b-body">
+          <div class="b-name">アブローラ or クランチ</div>
+          <div class="b-meta">
+            <span class="part-lead">腹筋</span><span class="sep">｜</span>10回×2セット<span class="sep">｜</span>休憩 1分
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tc-note">実行記録は <a href="#">トレーナークラウド</a></div>
+    <div class="footer"><button class="footer-btn">メニュー変更リクエスト</button></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- =============== 案 B-2: 狙いラベルを末尾 =============== -->
+<section class="pattern">
+  <div class="pattern-header">
+    <div class="pattern-num">案 B-2</div>
+    <div class="pattern-title">狙いを末尾でラベル化</div>
+    <div class="pattern-note">「10回×2セット ｜ 休憩 3分 ｜ 狙い:胸」</div>
+  </div>
+  <div class="phone">
+    <div class="app-header">
+      <button class="back-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <div class="app-title">あなたのメニュー</div>
+      <div style="width:20px"></div>
+    </div>
+    <div class="day-tabs">
+      <div class="day-tab active">A<div class="sub">胸・背中・脚</div></div>
+      <div class="day-tab">B<div class="sub">肩・腕</div></div>
+    </div>
+    <div class="b-list">
+      <div class="b-row">
+        <div class="b-num">1</div>
+        <div class="b-body">
+          <div class="b-name">インクラインダンベルフライ</div>
+          <div class="b-meta">
+            10回×2セット<span class="sep">｜</span>休憩 3分<span class="sep">｜</span><span class="target-label">狙い:</span><span class="target">胸</span>
+          </div>
+        </div>
+      </div>
+      <div class="b-row">
+        <div class="b-num">2</div>
+        <div class="b-body">
+          <div class="b-name">懸垂</div>
+          <div class="b-meta">
+            10回×2セット<span class="sep">｜</span>休憩 3分<span class="sep">｜</span><span class="target-label">狙い:</span><span class="target">背中</span>
+          </div>
+        </div>
+      </div>
+      <div class="b-row">
+        <div class="b-num">3</div>
+        <div class="b-body">
+          <div class="b-name">バーベルスクワット</div>
+          <div class="b-meta">
+            10回×2セット<span class="sep">｜</span>休憩 3分<span class="sep">｜</span><span class="target-label">狙い:</span><span class="target">脚</span>
+          </div>
+        </div>
+      </div>
+      <div class="b-row">
+        <div class="b-num">4</div>
+        <div class="b-body">
+          <div class="b-name">アブローラ or クランチ</div>
+          <div class="b-meta">
+            10回×2セット<span class="sep">｜</span>休憩 1分<span class="sep">｜</span><span class="target-label">狙い:</span><span class="target">腹筋</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tc-note">実行記録は <a href="#">トレーナークラウド</a></div>
+    <div class="footer"><button class="footer-btn">メニュー変更リクエスト</button></div>
+  </div>
+</section>
+
+</body>
+</html>
