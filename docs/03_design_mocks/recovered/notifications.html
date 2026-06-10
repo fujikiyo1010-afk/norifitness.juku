@@ -11,13 +11,15 @@
     --primary-dark: #00695c;
     --primary-darker: #004d40;
     --ink: #1a1a1a;
-    --ink2: #555;
+    --ink2: #4a4a4a;
     --ink3: #888;
     --ink4: #ccc;
     --border: #e8ebe9;
     --bg: #fff;
-    --bg-soft: #f8f9fa;
-    --bg-warm: linear-gradient(135deg, #e0f2f1, #fffbe6);
+    --bg-card-area: #fafafa;
+    /* 参考画像準拠の色 (薄ピンク系タグ) */
+    --tag-bg: #fde4e6;
+    --tag-text: #d63349;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Noto Sans JP', sans-serif; background: #e8ebec; color: var(--ink); line-height: 1.6; padding: 24px; }
@@ -38,116 +40,81 @@
     min-height: 720px;
   }
   .phone-status { background: #2a2a2a; color: #fff; text-align: center; font-size: 10px; padding: 3px; font-family: 'Inter', sans-serif; }
+
+  /* ヘッダー (戻る + 中央タイトル) */
   .app-header {
-    padding: 12px 14px;
+    padding: 14px 14px;
     background: #fff;
     border-bottom: 1px solid var(--border);
-    display: flex;
+    display: grid;
+    grid-template-columns: 40px 1fr 40px;
     align-items: center;
-    gap: 10px;
   }
-  .app-header .back-btn { background: none; border: none; color: var(--ink2); cursor: pointer; padding: 4px; display: flex; }
-  .app-header .back-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .app-header .title { font-size: 15px; font-weight: 700; flex: 1; }
-  .app-header .filter-btn {
-    font-size: 10.5px;
-    color: var(--ink3);
-    background: none;
-    border: 1px solid var(--ink4);
-    padding: 3px 9px;
-    border-radius: 9999px;
-    cursor: pointer;
+  .app-header .back-btn {
+    background: none; border: none; color: var(--ink2); cursor: pointer; padding: 4px; display: flex; align-items: center;
   }
-  .app-header .filter-btn.active {
-    color: var(--primary-dark);
-    border-color: var(--primary);
-    background: rgba(0,137,123,.06);
-  }
+  .app-header .back-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .app-header .title { font-size: 16px; font-weight: 700; color: var(--ink); text-align: center; }
+
+  /* カード一覧エリア */
   .scroll-area {
     flex: 1;
     overflow-y: auto;
-    background: var(--bg-soft);
+    background: var(--bg-card-area);
+    padding: 14px 14px 18px;
   }
-  .notif-list { list-style: none; padding: 0; }
-  .notif-item {
+  .notif-list {
+    list-style: none;
+    padding: 0;
     display: flex;
-    align-items: flex-start;
+    flex-direction: column;
     gap: 12px;
-    padding: 14px 14px 12px;
+  }
+
+  /* カード本体 */
+  .notif-card {
     background: #fff;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-  }
-  .notif-item:hover { background: var(--bg-soft); }
-  .notif-item .dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--primary);
-    flex-shrink: 0;
-    margin-top: 5px;
-  }
-  .notif-item.read .dot { background: transparent; border: 1px solid var(--ink4); }
-  .notif-item .icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 14px 14px 16px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-  .notif-item .icon svg { width: 18px; height: 18px; stroke: var(--primary-dark); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .notif-item.read .icon svg { stroke: var(--ink3); }
-  .notif-item .body { flex: 1; min-width: 0; }
-  .notif-item .top-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
     gap: 8px;
-    margin-bottom: 3px;
+    cursor: pointer;
+    transition: box-shadow .15s ease;
   }
-  .notif-item .ttl {
-    font-size: 13px;
+  .notif-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.06); }
+  .notif-card .body { flex: 1; min-width: 0; }
+  .notif-card .tag {
+    display: inline-block;
+    background: var(--tag-bg);
+    color: var(--tag-text);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 5px;
+    margin-bottom: 8px;
+    letter-spacing: .02em;
+  }
+  .notif-card .ttl {
+    font-size: 14px;
     font-weight: 700;
     color: var(--ink);
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    line-height: 1.5;
+    margin-bottom: 4px;
   }
-  .notif-item.read .ttl { color: var(--ink2); font-weight: 500; }
-  .notif-item .date {
-    font-size: 10px;
+  .notif-card .date {
+    font-size: 11px;
     color: var(--ink3);
     font-family: 'Inter', sans-serif;
+  }
+  .notif-card .chevron {
     flex-shrink: 0;
+    color: var(--ink4);
+    display: flex;
+    align-items: center;
   }
-  .notif-item .preview {
-    font-size: 11.5px;
-    color: var(--ink2);
-    line-height: 1.6;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  .notif-item.read .preview { color: var(--ink3); }
-  .section-date {
-    padding: 10px 14px 6px;
-    font-size: 10px;
-    color: var(--ink3);
-    font-weight: 700;
-    letter-spacing: .12em;
-    background: var(--bg-soft);
-  }
-  .empty-bottom {
-    padding: 24px;
-    text-align: center;
-    color: var(--ink3);
-    font-size: 11px;
-  }
+  .notif-card .chevron svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
   .annotation-wrap { max-width: 900px; margin: 32px auto 0; }
   .annotation { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; font-size: 13px; color: #555; }
@@ -161,94 +128,74 @@
 
 <div class="page-header">
   <h1>お知らせ一覧画面</h1>
-  <p>ホーム ヘッダー ✉ アイコンから開く ・ (未実装)</p>
+  <p>ホーム ヘッダー ✉ アイコンから開く ・ 参考画像準拠スタイル ・ (未実装)</p>
 </div>
 
 <div class="stage">
   <div class="phone">
-    <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+    <div class="phone-status">●●● iPhone 15:31 ▮▮▮</div>
     <div class="app-header">
       <button class="back-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
       <div class="title">お知らせ</div>
-      <button class="filter-btn active">未読のみ</button>
+      <div></div>
     </div>
 
     <div class="scroll-area">
-      <div class="section-date">今週</div>
-
       <ul class="notif-list">
-        <li class="notif-item">
-          <div class="dot"></div>
-          <div class="icon">
-            <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
-          </div>
+        <li class="notif-card">
           <div class="body">
-            <div class="top-row">
-              <div class="ttl">のりfitness から動画返信が届きました</div>
-              <div class="date">06/09</div>
-            </div>
-            <div class="preview">
-              2026 年 5 月の月次添削に対する返信動画が公開されました。「記録」タブからご覧いただけます。
-            </div>
+            <span class="tag">メンテナンス</span>
+            <div class="ttl">6/11 メンテナンス予告のお知らせ</div>
+            <div class="date">31 分前</div>
           </div>
+          <span class="chevron"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
         </li>
 
-        <li class="notif-item">
-          <div class="dot"></div>
-          <div class="icon">
-            <svg viewBox="0 0 24 24"><path d="M14.5 8 8 14.5l1.5 1.5L16 9.5z"/><path d="M2 12c0-1 .9-2 2-2h2v4H4c-1.1 0-2-.9-2-2"/><path d="M18 14h2c1.1 0 2-.9 2-2s-.9-2-2-2h-2v4"/></svg>
-          </div>
+        <li class="notif-card">
           <div class="body">
-            <div class="top-row">
-              <div class="ttl">専用筋トレメニューが届きました</div>
-              <div class="date">06/07</div>
-            </div>
-            <div class="preview">
-              あなた専用の筋トレメニューが完成しました。「ホーム → 筋トレメニュー」からご確認ください。
-            </div>
+            <span class="tag">月次添削</span>
+            <div class="ttl">のりfitness から動画返信が届きました</div>
+            <div class="date">2026/06/09</div>
           </div>
+          <span class="chevron"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
+        </li>
+
+        <li class="notif-card">
+          <div class="body">
+            <span class="tag">筋トレメニュー</span>
+            <div class="ttl">専用筋トレメニューが届きました</div>
+            <div class="date">2026/06/07</div>
+          </div>
+          <span class="chevron"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
+        </li>
+
+        <li class="notif-card">
+          <div class="body">
+            <span class="tag">月次添削</span>
+            <div class="ttl">2026 年 6 月の月次振り返り 受付開始</div>
+            <div class="date">2026/06/01</div>
+          </div>
+          <span class="chevron"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
+        </li>
+
+        <li class="notif-card">
+          <div class="body">
+            <span class="tag">目標シート</span>
+            <div class="ttl">目標管理シートに添削が届きました</div>
+            <div class="date">2026/05/28</div>
+          </div>
+          <span class="chevron"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
+        </li>
+
+        <li class="notif-card">
+          <div class="body">
+            <span class="tag">お知らせ</span>
+            <div class="ttl">【6 月】各種更新のお知らせ</div>
+            <div class="date">2026/06/01</div>
+          </div>
+          <span class="chevron"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
         </li>
       </ul>
-
-      <div class="section-date">先週</div>
-
-      <ul class="notif-list">
-        <li class="notif-item read">
-          <div class="dot"></div>
-          <div class="icon">
-            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          </div>
-          <div class="body">
-            <div class="top-row">
-              <div class="ttl">2026 年 6 月の月次振り返り 受付開始</div>
-              <div class="date">06/01</div>
-            </div>
-            <div class="preview">
-              月末までに 17 項目の振り返りを記入してください。提出後、のり社長から動画返信が届きます。
-            </div>
-          </div>
-        </li>
-
-        <li class="notif-item read">
-          <div class="dot"></div>
-          <div class="icon">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-          </div>
-          <div class="body">
-            <div class="top-row">
-              <div class="ttl">目標管理シートに添削が届きました</div>
-              <div class="date">05/28</div>
-            </div>
-            <div class="preview">
-              のりfitness からあなたの目標シートに対するコメントが追加されました。
-            </div>
-          </div>
-        </li>
-      </ul>
-
-      <div class="empty-bottom">
-        ─ ここまでが過去 30 日のお知らせ ─
-      </div>
     </div>
   </div>
 </div>
@@ -258,38 +205,35 @@
     <h3>画面の役割</h3>
     <ul>
       <li>ホーム画面のヘッダー右上 ✉ アイコンから開く</li>
-      <li>受講生に届く通知 (動画返信 / メニュー配布 / 月次受付開始 / 目標シート添削 等) を一覧で確認</li>
-      <li>未読 / 既読の区別</li>
+      <li>受講生に届く通知 (動画返信 / メニュー配布 / 月次受付開始 / 目標シート添削 / メンテナンス等) を一覧で確認</li>
+      <li>参考画像 (CANDY TUNE 風) に準拠した iOS ネイティブライクなカードデザイン</li>
     </ul>
 
     <h3>構成 (上から)</h3>
     <ul>
-      <li>ヘッダー: ← + 「お知らせ」+ 「未読のみ」フィルタ (トグル)</li>
-      <li>セクション見出し (今週 / 先週 / 過去) で時系列にグルーピング</li>
-      <li>各通知カード:
+      <li>ヘッダー: ← + 「お知らせ」(中央寄せ)</li>
+      <li>カード (白背景、border-radius 14px):
         <ul>
-          <li>左: 未読ドット (ティール緑) or 既読 (リング)</li>
-          <li>アイコン (種類別: ✉ / 💪 / 📅 / 🎯)</li>
-          <li>タイトル + 日付</li>
-          <li>本文プレビュー (2 行 line-clamp)</li>
+          <li>左上に薄ピンクタグ (種別) 例: メンテナンス / 月次添削 / 筋トレメニュー / 目標シート / お知らせ</li>
+          <li>タイトル (太字 14px)</li>
+          <li>日付 (グレー、Inter フォント)</li>
+          <li>右に chevron `>` (タップ可示唆)</li>
         </ul>
       </li>
-      <li>「過去 30 日まで」の境界線</li>
     </ul>
 
     <h3>動線</h3>
     <ul>
       <li>各通知をタップ → 該当画面 (動画返信なら月詳細、メニューなら筋トレメニュー等)</li>
       <li>戻る → ホーム</li>
-      <li>フィルタ切替: 「未読のみ」 ⇔ 「すべて」</li>
     </ul>
 
     <h3>関連</h3>
     <ul>
       <li>実装: 未実装 (Phase 4 候補)</li>
-      <li>通知の種類: 動画返信届 / メニュー配布 / 目標シート添削 / 月次受付開始 / 等</li>
+      <li>通知の種類: 月次添削 / 筋トレメニュー / 目標シート / メンテナンス / お知らせ / その他</li>
       <li>OS プッシュ通知連動 (オンボ Step 6 で許可済の場合)</li>
-      <li>2026-06-10 確定</li>
+      <li>デザイン: 参考画像 (薄ピンクタグ + 白カード) に準拠 ・ 2026-06-10 更新</li>
     </ul>
   </div>
 </div>
