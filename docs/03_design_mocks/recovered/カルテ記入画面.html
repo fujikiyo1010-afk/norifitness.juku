@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>のりfitness 筋肉塾 — カルテ記入画面</title>
+<style>
+  :root {
+    --teal: #00897b;
+    --teal-dark: #00695c;
+    --teal-darker: #004d40;
+    --teal-soft: rgba(0,137,123,0.08);
+    --pastel: #e0f2f1;
+    --border: #e8ebe9;
+    --gray-50: #fafafa;
+    --gray-100: #f4f4f5;
+    --gray-300: #d4d4d8;
+    --gray-500: #71717a;
+    --gray-700: #3f3f46;
+    --gray-900: #18181b;
+    --warm-grad: linear-gradient(135deg, #e0f2f1, #fffbe6);
+    --ink: #1a1a1a;
+    --bg-soft: #f8f9fa;
+    --required: #d32f2f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+    background: #ececec;
+    color: var(--ink);
+    padding: 32px 16px 64px;
+    line-height: 1.6;
+  }
+  .page-header { max-width: 600px; margin: 0 auto 28px; text-align: center; }
+  .page-header h1 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .page-header p { font-size: 12px; color: var(--gray-500); line-height: 1.7; }
+  .page-header .route {
+    display: inline-block; margin-top: 8px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px; color: var(--gray-500); background: white; padding: 4px 10px;
+    border-radius: 6px; border: 1px solid var(--border);
+  }
+
+  .phone {
+    max-width: 390px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  }
+
+  /* === ヘッダー === */
+  .app-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .back-btn { background: none; border: none; padding: 0; cursor: pointer; color: var(--gray-900); }
+  .app-title { flex: 1; text-align: center; font-size: 14px; font-weight: 700; }
+
+  /* === グラデ ヒーロー === */
+  .hero {
+    padding: 20px 16px 18px;
+    background: var(--warm-grad);
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+  }
+  .hero-label {
+    font-size: 11px; font-weight: 700; color: var(--teal-dark);
+    letter-spacing: 1px; margin-bottom: 10px;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .hero-title {
+    font-size: 24px; font-weight: 700; color: var(--gray-900);
+    letter-spacing: 1px; line-height: 1.25; margin-bottom: 8px;
+  }
+  .hero-sub {
+    font-size: 11px; color: var(--gray-700); margin-bottom: 12px;
+  }
+  .hero-note {
+    font-size: 11px; color: var(--gray-500); line-height: 1.7;
+    padding-top: 10px; border-top: 1px solid var(--border);
+  }
+
+  /* === 進捗バー === */
+  .progress {
+    padding: 12px 16px;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border);
+  }
+  .progress-label {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 11px; color: var(--gray-500); margin-bottom: 6px;
+  }
+  .progress-count { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 700; color: var(--gray-900); }
+  .progress-bar {
+    height: 6px; background: white; border: 1px solid var(--border);
+    border-radius: 999px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; background: var(--teal); transition: width .3s;
+  }
+
+  /* === 下書き保存通知 === */
+  .draft-notice {
+    padding: 8px 16px;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border);
+    font-size: 10px;
+    color: var(--gray-500);
+    text-align: center;
+  }
+
+  /* === セクションバンド === */
+  .section-band {
+    background: var(--gray-900);
+    color: white;
+    padding: 10px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-band .count {
+    margin-left: auto;
+    color: var(--teal);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  /* === 質問カード === */
+  .question-card {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .question-card.missing {
+    background: #fef2f2;
+  }
+  .q-num {
+    font-size: 11px;
+    color: var(--gray-500);
+    font-weight: 700;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    margin-bottom: 4px;
+  }
+  .q-label {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;
+    font-size: 13px; font-weight: 700; color: var(--gray-900); line-height: 1.4;
+    margin-bottom: 10px;
+  }
+  .q-helper {
+    margin-left: 8px;
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--gray-500);
+  }
+  .q-required {
+    color: var(--required);
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+  .q-optional {
+    color: var(--gray-300);
+    font-size: 10px;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .chip-group {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .chip {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: white;
+    color: var(--gray-700);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .chip:hover {
+    border-color: var(--teal);
+  }
+  .chip.selected {
+    border-color: var(--teal);
+    background: var(--teal-soft);
+    color: var(--teal-dark);
+  }
+  .chip .check {
+    margin-right: 4px;
+  }
+
+  /* === フッタ === */
+  .footer {
+    padding: 12px 16px;
+    background: white;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+  }
+  .footer-btn {
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: white;
+    color: var(--gray-900);
+  }
+  .footer-btn.primary {
+    flex: 1;
+    background: var(--teal);
+    color: white;
+    border-color: var(--teal);
+  }
+  .footer-btn.primary:hover {
+    background: var(--teal-dark);
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>📋 カルテ記入画面</h1>
+  <p>
+    新規入塾時のカルテ記入。 8 項目 (必須 4 / 任意 4) を 2 セクションで構成<br>
+    chip 型選択肢、 下書き保存、 提出前プレビューあり
+  </p>
+  <div class="route">/workout/carte/new ・ /workout/carte</div>
+</div>
+
+<div class="phone">
+
+  <!-- ヘッダー -->
+  <div class="app-header">
+    <button class="back-btn" aria-label="戻る">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+    </button>
+    <div class="app-title">筋トレカルテ</div>
+    <div style="width:20px"></div>
+  </div>
+
+  <!-- ヒーロー -->
+  <div class="hero">
+    <div class="hero-label">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      のりfitness の筋トレカルテ
+    </div>
+    <div class="hero-title">あなたのカルテ</div>
+    <div class="hero-sub">オリジナルメニューを作るための、 はじめの 1 歩。</div>
+    <div class="hero-note">
+      記入後、 のりfitness が確認してメニューを作成します。<br>
+      提出後は変更できないので、 慎重にお選びください。
+    </div>
+  </div>
+
+  <!-- 進捗バー -->
+  <div class="progress">
+    <div class="progress-label">
+      <span>記入状況</span>
+      <span class="progress-count">4 / 8 項目</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-bar-fill" style="width:50%"></div>
+    </div>
+  </div>
+
+  <!-- 下書き保存通知 -->
+  <div class="draft-notice">下書きを保存しました ・ 06/10 10:30</div>
+
+  <!-- セクション 1: あなたについて -->
+  <div class="section-band">
+    <span>あなたについて</span>
+    <span class="count">4</span>
+  </div>
+
+  <!-- Q1 性別 -->
+  <div class="question-card">
+    <div class="q-num">Q1 / 8</div>
+    <div class="q-label">
+      <span>性別</span>
+      <span class="q-required">★</span>
+    </div>
+    <div class="chip-group">
+      <button class="chip selected">男</button>
+      <button class="chip">女</button>
+      <button class="chip">その他</button>
+    </div>
+  </div>
+
+  <!-- Q2 使える環境 -->
+  <div class="question-card">
+    <div class="q-num">Q2 / 8</div>
+    <div class="q-label">
+      <span>使える環境<span class="q-helper">複数選んでください</span></span>
+      <span class="q-required">★</span>
+    </div>
+    <div class="chip-group">
+      <button class="chip">何もない</button>
+      <button class="chip selected"><span class="check">✓</span>ダンベル</button>
+      <button class="chip">ベンチ</button>
+      <button class="chip">懸垂機</button>
+      <button class="chip selected"><span class="check">✓</span>ジム</button>
+      <button class="chip">家トレ</button>
+    </div>
+  </div>
+
+  <!-- Q3 理想の頻度 -->
+  <div class="question-card">
+    <div class="q-num">Q3 / 8</div>
+    <div class="q-label">
+      <span>理想の頻度</span>
+      <span class="q-required">★</span>
+    </div>
+    <div class="chip-group">
+      <button class="chip">毎日コツコツ</button>
+      <button class="chip">毎日</button>
+      <button class="chip">週6</button>
+      <button class="chip">週5</button>
+      <button class="chip">週4</button>
+      <button class="chip">週3-4</button>
+      <button class="chip selected">週3</button>
+      <button class="chip">週2-3</button>
+      <button class="chip">週2</button>
+      <button class="chip">週1</button>
+      <button class="chip">任せる</button>
+    </div>
+  </div>
+
+  <!-- Q4 鍛えたい部位 -->
+  <div class="question-card">
+    <div class="q-num">Q4 / 8</div>
+    <div class="q-label">
+      <span>鍛えたい部位<span class="q-helper">複数選んでください</span></span>
+      <span class="q-required">★</span>
+    </div>
+    <div class="chip-group">
+      <button class="chip">全身バランス</button>
+      <button class="chip">腕</button>
+      <button class="chip selected"><span class="check">✓</span>胸</button>
+      <button class="chip selected"><span class="check">✓</span>背中</button>
+      <button class="chip">脚</button>
+      <button class="chip">腹筋</button>
+      <button class="chip">肩</button>
+    </div>
+  </div>
+
+  <!-- セクション 2: のりfitness への参考情報 -->
+  <div class="section-band">
+    <span>のりfitness への参考情報</span>
+    <span class="count">4</span>
+  </div>
+
+  <!-- Q5 目的 -->
+  <div class="question-card">
+    <div class="q-num">Q5 / 8</div>
+    <div class="q-label">
+      <span>目的<span class="q-helper">複数選んでも OK</span></span>
+      <span class="q-optional">(任意)</span>
+    </div>
+    <div class="chip-group">
+      <button class="chip">ダイエット</button>
+      <button class="chip">筋肉増</button>
+      <button class="chip">健康維持</button>
+      <button class="chip">体力向上</button>
+      <button class="chip">見た目改善</button>
+    </div>
+  </div>
+
+  <!-- Q6 運動経験 -->
+  <div class="question-card">
+    <div class="q-num">Q6 / 8</div>
+    <div class="q-label">
+      <span>今までの運動経験</span>
+      <span class="q-optional">(任意)</span>
+    </div>
+    <div class="chip-group">
+      <button class="chip">全くない</button>
+      <button class="chip">たまに</button>
+      <button class="chip">週次</button>
+      <button class="chip">毎日</button>
+    </div>
+  </div>
+
+  <!-- Q7 気になる体の不調 -->
+  <div class="question-card">
+    <div class="q-num">Q7 / 8</div>
+    <div class="q-label">
+      <span>気になる体の不調<span class="q-helper">ない場合は何も選ばずに OK</span></span>
+      <span class="q-optional">(任意)</span>
+    </div>
+    <div class="chip-group">
+      <button class="chip">腰痛</button>
+      <button class="chip">膝痛</button>
+      <button class="chip">心臓</button>
+      <button class="chip">高血圧</button>
+      <button class="chip">その他</button>
+    </div>
+  </div>
+
+  <!-- Q8 目指す身体像 -->
+  <div class="question-card">
+    <div class="q-num">Q8 / 8</div>
+    <div class="q-label">
+      <span>目指す身体像</span>
+      <span class="q-optional">(任意)</span>
+    </div>
+    <div class="chip-group">
+      <button class="chip">健康+適度に筋肉</button>
+      <button class="chip">細マッチョ</button>
+      <button class="chip">マッチョ</button>
+      <button class="chip">曲線美</button>
+      <button class="chip">モデル体型</button>
+    </div>
+  </div>
+
+  <!-- フッタ -->
+  <div class="footer">
+    <button class="footer-btn">下書き保存</button>
+    <button class="footer-btn primary">プレビューを確認する</button>
+  </div>
+
+</div>
+
+</body>
+</html>

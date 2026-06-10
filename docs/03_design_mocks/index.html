@@ -81,13 +81,13 @@ h1 { font-size:26px; margin-bottom:6px; }
 <div class="summary-box">
   <h3>📊 全画面 状態サマリー</h3>
   <div class="stats">
-    <div class="stat"><b>46</b> ✅ 確定</div>
+    <div class="stat"><b>48</b> ✅ 確定</div>
     <div class="stat"><b>0</b> 🟡 未確定</div>
     <div class="stat"><b>12</b> ⚙ 実装あり (モック未作成)</div>
-    <div class="stat"><b>5</b> ❓ 完全未着手</div>
+    <div class="stat"><b>3</b> ❓ 完全未着手</div>
     <div class="stat"><b>19</b> 🔵 比較用 (recovered/ に温存)</div>
   </div>
-  <p style="margin-top:10px; font-size:12px; color:var(--ink-700);">合計 55 画面想定 (実装 route + 必要なモック)。比較用 17 ファイルは別カウント。最終更新: 2026-06-09 (オンボ + 全課程完了 + 記録ハブ + 学習 確定)</p>
+  <p style="margin-top:10px; font-size:12px; color:var(--ink-700);">合計 55 画面想定 (実装 route + 必要なモック)。比較用 17 ファイルは別カウント。最終更新: 2026-06-10 (カルテ 記入 + カルテ更新リクエスト 確定)</p>
 </div>
 
 <!-- ===================================== -->
@@ -220,8 +220,8 @@ h1 { font-size:26px; margin-bottom:6px; }
 <tr><td class="col-name">筋トレメニュー 閲覧</td><td><span class="status ok">✅ 確定</span></td><td class="col-mock"><a href="recovered/受講生メニュー閲覧_モック.html" target="_blank">受講生メニュー閲覧 モック</a></td><td class="col-route">/workout</td><td class="col-note">2026-06-02</td></tr>
 <tr><td class="col-name">受講生 メニュー リクエスト送信</td><td><span class="status ok">✅ 確定</span></td><td class="col-mock"><a href="recovered/受講生リクエスト送信_モック.html" target="_blank">受講生リクエスト送信 モック</a></td><td class="col-route">/workout/menu/request</td><td class="col-note">2026-06-02</td></tr>
 <tr><td class="col-name">メニュー リクエスト送信完了</td><td><span class="status ok">✅ 確定</span></td><td class="col-mock"><a href="recovered/メニューリクエスト送信完了画面.html" target="_blank">メニューリクエスト送信完了画面</a></td><td class="col-route">/workout/request-complete</td><td class="col-note">2026-06-10</td></tr>
-<tr><td class="col-name">カルテ 記入 (新規)</td><td><span class="status todo">❓ 未作成</span></td><td class="col-mock"><span class="none">モックなし</span></td><td class="col-route">/workout/carte, /workout/carte/new</td><td class="col-note">実装済</td></tr>
-<tr><td class="col-name">カルテ → リクエスト送信</td><td><span class="status todo">❓ 未作成</span></td><td class="col-mock"><span class="none">モックなし</span></td><td class="col-route">/workout/carte/request</td><td class="col-note">実装済</td></tr>
+<tr><td class="col-name">カルテ 記入 (新規)</td><td><span class="status ok">✅ 確定</span></td><td class="col-mock"><a href="recovered/カルテ記入画面.html" target="_blank">カルテ記入画面</a></td><td class="col-route">/workout/carte, /workout/carte/new</td><td class="col-note">2026-06-10</td></tr>
+<tr><td class="col-name">カルテ → リクエスト送信</td><td><span class="status ok">✅ 確定</span></td><td class="col-mock"><a href="recovered/カルテ更新リクエスト送信画面.html" target="_blank">カルテ更新リクエスト送信画面</a></td><td class="col-route">/workout/carte/request</td><td class="col-note">2026-06-10</td></tr>
 <tr><td class="col-name">カルテ 作成完了</td><td><span class="status ok">✅ 確定</span></td><td class="col-mock"><a href="recovered/カルテ作成完了画面.html" target="_blank">カルテ作成完了画面</a></td><td class="col-route">/workout/carte/complete</td><td class="col-note">2026-06-10</td></tr>
 </tbody></table>
 </div>
@@ -354,7 +354,6 @@ h1 { font-size:26px; margin-bottom:6px; }
 <tr><td class="col-name">振り返り一覧</td><td class="col-route">/my-log/reviews</td><td class="col-note">中</td></tr>
 <tr><td class="col-name">体組成 推移グラフ</td><td class="col-route">(未実装)</td><td class="col-note">中 (体組成 v2 から遷移)</td></tr>
 <tr><td class="col-name">メニュー リクエスト送信完了</td><td class="col-route">/workout/request-complete</td><td class="col-note">中</td></tr>
-<tr><td class="col-name">カルテ 記入 + カルテ → リクエスト + カルテ完了 (3 画面)</td><td class="col-route">/workout/carte, /workout/carte/new, /workout/carte/request, /workout/carte/complete</td><td class="col-note">中 (受講生の入塾フロー)</td></tr>
 <tr><td class="col-name">管理画面 ダッシュボード + 11 画面</td><td class="col-route">/admin/* 各種</td><td class="col-note">低 (社内のり氏のみ使う)</td></tr>
 </tbody></table>
 </div>
