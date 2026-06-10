@@ -13,8 +13,14 @@ import {
  *
  * 用途: のり氏が「送信して終了」/「送信して次へ」を押した後、
  *   - クライアントは即座に画面遷移できる (体感ノータイム)
- *   - アップロードは裏で fetch promise として継続
+ *   - アップロードは裏で 3 ステップで継続
  *   - 右下の UploadIndicator がジョブ状態を表示する
+ *
+ * アップロードフロー (2026-06-09 クライアント直アップ方式に変更):
+ *   1. /api/vimeo/upload/create-link に動画メタを送る → upload_link + vimeoUri 取得
+ *   2. upload_link に対して **直接 tus PATCH** で動画ファイル送信 (サーバー経由しない)
+ *      → Next.js のメモリ制約 (~50MB) を回避、Vimeo Pro 上限 5GB まで安定
+ *   3. /api/vimeo/upload/finalize で transcode 完了確認 + DB 更新
  *
  * 同時並行は 1 件のみ (uploading 中に startUpload 呼ばれたら新規無視)。
  * ブラウザ閉じる/リロードでジョブ中断 → 受講生情報は DB に書き込まれない
@@ -70,28 +76,55 @@ export function UploadJobProvider({ children }: { children: ReactNode }) {
     });
 
     try {
-      const formData = new FormData();
-      formData.append("auditId", params.auditId);
-      formData.append("userName", params.userName);
-      formData.append("targetMonthLabel", params.targetMonthLabel);
-      formData.append("durationSec", String(params.durationSec));
-      const ext = params.mimeType.includes("mp4") ? "mp4" : "webm";
-      formData.append("file", params.blob, `recording.${ext}`);
-
-      const res = await fetch("/api/vimeo/upload", {
+      // ===== Step 1/3: create-link で Vimeo 動画オブジェクト作成 =====
+      const createRes = await fetch("/api/vimeo/upload/create-link", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          auditId: params.auditId,
+          userName: params.userName,
+          targetMonthLabel: params.targetMonthLabel,
+          fileSize: params.blob.size,
+        }),
       });
+      if (!createRes.ok) {
+        throw new Error(await extractError(createRes, "動画オブジェクト作成失敗"));
+      }
+      const createData = (await createRes.json()) as {
+        ok: boolean;
+        uploadLink: string;
+        vimeoUri: string;
+      };
+      if (!createData.ok || !createData.uploadLink) {
+        throw new Error("Vimeo upload_link を取得できませんでした");
+      }
 
-      if (!res.ok) {
-        let errMsg = `HTTP ${res.status}`;
-        try {
-          const errBody = await res.json();
-          if (errBody.error) errMsg = errBody.error;
-        } catch {
-          // ignore JSON parse error
-        }
-        throw new Error(errMsg);
+      // ===== Step 2/3: Vimeo に直接 tus PATCH (サーバー経由しない) =====
+      const patchRes = await fetch(createData.uploadLink, {
+        method: "PATCH",
+        headers: {
+          "Tus-Resumable": "1.0.0",
+          "Upload-Offset": "0",
+          "Content-Type": "application/offset+octet-stream",
+        },
+        body: params.blob,
+      });
+      if (patchRes.status !== 204) {
+        throw new Error(`Vimeo アップロード失敗 (HTTP ${patchRes.status})`);
+      }
+
+      // ===== Step 3/3: finalize で transcode 待ち + DB 更新 =====
+      const finalizeRes = await fetch("/api/vimeo/upload/finalize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          auditId: params.auditId,
+          vimeoUri: createData.vimeoUri,
+          durationSec: params.durationSec,
+        }),
+      });
+      if (!finalizeRes.ok) {
+        throw new Error(await extractError(finalizeRes, "DB 更新失敗"));
       }
 
       setJob((prev) => ({
@@ -148,4 +181,18 @@ export function useUploadJob() {
     throw new Error("useUploadJob must be used inside <UploadJobProvider>");
   }
   return ctx;
+}
+
+/**
+ * Response からエラーメッセージを抽出 (JSON ボディに { error: "..." } があればそれを使う)。
+ * JSON でない場合は HTTP ステータスを返す。
+ */
+async function extractError(res: Response, fallback: string): Promise<string> {
+  try {
+    const body = await res.json();
+    if (typeof body?.error === "string" && body.error) return body.error;
+  } catch {
+    // JSON でない場合は fallback
+  }
+  return `${fallback} (HTTP ${res.status})`;
 }
