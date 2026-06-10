@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>のりfitness 筋肉塾 — 体組成推移グラフ画面 (B vs C 比較)</title>
+<style>
+  :root {
+    --teal: #00897b;
+    --teal-dark: #00695c;
+    --teal-darker: #004d40;
+    --teal-soft: rgba(0,137,123,0.08);
+    --pastel: #e0f2f1;
+    --gold: #b8860b;
+    --gold-soft: rgba(184,134,11,0.10);
+    --blue: #0369a1;
+    --blue-soft: rgba(3,105,161,0.08);
+    --border: #e8ebe9;
+    --gray-50: #fafafa;
+    --gray-100: #f4f4f5;
+    --gray-300: #d4d4d8;
+    --gray-500: #71717a;
+    --gray-700: #3f3f46;
+    --gray-900: #18181b;
+    --warm-grad: linear-gradient(135deg, #e0f2f1, #fffbe6);
+    --ink: #1a1a1a;
+    --positive: #00897b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+    background: #ececec;
+    color: var(--ink);
+    padding: 32px 16px 64px;
+    line-height: 1.6;
+  }
+  .page-header { max-width: 700px; margin: 0 auto 28px; text-align: center; }
+  .page-header h1 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .page-header p { font-size: 12px; color: var(--gray-500); line-height: 1.7; }
+  .page-header .route {
+    display: inline-block; margin-top: 8px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px; color: var(--gray-500); background: white;
+    padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border);
+  }
+
+  /* === 並びレイアウト === */
+  .compare {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .pattern {
+    max-width: 420px;
+    flex: 0 0 auto;
+  }
+  .pattern-header { text-align: center; margin-bottom: 14px; }
+  .pattern-num {
+    font-size: 11px; color: var(--gray-500);
+    letter-spacing: 2px; font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .pattern-title {
+    font-size: 15px; font-weight: 700; color: var(--gray-900);
+  }
+  .pattern-note {
+    font-size: 11px; color: var(--gray-500);
+    margin-top: 4px;
+  }
+
+  .phone {
+    max-width: 390px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  }
+
+  /* === ヘッダー === */
+  .app-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .back-btn { background: none; border: none; padding: 0; cursor: pointer; color: var(--gray-900); }
+  .app-title { flex: 1; text-align: center; font-size: 14px; font-weight: 700; }
+
+  /* === 期間タブ === */
+  .period-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 12px 16px 0;
+  }
+  .period-tab {
+    padding: 5px 12px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gray-700);
+    cursor: pointer;
+  }
+  .period-tab.active {
+    background: var(--gray-900);
+    color: white;
+    border-color: var(--gray-900);
+  }
+
+  /* === 指標切替タブ (C 案のみ) === */
+  .metric-tabs {
+    display: flex;
+    margin: 12px 16px 0;
+    background: var(--gray-100);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 0;
+  }
+  .metric-tab {
+    flex: 1;
+    padding: 7px 8px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gray-500);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .metric-tab.active {
+    background: white;
+    color: var(--gray-900);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  }
+
+  /* === グラフカード === */
+  .chart-card {
+    margin: 8px 16px 0;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 10px 14px 8px;
+  }
+  .chart-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2px;
+  }
+  .chart-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gray-900);
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  .chart-value-block { text-align: right; }
+  .chart-current {
+    font-size: 17px;
+    font-weight: 700;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--gray-900);
+    line-height: 1.1;
+  }
+  .chart-delta {
+    font-size: 9px;
+    font-weight: 700;
+    margin-top: 1px;
+  }
+  .chart-delta.down { color: var(--positive); }
+  .chart-delta.up { color: var(--positive); }
+  .chart-svg { width: 100%; height: 72px; display: block; }
+  .chart-xlabels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1px;
+    font-size: 9px;
+    color: var(--gray-500);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    line-height: 1.2;
+  }
+
+  /* === 目標達成度ブロック === */
+  .goal-block {
+    margin: 14px 16px;
+    padding: 14px;
+    background: var(--warm-grad);
+    border: 1px solid #d4ebe8;
+    border-radius: 14px;
+  }
+  .goal-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--teal-dark);
+    margin-bottom: 8px;
+  }
+  .goal-body {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .goal-track {
+    font-size: 10px;
+    color: var(--gray-500);
+    margin-bottom: 2px;
+  }
+  .goal-track-values {
+    font-size: 13px;
+    font-weight: 700;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--gray-900);
+  }
+  .goal-track-values .now { color: var(--teal-dark); }
+  .goal-percent {
+    text-align: right;
+  }
+  .goal-percent-big {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--teal-dark);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    line-height: 1;
+  }
+  .goal-percent-big small { font-size: 14px; }
+  .goal-percent-label {
+    font-size: 9px;
+    color: var(--gray-500);
+    margin-top: 2px;
+  }
+  .goal-progress {
+    height: 8px;
+    background: rgba(0,0,0,0.05);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .goal-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--teal), var(--teal-dark));
+    border-radius: 999px;
+  }
+  .goal-remain {
+    margin-top: 8px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--gray-700);
+  }
+
+  /* === セクション区切り === */
+  .compare-divider {
+    width: 100%;
+    text-align: center;
+    color: var(--gray-300);
+    margin: 24px 0 16px;
+    font-size: 11px;
+    letter-spacing: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>📊 体組成 推移グラフ 画面</h1>
+  <p>
+    体組成 v2 の「変化を見る」リンクから遷移する想定の推移グラフ画面<br>
+    <b>★ 採用案: B (3 グラフ並び)</b> ・ C は比較参考
+  </p>
+  <div class="route">(未実装) ・ 体組成 v2 から遷移</div>
+</div>
+
+<div class="compare">
+
+  <!-- ==================================== -->
+  <!-- 案 B: 3 グラフ並び -->
+  <!-- ==================================== -->
+  <div class="pattern">
+    <div class="pattern-header">
+      <div class="pattern-num" style="color:#00897b">★ 採用 ・ 案 B</div>
+      <div class="pattern-title">3 グラフ並び</div>
+      <div class="pattern-note">体重 / 体脂肪率 / ウエスト を全部見せる</div>
+    </div>
+
+    <div class="phone">
+
+      <!-- ヘッダー -->
+      <div class="app-header">
+        <button class="back-btn" aria-label="戻る">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <div class="app-title">体組成 推移</div>
+        <div style="width:20px"></div>
+      </div>
+
+      <!-- 期間タブ -->
+      <div class="period-tabs">
+        <button class="period-tab active">直近 6 ヶ月</button>
+        <button class="period-tab">1 年</button>
+        <button class="period-tab">全期間</button>
+      </div>
+
+      <!-- グラフ 1: 体重 -->
+      <div class="chart-card">
+        <div class="chart-head">
+          <div class="chart-label">
+            <span class="dot" style="background:var(--teal)"></span>
+            体重 (kg)
+          </div>
+          <div class="chart-value-block">
+            <div class="chart-current">80.0</div>
+            <div class="chart-delta down">-3.5 / 6 ヶ月</div>
+          </div>
+        </div>
+        <svg viewBox="0 0 300 100" class="chart-svg" preserveAspectRatio="none">
+          <line x1="0" y1="80" x2="300" y2="80" stroke="#e8ebe9" stroke-width="1"/>
+          <line x1="0" y1="50" x2="300" y2="50" stroke="#e8ebe9" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="0" y1="20" x2="300" y2="20" stroke="#e8ebe9" stroke-width="1"/>
+          <polyline points="20,30 70,40 120,50 170,55 220,65 270,75" fill="none" stroke="#00897b" stroke-width="2"/>
+          <circle cx="20" cy="30" r="3" fill="#00897b"/>
+          <circle cx="70" cy="40" r="3" fill="#00897b"/>
+          <circle cx="120" cy="50" r="3" fill="#00897b"/>
+          <circle cx="170" cy="55" r="3" fill="#00897b"/>
+          <circle cx="220" cy="65" r="3" fill="#00897b"/>
+          <circle cx="270" cy="75" r="4" fill="#00897b" stroke="white" stroke-width="2"/>
+        </svg>
+        <div class="chart-xlabels">
+          <span>1月</span><span>2月</span><span>3月</span><span>4月</span><span>5月</span><span>6月</span>
+        </div>
+      </div>
+
+      <!-- グラフ 2: 体脂肪率 -->
+      <div class="chart-card">
+        <div class="chart-head">
+          <div class="chart-label">
+            <span class="dot" style="background:var(--gold)"></span>
+            体脂肪率 (%)
+          </div>
+          <div class="chart-value-block">
+            <div class="chart-current">22.4</div>
+            <div class="chart-delta down">-2.1 / 6 ヶ月</div>
+          </div>
+        </div>
+        <svg viewBox="0 0 300 100" class="chart-svg" preserveAspectRatio="none">
+          <line x1="0" y1="80" x2="300" y2="80" stroke="#e8ebe9" stroke-width="1"/>
+          <line x1="0" y1="50" x2="300" y2="50" stroke="#e8ebe9" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="0" y1="20" x2="300" y2="20" stroke="#e8ebe9" stroke-width="1"/>
+          <polyline points="20,28 70,35 120,40 170,52 220,60 270,70" fill="none" stroke="#b8860b" stroke-width="2"/>
+          <circle cx="20" cy="28" r="3" fill="#b8860b"/>
+          <circle cx="70" cy="35" r="3" fill="#b8860b"/>
+          <circle cx="120" cy="40" r="3" fill="#b8860b"/>
+          <circle cx="170" cy="52" r="3" fill="#b8860b"/>
+          <circle cx="220" cy="60" r="3" fill="#b8860b"/>
+          <circle cx="270" cy="70" r="4" fill="#b8860b" stroke="white" stroke-width="2"/>
+        </svg>
+        <div class="chart-xlabels">
+          <span>1月</span><span>2月</span><span>3月</span><span>4月</span><span>5月</span><span>6月</span>
+        </div>
+      </div>
+
+      <!-- グラフ 3: ウエスト -->
+      <div class="chart-card">
+        <div class="chart-head">
+          <div class="chart-label">
+            <span class="dot" style="background:var(--blue)"></span>
+            ウエスト (cm)
+          </div>
+          <div class="chart-value-block">
+            <div class="chart-current">85.0</div>
+            <div class="chart-delta down">-3.0 / 6 ヶ月</div>
+          </div>
+        </div>
+        <svg viewBox="0 0 300 100" class="chart-svg" preserveAspectRatio="none">
+          <line x1="0" y1="80" x2="300" y2="80" stroke="#e8ebe9" stroke-width="1"/>
+          <line x1="0" y1="50" x2="300" y2="50" stroke="#e8ebe9" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="0" y1="20" x2="300" y2="20" stroke="#e8ebe9" stroke-width="1"/>
+          <polyline points="20,32 70,38 120,46 170,55 220,68 270,72" fill="none" stroke="#0369a1" stroke-width="2"/>
+          <circle cx="20" cy="32" r="3" fill="#0369a1"/>
+          <circle cx="70" cy="38" r="3" fill="#0369a1"/>
+          <circle cx="120" cy="46" r="3" fill="#0369a1"/>
+          <circle cx="170" cy="55" r="3" fill="#0369a1"/>
+          <circle cx="220" cy="68" r="3" fill="#0369a1"/>
+          <circle cx="270" cy="72" r="4" fill="#0369a1" stroke="white" stroke-width="2"/>
+        </svg>
+        <div class="chart-xlabels">
+          <span>1月</span><span>2月</span><span>3月</span><span>4月</span><span>5月</span><span>6月</span>
+        </div>
+      </div>
+
+      <!-- 目標達成度 (体重ベース) -->
+      <div class="goal-block">
+        <div class="goal-label">目標達成度 (体重)</div>
+        <div class="goal-body">
+          <div>
+            <div class="goal-track">開始 → 現在 → 目標</div>
+            <div class="goal-track-values">83.5 → <span class="now">80.0</span> → 68.0 kg</div>
+          </div>
+          <div class="goal-percent">
+            <div class="goal-percent-big">22<small>%</small></div>
+            <div class="goal-percent-label">達成率</div>
+          </div>
+        </div>
+        <div class="goal-progress">
+          <div class="goal-progress-fill" style="width:22%"></div>
+        </div>
+        <div class="goal-remain">残り 12.0 kg ・ 目標日まで 87 日</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================================== -->
+  <!-- 案 C: 切替式 1 グラフ -->
+  <!-- ==================================== -->
+  <div class="pattern">
+    <div class="pattern-header">
+      <div class="pattern-num" style="color:#a1a1aa">参考 ・ 案 C</div>
+      <div class="pattern-title">切替式 1 グラフ</div>
+      <div class="pattern-note">タブで指標を切り替え、 縦が短くスッキリ</div>
+    </div>
+
+    <div class="phone">
+
+      <!-- ヘッダー -->
+      <div class="app-header">
+        <button class="back-btn" aria-label="戻る">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <div class="app-title">体組成 推移</div>
+        <div style="width:20px"></div>
+      </div>
+
+      <!-- 指標切替タブ -->
+      <div class="metric-tabs">
+        <button class="metric-tab active">体重</button>
+        <button class="metric-tab">体脂肪率</button>
+        <button class="metric-tab">ウエスト</button>
+      </div>
+
+      <!-- 期間タブ -->
+      <div class="period-tabs">
+        <button class="period-tab active">直近 6 ヶ月</button>
+        <button class="period-tab">1 年</button>
+        <button class="period-tab">全期間</button>
+      </div>
+
+      <!-- 選択中の 1 グラフ (体重) -->
+      <div class="chart-card">
+        <div class="chart-head">
+          <div class="chart-label">
+            <span class="dot" style="background:var(--teal)"></span>
+            体重 (kg)
+          </div>
+          <div class="chart-value-block">
+            <div class="chart-current">80.0</div>
+            <div class="chart-delta down">-3.5 / 6 ヶ月</div>
+          </div>
+        </div>
+        <svg viewBox="0 0 300 120" class="chart-svg" preserveAspectRatio="none" style="height:120px">
+          <line x1="0" y1="100" x2="300" y2="100" stroke="#e8ebe9" stroke-width="1"/>
+          <line x1="0" y1="65" x2="300" y2="65" stroke="#e8ebe9" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="0" y1="25" x2="300" y2="25" stroke="#e8ebe9" stroke-width="1"/>
+          <polyline points="20,35 70,48 120,60 170,68 220,80 270,92" fill="none" stroke="#00897b" stroke-width="2.5"/>
+          <circle cx="20" cy="35" r="3.5" fill="#00897b"/>
+          <circle cx="70" cy="48" r="3.5" fill="#00897b"/>
+          <circle cx="120" cy="60" r="3.5" fill="#00897b"/>
+          <circle cx="170" cy="68" r="3.5" fill="#00897b"/>
+          <circle cx="220" cy="80" r="3.5" fill="#00897b"/>
+          <circle cx="270" cy="92" r="5" fill="#00897b" stroke="white" stroke-width="2.5"/>
+        </svg>
+        <div class="chart-xlabels">
+          <span>1月</span><span>2月</span><span>3月</span><span>4月</span><span>5月</span><span>6月</span>
+        </div>
+      </div>
+
+      <!-- 目標達成度 (現在表示中の指標と連動) -->
+      <div class="goal-block">
+        <div class="goal-label">目標達成度 (体重)</div>
+        <div class="goal-body">
+          <div>
+            <div class="goal-track">開始 → 現在 → 目標</div>
+            <div class="goal-track-values">83.5 → <span class="now">80.0</span> → 68.0 kg</div>
+          </div>
+          <div class="goal-percent">
+            <div class="goal-percent-big">22<small>%</small></div>
+            <div class="goal-percent-label">達成率</div>
+          </div>
+        </div>
+        <div class="goal-progress">
+          <div class="goal-progress-fill" style="width:22%"></div>
+        </div>
+        <div class="goal-remain">残り 12.0 kg ・ 目標日まで 87 日</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
