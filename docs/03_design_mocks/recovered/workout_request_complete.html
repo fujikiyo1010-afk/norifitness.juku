@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — メニュー リクエスト送信完了画面</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --ink4: #ccc;
+    --border: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f8f9fa;
+    --bg-warm: linear-gradient(135deg, #e0f2f1, #fffbe6);
+    --yellow-bg: rgba(255,235,59,.12);
+    --yellow-border: rgba(255,235,59,.5);
+    --yellow-name: #b8860b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: #e8ebec; color: var(--ink); line-height: 1.6; padding: 24px; }
+  .page-header { max-width: 900px; margin: 0 auto 32px; text-align: center; }
+  .page-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .page-header p { color: #6b7d75; font-size: 13px; }
+  .stage { max-width: 320px; margin: 0 auto; }
+  .phone {
+    width: 100%;
+    background: var(--bg);
+    border: 6px solid #2a2a2a;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 6px 24px rgba(0,0,0,.15);
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    min-height: 700px;
+  }
+  .phone-status { background: #2a2a2a; color: #fff; text-align: center; font-size: 10px; padding: 3px; font-family: 'Inter', sans-serif; }
+  .complete-area {
+    flex: 1;
+    background: var(--bg-warm);
+    padding: 40px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    overflow: hidden;
+    position: relative;
+  }
+  .complete-area::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: rgba(0,137,123,.04);
+    pointer-events: none;
+  }
+  .check-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    box-shadow: 0 10px 28px rgba(0,137,123,.3);
+    z-index: 1;
+  }
+  .check-circle svg {
+    width: 50px;
+    height: 50px;
+    stroke: #fff;
+    fill: none;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary-darker);
+    margin-bottom: 12px;
+    z-index: 1;
+  }
+  .message {
+    font-size: 13px;
+    color: var(--ink2);
+    line-height: 1.8;
+    margin-bottom: 24px;
+    z-index: 1;
+  }
+  .message b { color: var(--primary-darker); font-weight: 700; }
+  .info-card {
+    width: 100%;
+    background: var(--yellow-bg);
+    border: 1px solid var(--yellow-border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 24px;
+    z-index: 1;
+  }
+  .info-card .lbl {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--yellow-name);
+    letter-spacing: .08em;
+    margin-bottom: 4px;
+  }
+  .info-card .val {
+    font-size: 12px;
+    color: var(--ink);
+    line-height: 1.7;
+  }
+  .info-card .val b { color: var(--primary-darker); font-weight: 700; }
+  .actions {
+    width: 100%;
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 1;
+  }
+  .cta-btn {
+    width: 100%;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 4px 12px rgba(0,137,123,.22);
+  }
+  .cta-btn:hover { background: var(--primary-dark); }
+  .cta-btn.outline {
+    background: #fff;
+    color: var(--primary-dark);
+    border: 1px solid var(--primary);
+    box-shadow: none;
+  }
+
+  .annotation-wrap { max-width: 900px; margin: 32px auto 0; }
+  .annotation { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; font-size: 13px; color: #555; }
+  .annotation h3 { font-size: 14px; color: var(--ink); margin: 18px 0 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+  .annotation h3:first-child { margin-top: 0; }
+  .annotation ul { padding-left: 20px; }
+  .annotation li { margin-bottom: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>メニュー リクエスト送信完了画面</h1>
+  <p>受講生が筋トレメニューをリクエストした後の完了表示 ・ /workout/request-complete</p>
+</div>
+
+<div class="stage">
+  <div class="phone">
+    <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+    <div class="complete-area">
+      <div class="check-circle">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="title">リクエストを<br>送信しました</div>
+      <div class="message">
+        のりfitness が内容を確認し、<br>
+        あなた専用の<b>筋トレメニュー</b>を作成します
+      </div>
+
+      <div class="info-card">
+        <div class="lbl">受け取り目安</div>
+        <div class="val">
+          <b>数日以内</b>にホーム画面の「筋トレメニュー」に届きます
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="cta-btn">ホームに戻る</button>
+        <button class="cta-btn outline">リクエスト内容を確認</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="annotation-wrap">
+  <div class="annotation">
+    <h3>画面の役割</h3>
+    <ul>
+      <li>受講生が「筋トレメニュー リクエスト送信」フォームから送信した後の完了表示</li>
+      <li>静かな祝福 (派手すぎず、達成感を伝える)</li>
+      <li>次の期待値 (数日以内に届く) を明示することで不安解消</li>
+    </ul>
+
+    <h3>構成 (上から)</h3>
+    <ul>
+      <li>大きいティール緑チェックマーク (100px、影あり)</li>
+      <li>「リクエストを送信しました」(22px、ティール暗緑)</li>
+      <li>説明文 (のりfitness が確認 → メニュー作成)</li>
+      <li>受け取り目安カード (黄マーカー、「数日以内」明示)</li>
+      <li>「ホームに戻る」(主、ティール緑)</li>
+      <li>「リクエスト内容を確認」(副、アウトライン)</li>
+    </ul>
+
+    <h3>動線</h3>
+    <ul>
+      <li>ホームに戻る → /  (ホーム画面)</li>
+      <li>リクエスト内容を確認 → /workout/menu/request の確認モードへ</li>
+    </ul>
+
+    <h3>関連</h3>
+    <ul>
+      <li>実装: /workout/request-complete</li>
+      <li>前画面: /workout/menu/request (受講生リクエスト送信モック)</li>
+      <li>パターン継承元: 月次添削 送信完了モック</li>
+      <li>2026-06-10 確定</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

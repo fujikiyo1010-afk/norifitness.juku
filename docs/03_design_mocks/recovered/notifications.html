@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — お知らせ一覧画面</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --ink4: #ccc;
+    --border: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f8f9fa;
+    --bg-warm: linear-gradient(135deg, #e0f2f1, #fffbe6);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: #e8ebec; color: var(--ink); line-height: 1.6; padding: 24px; }
+  .page-header { max-width: 900px; margin: 0 auto 32px; text-align: center; }
+  .page-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .page-header p { color: #6b7d75; font-size: 13px; }
+  .stage { max-width: 320px; margin: 0 auto; }
+  .phone {
+    width: 100%;
+    background: var(--bg);
+    border: 6px solid #2a2a2a;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 6px 24px rgba(0,0,0,.15);
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    min-height: 720px;
+  }
+  .phone-status { background: #2a2a2a; color: #fff; text-align: center; font-size: 10px; padding: 3px; font-family: 'Inter', sans-serif; }
+  .app-header {
+    padding: 12px 14px;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .app-header .back-btn { background: none; border: none; color: var(--ink2); cursor: pointer; padding: 4px; display: flex; }
+  .app-header .back-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .app-header .title { font-size: 15px; font-weight: 700; flex: 1; }
+  .app-header .filter-btn {
+    font-size: 10.5px;
+    color: var(--ink3);
+    background: none;
+    border: 1px solid var(--ink4);
+    padding: 3px 9px;
+    border-radius: 9999px;
+    cursor: pointer;
+  }
+  .app-header .filter-btn.active {
+    color: var(--primary-dark);
+    border-color: var(--primary);
+    background: rgba(0,137,123,.06);
+  }
+  .scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--bg-soft);
+  }
+  .notif-list { list-style: none; padding: 0; }
+  .notif-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 14px 12px;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .notif-item:hover { background: var(--bg-soft); }
+  .notif-item .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--primary);
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+  .notif-item.read .dot { background: transparent; border: 1px solid var(--ink4); }
+  .notif-item .icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--bg-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .notif-item .icon svg { width: 18px; height: 18px; stroke: var(--primary-dark); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .notif-item.read .icon svg { stroke: var(--ink3); }
+  .notif-item .body { flex: 1; min-width: 0; }
+  .notif-item .top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 3px;
+  }
+  .notif-item .ttl {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .notif-item.read .ttl { color: var(--ink2); font-weight: 500; }
+  .notif-item .date {
+    font-size: 10px;
+    color: var(--ink3);
+    font-family: 'Inter', sans-serif;
+    flex-shrink: 0;
+  }
+  .notif-item .preview {
+    font-size: 11.5px;
+    color: var(--ink2);
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .notif-item.read .preview { color: var(--ink3); }
+  .section-date {
+    padding: 10px 14px 6px;
+    font-size: 10px;
+    color: var(--ink3);
+    font-weight: 700;
+    letter-spacing: .12em;
+    background: var(--bg-soft);
+  }
+  .empty-bottom {
+    padding: 24px;
+    text-align: center;
+    color: var(--ink3);
+    font-size: 11px;
+  }
+
+  .annotation-wrap { max-width: 900px; margin: 32px auto 0; }
+  .annotation { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; font-size: 13px; color: #555; }
+  .annotation h3 { font-size: 14px; color: var(--ink); margin: 18px 0 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+  .annotation h3:first-child { margin-top: 0; }
+  .annotation ul { padding-left: 20px; }
+  .annotation li { margin-bottom: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>お知らせ一覧画面</h1>
+  <p>ホーム ヘッダー ✉ アイコンから開く ・ (未実装)</p>
+</div>
+
+<div class="stage">
+  <div class="phone">
+    <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+    <div class="app-header">
+      <button class="back-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <div class="title">お知らせ</div>
+      <button class="filter-btn active">未読のみ</button>
+    </div>
+
+    <div class="scroll-area">
+      <div class="section-date">今週</div>
+
+      <ul class="notif-list">
+        <li class="notif-item">
+          <div class="dot"></div>
+          <div class="icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+          </div>
+          <div class="body">
+            <div class="top-row">
+              <div class="ttl">のりfitness から動画返信が届きました</div>
+              <div class="date">06/09</div>
+            </div>
+            <div class="preview">
+              2026 年 5 月の月次添削に対する返信動画が公開されました。「記録」タブからご覧いただけます。
+            </div>
+          </div>
+        </li>
+
+        <li class="notif-item">
+          <div class="dot"></div>
+          <div class="icon">
+            <svg viewBox="0 0 24 24"><path d="M14.5 8 8 14.5l1.5 1.5L16 9.5z"/><path d="M2 12c0-1 .9-2 2-2h2v4H4c-1.1 0-2-.9-2-2"/><path d="M18 14h2c1.1 0 2-.9 2-2s-.9-2-2-2h-2v4"/></svg>
+          </div>
+          <div class="body">
+            <div class="top-row">
+              <div class="ttl">専用筋トレメニューが届きました</div>
+              <div class="date">06/07</div>
+            </div>
+            <div class="preview">
+              あなた専用の筋トレメニューが完成しました。「ホーム → 筋トレメニュー」からご確認ください。
+            </div>
+          </div>
+        </li>
+      </ul>
+
+      <div class="section-date">先週</div>
+
+      <ul class="notif-list">
+        <li class="notif-item read">
+          <div class="dot"></div>
+          <div class="icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <div class="body">
+            <div class="top-row">
+              <div class="ttl">2026 年 6 月の月次振り返り 受付開始</div>
+              <div class="date">06/01</div>
+            </div>
+            <div class="preview">
+              月末までに 17 項目の振り返りを記入してください。提出後、のり社長から動画返信が届きます。
+            </div>
+          </div>
+        </li>
+
+        <li class="notif-item read">
+          <div class="dot"></div>
+          <div class="icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          </div>
+          <div class="body">
+            <div class="top-row">
+              <div class="ttl">目標管理シートに添削が届きました</div>
+              <div class="date">05/28</div>
+            </div>
+            <div class="preview">
+              のりfitness からあなたの目標シートに対するコメントが追加されました。
+            </div>
+          </div>
+        </li>
+      </ul>
+
+      <div class="empty-bottom">
+        ─ ここまでが過去 30 日のお知らせ ─
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="annotation-wrap">
+  <div class="annotation">
+    <h3>画面の役割</h3>
+    <ul>
+      <li>ホーム画面のヘッダー右上 ✉ アイコンから開く</li>
+      <li>受講生に届く通知 (動画返信 / メニュー配布 / 月次受付開始 / 目標シート添削 等) を一覧で確認</li>
+      <li>未読 / 既読の区別</li>
+    </ul>
+
+    <h3>構成 (上から)</h3>
+    <ul>
+      <li>ヘッダー: ← + 「お知らせ」+ 「未読のみ」フィルタ (トグル)</li>
+      <li>セクション見出し (今週 / 先週 / 過去) で時系列にグルーピング</li>
+      <li>各通知カード:
+        <ul>
+          <li>左: 未読ドット (ティール緑) or 既読 (リング)</li>
+          <li>アイコン (種類別: ✉ / 💪 / 📅 / 🎯)</li>
+          <li>タイトル + 日付</li>
+          <li>本文プレビュー (2 行 line-clamp)</li>
+        </ul>
+      </li>
+      <li>「過去 30 日まで」の境界線</li>
+    </ul>
+
+    <h3>動線</h3>
+    <ul>
+      <li>各通知をタップ → 該当画面 (動画返信なら月詳細、メニューなら筋トレメニュー等)</li>
+      <li>戻る → ホーム</li>
+      <li>フィルタ切替: 「未読のみ」 ⇔ 「すべて」</li>
+    </ul>
+
+    <h3>関連</h3>
+    <ul>
+      <li>実装: 未実装 (Phase 4 候補)</li>
+      <li>通知の種類: 動画返信届 / メニュー配布 / 目標シート添削 / 月次受付開始 / 等</li>
+      <li>OS プッシュ通知連動 (オンボ Step 6 で許可済の場合)</li>
+      <li>2026-06-10 確定</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>
