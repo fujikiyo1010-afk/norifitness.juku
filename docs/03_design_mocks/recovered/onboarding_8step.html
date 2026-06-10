@@ -841,19 +841,19 @@
           <div class="mini-form">
             <div class="field">
               <label>郵便番号 <span class="req">必須</span></label>
-              <input type="text" placeholder="123-4567" value="123-4567" />
+              <input type="text" placeholder="123-4567" value="123-4567" autocomplete="postal-code" />
             </div>
             <div class="field">
               <label>住所 (都道府県 + 市区町村 + 番地) <span class="req">必須</span></label>
-              <input type="text" placeholder="東京都渋谷区 神宮前 1-2-3" value="東京都渋谷区 神宮前 1-2-3" />
+              <input type="text" placeholder="東京都渋谷区 神宮前 1-2-3" value="東京都渋谷区 神宮前 1-2-3" autocomplete="street-address" />
             </div>
             <div class="field">
               <label>建物名 ・ 部屋番号 (任意)</label>
-              <input type="text" placeholder="○○マンション 101 号室" value="" />
+              <input type="text" placeholder="○○マンション 101 号室" value="" autocomplete="address-line2" />
             </div>
             <div class="field">
-              <label>受取人氏名 <span class="req">必須</span></label>
-              <input type="text" value="鈴木太郎" />
+              <label>受取人氏名 <span class="req">必須</span> <span style="font-size:9px;color:var(--ink3);font-weight:400;margin-left:4px;">(氏名を自動反映、変更可能)</span></label>
+              <input type="text" value="鈴木太郎" autocomplete="name" />
             </div>
           </div>
           <div class="summary">
