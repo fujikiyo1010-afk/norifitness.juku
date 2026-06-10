@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — 章詳細画面</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --ink4: #ccc;
+    --border: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f8f9fa;
+    --bg-warm: linear-gradient(135deg, #e0f2f1, #fffbe6);
+    --yellow-name: #b8860b;
+    --yellow-bg: rgba(255,235,59,.12);
+    --yellow-border: rgba(255,235,59,.5);
+    --accent-red: #c44;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: #e8ebec; color: var(--ink); line-height: 1.6; padding: 24px; }
+  .page-header { max-width: 900px; margin: 0 auto 32px; text-align: center; }
+  .page-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .page-header p { color: #6b7d75; font-size: 13px; }
+  .stage { max-width: 360px; margin: 0 auto; }
+
+  .phone {
+    width: 100%;
+    background: var(--bg);
+    border: 6px solid #2a2a2a;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 6px 24px rgba(0,0,0,.15);
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    min-height: 780px;
+  }
+  .phone-status { background: #2a2a2a; color: #fff; text-align: center; font-size: 10px; padding: 3px; font-family: 'Inter', sans-serif; }
+
+  /* アプリヘッダー */
+  .app-header {
+    padding: 12px 14px;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .app-header .back-btn {
+    background: none; border: none; color: var(--ink2); cursor: pointer; padding: 4px; display: flex; align-items: center;
+  }
+  .app-header .back-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .app-header .ttl-area { flex: 1; min-width: 0; }
+  .app-header .ttl { font-size: 14px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .app-header .sub { font-size: 10px; color: var(--ink3); margin-top: 1px; }
+
+  /* スクロール */
+  .scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--bg-soft);
+  }
+
+  /* ブレッドクラム */
+  .crumb {
+    padding: 10px 14px;
+    font-size: 10px;
+    color: var(--ink3);
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+  }
+  .crumb .sep { margin: 0 4px; color: var(--ink4); }
+  .crumb .current { color: var(--ink); font-weight: 600; }
+
+  /* ヒーロー (章タイトル + 説明 + 進捗) */
+  .hero {
+    padding: 18px 16px 16px;
+    background: var(--bg-warm);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero .ch-num {
+    font-size: 10px;
+    color: var(--primary-dark);
+    font-weight: 700;
+    letter-spacing: .08em;
+    margin-bottom: 4px;
+  }
+  .hero .ch-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary-darker);
+    line-height: 1.4;
+    margin-bottom: 8px;
+  }
+  .hero .ch-desc {
+    font-size: 11.5px;
+    color: var(--ink2);
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+  .hero .progress-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 5px;
+    font-size: 10.5px;
+  }
+  .hero .progress-row .lbl { color: var(--ink2); }
+  .hero .progress-row .val { color: var(--ink); font-weight: 700; font-family: 'Inter', sans-serif; }
+  .hero .bar {
+    height: 5px;
+    background: rgba(0,137,123,.15);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .hero .bar > div { height: 100%; background: var(--primary); transition: width .5s; }
+
+  /* 続きから CTA */
+  .continue-cta {
+    margin: 14px 14px 0;
+    display: block;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    border-radius: 12px;
+    padding: 12px 14px;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(0,137,123,.22);
+    position: relative;
+    overflow: hidden;
+  }
+  .continue-cta .lbl {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    opacity: .9;
+    margin-bottom: 2px;
+  }
+  .continue-cta .lesson-name {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+  .continue-cta .meta {
+    font-size: 10px;
+    opacity: .85;
+    margin-top: 3px;
+  }
+  .continue-cta .play-ico {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.22);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .continue-cta .play-ico svg { width: 14px; height: 14px; fill: #fff; stroke: none; }
+
+  /* セクションラベル */
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--ink3);
+    letter-spacing: .12em;
+    padding: 16px 16px 8px;
+  }
+
+  /* レッスンリスト */
+  .lesson-list { padding: 0 14px 14px; }
+  .lesson-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    transition: box-shadow .15s;
+    cursor: pointer;
+  }
+  .lesson-card:hover { box-shadow: 0 3px 12px rgba(0,0,0,.06); }
+  .lesson-card.done { background: rgba(0,137,123,.03); }
+  .lesson-card.current { border-color: var(--primary); box-shadow: 0 2px 10px rgba(0,137,123,.15); }
+
+  /* 完了マーク */
+  .lesson-card .status-mark {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+  }
+  .status-mark.done {
+    background: var(--primary);
+    color: #fff;
+  }
+  .status-mark.done svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+  .status-mark.todo {
+    border: 1.5px solid var(--ink4);
+    background: #fff;
+  }
+  .status-mark.current {
+    background: #fff;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+  }
+  .status-mark.current svg { width: 10px; height: 10px; fill: currentColor; stroke: none; }
+
+  /* レッスン本体 */
+  .lesson-body { flex: 1; min-width: 0; }
+  .lesson-body .num {
+    font-size: 9.5px;
+    color: var(--primary-dark);
+    font-weight: 700;
+    letter-spacing: .04em;
+    margin-bottom: 2px;
+  }
+  .lesson-body .ttl {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.4;
+    margin-bottom: 4px;
+  }
+  .lesson-body.done-text .ttl { color: var(--ink2); }
+  .lesson-body .meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 10px;
+    color: var(--ink3);
+    margin-bottom: 4px;
+  }
+  .lesson-body .meta .duration {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .lesson-body .meta .duration svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .lesson-body .meta .review-badge {
+    background: var(--yellow-bg);
+    color: var(--yellow-name);
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid var(--yellow-border);
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .lesson-body .meta .review-badge svg { width: 10px; height: 10px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .lesson-body .desc {
+    font-size: 10.5px;
+    color: var(--ink2);
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .lesson-body .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 5px;
+  }
+  .lesson-body .tag {
+    font-size: 9px;
+    color: var(--ink2);
+    background: var(--bg-soft);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  /* 章末モーダル動線 */
+  .chapter-end-cta {
+    margin: 8px 14px 18px;
+    padding: 14px 16px;
+    background: var(--yellow-bg);
+    border: 1px solid var(--yellow-border);
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+  }
+  .chapter-end-cta .lbl {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--yellow-name);
+    margin-bottom: 4px;
+    letter-spacing: .06em;
+  }
+  .chapter-end-cta .msg {
+    font-size: 12px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .chapter-end-cta .msg svg {
+    width: 13px;
+    height: 13px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vertical-align: -2px;
+    margin-right: 4px;
+  }
+
+  /* 下部タブ */
+  .tab-nav {
+    display: flex;
+    background: #fff;
+    border-top: 1px solid var(--border);
+    padding: 6px 0 4px;
+    flex-shrink: 0;
+  }
+  .tab-nav .tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    font-size: 9.5px;
+    color: var(--ink3);
+    padding: 4px 0;
+    cursor: pointer;
+  }
+  .tab-nav .tab svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .tab-nav .tab.active { color: var(--primary-dark); font-weight: 700; }
+  .tab-nav .tab.active svg { stroke-width: 2.4; }
+
+  /* === SVG アイコン (h1/h2/h3) === */
+  .ic {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    vertical-align: -3px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    margin-right: 6px;
+  }
+  .page-header h1 .ic { width: 22px; height: 22px; vertical-align: -4px; }
+
+  /* === 注釈 === */
+  .annotation-wrap { max-width: 900px; margin: 32px auto 0; }
+  .annotation { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; font-size: 13px; color: #555; }
+  .annotation h3 { font-size: 14px; color: var(--ink); margin: 18px 0 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+  .annotation h3:first-child { margin-top: 0; }
+  .annotation ul { padding-left: 20px; }
+  .annotation li { margin-bottom: 4px; font-size: 12px; }
+  .annotation .highlight {
+    background: rgba(0,137,123,.06);
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin: 8px 0;
+    font-size: 12px;
+    color: var(--primary-darker);
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>章詳細画面</h1>
+  <p>コース → 章詳細 → レッスン詳細 (3 階層) ・ /courses/[courseId]/chapters/[chapterId]</p>
+</div>
+
+<div class="stage">
+  <div class="phone">
+    <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+
+    <div class="app-header">
+      <button class="back-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <div class="ttl-area">
+        <div class="ttl">正しい食事のリズム</div>
+        <div class="sub">コース 1 ・ 第 3 章</div>
+      </div>
+    </div>
+
+    <div class="scroll-area">
+
+      <!-- ブレッドクラム -->
+      <div class="crumb">
+        <span>ホーム</span><span class="sep">/</span>
+        <span>コース</span><span class="sep">/</span>
+        <span>ダイエットの基礎</span><span class="sep">/</span>
+        <span class="current">正しい食事のリズム</span>
+      </div>
+
+      <!-- ヒーロー -->
+      <div class="hero">
+        <div class="ch-num">CHAPTER 3</div>
+        <div class="ch-title">正しい食事のリズム</div>
+        <div class="ch-desc">
+          食事の「タイミング」と「順番」を整えることで、 同じ食事でも体への影響が変わります。 リズムを作る基本を学びましょう。
+        </div>
+        <div class="progress-row">
+          <span class="lbl">進捗</span>
+          <span class="val">2 / 6 レッスン完了 (33%)</span>
+        </div>
+        <div class="bar"><div style="width: 33%;"></div></div>
+      </div>
+
+      <!-- 続きから -->
+      <a class="continue-cta">
+        <div class="lbl">▶ 続きから</div>
+        <div class="lesson-name">Lesson 3 ・ 間食の選び方</div>
+        <div class="meta">10 分 ・ 動画 + ワーク</div>
+        <div class="play-ico">
+          <svg viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+        </div>
+      </a>
+
+      <div class="section-label">レッスン一覧 (全 6 件)</div>
+
+      <!-- レッスン 1 (完了) -->
+      <div class="lesson-list">
+        <div class="lesson-card done">
+          <div class="status-mark done">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="lesson-body done-text">
+            <div class="num">LESSON 1</div>
+            <div class="ttl">食事のタイミング</div>
+            <div class="meta">
+              <span class="duration">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                8 分
+              </span>
+              <span class="review-badge">
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                振り返り済
+              </span>
+            </div>
+            <div class="desc">朝食 / 昼食 / 夕食 / 補食、 それぞれの最適な時間帯を理解する。</div>
+          </div>
+        </div>
+
+        <!-- レッスン 2 (完了) -->
+        <div class="lesson-card done">
+          <div class="status-mark done">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="lesson-body done-text">
+            <div class="num">LESSON 2</div>
+            <div class="ttl">朝食の重要性</div>
+            <div class="meta">
+              <span class="duration">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                12 分
+              </span>
+              <span class="review-badge">
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                振り返り済
+              </span>
+            </div>
+            <div class="desc">なぜ朝食が代謝に影響するか、 内容と量のコツ。</div>
+            <div class="tags">
+              <span class="tag">代謝</span>
+              <span class="tag">朝食</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- レッスン 3 (進行中 = 続きから) -->
+        <div class="lesson-card current">
+          <div class="status-mark current">
+            <svg viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+          </div>
+          <div class="lesson-body">
+            <div class="num">LESSON 3 ・ 視聴中</div>
+            <div class="ttl">間食の選び方</div>
+            <div class="meta">
+              <span class="duration">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                10 分 (4 分視聴済)
+              </span>
+            </div>
+            <div class="desc">タンパク質ファースト、 GI 値の低い間食、 タイミングの基準。</div>
+            <div class="tags">
+              <span class="tag">間食</span>
+              <span class="tag">PFC</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- レッスン 4 (未) -->
+        <div class="lesson-card">
+          <div class="status-mark todo"></div>
+          <div class="lesson-body">
+            <div class="num">LESSON 4</div>
+            <div class="ttl">PFC バランスの基礎</div>
+            <div class="meta">
+              <span class="duration">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                15 分
+              </span>
+            </div>
+            <div class="desc">タンパク質 / 脂質 / 炭水化物 の理想比率と、 目的別の調整。</div>
+            <div class="tags">
+              <span class="tag">PFC</span>
+              <span class="tag">栄養</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- レッスン 5 (未) -->
+        <div class="lesson-card">
+          <div class="status-mark todo"></div>
+          <div class="lesson-body">
+            <div class="num">LESSON 5</div>
+            <div class="ttl">カーボサイクル</div>
+            <div class="meta">
+              <span class="duration">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                10 分
+              </span>
+            </div>
+            <div class="desc">炭水化物の量を日によって変える、 中級者向けの食事戦略。</div>
+          </div>
+        </div>
+
+        <!-- レッスン 6 (未) -->
+        <div class="lesson-card">
+          <div class="status-mark todo"></div>
+          <div class="lesson-body">
+            <div class="num">LESSON 6</div>
+            <div class="ttl">食事日記の付け方</div>
+            <div class="meta">
+              <span class="duration">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                8 分
+              </span>
+            </div>
+            <div class="desc">無理なく続けられる記録の最小構成。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 章末モーダル動線 (全レッスン完了時に表示、 現状は灰色) -->
+      <a class="chapter-end-cta">
+        <div class="lbl">CHAPTER COMPLETE</div>
+        <div class="msg">
+          <svg viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+          全レッスン完了で章末メッセージが表示されます
+        </div>
+      </a>
+
+    </div>
+
+    <!-- 下部タブ -->
+    <div class="tab-nav">
+      <div class="tab"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>ホーム</div>
+      <div class="tab active"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>コース</div>
+      <div class="tab"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>記録</div>
+      <div class="tab"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>検索</div>
+      <div class="tab"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/></svg>設定</div>
+    </div>
+  </div>
+</div>
+
+<!-- 注釈 -->
+<div class="annotation-wrap">
+  <div class="annotation">
+    <h3>画面の役割</h3>
+    <ul>
+      <li>コース内の各章の詳細画面 ・ 章のレッスン一覧を表示</li>
+      <li>動線: ホーム → コース一覧 → コース詳細 → <b>章詳細</b> → レッスン詳細 (3 階層)</li>
+      <li>受講生が学習を再開する時の主要動線 (続きからボタン経由)</li>
+    </ul>
+
+    <h3>構成 (上から)</h3>
+    <ol style="margin-left:20px; font-size: 12px; line-height: 1.8;">
+      <li><b>ヘッダー</b>: ← + 章名 + サブ「コース X ・ 第 Y 章」</li>
+      <li><b>ブレッドクラム</b>: ホーム / コース / コース名 / <b>章名 (current)</b></li>
+      <li><b>ヒーロー</b> (ベージュグラデ): CHAPTER N + 章タイトル + 章説明 + 進捗バー</li>
+      <li><b>続きから CTA</b> (ティール緑グラデ): 最後に見たレッスン即ジャンプ + 「▶ 続きから」 + 視聴時間</li>
+      <li><b>レッスンリスト</b> (全 N 件):
+        <ul>
+          <li><b>完了</b>: ✓ アイコン (ティール緑) + done-text スタイル + 「振り返り済」黄バッジ (記入済の場合)</li>
+          <li><b>視聴中</b>: ▶ アイコン (緑枠) + 「視聴中」ラベル + 「N 分 (M 分視聴済)」 + ボーダーハイライト</li>
+          <li><b>未</b>: 空円 + 通常表示</li>
+          <li>各カード: LESSON N / タイトル / 動画長 / 振り返り済 / 説明 / タグ</li>
+        </ul>
+      </li>
+      <li><b>章末モーダル動線</b> (黄バナー): 全レッスン完了で章末メッセージ表示の説明</li>
+      <li><b>下部タブ</b>: コース active</li>
+    </ol>
+
+    <h3>含まれる要素 (確定 2026-06-10)</h3>
+    <div class="highlight">
+      きよむさん指示で全要素を入れて目視で判断する方針:<br>
+      ・ <b>動画長さ表示</b> (時計アイコン + N 分)<br>
+      ・ <b>続きから CTA</b> (大きいティール緑ボタン、 即ジャンプ)<br>
+      ・ <b>振り返り済バッジ</b> (黄バッジ + ✓ アイコン)<br>
+      ・ <b>章末モーダル動線</b> (黄バナー、 完了時の動線案内)<br>
+      ・ <b>章説明文</b> (実装通り、 ヒーローに表示)
+    </div>
+
+    <h3>状態バリエーション (実装で動的)</h3>
+    <ul>
+      <li><b>未着手</b>: 続きから CTA → 「Lesson 1 から始めましょう」、 全レッスン空円</li>
+      <li><b>視聴中 (このモック)</b>: 続きから CTA → 視聴中のレッスン、 完了 2、 視聴中 1、 未 3</li>
+      <li><b>全完了</b>: 続きから CTA → 「もう一度学ぶ」、 章末モーダル表示</li>
+    </ul>
+
+    <h3>未確定 / 議論ポイント</h3>
+    <ul>
+      <li>「振り返り済」バッジの位置: meta 行 (現状) or 別行?</li>
+      <li>動画長さ「N 分 (M 分視聴済)」の表示: 詳細すぎ? シンプル化案あり (「視聴中 50%」プログレスバー等)</li>
+      <li>タグ表示: 全レッスン に出すか、 重要レッスンのみか</li>
+      <li>章末モーダル動線: 「全完了時に出る」の説明バナー、 不要なら削除</li>
+      <li>レッスンカードのホバー効果: モバイルでは無効化</li>
+    </ul>
+
+    <h3>関連</h3>
+    <ul>
+      <li>route: /courses/[courseId]/chapters/[chapterId] (実装済)</li>
+      <li>前画面: コース詳細 (要モック化、 現状は第1弾モックの③)</li>
+      <li>次画面: レッスン詳細 (要モック化、 現状は第1弾モックの④ or /tmp/screens_more_latest ⑪)</li>
+      <li>2026-06-10 確定</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>
