@@ -13,6 +13,7 @@
   --status-pending:#e65100;
   --status-todo:#c44;
   --status-compare:#6b7d75;
+  --status-impl:#3a6050;
   --bg:#fafcfb;
 }
 * { box-sizing:border-box; margin:0; padding:0; }
@@ -41,6 +42,7 @@ h1 { font-size:26px; margin-bottom:6px; }
 .status.pending { background:#fff8f0; color:var(--status-pending); }
 .status.todo { background:#fff1f1; color:var(--status-todo); }
 .status.compare { background:#f0f5f3; color:var(--status-compare); }
+.status.impl { background:#edf2ef; color:var(--status-impl); }
 .col-name { width:25%; font-weight:600; color:var(--ink-900); }
 .col-status { width:11%; }
 .col-mock { width:30%; font-size:12px; }
@@ -71,7 +73,8 @@ h1 { font-size:26px; margin-bottom:6px; }
 <div class="legend">
   <div class="legend-item"><span class="dot ok"></span>✅ 確定 = 唯一の最終モックあり</div>
   <div class="legend-item"><span class="dot pending"></span>🟡 未確定 = 揺れあり (バリエーション複数)</div>
-  <div class="legend-item"><span class="dot todo"></span>❓ モック未作成 = 実装はあるがモックなし or 完全未着手</div>
+  <div class="legend-item"><span class="dot impl" style="background:#3a6050"></span>⚙ 実装あり = モックは無いが Next.js 実装は動作中 (dev server で確認)</div>
+  <div class="legend-item"><span class="dot todo"></span>❓ モック未作成 = 実装もモックもなし、または要相談</div>
   <div class="legend-item"><span class="dot compare"></span>🔵 比較用 = 過程の比較/検討モック (一覧の主役ではない)</div>
 </div>
 
@@ -80,7 +83,8 @@ h1 { font-size:26px; margin-bottom:6px; }
   <div class="stats">
     <div class="stat"><b>43</b> ✅ 確定</div>
     <div class="stat"><b>2</b> 🟡 未確定</div>
-    <div class="stat"><b>17</b> ❓ モック未作成</div>
+    <div class="stat"><b>12</b> ⚙ 実装あり (モック未作成)</div>
+    <div class="stat"><b>6</b> ❓ 完全未着手</div>
     <div class="stat"><b>18</b> 🔵 比較用 (recovered/ に温存)</div>
   </div>
   <p style="margin-top:10px; font-size:12px; color:var(--ink-700);">合計 55 画面想定 (実装 route + 必要なモック)。比較用 17 ファイルは別カウント。最終更新: 2026-06-09 (オンボ + 全課程完了 + 記録ハブ + 学習 確定)</p>
@@ -279,22 +283,23 @@ h1 { font-size:26px; margin-bottom:6px; }
 <!-- ============================================ -->
 <div class="section">
 <h2>15. 管理画面 — その他 <span class="count">(12 画面)</span></h2>
-<div class="section-warn">⚠ 管理画面 ダッシュボード + コース管理 + 受講生ハブ + 受講生招待 + リクエスト等、ほとんどモック未作成。実装は存在。</div>
+<div class="section-warn">⚙ ほとんど Next.js 実装あり (dev server で確認可能)。モック化は必要に応じて (実装が動くので緊急性低)。</div>
 <table class="table">
 <thead><tr><th class="col-name">画面</th><th class="col-status">状態</th><th class="col-mock">モック</th><th class="col-route">実装 route</th><th class="col-note">備考</th></tr></thead>
 <tbody>
-<tr><td class="col-name">管理画面 ダッシュボード</td><td><span class="status todo">❓ 未作成</span></td><td class="col-mock"><span class="none">モックなし</span></td><td class="col-route">/admin</td><td class="col-note">実装済</td></tr>
-<tr><td class="col-name">コース管理</td><td><span class="status todo">❓ 未作成</span></td><td class="col-mock"><span class="none">モックなし</span></td><td class="col-route">/admin/courses</td><td class="col-note">実装済</td></tr>
-<tr><td class="col-name">コース管理 (個別)</td><td><span class="status todo">❓ 未作成</span></td><td class="col-mock"><span class="none">モックなし</span></td><td class="col-route">/admin/courses/[id]</td><td class="col-note">実装済</td></tr>
-<tr><td class="col-name">章管理 (個別)</td><td><span class="status todo">❓ 未作成</span></td><td class="col-mock"><span class="none">モックなし</span></td><td class="col-route">/admin/courses/[id]/chapters/[id]</td><td class="col-note">実装済</td></tr>
-<tr><td class="col-name">受講生招待</td><td><span class="status todo">❓ 未作成</span></td><td class="col-mock"><span class="none">モックなし</span></td><td class="col-route">/admin/invitations</td><td class="col-note">実装済</td></tr>
-<tr><td class="col-name">リクエスト一覧</td><td><span class="status todo">❓ 未作成</span></td><td class="col-mock"><span class="none">モックなし</span></td><td class="col-route">/admin/requests</td><td class="col-note">実装済 ・ 受講生からのメニュー/カルテリクエスト</td></tr>
-<tr><td class="col-name">受講生一覧</td><td><span class="status todo">❓ 未作成</span></td><td class="col-mock"><span class="none">モックなし</span></td><td class="col-route">/admin/users</td><td class="col-note">実装済</td></tr>
-<tr><td class="col-name">受講生ハブ (個別)</td><td><span class="status todo">❓ 未作成</span></td><td class="col-mock"><span class="none">モックなし (memory に「案 B 確定」言及あり)</span></td><td class="col-route">/admin/users/[id]</td><td class="col-note">実装済 ・ 2026-06-03 案 B 確定</td></tr>
-<tr><td class="col-name">受講生 カルテ管理</td><td><span class="status todo">❓ 未作成</span></td><td class="col-mock"><span class="none">モックなし</span></td><td class="col-route">/admin/users/[id]/carte</td><td class="col-note">実装済</td></tr>
-<tr><td class="col-name">受講生 目標シート 管理</td><td><span class="status todo">❓ 未作成</span></td><td class="col-mock"><span class="none">モックなし</span></td><td class="col-route">/admin/users/[id]/goal-sheet</td><td class="col-note">実装済</td></tr>
-<tr><td class="col-name">受講生 マッチング</td><td><span class="status todo">❓ 未作成</span></td><td class="col-mock"><span class="none">モックなし</span></td><td class="col-route">/admin/users/[id]/match</td><td class="col-note">実装済 ・ 過去事例検索</td></tr>
-<tr><td class="col-name">受講生 メニュー新規作成</td><td><span class="status todo">❓ 未作成</span></td><td class="col-mock"><span class="none">モックなし</span></td><td class="col-route">/admin/users/[id]/menu/new</td><td class="col-note">実装済 ・ のり氏作成画面</td></tr>
+<tr><td class="col-name">管理画面 ダッシュボード</td><td><span class="status impl">⚙ 実装あり</span></td><td class="col-mock"><a href="http://localhost:3000/admin" target="_blank">http://localhost:3000/admin</a></td><td class="col-route">/admin</td><td class="col-note">dev server 起動で確認</td></tr>
+<tr><td class="col-name">コース管理</td><td><span class="status impl">⚙ 実装あり</span></td><td class="col-mock"><a href="http://localhost:3000/admin/courses" target="_blank">http://localhost:3000/admin/courses</a></td><td class="col-route">/admin/courses</td><td class="col-note">dev server 起動で確認</td></tr>
+<tr><td class="col-name">コース管理 (個別)</td><td><span class="status impl">⚙ 実装あり</span></td><td class="col-mock"><span style="color:var(--ink-500);font-size:11px;">/admin/courses/[id] (動作中)</span></td><td class="col-route">/admin/courses/[id]</td><td class="col-note">dev server 起動で確認</td></tr>
+<tr><td class="col-name">章管理 (個別)</td><td><span class="status impl">⚙ 実装あり</span></td><td class="col-mock"><span style="color:var(--ink-500);font-size:11px;">/admin/courses/[id]/chapters/[id] (動作中)</span></td><td class="col-route">/admin/courses/[id]/chapters/[id]</td><td class="col-note">dev server 起動で確認</td></tr>
+<tr><td class="col-name">受講生招待</td><td><span class="status impl">⚙ 実装あり</span></td><td class="col-mock"><a href="http://localhost:3000/admin/invitations" target="_blank">http://localhost:3000/admin/invitations</a></td><td class="col-route">/admin/invitations</td><td class="col-note">dev server 起動で確認 ・ 入会動線新方針 (マジックリンク) で要改修</td></tr>
+<tr><td class="col-name">リクエスト一覧</td><td><span class="status impl">⚙ 実装あり</span></td><td class="col-mock"><a href="http://localhost:3000/admin/requests" target="_blank">http://localhost:3000/admin/requests</a></td><td class="col-route">/admin/requests</td><td class="col-note">受講生からのメニュー/カルテリクエスト</td></tr>
+<tr><td class="col-name">受講生一覧</td><td><span class="status impl">⚙ 実装あり</span></td><td class="col-mock"><a href="http://localhost:3000/admin/users" target="_blank">http://localhost:3000/admin/users</a></td><td class="col-route">/admin/users</td><td class="col-note">dev server 起動で確認</td></tr>
+<tr><td class="col-name">受講生ハブ (個別)</td><td><span class="status impl">⚙ 実装あり</span></td><td class="col-mock"><span style="color:var(--ink-500);font-size:11px;">/admin/users/[id] (動作中 ・ 2026-06-03 案 B 確定)</span></td><td class="col-route">/admin/users/[id]</td><td class="col-note">2026-06-03 案 B 確定 ・ モック化は要相談</td></tr>
+<tr><td class="col-name">受講生 カルテ管理</td><td><span class="status impl">⚙ 実装あり</span></td><td class="col-mock"><span style="color:var(--ink-500);font-size:11px;">/admin/users/[id]/carte (動作中)</span></td><td class="col-route">/admin/users/[id]/carte</td><td class="col-note">dev server 起動で確認</td></tr>
+<tr><td class="col-name">受講生 目標シート 管理</td><td><span class="status impl">⚙ 実装あり</span></td><td class="col-mock"><span style="color:var(--ink-500);font-size:11px;">/admin/users/[id]/goal-sheet (動作中)</span></td><td class="col-route">/admin/users/[id]/goal-sheet</td><td class="col-note">dev server 起動で確認</td></tr>
+<tr><td class="col-name">受講生 マッチング</td><td><span class="status impl">⚙ 実装あり</span></td><td class="col-mock"><span style="color:var(--ink-500);font-size:11px;">/admin/users/[id]/match (動作中 ・ 過去事例検索)</span></td><td class="col-route">/admin/users/[id]/match</td><td class="col-note">過去事例検索</td></tr>
+<tr><td class="col-name">受講生 メニュー新規作成</td><td><span class="status impl">⚙ 実装あり</span></td><td class="col-mock"><span style="color:var(--ink-500);font-size:11px;">/admin/users/[id]/menu/new (動作中)</span></td><td class="col-route">/admin/users/[id]/menu/new</td><td class="col-note">のり氏作成画面</td></tr>
+<tr><td class="col-name">発送リスト (プロテイン管理)</td><td><span class="status todo">❓ 未作成</span></td><td class="col-mock"><span class="none">モックなし ・ 実装もなし</span></td><td class="col-route">(未実装)</td><td class="col-note">2026-06-10 オンボ Step 6 プロテイン発送先 採用に伴い必要 (新規)</td></tr>
 </tbody></table>
 </div>
 
