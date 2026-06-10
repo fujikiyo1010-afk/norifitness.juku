@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — 申請フォーム画面</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --ink4: #ccc;
+    --border: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f8f9fa;
+    --bg-warm: linear-gradient(135deg, #e0f2f1, #fffbe6);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: #e8ebec; color: var(--ink); line-height: 1.6; padding: 24px; }
+  .page-header { max-width: 900px; margin: 0 auto 32px; text-align: center; }
+  .page-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .page-header p { color: #6b7d75; font-size: 13px; }
+  .stage { max-width: 320px; margin: 0 auto; }
+  .phone {
+    width: 100%;
+    background: var(--bg);
+    border: 6px solid #2a2a2a;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 6px 24px rgba(0,0,0,.15);
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    min-height: 700px;
+  }
+  .phone-status { background: #2a2a2a; color: #fff; text-align: center; font-size: 10px; padding: 3px; font-family: 'Inter', sans-serif; }
+  .app-header {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 12px 14px;
+    text-align: center;
+  }
+  .app-header .title { font-size: 15px; font-weight: 700; }
+  .body-area {
+    flex: 1;
+    background: var(--bg-warm);
+    padding: 28px 24px 24px;
+    display: flex;
+    flex-direction: column;
+  }
+  .intro {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .intro .icon-wrap {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 12px;
+    background: rgba(0,137,123,.08);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .intro svg { width: 30px; height: 30px; stroke: var(--primary-darker); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .intro h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary-darker);
+    margin-bottom: 6px;
+  }
+  .intro p {
+    font-size: 12px;
+    color: var(--ink2);
+    line-height: 1.7;
+  }
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field label {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--ink2);
+    padding-left: 2px;
+  }
+  .field input {
+    border: 1px solid var(--ink4);
+    border-radius: 10px;
+    padding: 11px 12px;
+    font-size: 13px;
+    background: #fff;
+    color: var(--ink);
+    font-family: inherit;
+    width: 100%;
+  }
+  .field input:focus {
+    outline: 2px solid var(--primary);
+    border-color: var(--primary);
+  }
+  .field .hint {
+    font-size: 10px;
+    color: var(--ink3);
+    padding-left: 2px;
+  }
+  .submit-btn {
+    width: 100%;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 13px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 4px 12px rgba(0,137,123,.22);
+  }
+  .submit-btn:hover { background: var(--primary-dark); }
+  .note {
+    margin-top: 14px;
+    background: rgba(0,137,123,.06);
+    border-left: 3px solid var(--primary);
+    padding: 10px 12px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--ink2);
+    line-height: 1.7;
+  }
+
+  .annotation-wrap { max-width: 900px; margin: 32px auto 0; }
+  .annotation { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; font-size: 13px; color: #555; }
+  .annotation h3 { font-size: 14px; color: var(--ink); margin: 18px 0 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+  .annotation h3:first-child { margin-top: 0; }
+  .annotation ul { padding-left: 20px; }
+  .annotation li { margin-bottom: 4px; font-size: 12px; }
+  .annotation .highlight {
+    background: rgba(0,137,123,.06);
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin: 8px 0;
+    font-size: 12px;
+    color: var(--primary-darker);
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>申請フォーム画面 (新規入会・受講生主導)</h1>
+  <p>振込確認後に LINE で送られたリンクから開く ・ /request</p>
+</div>
+
+<div class="stage">
+  <div class="phone">
+    <div class="phone-status">●●● iPhone 9:41 ▮▮▮</div>
+    <div class="app-header">
+      <div class="title">入会申請</div>
+    </div>
+    <div class="body-area">
+      <div class="intro">
+        <div class="icon-wrap">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+        </div>
+        <h2>筋肉塾へようこそ</h2>
+        <p>
+          お振込ありがとうございました。<br>
+          以下の情報を入力してください
+        </p>
+      </div>
+
+      <div class="form">
+        <div class="field">
+          <label>氏名 <span style="color:#c44;font-size:9px;font-weight:700;">必須</span></label>
+          <input type="text" placeholder="鈴木 太郎" value="" />
+          <div class="hint">LINE と同じお名前を推奨</div>
+        </div>
+        <div class="field">
+          <label>メールアドレス <span style="color:#c44;font-size:9px;font-weight:700;">必須</span></label>
+          <input type="email" placeholder="you@example.com" value="" />
+          <div class="hint">アカウント有効化リンクをお送りします</div>
+        </div>
+      </div>
+
+      <button class="submit-btn">申請する</button>
+
+      <div class="note">
+        申請後、のりfitness が内容を確認 (通常 1 営業日以内)、確認完了後にメールでアカウント有効化リンクをお送りします。
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="annotation-wrap">
+  <div class="annotation">
+    <h3>画面の役割</h3>
+    <ul>
+      <li>受講生主導の新規入会動線の起点</li>
+      <li>振込確認後、きよむさんが LINE で送るリンクから開かれる</li>
+      <li>受講生が自分の氏名・メアドを入力 → きよむさん承認 → アカウント有効化リンクがメールで届く</li>
+    </ul>
+
+    <h3>構成 (上から)</h3>
+    <ul>
+      <li>ヘッダー: 「入会申請」(戻るボタンなし、 LINE から直接遷移)</li>
+      <li>アイコン (書類) + 「筋肉塾へようこそ」 + 説明</li>
+      <li>フォーム 2 項目:
+        <ul>
+          <li>氏名 (LINE と同じ名前を推奨、ヒント明示)</li>
+          <li>メールアドレス (有効化リンク送信先、ヒント明示)</li>
+        </ul>
+      </li>
+      <li>「申請する」ボタン</li>
+      <li>注意書き (1 営業日以内に確認、有効化リンクを送付)</li>
+    </ul>
+
+    <h3>確定方針 (2026-06-10)</h3>
+    <div class="highlight">
+      <b>B-2 マジックリンク方式</b><br>
+      <b>「招待コード」は廃止</b>、メアド+リンクで完結する設計に統一。<br><br>
+      <b>動線</b>:<br>
+      1. 受講生が支払い (銀行振込 or Stripe) → きよむさん入金確認<br>
+      2. きよむさんが LINE で申請フォームのリンク送付<br>
+      3. 受講生が <b>この画面</b> で氏名 + メアド入力<br>
+      4. 管理画面の「申請中」リストに表示 → きよむさん承認<br>
+      5. システムがメールで「アカウント有効化リンク」自動送信 (Resend 経由)<br>
+      6. 受講生がリンククリック → パスワード設定画面 → ホーム → オンボーディング 8 ステップ
+    </div>
+
+    <h3>関連</h3>
+    <ul>
+      <li>route: /request (未実装)</li>
+      <li>次画面: 申請完了表示 → メール待ち</li>
+      <li>後続: 会員情報登録画面 (パスワード設定) /create-account</li>
+      <li>関連 memory: project_kinniku_juku_invitation_flow (要作成)</li>
+      <li>2026-06-10 確定</li>
+    </ul>
+
+    <h3>未確定 / 議論ポイント</h3>
+    <ul>
+      <li>申請完了画面 (送信後の表示) を別途モック化するか</li>
+      <li>申請フォームに「振込金額」「振込日」を追加で照合補助とするか</li>
+      <li>同じメアドで複数申請があった場合の警告メッセージ</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>
