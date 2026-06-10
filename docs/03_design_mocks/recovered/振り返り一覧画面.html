@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>のりfitness 筋肉塾 — 振り返り一覧画面</title>
+<style>
+  :root {
+    --teal: #00897b;
+    --teal-dark: #00695c;
+    --teal-soft: rgba(0,137,123,0.08);
+    --border: #e8ebe9;
+    --gray-50: #fafafa;
+    --gray-100: #f4f4f5;
+    --gray-300: #d4d4d8;
+    --gray-500: #71717a;
+    --gray-700: #3f3f46;
+    --gray-900: #18181b;
+    --highlight: #fef08a;
+    --ink: #1a1a1a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+    background: #ececec;
+    color: var(--ink);
+    padding: 32px 16px 64px;
+    line-height: 1.6;
+  }
+  .page-header { max-width: 600px; margin: 0 auto 28px; text-align: center; }
+  .page-header h1 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .page-header p { font-size: 12px; color: var(--gray-500); line-height: 1.7; }
+  .page-header .route {
+    display: inline-block; margin-top: 8px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px; color: var(--gray-500); background: white;
+    padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border);
+  }
+
+  .phone {
+    max-width: 390px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  }
+
+  /* === ヘッダー === */
+  .app-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .back-btn { background: none; border: none; padding: 0; cursor: pointer; color: var(--gray-900); }
+  .app-title { flex: 1; text-align: center; font-size: 14px; font-weight: 700; }
+
+  /* === コンテンツ領域 === */
+  .content {
+    padding: 16px;
+  }
+
+  /* === パンくず === */
+  .breadcrumb {
+    font-size: 11px;
+    color: var(--gray-500);
+    margin-bottom: 8px;
+  }
+  .breadcrumb a {
+    color: var(--gray-500);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+  }
+  .breadcrumb a:hover { color: var(--gray-700); }
+  .breadcrumb .sep { margin: 0 4px; }
+  .breadcrumb .current { color: var(--gray-700); }
+
+  /* === タイトル === */
+  .page-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gray-900);
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  .page-desc {
+    font-size: 12px;
+    color: var(--gray-500);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  /* === 検索バー === */
+  .search {
+    position: relative;
+    margin-bottom: 14px;
+  }
+  .search-icon {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-300);
+    pointer-events: none;
+  }
+  .search input {
+    width: 100%;
+    padding: 9px 12px 9px 36px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: white;
+    font-size: 13px;
+    color: var(--gray-900);
+    font-family: inherit;
+  }
+  .search input::placeholder { color: var(--gray-300); }
+  .search input:focus { outline: none; border-color: var(--teal); }
+
+  /* === モード切替タブ === */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .tab {
+    padding: 8px 12px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-500);
+    cursor: pointer;
+    margin-bottom: -1px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .tab.active {
+    color: var(--gray-900);
+    border-bottom-color: var(--gray-900);
+  }
+  .tab-count {
+    background: var(--gray-100);
+    color: var(--gray-700);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 8px;
+    border-radius: 999px;
+  }
+
+  /* === レビューカード === */
+  .review-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .review-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .review-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+  .review-lesson-link {
+    flex: 1;
+    min-width: 0;
+    text-decoration: none;
+    color: var(--gray-900);
+  }
+  .review-lesson-link:hover .review-lesson { text-decoration: underline; }
+  .review-lesson {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-900);
+    line-height: 1.4;
+  }
+  .review-meta {
+    font-size: 11px;
+    color: var(--gray-500);
+    margin-top: 2px;
+    line-height: 1.5;
+  }
+  .review-date {
+    flex-shrink: 0;
+    font-size: 11px;
+    color: var(--gray-500);
+    white-space: nowrap;
+  }
+  .review-field {
+    margin-top: 6px;
+    font-size: 13px;
+    color: var(--gray-700);
+    line-height: 1.6;
+  }
+  .review-field-label {
+    color: var(--gray-500);
+    font-size: 11px;
+    margin-right: 4px;
+  }
+  /* 「次やる」だけ蛍光ペン強調 */
+  .review-field.next-action .nx-mark {
+    background: linear-gradient(transparent 58%, rgba(250, 204, 21, 0.45) 58%);
+    padding: 0 2px;
+    border-radius: 1px;
+  }
+  mark.hl {
+    background: var(--highlight);
+    color: inherit;
+    border-radius: 2px;
+    padding: 0 2px;
+  }
+
+  /* === カードフッタ アクション === */
+  .card-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--gray-100);
+  }
+  .card-action {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 10px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-900);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .card-action svg { color: var(--teal-dark); flex-shrink: 0; }
+  .card-action:hover {
+    border-color: var(--teal);
+    color: var(--teal-dark);
+    background: var(--teal-soft);
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>📝 振り返り一覧画面</h1>
+  <p>
+    受講生が書いた振り返りの一覧。 検索 + モード切替 (新しい順 / コース別)<br>
+    本モックは「新しい順」表示で「PFC」検索中の状態
+  </p>
+  <div class="route">/my-log/reviews</div>
+</div>
+
+<div class="phone">
+
+  <!-- ヘッダー -->
+  <div class="app-header">
+    <button class="back-btn" aria-label="戻る">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+    </button>
+    <div class="app-title">振り返り</div>
+    <div style="width:20px"></div>
+  </div>
+
+  <!-- コンテンツ -->
+  <div class="content">
+
+    <!-- パンくず -->
+    <nav class="breadcrumb">
+      <a href="#">ホーム</a><span class="sep">/</span><a href="#">マイ学習ログ</a><span class="sep">/</span><span class="current">振り返り</span>
+    </nav>
+
+    <!-- タイトル -->
+    <h1 class="page-title">📝 振り返り</h1>
+    <p class="page-desc">
+      あなたが書いた振り返りの一覧です。 並び替え・検索もできます。
+    </p>
+
+    <!-- 検索バー -->
+    <div class="search">
+      <span class="search-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      </span>
+      <input type="search" placeholder="振り返りを検索(キーワード、 レッスン名 等)" value="" />
+    </div>
+
+    <!-- モード切替タブ -->
+    <div class="tabs">
+      <button class="tab active">新しい順 <span class="tab-count">5</span></button>
+      <button class="tab">コース別 <span class="tab-count">5</span></button>
+    </div>
+
+    <!-- 振り返りカード一覧 -->
+    <div class="review-list">
+
+      <!-- カード 1 -->
+      <div class="review-card">
+        <div class="review-head">
+          <a class="review-lesson-link" href="#">
+            <div class="review-lesson">PFC バランスの基礎</div>
+            <div class="review-meta">📖 食事の基本 / 📑 栄養の三本柱</div>
+          </a>
+          <div class="review-date">2026/06/09</div>
+        </div>
+        <div class="review-field">
+          <span class="review-field-label">学んだ:</span>タンパク質は体重 × 1.6g が目安
+        </div>
+        <div class="review-field">
+          <span class="review-field-label">印象:</span>計算してみたら全然足りてなかった
+        </div>
+        <div class="review-field next-action">
+          <span class="review-field-label">次やる:</span><span class="nx-mark">プロテインを朝に追加してみる</span>
+        </div>
+        <div class="card-actions">
+          <button class="card-action">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+            レッスンを見る
+          </button>
+          <button class="card-action">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            振り返りを編集
+          </button>
+        </div>
+      </div>
+
+      <!-- カード 2 -->
+      <div class="review-card">
+        <div class="review-head">
+          <a class="review-lesson-link" href="#">
+            <div class="review-lesson">ベンチプレス フォームの基本</div>
+            <div class="review-meta">📖 筋トレ実践 / 📑 胸トレの基礎</div>
+          </a>
+          <div class="review-date">2026/06/07</div>
+        </div>
+        <div class="review-field">
+          <span class="review-field-label">学んだ:</span>肩甲骨を寄せて胸を張ること
+        </div>
+        <div class="review-field">
+          <span class="review-field-label">印象:</span>今まで全然できてなかった
+        </div>
+        <div class="review-field next-action">
+          <span class="review-field-label">次やる:</span><span class="nx-mark">次回ジムで意識してやる</span>
+        </div>
+        <div class="card-actions">
+          <button class="card-action">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+            レッスンを見る
+          </button>
+          <button class="card-action">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            振り返りを編集
+          </button>
+        </div>
+      </div>
+
+      <!-- カード 3 -->
+      <div class="review-card">
+        <div class="review-head">
+          <a class="review-lesson-link" href="#">
+            <div class="review-lesson">停滞期の乗り越え方</div>
+            <div class="review-meta">📖 メンタル / 📑 継続のコツ</div>
+          </a>
+          <div class="review-date">2026/06/05</div>
+        </div>
+        <div class="review-field">
+          <span class="review-field-label">学んだ:</span>停滞は当然来る、 焦らない
+        </div>
+        <div class="review-field">
+          <span class="review-field-label">印象:</span>自分だけじゃないと知って安心
+        </div>
+        <div class="card-actions">
+          <button class="card-action">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+            レッスンを見る
+          </button>
+          <button class="card-action">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            振り返りを編集
+          </button>
+        </div>
+      </div>
+
+      <!-- カード 4 -->
+      <div class="review-card">
+        <div class="review-head">
+          <a class="review-lesson-link" href="#">
+            <div class="review-lesson">炭水化物の取り方</div>
+            <div class="review-meta">📖 食事の基本 / 📑 栄養の三本柱</div>
+          </a>
+          <div class="review-date">2026/06/02</div>
+        </div>
+        <div class="review-field">
+          <span class="review-field-label">学んだ:</span>GI 値を意識して低 GI を選ぶ
+        </div>
+        <div class="review-field next-action">
+          <span class="review-field-label">次やる:</span><span class="nx-mark">白米 → 玄米に切り替えてみる</span>
+        </div>
+        <div class="card-actions">
+          <button class="card-action">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+            レッスンを見る
+          </button>
+          <button class="card-action">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            振り返りを編集
+          </button>
+        </div>
+      </div>
+
+      <!-- カード 5 -->
+      <div class="review-card">
+        <div class="review-head">
+          <a class="review-lesson-link" href="#">
+            <div class="review-lesson">自重スクワットの基本</div>
+            <div class="review-meta">📖 筋トレ実践 / 📑 脚の基礎</div>
+          </a>
+          <div class="review-date">2026/05/30</div>
+        </div>
+        <div class="review-field">
+          <span class="review-field-label">学んだ:</span>膝が前に出すぎていた
+        </div>
+        <div class="review-field">
+          <span class="review-field-label">印象:</span>フォーム意識すると全然違う
+        </div>
+        <div class="review-field next-action">
+          <span class="review-field-label">次やる:</span><span class="nx-mark">動画で自分のフォームを撮ってみる</span>
+        </div>
+        <div class="card-actions">
+          <button class="card-action">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+            レッスンを見る
+          </button>
+          <button class="card-action">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            振り返りを編集
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
