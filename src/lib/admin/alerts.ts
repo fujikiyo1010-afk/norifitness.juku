@@ -111,15 +111,21 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
   if (!users || users.length === 0) return [];
 
   // 関連データを並列取得
-  const [audits, cartes, sheets, lessons, authList] = await Promise.all([
-    admin
-      .from("monthly_audits")
-      .select("user_id, target_month, submitted_at"),
-    admin.from("user_workout_carte").select("user_id"),
-    admin.from("goal_sheets").select("user_id"),
-    admin.from("lesson_progress").select("user_id").eq("is_completed", true),
-    admin.auth.admin.listUsers({ perPage: 1000 }),
-  ]);
+  const [audits, cartes, sheets, lessons, authList, bodyMetrics, sheetsWithContent] =
+    await Promise.all([
+      admin
+        .from("monthly_audits")
+        .select("user_id, target_month, submitted_at"),
+      admin.from("user_workout_carte").select("user_id"),
+      admin.from("goal_sheets").select("user_id"),
+      admin.from("lesson_progress").select("user_id").eq("is_completed", true),
+      admin.auth.admin.listUsers({ perPage: 1000 }),
+      admin
+        .from("body_metrics")
+        .select("user_id, recorded_at, weight_kg")
+        .order("recorded_at", { ascending: false }),
+      admin.from("goal_sheets").select("user_id, content"),
+    ]);
 
   // 高速ルックアップ用の Set / Map
   const carteUserIds = new Set(cartes.data?.map((c) => c.user_id) ?? []);
@@ -137,6 +143,32 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
     const arr = auditsByUser.get(a.user_id) ?? [];
     arr.push({ target_month: a.target_month as string, submitted_at: a.submitted_at as string | null });
     auditsByUser.set(a.user_id, arr);
+  }
+
+  // body_metrics: ユーザーごとに最新記録日 + 最新体重
+  const bodyMetricsByUser = new Map<
+    string,
+    { latestDate: Date; latestWeight: number | null }
+  >();
+  for (const m of bodyMetrics.data ?? []) {
+    const existing = bodyMetricsByUser.get(m.user_id);
+    const date = new Date(m.recorded_at as string);
+    if (!existing || date > existing.latestDate) {
+      bodyMetricsByUser.set(m.user_id, {
+        latestDate: date,
+        latestWeight: m.weight_kg as number | null,
+      });
+    }
+  }
+
+  // goal_sheets: ユーザーごとに目標体重 (kg)
+  const targetWeightByUser = new Map<string, number>();
+  for (const g of sheetsWithContent.data ?? []) {
+    const content = g.content as
+      | { goal_selection?: { target_weight_kg?: number } }
+      | null;
+    const target = content?.goal_selection?.target_weight_kg;
+    if (target && target > 0) targetWeightByUser.set(g.user_id, target);
   }
 
   return users.map((user) => {
@@ -169,9 +201,31 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
       }
     }
 
-    // 3. 体組成 N 日途絶 ・ TODO: 体組成 DB 未実装、 集計スキップ
+    // 3. 体組成 N 日途絶
+    const bm = bodyMetricsByUser.get(user.id);
+    if (bm) {
+      const daysSinceLatest = daysBetween(bm.latestDate, now);
+      if (daysSinceLatest >= ALERT_THRESHOLDS.BODY_METRICS_STALLED_DAYS) {
+        tags.push({
+          key: "body_metrics_stalled",
+          label: `体組成 ${daysSinceLatest} 日途絶`,
+          severity: "warn",
+        });
+      }
+    }
 
-    // 4. 目標乖離 ・ TODO: 体組成 DB 未実装、 集計スキップ
+    // 4. 目標乖離 (体重 vs 目標体重)
+    const target = targetWeightByUser.get(user.id);
+    if (bm?.latestWeight && target) {
+      const deviation = Math.abs(((bm.latestWeight - target) / target) * 100);
+      if (deviation >= ALERT_THRESHOLDS.GOAL_DEVIATION_PERCENT) {
+        tags.push({
+          key: "goal_deviation",
+          label: `目標乖離 ${deviation.toFixed(0)}%`,
+          severity: "urgent",
+        });
+      }
+    }
 
     // 5. カルテ未記入
     if (!carteUserIds.has(user.id) && daysSinceJoined >= ALERT_THRESHOLDS.CARTE_BLANK_DAYS) {
