@@ -66,7 +66,7 @@ export function PWAInstallBanner() {
   return (
     <>
       {/* バナー本体 */}
-      <div className="fixed bottom-3 left-3 right-3 z-40 mx-auto max-w-md bg-white border border-[#e8ebe9] rounded-xl shadow-lg p-3 flex items-center gap-3">
+      <div className="fixed bottom-[7rem] left-3 right-3 z-40 mx-auto max-w-md bg-white border border-[#e8ebe9] rounded-xl shadow-lg p-3 flex items-center gap-3">
         <div className="w-10 h-10 rounded-lg bg-[#00897b] text-white flex items-center justify-center flex-shrink-0">
           <svg
             viewBox="0 0 24 24"
