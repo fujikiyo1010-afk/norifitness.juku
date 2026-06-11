@@ -116,7 +116,7 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
       admin
         .from("monthly_audits")
         .select("user_id, target_month, submitted_at"),
-      admin.from("user_workout_carte").select("user_id"),
+      admin.from("user_workout_carte").select("user_id, purposes"),
       admin.from("goal_sheets").select("user_id"),
       admin.from("lesson_progress").select("user_id").eq("is_completed", true),
       admin.auth.admin.listUsers({ perPage: 1000 }),
@@ -129,6 +129,16 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
 
   // 高速ルックアップ用の Set / Map
   const carteUserIds = new Set(cartes.data?.map((c) => c.user_id) ?? []);
+  // ダイエット目的かどうか (goal_deviation アラート対象判定用)
+  // ダイエット系の目的 (ダイエット / 見た目改善) を持つ受講生のみ体重乖離を警告
+  const isDietGoalByUser = new Map<string, boolean>();
+  for (const c of cartes.data ?? []) {
+    const purposes = (c.purposes as string[] | null) ?? [];
+    const isDiet = purposes.some(
+      (p) => p === "ダイエット" || p === "見た目改善"
+    );
+    isDietGoalByUser.set(c.user_id, isDiet);
+  }
   const sheetUserIds = new Set(sheets.data?.map((s) => s.user_id) ?? []);
   const learningUserIds = new Set(lessons.data?.map((l) => l.user_id) ?? []);
   const lastLoginByUser = new Map<string, Date>();
@@ -215,8 +225,15 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
     }
 
     // 4. 目標乖離 (体重 vs 目標体重)
+    //
+    // ⚠️ 暫定実装 (2026-06-11 v5):
+    //   - 体重ベースの判定のため、 ダイエット系目的者のみ対象
+    //   - カルテの purposes に「ダイエット」または「見た目改善」を含む場合のみ判定
+    //   - 筋肉増 / 健康維持 / 体力向上が目的の受講生では誤作動するため除外
+    //   - KPI 本体 (実施完工率) には昇格させない (社長確認待ち)
     const target = targetWeightByUser.get(user.id);
-    if (bm?.latestWeight && target) {
+    const isDietGoal = isDietGoalByUser.get(user.id) ?? false;
+    if (isDietGoal && bm?.latestWeight && target) {
       const deviation = Math.abs(((bm.latestWeight - target) / target) * 100);
       if (deviation >= ALERT_THRESHOLDS.GOAL_DEVIATION_PERCENT) {
         tags.push({
