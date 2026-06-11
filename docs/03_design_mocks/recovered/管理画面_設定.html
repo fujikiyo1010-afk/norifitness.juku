@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — 管理画面 / 設定</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+    --primary-soft: rgba(0,137,123,0.08);
+    --pastel: #e0f2f1;
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --ink4: #ccc;
+    --border: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f8f9fa;
+    --bg-warm: linear-gradient(135deg, #e0f2f1, #fffbe6);
+    --danger: #d32f2f;
+    --gold: #b8860b;
+    --gold-bg: rgba(255,235,59,0.12);
+    --nav-bg: #1a1a1a;
+    --nav-text: #d4d4d8;
+    --cat-monthly: #00897b;
+    --cat-request: #0369a1;
+    --cat-welcome: #b8860b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: #e8ebec; color: var(--ink); line-height: 1.6; padding: 24px; }
+  .page-header { max-width: 1320px; margin: 0 auto 24px; text-align: center; }
+  .page-header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .page-header p { color: #6b7d75; font-size: 12px; line-height: 1.7; }
+  .page-header .route { display: inline-block; margin-top: 6px; font-family: 'Inter', monospace; font-size: 11px; color: var(--ink3); background: white; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); }
+
+  .frame-label {
+    max-width: 1320px;
+    margin: 0 auto 12px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .frame-label .frame-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .frame-label .frame-title { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .frame-label .frame-note { font-size: 11px; color: var(--ink3); margin-left: auto; }
+
+  .desk { max-width: 1320px; margin: 0 auto 40px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,.08); min-height: 820px; display: flex; flex-direction: column; }
+  .desk-chrome { background: #f1f3f4; padding: 8px 12px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--border); }
+  .desk-chrome .dot { width: 10px; height: 10px; border-radius: 50%; background: #d0d0d0; }
+  .desk-chrome .url { flex: 1; margin-left: 12px; background: #fff; padding: 4px 10px; border-radius: 4px; font-size: 11px; color: var(--ink3); font-family: 'Inter', sans-serif; }
+  .desk-body { flex: 1; display: flex; }
+
+  /* === サイドナビ === */
+  .sidenav { width: 220px; background: var(--nav-bg); color: var(--nav-text); display: flex; flex-direction: column; flex-shrink: 0; }
+  .sidenav-brand { padding: 18px 18px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .sidenav-brand .brand-mark { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; margin-bottom: 8px; }
+  .sidenav-brand .brand-ttl { font-size: 14px; font-weight: 700; color: #fff; }
+  .sidenav-brand .brand-sub { font-size: 11px; color: var(--nav-text); margin-top: 1px; }
+  .sidenav-menu { flex: 1; padding: 12px 8px; }
+  .sidenav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 6px; color: var(--nav-text); font-size: 13px; font-weight: 500; margin-bottom: 2px; cursor: pointer; }
+  .sidenav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
+  .sidenav-item.active { background: rgba(0,137,123,0.18); color: #fff; font-weight: 700; }
+  .sidenav-item .icon { width: 18px; height: 18px; flex-shrink: 0; }
+  .sidenav-item .badge { margin-left: auto; background: var(--danger); color: white; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 999px; font-family: 'Inter', sans-serif; }
+  .sidenav-footer { padding: 12px 14px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 10px; }
+  .sidenav-footer .ava { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; }
+  .sidenav-footer .info .name { font-size: 12px; font-weight: 700; color: #fff; }
+  .sidenav-footer .info .role { font-size: 10px; color: var(--nav-text); }
+
+  /* === メイン === */
+  .main { flex: 1; background: var(--bg-soft); overflow: auto; }
+  .main-head { padding: 20px 28px; background: #fff; border-bottom: 1px solid var(--border); }
+  .main-head h2 { font-size: 18px; font-weight: 700; color: var(--ink); }
+  .main-head .sub { font-size: 11px; color: var(--ink3); margin-top: 2px; }
+
+  .settings-body { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100% - 80px); }
+
+  /* サブナビ */
+  .sub-nav { background: #fff; border-right: 1px solid var(--border); padding: 16px 8px; }
+  .sub-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 6px; font-size: 13px; color: var(--ink2); cursor: pointer; margin-bottom: 2px; text-decoration: none; }
+  .sub-nav-item:hover { background: var(--bg-soft); color: var(--ink); }
+  .sub-nav-item.active { background: var(--primary-soft); color: var(--primary-darker); font-weight: 700; }
+  .sub-nav-item .ic { width: 16px; height: 16px; flex-shrink: 0; }
+  .sub-nav-item .sub-mark { margin-left: auto; font-size: 9px; color: var(--ink3); background: var(--bg-soft); padding: 1px 6px; border-radius: 999px; border: 1px solid var(--border); }
+
+  /* === 設定本体 === */
+  .settings-content { padding: 24px 28px 40px; }
+  .settings-title-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .settings-title-bar h3 { font-size: 17px; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 8px; }
+  .settings-title-bar h3 .title-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .settings-desc { font-size: 12px; color: var(--ink3); margin-bottom: 22px; }
+
+  /* === カテゴリブロック === */
+  .cat-block { margin-bottom: 22px; }
+  .cat-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .cat-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .cat-dot.monthly { background: var(--cat-monthly); }
+  .cat-dot.request { background: var(--cat-request); }
+  .cat-dot.welcome { background: var(--cat-welcome); }
+  .cat-title { font-size: 13px; font-weight: 700; color: var(--ink); }
+  .cat-count { background: var(--bg-soft); border: 1px solid var(--border); color: var(--ink2); font-size: 10px; font-weight: 700; padding: 1px 8px; border-radius: 999px; font-family: 'Inter', sans-serif; }
+  .cat-add { margin-left: auto; font-size: 11px; color: var(--primary-dark); text-decoration: none; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; }
+  .cat-add:hover { text-decoration: underline; }
+
+  /* テンプレート行 */
+  .tpl-list { display: flex; flex-direction: column; gap: 8px; }
+  .tpl-row { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; display: flex; align-items: flex-start; gap: 12px; }
+  .tpl-row .tpl-icon-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+  .tpl-row .tpl-icon-dot.monthly { background: var(--cat-monthly); }
+  .tpl-row .tpl-icon-dot.request { background: var(--cat-request); }
+  .tpl-row .tpl-icon-dot.welcome { background: var(--cat-welcome); }
+  .tpl-row .tpl-info { flex: 1; min-width: 0; }
+  .tpl-row .tpl-title { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+  .tpl-row .tpl-preview { font-size: 11px; color: var(--ink2); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .tpl-row .tpl-actions { display: flex; gap: 4px; flex-shrink: 0; }
+  .tpl-row .tpl-btn { padding: 4px 8px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 6px; font-size: 11px; color: var(--ink2); cursor: pointer; }
+  .tpl-row .tpl-btn:hover { color: var(--primary-dark); border-color: var(--primary); }
+
+  /* 新規作成 */
+  .new-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--primary); color: white; border: none; border-radius: 8px; padding: 9px 16px; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .new-btn:hover { background: var(--primary-dark); }
+  .new-btn .ic { width: 14px; height: 14px; }
+
+  /* === 通知設定 === */
+  .notify-info {
+    background: var(--bg-warm); border: 1px solid #d4ebe8;
+    border-radius: 8px; padding: 12px 16px;
+    font-size: 12px; color: var(--primary-darker);
+    margin-bottom: 22px; line-height: 1.7;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .notify-info .nf-ic { width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px; color: var(--primary-dark); }
+  .notify-info b { color: var(--primary-darker); }
+
+  .notify-section-label {
+    font-size: 11px; font-weight: 700;
+    color: var(--ink3); letter-spacing: 1.5px;
+    margin: 22px 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .notify-section-label:first-of-type { margin-top: 0; }
+
+  .notify-block { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 14px; }
+  .notify-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px dashed var(--border); }
+  .notify-row:last-child { border-bottom: none; }
+  .notify-row .nfo .nfo-ttl { font-size: 13px; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 8px; }
+  .notify-row .nfo .nfo-ttl .nf-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .notify-row .nfo .nfo-sub { font-size: 11px; color: var(--ink3); margin-top: 3px; margin-left: 16px; }
+  .notify-row .nfo .nfo-channels {
+    font-size: 10px; color: var(--primary-dark); margin-top: 5px;
+    margin-left: 16px;
+    display: inline-flex; gap: 8px;
+  }
+  .notify-row .nfo .nfo-channels .ch {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 7px; background: var(--primary-soft);
+    border-radius: 4px; font-weight: 600;
+  }
+  .notify-row .nfo .nfo-channels .ch .ch-ic { width: 11px; height: 11px; }
+
+  .toggle { position: relative; width: 38px; height: 22px; background: var(--ink4); border-radius: 999px; cursor: pointer; transition: background .2s; flex-shrink: 0; }
+  .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; background: white; border-radius: 50%; transition: left .2s; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+  .toggle.on { background: var(--primary); }
+  .toggle.on::after { left: 18px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>管理画面 ・ 設定</h1>
+  <p>
+    サブナビ 5 項目 ・ テンプレート / 通知設定 を別タブで分離 (混在解消)<br>
+    通知 = 画面内バッジ優先、 メールは最小限
+  </p>
+  <div class="route">/admin/settings/templates (default) + /admin/settings/notifications</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- desk 1: テンプレートタブ (テンプレートだけに集中) -->
+<!-- ============================================================ -->
+<div class="frame-label">
+  <span class="frame-dot" style="background:var(--primary);"></span>
+  <span class="frame-title">desk 1 ・ テンプレートタブ active</span>
+  <span class="frame-note">/admin/settings/templates ・ テンプレート 3 カテゴリのみ</span>
+</div>
+
+<div class="desk">
+  <div class="desk-chrome">
+    <span class="dot" style="background:#ff5f57"></span>
+    <span class="dot" style="background:#febc2e"></span>
+    <span class="dot" style="background:#28c840"></span>
+    <span class="url">app.norifitness.com/admin/settings/templates</span>
+  </div>
+  <div class="desk-body">
+
+    <nav class="sidenav">
+      <div class="sidenav-brand"><div class="brand-mark">の</div><div class="brand-ttl">のりfitness</div><div class="brand-sub">筋肉塾 管理</div></div>
+      <div class="sidenav-menu">
+        <a class="sidenav-item"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>ホーム</a>
+        <a class="sidenav-item"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>受講生 <span class="badge" style="background:var(--ink2)">21</span></a>
+        <a class="sidenav-item"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>月次添削 <span class="badge">5</span></a>
+        <a class="sidenav-item"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>リクエスト <span class="badge">2</span></a>
+        <a class="sidenav-item"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>発送管理 <span class="badge">1</span></a>
+        <a class="sidenav-item"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>招待</a>
+        <a class="sidenav-item active"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>設定</a>
+      </div>
+      <div class="sidenav-footer"><div class="ava">の</div><div class="info"><div class="name">のり氏</div><div class="role">管理者</div></div></div>
+    </nav>
+
+    <div class="main">
+      <div class="main-head">
+        <h2>設定</h2>
+        <div class="sub">のりfitness 管理画面の運用設定</div>
+      </div>
+
+      <div class="settings-body">
+
+        <!-- サブナビ -->
+        <div class="sub-nav">
+          <a class="sub-nav-item">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            プロフィール
+          </a>
+          <a class="sub-nav-item active">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            テンプレート
+            <span class="sub-mark">7</span>
+          </a>
+          <a class="sub-nav-item">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+            通知設定
+          </a>
+          <a class="sub-nav-item">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/></svg>
+            発送リスト
+            <span class="sub-mark">1</span>
+          </a>
+          <a class="sub-nav-item">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            アカウント
+            <span class="sub-mark">近日</span>
+          </a>
+        </div>
+
+        <!-- テンプレート内容のみ -->
+        <div class="settings-content">
+
+          <div class="settings-title-bar">
+            <div>
+              <h3>
+                <span class="title-dot" style="background:var(--primary);"></span>
+                メッセージテンプレート
+              </h3>
+              <div class="settings-desc" style="margin-bottom:0;">月次添削動画コメント / リクエスト返答 / 新規入会案内 で使う定型文を管理</div>
+            </div>
+            <button class="new-btn">
+              <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              新規作成
+            </button>
+          </div>
+
+          <div style="height:18px"></div>
+
+          <!-- 月次添削 -->
+          <div class="cat-block">
+            <div class="cat-head">
+              <span class="cat-dot monthly"></span>
+              <span class="cat-title">月次添削 コメント</span>
+              <span class="cat-count">3</span>
+              <a class="cat-add">+ 追加</a>
+            </div>
+            <div class="tpl-list">
+              <div class="tpl-row">
+                <div class="tpl-icon-dot monthly"></div>
+                <div class="tpl-info">
+                  <div class="tpl-title">録画 冒頭挨拶</div>
+                  <div class="tpl-preview">「{受講生名}さん、 こんにちは。 のりです。 今月の体組成データを拝見しました...」</div>
+                </div>
+                <div class="tpl-actions"><button class="tpl-btn">編集</button><button class="tpl-btn">複製</button></div>
+              </div>
+              <div class="tpl-row">
+                <div class="tpl-icon-dot monthly"></div>
+                <div class="tpl-info">
+                  <div class="tpl-title">数値改善 フィードバック</div>
+                  <div class="tpl-preview">「数値が動いた良いタイミングですね。 この調子で次月も継続していきましょう...」</div>
+                </div>
+                <div class="tpl-actions"><button class="tpl-btn">編集</button><button class="tpl-btn">複製</button></div>
+              </div>
+              <div class="tpl-row">
+                <div class="tpl-icon-dot monthly"></div>
+                <div class="tpl-info">
+                  <div class="tpl-title">数値停滞 励まし</div>
+                  <div class="tpl-preview">「停滞期は誰にでも来ます、 焦らずに今のフォームと食事を見直していきましょう...」</div>
+                </div>
+                <div class="tpl-actions"><button class="tpl-btn">編集</button><button class="tpl-btn">複製</button></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- リクエスト返答 (完了形に書き換え) -->
+          <div class="cat-block">
+            <div class="cat-head">
+              <span class="cat-dot request"></span>
+              <span class="cat-title">リクエスト返答 (完了形 標準)</span>
+              <span class="cat-count">3</span>
+              <a class="cat-add">+ 追加</a>
+            </div>
+            <div class="tpl-list">
+              <div class="tpl-row">
+                <div class="tpl-icon-dot request"></div>
+                <div class="tpl-info">
+                  <div class="tpl-title">環境変更 完了</div>
+                  <div class="tpl-preview">「{環境}を「{新環境}」に変更しました。 今日からこのメニューでお願いします...」</div>
+                </div>
+                <div class="tpl-actions"><button class="tpl-btn">編集</button><button class="tpl-btn">複製</button></div>
+              </div>
+              <div class="tpl-row">
+                <div class="tpl-icon-dot request"></div>
+                <div class="tpl-info">
+                  <div class="tpl-title">代替種目 反映済</div>
+                  <div class="tpl-preview">「{種目}を「{代替種目}」に変更しました。 フォームも安定しやすく {効果} に効果的です...」</div>
+                </div>
+                <div class="tpl-actions"><button class="tpl-btn">編集</button><button class="tpl-btn">複製</button></div>
+              </div>
+              <div class="tpl-row">
+                <div class="tpl-icon-dot request"></div>
+                <div class="tpl-info">
+                  <div class="tpl-title">フォーム解説 添付</div>
+                  <div class="tpl-preview">「フォームの短い解説動画を添付しました。 注意点は {ポイント} です...」</div>
+                </div>
+                <div class="tpl-actions"><button class="tpl-btn">編集</button><button class="tpl-btn">複製</button></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ウェルカム -->
+          <div class="cat-block">
+            <div class="cat-head">
+              <span class="cat-dot welcome"></span>
+              <span class="cat-title">新規入会 ウェルカム</span>
+              <span class="cat-count">1</span>
+              <a class="cat-add">+ 追加</a>
+            </div>
+            <div class="tpl-list">
+              <div class="tpl-row">
+                <div class="tpl-icon-dot welcome"></div>
+                <div class="tpl-info">
+                  <div class="tpl-title">マジックリンク同梱 挨拶</div>
+                  <div class="tpl-preview">「{受講生名}さん、 のりfitness 筋肉塾へようこそ。 まずはこちらのリンクからログイン、 カルテと目標シートを記入してください...」</div>
+                </div>
+                <div class="tpl-actions"><button class="tpl-btn">編集</button><button class="tpl-btn">複製</button></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- desk 2: 通知設定タブ (通知だけに集中) -->
+<!-- ============================================================ -->
+<div class="frame-label">
+  <span class="frame-dot" style="background:var(--cat-request);"></span>
+  <span class="frame-title">desk 2 ・ 通知設定タブ active</span>
+  <span class="frame-note">/admin/settings/notifications ・ 画面内バッジ + メール 分離管理</span>
+</div>
+
+<div class="desk">
+  <div class="desk-chrome">
+    <span class="dot" style="background:#ff5f57"></span>
+    <span class="dot" style="background:#febc2e"></span>
+    <span class="dot" style="background:#28c840"></span>
+    <span class="url">app.norifitness.com/admin/settings/notifications</span>
+  </div>
+  <div class="desk-body">
+
+    <nav class="sidenav">
+      <div class="sidenav-brand"><div class="brand-mark">の</div><div class="brand-ttl">のりfitness</div><div class="brand-sub">筋肉塾 管理</div></div>
+      <div class="sidenav-menu">
+        <a class="sidenav-item"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>ホーム</a>
+        <a class="sidenav-item"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>受講生 <span class="badge" style="background:var(--ink2)">21</span></a>
+        <a class="sidenav-item"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>月次添削 <span class="badge">5</span></a>
+        <a class="sidenav-item"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>リクエスト <span class="badge">2</span></a>
+        <a class="sidenav-item"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>発送管理 <span class="badge">1</span></a>
+        <a class="sidenav-item"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>招待</a>
+        <a class="sidenav-item active"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>設定</a>
+      </div>
+      <div class="sidenav-footer"><div class="ava">の</div><div class="info"><div class="name">のり氏</div><div class="role">管理者</div></div></div>
+    </nav>
+
+    <div class="main">
+      <div class="main-head">
+        <h2>設定</h2>
+        <div class="sub">のりfitness 管理画面の運用設定</div>
+      </div>
+
+      <div class="settings-body">
+
+        <!-- サブナビ (通知 active) -->
+        <div class="sub-nav">
+          <a class="sub-nav-item">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            プロフィール
+          </a>
+          <a class="sub-nav-item">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            テンプレート
+            <span class="sub-mark">7</span>
+          </a>
+          <a class="sub-nav-item active">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+            通知設定
+          </a>
+          <a class="sub-nav-item">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/></svg>
+            発送リスト
+            <span class="sub-mark">1</span>
+          </a>
+          <a class="sub-nav-item">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            アカウント
+            <span class="sub-mark">近日</span>
+          </a>
+        </div>
+
+        <!-- 通知設定 内容のみ -->
+        <div class="settings-content">
+
+          <div class="settings-title-bar">
+            <div>
+              <h3>
+                <span class="title-dot" style="background:var(--cat-request);"></span>
+                通知設定
+              </h3>
+              <div class="settings-desc" style="margin-bottom:0;">画面内バッジ (サイドナビ ・ KPI) を主軸、 メール通知は最小限</div>
+            </div>
+          </div>
+
+          <div style="height:18px"></div>
+
+          <div class="notify-info">
+            <svg class="nf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <div>
+              <b>過剰実装を避ける方針</b><br>
+              画面内バッジ (サイドナビ + KPI カード) を主軸に。 メール通知は最小限 (新規入会 + 重要 daily まとめ のみ)。
+            </div>
+          </div>
+
+          <!-- 画面内バッジ -->
+          <div class="notify-section-label">画面内バッジ (常時表示)</div>
+          <div class="notify-block">
+            <div class="notify-row">
+              <div class="nfo">
+                <div class="nfo-ttl">
+                  <span class="nf-dot" style="background:var(--cat-monthly);"></span>
+                  月次添削 期限間近 ・ 期限切れ
+                </div>
+                <div class="nfo-sub">期限 3 日前から KPI と受講生別バッジに表示</div>
+              </div>
+              <div class="toggle on"></div>
+            </div>
+            <div class="notify-row">
+              <div class="nfo">
+                <div class="nfo-ttl">
+                  <span class="nf-dot" style="background:var(--cat-request);"></span>
+                  リクエスト未対応 (カルテ更新 / メニュー変更)
+                </div>
+                <div class="nfo-sub">サイドナビ「リクエスト」とホーム KPI に件数バッジ</div>
+              </div>
+              <div class="toggle on"></div>
+            </div>
+            <div class="notify-row">
+              <div class="nfo">
+                <div class="nfo-ttl">
+                  <span class="nf-dot" style="background:var(--danger);"></span>
+                  重要アラート (体組成途絶 / 目標乖離 等)
+                </div>
+                <div class="nfo-sub">ホーム「今すぐ対応」「今日中に確認」セクションに表示</div>
+              </div>
+              <div class="toggle on"></div>
+            </div>
+            <div class="notify-row">
+              <div class="nfo">
+                <div class="nfo-ttl">
+                  <span class="nf-dot" style="background:var(--cat-welcome);"></span>
+                  新規入会 (マジックリンク発行リクエスト)
+                </div>
+                <div class="nfo-sub">サイドナビ「招待」に件数バッジ</div>
+              </div>
+              <div class="toggle on"></div>
+            </div>
+          </div>
+
+          <!-- メール通知 -->
+          <div class="notify-section-label">メール通知 (最小限)</div>
+          <div class="notify-block">
+            <div class="notify-row">
+              <div class="nfo">
+                <div class="nfo-ttl">
+                  <span class="nf-dot" style="background:var(--cat-welcome);"></span>
+                  新規入会 通知
+                </div>
+                <div class="nfo-sub">新規受講生のマジックリンク発行があった時、 即時メール</div>
+                <div class="nfo-channels">
+                  <span class="ch"><svg class="ch-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>即時 1 通</span>
+                </div>
+              </div>
+              <div class="toggle on"></div>
+            </div>
+            <div class="notify-row">
+              <div class="nfo">
+                <div class="nfo-ttl">
+                  <span class="nf-dot" style="background:var(--danger);"></span>
+                  重要アラート daily まとめ
+                </div>
+                <div class="nfo-sub">体組成途絶 / 目標乖離 / 学習未着手 等を毎朝 1 通に集約</div>
+                <div class="nfo-channels">
+                  <span class="ch"><svg class="ch-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>毎朝 7:00</span>
+                </div>
+              </div>
+              <div class="toggle on"></div>
+            </div>
+            <div class="notify-row">
+              <div class="nfo">
+                <div class="nfo-ttl">
+                  <span class="nf-dot" style="background:var(--ink4);"></span>
+                  リクエスト着信 メール
+                </div>
+                <div class="nfo-sub">サイドナビバッジで十分、 メールは過剰</div>
+                <div class="nfo-channels">
+                  <span class="ch" style="background:var(--bg-soft); color:var(--ink3);">無効 推奨</span>
+                </div>
+              </div>
+              <div class="toggle"></div>
+            </div>
+            <div class="notify-row">
+              <div class="nfo">
+                <div class="nfo-ttl">
+                  <span class="nf-dot" style="background:var(--ink4);"></span>
+                  月次添削 期限間近 メール
+                </div>
+                <div class="nfo-sub">KPI バッジで気付ける、 メールは過剰</div>
+                <div class="nfo-channels">
+                  <span class="ch" style="background:var(--bg-soft); color:var(--ink3);">無効 推奨</span>
+                </div>
+              </div>
+              <div class="toggle"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

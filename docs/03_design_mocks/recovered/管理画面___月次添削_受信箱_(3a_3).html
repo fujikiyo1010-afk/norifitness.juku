@@ -158,6 +158,52 @@
     gap: 8px;
   }
 
+  /* === 進捗ブロック (今月の添削完了率) === */
+  .progress-block {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    min-width: 240px;
+  }
+  .progress-text {
+    font-size: 12px;
+    color: var(--ink2);
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .progress-text .pt-num {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    color: var(--primary-darker);
+    font-size: 14px;
+  }
+  .progress-text .pt-pct {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    color: var(--primary-dark);
+    font-size: 13px;
+  }
+  .progress-text .pt-remain {
+    color: var(--ink3);
+    font-size: 11px;
+  }
+  .progress-bar {
+    width: 240px;
+    height: 6px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+    border-radius: 999px;
+    transition: width 0.3s ease;
+  }
+
   /* === 検索バー === */
   .search-bar {
     background: #fff;
@@ -396,9 +442,19 @@
     <!-- コンテンツ -->
     <div class="content">
 
-      <!-- ページタイトル -->
+      <!-- ページタイトル + 今月の進捗 -->
       <div class="page-title-bar">
         <h2>月次添削 受信箱</h2>
+        <div class="progress-block">
+          <div class="progress-text">
+            <span class="pt-num">11 / 25</span>
+            <span class="pt-pct">44%</span>
+            <span class="pt-remain">残り 14 人</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:44%"></div>
+          </div>
+        </div>
       </div>
 
       <!-- 検索バー -->

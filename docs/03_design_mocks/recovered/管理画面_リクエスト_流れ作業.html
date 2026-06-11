@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — 管理画面 / リクエスト処理 (即時モデル)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+    --primary-soft: rgba(0,137,123,0.08);
+    --pastel: #e0f2f1;
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --ink4: #ccc;
+    --border: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f8f9fa;
+    --bg-warm: linear-gradient(135deg, #e0f2f1, #fffbe6);
+    --danger: #d32f2f;
+    --warn: #c2410c;
+    --warn-bg: #fff7ed;
+    --warn-border: #fed7aa;
+    --success: #16a34a;
+    --success-bg: #f0fdf4;
+    --success-border: #bbf7d0;
+    --gold: #b8860b;
+    --gold-bg: rgba(255,235,59,0.12);
+    --nav-bg: #1a1a1a;
+    --nav-text: #d4d4d8;
+    --cat-carte: #0369a1;
+    --cat-menu: #00897b;
+    --highlight-bg: rgba(255,235,59,0.18);
+    --highlight-border: rgba(255,235,59,0.55);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #e8ebec;
+    color: var(--ink);
+    line-height: 1.6;
+    padding: 24px;
+  }
+  .page-header { max-width: 1320px; margin: 0 auto 24px; text-align: center; }
+  .page-header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .page-header p { color: #6b7d75; font-size: 12px; line-height: 1.7; }
+  .page-header .route {
+    display: inline-block; margin-top: 6px; font-family: 'Inter', monospace;
+    font-size: 11px; color: var(--ink3); background: white;
+    padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border);
+  }
+  .principle {
+    max-width: 1320px; margin: 0 auto 32px;
+    background: var(--bg-warm); border: 1px solid #d4ebe8;
+    border-radius: 10px; padding: 14px 22px;
+    font-size: 12px; color: var(--primary-darker); line-height: 1.8;
+  }
+  .principle b { color: var(--primary-darker); }
+  .principle ul { margin: 6px 0 0 22px; }
+
+  .frame-label {
+    max-width: 1320px;
+    margin: 0 auto 12px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .frame-label .frame-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .frame-label .frame-title { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .frame-label .frame-note { font-size: 11px; color: var(--ink3); margin-left: auto; }
+
+  .desk {
+    max-width: 1320px; margin: 0 auto 40px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,.08);
+    min-height: 880px; display: flex; flex-direction: column;
+  }
+  .desk-chrome { background: #f1f3f4; padding: 8px 12px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--border); }
+  .desk-chrome .dot { width: 10px; height: 10px; border-radius: 50%; background: #d0d0d0; }
+  .desk-chrome .url { flex: 1; margin-left: 12px; background: #fff; padding: 4px 10px; border-radius: 4px; font-size: 11px; color: var(--ink3); font-family: 'Inter', sans-serif; }
+  .desk-body { flex: 1; display: flex; }
+
+  /* === サイドナビ === */
+  .sidenav { width: 220px; background: var(--nav-bg); color: var(--nav-text); display: flex; flex-direction: column; flex-shrink: 0; }
+  .sidenav-brand { padding: 18px 18px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .sidenav-brand .brand-mark { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; margin-bottom: 8px; }
+  .sidenav-brand .brand-ttl { font-size: 14px; font-weight: 700; color: #fff; }
+  .sidenav-brand .brand-sub { font-size: 11px; color: var(--nav-text); margin-top: 1px; }
+  .sidenav-menu { flex: 1; padding: 12px 8px; }
+  .sidenav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 6px; color: var(--nav-text); font-size: 13px; font-weight: 500; margin-bottom: 2px; cursor: pointer; }
+  .sidenav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
+  .sidenav-item.active { background: rgba(0,137,123,0.18); color: #fff; font-weight: 700; }
+  .sidenav-item .icon { width: 18px; height: 18px; flex-shrink: 0; }
+  .sidenav-item .badge { margin-left: auto; background: var(--danger); color: white; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 999px; font-family: 'Inter', sans-serif; }
+  .sidenav-footer { padding: 12px 14px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 10px; }
+  .sidenav-footer .ava { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; }
+  .sidenav-footer .info .name { font-size: 12px; font-weight: 700; color: #fff; }
+  .sidenav-footer .info .role { font-size: 10px; color: var(--nav-text); }
+
+  /* === メイン === */
+  .main { flex: 1; background: var(--bg-soft); display: flex; flex-direction: column; }
+  .head-bar {
+    padding: 16px 24px; background: #fff; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .head-bar h2 { font-size: 17px; font-weight: 700; color: var(--ink); }
+  .head-bar .head-sub { font-size: 11px; color: var(--ink3); margin-top: 2px; }
+  .progress-block { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; min-width: 240px; }
+  .progress-text { display: flex; align-items: baseline; gap: 10px; font-size: 12px; color: var(--ink2); }
+  .progress-text .pt-num { font-family: 'Inter', sans-serif; font-weight: 700; color: var(--primary-darker); font-size: 14px; }
+  .progress-text .pt-pct { font-family: 'Inter', sans-serif; font-weight: 700; color: var(--primary-dark); font-size: 13px; }
+  .progress-text .pt-remain { color: var(--ink3); font-size: 11px; }
+  .progress-bar { width: 240px; height: 6px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--primary-dark)); border-radius: 999px; }
+
+  /* === ワークスペース 2 ペイン === */
+  .workspace { flex: 1; display: grid; grid-template-columns: 320px 1fr; overflow: hidden; }
+
+  /* === 左ペイン === */
+  .req-list { background: #fff; border-right: 1px solid var(--border); overflow-y: auto; }
+  .req-section-label {
+    padding: 14px 16px 8px; font-size: 10px; font-weight: 700;
+    color: var(--ink3); letter-spacing: 1.5px; background: var(--bg-soft);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .req-section-label .sec-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .req-section-label .count { margin-left: auto; background: #fff; border: 1px solid var(--border); color: var(--ink2); padding: 1px 8px; border-radius: 999px; font-family: 'Inter', sans-serif; }
+  .req-section-label .count.urgent { color: var(--danger); border-color: #fecaca; background: #fef2f2; }
+
+  .req-row { padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background .15s; }
+  .req-row:hover { background: var(--bg-soft); }
+  .req-row.active { background: var(--primary-soft); border-left: 3px solid var(--primary); padding-left: 13px; }
+  .req-row.done { opacity: 0.6; }
+  .req-row-top { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .req-ava { width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11px; flex-shrink: 0; }
+  .req-name { font-size: 13px; font-weight: 700; color: var(--ink); flex: 1; }
+  .req-check { color: var(--primary); flex-shrink: 0; }
+
+  /* リクエスト種別タグ (色丸 + ラベル ・ 絵文字排除) */
+  .req-type {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 700;
+    margin-bottom: 4px; color: var(--ink2);
+  }
+  .req-type .type-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .req-type.carte .type-dot { background: var(--cat-carte); }
+  .req-type.menu .type-dot { background: var(--cat-menu); }
+  .req-type.carte { color: var(--cat-carte); }
+  .req-type.menu { color: var(--cat-menu); }
+
+  .req-preview {
+    font-size: 11px; color: var(--ink2); line-height: 1.5;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .req-meta { font-size: 10px; color: var(--ink3); margin-top: 4px; font-family: 'Inter', sans-serif; }
+
+  /* === 右ペイン === */
+  .req-detail { background: var(--bg-soft); display: flex; flex-direction: column; overflow: hidden; }
+  .req-detail-head {
+    padding: 16px 24px; background: #fff; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .req-detail-head .who { display: flex; align-items: center; gap: 12px; }
+  .req-detail-head .ava-md { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
+  .req-detail-head .info .name { font-size: 14px; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 8px; }
+  .req-detail-head .info .meta { font-size: 11px; color: var(--ink3); }
+  .req-detail-head .req-type-inline { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  .req-detail-head .req-type-inline .type-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .req-detail-head .req-type-inline.carte { background: rgba(3,105,161,0.08); color: var(--cat-carte); border: 1px solid rgba(3,105,161,0.2); }
+  .req-detail-head .req-type-inline.carte .type-dot { background: var(--cat-carte); }
+  .req-detail-head .req-type-inline.menu { background: var(--primary-soft); color: var(--cat-menu); border: 1px solid rgba(0,137,123,0.2); }
+  .req-detail-head .req-type-inline.menu .type-dot { background: var(--cat-menu); }
+  .req-detail-head .user-link {
+    font-size: 12px; color: var(--primary-dark); text-decoration: none;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .req-detail-head .user-link:hover { text-decoration: underline; }
+
+  .req-detail-body { flex: 1; overflow-y: auto; padding: 18px 24px; }
+
+  /* === 変化点強調バー === */
+  .delta-bar {
+    background: var(--highlight-bg);
+    border: 1px solid var(--highlight-border);
+    border-left: 4px solid var(--gold);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+  }
+  .delta-bar .delta-label {
+    font-size: 10px; font-weight: 700; color: var(--gold);
+    letter-spacing: 1.5px; margin-bottom: 5px;
+  }
+  .delta-bar .delta-content {
+    font-size: 14px; font-weight: 700; color: var(--ink);
+    line-height: 1.5;
+  }
+  .delta-bar .delta-content .from { color: var(--ink3); text-decoration: line-through; }
+  .delta-bar .delta-content .arrow { color: var(--gold); font-family: 'Inter', sans-serif; margin: 0 6px; }
+  .delta-bar .delta-content .to { color: var(--gold); }
+
+  /* === 詳細カード === */
+  .detail-card {
+    background: #fff; border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; margin-bottom: 12px;
+  }
+  .detail-card .dc-label {
+    font-size: 10px; font-weight: 700; color: var(--ink3);
+    letter-spacing: 1px; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .detail-card .dc-label .ic { width: 14px; height: 14px; color: var(--primary-dark); }
+  .detail-card .dc-label .lbl-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .detail-card .dc-body { font-size: 13px; color: var(--ink); line-height: 1.7; }
+  .detail-card .dc-body.quote {
+    padding: 10px 12px; background: var(--bg-soft);
+    border-left: 3px solid var(--primary); border-radius: 4px;
+  }
+  .detail-card .dc-foot { font-size: 10px; color: var(--ink3); margin-top: 6px; font-family: 'Inter', sans-serif; }
+
+  /* === アコーディオン (不変項目) === */
+  .collapsible-head {
+    display: flex; align-items: center; gap: 6px;
+    cursor: pointer; padding: 4px 0;
+    font-size: 11px; color: var(--ink3); font-weight: 600;
+  }
+  .collapsible-head .chev {
+    width: 12px; height: 12px;
+    transition: transform .2s;
+  }
+  .collapsible-head.open .chev { transform: rotate(90deg); }
+  .collapsible-content {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border);
+  }
+  .collapsible-content.closed { display: none; }
+  .info-grid {
+    display: grid; grid-template-columns: 90px 1fr;
+    gap: 6px 12px; font-size: 12px;
+  }
+  .info-grid dt { color: var(--ink3); }
+  .info-grid dd { color: var(--ink2); margin: 0; }
+  .info-grid dd.unchanged { color: var(--ink3); }
+
+  /* === 編集ディープリンクボタン === */
+  .edit-deep-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 18px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .1s;
+    box-shadow: 0 2px 8px rgba(0,137,123,0.25);
+  }
+  .edit-deep-link:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,137,123,0.35); }
+  .edit-deep-link .ic { width: 16px; height: 16px; }
+  .edit-deep-link .arrow { margin-left: auto; opacity: 0.7; }
+
+  /* === 編集ステータスバッジ === */
+  .edit-status {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12px; font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .edit-status.pending {
+    background: var(--warn-bg);
+    color: var(--warn);
+    border: 1px solid var(--warn-border);
+  }
+  .edit-status.done {
+    background: var(--success-bg);
+    color: var(--success);
+    border: 1px solid var(--success-border);
+  }
+  .edit-status .es-ic { width: 16px; height: 16px; flex-shrink: 0; }
+  .edit-status .es-sub { font-weight: 500; color: var(--ink3); margin-left: auto; font-size: 11px; }
+
+  /* === 返答エリア === */
+  .reply-area { background: #fff; border-top: 1px solid var(--border); padding: 14px 24px 16px; }
+  .reply-templates { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; font-size: 11px; align-items: center; }
+  .reply-templates .tpl-label { color: var(--ink3); font-weight: 700; }
+  .reply-templates .tpl-btn {
+    background: var(--bg-soft); border: 1px solid var(--border);
+    border-radius: 6px; padding: 4px 10px; font-size: 11px;
+    color: var(--ink); cursor: pointer;
+  }
+  .reply-templates .tpl-btn:hover { border-color: var(--primary); color: var(--primary-dark); }
+  .reply-textarea {
+    width: 100%; min-height: 90px;
+    padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
+    font-family: inherit; font-size: 13px; resize: vertical;
+    background: #fff; color: var(--ink); line-height: 1.7;
+  }
+  .reply-textarea:focus { outline: none; border-color: var(--primary); }
+  .reply-textarea:disabled {
+    background: var(--bg-soft);
+    color: var(--ink3);
+    cursor: not-allowed;
+  }
+  .reply-foot {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 10px;
+  }
+  .reply-foot .remain { font-size: 12px; color: var(--ink2); }
+  .reply-foot .remain b { color: var(--primary-dark); font-family: 'Inter', sans-serif; }
+  .reply-foot .actions { display: flex; gap: 8px; }
+  .btn {
+    padding: 9px 16px; border-radius: 8px;
+    font-family: inherit; font-size: 13px; font-weight: 700;
+    cursor: pointer; border: 1px solid var(--border);
+    background: #fff; color: var(--ink);
+  }
+  .btn.primary { background: var(--primary); color: white; border-color: var(--primary); }
+  .btn.primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
+  .btn.primary.disabled {
+    background: var(--ink4);
+    border-color: var(--ink4);
+    color: white;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  .btn.primary.disabled:hover { background: var(--ink4); border-color: var(--ink4); }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>管理画面 ・ リクエスト処理 (即時モデル)</h1>
+  <p>
+    カルテ更新 (上) + メニュー変更 (下) ・ 編集 → 返信 の順番強制 ・ 中間状態なし<br>
+    完了形テンプレ標準 (「変更しました」)、 「次月反映」廃止
+  </p>
+  <div class="route">/admin/requests + /admin/requests/[id]</div>
+</div>
+
+<div class="principle">
+  <b>運用原則 (即時モデル)</b>
+  <ul>
+    <li><b>編集 → 返信 の順番固定</b> ・ カルテ/メニューを編集する前に返信送信は不可 (送信ボタン非活性)</li>
+    <li><b>ステータス 2 値のみ</b> ・ 未対応 / 対応済 (「次月反映」「保留中」等の中間状態は作らない)</li>
+    <li><b>即決できないものは未対応のまま</b> ・ 偽の完了を作らず、 ホームの未対応カウントに残す</li>
+    <li><b>完了形テンプレ標準</b> ・ 「変更しました」を使い、 「来月反映します」は廃止</li>
+  </ul>
+</div>
+
+<!-- ============================================================ -->
+<!-- desk 1: カルテ更新 ・ 未編集状態 (これから編集するフェーズ) -->
+<!-- ============================================================ -->
+<div class="frame-label">
+  <span class="frame-dot" style="background:var(--cat-carte);"></span>
+  <span class="frame-title">desk 1 ・ カルテ更新リクエスト</span>
+  <span class="frame-note">状態 = 未編集 (送信ボタン非活性 / 編集を促す)</span>
+</div>
+
+<div class="desk">
+  <div class="desk-chrome">
+    <span class="dot" style="background:#ff5f57"></span>
+    <span class="dot" style="background:#febc2e"></span>
+    <span class="dot" style="background:#28c840"></span>
+    <span class="url">app.norifitness.com/admin/requests/r-suzuki-202606</span>
+  </div>
+
+  <div class="desk-body">
+
+    <nav class="sidenav">
+      <div class="sidenav-brand"><div class="brand-mark">の</div><div class="brand-ttl">のりfitness</div><div class="brand-sub">筋肉塾 管理</div></div>
+      <div class="sidenav-menu">
+        <a class="sidenav-item"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>ホーム</a>
+        <a class="sidenav-item"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>受講生 <span class="badge" style="background:var(--ink2)">21</span></a>
+        <a class="sidenav-item"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>月次添削 <span class="badge">5</span></a>
+        <a class="sidenav-item active"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>リクエスト <span class="badge">2</span></a>
+        <a class="sidenav-item"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>発送管理 <span class="badge">1</span></a>
+        <a class="sidenav-item"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>招待</a>
+        <a class="sidenav-item"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>設定</a>
+      </div>
+      <div class="sidenav-footer"><div class="ava">の</div><div class="info"><div class="name">のり氏</div><div class="role">管理者</div></div></div>
+    </nav>
+
+    <div class="main">
+      <div class="head-bar">
+        <div>
+          <h2>リクエスト処理</h2>
+          <div class="head-sub">カルテ更新 / メニュー変更 ・ 古い順に対応 ・ 即時処理</div>
+        </div>
+        <div class="progress-block">
+          <div class="progress-text">
+            <span class="pt-num">6 / 8</span>
+            <span class="pt-pct">75%</span>
+            <span class="pt-remain">残り 2 件</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:75%"></div></div>
+        </div>
+      </div>
+
+      <div class="workspace">
+
+        <!-- 左ペイン -->
+        <div class="req-list">
+          <div class="req-section-label">
+            <span class="sec-dot" style="background:var(--danger);"></span>
+            未対応
+            <span class="count urgent">2</span>
+          </div>
+
+          <div class="req-row active">
+            <div class="req-row-top"><div class="req-ava">鈴</div><div class="req-name">鈴木 美咲</div></div>
+            <div class="req-type carte"><span class="type-dot"></span>カルテ更新</div>
+            <div class="req-preview">ジムを退会したので「ジム」を環境から外したい。 代わりに自宅でダンベルだけ...</div>
+            <div class="req-meta">6/9 受信 ・ 2 日経過</div>
+          </div>
+
+          <div class="req-row">
+            <div class="req-row-top"><div class="req-ava">佐</div><div class="req-name">佐藤 健</div></div>
+            <div class="req-type menu"><span class="type-dot"></span>メニュー変更</div>
+            <div class="req-preview">懸垂が今の自分には難しすぎる、 別の背中種目に変えてほしい...</div>
+            <div class="req-meta">6/10 受信 ・ 1 日経過</div>
+          </div>
+
+          <div class="req-section-label">
+            <span class="sec-dot" style="background:var(--success);"></span>
+            対応済
+            <span class="count">6</span>
+          </div>
+
+          <div class="req-row done">
+            <div class="req-row-top">
+              <div class="req-ava" style="background:var(--ink3)">田</div>
+              <div class="req-name">田中 太郎</div>
+              <svg class="req-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="req-type menu"><span class="type-dot"></span>メニュー変更</div>
+            <div class="req-preview">脚トレを増やしてほしい...</div>
+            <div class="req-meta">6/8 対応</div>
+          </div>
+
+          <div class="req-row done">
+            <div class="req-row-top">
+              <div class="req-ava" style="background:var(--ink3)">渡</div>
+              <div class="req-name">渡部 久美子</div>
+              <svg class="req-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="req-type carte"><span class="type-dot"></span>カルテ更新</div>
+            <div class="req-preview">体重目標を 50kg → 48kg に変更...</div>
+            <div class="req-meta">6/7 対応</div>
+          </div>
+
+          <div class="req-row done">
+            <div class="req-row-top">
+              <div class="req-ava" style="background:var(--ink3)">山</div>
+              <div class="req-name">山田 花子</div>
+              <svg class="req-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="req-type menu"><span class="type-dot"></span>メニュー変更</div>
+            <div class="req-preview">腰痛が出たのでスクワットを抜きたい...</div>
+            <div class="req-meta">6/5 対応</div>
+          </div>
+        </div>
+
+        <!-- 右ペイン (カルテ ・ 未編集状態) -->
+        <div class="req-detail">
+
+          <div class="req-detail-head">
+            <div class="who">
+              <div class="ava-md">鈴</div>
+              <div class="info">
+                <div class="name">
+                  鈴木 美咲
+                  <span class="req-type-inline carte"><span class="type-dot"></span>カルテ更新</span>
+                </div>
+                <div class="meta">女性 35 歳 ・ 2026/04/02 入塾 ・ 6/9 受信</div>
+              </div>
+            </div>
+            <a class="user-link">
+              受講生ハブで詳細
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+            </a>
+          </div>
+
+          <div class="req-detail-body">
+
+            <!-- 変化点強調バー -->
+            <div class="delta-bar">
+              <div class="delta-label">★ 変更希望</div>
+              <div class="delta-content">
+                使える環境: <span class="from">ジム</span><span class="arrow">→</span><span class="to">家トレ (ダンベルのみ)</span>
+              </div>
+            </div>
+
+            <!-- 受講生の要望 -->
+            <div class="detail-card">
+              <div class="dc-label">
+                <span class="lbl-dot" style="background:var(--cat-carte);"></span>
+                受講生の要望
+              </div>
+              <div class="dc-body quote">
+                ジムを退会したので「ジム」を環境から外したいです。<br>
+                代わりに自宅でダンベルだけでできるメニューにしたいです。<br>
+                懸垂機は置けないので、 ダンベルだけで背中を鍛える方法を教えてください。
+              </div>
+              <div class="dc-foot">2026/06/09 14:32 送信</div>
+            </div>
+
+            <!-- 提出済カルテ ・ 不変項目は淡色 + 折りたたみ -->
+            <div class="detail-card">
+              <div class="dc-label">
+                <span class="lbl-dot" style="background:var(--ink3);"></span>
+                提出済カルテ ・ 変更箇所以外
+              </div>
+              <div class="collapsible-head open">
+                <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                展開する (5 項目 ・ 変更なし)
+              </div>
+              <div class="collapsible-content">
+                <dl class="info-grid">
+                  <dt>性別</dt><dd class="unchanged">女</dd>
+                  <dt>理想の頻度</dt><dd class="unchanged">週 3</dd>
+                  <dt>鍛えたい部位</dt><dd class="unchanged">背中 ・ お腹</dd>
+                  <dt>目的</dt><dd class="unchanged">ダイエット</dd>
+                  <dt>不調</dt><dd class="unchanged">—</dd>
+                </dl>
+              </div>
+            </div>
+
+            <!-- 編集ディープリンク -->
+            <button class="edit-deep-link">
+              <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6"/><path d="M9 15h6"/></svg>
+              カルテを編集する
+              <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+            </button>
+            <div style="font-size:11px; color:var(--ink3); margin-top:6px; text-align:center;">
+              → /admin/users/u-suzuki/carte?from=request&amp;requestId=r-suzuki-202606 (環境フィールドにフォーカス)
+            </div>
+
+          </div>
+
+          <!-- 返答エリア ・ 未編集 → 送信非活性 -->
+          <div class="reply-area">
+
+            <div class="edit-status pending">
+              <svg class="es-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              カルテ未編集
+              <span class="es-sub">先にカルテを編集してから返信してください</span>
+            </div>
+
+            <div class="reply-templates">
+              <span class="tpl-label">テンプレ:</span>
+              <button class="tpl-btn">環境変更 完了</button>
+              <button class="tpl-btn">代替種目 反映済</button>
+            </div>
+            <textarea class="reply-textarea" placeholder="カルテを編集してから返信してください..." disabled></textarea>
+            <div class="reply-foot">
+              <div class="remain">残り <b>1 件</b> ・ ステータスは 未対応</div>
+              <div class="actions">
+                <button class="btn">下書き保存</button>
+                <button class="btn primary disabled">送信 + 次の人 →</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- desk 2: メニュー変更 ・ 編集済状態 (返信できるフェーズ) -->
+<!-- ============================================================ -->
+<div class="frame-label">
+  <span class="frame-dot" style="background:var(--cat-menu);"></span>
+  <span class="frame-title">desk 2 ・ メニュー変更リクエスト</span>
+  <span class="frame-note">状態 = 編集済 (送信ボタン活性 / 完了形テンプレ使用)</span>
+</div>
+
+<div class="desk">
+  <div class="desk-chrome">
+    <span class="dot" style="background:#ff5f57"></span>
+    <span class="dot" style="background:#febc2e"></span>
+    <span class="dot" style="background:#28c840"></span>
+    <span class="url">app.norifitness.com/admin/requests/r-sato-202606</span>
+  </div>
+
+  <div class="desk-body">
+
+    <nav class="sidenav">
+      <div class="sidenav-brand"><div class="brand-mark">の</div><div class="brand-ttl">のりfitness</div><div class="brand-sub">筋肉塾 管理</div></div>
+      <div class="sidenav-menu">
+        <a class="sidenav-item"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>ホーム</a>
+        <a class="sidenav-item"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>受講生 <span class="badge" style="background:var(--ink2)">21</span></a>
+        <a class="sidenav-item"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>月次添削 <span class="badge">5</span></a>
+        <a class="sidenav-item active"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>リクエスト <span class="badge">2</span></a>
+        <a class="sidenav-item"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>発送管理 <span class="badge">1</span></a>
+        <a class="sidenav-item"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>招待</a>
+        <a class="sidenav-item"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>設定</a>
+      </div>
+      <div class="sidenav-footer"><div class="ava">の</div><div class="info"><div class="name">のり氏</div><div class="role">管理者</div></div></div>
+    </nav>
+
+    <div class="main">
+      <div class="head-bar">
+        <div>
+          <h2>リクエスト処理</h2>
+          <div class="head-sub">カルテ更新 / メニュー変更 ・ 古い順に対応 ・ 即時処理</div>
+        </div>
+        <div class="progress-block">
+          <div class="progress-text">
+            <span class="pt-num">6 / 8</span>
+            <span class="pt-pct">75%</span>
+            <span class="pt-remain">残り 2 件</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:75%"></div></div>
+        </div>
+      </div>
+
+      <div class="workspace">
+
+        <!-- 左ペイン -->
+        <div class="req-list">
+          <div class="req-section-label">
+            <span class="sec-dot" style="background:var(--danger);"></span>
+            未対応
+            <span class="count urgent">2</span>
+          </div>
+
+          <div class="req-row">
+            <div class="req-row-top"><div class="req-ava">鈴</div><div class="req-name">鈴木 美咲</div></div>
+            <div class="req-type carte"><span class="type-dot"></span>カルテ更新</div>
+            <div class="req-preview">ジムを退会したので「ジム」を環境から外したい...</div>
+            <div class="req-meta">6/9 受信 ・ 2 日経過</div>
+          </div>
+
+          <div class="req-row active">
+            <div class="req-row-top"><div class="req-ava">佐</div><div class="req-name">佐藤 健</div></div>
+            <div class="req-type menu"><span class="type-dot"></span>メニュー変更</div>
+            <div class="req-preview">懸垂が今の自分には難しすぎる、 別の背中種目に変えてほしい...</div>
+            <div class="req-meta">6/10 受信 ・ 1 日経過</div>
+          </div>
+
+          <div class="req-section-label">
+            <span class="sec-dot" style="background:var(--success);"></span>
+            対応済
+            <span class="count">6</span>
+          </div>
+          <div class="req-row done">
+            <div class="req-row-top"><div class="req-ava" style="background:var(--ink3)">田</div><div class="req-name">田中 太郎</div><svg class="req-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="req-type menu"><span class="type-dot"></span>メニュー変更</div>
+            <div class="req-preview">脚トレを増やしてほしい...</div>
+            <div class="req-meta">6/8 対応</div>
+          </div>
+        </div>
+
+        <!-- 右ペイン (メニュー ・ 編集済状態) -->
+        <div class="req-detail">
+
+          <div class="req-detail-head">
+            <div class="who">
+              <div class="ava-md">佐</div>
+              <div class="info">
+                <div class="name">
+                  佐藤 健
+                  <span class="req-type-inline menu"><span class="type-dot"></span>メニュー変更</span>
+                </div>
+                <div class="meta">男性 48 歳 ・ 2025/11/10 入塾 ・ 6/10 受信</div>
+              </div>
+            </div>
+            <a class="user-link">
+              受講生ハブで詳細
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+            </a>
+          </div>
+
+          <div class="req-detail-body">
+
+            <!-- 変化点強調バー -->
+            <div class="delta-bar">
+              <div class="delta-label">★ 変更希望</div>
+              <div class="delta-content">
+                背中種目: <span class="from">懸垂</span><span class="arrow">→</span><span class="to">代替種目 (フォーム安定優先)</span>
+              </div>
+            </div>
+
+            <!-- 受講生の要望 -->
+            <div class="detail-card">
+              <div class="dc-label">
+                <span class="lbl-dot" style="background:var(--cat-menu);"></span>
+                受講生の要望
+              </div>
+              <div class="dc-body quote">
+                懸垂が今の自分には難しすぎるので、 別の背中種目に変えてほしいです。<br>
+                フォームが安定しなくて怪我しそうで不安です。
+              </div>
+              <div class="dc-foot">2026/06/10 09:15 送信</div>
+            </div>
+
+            <!-- 現在のメニュー ・ 該当種目強調 -->
+            <div class="detail-card">
+              <div class="dc-label">
+                <span class="lbl-dot" style="background:var(--ink3);"></span>
+                現在のメニュー (5/28 配布)
+              </div>
+              <div class="collapsible-head open">
+                <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                展開する (週 3 ・ 全 6 種目)
+              </div>
+              <div class="collapsible-content">
+                <dl class="info-grid">
+                  <dt>頻度</dt><dd class="unchanged">週 3 (月/水/金)</dd>
+                  <dt>環境</dt><dd class="unchanged">ダンベル ・ 懸垂機</dd>
+                  <dt>胸</dt><dd class="unchanged">ダンベルプレス ・ ダンベルフライ</dd>
+                  <dt>背中 ★</dt><dd style="color:var(--gold);font-weight:700;">懸垂 ・ ダンベルローイング</dd>
+                  <dt>脚</dt><dd class="unchanged">ダンベルスクワット ・ ブルガリアン</dd>
+                </dl>
+              </div>
+            </div>
+
+            <!-- 編集ディープリンク -->
+            <button class="edit-deep-link">
+              <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              メニューを編集する
+              <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+            </button>
+            <div style="font-size:11px; color:var(--ink3); margin-top:6px; text-align:center;">
+              → /admin/users/u-sato/menu/new?from=request&amp;requestId=r-sato-202606 (懸垂の種目にフォーカス)
+            </div>
+
+          </div>
+
+          <!-- 返答エリア ・ 編集済 → 送信活性 -->
+          <div class="reply-area">
+
+            <div class="edit-status done">
+              <svg class="es-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              メニュー編集済
+              <span class="es-sub">懸垂 → ダンベル プルオーバー に変更 ・ 返信できます</span>
+            </div>
+
+            <div class="reply-templates">
+              <span class="tpl-label">テンプレ:</span>
+              <button class="tpl-btn">代替種目 反映済</button>
+              <button class="tpl-btn">フォーム解説 添付</button>
+            </div>
+            <textarea class="reply-textarea">懸垂を「ダンベル プルオーバー」に変更しました。 ダンベル 1 個でフォームも安定しやすく、 背中の広がりに効果的です。 今日からこのメニューでお願いします。 フォーム解説の短い動画も添付しておきますね。</textarea>
+            <div class="reply-foot">
+              <div class="remain">残り <b>1 件</b> ・ 送信で 対応済 になります</div>
+              <div class="actions">
+                <button class="btn">下書き保存</button>
+                <button class="btn primary">送信 + 次の人 →</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

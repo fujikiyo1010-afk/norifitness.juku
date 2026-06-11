@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — 管理画面 / 招待 (マジックリンク発行)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+    --primary-soft: rgba(0,137,123,0.08);
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --ink4: #ccc;
+    --border: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f8f9fa;
+    --bg-warm: linear-gradient(135deg, #e0f2f1, #fffbe6);
+    --danger: #d32f2f;
+    --warn: #c2410c;
+    --warn-bg: #fff7ed;
+    --warn-border: #fed7aa;
+    --success: #16a34a;
+    --success-bg: #f0fdf4;
+    --success-border: #bbf7d0;
+    --gray-bg: #f4f4f5;
+    --nav-bg: #1a1a1a;
+    --nav-text: #d4d4d8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: #e8ebec; color: var(--ink); line-height: 1.6; padding: 24px; }
+  .page-header { max-width: 1320px; margin: 0 auto 24px; text-align: center; }
+  .page-header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .page-header p { color: #6b7d75; font-size: 12px; line-height: 1.7; }
+  .page-header .route { display: inline-block; margin-top: 6px; font-family: 'Inter', monospace; font-size: 11px; color: var(--ink3); background: white; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); }
+
+  .desk { max-width: 1320px; margin: 0 auto; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,.08); min-height: 820px; display: flex; flex-direction: column; }
+  .desk-chrome { background: #f1f3f4; padding: 8px 12px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--border); }
+  .desk-chrome .dot { width: 10px; height: 10px; border-radius: 50%; background: #d0d0d0; }
+  .desk-chrome .url { flex: 1; margin-left: 12px; background: #fff; padding: 4px 10px; border-radius: 4px; font-size: 11px; color: var(--ink3); font-family: 'Inter', sans-serif; }
+  .desk-body { flex: 1; display: flex; }
+
+  /* === サイドナビ === */
+  .sidenav { width: 220px; background: var(--nav-bg); color: var(--nav-text); display: flex; flex-direction: column; flex-shrink: 0; }
+  .sidenav-brand { padding: 18px 18px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .sidenav-brand .brand-mark { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; margin-bottom: 8px; }
+  .sidenav-brand .brand-ttl { font-size: 14px; font-weight: 700; color: #fff; }
+  .sidenav-brand .brand-sub { font-size: 11px; color: var(--nav-text); margin-top: 1px; }
+  .sidenav-menu { flex: 1; padding: 12px 8px; }
+  .sidenav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 6px; color: var(--nav-text); font-size: 13px; font-weight: 500; margin-bottom: 2px; cursor: pointer; }
+  .sidenav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
+  .sidenav-item.active { background: rgba(0,137,123,0.18); color: #fff; font-weight: 700; }
+  .sidenav-item .icon { width: 18px; height: 18px; flex-shrink: 0; }
+  .sidenav-item .badge { margin-left: auto; background: var(--danger); color: white; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 999px; font-family: 'Inter', sans-serif; }
+  .sidenav-footer { padding: 12px 14px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 10px; }
+  .sidenav-footer .ava { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; }
+  .sidenav-footer .info .name { font-size: 12px; font-weight: 700; color: #fff; }
+  .sidenav-footer .info .role { font-size: 10px; color: var(--nav-text); }
+
+  /* === メイン === */
+  .main { flex: 1; background: var(--bg-soft); overflow: auto; }
+  .main-head { padding: 20px 28px; background: #fff; border-bottom: 1px solid var(--border); }
+  .main-head h2 { font-size: 18px; font-weight: 700; color: var(--ink); }
+  .main-head .sub { font-size: 11px; color: var(--ink3); margin-top: 2px; }
+
+  .content { padding: 24px 28px 40px; }
+
+  /* 新規招待ブロック */
+  .invite-block {
+    background: linear-gradient(135deg, #fff, var(--bg-warm) 200%);
+    border: 1px solid #d4ebe8;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+  }
+  .invite-block h3 {
+    font-size: 14px; font-weight: 700; color: var(--ink);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .invite-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 12px;
+    align-items: flex-end;
+  }
+  .invite-fields .field-label {
+    font-size: 11px; color: var(--ink3); margin-bottom: 4px;
+    font-weight: 700;
+  }
+  .invite-fields input {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--ink);
+    background: #fff;
+  }
+  .invite-fields input:focus { outline: none; border-color: var(--primary); }
+  .invite-fields .send-btn {
+    padding: 9px 18px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .invite-fields .send-btn:hover { background: var(--primary-dark); }
+  .invite-help {
+    font-size: 11px; color: var(--ink3);
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border);
+    line-height: 1.7;
+  }
+
+  /* 履歴テーブル */
+  .history-head {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 12px;
+  }
+  .history-head h3 { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .history-head .total { font-size: 11px; color: var(--ink3); font-family: 'Inter', sans-serif; }
+  .history-filters { display: flex; gap: 6px; margin-left: auto; }
+  .filter-chip {
+    padding: 5px 12px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink2);
+    cursor: pointer;
+  }
+  .filter-chip.active { background: var(--ink); color: white; border-color: var(--ink); }
+
+  .table-wrap {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  table.history { width: 100%; border-collapse: collapse; }
+  table.history th {
+    text-align: left;
+    padding: 12px 16px;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink3);
+    letter-spacing: 1px;
+  }
+  table.history td {
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--ink);
+    vertical-align: middle;
+  }
+  table.history tr:last-child td { border-bottom: none; }
+  table.history tr:hover td { background: var(--bg-soft); }
+  table.history .email { font-family: 'Inter', monospace; font-size: 12px; color: var(--primary-dark); }
+  table.history .date { font-family: 'Inter', sans-serif; font-size: 12px; color: var(--ink2); }
+  table.history .name { font-weight: 600; }
+
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; font-weight: 700;
+    padding: 3px 10px; border-radius: 999px;
+  }
+  .status-badge.pending {
+    background: var(--warn-bg); color: var(--warn);
+    border: 1px solid var(--warn-border);
+  }
+  .status-badge.registered {
+    background: var(--success-bg); color: var(--success);
+    border: 1px solid var(--success-border);
+  }
+  .status-badge.expired {
+    background: var(--gray-bg); color: var(--ink3);
+    border: 1px solid var(--border);
+  }
+  .resend-btn {
+    padding: 5px 12px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink2);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .resend-btn:hover { border-color: var(--primary); color: var(--primary-dark); }
+  .resend-btn.disabled { opacity: 0.4; cursor: not-allowed; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>管理画面 ・ 招待 (マジックリンク発行)</h1>
+  <p>
+    マジックリンク方式 (2026-06-10 確定) ・ メアド + 氏名 → メール送信 ・ 履歴テーブルで重複防止<br>
+    トレクラの招待管理を のりfitness 流に踏襲
+  </p>
+  <div class="route">/admin/invitations</div>
+</div>
+
+<div class="desk">
+  <div class="desk-chrome">
+    <span class="dot" style="background:#ff5f57"></span>
+    <span class="dot" style="background:#febc2e"></span>
+    <span class="dot" style="background:#28c840"></span>
+    <span class="url">app.norifitness.com/admin/invitations</span>
+  </div>
+
+  <div class="desk-body">
+
+    <!-- ===== サイドナビ (active: 招待) ===== -->
+    <nav class="sidenav">
+      <div class="sidenav-brand">
+        <div class="brand-mark">の</div>
+        <div class="brand-ttl">のりfitness</div>
+        <div class="brand-sub">筋肉塾 管理</div>
+      </div>
+      <div class="sidenav-menu">
+        <a class="sidenav-item">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          ホーム
+        </a>
+        <a class="sidenav-item">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          受講生 <span class="badge" style="background:var(--ink2)">21</span>
+        </a>
+        <a class="sidenav-item">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+          月次添削 <span class="badge">5</span>
+        </a>
+        <a class="sidenav-item">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          リクエスト <span class="badge">2</span>
+        </a>
+        <a class="sidenav-item">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          発送管理 <span class="badge">1</span>
+        </a>
+        <a class="sidenav-item active">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          招待
+        </a>
+        <a class="sidenav-item">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          設定
+        </a>
+      </div>
+      <div class="sidenav-footer">
+        <div class="ava">の</div>
+        <div class="info"><div class="name">のり氏</div><div class="role">管理者</div></div>
+      </div>
+    </nav>
+
+    <!-- ===== メイン ===== -->
+    <div class="main">
+
+      <div class="main-head">
+        <h2>📨 招待 (マジックリンク発行)</h2>
+        <div class="sub">新規受講生にマジックリンク付きメールを発行 ・ パスワード不要で登録完了</div>
+      </div>
+
+      <div class="content">
+
+        <!-- 新規招待ブロック -->
+        <div class="invite-block">
+          <h3>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary-dark);"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            新規招待
+          </h3>
+          <div class="invite-fields">
+            <div>
+              <div class="field-label">メールアドレス *</div>
+              <input type="email" placeholder="user@example.com" autocomplete="email" />
+            </div>
+            <div>
+              <div class="field-label">氏名 *</div>
+              <input type="text" placeholder="山田 太郎" autocomplete="name" />
+            </div>
+            <button class="send-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              マジックリンクを発行
+            </button>
+          </div>
+          <div class="invite-help" style="display:flex; gap:8px; align-items:flex-start;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;color:var(--primary-dark);margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <div>
+              入力したメアドに <b>ログイン用マジックリンク + ウェルカム挨拶 (テンプレ自動挿入)</b> が送信されます。<br>
+              受講生は届いたリンクをタップするだけで初回ログイン完了 ・ パスワード入力不要 ・ 氏名は LINE と同じものを推奨
+            </div>
+          </div>
+        </div>
+
+        <!-- 履歴 -->
+        <div class="history-head">
+          <h3>招待履歴</h3>
+          <span class="total">全 21 件</span>
+          <div class="history-filters">
+            <button class="filter-chip active">すべて 21</button>
+            <button class="filter-chip">発行中 2</button>
+            <button class="filter-chip">登録済 18</button>
+            <button class="filter-chip">期限切れ 1</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="history">
+            <thead>
+              <tr>
+                <th style="width:30%;">メールアドレス</th>
+                <th style="width:18%;">氏名</th>
+                <th style="width:15%;">発行日時</th>
+                <th style="width:15%;">最終送信</th>
+                <th style="width:12%;">ステータス</th>
+                <th style="width:10%;">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="email">tanaka.shin@example.com</td>
+                <td class="name">田中 真</td>
+                <td class="date">2026/06/11 09:32</td>
+                <td class="date">2026/06/11 09:32</td>
+                <td><span class="status-badge pending"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--warn);"></span>発行中</span></td>
+                <td><button class="resend-btn">再発行</button></td>
+              </tr>
+              <tr>
+                <td class="email">yamada.taro@example.com</td>
+                <td class="name">山田 太郎</td>
+                <td class="date">2026/06/10 14:15</td>
+                <td class="date">2026/06/10 14:15</td>
+                <td><span class="status-badge pending"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--warn);"></span>発行中</span></td>
+                <td><button class="resend-btn">再発行</button></td>
+              </tr>
+              <tr>
+                <td class="email">takahashi.ichiro@example.com</td>
+                <td class="name">高橋 一郎</td>
+                <td class="date">2026/04/14 10:20</td>
+                <td class="date">2026/04/14 10:20</td>
+                <td><span class="status-badge registered"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--success);"></span>登録済</span></td>
+                <td><button class="resend-btn disabled">再発行</button></td>
+              </tr>
+              <tr>
+                <td class="email">suzuki.misaki@example.com</td>
+                <td class="name">鈴木 美咲</td>
+                <td class="date">2026/04/02 11:30</td>
+                <td class="date">2026/04/02 11:30</td>
+                <td><span class="status-badge registered"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--success);"></span>登録済</span></td>
+                <td><button class="resend-btn disabled">再発行</button></td>
+              </tr>
+              <tr>
+                <td class="email">sato.ken@example.com</td>
+                <td class="name">佐藤 健</td>
+                <td class="date">2026/03/28 16:45</td>
+                <td class="date">2026/03/28 16:45</td>
+                <td><span class="status-badge registered"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--success);"></span>登録済</span></td>
+                <td><button class="resend-btn disabled">再発行</button></td>
+              </tr>
+              <tr>
+                <td class="email">tanaka.taro@example.com</td>
+                <td class="name">田中 太郎</td>
+                <td class="date">2026/03/22 09:15</td>
+                <td class="date">2026/03/22 09:15</td>
+                <td><span class="status-badge registered"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--success);"></span>登録済</span></td>
+                <td><button class="resend-btn disabled">再発行</button></td>
+              </tr>
+              <tr>
+                <td class="email">yamada.hanako@example.com</td>
+                <td class="name">山田 花子</td>
+                <td class="date">2026/03/15 12:00</td>
+                <td class="date">2026/03/15 12:00</td>
+                <td><span class="status-badge registered"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--success);"></span>登録済</span></td>
+                <td><button class="resend-btn disabled">再発行</button></td>
+              </tr>
+              <tr>
+                <td class="email">old.member@example.com</td>
+                <td class="name">過去 招待者</td>
+                <td class="date">2026/02/10 14:30</td>
+                <td class="date">2026/02/10 14:30</td>
+                <td><span class="status-badge expired"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ink3);"></span>期限切れ</span></td>
+                <td><button class="resend-btn">再発行</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

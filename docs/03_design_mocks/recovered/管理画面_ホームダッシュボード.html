@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>のりfitness 筋肉塾 — 管理画面 / ホームダッシュボード</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #00897b;
+    --primary-dark: #00695c;
+    --primary-darker: #004d40;
+    --primary-soft: rgba(0,137,123,0.08);
+    --pastel: #e0f2f1;
+    --ink: #1a1a1a;
+    --ink2: #555;
+    --ink3: #888;
+    --ink4: #ccc;
+    --border: #e8ebe9;
+    --bg: #fff;
+    --bg-soft: #f8f9fa;
+    --bg-warm: linear-gradient(135deg, #e0f2f1, #fffbe6);
+    --danger: #d32f2f;
+    --danger-bg: #fef2f2;
+    --danger-border: #fecaca;
+    --warn: #c2410c;
+    --warn-bg: #fff7ed;
+    --warn-border: #fed7aa;
+    --gold: #b8860b;
+    --gold-bg: rgba(255,235,59,0.12);
+    --nav-bg: #1a1a1a;
+    --nav-bg-active: #00897b;
+    --nav-text: #d4d4d8;
+    --nav-text-active: #fff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #e8ebec;
+    color: var(--ink);
+    line-height: 1.6;
+    padding: 24px;
+  }
+
+  .page-header { max-width: 1320px; margin: 0 auto 24px; text-align: center; }
+  .page-header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .page-header p { color: #6b7d75; font-size: 12px; line-height: 1.7; }
+  .page-header .route {
+    display: inline-block; margin-top: 6px;
+    font-family: 'Inter', monospace;
+    font-size: 11px; color: var(--ink3); background: white;
+    padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border);
+  }
+
+  /* === デスクトップフレーム === */
+  .desk {
+    max-width: 1320px;
+    margin: 0 auto;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,.08);
+    min-height: 820px;
+    display: flex;
+    flex-direction: column;
+  }
+  .desk-chrome {
+    background: #f1f3f4;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .desk-chrome .dot { width: 10px; height: 10px; border-radius: 50%; background: #d0d0d0; }
+  .desk-chrome .url {
+    flex: 1; margin-left: 12px; background: #fff;
+    padding: 4px 10px; border-radius: 4px; font-size: 11px;
+    color: var(--ink3); font-family: 'Inter', sans-serif;
+  }
+  .desk-body { flex: 1; display: flex; }
+
+  /* === 左サイドナビ === */
+  .sidenav {
+    width: 220px;
+    background: var(--nav-bg);
+    color: var(--nav-text);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+  .sidenav-brand {
+    padding: 18px 18px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .sidenav-brand .brand-mark {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px;
+    margin-bottom: 8px;
+  }
+  .sidenav-brand .brand-ttl { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.3; }
+  .sidenav-brand .brand-sub { font-size: 11px; color: var(--nav-text); margin-top: 1px; }
+
+  .sidenav-menu { flex: 1; padding: 12px 8px; }
+  .sidenav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px;
+    border-radius: 6px;
+    color: var(--nav-text);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    margin-bottom: 2px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .sidenav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
+  .sidenav-item.active { background: rgba(0,137,123,0.18); color: #fff; font-weight: 700; }
+  .sidenav-item .icon { width: 18px; height: 18px; flex-shrink: 0; }
+  .sidenav-item .badge {
+    margin-left: auto;
+    background: var(--danger);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 999px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .sidenav-footer {
+    padding: 12px 14px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sidenav-footer .ava {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 12px;
+  }
+  .sidenav-footer .info { flex: 1; min-width: 0; }
+  .sidenav-footer .info .name { font-size: 12px; font-weight: 700; color: #fff; }
+  .sidenav-footer .info .role { font-size: 10px; color: var(--nav-text); }
+  .sidenav-footer .logout { color: var(--nav-text); cursor: pointer; }
+
+  /* === メインエリア === */
+  .main { flex: 1; background: var(--bg-soft); overflow: auto; }
+  .main-header {
+    padding: 20px 28px;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .main-header .greet { font-size: 18px; font-weight: 700; color: var(--ink); }
+  .main-header .date { font-size: 12px; color: var(--ink3); margin-top: 2px; font-family: 'Inter', sans-serif; }
+  .main-header .actions { display: flex; gap: 8px; }
+  .main-header .icon-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink2);
+    cursor: pointer;
+  }
+
+  .main-content { padding: 24px 28px 40px; }
+
+  /* === KPI カード === */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: 1.6fr repeat(5, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .kpi-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    transition: border-color .15s;
+    cursor: pointer;
+  }
+  .kpi-card:hover { border-color: var(--primary); }
+  .kpi-card.alert { border-color: var(--danger-border); background: var(--danger-bg); }
+  .kpi-card.hero {
+    background: linear-gradient(135deg, #e0f2f1, #fffbe6);
+    border-color: #b2dfdb;
+  }
+  .kpi-card.hero .kpi-label {
+    color: var(--primary-dark);
+    font-weight: 700;
+  }
+  .kpi-card.hero .kpi-hero-row {
+    display: flex; align-items: baseline; gap: 10px;
+    margin-bottom: 8px;
+  }
+  .kpi-card.hero .kpi-hero-row .big {
+    font-size: 32px; font-weight: 700; color: var(--primary-darker);
+    font-family: 'Inter', sans-serif; line-height: 1;
+  }
+  .kpi-card.hero .kpi-hero-row .total {
+    font-size: 14px; color: var(--ink2); font-weight: 500;
+  }
+  .kpi-card.hero .kpi-hero-row .percent {
+    margin-left: auto;
+    font-size: 18px; font-weight: 700;
+    color: var(--primary-darker);
+    font-family: 'Inter', sans-serif;
+  }
+  .kpi-card.hero .progress-bar {
+    height: 6px;
+    background: rgba(255,255,255,0.7);
+    border: 1px solid #b2dfdb;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .kpi-card.hero .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+    border-radius: 999px;
+  }
+  .kpi-card.hero .kpi-hero-foot {
+    font-size: 11px; color: var(--primary-darker);
+    font-weight: 600;
+  }
+  .kpi-card .kpi-label {
+    font-size: 11px; color: var(--ink3); font-weight: 700;
+    letter-spacing: 1px; margin-bottom: 8px;
+  }
+  .kpi-card .kpi-value {
+    font-size: 28px; font-weight: 700; color: var(--ink);
+    font-family: 'Inter', sans-serif; line-height: 1;
+  }
+  .kpi-card.alert .kpi-value { color: var(--danger); }
+  .kpi-card .kpi-sub {
+    font-size: 11px; color: var(--ink3);
+    margin-top: 6px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .kpi-card .kpi-sub a { color: var(--primary-dark); text-decoration: underline; }
+
+  /* === セクションヘッダ === */
+  .section-head {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 12px; margin-top: 8px;
+  }
+  .section-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .section-dot.urgent { background: var(--danger); }
+  .section-dot.today { background: var(--warn); }
+  .section-title { font-size: 15px; font-weight: 700; color: var(--ink); }
+  .section-count {
+    font-size: 12px; color: var(--ink3);
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    padding: 1px 8px; border-radius: 999px;
+    font-family: 'Inter', sans-serif;
+  }
+  .section-count.urgent { color: var(--danger); border-color: var(--danger-border); background: var(--danger-bg); }
+  .section-count.today { color: var(--warn); border-color: var(--warn-border); background: var(--warn-bg); }
+
+  /* === ユーザーカード === */
+  .user-list {
+    display: flex; flex-direction: column; gap: 10px;
+    margin-bottom: 24px;
+  }
+  .user-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: border-color .15s;
+  }
+  .user-card:hover { border-color: var(--primary); }
+  .user-card .ava {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px;
+    flex-shrink: 0;
+  }
+  .user-card .info { flex: 1; min-width: 0; }
+  .user-card .info .name {
+    font-size: 14px; font-weight: 700; color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .user-card .alerts {
+    display: flex; flex-wrap: wrap; gap: 5px;
+  }
+  .alert-tag {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 11px; font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+  .alert-tag.urgent {
+    background: var(--danger-bg);
+    color: var(--danger);
+    border: 1px solid var(--danger-border);
+  }
+  .alert-tag.warn {
+    background: var(--warn-bg);
+    color: var(--warn);
+    border: 1px solid var(--warn-border);
+  }
+
+  .user-card .actions {
+    display: flex; gap: 6px; flex-shrink: 0;
+  }
+  .action-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 10px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all .15s;
+  }
+  .action-btn:hover { border-color: var(--primary); color: var(--primary-dark); background: var(--primary-soft); }
+  .action-btn .icon { width: 14px; height: 14px; color: var(--primary-dark); }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>管理画面 ・ ホームダッシュボード</h1>
+  <p>
+    のり氏 1 人用 ・ サイドナビ 7 セクション + KPI 5 カード + 優先度別ユーザーリスト 2 段<br>
+    トレーナークラウドの強みを踏襲、 のりfitness の月次添削主軸に最適化
+  </p>
+  <div class="route">/admin/ (新規)</div>
+</div>
+
+<div class="desk">
+  <div class="desk-chrome">
+    <span class="dot" style="background:#ff5f57"></span>
+    <span class="dot" style="background:#febc2e"></span>
+    <span class="dot" style="background:#28c840"></span>
+    <span class="url">app.norifitness.com/admin/</span>
+  </div>
+
+  <div class="desk-body">
+
+    <!-- ============ 左サイドナビ ============ -->
+    <nav class="sidenav">
+      <div class="sidenav-brand">
+        <div class="brand-mark">の</div>
+        <div class="brand-ttl">のりfitness</div>
+        <div class="brand-sub">筋肉塾 管理</div>
+      </div>
+
+      <div class="sidenav-menu">
+        <a class="sidenav-item active">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          ホーム
+        </a>
+        <a class="sidenav-item">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          受講生
+          <span class="badge" style="background:var(--ink2)">21</span>
+        </a>
+        <a class="sidenav-item">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+          月次添削
+          <span class="badge">5</span>
+        </a>
+        <a class="sidenav-item">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          リクエスト
+          <span class="badge">2</span>
+        </a>
+        <a class="sidenav-item">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          発送管理
+          <span class="badge">1</span>
+        </a>
+        <a class="sidenav-item">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          招待
+        </a>
+        <a class="sidenav-item">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          設定
+        </a>
+      </div>
+
+      <div class="sidenav-footer">
+        <div class="ava">の</div>
+        <div class="info">
+          <div class="name">のり氏</div>
+          <div class="role">管理者</div>
+        </div>
+        <svg class="logout" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </div>
+    </nav>
+
+    <!-- ============ メインエリア ============ -->
+    <div class="main">
+
+      <div class="main-header">
+        <div>
+          <div class="greet">お疲れさまです、 のり氏さん</div>
+          <div class="date">2026年6月11日 (木) ・ 受講生 21 名</div>
+        </div>
+        <div class="actions">
+          <div class="icon-btn" title="検索">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </div>
+          <div class="icon-btn" title="通知">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="main-content">
+
+        <!-- ============ KPI 6 カード (成果 1 + 残務 5) ============ -->
+        <div class="kpi-grid">
+          <div class="kpi-card hero">
+            <div class="kpi-label"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--primary);margin-right:6px;vertical-align:middle;"></span>今月の月次添削 完了率</div>
+            <div class="kpi-hero-row">
+              <span class="big">16</span>
+              <span class="total">/ 21 人</span>
+              <span class="percent">76%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width:76%"></div>
+            </div>
+            <div class="kpi-hero-foot">残り 5 人 ・ 期限まで 19 日</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">月次添削 未送信</div>
+            <div class="kpi-value">5<span style="font-size:14px;color:var(--ink3);font-weight:500;"> / 21</span></div>
+            <div class="kpi-sub"><a>添削する →</a></div>
+          </div>
+          <div class="kpi-card alert">
+            <div class="kpi-label">重要アラート</div>
+            <div class="kpi-value">3<span style="font-size:14px;color:var(--ink3);font-weight:500;"> 件</span></div>
+            <div class="kpi-sub" style="color:var(--danger);">下記「今すぐ対応」参照</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">リクエスト未対応</div>
+            <div class="kpi-value">2<span style="font-size:14px;color:var(--ink3);font-weight:500;"> 件</span></div>
+            <div class="kpi-sub"><a>確認する →</a></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">プロテイン発送未対応</div>
+            <div class="kpi-value">1<span style="font-size:14px;color:var(--ink3);font-weight:500;"> 件</span></div>
+            <div class="kpi-sub"><a>発送リスト →</a></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">新規入会 未処理</div>
+            <div class="kpi-value">0<span style="font-size:14px;color:var(--ink3);font-weight:500;"> 件</span></div>
+            <div class="kpi-sub" style="color:#16a34a; display:inline-flex; align-items:center; gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>すべて処理済</div>
+          </div>
+        </div>
+
+        <!-- ============ 今すぐ対応 ============ -->
+        <div class="section-head">
+          <span class="section-dot urgent"></span>
+          <span class="section-title">今すぐ対応</span>
+          <span class="section-count urgent">3 人</span>
+        </div>
+        <div class="user-list">
+
+          <div class="user-card">
+            <div class="ava">高</div>
+            <div class="info">
+              <div class="name">高橋 一郎 ・ 男性 41 歳</div>
+              <div class="alerts">
+                <span class="alert-tag urgent">月次未提出 (期限 2 日前)</span>
+                <span class="alert-tag urgent">カルテ未記入</span>
+              </div>
+            </div>
+            <div class="actions">
+              <a class="action-btn">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5.5 21v-2a4 4 0 0 1 4-4h5a4 4 0 0 1 4 4v2"/></svg>
+                詳細
+              </a>
+              <a class="action-btn">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                添削
+              </a>
+              <a class="action-btn">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                カルテ
+              </a>
+            </div>
+          </div>
+
+          <div class="user-card">
+            <div class="ava">鈴</div>
+            <div class="info">
+              <div class="name">鈴木 美咲 ・ 女性 35 歳</div>
+              <div class="alerts">
+                <span class="alert-tag urgent">体組成 12 日途絶 (閾値 7 日)</span>
+              </div>
+            </div>
+            <div class="actions">
+              <a class="action-btn">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5.5 21v-2a4 4 0 0 1 4-4h5a4 4 0 0 1 4 4v2"/></svg>
+                詳細
+              </a>
+              <a class="action-btn">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                体組成推移
+              </a>
+              <a class="action-btn">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                LINE
+              </a>
+            </div>
+          </div>
+
+          <div class="user-card">
+            <div class="ava">佐</div>
+            <div class="info">
+              <div class="name">佐藤 健 ・ 男性 48 歳</div>
+              <div class="alerts">
+                <span class="alert-tag urgent">目標乖離 +10% (閾値 7%)</span>
+                <span class="alert-tag warn">トレーニング頻度低下</span>
+              </div>
+            </div>
+            <div class="actions">
+              <a class="action-btn">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5.5 21v-2a4 4 0 0 1 4-4h5a4 4 0 0 1 4 4v2"/></svg>
+                詳細
+              </a>
+              <a class="action-btn">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                添削
+              </a>
+              <a class="action-btn">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                目標シート
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ============ 今日中に確認 ============ -->
+        <div class="section-head">
+          <span class="section-dot today"></span>
+          <span class="section-title">今日中に確認</span>
+          <span class="section-count today">4 人</span>
+        </div>
+        <div class="user-list">
+
+          <div class="user-card">
+            <div class="ava">田</div>
+            <div class="info">
+              <div class="name">田中 太郎 ・ 男性 30 歳</div>
+              <div class="alerts">
+                <span class="alert-tag warn">体組成 8 日途絶</span>
+              </div>
+            </div>
+            <div class="actions">
+              <a class="action-btn">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5.5 21v-2a4 4 0 0 1 4-4h5a4 4 0 0 1 4 4v2"/></svg>
+                詳細
+              </a>
+              <a class="action-btn">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                体組成推移
+              </a>
+            </div>
+          </div>
+
+          <div class="user-card">
+            <div class="ava">山</div>
+            <div class="info">
+              <div class="name">山田 花子 ・ 女性 28 歳</div>
+              <div class="alerts">
+                <span class="alert-tag warn">目標シート空</span>
+                <span class="alert-tag warn">学習未着手</span>
+              </div>
+            </div>
+            <div class="actions">
+              <a class="action-btn">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5.5 21v-2a4 4 0 0 1 4-4h5a4 4 0 0 1 4 4v2"/></svg>
+                詳細
+              </a>
+              <a class="action-btn">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                目標シート
+              </a>
+            </div>
+          </div>
+
+          <div class="user-card">
+            <div class="ava">伊</div>
+            <div class="info">
+              <div class="name">伊藤 直樹 ・ 男性 52 歳</div>
+              <div class="alerts">
+                <span class="alert-tag warn">最終ログイン 5 日前</span>
+              </div>
+            </div>
+            <div class="actions">
+              <a class="action-btn">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5.5 21v-2a4 4 0 0 1 4-4h5a4 4 0 0 1 4 4v2"/></svg>
+                詳細
+              </a>
+              <a class="action-btn">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                LINE
+              </a>
+            </div>
+          </div>
+
+          <div class="user-card">
+            <div class="ava">渡</div>
+            <div class="info">
+              <div class="name">渡部 久美子 ・ 女性 55 歳</div>
+              <div class="alerts">
+                <span class="alert-tag warn">月次未提出 (期限 5 日後)</span>
+              </div>
+            </div>
+            <div class="actions">
+              <a class="action-btn">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5.5 21v-2a4 4 0 0 1 4-4h5a4 4 0 0 1 4 4v2"/></svg>
+                詳細
+              </a>
+              <a class="action-btn">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                添削
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
