@@ -8,6 +8,7 @@ import {
   getMyLessonReview,
 } from "@/lib/courses/queries";
 import { VimeoEmbed } from "@/components/VimeoEmbed";
+import { BackLink } from "@/components/BackLink";
 import { CompleteButton } from "./CompleteButton";
 import { ReviewAccordion } from "./ReviewAccordion";
 
@@ -21,10 +22,13 @@ type RouteParams = Promise<{
 
 export default async function StudentLessonPage({
   params,
+  searchParams,
 }: {
   params: RouteParams;
+  searchParams: Promise<{ from?: string; focus?: string }>;
 }) {
   const { courseId, chapterId, lessonId } = await params;
+  const { from } = await searchParams;
 
   const [course, chapter, lesson] = await Promise.all([
     getPublicCourse(courseId),
@@ -45,6 +49,7 @@ export default async function StudentLessonPage({
     <main className="flex flex-1 flex-col p-6 sm:p-8">
       <div className="mx-auto w-full max-w-3xl space-y-6">
         <header className="space-y-2">
+          <BackLink from={from} className="inline-flex items-center gap-1 text-xs text-zinc-600 hover:text-[#00695c] mb-1" />
           <nav className="text-xs text-zinc-500 space-x-1">
             <Link href="/" className="underline hover:text-zinc-700 dark:hover:text-zinc-300">
               ホーム

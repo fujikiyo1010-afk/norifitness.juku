@@ -60,5 +60,7 @@ export async function replyToRequest(
 
   revalidatePath("/admin/requests");
   revalidatePath("/admin");
+  // 受講生ハブからもアクセスされるので layout 単位で revalidate
+  revalidatePath("/admin/users", "layout");
   return { ok: true };
 }

@@ -63,6 +63,9 @@ export async function upsertBodyMetric(input: BodyMetricInput): Promise<ActionRe
 
   revalidatePath("/body-metrics");
   revalidatePath("/body-metrics/chart");
+  // 管理画面側も更新 (受講生ハブ /metrics タブ + ホーム KPI + アラート集計)
+  revalidatePath("/admin/users", "layout");
+  revalidatePath("/admin");
   return { ok: true };
 }
 
@@ -86,5 +89,7 @@ export async function deleteBodyMetric(id: string): Promise<ActionResult> {
 
   revalidatePath("/body-metrics");
   revalidatePath("/body-metrics/chart");
+  revalidatePath("/admin/users", "layout");
+  revalidatePath("/admin");
   return { ok: true };
 }

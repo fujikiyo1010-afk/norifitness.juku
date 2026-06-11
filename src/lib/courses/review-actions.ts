@@ -73,5 +73,8 @@ export async function saveReview(
     `/courses/[courseId]/chapters/[chapterId]/lessons/${lessonId}`,
     "page"
   );
+  // 振り返り一覧 + 学習ハブ も更新 (BackLink で戻った時に最新表示)
+  revalidatePath("/my-log/reviews");
+  revalidatePath("/my-log");
   return { ok: true, updated_at: data.updated_at as string };
 }

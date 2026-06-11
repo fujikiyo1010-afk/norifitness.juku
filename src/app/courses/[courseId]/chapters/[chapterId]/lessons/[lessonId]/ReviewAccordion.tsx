@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { saveReview } from "@/lib/courses/review-actions";
 
 type InitialReview = {
@@ -30,7 +30,17 @@ export function ReviewAccordion({
   lessonId: string;
   initial: InitialReview;
 }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const focusReview = searchParams?.get("focus") === "review";
+  const [isOpen, setIsOpen] = useState(focusReview);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (focusReview && sectionRef.current) {
+      sectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    // 初回マウントのみ
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [learned, setLearned] = useState(initial?.learned ?? "");
   const [impressed, setImpressed] = useState(initial?.impressed ?? "");
   const [nextAction, setNextAction] = useState(initial?.next_action ?? "");
@@ -83,7 +93,7 @@ export function ReviewAccordion({
     "w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 focus:border-zinc-900 dark:focus:border-zinc-50 focus:outline-none disabled:opacity-50 resize-y";
 
   return (
-    <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+    <div ref={sectionRef} className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden scroll-mt-4">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
