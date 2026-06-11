@@ -23,6 +23,34 @@ import { useUploadJob } from "@/lib/upload/UploadJobContext";
  *   - 送信中 (楽観) = 黄色注意喚起 (#b8860b)
  */
 
+function MonthlyProgress({
+  completed,
+  total,
+}: {
+  completed: number;
+  total: number;
+}) {
+  const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const remaining = Math.max(0, total - completed);
+  return (
+    <div className="flex flex-col items-end gap-1 min-w-[240px]">
+      <div className="flex items-baseline gap-2.5 text-xs">
+        <span className="font-mono font-bold text-[#004d40] text-sm">
+          {completed} / {total}
+        </span>
+        <span className="font-mono font-bold text-[#00695c]">{percent}%</span>
+        <span className="text-zinc-500 text-[11px]">残り {remaining} 人</span>
+      </div>
+      <div className="w-[240px] h-1.5 bg-white border border-[#e8ebe9] rounded-full overflow-hidden">
+        <div
+          className="h-full bg-gradient-to-r from-[#00897b] to-[#00695c] rounded-full transition-all"
+          style={{ width: `${percent}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export type InboxAudit = {
   id: string;
   userName: string;
@@ -45,9 +73,13 @@ export function InboxClient({
   replied,
   adminName,
   adminInitial,
+  thisMonthCompleted,
+  thisMonthTotal,
 }: {
   pending: InboxAudit[];
   replied: InboxAudit[];
+  thisMonthCompleted?: number;
+  thisMonthTotal?: number;
   adminName: string;
   adminInitial: string;
 }) {
@@ -147,9 +179,15 @@ export function InboxClient({
 
         {/* === コンテンツ === */}
         <div className="bg-[#f8f9fa] px-6 py-5">
-          {/* ページタイトル */}
-          <div className="flex items-center justify-between mb-4">
+          {/* ページタイトル + 今月の進捗 */}
+          <div className="flex items-center justify-between mb-4 gap-4">
             <h2 className="text-lg font-bold text-zinc-900">月次添削 受信箱</h2>
+            {thisMonthTotal !== undefined && thisMonthCompleted !== undefined && thisMonthTotal > 0 && (
+              <MonthlyProgress
+                completed={thisMonthCompleted}
+                total={thisMonthTotal}
+              />
+            )}
           </div>
 
           {/* 検索バー */}

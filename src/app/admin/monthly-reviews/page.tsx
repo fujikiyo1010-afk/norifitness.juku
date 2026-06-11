@@ -66,12 +66,26 @@ export default async function AdminMonthlyReviewInboxPage() {
   const pendingInbox = pending.map(toInboxAudit);
   const repliedInbox = replied.map(toInboxAudit);
 
+  // 今月の進捗バー用集計
+  const supabase = createAdminClient();
+  const targetMonth = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}-01`;
+  const [usersCount, completedCount] = await Promise.all([
+    supabase.from("users").select("id", { count: "exact", head: true }),
+    supabase
+      .from("monthly_audits")
+      .select("id", { count: "exact", head: true })
+      .eq("target_month", targetMonth)
+      .not("nori_video_published_at", "is", null),
+  ]);
+
   return (
     <InboxClient
       pending={pendingInbox}
       replied={repliedInbox}
       adminName={admin.name}
       adminInitial={admin.name.charAt(0)}
+      thisMonthCompleted={completedCount.count ?? 0}
+      thisMonthTotal={usersCount.count ?? 0}
     />
   );
 }
