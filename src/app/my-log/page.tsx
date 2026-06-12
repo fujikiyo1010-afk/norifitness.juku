@@ -28,8 +28,8 @@ export default async function MyLogPage() {
     ]);
 
   return (
-    <main className="flex flex-1 flex-col p-6 sm:p-8">
-      <div className="mx-auto w-full max-w-3xl space-y-6">
+    <main className="flex flex-1 flex-col bg-zinc-50 min-h-screen">
+      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e8ebe9] bg-white p-6 space-y-6">
         <header className="space-y-2">
           <nav className="text-xs text-zinc-500">
             <Link href="/" className="underline hover:text-zinc-700 dark:hover:text-zinc-300">
@@ -50,7 +50,7 @@ export default async function MyLogPage() {
         {flashback && <FlashbackCard review={flashback} />}
 
         {/* ハブカード */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <section className="grid grid-cols-2 gap-3">
           <HubCard
             href="/my-log/reviews"
             icon={<PenIcon />}
