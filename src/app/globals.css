@@ -8,7 +8,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-noto-sans-jp), "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
@@ -22,5 +22,29 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-noto-sans-jp), "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", system-ui, sans-serif;
 }
+
+/* オンボーディング ・ 完了画面 共通アニメーション (chapter_complete / course_complete モック準拠) */
+@keyframes charPop {
+  0%   { opacity: 0; transform: scale(0.85); }
+  60%  { transform: scale(1.05); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.anim-char-pop {
+  animation: charPop 0.5s ease-out 0.1s both;
+}
+
+.anim-fade-up {
+  animation: fadeUp 0.4s ease-out both;
+}
+
+.anim-delay-1 { animation-delay: 0.25s; }
+.anim-delay-2 { animation-delay: 0.35s; }
+.anim-delay-3 { animation-delay: 0.45s; }
