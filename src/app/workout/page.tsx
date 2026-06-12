@@ -45,7 +45,7 @@ function WaitingForMenu({ carte }: { carte: NonNullable<Awaited<ReturnType<typeo
 
   return (
     <div className="min-h-screen bg-zinc-50">
-      <div className="mx-auto max-w-2xl px-4 py-6">
+      <div className="mx-auto max-w-[460px] px-4 py-6">
         <div className="bg-white border border-[#e8ebe9] rounded-2xl overflow-hidden">
           {/* ヘッダー */}
           <div className="px-4 py-3 border-b border-[#e8ebe9] flex items-center gap-2">

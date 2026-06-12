@@ -34,7 +34,7 @@ export default async function BodyMetricsChartPage({
 
   return (
     <div className="min-h-screen bg-zinc-50">
-      <div className="mx-auto max-w-md px-4 py-6">
+      <div className="mx-auto max-w-[460px] px-4 py-6">
         {/* ヘッダー */}
         <header className="mb-5">
           <div className="text-xs text-zinc-500 mb-1">

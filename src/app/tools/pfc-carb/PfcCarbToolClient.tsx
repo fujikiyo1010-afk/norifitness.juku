@@ -208,7 +208,7 @@ export function PfcCarbToolClient({
         </h1>
       </header>
 
-      <div className="flex-1 max-w-md mx-auto w-full pb-10">
+      <div className="flex-1 max-w-[460px] mx-auto w-full pb-10">
         {/* ヒーロー帯 */}
         <section className="bg-gradient-to-br from-[#e8eaf6] to-[#fffbe6] border-b border-[#e8ebe9] px-6 py-5">
           <h2 className="text-lg font-bold text-[#1a237e] mb-1">

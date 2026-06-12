@@ -46,7 +46,7 @@ export default function ToolsIndexPage() {
         </h1>
       </header>
 
-      <div className="flex-1 max-w-md mx-auto w-full pb-12">
+      <div className="flex-1 max-w-[460px] mx-auto w-full pb-12">
         {/* ヒーロー帯 */}
         <section className="bg-gradient-to-br from-[#e8eaf6] to-[#fffbe6] border-b border-[#e8ebe9] px-6 py-5">
           <h2 className="text-xl font-bold text-[#1a237e] mb-1.5 flex items-center gap-2">

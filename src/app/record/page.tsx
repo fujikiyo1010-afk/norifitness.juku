@@ -22,7 +22,7 @@ export default async function RecordHubPage() {
 
   return (
     <div className="min-h-screen bg-zinc-50 pb-24">
-      <div className="mx-auto max-w-md px-4 py-6">
+      <div className="mx-auto max-w-[460px] px-4 py-6">
         <header className="mb-5">
           <h1 className="text-xl font-bold text-zinc-900">記録</h1>
           <p className="text-xs text-zinc-500 mt-1">

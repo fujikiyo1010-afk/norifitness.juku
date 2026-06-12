@@ -47,7 +47,7 @@ export default async function StudentLessonPage({
 
   return (
     <main className="flex flex-1 flex-col p-6 sm:p-8">
-      <div className="mx-auto w-full max-w-3xl space-y-6">
+      <div className="mx-auto w-full max-w-[460px] space-y-6">
         <header className="space-y-2">
           <BackLink from={from} className="inline-flex items-center gap-1 text-xs text-zinc-600 hover:text-[#00695c] mb-1" />
           <nav className="text-xs text-zinc-500 space-x-1">

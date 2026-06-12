@@ -32,7 +32,7 @@ export default async function GoalSheetPage() {
   if (!sheet) {
     return (
       <main className="flex flex-1 flex-col p-6 sm:p-8 bg-[#e8ebec]">
-        <div className="mx-auto w-full max-w-2xl">
+        <div className="mx-auto w-full max-w-[460px]">
           <header className="mb-6 space-y-2">
             <nav className="text-xs text-zinc-500">
               <Link href="/" className="underline hover:text-zinc-700">
