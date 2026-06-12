@@ -57,7 +57,8 @@ alwaysApply: true
 
 ## C. UI・デザイン
 
-9. **受講生UIはスマホ幅で実装する。** 既存パターンに揃える:
+9. **受講生UIはスマホ幅で実装する。** PC のブラウザで見ても一貫してスマホ幅（`max-w-[460px]` 中央カラム）。横に広げない。
+   既存パターン:
    ```
    <main className="flex flex-1 flex-col bg-zinc-50 min-h-screen">
      <div className="mx-auto w-full max-w-[460px] border-x border-[#e8ebe9] bg-white">
@@ -68,7 +69,11 @@ alwaysApply: true
    外側 main = 全幅（背景色）、内側 wrapper = `max-w-[460px] mx-auto border-x`。
    PWA standalone（スマホ実機）ではフル幅、デスクトップでは中央 460px。**この wrapper を忘れない**。
    **460px = 実装側 wrapper 上限**（デスクトップ確認時の余裕 + 大型スマホ安心代）。
-   モック側（[[C.27]]）の 390px とは意図的に分ける ・ モック = 実機密度基準、実装 = 上限の許容
+   モック側（[[C.27]]）の 390px とは意図的に分ける ・ モック = 実機密度基準、実装 = 上限の許容。
+
+   ✅ **適用範囲**: 受講生向け全画面（ホーム / コース / 振り返り / 目標シート / 月次添削 / 体組成 / 筋トレ / ツール / 検索 / 記録 等）
+   ❌ **適用外**: 認証画面（login / invite / reset-password / forgot-password）= 中央カード型のため `max-w-md` 可
+   ❌ **適用外**: 管理画面（[[C.26]] デスクトップ専用、`max-w-3xl` 〜 `max-w-5xl`）
 10. **screen_master が正典。デザインを即興しない。** 確定タブは
     **ホーム / コース / 記録 / 検索 / 設定**（学習・体組成・メニューは独立タブにしない）。
     screen_master と食い違ったら screen_master が勝つ
