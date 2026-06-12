@@ -35,10 +35,11 @@ export default async function MyLogPage() {
             <Link href="/" className="underline hover:text-zinc-700 dark:hover:text-zinc-300">
               ホーム
             </Link>
-            <span> / マイ学習ログ</span>
+            <span> / 学習</span>
           </nav>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            📊 マイ学習ログ
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
+            <ChartIcon />
+            学習
           </h1>
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
             あなたの学びの軌跡を一覧できます。
@@ -52,23 +53,23 @@ export default async function MyLogPage() {
         <section className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <HubCard
             href="/my-log/reviews"
-            icon="📝"
+            icon={<PenIcon />}
             title="振り返り"
             count={reviewCount ?? 0}
             countLabel="件記入"
           />
           <HubCard
-            icon="🔖"
+            icon={<BookmarkIcon />}
             title="ブックマーク"
             comingSoon
           />
           <HubCard
-            icon="💪"
+            icon={<DumbbellIcon />}
             title="実践リスト"
             comingSoon
           />
           <HubCard
-            icon="✅"
+            icon={<CheckCircleIcon />}
             title="完了履歴"
             count={completedCount ?? 0}
             countLabel="レッスン完了"
@@ -87,7 +88,9 @@ function FlashbackCard({ review }: { review: MyReviewWithContext }) {
   return (
     <div className="rounded-lg border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950 p-4 space-y-3">
       <div className="flex items-center gap-2">
-        <span className="text-lg">💭</span>
+        <span className="text-amber-700 dark:text-amber-300 flex-shrink-0">
+          <ThoughtIcon />
+        </span>
         <div className="flex-1">
           <p className="text-xs text-amber-700 dark:text-amber-300">
             {dayLabel}のあなたの振り返り
@@ -139,7 +142,7 @@ function HubCard({
   comingSoon = false,
 }: {
   href?: string;
-  icon: string;
+  icon: React.ReactNode;
   title: string;
   count?: number;
   countLabel?: string;
@@ -155,7 +158,7 @@ function HubCard({
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="flex items-center gap-2">
-          <span className="text-2xl">{icon}</span>
+          <span className="text-zinc-700 dark:text-zinc-300 flex-shrink-0">{icon}</span>
           <h3 className="font-semibold text-zinc-900 dark:text-zinc-50">
             {title}
           </h3>
@@ -193,4 +196,75 @@ function HubCard({
     return <div>{content}</div>;
   }
   return <Link href={href}>{content}</Link>;
+}
+
+// =====================================================================
+// アイコン (線画黒一色、 許可絵文字は ✓ ▶ → ← のみ)
+// =====================================================================
+
+const ICO_PROPS = {
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 2,
+  strokeLinecap: "round" as const,
+  strokeLinejoin: "round" as const,
+};
+
+function ChartIcon() {
+  return (
+    <svg {...ICO_PROPS} width="24" height="24">
+      <line x1="12" y1="20" x2="12" y2="10" />
+      <line x1="18" y1="20" x2="18" y2="4" />
+      <line x1="6" y1="20" x2="6" y2="16" />
+      <line x1="3" y1="20" x2="21" y2="20" />
+    </svg>
+  );
+}
+
+function PenIcon() {
+  return (
+    <svg {...ICO_PROPS} width="20" height="20">
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z" />
+    </svg>
+  );
+}
+
+function BookmarkIcon() {
+  return (
+    <svg {...ICO_PROPS} width="20" height="20">
+      <path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
+
+function DumbbellIcon() {
+  return (
+    <svg {...ICO_PROPS} width="20" height="20">
+      <path d="M6.5 6.5h11" />
+      <path d="M6.5 17.5h11" />
+      <path d="M4 9v6" />
+      <path d="M20 9v6" />
+      <path d="M2 11v2" />
+      <path d="M22 11v2" />
+    </svg>
+  );
+}
+
+function CheckCircleIcon() {
+  return (
+    <svg {...ICO_PROPS} width="20" height="20">
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="9 12 11 14 15 10" />
+    </svg>
+  );
+}
+
+function ThoughtIcon() {
+  return (
+    <svg {...ICO_PROPS} width="18" height="18">
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+    </svg>
+  );
 }

@@ -91,8 +91,8 @@ export function ReviewsListView({
     <div className="space-y-4">
       {/* 検索 */}
       <div className="relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none">
-          🔍
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none flex items-center">
+          <SearchIcon />
         </span>
         <input
           type="search"
@@ -121,8 +121,8 @@ export function ReviewsListView({
 
       {/* 検索中の表示 */}
       {query.trim().length > 0 && (
-        <p className="text-xs text-zinc-500">
-          🔍 「{query}」でフィルタ中 ({filteredReviews.length} 件)
+        <p className="text-xs text-zinc-500 inline-flex items-center gap-1.5">
+          <SearchIcon /> 「{query}」でフィルタ中 ({filteredReviews.length} 件)
         </p>
       )}
 
@@ -253,8 +253,8 @@ function CourseGroupedList({
         );
         return (
           <div key={course.course_id} className="space-y-3">
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-              📖 {course.course_title}
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 inline-flex items-center gap-1.5">
+              <BookIcon /> {course.course_title}
             </h3>
             {sortedChapters.map((chapter) => {
               const sortedReviews = [...chapter.reviews].sort(
@@ -262,8 +262,8 @@ function CourseGroupedList({
               );
               return (
                 <div key={chapter.chapter_id} className="ml-4 space-y-2">
-                  <h4 className="text-xs text-zinc-600 dark:text-zinc-400">
-                    📑 {chapter.chapter_title}
+                  <h4 className="text-xs text-zinc-600 dark:text-zinc-400 inline-flex items-center gap-1.5">
+                    <ChapterMarkIcon /> {chapter.chapter_title}
                   </h4>
                   <ul className="space-y-2">
                     {sortedReviews.map((r) => (
@@ -300,8 +300,11 @@ function ReviewCard({
             <Highlight text={review.lesson_title} query={query} />
           </p>
           {!compact && (
-            <p className="text-xs text-zinc-500 mt-0.5">
-              📖 <Highlight text={review.course_title} query={query} /> / 📑{" "}
+            <p className="text-xs text-zinc-500 mt-0.5 inline-flex items-center gap-1.5 flex-wrap">
+              <BookIcon />
+              <Highlight text={review.course_title} query={query} />
+              <span>/</span>
+              <ChapterMarkIcon />
               <Highlight text={review.chapter_title} query={query} />
             </p>
           )}
@@ -378,5 +381,44 @@ function ReviewCard({
         </Link>
       </div>
     </li>
+  );
+}
+
+// =====================================================================
+// アイコン (線画黒一色、 許可絵文字は ✓ ▶ → ← のみ)
+// =====================================================================
+
+const ICO_PROPS = {
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 2,
+  strokeLinecap: "round" as const,
+  strokeLinejoin: "round" as const,
+};
+
+function SearchIcon() {
+  return (
+    <svg {...ICO_PROPS} width="14" height="14">
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.3-4.3" />
+    </svg>
+  );
+}
+
+function BookIcon() {
+  return (
+    <svg {...ICO_PROPS} width="14" height="14" className="flex-shrink-0">
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+    </svg>
+  );
+}
+
+function ChapterMarkIcon() {
+  return (
+    <svg {...ICO_PROPS} width="12" height="12" className="flex-shrink-0">
+      <path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+    </svg>
   );
 }
