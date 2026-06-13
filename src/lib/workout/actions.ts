@@ -45,6 +45,9 @@ export type ActionResult<T = void> =
 // =====================================================================
 
 export type MyCarteInput = {
+  // 生年月日は user_profiles.birthday を「唯一の正」として保存する。
+  // カルテ表 (user_workout_carte) に birth_date / age_band は持たせない (二重化防止)。
+  birthday: string | null; // YYYY-MM-DD
   gender: Gender;
   environments: Environment[];
   frequency_wish: Frequency | null;
@@ -74,7 +77,25 @@ export async function createMyCarte(
     return { ok: false, message: "ログインが必要です" };
   }
 
-  // 必須項目バリデーション (機械マッチング 4 項目)
+  // 必須項目バリデーション (生年月日 + 機械マッチング 4 項目)
+  if (!input.birthday || !/^\d{4}-\d{2}-\d{2}$/.test(input.birthday)) {
+    return { ok: false, message: "生年月日を入力してください" };
+  }
+  // 妥当性チェック (未来日付・100 歳超は弾く)
+  const birthDate = new Date(input.birthday);
+  const today = new Date();
+  const hundredYearsAgo = new Date(
+    today.getFullYear() - 100,
+    today.getMonth(),
+    today.getDate()
+  );
+  if (
+    Number.isNaN(birthDate.getTime()) ||
+    birthDate > today ||
+    birthDate < hundredYearsAgo
+  ) {
+    return { ok: false, message: "生年月日を確認してください" };
+  }
   if (input.environments.length === 0) {
     return { ok: false, message: "使える環境を 1 つ以上選んでください" };
   }
@@ -83,6 +104,24 @@ export async function createMyCarte(
   }
   if (input.focus_body_parts.length === 0) {
     return { ok: false, message: "鍛えたい部位を 1 つ以上選んでください" };
+  }
+
+  // 1 フォーム・ 2 保存先: 先に birthday を user_profiles に upsert する。
+  // - 行が無ければ作る (acceptInvitation 未経由の既存ユーザー対策)
+  // - 既に行があれば birthday カラムだけ更新
+  // - RLS "user_profiles: self upsert" / "self update" により自分の行は操作可
+  const { error: profileError } = await supabase
+    .from("user_profiles")
+    .upsert(
+      { user_id: user.id, birthday: input.birthday },
+      { onConflict: "user_id" }
+    );
+
+  if (profileError) {
+    return {
+      ok: false,
+      message: `生年月日の保存に失敗しました: ${profileError.message}`,
+    };
   }
 
   const { error } = await supabase.from("user_workout_carte").insert({

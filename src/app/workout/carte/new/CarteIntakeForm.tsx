@@ -85,9 +85,11 @@ const CARTE_SECTIONS: Record<
   SectionKey,
   { label: string; count: number; order: number }
 > = {
-  you: { label: "あなたについて", count: 4, order: 1 },
+  you: { label: "あなたについて", count: 5, order: 1 },
   ref: { label: "のりfitness への参考情報", count: 4, order: 2 },
 };
+
+const TOTAL_QUESTIONS = 9;
 
 type CarteQuestion = {
   key: keyof DraftState;
@@ -100,15 +102,17 @@ type CarteQuestion = {
   multi: boolean;
 };
 
+// 注: 生年月日 (Q1) は date 入力なので CARTE_QUESTIONS には含めず、
+//     BirthdayCard で独立に描画する。 num は 1 を予約し、 既存 8 項目は 2..9 に振る。
 const CARTE_QUESTIONS: readonly CarteQuestion[] = [
-  { key: "gender", num: 1, section: "you", label: "性別", required: true, options: GENDER_OPTIONS, multi: false },
-  { key: "environments", num: 2, section: "you", label: "使える環境", required: true, helper: "複数選んでください", options: ENV_OPTIONS, multi: true },
-  { key: "frequency_wish", num: 3, section: "you", label: "理想の頻度", required: true, options: FREQUENCY_OPTIONS, multi: false },
-  { key: "focus_body_parts", num: 4, section: "you", label: "鍛えたい部位", required: true, helper: "複数選んでください", options: BODY_PART_OPTIONS, multi: true },
-  { key: "purposes", num: 5, section: "ref", label: "目的", required: false, helper: "複数選んでも OK", options: PURPOSE_OPTIONS, multi: true },
-  { key: "experience", num: 6, section: "ref", label: "今までの運動経験", required: false, options: EXPERIENCE_OPTIONS, multi: false },
-  { key: "medical_limits", num: 7, section: "ref", label: "気になる体の不調", required: false, helper: "ない場合は何も選ばずに OK", options: MEDICAL_OPTIONS, multi: true },
-  { key: "ideal_body", num: 8, section: "ref", label: "目指す身体像", required: false, options: IDEAL_BODY_OPTIONS, multi: false },
+  { key: "gender", num: 2, section: "you", label: "性別", required: true, options: GENDER_OPTIONS, multi: false },
+  { key: "environments", num: 3, section: "you", label: "使える環境", required: true, helper: "複数選んでください", options: ENV_OPTIONS, multi: true },
+  { key: "frequency_wish", num: 4, section: "you", label: "理想の頻度", required: true, options: FREQUENCY_OPTIONS, multi: false },
+  { key: "focus_body_parts", num: 5, section: "you", label: "鍛えたい部位", required: true, helper: "複数選んでください", options: BODY_PART_OPTIONS, multi: true },
+  { key: "purposes", num: 6, section: "ref", label: "目的", required: false, helper: "複数選んでも OK", options: PURPOSE_OPTIONS, multi: true },
+  { key: "experience", num: 7, section: "ref", label: "今までの運動経験", required: false, options: EXPERIENCE_OPTIONS, multi: false },
+  { key: "medical_limits", num: 8, section: "ref", label: "気になる体の不調", required: false, helper: "ない場合は何も選ばずに OK", options: MEDICAL_OPTIONS, multi: true },
+  { key: "ideal_body", num: 9, section: "ref", label: "目指す身体像", required: false, options: IDEAL_BODY_OPTIONS, multi: false },
 ];
 
 // =====================================================================
@@ -116,6 +120,7 @@ const CARTE_QUESTIONS: readonly CarteQuestion[] = [
 // =====================================================================
 
 type DraftState = {
+  birthday: string | null; // YYYY-MM-DD (Q1, 必須)
   gender: Gender;
   environments: Environment[];
   frequency_wish: Frequency | null;
@@ -127,6 +132,7 @@ type DraftState = {
 };
 
 const INITIAL_DRAFT: DraftState = {
+  birthday: null,
   gender: "男",
   environments: [],
   frequency_wish: null,
@@ -136,6 +142,15 @@ const INITIAL_DRAFT: DraftState = {
   medical_limits: [],
   ideal_body: null,
 };
+
+// 生年月日入力の許容範囲 (未来日付・100 歳超 を弾く)
+function getBirthdayRange() {
+  const today = new Date();
+  const todayStr = today.toISOString().slice(0, 10);
+  const minYear = today.getFullYear() - 100;
+  const minStr = `${minYear}-01-01`;
+  return { todayStr, minStr };
+}
 
 // =====================================================================
 // コンポーネント
@@ -161,6 +176,7 @@ export function CarteIntakeForm() {
       if (saved) {
         const parsed = JSON.parse(saved) as DraftState & { _savedAt?: string };
         setDraft({
+          birthday: parsed.birthday ?? null,
           gender: parsed.gender ?? "男",
           environments: parsed.environments ?? [],
           frequency_wish: parsed.frequency_wish ?? null,
@@ -215,6 +231,7 @@ export function CarteIntakeForm() {
     setError(null);
     setSavedMessage(null);
     const missing = new Set<string>();
+    if (!draft.birthday) missing.add("birthday");
     if (draft.environments.length === 0) missing.add("environments");
     if (!draft.frequency_wish) missing.add("frequency_wish");
     if (draft.focus_body_parts.length === 0) missing.add("focus_body_parts");
@@ -248,7 +265,8 @@ export function CarteIntakeForm() {
 
   // 進捗 (性別は常にデフォルト値あり = 記入済扱い)
   const filledCount =
-    1 +
+    (draft.birthday ? 1 : 0) +
+    1 + // gender
     (draft.environments.length > 0 ? 1 : 0) +
     (draft.frequency_wish ? 1 : 0) +
     (draft.focus_body_parts.length > 0 ? 1 : 0) +
@@ -320,13 +338,13 @@ export function CarteIntakeForm() {
               <div className="flex justify-between text-[11px] text-zinc-500 mb-1.5">
                 <span>記入状況</span>
                 <span className="font-bold text-zinc-900 font-mono">
-                  {filledCount} / 8 項目
+                  {filledCount} / {TOTAL_QUESTIONS} 項目
                 </span>
               </div>
               <div className="h-1.5 bg-white border border-[#e8ebe9] rounded-full overflow-hidden">
                 <div
                   className="h-full bg-[#00897b] transition-all"
-                  style={{ width: `${(filledCount / 8) * 100}%` }}
+                  style={{ width: `${(filledCount / TOTAL_QUESTIONS) * 100}%` }}
                 />
               </div>
             </div>
@@ -358,6 +376,13 @@ export function CarteIntakeForm() {
                   return (
                     <div key={secKey}>
                       <CategoryBand label={sec.label} count={sec.count} />
+                      {secKey === "you" && (
+                        <BirthdayCard
+                          value={draft.birthday}
+                          onChange={(v) => update("birthday", v)}
+                          missing={missingKeys.has("birthday")}
+                        />
+                      )}
                       {questions.map((q) => (
                         <ItemCard
                           key={q.key}
@@ -474,6 +499,7 @@ function PreviewView({
             return (
               <div key={secKey}>
                 <CategoryBand label={sec.label} count={sec.count} />
+                {secKey === "you" && <BirthdayPreviewItem value={draft.birthday} />}
                 {questions.map((q) => (
                   <PreviewItem key={q.key} question={q} draft={draft} />
                 ))}
@@ -600,6 +626,68 @@ function ItemCard({
             </button>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+// 生年月日カード (Q1 専用、 date 入力)
+function BirthdayCard({
+  value,
+  onChange,
+  missing,
+}: {
+  value: string | null;
+  onChange: (v: string | null) => void;
+  missing: boolean;
+}) {
+  const { todayStr, minStr } = getBirthdayRange();
+  return (
+    <div
+      className={`p-4 border-b border-[#e8ebe9] ${missing ? "bg-red-50" : ""}`}
+    >
+      <div className="text-[11px] text-zinc-500 font-bold font-mono mb-1">
+        Q1 / {TOTAL_QUESTIONS}
+      </div>
+      <div className="text-[13px] font-bold text-zinc-900 leading-snug mb-2.5 flex justify-between items-start gap-2">
+        <span>
+          生年月日
+          <span className="ml-2 text-[10px] text-zinc-500 font-normal">
+            年齢層からメニュー最適化に使います
+          </span>
+        </span>
+        <span className="text-red-500 text-[11px] flex-shrink-0">★</span>
+      </div>
+      <input
+        type="date"
+        value={value ?? ""}
+        max={todayStr}
+        min={minStr}
+        onChange={(e) => onChange(e.target.value || null)}
+        className="w-full rounded-md border border-[#e8ebe9] bg-white text-zinc-900 px-3 py-2 text-sm font-bold focus:border-[#00897b] focus:outline-none"
+      />
+    </div>
+  );
+}
+
+function BirthdayPreviewItem({ value }: { value: string | null }) {
+  const display = value
+    ? new Date(value).toLocaleDateString("ja-JP", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "(未記入)";
+  return (
+    <div className="p-4 border-b border-[#e8ebe9]">
+      <div className="text-[11px] text-zinc-500 font-bold font-mono mb-1">
+        Q1 / {TOTAL_QUESTIONS}
+      </div>
+      <div className="text-[13px] font-bold text-zinc-900 leading-snug mb-2.5">
+        生年月日
+      </div>
+      <div className="text-[13px] text-zinc-900 leading-relaxed bg-[#f8f9fa] rounded-md px-3 py-2">
+        {display}
       </div>
     </div>
   );

@@ -82,6 +82,20 @@ export async function acceptInvitation(
     };
   }
 
+  // ───── 4.5. user_profiles 空行を生成 ─────
+  // 設計上 user_profiles は「カルテ提出時に birthday を upsert」「将来のプロフィール編集で
+  // その他カラムを update」する受け皿。 行が無いと UPDATE 経路が成立しないため、 入会時点で
+  // 空行 (birthday は NULL) を作っておく。 acceptInvitation 経由しない既存ユーザー向けには
+  // カルテ提出 server action 側でも安全側に upsert する。
+  const { error: profileError } = await admin
+    .from("user_profiles")
+    .upsert({ user_id: newUserId }, { onConflict: "user_id" });
+
+  if (profileError) {
+    // 致命的ではない (カルテ提出時の upsert で復旧する)。 ログのみ。
+    console.error("user_profiles 初期化失敗(致命的ではない):", profileError);
+  }
+
   // ───── 5. invitations を accepted に更新 ─────
   const { error: updateError } = await admin
     .from("invitations")
