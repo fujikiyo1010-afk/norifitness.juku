@@ -1,6 +1,10 @@
 import { requireAdmin } from "@/lib/auth/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { InviteSendForm } from "./InviteSendForm";
+import {
+  PendingRequestsList,
+  type PendingSignupRequest,
+} from "./PendingRequestsList";
 
 export const dynamic = "force-dynamic";
 
@@ -26,13 +30,23 @@ export default async function AdminInvitationsPage() {
   await requireAdmin();
 
   const supabase = createAdminClient();
-  const { data: invitations } = await supabase
-    .from("invitations")
-    .select("id, email, name, expires_at, accepted_at, user_id, created_at")
-    .order("created_at", { ascending: false })
-    .limit(100);
+  const [{ data: invitations }, { data: pendingRequests }] = await Promise.all([
+    supabase
+      .from("invitations")
+      .select("id, email, name, expires_at, accepted_at, user_id, created_at")
+      .order("created_at", { ascending: false })
+      .limit(100),
+    // 申請中リスト = 受講生 (/request) からの未処理申請、 古い順 (FIFO)
+    supabase
+      .from("signup_requests")
+      .select("id, name, email, created_at")
+      .eq("status", "pending")
+      .order("created_at", { ascending: true })
+      .limit(100),
+  ]);
 
   const list = (invitations ?? []) as InvitationRow[];
+  const pendings = (pendingRequests ?? []) as PendingSignupRequest[];
 
   const counts = list.reduce(
     (acc, inv) => {
@@ -56,7 +70,24 @@ export default async function AdminInvitationsPage() {
         </p>
       </header>
 
-      {/* 新規招待ブロック */}
+      {/* 申請中リスト (受講生 /request からの申請、 古い順) */}
+      <section className="mb-7">
+        <div className="flex items-center gap-3 mb-3">
+          <h2 className="text-sm font-bold text-zinc-900 flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+            受講生からの申請
+          </h2>
+          <span className="text-[11px] text-zinc-500 font-mono">
+            {pendings.length} 件
+          </span>
+          <span className="text-[11px] text-zinc-500">
+            (/request からの新規申請 ・ 古い順)
+          </span>
+        </div>
+        <PendingRequestsList requests={pendings} />
+      </section>
+
+      {/* 新規招待ブロック (管理者が直接発行) */}
       <section className="bg-gradient-to-br from-white to-[#e0f2f1]/30 border border-[#b2dfdb] rounded-[12px] p-5 mb-7">
         <h2 className="text-sm font-bold text-zinc-900 mb-3 flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-[#00897b]" />
