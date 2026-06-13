@@ -111,6 +111,17 @@ export async function acceptInvitation(
     };
   }
 
-  // ───── 7. リダイレクト ─────
-  redirect("/");
+  // ───── 7. オンボ判定リダイレクト ─────
+  // 新規登録なので通常 shipments 行は無い = /onboarding へ
+  // (念のため判定: 既に shipments 行があれば / へ)
+  const { data: existingShipment } = await admin
+    .from("shipments")
+    .select("id")
+    .eq("user_id", newUserId)
+    .maybeSingle();
+
+  if (existingShipment) {
+    redirect("/");
+  }
+  redirect("/onboarding");
 }

@@ -15,6 +15,18 @@ export default async function OnboardingPage() {
     redirect("/login");
   }
 
+  // 既にオンボ済 (= shipments 行あり) なら / へ
+  // 2 回目以降のうっかりアクセスでオンボをやり直さないため
+  const { data: existingShipment } = await supabase
+    .from("shipments")
+    .select("id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (existingShipment) {
+    redirect("/");
+  }
+
   // ニックネーム廃止 = users.name (or auth metadata の name) を受取人氏名のデフォルトに使う
   const { data: profile } = await supabase
     .from("users")
