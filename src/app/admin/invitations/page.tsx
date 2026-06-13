@@ -93,13 +93,6 @@ export default async function AdminInvitationsPage() {
           <span className="w-2.5 h-2.5 rounded-full bg-[#00897b]" />
           新規招待
         </h2>
-        <div className="rounded-md bg-amber-50 border border-amber-200 px-3 py-2 mb-3 text-[11px] text-amber-800 leading-relaxed">
-          <b>MVP 制限:</b> Resend ドメイン未認証のため、 現在は
-          <code className="mx-1 px-1.5 py-0.5 bg-amber-100 rounded font-mono">
-            fujikiyo1010@gmail.com
-          </code>
-          にのみ送信可。 ドメイン認証後に解禁。
-        </div>
         <InviteSendForm />
       </section>
 
