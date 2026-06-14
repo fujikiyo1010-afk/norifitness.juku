@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "seed:e2e": "node e2e/setup/seed_e2e_student.js",
+    "reset:e2e": "node e2e/setup/reset_e2e_student.js"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.3",
@@ -17,6 +21,7 @@
     "resend": "^6.12.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
