@@ -143,13 +143,15 @@ const INITIAL_DRAFT: DraftState = {
   ideal_body: null,
 };
 
-// 生年月日入力の許容範囲 (未来日付・100 歳超 を弾く)
-function getBirthdayRange() {
-  const today = new Date();
-  const todayStr = today.toISOString().slice(0, 10);
-  const minYear = today.getFullYear() - 100;
-  const minStr = `${minYear}-01-01`;
-  return { todayStr, minStr };
+// 生年月日 (年/月/日 3 列 select) の選択肢生成
+// 端末差で <input type="date"> の picker UI が振れる (カレンダー型/ホイール型)
+// 問題を避けるため、 全プラットフォームで一貫して 3 列 select を採用する。
+function getBirthdayOptions() {
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 101 }, (_, i) => currentYear - i); // 今年〜100 年前
+  const months = Array.from({ length: 12 }, (_, i) => i + 1);
+  const days = Array.from({ length: 31 }, (_, i) => i + 1);
+  return { years, months, days };
 }
 
 // =====================================================================
@@ -631,7 +633,7 @@ function ItemCard({
   );
 }
 
-// 生年月日カード (Q1 専用、 date 入力)
+// 生年月日カード (Q1 専用、 年/月/日 3 列 select)
 function BirthdayCard({
   value,
   onChange,
@@ -641,7 +643,27 @@ function BirthdayCard({
   onChange: (v: string | null) => void;
   missing: boolean;
 }) {
-  const { todayStr, minStr } = getBirthdayRange();
+  const parts = value?.split("-") ?? [];
+  const year = parts[0] ?? "";
+  const month = parts[1] ?? "";
+  const day = parts[2] ?? "";
+
+  const { years, months, days } = getBirthdayOptions();
+
+  function setPart(part: "y" | "m" | "d", val: string) {
+    const newY = part === "y" ? val : year;
+    const newM = part === "m" ? val : month;
+    const newD = part === "d" ? val : day;
+    if (newY && newM && newD) {
+      onChange(`${newY}-${newM}-${newD}`);
+    } else {
+      onChange(null);
+    }
+  }
+
+  const selectClass =
+    "flex-1 rounded-md border border-[#e8ebe9] bg-white text-zinc-900 px-2 py-2 text-sm font-bold focus:border-[#00897b] focus:outline-none";
+
   return (
     <div
       className={`p-4 border-b border-[#e8ebe9] ${missing ? "bg-red-50" : ""}`}
@@ -658,14 +680,47 @@ function BirthdayCard({
         </span>
         <span className="text-red-500 text-[11px] flex-shrink-0">★</span>
       </div>
-      <input
-        type="date"
-        value={value ?? ""}
-        max={todayStr}
-        min={minStr}
-        onChange={(e) => onChange(e.target.value || null)}
-        className="w-full rounded-md border border-[#e8ebe9] bg-white text-zinc-900 px-3 py-2 text-sm font-bold focus:border-[#00897b] focus:outline-none"
-      />
+      <div className="flex gap-2">
+        <select
+          value={year}
+          onChange={(e) => setPart("y", e.target.value)}
+          className={selectClass}
+          aria-label="生年"
+        >
+          <option value="">年</option>
+          {years.map((y) => (
+            <option key={y} value={String(y)}>
+              {y} 年
+            </option>
+          ))}
+        </select>
+        <select
+          value={month}
+          onChange={(e) => setPart("m", e.target.value)}
+          className={selectClass}
+          aria-label="生月"
+        >
+          <option value="">月</option>
+          {months.map((m) => (
+            <option key={m} value={String(m).padStart(2, "0")}>
+              {m} 月
+            </option>
+          ))}
+        </select>
+        <select
+          value={day}
+          onChange={(e) => setPart("d", e.target.value)}
+          className={selectClass}
+          aria-label="生日"
+        >
+          <option value="">日</option>
+          {days.map((d) => (
+            <option key={d} value={String(d).padStart(2, "0")}>
+              {d} 日
+            </option>
+          ))}
+        </select>
+      </div>
     </div>
   );
 }
