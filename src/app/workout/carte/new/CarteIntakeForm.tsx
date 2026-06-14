@@ -643,10 +643,14 @@ function BirthdayCard({
   onChange: (v: string | null) => void;
   missing: boolean;
 }) {
-  const parts = value?.split("-") ?? [];
-  const year = parts[0] ?? "";
-  const month = parts[1] ?? "";
-  const day = parts[2] ?? "";
+  // 内部 state で年/月/日を独立に保持。
+  // 親 state (draft.birthday) は YYYY-MM-DD 1 文字列しか持てないので、
+  // 「年だけ選んだ」 等の中間状態が表現できない。 ここで独立保持し、
+  // 3 つ揃った時だけ親に YYYY-MM-DD を渡す。
+  const initialParts = value?.split("-") ?? [];
+  const [year, setYear] = useState(initialParts[0] ?? "");
+  const [month, setMonth] = useState(initialParts[1] ?? "");
+  const [day, setDay] = useState(initialParts[2] ?? "");
 
   const { years, months, days } = getBirthdayOptions();
 
@@ -654,6 +658,9 @@ function BirthdayCard({
     const newY = part === "y" ? val : year;
     const newM = part === "m" ? val : month;
     const newD = part === "d" ? val : day;
+    if (part === "y") setYear(val);
+    if (part === "m") setMonth(val);
+    if (part === "d") setDay(val);
     if (newY && newM && newD) {
       onChange(`${newY}-${newM}-${newD}`);
     } else {
