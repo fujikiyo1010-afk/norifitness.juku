@@ -163,4 +163,31 @@ npm run lint     # ESLint 実行
 
 ---
 
+## 🔧 開発用スクリプト (scripts/)
+
+### `seed_admin.js` — 管理者を admin_users に UPSERT (auth リセット時の保険)
+
+`admin_users.id` は `auth.users(id)` を `on delete cascade` で参照しているため、
+テスト中に Supabase Auth からユーザーを削除すると `admin_users` 行も道連れで消える。
+そのまま放置すると `/admin/*` に誰も入れなくなる事故が起きるため、 復旧手段を script 化。
+
+```bash
+# 基本: きよむを superadmin で登録
+node scripts/seed_admin.js fujikiyo1010@gmail.com きよむ superadmin
+
+# 引数省略時 (name="管理者", role="superadmin")
+node scripts/seed_admin.js fujikiyo1010@gmail.com
+
+# 補助管理者を admin ロールで追加
+node scripts/seed_admin.js secondary@example.com 補助管理者 admin
+```
+
+- UPSERT 方式 (onConflict: "id") = 何度実行しても安全
+- 対象 email が `auth.users` に無ければエラー終了 (= 先に Auth でアカウント作る必要あり)
+- DELETE しないので、 `admin_users.id` を FK 参照している他テーブル (`goal_sheets.reviewed_by` 等) と衝突しない
+
+関連: [`DO_NOT_DO.md`](./DO_NOT_DO.md) `R-1` (素アドレスの auth 削除禁止)
+
+---
+
 詳細な進行ルール・抽出項目・リスク対策は [`CLAUDE.md`](./CLAUDE.md) を参照。
