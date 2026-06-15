@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { saveMyGoalSheet } from "@/lib/goal-sheet/actions";
@@ -56,8 +56,13 @@ export function GoalSheetEditor({
   // ===== マウント時: ドラフト復元 + ツール反映の取り込み =====
   // - 編集中の draft (sessionStorage) があれば優先 (リロード/タブ往復で消えない)
   // - ツール画面から戻ってきた場合は reflect キーを上書き適用
+  // - React StrictMode (dev) の useEffect 二重実行で reflect 反映が undefined に
+  //   上書きされる事故を防ぐため、 useRef で 1 回だけ走らせる (B2 修正)
+  const initializedRef = useRef(false);
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (initializedRef.current) return;
+    initializedRef.current = true;
 
     let next: GoalSheetContent = initialContent;
     let reflectMessage: string | null = null;
@@ -134,7 +139,8 @@ export function GoalSheetEditor({
     setHydrated(true);
     if (reflectMessage) {
       setSavedMessage(reflectMessage);
-      setTimeout(() => setSavedMessage(null), 4000);
+      // B2-2: 2 秒で消える (= きよむさん指定の体感に合わせる)
+      setTimeout(() => setSavedMessage(null), 2000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -569,7 +575,11 @@ export function GoalSheetEditor({
         </div>
       )}
       {savedMessage && (
-        <div className="mx-4 mb-2 px-3 py-2 bg-green-50 border border-green-200 rounded-md text-xs text-green-800">
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 bg-[#00897b] text-white rounded-lg shadow-lg text-xs font-bold whitespace-nowrap"
+        >
           ✓ {savedMessage}
         </div>
       )}
