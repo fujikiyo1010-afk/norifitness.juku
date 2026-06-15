@@ -6,6 +6,8 @@ import Link from "next/link";
 import { saveMyGoalSheet } from "@/lib/goal-sheet/actions";
 import { readDraft, writeDraft, clearDraft } from "@/lib/goal-sheet/draft-storage";
 import { normalizeNumberInput } from "@/lib/utils/normalize-number";
+import { calculateBodyFat } from "@/lib/tools/calculations";
+import type { Gender as ToolGender } from "@/lib/tools/types";
 import {
   SECTION_META,
   SELF_IMAGE_ITEMS,
@@ -35,8 +37,11 @@ import {
  */
 export function GoalSheetEditor({
   initialContent,
+  gender,
 }: {
   initialContent: GoalSheetContent;
+  /** 体脂肪率自動計算用 (= カルテ未提出時は null = 計算スキップ) */
+  gender: ToolGender | null;
 }) {
   const router = useRouter();
   const [content, setContent] = useState<GoalSheetContent>(initialContent);
@@ -140,6 +145,59 @@ export function GoalSheetEditor({
     if (!hydrated) return;
     writeDraft(content);
   }, [content, hydrated]);
+
+  // ===== 体脂肪率 自動計算 (B1: アメリカ海軍式) =====
+  // 必要 4 項目 (体重 / 身長 / ウエスト / 首回り) + gender が全部揃った時、
+  // calculateBodyFat を呼んで current_status.body_fat_pct に書き込む。
+  // - gender が null (= カルテ未提出) なら計算スキップ
+  // - 既存値と一致するなら setContent しない (= 無限ループ防止)
+  // - 計算エラー時は silent skip (= 入力途中の異常値は無視)
+  // - gender = "other" は formula = "male" (男性式) をデフォルトで使う
+  //   (= 別 UI で選ばせるとスコープ膨らむため、 受講生は自己申告で値直す前提)
+  // - readOnly は維持 = 自動計算のみ反映、 手入力は元から不可
+  useEffect(() => {
+    if (!hydrated) return;
+    if (!gender) return;
+    const cs = content.current_status;
+    if (!cs) return;
+    const weight_kg = cs.weight_kg;
+    const height_cm = cs.height_cm;
+    const waist_cm = cs.waist_cm;
+    const neck_cm = cs.neck_cm;
+    if (
+      typeof height_cm !== "number" ||
+      typeof waist_cm !== "number" ||
+      typeof neck_cm !== "number"
+    ) {
+      return;
+    }
+    try {
+      const { body_fat_pct } = calculateBodyFat({
+        gender,
+        formula: gender === "other" ? "male" : undefined,
+        height_cm,
+        waist_cm,
+        neck_cm,
+        weight_kg,
+      });
+      if (cs.body_fat_pct === body_fat_pct) return;
+      setContent((prev) => ({
+        ...prev,
+        current_status: { ...(prev.current_status ?? {}), body_fat_pct },
+      }));
+    } catch {
+      // 入力値が範囲外等 → silent skip
+    }
+  }, [
+    hydrated,
+    gender,
+    content.current_status?.weight_kg,
+    content.current_status?.height_cm,
+    content.current_status?.waist_cm,
+    content.current_status?.neck_cm,
+    content.current_status?.body_fat_pct,
+    content.current_status,
+  ]);
 
   // ===== 各セクションの更新関数 =====
   const updateCurrentStatus = (patch: Partial<CurrentStatus>) => {
