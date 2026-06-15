@@ -30,6 +30,7 @@ import {
   classifyBMI,
   calcWeightProgress,
 } from "@/lib/monthly-audit/series";
+import { getLatestBodyMetricSummary } from "@/lib/body-metrics/queries";
 import {
   getGoalSheetForUser,
   listGoalSheetRevisionsForUser,
@@ -93,7 +94,7 @@ export default async function AdminUserHubPage({
   const age = birthday ? calcAge(birthday) : null;
   const ageBand = birthday ? calcAgeBand(birthday) : null;
 
-  // 7 リソースを並列取得
+  // 8 リソースを並列取得 (body_metrics 追加 = 「現在の最新値」 を日々記録から補完)
   const [
     carte,
     currentMenu,
@@ -102,6 +103,7 @@ export default async function AdminUserHubPage({
     goalSheet,
     revisions,
     pendingCounts,
+    latestBodyMetric,
   ] = await Promise.all([
     getCarteForAdmin(userId),
     getCurrentMenuForAdmin(userId),
@@ -110,15 +112,28 @@ export default async function AdminUserHubPage({
     getGoalSheetForUser(userId),
     listGoalSheetRevisionsForUser(userId, 2), // 前回値比較用 (最新1件 = 1 つ前の編集)
     countPendingRequestsForUser(userId),
+    getLatestBodyMetricSummary(userId), // body_metrics (日々記録) の最新値
   ]);
 
-  // 体組成推移データ
+  // 体組成推移データ (sparkline + 前月比較は monthly_audits 由来のまま)
   const weightSeries = extractWeightSeries(recentAudits);
   const waistSeries = extractWaistSeries(recentAudits);
-  const { latest: latestWeight, previous: prevWeight } =
-    getLatestAndPrevious(weightSeries);
-  const { latest: latestWaist, previous: prevWaist } =
-    getLatestAndPrevious(waistSeries);
+  const {
+    latest: latestWeightFromAudit,
+    previous: prevWeight,
+  } = getLatestAndPrevious(weightSeries);
+  const {
+    latest: latestWaistFromAudit,
+    previous: prevWaist,
+  } = getLatestAndPrevious(waistSeries);
+
+  // 「現在の最新値」 は body_metrics (日々記録) を優先、 なければ monthly_audits 最新で fallback。
+  // 設計思想: のり氏はリアルタイムで見えるが日々の変更で通知されない (= プル/プッシュ分離、
+  // 2026-06-15 きよむさん確定)。 推移グラフ自体は月次のまま。
+  const latestWeight =
+    latestBodyMetric.latest?.weight_kg ?? latestWeightFromAudit;
+  const latestWaist =
+    latestBodyMetric.latest?.waist_cm ?? latestWaistFromAudit;
 
   // 体脂肪率 (現在値 = 目標シートの current_status、前回値 = revisions 最新スナップショット)
   const currentBodyFat = goalSheet?.content.current_status?.body_fat_pct ?? null;
