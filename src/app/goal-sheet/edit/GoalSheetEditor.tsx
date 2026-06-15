@@ -49,6 +49,30 @@ export function GoalSheetEditor({
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
+  // savedMessage のフェード制御 (B2-2 きよむさん指定の「ふわっと」)
+  const [savedMessageVisible, setSavedMessageVisible] = useState(false);
+  const toastTimersRef = useRef<{ fadeOut: number | null; unmount: number | null }>({
+    fadeOut: null,
+    unmount: null,
+  });
+  const showToast = (message: string) => {
+    if (toastTimersRef.current.fadeOut !== null)
+      window.clearTimeout(toastTimersRef.current.fadeOut);
+    if (toastTimersRef.current.unmount !== null)
+      window.clearTimeout(toastTimersRef.current.unmount);
+    setSavedMessage(message);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => setSavedMessageVisible(true));
+    });
+    toastTimersRef.current.fadeOut = window.setTimeout(
+      () => setSavedMessageVisible(false),
+      3000
+    );
+    toastTimersRef.current.unmount = window.setTimeout(
+      () => setSavedMessage(null),
+      3300
+    );
+  };
 
   const filledCount = countFilledSections(content);
   const audits = content.audits;
@@ -138,9 +162,7 @@ export function GoalSheetEditor({
     setContent(next);
     setHydrated(true);
     if (reflectMessage) {
-      setSavedMessage(reflectMessage);
-      // B2-2: 2 秒で消える (= きよむさん指定の体感に合わせる)
-      setTimeout(() => setSavedMessage(null), 2000);
+      showToast(reflectMessage);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -265,10 +287,14 @@ export function GoalSheetEditor({
         return;
       }
       if (asDraft) {
-        setSavedMessage("下書きを保存しました");
+        showToast("下書きを保存しました");
       } else {
         // 本保存後はドラフト破棄 → 閲覧モードへ遷移
         clearDraft();
+        // E: 閲覧モードでトースト表示するためフラグを書く (= SavedToast が読んで removeItem)
+        try {
+          sessionStorage.setItem("goal-sheet-just-saved", "1");
+        } catch {}
         router.push("/goal-sheet");
         router.refresh();
       }
@@ -578,9 +604,12 @@ export function GoalSheetEditor({
         <div
           role="status"
           aria-live="polite"
-          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 bg-[#00897b] text-white rounded-lg shadow-lg text-xs font-bold whitespace-nowrap"
+          className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 bg-zinc-900 text-white rounded-lg shadow-lg text-xs font-bold whitespace-nowrap transition-opacity duration-300 ${
+            savedMessageVisible ? "opacity-100" : "opacity-0"
+          }`}
         >
-          ✓ {savedMessage}
+          <span className="text-[#7ad6c8] mr-1">✓</span>
+          {savedMessage}
         </div>
       )}
 

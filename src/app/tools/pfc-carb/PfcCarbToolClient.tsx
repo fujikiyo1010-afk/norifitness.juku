@@ -81,14 +81,25 @@ export function PfcCarbToolClient({
 
   // 目標シート編集中のドラフトから体重・目標カロリーをプリセット
   // (?return=goal-sheet で来た時のみ)
+  // B/C/D 修正: 「必要カロリー計算ツール」 の maintenance_kcal を最優先で
+  // 反映する (= 同じ目標シート内の前段ツール結果を そのまま使う動線に統一)。
+  // maintenance_kcal が未設定なら 入力欄下に赤い警告を出す (= hasMaintenanceKcal=false)。
+  const [hasMaintenanceKcal, setHasMaintenanceKcal] = useState(false);
   useEffect(() => {
     if (!isFromGoalSheet) return;
     const draft = readDraft();
     if (!draft) return;
     const w = draft.current_status?.weight_kg;
     if (typeof w === "number") setWeight(w.toString());
+    const mk = draft.current_status?.maintenance_kcal;
     const cal = draft.nutrition?.target_calorie;
-    if (typeof cal === "number") setCalorie(cal.toString());
+    if (typeof mk === "number") {
+      setCalorie(mk.toString());
+      setHasMaintenanceKcal(true);
+    } else if (typeof cal === "number") {
+      setCalorie(cal.toString());
+      // hasMaintenanceKcal = false のまま → 警告は出る (= 順序強制)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -260,25 +271,28 @@ export function PfcCarbToolClient({
             hasError={missingFields.has("calorie")}
           />
 
-          {/* 摂取カロリーの目安 (誘導リンク + ツール 2 の前回値) */}
-          <div className="-mt-2.5 mb-3.5">
-            <p className="text-[10px] text-zinc-600 leading-relaxed">
-              目安が分からない時は{" "}
-              <Link
-                href="/tools/calorie"
-                className="text-[#3949ab] underline underline-offset-2 hover:text-[#283593]"
-              >
-                必要カロリー計算
-              </Link>{" "}
-              で計算 →
-            </p>
-            {calorieHint && (
-              <p className="mt-1 text-[10px] text-zinc-400 font-mono leading-relaxed">
+          {/* C/D 修正: ?return=goal-sheet で来てるのに maintenance_kcal 未設定なら赤警告。
+              旧「目安が分からない時は /tools/calorie で計算 →」 リンクは削除
+              (= 飛んで戻る動線がややこしいため、 順序強制 = 警告で誘導)。
+              単独モード (= ?return=goal-sheet なし) では従来通り calorieHint で前回値表示。 */}
+          {isFromGoalSheet && !hasMaintenanceKcal && (
+            <div className="-mt-2.5 mb-3.5 px-3 py-2 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-[11px] text-red-700 font-bold leading-relaxed">
+                ⚠️ セクション 1 の「必要カロリー計算ツール」 が未入力です
+              </p>
+              <p className="mt-0.5 text-[10px] text-red-600 leading-relaxed">
+                目標シートに戻って 先に必要カロリー計算ツールを実行してください。
+              </p>
+            </div>
+          )}
+          {!isFromGoalSheet && calorieHint && (
+            <div className="-mt-2.5 mb-3.5">
+              <p className="text-[10px] text-zinc-400 font-mono leading-relaxed">
                 前回計算: メンテ {calorieHint.maintenance.toLocaleString()}{" "}
                 kcal / ダイエット時 {calorieHint.diet.toLocaleString()} kcal
               </p>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* 脂質比率 3 択 */}
           <div>

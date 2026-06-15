@@ -11,6 +11,7 @@ import {
   type SelfImageItem,
   type AuditComment,
 } from "@/lib/goal-sheet/types";
+import { SavedToast } from "./SavedToast";
 
 export const dynamic = "force-dynamic";
 
@@ -89,6 +90,7 @@ export default async function GoalSheetPage() {
 
   return (
     <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#e8ebec]">
+      <SavedToast />
       <div className="mx-auto w-full max-w-[980px] space-y-4">
         {/* パンくず */}
         <nav className="text-xs text-zinc-500 px-1">
