@@ -519,7 +519,7 @@ export function GoalSheetEditor({
           <div className="text-[10px] text-zinc-400 mb-3 leading-relaxed">
             スコア: 0 = まったく / 5 = ときどき / 10 = いつもできている。
             <br />
-            改善前は「今のリアルな実感」 で。 高くつけすぎると改善余地が見えなくなります。
+            改善前 = 今のリアルな実感で (高くつけすぎ注意)、 改善後 = 想像で OK (後で修正できます)。
           </div>
           <div className="grid grid-cols-2 gap-2 mb-3">
             <div className="text-[10px] font-bold text-center py-1 px-2 rounded bg-white text-zinc-500 border border-[#e8ebe9]">
