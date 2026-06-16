@@ -156,7 +156,8 @@ export async function saveGoalSheetAuditByAdmin(
 }
 
 export async function saveMyGoalSheet(
-  inputContent: GoalSheetContent
+  inputContent: GoalSheetContent,
+  options: { notify?: boolean } = {}
 ): Promise<SaveGoalSheetResult> {
   const supabase = await createClient();
   const {
@@ -193,16 +194,22 @@ export async function saveMyGoalSheet(
     filled_sections: calcFilledSections(inputContent),
   };
 
-  // upsert
+  // upsert (notify=true なら last_review_requested_at = now() で
+  // 「送信して [再]添削を依頼」 を記録、 管理者アラート集計時に urgent タグ)
+  const upsertPayload: {
+    user_id: string;
+    content: GoalSheetContent;
+    last_review_requested_at?: string;
+  } = {
+    user_id: user.id,
+    content: contentToSave,
+  };
+  if (options.notify) {
+    upsertPayload.last_review_requested_at = new Date().toISOString();
+  }
   const { data, error } = await supabase
     .from("goal_sheets")
-    .upsert(
-      {
-        user_id: user.id,
-        content: contentToSave,
-      },
-      { onConflict: "user_id" }
-    )
+    .upsert(upsertPayload, { onConflict: "user_id" })
     .select("updated_at")
     .single();
 
@@ -223,6 +230,10 @@ export async function saveMyGoalSheet(
 
   revalidatePath("/goal-sheet", "page");
   revalidatePath("/goal-sheet/edit", "page");
+  // 「送信して [再]添削を依頼」 の場合は管理画面のアラート集計も再生成
+  if (options.notify) {
+    revalidatePath("/admin", "page");
+  }
 
   return {
     ok: true,

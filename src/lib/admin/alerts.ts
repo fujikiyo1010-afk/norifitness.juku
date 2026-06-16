@@ -31,7 +31,8 @@ export type AlertTagKey =
   | "carte_blank"
   | "goal_sheet_blank"
   | "long_no_login"
-  | "no_learning";
+  | "no_learning"
+  | "goal_sheet_review_requested";
 
 export type AlertTag = {
   key: AlertTagKey;
@@ -111,21 +112,30 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
   if (!users || users.length === 0) return [];
 
   // 関連データを並列取得
-  const [audits, cartes, sheets, lessons, authList, bodyMetrics, sheetsWithContent] =
-    await Promise.all([
-      admin
-        .from("monthly_audits")
-        .select("user_id, target_month, submitted_at"),
-      admin.from("user_workout_carte").select("user_id, purposes"),
-      admin.from("goal_sheets").select("user_id"),
-      admin.from("lesson_progress").select("user_id").eq("is_completed", true),
-      admin.auth.admin.listUsers({ perPage: 1000 }),
-      admin
-        .from("body_metrics")
-        .select("user_id, recorded_at, weight_kg")
-        .order("recorded_at", { ascending: false }),
-      admin.from("goal_sheets").select("user_id, content"),
-    ]);
+  const [
+    audits,
+    cartes,
+    sheets,
+    lessons,
+    authList,
+    bodyMetrics,
+    sheetsWithContent,
+    sheetsForReviewRequest,
+  ] = await Promise.all([
+    admin.from("monthly_audits").select("user_id, target_month, submitted_at"),
+    admin.from("user_workout_carte").select("user_id, purposes"),
+    admin.from("goal_sheets").select("user_id"),
+    admin.from("lesson_progress").select("user_id").eq("is_completed", true),
+    admin.auth.admin.listUsers({ perPage: 1000 }),
+    admin
+      .from("body_metrics")
+      .select("user_id, recorded_at, weight_kg")
+      .order("recorded_at", { ascending: false }),
+    admin.from("goal_sheets").select("user_id, content"),
+    admin
+      .from("goal_sheets")
+      .select("user_id, last_review_requested_at, reviewed_at"),
+  ]);
 
   // 高速ルックアップ用の Set / Map
   const carteUserIds = new Set(cartes.data?.map((c) => c.user_id) ?? []);
@@ -179,6 +189,19 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
       | null;
     const target = content?.goal_selection?.target_weight_kg;
     if (target && target > 0) targetWeightByUser.set(g.user_id, target);
+  }
+
+  // goal_sheets: 再添削依頼が反映済より新しい受講生 Set 化
+  // (= last_review_requested_at > reviewed_at の受講生 = 管理者対応待ち)
+  // Phase 4 #16 線① 前倒し (2026-06-16)
+  const reviewRequestedUserIds = new Set<string>();
+  for (const g of sheetsForReviewRequest.data ?? []) {
+    const requestedAt = g.last_review_requested_at as string | null;
+    const reviewedAt = g.reviewed_at as string | null;
+    if (!requestedAt) continue;
+    if (!reviewedAt || new Date(requestedAt) > new Date(reviewedAt)) {
+      reviewRequestedUserIds.add(g.user_id);
+    }
   }
 
   return users.map((user) => {
@@ -281,6 +304,15 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
         key: "no_learning",
         label: "学習未着手",
         severity: "warn",
+      });
+    }
+
+    // 9. 目標シート 再添削依頼 (Phase 4 #16 線① 前倒し、 severity = urgent)
+    if (reviewRequestedUserIds.has(user.id)) {
+      tags.push({
+        key: "goal_sheet_review_requested",
+        label: "目標シート 再添削依頼",
+        severity: "urgent",
       });
     }
 

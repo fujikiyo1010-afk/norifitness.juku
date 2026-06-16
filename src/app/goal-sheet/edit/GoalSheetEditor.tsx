@@ -277,11 +277,13 @@ export function GoalSheetEditor({
   };
 
   // ===== 保存処理 =====
+  // asDraft=true → 下書き保存 (DB upsert + content のみ、 通知なし、 トースト)
+  // asDraft=false → 「送信して [再]添削を依頼」 (DB upsert + last_review_requested_at、 管理者アラート、 ホーム遷移)
   const handleSave = (asDraft: boolean) => {
     setError(null);
     setSavedMessage(null);
     startTransition(async () => {
-      const result = await saveMyGoalSheet(content);
+      const result = await saveMyGoalSheet(content, { notify: !asDraft });
       if (!result.ok) {
         setError(result.message);
         return;
@@ -300,6 +302,13 @@ export function GoalSheetEditor({
       }
     });
   };
+
+  // 「送信して [再]添削を依頼」 ボタンの動的文言:
+  // 初回 (audits なし) = 「送信して添削を依頼」
+  // 2 回目以降 (audits あり) = 「送信して再添削を依頼」
+  const reviewButtonLabel = audits
+    ? "送信して再添削を依頼"
+    : "送信して添削を依頼";
 
   return (
     <div className="bg-white border border-[#e8ebe9] rounded-2xl overflow-hidden">
@@ -554,20 +563,6 @@ export function GoalSheetEditor({
           </div>
         )}
 
-        {/* 再添削申請 */}
-        <div className="bg-[#f8f9fa] border border-dashed border-[#00897b] rounded-2xl p-3 text-center">
-          <div className="text-[11px] text-zinc-700 mb-2">
-            目標を更新したら、のりに見てもらえます
-          </div>
-          <button
-            type="button"
-            className="bg-[#00897b] hover:bg-[#00695c] text-white px-5 py-2.5 rounded-md text-xs font-bold tracking-wide transition-colors"
-            onClick={() => alert("再添削申請機能は Phase 3 後半で実装予定です")}
-          >
-            のりに再添削を依頼する
-          </button>
-        </div>
-
         {/* 下部リンク 2 個 (編集履歴 / 変化を見る) */}
         <div className="grid grid-cols-2 gap-2.5">
           <Link
@@ -629,7 +624,7 @@ export function GoalSheetEditor({
           onClick={() => handleSave(false)}
           className="flex-1 px-3 py-3 bg-[#00897b] hover:bg-[#00695c] text-white rounded-2xl text-sm font-bold disabled:opacity-50 transition-colors"
         >
-          {isPending ? "保存中..." : "保存する"}
+          {isPending ? "送信中..." : reviewButtonLabel}
         </button>
       </div>
     </div>
