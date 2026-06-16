@@ -75,21 +75,19 @@ export type SelfImageItem = {
   after?: number;    // 改善後 (目標) 0-10
 };
 
-// セルフイメージの 8 項目定義 (TODO: のり氏 / きよむさんに残り 7 項目を確定する)
-// モック (goal_sheet_v3.html) で 1 項目目のみ明示済、残り 7 項目は未確定
+// セルフイメージの 8 項目定義
+// 出典: 01_tokuten/tokuten_25.html (のり氏 特典 25 「目標設定シートテンプレート」 selfItems)
+// 2026-06-16 線① ローンチ前に きよむさん指摘 + Claude 調査で確定反映
+// ⚠️ label 変更時は migration 必須 (過去データの意味付けが変わる)
 export const SELF_IMAGE_ITEMS: readonly { key: string; label: string }[] = [
-  {
-    key: 'item_1',
-    label: '自分の体に対して批判的な思考を減らし、ありのままの自分を受け入れる',
-  },
-  // TODO: 残り 7 項目を確定 (Phase 3 進行中に のり氏 or きよむさんから受領)
-  { key: 'item_2', label: '(未確定 2)' },
-  { key: 'item_3', label: '(未確定 3)' },
-  { key: 'item_4', label: '(未確定 4)' },
-  { key: 'item_5', label: '(未確定 5)' },
-  { key: 'item_6', label: '(未確定 6)' },
-  { key: 'item_7', label: '(未確定 7)' },
-  { key: 'item_8', label: '(未確定 8)' },
+  { key: 'item_1', label: '自分の体に対して批判的な思考を減らし、ありのままの自分を受け入れることを学ぶ' },
+  { key: 'item_2', label: 'メディアで描かれる体のイメージが現実とは異なることを理解しその影響を減らす' },
+  { key: 'item_3', label: '自分の体重やウエストを記録して客観的な数値の感覚を身につける' },
+  { key: 'item_4', label: '自分の肉体はどうやって動くのか?どのような体型なのか?に関する意識を高める' },
+  { key: 'item_5', label: 'ボディイメージからくるストレスをやわらげる' },
+  { key: 'item_6', label: 'そもそもボディイメージとは何かを学ぶ' },
+  { key: 'item_7', label: '自分が感じたネガティブなイメージを日記に書く' },
+  { key: 'item_8', label: 'ネガティブな感情をプラスの感情にする' },
 ] as const;
 
 // =============================================================
@@ -195,6 +193,11 @@ export function isPositiveGoalsFilled(s?: PositiveGoals): boolean {
 
 export function isSelfImageFilled(s?: SelfImageItem[]): boolean {
   // 全 8 項目で before/after が両方記入されているかチェック
+  // null も undefined も「未記入」 扱い (UI で SliderWithValue が null 時に "— 未記入" を表示)
   if (!s || s.length < 8) return false;
-  return s.every((item) => item.before !== undefined && item.after !== undefined);
+  return s.every(
+    (item) =>
+      item.before !== undefined && item.before !== null &&
+      item.after !== undefined && item.after !== null,
+  );
 }

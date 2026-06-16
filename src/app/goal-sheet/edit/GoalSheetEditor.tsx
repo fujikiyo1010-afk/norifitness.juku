@@ -513,8 +513,13 @@ export function GoalSheetEditor({
 
         {/* ⑤ セルフイメージ改善 */}
         <SectionWrapper sectionKey="self_image" filled={!!content.filled_sections?.includes("self_image")}>
-          <div className="text-[11px] text-zinc-500 mb-3">
-            8 項目それぞれを「今 (改善前)」と「目標 (改善後)」で 0-10 点で評価
+          <div className="text-[11px] text-zinc-500 mb-2 leading-relaxed">
+            8 項目それぞれを「今 (改善前)」 と「目標 (改善後)」 で 0-10 点で評価。
+          </div>
+          <div className="text-[10px] text-zinc-400 mb-3 leading-relaxed">
+            スコア: 0 = まったく / 5 = ときどき / 10 = いつもできている。
+            <br />
+            改善前は「今のリアルな実感」 で。 高くつけすぎると改善余地が見えなくなります。
           </div>
           <div className="grid grid-cols-2 gap-2 mb-3">
             <div className="text-[10px] font-bold text-center py-1 px-2 rounded bg-white text-zinc-500 border border-[#e8ebe9]">
@@ -526,18 +531,24 @@ export function GoalSheetEditor({
           </div>
           {SELF_IMAGE_ITEMS.map((meta) => {
             const item = content.self_image?.find((i) => i.key === meta.key);
+            const hint = SELF_IMAGE_HINTS[meta.key];
             return (
               <div key={meta.key} className="py-2.5 border-b border-dashed border-[#e8ebe9] last:border-b-0">
                 <div className="text-[11px] text-zinc-700 leading-snug mb-2">
                   {meta.label}
+                  {hint && (
+                    <span className="block text-[10px] text-zinc-400 mt-0.5">
+                      ・ {hint}
+                    </span>
+                  )}
                 </div>
                 <div className="grid grid-cols-2 gap-2.5">
                   <SliderWithValue
-                    value={item?.before ?? 0}
+                    value={item?.before ?? null}
                     onChange={(v) => updateSelfImage(meta.key, { before: v })}
                   />
                   <SliderWithValue
-                    value={item?.after ?? 0}
+                    value={item?.after ?? null}
                     onChange={(v) => updateSelfImage(meta.key, { after: v })}
                   />
                 </div>
@@ -837,25 +848,38 @@ function SliderWithValue({
   value,
   onChange,
 }: {
-  value: number;
+  value: number | null;
   onChange: (v: number) => void;
 }) {
+  // null = 未記入。 サムは中央 (5) 位置で薄表示 ・ ラベルは "— 未記入"
+  // 受講生が触ると onChange で数値が入って通常表示に切替
+  const isUnset = value === null;
   return (
     <div>
       <input
         type="range"
         min={0}
         max={10}
-        value={value}
+        value={isUnset ? 5 : value}
         onChange={(e) => onChange(parseInt(e.target.value, 10))}
-        className="w-full accent-[#00897b]"
+        className={`w-full accent-[#00897b] ${isUnset ? "opacity-30" : ""}`}
       />
-      <div className="text-center text-[13px] font-bold text-[#00695c] font-mono">
-        {value}
+      <div
+        className={`text-center text-[13px] font-mono ${
+          isUnset ? "text-zinc-400 font-normal" : "text-[#00695c] font-bold"
+        }`}
+      >
+        {isUnset ? "— 未記入" : value}
       </div>
     </div>
   );
 }
+
+// セクション 5 ・ 項目別の評価軸ヒント (D 提案 ・ 6 番と 7 番の意味曖昧さの補強)
+const SELF_IMAGE_HINTS: Record<string, string> = {
+  item_6: "ボディイメージの仕組みを理解できているか",
+  item_7: "ネガティブを書き出す習慣ができているか",
+};
 
 /**
  * ③ 栄養設計セクションの視覚的表現
