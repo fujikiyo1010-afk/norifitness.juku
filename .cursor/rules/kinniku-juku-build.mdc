@@ -213,3 +213,7 @@ alwaysApply: true
   Step 6 プロテイン発送先 + Step 7 通知 は実入力維持
 - 旧「受講生 UI は控えめな絵文字可」→ **許可リスト方式 `✓ ▶ → ←` の 4 つのみに厳格化**
   （2026-06-12）。詳細は [[C.12]]
+- 旧「ホスティング: Cloudflare Pages」→ **Vercel Pro に転換**（2026-06-16 きよむさん判断）。
+  理由: 06 が Node 前提フルスタック（App Router + Server Action + Supabase Admin SDK + Resend）で
+  Cloudflare Edge Runtime と相性悪く確実性優先。 Vercel Pro（約 $20/月）使用、 商用想定（Hobby は非商用専用のため不可）。
+  関連: [[project-kinniku-juku-tech-stack-confirmed]] 更新済

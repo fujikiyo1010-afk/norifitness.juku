@@ -69,7 +69,7 @@
 | 動画ホスト | Vimeo (既存動画継承 + 月次添削動画もここ確定 ・ 2026-05-27) |
 | メール送信 | Resend |
 | LINE 連携 | LINE Messaging API (経路は Step 9d 着手時決定 ・ memory `project_line_integration_options`) |
-| ホスティング | Cloudflare Pages |
+| ホスティング | **Vercel Pro** (約 $20/月、 商用想定 ・ 旧: Cloudflare Pages、 2026-06-16 転換、 06 が Node 前提フルスタックで Cloudflare Edge と相性悪のため) |
 | ドメイン | juku.norifitness.com (Xserver DNS) |
 
 ---
