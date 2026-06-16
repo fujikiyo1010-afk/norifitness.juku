@@ -77,6 +77,14 @@ export default async function BodyMetricsPage() {
             </ul>
           )}
         </section>
+
+        {/* ホームに戻る */}
+        <Link
+          href="/"
+          className="flex items-center justify-center mt-6 px-4 py-3 bg-[#00897b] hover:bg-[#00695c] rounded-2xl text-sm font-bold text-white transition-colors"
+        >
+          ホームに戻る
+        </Link>
       </div>
     </div>
   );
