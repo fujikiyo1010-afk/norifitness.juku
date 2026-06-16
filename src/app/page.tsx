@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getAdminInfo } from "@/lib/auth/admin";
-import { getMyAlerts, type MemberAlertKey } from "@/lib/member/alerts";
+import { getMyAlerts, type MemberAlert, type MemberAlertKey } from "@/lib/member/alerts";
 import { getMyHomeStats } from "@/lib/member/home-stats";
 import { getMyLastWatchedLesson } from "@/lib/member/last-watched";
 import { getMyGoalSheetStatus } from "@/lib/member/goal-sheet-status";
@@ -92,8 +92,8 @@ export default async function Home() {
 
       {/* 黄バナー 3 (該当アラートのみ表示) */}
       <div className="px-4 pt-3.5 flex flex-col gap-2">
-        {alerts.map((key) => (
-          <NoticeBanner key={key} alertKey={key} />
+        {alerts.map((alert) => (
+          <NoticeBanner key={alert.key} alert={alert} />
         ))}
       </div>
 
@@ -231,10 +231,15 @@ export default async function Home() {
 // 黄バナー
 // =====================================================================
 
-const ALERT_CONFIG: Record<
-  MemberAlertKey,
-  { strong: string; tail: string; href: string; icon: React.ReactNode }
-> = {
+type AlertConfig = {
+  /** 動的データを受けて strong 文字列を生成 (= 体組成 N 日途絶など)。 string で固定値も OK */
+  strong: string | ((alert: MemberAlert) => string);
+  tail: string;
+  href: string;
+  icon: React.ReactNode;
+};
+
+const ALERT_CONFIG: Record<MemberAlertKey, AlertConfig> = {
   carte_blank: {
     strong: "カルテが未記入",
     tail: "です。専用メニュー作成のために記入を",
@@ -253,10 +258,19 @@ const ALERT_CONFIG: Record<
     href: "/body-metrics",
     icon: <BarIcon />,
   },
+  body_metrics_stalled: {
+    strong: (alert) =>
+      `体組成の記録が止まっています (最後 ${alert.daysSinceLatest ?? "?"} 日前)`,
+    tail: "。記録しましょう",
+    href: "/body-metrics",
+    icon: <BarIcon />,
+  },
 };
 
-function NoticeBanner({ alertKey }: { alertKey: MemberAlertKey }) {
-  const cfg = ALERT_CONFIG[alertKey];
+function NoticeBanner({ alert }: { alert: MemberAlert }) {
+  const cfg = ALERT_CONFIG[alert.key];
+  const strong =
+    typeof cfg.strong === "function" ? cfg.strong(alert) : cfg.strong;
   return (
     <Link
       href={cfg.href}
@@ -266,7 +280,7 @@ function NoticeBanner({ alertKey }: { alertKey: MemberAlertKey }) {
         {cfg.icon}
       </span>
       <span className="flex-1">
-        <b className="text-[#b8860b] font-bold">{cfg.strong}</b>
+        <b className="text-[#b8860b] font-bold">{strong}</b>
         {cfg.tail}
       </span>
       <span className="text-[#b8860b] font-mono font-bold">→</span>

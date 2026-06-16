@@ -284,9 +284,14 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
       });
     }
 
-    const hasUrgent = tags.some((t) => t.severity === "urgent");
+    // body_metrics_stalled は「情報表示のみ」 (= 受講生自走に任せる) のため、
+    // ホームダッシュ「今日中に確認」 セクションに出さない (Phase 4 #17 線① 前倒し、 2026-06-15)。
+    // タグ自体は受講生一覧バッジ + 受講生ハブには表示残る (= のり氏は状況を知れる)。
+    // 受講生側は src/lib/member/alerts.ts の body_metrics_stalled 黄バナーで自走を促す。
+    const actionableTags = tags.filter((t) => t.key !== "body_metrics_stalled");
+    const hasUrgent = actionableTags.some((t) => t.severity === "urgent");
     const topSeverity: AlertSeverity | null =
-      tags.length === 0 ? null : hasUrgent ? "urgent" : "warn";
+      actionableTags.length === 0 ? null : hasUrgent ? "urgent" : "warn";
 
     return {
       userId: user.id,

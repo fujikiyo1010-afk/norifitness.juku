@@ -34,6 +34,9 @@ export default async function BodyMetricsPage() {
           <p className="text-xs text-zinc-500 mt-1">
             毎日 or 週 1 で記録 ・ 推移はグラフでチェック
           </p>
+          <p className="text-xs text-zinc-500 mt-0.5">
+            リアルタイムで共有されます
+          </p>
         </header>
 
         {/* 入力フォーム */}
@@ -47,9 +50,10 @@ export default async function BodyMetricsPage() {
         {records.length > 0 && (
           <Link
             href="/body-metrics/chart"
-            className="block mt-4 px-4 py-3 bg-white border border-[#e8ebe9] rounded-2xl text-center text-sm font-bold text-[#00695c] hover:border-[#00897b] hover:bg-[#00897b]/5 transition-colors"
+            className="flex items-center justify-center gap-2 mt-4 px-4 py-3 bg-white border border-[#e8ebe9] rounded-2xl text-sm font-bold text-[#00695c] hover:border-[#00897b] hover:bg-[#00897b]/5 transition-colors"
           >
-            📈 変化を見る (推移グラフ)
+            <TrendingUpIcon />
+            変化を見る (推移グラフ)
           </Link>
         )}
 
@@ -148,5 +152,24 @@ function Metric({
         )}
       </div>
     </div>
+  );
+}
+
+function TrendingUpIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      width="18"
+      height="18"
+      aria-hidden="true"
+    >
+      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+      <polyline points="16 7 22 7 22 13" />
+    </svg>
   );
 }
