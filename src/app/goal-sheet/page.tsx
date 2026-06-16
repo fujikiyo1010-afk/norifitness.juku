@@ -236,12 +236,20 @@ export default async function GoalSheetPage() {
               <FooterLink href="#" label="変化を見る" />
               <FooterLink href="#" label="過去の添削履歴 (0)" />
             </div>
-            <Link
-              href="/goal-sheet/edit"
-              className="inline-block text-center rounded-md bg-[#00897b] hover:bg-[#00695c] text-white px-4 py-2 text-xs font-bold tracking-wide transition-colors"
-            >
-              編集する
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+              <Link
+                href="/goal-sheet/edit"
+                className="inline-block text-center rounded-md border border-zinc-300 bg-white hover:bg-zinc-50 text-zinc-700 px-4 py-2 text-xs font-bold tracking-wide transition-colors"
+              >
+                修正する
+              </Link>
+              <Link
+                href="/"
+                className="inline-block text-center rounded-md bg-[#00897b] hover:bg-[#00695c] text-white px-4 py-2 text-xs font-bold tracking-wide transition-colors"
+              >
+                ホームに戻る
+              </Link>
+            </div>
           </div>
         </div>
       </div>
