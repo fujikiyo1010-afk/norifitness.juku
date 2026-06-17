@@ -11,6 +11,12 @@ import {
   type MonthlyAuditRow,
   type AuditStatus,
 } from "@/lib/monthly-audit/types";
+import {
+  buildTrend,
+  getCategoryAverages,
+} from "@/lib/monthly-audit/aggregations";
+import { CategoryScoresBlock } from "./CategoryScoresBlock";
+import { TrendChart } from "./TrendChart";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +41,15 @@ export default async function MonthlyReviewHistoryPage() {
     ? allAudits.filter((a) => a.id !== currentAudit.id)
     : allAudits;
 
+  // ブロック B-1 / B-2 用 集計 (2026-06-17 線① 1 件目から表示)
+  // 「最新の提出済み audit」 のカテゴリ別平均をブロック B-1 に
+  const latestSubmittedAudit = allAudits.find((a) => a.submitted_at !== null) ?? null;
+  const categoryAverages = latestSubmittedAudit
+    ? getCategoryAverages(latestSubmittedAudit.items)
+    : null;
+  const trend = buildTrend(allAudits);
+  const hasAnyAudit = trend.length > 0 || categoryAverages !== null;
+
   return (
     <>
       <MemberHeader title="月次添削 履歴" fallbackHref="/" />
@@ -48,18 +63,22 @@ export default async function MonthlyReviewHistoryPage() {
             <CurrentMonthCard status={currentStatus} audit={currentAudit} />
           </BlockWrapper>
 
-          {/* ====== ブロック B-1: カテゴリ別スコア (Day 15+ で本格実装、現状はプレースホルダ) ====== */}
-          <BlockWrapper title="カテゴリ別スコア" icon="bar">
-            <PlaceholderBlock
-              text="過去 3 ヶ月以上の月次添削が揃うと、ここにカテゴリ別の推移が表示されます"
-            />
+          {/* ====== ブロック B-1: 最新カテゴリ別スコア (2026-06-17 1 件目から表示) ====== */}
+          <BlockWrapper title="カテゴリ別スコア" icon="bar" hint={latestSubmittedAudit ? formatTargetMonthLabel(latestSubmittedAudit.target_month) : undefined}>
+            {categoryAverages ? (
+              <CategoryScoresBlock averages={categoryAverages} />
+            ) : (
+              <PlaceholderBlock text="月次添削を 1 件提出すると、 カテゴリ別の平均スコアが表示されます" />
+            )}
           </BlockWrapper>
 
-          {/* ====== ブロック B-2: 月次推移グラフ (Day 15+ で本格実装) ====== */}
+          {/* ====== ブロック B-2: 月次推移グラフ (2026-06-17 1 件目から単独点表示) ====== */}
           <BlockWrapper title="月次推移 (17 項目 平均)" icon="line">
-            <PlaceholderBlock
-              text="過去 3 ヶ月以上の月次添削が揃うと、ここに折れ線グラフが表示されます"
-            />
+            {hasAnyAudit ? (
+              <TrendChart trend={trend} />
+            ) : (
+              <PlaceholderBlock text="月次添削を 1 件提出すると、 ここに推移グラフが表示されます" />
+            )}
           </BlockWrapper>
 
           {/* ====== ブロック C: 月別ログ一覧 ====== */}
