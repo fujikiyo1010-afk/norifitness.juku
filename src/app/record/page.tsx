@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getLatestBodyMetricSummary } from "@/lib/body-metrics/queries";
+import { MemberHeader } from "@/components/MemberHeader";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -21,14 +22,13 @@ export default async function RecordHubPage() {
   const summary = await getLatestBodyMetricSummary(user.id);
 
   return (
-    <div className="min-h-screen bg-zinc-50 pb-24">
-      <div className="mx-auto max-w-[460px] px-4 py-6">
-        <header className="mb-5">
-          <h1 className="text-xl font-bold text-zinc-900">記録</h1>
-          <p className="text-xs text-zinc-500 mt-1">
+    <>
+      <MemberHeader title="記録" fallbackHref="/" />
+      <div className="min-h-screen bg-zinc-50 pb-24">
+        <div className="mx-auto max-w-[460px] px-4 py-6">
+          <p className="text-xs text-zinc-500 mt-1 mb-5">
             体組成 ・ 月次添削
           </p>
-        </header>
 
         {/* 体組成 カード */}
         <Link
@@ -101,8 +101,9 @@ export default async function RecordHubPage() {
             月 1 回、 17 項目に回答 → のり氏が動画で返信
           </p>
         </Link>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

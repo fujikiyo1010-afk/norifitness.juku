@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { RequestForm } from "./RequestForm";
+import { MemberHeader } from "@/components/MemberHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -17,12 +18,10 @@ export default async function RequestPage({
   }
 
   return (
-    <main className="flex flex-1 flex-col bg-zinc-50 min-h-screen">
+    <>
+      <MemberHeader title="入会申請" fallbackHref="/" />
+      <main className="flex flex-1 flex-col bg-zinc-50 min-h-screen">
       <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e8ebe9] bg-white">
-        <header className="px-4 py-3 border-b border-[#e8ebe9] text-center">
-          <h1 className="text-[15px] font-bold text-zinc-900">入会申請</h1>
-        </header>
-
         <div
           className="flex-1 px-6 py-7"
           style={{ background: "linear-gradient(135deg, #e0f2f1, #fffbe6)" }}
@@ -55,6 +54,7 @@ export default async function RequestPage({
         </div>
       </div>
     </main>
+    </>
   );
 }
 

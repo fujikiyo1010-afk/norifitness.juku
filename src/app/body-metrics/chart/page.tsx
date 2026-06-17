@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { listMyBodyMetrics } from "@/lib/body-metrics/queries";
+import { MemberHeader } from "@/components/MemberHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -33,20 +34,14 @@ export default async function BodyMetricsChartPage({
   const waistSeries = toSeries(filtered, "waist_cm");
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <div className="mx-auto max-w-[460px] px-4 py-6">
-        {/* ヘッダー */}
+    <>
+      <MemberHeader title="体組成 推移" fallbackHref="/body-metrics" />
+      <div className="min-h-screen bg-zinc-50">
+        <div className="mx-auto max-w-[460px] px-4 py-6">
+        {/* 副題 */}
         <header className="mb-5">
           <div className="text-xs text-zinc-500 mb-1">
-            <Link href="/" className="hover:underline">
-              ホーム
-            </Link>
-            <span className="mx-1.5 text-zinc-300">/</span>
-            <Link href="/body-metrics" className="hover:underline">
-              体組成
-            </Link>
-            <span className="mx-1.5 text-zinc-300">/</span>
-            <span className="text-zinc-700">推移</span>
+            <span className="text-zinc-700">推移グラフ</span>
           </div>
           <h1 className="text-xl font-bold text-zinc-900">体組成 推移</h1>
           <p className="text-xs text-zinc-500 mt-1">
@@ -92,8 +87,9 @@ export default async function BodyMetricsChartPage({
             />
           </>
         )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

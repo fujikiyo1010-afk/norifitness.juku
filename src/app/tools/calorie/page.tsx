@@ -1,6 +1,7 @@
 import { getMyToolCalculation } from "@/lib/tools/queries";
 import type { CalorieInputs, CalorieOutputs } from "@/lib/tools/types";
 import { CalorieToolClient } from "./CalorieToolClient";
+import { MemberHeader } from "@/components/MemberHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -22,5 +23,10 @@ export default async function CalorieToolPage() {
     "calorie"
   );
 
-  return <CalorieToolClient previous={previous} />;
+  return (
+    <>
+      <MemberHeader title="必要カロリー計算" fallbackHref="/tools" />
+      <CalorieToolClient previous={previous} />
+    </>
+  );
 }

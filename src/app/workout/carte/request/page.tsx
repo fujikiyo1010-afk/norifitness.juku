@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getMyCarte } from "@/lib/workout/queries";
 import { RequestForm } from "../../_components/RequestForm";
+import { MemberHeader } from "@/components/MemberHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -34,5 +35,10 @@ export default async function CarteRequestPage() {
     },
   ];
 
-  return <RequestForm type="carte" currentInfo={currentInfo} />;
+  return (
+    <>
+      <MemberHeader title="カルテ 更新リクエスト" fallbackHref="/workout/carte" />
+      <RequestForm type="carte" currentInfo={currentInfo} />
+    </>
+  );
 }

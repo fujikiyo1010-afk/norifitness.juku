@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getMyCurrentMenu, getMyCarte } from "@/lib/workout/queries";
 import { formatDistributionDate } from "@/lib/workout/menu-display";
 import { RequestForm } from "../../_components/RequestForm";
+import { MemberHeader } from "@/components/MemberHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -32,5 +33,10 @@ export default async function MenuRequestPage() {
     { label: "頻度", value: freqDisplay },
   ];
 
-  return <RequestForm type="menu" currentInfo={currentInfo} />;
+  return (
+    <>
+      <MemberHeader title="メニュー 変更リクエスト" fallbackHref="/workout" />
+      <RequestForm type="menu" currentInfo={currentInfo} />
+    </>
+  );
 }

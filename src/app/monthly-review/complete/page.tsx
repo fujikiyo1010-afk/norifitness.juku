@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Image from "next/image";
 import { getMyCurrentMonthAudit } from "@/lib/monthly-audit/queries";
 import { formatTargetMonthLabel } from "@/lib/monthly-audit/types";
+import { MemberHeader } from "@/components/MemberHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -43,9 +44,11 @@ export default async function MonthlyReviewCompletePage() {
   const monthLabel = formatTargetMonthLabel(audit.target_month);
 
   return (
-    <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#e8ebec]">
-      <div className="mx-auto w-full max-w-[460px]">
-        <div className="bg-white border border-[#e8ebe9] rounded-2xl overflow-hidden min-h-[640px] flex flex-col">
+    <>
+      <MemberHeader title="月次添削 送信完了" fallbackHref="/monthly-review" />
+      <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#e8ebec]">
+        <div className="mx-auto w-full max-w-[460px]">
+          <div className="bg-white border border-[#e8ebe9] rounded-2xl overflow-hidden min-h-[640px] flex flex-col">
           {/* 完了画面本体 (温かいグラデ背景) */}
           <div className="flex-1 bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] flex flex-col items-center justify-center px-7 py-10 text-center">
             {/* キャラ画像 (140px 円形、scale 1.2 で黒円を枠外に追い出す) */}
@@ -150,8 +153,9 @@ export default async function MonthlyReviewCompletePage() {
               ホームに戻る
             </Link>
           </div>
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }

@@ -6,6 +6,7 @@ import type {
   PfcCarbOutputs,
 } from "@/lib/tools/types";
 import { PfcCarbToolClient } from "./PfcCarbToolClient";
+import { MemberHeader } from "@/components/MemberHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -30,16 +31,19 @@ export default async function PfcCarbToolPage() {
   ]);
 
   return (
-    <PfcCarbToolClient
-      previous={previous}
-      calorieHint={
-        caloriePrevious
-          ? {
-              maintenance: caloriePrevious.outputs.maintenance,
-              diet: caloriePrevious.outputs.diet,
-            }
-          : null
-      }
-    />
+    <>
+      <MemberHeader title="PFC・カーボサイクル設定" fallbackHref="/tools" />
+      <PfcCarbToolClient
+        previous={previous}
+        calorieHint={
+          caloriePrevious
+            ? {
+                maintenance: caloriePrevious.outputs.maintenance,
+                diet: caloriePrevious.outputs.diet,
+              }
+            : null
+        }
+      />
+    </>
   );
 }

@@ -4,6 +4,7 @@ import type {
   DietPeriodOutputs,
 } from "@/lib/tools/types";
 import { DietPeriodToolClient } from "./DietPeriodToolClient";
+import { MemberHeader } from "@/components/MemberHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -26,5 +27,10 @@ export default async function DietPeriodToolPage() {
   // 開始日のデフォルト = 今日 (前回値があれば前回値)
   const todayISO = new Date().toISOString().slice(0, 10);
 
-  return <DietPeriodToolClient previous={previous} todayISO={todayISO} />;
+  return (
+    <>
+      <MemberHeader title="減量期間逆算" fallbackHref="/tools" />
+      <DietPeriodToolClient previous={previous} todayISO={todayISO} />
+    </>
+  );
 }

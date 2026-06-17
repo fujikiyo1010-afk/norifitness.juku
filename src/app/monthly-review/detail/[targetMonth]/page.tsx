@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getMyAudit, listMyAudits } from "@/lib/monthly-audit/queries";
+import { MemberHeader } from "@/components/MemberHeader";
 import {
   AUDIT_QUESTIONS,
   AUDIT_CATEGORIES,
@@ -88,26 +89,10 @@ export default async function MonthlyReviewDetailPage({
     : null;
 
   return (
-    <main className="flex flex-1 flex-col bg-[#fafbfa] min-h-screen">
-      <div className="mx-auto w-full max-w-[460px] bg-white border-x border-[#e8ebe9]">
-        {/* ヘッダー */}
-        <div className="px-4 py-3 border-b border-[#e8ebe9] flex items-center justify-between bg-white">
-          <Link href="/monthly-review" className="text-zinc-900">
-            <svg
-              className="w-5 h-5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </Link>
-          <div className="text-sm font-bold text-zinc-900">月次添削 詳細</div>
-          <div className="w-5" />
-        </div>
+    <>
+      <MemberHeader title="月次添削 詳細" fallbackHref="/monthly-review" />
+      <main className="flex flex-1 flex-col bg-[#fafbfa] min-h-screen">
+        <div className="mx-auto w-full max-w-[460px] bg-white border-x border-[#e8ebe9]">
 
         {/* ヒーロー帯 (温かいグラデ) */}
         <div className="bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] px-5 py-4 border-b border-[#e8ebe9]">
@@ -198,6 +183,7 @@ export default async function MonthlyReviewDetailPage({
         </div>
       </div>
     </main>
+    </>
   );
 }
 

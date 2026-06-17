@@ -1,6 +1,7 @@
 import { getMyToolCalculation } from "@/lib/tools/queries";
 import type { BodyFatInputs, BodyFatOutputs } from "@/lib/tools/types";
 import { BodyFatToolClient } from "./BodyFatToolClient";
+import { MemberHeader } from "@/components/MemberHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -22,5 +23,10 @@ export default async function BodyFatToolPage() {
     "body_fat"
   );
 
-  return <BodyFatToolClient previous={previous} />;
+  return (
+    <>
+      <MemberHeader title="体脂肪率計算" fallbackHref="/tools" />
+      <BodyFatToolClient previous={previous} />
+    </>
+  );
 }
