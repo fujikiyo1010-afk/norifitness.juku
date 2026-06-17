@@ -55,6 +55,53 @@ export async function toggleEmailNotification(next: boolean): Promise<ActionResu
   return { ok: true };
 }
 
+/**
+ * パスワード変更 ・ 現在パスワード検証 → 新パスワード更新 (2026-06-17 線① 新設)
+ *
+ * 流れ:
+ *   1. 現在パスワードで signInWithPassword() 実行 (= 検証)
+ *      → 失敗 = 現在パスワード不一致
+ *   2. 成功 → updateUser({ password: new }) で新パスワード設定
+ *   3. ログイン状態は維持される (= Supabase 仕様)
+ */
+export async function updatePassword(
+  email: string,
+  currentPassword: string,
+  newPassword: string
+): Promise<ActionResult> {
+  if (!email) return { ok: false, error: "ログイン状態を確認できませんでした" };
+  if (!currentPassword) return { ok: false, error: "現在のパスワードを入力してください" };
+  if (!newPassword || newPassword.length < 8) {
+    return { ok: false, error: "新しいパスワードは 8 文字以上で設定してください" };
+  }
+  if (currentPassword === newPassword) {
+    return { ok: false, error: "新しいパスワードは現在のものと違う必要があります" };
+  }
+
+  const supabase = await createClient();
+
+  // 1) 現在パスワード検証
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email: email.toLowerCase(),
+    password: currentPassword,
+  });
+  if (signInError) {
+    // 不正解の理由を細かく出さない (列挙攻撃対策)
+    return { ok: false, error: "現在のパスワードが正しくありません" };
+  }
+
+  // 2) 新パスワードで更新
+  const { error: updateError } = await supabase.auth.updateUser({
+    password: newPassword,
+  });
+  if (updateError) {
+    return { ok: false, error: updateError.message };
+  }
+
+  revalidatePath("/account");
+  return { ok: true };
+}
+
 export async function signOutFromAccount() {
   const supabase = await createClient();
   await supabase.auth.signOut();

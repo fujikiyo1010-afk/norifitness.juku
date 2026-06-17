@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { saveShipmentAddress } from "./actions";
+import { toggleEmailNotification } from "@/lib/account/actions";
 
 const TOTAL_STEPS = 8;
 
@@ -109,8 +110,14 @@ export function OnboardingClient({
             )}
             {step === 7 && (
               <Step7Permission
-                onPermit={() => setStep(8)}
-                onSkip={() => setStep(8)}
+                onPermit={async () => {
+                  await toggleEmailNotification(true);
+                  setStep(8);
+                }}
+                onSkip={async () => {
+                  await toggleEmailNotification(false);
+                  setStep(8);
+                }}
               />
             )}
             {step === 8 && <Step8 />}
@@ -475,16 +482,16 @@ function Step7Permission({
         <BellIcon />
       </div>
       <h1 className="text-[20px] font-bold text-[#004d40] leading-snug mb-2.5">
-        お知らせを
+        メール通知を
         <br />
-        受け取る
+        ON にする
       </h1>
       <p className="text-xs text-zinc-600 leading-relaxed">
-        のりfitness からの
+        のり氏からの月次添削返信や
         <br />
-        大切なお知らせを受け取るため
+        大切なお知らせをメールで
         <br />
-        通知を有効にしてください
+        受け取ります
       </p>
 
       <div className="w-full mt-4">
@@ -493,14 +500,14 @@ function Step7Permission({
           onClick={onPermit}
           className="w-full bg-[#00897b] hover:bg-[#00695c] text-white rounded-xl py-3 text-[13px] font-bold shadow-md shadow-[#00897b]/25 transition-colors mb-2"
         >
-          通知を許可する
+          メール通知を ON にする
         </button>
         <button
           type="button"
           onClick={onSkip}
           className="block w-full text-[11px] text-zinc-400 py-1.5 hover:text-zinc-600 transition-colors"
         >
-          後で設定する
+          OFF のまま進む (後で /設定 から変更可)
         </button>
       </div>
     </div>
