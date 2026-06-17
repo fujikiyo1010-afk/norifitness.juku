@@ -303,12 +303,9 @@ export function GoalSheetEditor({
     });
   };
 
-  // 「送信して [再]添削を依頼」 ボタンの動的文言:
-  // 初回 (audits なし) = 「送信して添削を依頼」
-  // 2 回目以降 (audits あり) = 「送信して再添削を依頼」
-  const reviewButtonLabel = audits
-    ? "送信して再添削を依頼"
-    : "送信して添削を依頼";
+  // 「送信して添削を依頼」 ボタン文言 (2026-06-17 きよむさん判断で「再」 撤回 ・ B 案)
+  // 動的「再」 化は混乱を招く + 受講生 UI 上の必要性低い → 常時統一文言
+  const reviewButtonLabel = "送信して添削を依頼";
 
   return (
     <div className="bg-white border border-[#e8ebe9] rounded-2xl overflow-hidden">

@@ -226,7 +226,7 @@ function CoursesList({
             href={`/courses/${c.id}`}
             className="group flex gap-3 p-3 hover:bg-zinc-50 transition-colors"
           >
-            <CourseThumb />
+            <CourseThumb title={c.title} />
             <CourseInfo course={c} />
           </Link>
         </li>
@@ -236,11 +236,32 @@ function CoursesList({
 }
 
 // =====================================================================
-// サムネ (Phase 4 #15 線① 前倒し = 全コース共通 BookOpen 線画)
-// 線② で各コース固有アイコンに差し替え予定 (= のり氏判断、 別 todo)
+// サムネ (2026-06-17 タイトル別 個別 SVG ・ icons.tsx の統一ライブラリ使用)
+// 5 コースのタイトルに含まれるキーワードで分岐
+// 将来 sort_order を CourseSummary に含めるなら sort_order 分岐に置き換え可
 // =====================================================================
 
-function CourseThumb() {
+function pickIconPath(title: string): string {
+  // 限定ボディメイク = ロードマップ (TrendingUp 山型)
+  if (title.includes("ボディメイク") || title.includes("ロードマップ"))
+    return "M4 16 9.5 10.5l3.2 3.2L20 6.4 M15.5 6.4H20v4.5";
+  // 限定講義 live = 動画 (Video 矩形 + 三角)
+  if (title.includes("live") || title.includes("LIVE") || title.includes("講義"))
+    return "M3 6h12.5v12H3z M15.5 10.2 21 7v10l-5.5-3.2";
+  // マインドセット = スパーク (Bolt 雷)
+  if (title.includes("マインドセット") || title.includes("コンテンツ"))
+    return "M13 2.5 4.5 13.2a.6.6 0 0 0 .5.95H11l-1 7.35 8.5-10.7a.6.6 0 0 0-.5-.95H13Z";
+  // 筋トレフォーム = ダンベル
+  if (title.includes("フォーム") || title.includes("筋トレ"))
+    return "M8.5 12h7 M6 8.6v6.8 M3.6 10.2v3.6 M18 8.6v6.8 M20.4 10.2v3.6";
+  // ダイエットレシピ = チェック (CheckCircle)
+  if (title.includes("レシピ") || title.includes("ダイエット"))
+    return "M3.4 12a8.6 8.6 0 1 0 17.2 0 8.6 8.6 0 1 0-17.2 0 M8.5 12l2.4 2.4 4.6-4.8";
+  // フォールバック = BookOpen
+  return "M12 6.5C10.5 5 8 4.5 4 4.5v13c4 0 6.5.5 8 2 M12 6.5C13.5 5 16 4.5 20 4.5v13c-4 0-6.5.5-8 2 M12 6.5V21";
+}
+
+function CourseThumb({ title }: { title: string }) {
   return (
     <div className="w-20 h-20 rounded-[10px] bg-[#e0f2f1] flex items-center justify-center flex-shrink-0">
       <svg
@@ -249,13 +270,12 @@ function CourseThumb() {
         viewBox="0 0 24 24"
         fill="none"
         stroke="#00695c"
-        strokeWidth={1.8}
+        strokeWidth={1.75}
         strokeLinecap="round"
         strokeLinejoin="round"
         aria-hidden="true"
-      >
-        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-      </svg>
+        dangerouslySetInnerHTML={{ __html: `<path d="${pickIconPath(title)}" />` }}
+      />
     </div>
   );
 }

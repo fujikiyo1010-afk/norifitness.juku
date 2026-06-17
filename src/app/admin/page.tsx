@@ -384,7 +384,6 @@ function mapTagToAction(
       };
     case "goal_sheet_blank":
     case "goal_deviation":
-    case "goal_sheet_review_requested":
       return {
         label: "目標シート",
         href: `/admin/users/${userId}/goal-sheet`,
