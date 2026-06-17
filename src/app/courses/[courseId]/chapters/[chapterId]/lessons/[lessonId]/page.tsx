@@ -96,31 +96,19 @@ export default async function StudentLessonPage({
           <h1 className="text-xl font-bold tracking-tight text-zinc-900 leading-tight">
             {lesson.title}
           </h1>
-          {/* 講師 + メタタグ */}
-          <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-600">
-            <span className="inline-flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded-full bg-[#004d40] text-white text-[10px] flex items-center justify-center font-bold">
-                の
-              </span>
-              のり社長
-            </span>
-            {lesson.meta_tags && lesson.meta_tags.length > 0 && (
-              <>
-                <span className="text-zinc-300">・</span>
-                <span className="flex flex-wrap gap-1">
-                  {lesson.meta_tags.map((tag) => (
-                    <Link
-                      key={tag}
-                      href={`/search?q=${encodeURIComponent(tag)}`}
-                      className="text-[10px] rounded bg-zinc-100 text-zinc-700 px-1.5 py-0.5 hover:bg-zinc-200"
-                    >
-                      {tag}
-                    </Link>
-                  ))}
-                </span>
-              </>
-            )}
-          </div>
+          {lesson.meta_tags && lesson.meta_tags.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {lesson.meta_tags.map((tag) => (
+                <Link
+                  key={tag}
+                  href={`/search?q=${encodeURIComponent(tag)}`}
+                  className="text-[10px] rounded bg-zinc-100 text-zinc-700 px-1.5 py-0.5 hover:bg-zinc-200"
+                >
+                  {tag}
+                </Link>
+              ))}
+            </div>
+          )}
         </header>
 
         {/* 動画 or 試験準備中 or 動画 URL なし */}

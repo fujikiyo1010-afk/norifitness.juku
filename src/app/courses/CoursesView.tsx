@@ -241,40 +241,70 @@ function CoursesList({
 // 将来 sort_order を CourseSummary に含めるなら sort_order 分岐に置き換え可
 // =====================================================================
 
-function pickIconPath(title: string): string {
-  // 限定ボディメイク = ロードマップ (TrendingUp 山型)
+type CourseTheme = { bg: string; stroke: string; path: string };
+
+function pickCourseTheme(title: string): CourseTheme {
+  // 限定ボディメイク = ロードマップ (TrendingUp 山型) ・ ティール緑 (現状維持 ・ ブランド色)
   if (title.includes("ボディメイク") || title.includes("ロードマップ"))
-    return "M4 16 9.5 10.5l3.2 3.2L20 6.4 M15.5 6.4H20v4.5";
-  // 限定講義 live = 動画 (Video 矩形 + 三角)
+    return {
+      bg: "#e0f2f1",
+      stroke: "#00695c",
+      path: "M4 16 9.5 10.5l3.2 3.2L20 6.4 M15.5 6.4H20v4.5",
+    };
+  // 限定講義 live = 動画 (Video 矩形 + 三角) ・ 薄ラベンダー
   if (title.includes("live") || title.includes("LIVE") || title.includes("講義"))
-    return "M3 6h12.5v12H3z M15.5 10.2 21 7v10l-5.5-3.2";
-  // マインドセット = スパーク (Bolt 雷)
+    return {
+      bg: "#ede9fe",
+      stroke: "#7c3aed",
+      path: "M3 6h12.5v12H3z M15.5 10.2 21 7v10l-5.5-3.2",
+    };
+  // マインドセット = スパーク (Bolt 雷) ・ 薄イエロー
   if (title.includes("マインドセット") || title.includes("コンテンツ"))
-    return "M13 2.5 4.5 13.2a.6.6 0 0 0 .5.95H11l-1 7.35 8.5-10.7a.6.6 0 0 0-.5-.95H13Z";
-  // 筋トレフォーム = ダンベル
+    return {
+      bg: "#fef3c7",
+      stroke: "#ca8a04",
+      path: "M13 2.5 4.5 13.2a.6.6 0 0 0 .5.95H11l-1 7.35 8.5-10.7a.6.6 0 0 0-.5-.95H13Z",
+    };
+  // 筋トレフォーム = ダンベル ・ 薄ピーチ
   if (title.includes("フォーム") || title.includes("筋トレ"))
-    return "M8.5 12h7 M6 8.6v6.8 M3.6 10.2v3.6 M18 8.6v6.8 M20.4 10.2v3.6";
-  // ダイエットレシピ = チェック (CheckCircle)
+    return {
+      bg: "#ffedd5",
+      stroke: "#ea580c",
+      path: "M8.5 12h7 M6 8.6v6.8 M3.6 10.2v3.6 M18 8.6v6.8 M20.4 10.2v3.6",
+    };
+  // ダイエットレシピ = チェック (CheckCircle) ・ 薄ピンク
   if (title.includes("レシピ") || title.includes("ダイエット"))
-    return "M3.4 12a8.6 8.6 0 1 0 17.2 0 8.6 8.6 0 1 0-17.2 0 M8.5 12l2.4 2.4 4.6-4.8";
-  // フォールバック = BookOpen
-  return "M12 6.5C10.5 5 8 4.5 4 4.5v13c4 0 6.5.5 8 2 M12 6.5C13.5 5 16 4.5 20 4.5v13c-4 0-6.5.5-8 2 M12 6.5V21";
+    return {
+      bg: "#fce7f3",
+      stroke: "#db2777",
+      path: "M3.4 12a8.6 8.6 0 1 0 17.2 0 8.6 8.6 0 1 0-17.2 0 M8.5 12l2.4 2.4 4.6-4.8",
+    };
+  // フォールバック = BookOpen ・ ティール緑
+  return {
+    bg: "#e0f2f1",
+    stroke: "#00695c",
+    path: "M12 6.5C10.5 5 8 4.5 4 4.5v13c4 0 6.5.5 8 2 M12 6.5C13.5 5 16 4.5 20 4.5v13c-4 0-6.5.5-8 2 M12 6.5V21",
+  };
 }
 
 function CourseThumb({ title }: { title: string }) {
+  const theme = pickCourseTheme(title);
   return (
-    <div className="w-20 h-20 rounded-[10px] bg-[#e0f2f1] flex items-center justify-center flex-shrink-0">
+    <div
+      className="w-20 h-20 rounded-[10px] flex items-center justify-center flex-shrink-0"
+      style={{ backgroundColor: theme.bg }}
+    >
       <svg
         width="36"
         height="36"
         viewBox="0 0 24 24"
         fill="none"
-        stroke="#00695c"
+        stroke={theme.stroke}
         strokeWidth={1.75}
         strokeLinecap="round"
         strokeLinejoin="round"
         aria-hidden="true"
-        dangerouslySetInnerHTML={{ __html: `<path d="${pickIconPath(title)}" />` }}
+        dangerouslySetInnerHTML={{ __html: `<path d="${theme.path}" />` }}
       />
     </div>
   );
