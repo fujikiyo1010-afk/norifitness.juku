@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { getMyGoalSheet } from "@/lib/goal-sheet/queries";
+import { MemberHeader } from "@/components/MemberHeader";
 import { getMyCarte } from "@/lib/workout/queries";
 import type { Gender as CarteGender } from "@/lib/workout/types";
 import type { Gender as ToolGender } from "@/lib/tools/types";
@@ -35,22 +35,13 @@ export default async function GoalSheetEditPage() {
   const gender = mapGender(carte?.gender);
 
   return (
-    <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#e8ebec]">
-      <div className="mx-auto w-full max-w-[460px]">
-        {/* パンくず */}
-        <nav className="text-xs text-zinc-500 mb-3 px-1">
-          <Link href="/" className="underline hover:text-zinc-700">
-            ホーム
-          </Link>
-          <span> / </span>
-          <Link href="/goal-sheet" className="underline hover:text-zinc-700">
-            目標管理シート
-          </Link>
-          <span> / 編集</span>
-        </nav>
-
-        <GoalSheetEditor initialContent={initialContent} gender={gender} />
-      </div>
-    </main>
+    <>
+      <MemberHeader title="目標シート 編集" fallbackHref="/goal-sheet" />
+      <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#e8ebec]">
+        <div className="mx-auto w-full max-w-[460px]">
+          <GoalSheetEditor initialContent={initialContent} gender={gender} />
+        </div>
+      </main>
+    </>
   );
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getMyCurrentMonthAudit, listMyAudits } from "@/lib/monthly-audit/queries";
+import { MemberHeader } from "@/components/MemberHeader";
 import {
   getCurrentTargetMonth,
   formatTargetMonthLabel,
@@ -39,19 +40,10 @@ export default async function MonthlyReviewFormPage() {
   const submitted = !!audit?.submitted_at;
 
   return (
-    <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#e8ebec]">
-      <div className="mx-auto w-full max-w-[460px]">
-        {/* パンくず */}
-        <nav className="text-xs text-zinc-500 mb-3 px-1">
-          <Link href="/" className="underline hover:text-zinc-700">
-            ホーム
-          </Link>
-          <span> / </span>
-          <Link href="/monthly-review" className="underline hover:text-zinc-700">
-            月次添削
-          </Link>
-          <span> / 記入</span>
-        </nav>
+    <>
+      <MemberHeader title="月次添削 記入" fallbackHref="/monthly-review" />
+      <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#e8ebec]">
+        <div className="mx-auto w-full max-w-[460px]">
 
         {submitted ? (
           // 提出済の場合は編集不可、履歴ページへ誘導
@@ -78,7 +70,8 @@ export default async function MonthlyReviewFormPage() {
             prevQ2Waist={prevQ2Waist}
           />
         )}
-      </div>
-    </main>
+        </div>
+      </main>
+    </>
   );
 }

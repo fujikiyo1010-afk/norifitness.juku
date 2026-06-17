@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getMyCarte, getMyCurrentMenu } from "@/lib/workout/queries";
+import { MemberHeader } from "@/components/MemberHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -32,16 +33,10 @@ export default async function WorkoutCartePage() {
   });
 
   return (
-    <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#e8ebec]">
-      <div className="mx-auto w-full max-w-[980px] space-y-4">
-        {/* パンくず */}
-        <nav className="text-xs text-zinc-500 px-1">
-          <Link href="/" className="underline hover:text-zinc-700">
-            ホーム
-          </Link>
-          <span> / 筋トレカルテ</span>
-        </nav>
-
+    <>
+      <MemberHeader title="筋トレカルテ" fallbackHref="/" />
+      <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#e8ebec]">
+        <div className="mx-auto w-full max-w-[980px] space-y-4">
         {/* ドキュメントフレーム */}
         <div className="bg-white border border-[#d4d4d4] rounded-md shadow-sm overflow-hidden">
           {/* ① ヘッダー帯 */}
@@ -234,6 +229,7 @@ export default async function WorkoutCartePage() {
         </div>
       </div>
     </main>
+    </>
   );
 }
 

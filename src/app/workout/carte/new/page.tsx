@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getMyCarte } from "@/lib/workout/queries";
 import { CarteIntakeForm } from "./CarteIntakeForm";
+import { MemberHeader } from "@/components/MemberHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -24,8 +25,11 @@ export default async function WorkoutCarteNewPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <CarteIntakeForm />
-    </div>
+    <>
+      <MemberHeader title="カルテ 入力" fallbackHref="/workout" />
+      <div className="min-h-screen bg-zinc-50">
+        <CarteIntakeForm />
+      </div>
+    </>
   );
 }
