@@ -180,30 +180,6 @@ export function DietPeriodToolClient({
 
   return (
     <main className="min-h-screen bg-[#fafbfa] flex flex-col">
-      {/* ヘッダー */}
-      <header className="bg-white border-b border-[#e8ebe9] px-4 py-3.5 flex items-center sticky top-0 z-10">
-        <Link
-          href={isFromGoalSheet ? "/goal-sheet/edit" : "/tools"}
-          className="w-8 h-8 flex items-center justify-center text-zinc-900 hover:bg-zinc-100 rounded-full transition-colors"
-          aria-label={isFromGoalSheet ? "目標シート編集に戻る" : "ツール一覧に戻る"}
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="w-5 h-5 pointer-events-none"
-          >
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </Link>
-        <h1 className="flex-1 text-center text-base font-bold text-zinc-900 -ml-8 pointer-events-none">
-          減量期間逆算
-        </h1>
-      </header>
-
       <div className="flex-1 max-w-[460px] mx-auto w-full pb-10">
         {/* ヒーロー帯 */}
         <section className="bg-gradient-to-br from-[#e8eaf6] to-[#fffbe6] border-b border-[#e8ebe9] px-6 py-5">

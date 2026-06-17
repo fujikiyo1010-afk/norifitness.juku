@@ -43,7 +43,7 @@ export function MemberHeader({
         type="button"
         onClick={handleBack}
         aria-label="戻る"
-        className="w-8 h-8 flex items-center justify-center text-zinc-700 hover:text-[#00695c] transition-colors"
+        className="w-8 h-8 flex items-center justify-center text-zinc-900 hover:bg-zinc-100 rounded-full transition-colors cursor-pointer"
       >
         <svg
           width="20"
