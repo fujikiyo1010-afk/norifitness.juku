@@ -5,8 +5,15 @@ import {
   listPublicChapters,
   getMyLessonProgress,
 } from "@/lib/courses/queries";
+import {
+  getExamsByChapterIds,
+  getMyExamPassesByChapterIds,
+} from "@/lib/exams/queries";
 import { createClient } from "@/lib/supabase/server";
-import { type AccordionChapter } from "./CourseAccordion";
+import {
+  type AccordionChapter,
+  type AccordionExamInfo,
+} from "./CourseAccordion";
 import { CourseDetailView } from "./CourseDetailView";
 import { MemberHeader } from "@/components/MemberHeader";
 
@@ -99,6 +106,22 @@ export default async function StudentCoursePage({
     lessons: lessonsByChapter.get(c.id) ?? [],
   }));
 
+  // 章ごとの試験情報 + 受講生の合格状況 (試験機能 2026-06-17 線①)
+  const [examsMap, passesMap] = await Promise.all([
+    getExamsByChapterIds(chapterIds),
+    getMyExamPassesByChapterIds(chapterIds),
+  ]);
+  const examsByChapterId: Record<string, AccordionExamInfo> = {};
+  for (const [chId, exam] of examsMap.entries()) {
+    const pass = passesMap.get(chId);
+    examsByChapterId[chId] = {
+      examId: exam.id,
+      name: exam.name,
+      lastPassed: pass ? pass.passed : null,
+      lastFinishedAt: pass ? pass.finished_at : null,
+    };
+  }
+
   // コース全体の進捗集計
   const totalLessons = allLessonIds.length;
   const completedLessons = Object.values(initialProgress).filter(Boolean).length;
@@ -172,6 +195,7 @@ export default async function StudentCoursePage({
           chapters={accordionChapters}
           initialProgress={initialProgress}
           currentLessonId={firstUnfinished?.lessonId ?? null}
+          examsByChapterId={examsByChapterId}
         />
         </div>
       </main>

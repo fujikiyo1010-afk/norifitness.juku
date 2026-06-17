@@ -20,16 +20,25 @@ export type AccordionChapter = {
   lessons: AccordionLesson[];
 };
 
+export type AccordionExamInfo = {
+  examId: string;
+  name: string;
+  lastPassed: boolean | null;
+  lastFinishedAt: string | null;
+};
+
 export function CourseAccordion({
   courseId,
   chapters,
   initialProgress,
   currentLessonId = null,
+  examsByChapterId = {},
 }: {
   courseId: string;
   chapters: AccordionChapter[];
   initialProgress: Record<string, boolean>;
   currentLessonId?: string | null;
+  examsByChapterId?: Record<string, AccordionExamInfo>;
 }) {
   // 「続きから」 が含まれる章を初期表示で開く ( モック L1011 = 進行中の章だけ開く)
   const initialOpen = (() => {
@@ -246,6 +255,14 @@ export function CourseAccordion({
                         </li>
                       );
                     })}
+                    {/* 章末 ・ テスト行 (exam がある章のみ表示) */}
+                    {examsByChapterId[ch.id] ? (
+                      <ExamRow
+                        courseId={courseId}
+                        chapterId={ch.id}
+                        info={examsByChapterId[ch.id]}
+                      />
+                    ) : null}
                   </ul>
                 )}
               </div>
@@ -254,5 +271,53 @@ export function CourseAccordion({
         );
       })}
     </div>
+  );
+}
+
+function ExamRow({
+  courseId,
+  chapterId,
+  info,
+}: {
+  courseId: string;
+  chapterId: string;
+  info: AccordionExamInfo;
+}) {
+  const passed = info.lastPassed === true;
+  const attempted = info.lastPassed !== null;
+  return (
+    <li className="px-4 py-3 grid grid-cols-[24px_1fr_auto] gap-2.5 items-center bg-[#fffbeb]/40">
+      <span
+        className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold ${
+          passed
+            ? "bg-[#00897b] text-white"
+            : attempted
+              ? "bg-amber-400 text-zinc-900"
+              : "bg-white border border-amber-300 text-amber-600"
+        }`}
+        aria-label={passed ? "テスト合格" : attempted ? "テスト挑戦中" : "テスト未受験"}
+      >
+        {passed ? "✓" : attempted ? "▶" : ""}
+      </span>
+      <div className="min-w-0">
+        <Link
+          href={`/courses/${courseId}/chapters/${chapterId}/exam`}
+          className="group block"
+        >
+          <p className="text-xs leading-snug text-zinc-900 font-bold group-hover:underline flex items-center gap-1.5">
+            <span aria-hidden>📋</span>
+            <span>テスト ・ {info.name}</span>
+          </p>
+        </Link>
+        {attempted ? (
+          <div className="mt-0.5 text-[10px] text-zinc-500">
+            {passed ? "合格済 ・ 再挑戦可" : "再挑戦してみよう"}
+          </div>
+        ) : null}
+      </div>
+      <span className="text-[10px] bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded font-bold flex-shrink-0">
+        テスト
+      </span>
+    </li>
   );
 }

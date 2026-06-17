@@ -6,7 +6,11 @@ import {
   SearchResultsList,
   type SearchResultItem,
 } from "@/components/SearchResultsList";
-import { CourseAccordion, type AccordionChapter } from "./CourseAccordion";
+import {
+  CourseAccordion,
+  type AccordionChapter,
+  type AccordionExamInfo,
+} from "./CourseAccordion";
 
 type ApiResponse = {
   query: string;
@@ -26,11 +30,13 @@ export function CourseDetailView({
   chapters,
   initialProgress,
   currentLessonId = null,
+  examsByChapterId = {},
 }: {
   courseId: string;
   chapters: AccordionChapter[];
   initialProgress: Record<string, boolean>;
   currentLessonId?: string | null;
+  examsByChapterId?: Record<string, AccordionExamInfo>;
 }) {
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
@@ -116,6 +122,7 @@ export function CourseDetailView({
               chapters={chapters}
               initialProgress={initialProgress}
               currentLessonId={currentLessonId}
+              examsByChapterId={examsByChapterId}
             />
           )}
         </section>
