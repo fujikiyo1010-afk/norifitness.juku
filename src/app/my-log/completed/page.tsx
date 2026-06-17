@@ -8,10 +8,12 @@ export const dynamic = "force-dynamic";
 /**
  * 完了履歴 (/my-log/completed) ・ 2026-06-17 線① 新設
  *
- * 視聴完了したレッスンを 新しい順 に一覧表示。
- * 章 + コース名 + 完了日 + 「もう一度見る」 リンク。
+ * 視聴完了したレッスンを 新しい順 (completed_at desc) に一覧表示。
  *
- * 過去 docs: docs/03_design_mocks/recovered/学習画面_(ハブ型_確定版).html ・ 4 ハブカード目
+ * 実装方針:
+ *   - lesson_progress を起点に lesson + chapter + course を取得 (4 クエリ並列)
+ *   - 旧版 (3 クエリ + Map look-up) で 一覧が表示されない問題があったため、 個別 SELECT パターンに統一
+ *   - RLS: lesson_progress = self / lessons + chapters + courses = released_at AND is_published
  */
 export default async function CompletedLessonsPage() {
   const supabase = await createClient();
@@ -20,46 +22,58 @@ export default async function CompletedLessonsPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/my-log/completed");
 
-  // 完了 lesson_id + 完了日を取得 (新しい順)
+  // 1) 完了 lesson_progress を取得
   const { data: progress } = await supabase
     .from("lesson_progress")
-    .select("lesson_id, completed_at, last_watched_at, updated_at")
+    .select("lesson_id, completed_at, updated_at")
     .eq("user_id", user.id)
     .eq("is_completed", true)
-    .order("completed_at", { ascending: false, nullsFirst: false });
+    .order("completed_at", { ascending: false });
 
   type ProgressRow = {
     lesson_id: string;
     completed_at: string | null;
-    last_watched_at: string | null;
     updated_at: string;
   };
   const rows = (progress ?? []) as ProgressRow[];
   const lessonIds = rows.map((r) => r.lesson_id);
 
-  // lesson + chapter + course の情報を join 風に取る (3 クエリ並列)
-  const [lessonsRes, chaptersRes, coursesRes] = await Promise.all([
-    lessonIds.length > 0
-      ? supabase
-          .from("lessons")
-          .select("id, chapter_id, title, sort_order")
-          .in("id", lessonIds)
-      : Promise.resolve({ data: [] as { id: string; chapter_id: string; title: string; sort_order: number }[] }),
-    supabase.from("chapters").select("id, course_id, title, sort_order"),
-    supabase.from("courses").select("id, title"),
-  ]);
+  // 2) lessons + chapters + courses を取得 (lessonIds が空の時は skip)
+  let lessons: { id: string; chapter_id: string; title: string }[] = [];
+  let chapters: { id: string; course_id: string; title: string }[] = [];
+  let courses: { id: string; title: string }[] = [];
 
-  const lessonsMap = new Map(
-    (lessonsRes.data ?? []).map((l) => [l.id, l])
-  );
-  const chaptersMap = new Map(
-    (chaptersRes.data ?? []).map((c) => [c.id, c])
-  );
-  const coursesMap = new Map(
-    (coursesRes.data ?? []).map((c) => [c.id, c.title])
-  );
+  if (lessonIds.length > 0) {
+    const lessonsRes = await supabase
+      .from("lessons")
+      .select("id, chapter_id, title")
+      .in("id", lessonIds);
+    lessons = lessonsRes.data ?? [];
 
-  // 表示行を組み立て (順序は progress 順 = 完了日新しい順)
+    const chapterIds = [...new Set(lessons.map((l) => l.chapter_id))];
+    if (chapterIds.length > 0) {
+      const chaptersRes = await supabase
+        .from("chapters")
+        .select("id, course_id, title")
+        .in("id", chapterIds);
+      chapters = chaptersRes.data ?? [];
+
+      const courseIds = [...new Set(chapters.map((c) => c.course_id))];
+      if (courseIds.length > 0) {
+        const coursesRes = await supabase
+          .from("courses")
+          .select("id, title")
+          .in("id", courseIds);
+        courses = coursesRes.data ?? [];
+      }
+    }
+  }
+
+  const lessonsMap = new Map(lessons.map((l) => [l.id, l]));
+  const chaptersMap = new Map(chapters.map((c) => [c.id, c]));
+  const coursesMap = new Map(courses.map((c) => [c.id, c.title]));
+
+  // 3) 表示行を組み立て (順序は progress 順 = 完了日新しい順)
   const entries = rows.flatMap((r) => {
     const lesson = lessonsMap.get(r.lesson_id);
     if (!lesson) return [];
@@ -79,6 +93,9 @@ export default async function CompletedLessonsPage() {
     ];
   });
 
+  // 4) progress 件数 ≠ entries 件数 のとき、 lesson が引けなかった (= 章未公開や削除) 件数を表示
+  const orphanCount = rows.length - entries.length;
+
   return (
     <>
       <MemberHeader title="完了履歴" fallbackHref="/my-log" />
@@ -90,15 +107,22 @@ export default async function CompletedLessonsPage() {
               これまでに視聴完了したレッスン
             </p>
             <p className="text-[28px] font-bold text-[#00695c] font-mono leading-none mt-1">
-              {entries.length}
+              {rows.length}
               <span className="text-[12px] text-zinc-500 ml-1">レッスン</span>
             </p>
+            {orphanCount > 0 ? (
+              <p className="text-[10px] text-zinc-400 mt-1">
+                ※ {orphanCount} 件は元レッスンが非公開のため詳細を表示できません
+              </p>
+            ) : null}
           </div>
 
           {entries.length === 0 ? (
             <div className="bg-white border border-dashed border-[#e8ebe9] rounded-2xl p-8 text-center">
               <p className="text-[13px] text-zinc-500 leading-relaxed">
-                まだ完了したレッスンはありません。
+                {rows.length === 0
+                  ? "まだ完了したレッスンはありません。"
+                  : "表示できる完了レッスンがありません。"}
                 <br />
                 コースから学習を始めましょう。
               </p>
