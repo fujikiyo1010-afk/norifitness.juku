@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { getMyCarte } from "@/lib/workout/queries";
+import { MemberHeader } from "@/components/MemberHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -21,13 +22,15 @@ export default async function WorkoutCarteCompletePage() {
   }
 
   return (
-    <div
-      className="min-h-screen"
-      style={{
-        background: "linear-gradient(135deg, #e0f2f1, #fffbe6)",
-      }}
-    >
-      <div className="mx-auto flex min-h-screen max-w-[460px] flex-col items-center justify-center px-6 py-12">
+    <>
+      <MemberHeader title="カルテ 提出完了" fallbackHref="/workout" />
+      <div
+        className="min-h-screen"
+        style={{
+          background: "linear-gradient(135deg, #e0f2f1, #fffbe6)",
+        }}
+      >
+        <div className="mx-auto flex min-h-screen max-w-[460px] flex-col items-center justify-center px-6 py-12">
         {/* キャラ画像 (140px 円形、scale 1.2 で黒円を枠外に追い出す) */}
         <div className="w-[140px] h-[140px] rounded-full shadow-lg mb-6 overflow-hidden bg-white relative">
           <Image
@@ -97,5 +100,6 @@ export default async function WorkoutCarteCompletePage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getMyCarte, getMyCurrentMenu } from "@/lib/workout/queries";
 import { MenuView } from "./MenuView";
+import { MemberHeader } from "@/components/MemberHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -44,31 +45,12 @@ function WaitingForMenu({ carte }: { carte: NonNullable<Awaited<ReturnType<typeo
   });
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <div className="mx-auto max-w-[460px] px-4 py-6">
-        <div className="bg-white border border-[#e8ebe9] rounded-2xl overflow-hidden">
-          {/* ヘッダー */}
-          <div className="px-4 py-3 border-b border-[#e8ebe9] flex items-center gap-2">
-            <Link href="/" className="text-zinc-900">
-              <svg
-                className="w-5 h-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="m15 18-6-6 6-6" />
-              </svg>
-            </Link>
-            <div className="flex-1 text-center text-sm font-bold text-zinc-900">
-              あなたのメニュー
-            </div>
-            <div className="w-5 h-5" />
-          </div>
-
-          {/* 温かいグラデ説明 */}
+    <>
+      <MemberHeader title="筋トレ" fallbackHref="/" />
+      <div className="min-h-screen bg-zinc-50">
+        <div className="mx-auto max-w-[460px] px-4 py-6">
+          <div className="bg-white border border-[#e8ebe9] rounded-2xl overflow-hidden">
+            {/* 温かいグラデ説明 */}
           <div className="px-4 py-6 text-center bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] border-b border-[#e8ebe9]">
             <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#00695c] tracking-wide mb-3">
               <svg
@@ -148,5 +130,6 @@ function WaitingForMenu({ carte }: { carte: NonNullable<Awaited<ReturnType<typeo
         </div>
       </div>
     </div>
+    </>
   );
 }
