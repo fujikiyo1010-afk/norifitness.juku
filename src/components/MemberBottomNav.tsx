@@ -22,7 +22,7 @@ const TABS = [
   { label: "ホーム", href: "/", icon: <HomeIcon />, exact: true },
   { label: "コース", href: "/courses", icon: <BookIcon />, exact: false },
   { label: "記録", href: "/record", icon: <NoteIcon />, exact: false },
-  { label: "検索", href: "/search", icon: <SearchIcon />, exact: false },
+  { label: "月次添削", href: "/monthly-review", icon: <ClipboardCheckIcon />, exact: false },
   { label: "設定", href: "/account", icon: <CogIcon />, exact: false },
 ];
 
@@ -119,6 +119,16 @@ function SearchIcon() {
     <svg {...iconProps} width="22" height="22">
       <circle cx="11" cy="11" r="8" />
       <path d="m21 21-4.3-4.3" />
+    </svg>
+  );
+}
+
+function ClipboardCheckIcon() {
+  return (
+    <svg {...iconProps} width="22" height="22">
+      <rect x="6" y="4" width="12" height="16" rx="2" />
+      <path d="M9 4h6" />
+      <path d="m9.5 12 2 2 3.5-4" />
     </svg>
   );
 }

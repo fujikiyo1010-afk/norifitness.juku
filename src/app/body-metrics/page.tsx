@@ -39,10 +39,10 @@ export default async function BodyMetricsPage() {
           initialWaist={latest?.waist_cm ?? null}
         />
 
-        {/* 変化を見るリンク */}
+        {/* 変化を見るリンク → /record (あすけん風グラフが embed されている) */}
         {records.length > 0 && (
           <Link
-            href="/body-metrics/chart"
+            href="/record"
             className="flex items-center justify-center gap-2 mt-4 px-4 py-3 bg-white border border-[#e8ebe9] rounded-2xl text-sm font-bold text-[#00695c] hover:border-[#00897b] hover:bg-[#00897b]/5 transition-colors"
           >
             <TrendingUpIcon />

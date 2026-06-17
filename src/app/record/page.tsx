@@ -1,16 +1,23 @@
+import { redirect } from "next/navigation";
 import Link from "next/link";
-import { getLatestBodyMetricSummary } from "@/lib/body-metrics/queries";
 import { MemberHeader } from "@/components/MemberHeader";
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
+import { listMyBodyMetrics } from "@/lib/body-metrics/queries";
+import { getMyGoalSheet } from "@/lib/goal-sheet/queries";
+import { BodyMetricsHero } from "./BodyMetricsHero";
 
 export const dynamic = "force-dynamic";
 
 /**
- * 受講生 ・ 記録ハブ (/record)
+ * 受講生 ・ 記録ハブ (/record) ・ 2026-06-17 あすけん風リデザイン
  *
- * 下部タブ「記録」の遷移先。 体組成 + 月次添削 の入口。
- * モック: docs/03_design_mocks/recovered/記録ハブ画面.html (2026-06-09 確定)
+ * 設計変更:
+ *   - 月次添削ブロック削除 (= 下部ナビ「月次添削」 タブに独立)
+ *   - 体組成カードをあすけん UI に寄せた詳細版に
+ *   - 「推移グラフを見る」 別画面遷移 → 同一画面に embed (SVG 自前折れ線)
+ *   - 目標シートの target_weight_kg を目標線として表示
+ *
+ * モック: スクショ参考 (あすけん 体重グラフ画面) ・ ティール緑化
  */
 export default async function RecordHubPage() {
   const supabase = await createClient();
@@ -19,112 +26,35 @@ export default async function RecordHubPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/record");
 
-  const summary = await getLatestBodyMetricSummary(user.id);
+  const [rows, goalSheet] = await Promise.all([
+    listMyBodyMetrics(365),
+    getMyGoalSheet(),
+  ]);
+
+  // 古い順に並べ替え (グラフ描画は時系列 ascending が自然)
+  const sorted = [...rows].sort((a, b) =>
+    a.recorded_at.localeCompare(b.recorded_at)
+  );
+
+  const targetWeightKg =
+    (goalSheet?.content?.goal_selection as { target_weight_kg?: number } | undefined)
+      ?.target_weight_kg ?? null;
 
   return (
     <>
       <MemberHeader title="記録" fallbackHref="/" />
-      <div className="min-h-screen bg-zinc-50 pb-24">
-        <div className="mx-auto max-w-[460px] px-4 py-6">
-          <p className="text-xs text-zinc-500 mt-1 mb-5">
-            体組成 ・ 月次添削
-          </p>
+      <main className="min-h-screen bg-zinc-50">
+        <div className="mx-auto max-w-[460px] px-4 py-4 space-y-4">
+          <BodyMetricsHero rows={sorted} targetWeightKg={targetWeightKg} />
 
-        {/* 体組成 カード */}
-        <Link
-          href="/body-metrics"
-          className="block bg-white border border-[#e8ebe9] rounded-2xl p-5 mb-3 hover:border-[#00897b] transition-colors"
-        >
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-sm font-bold text-zinc-900 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#00897b]" />
-              体組成
-            </h2>
-            <span className="text-xs text-[#00695c] font-bold">記録する →</span>
-          </div>
-          {summary.latest ? (
-            <div className="grid grid-cols-3 gap-2 text-center mt-3">
-              <SumItem
-                label="体重"
-                value={summary.latest.weight_kg}
-                unit="kg"
-              />
-              <SumItem
-                label="体脂肪"
-                value={summary.latest.body_fat_percent}
-                unit="%"
-              />
-              <SumItem
-                label="ウエスト"
-                value={summary.latest.waist_cm}
-                unit="cm"
-              />
-            </div>
-          ) : (
-            <div className="text-xs text-zinc-500 mt-1">
-              まだ記録がありません
-            </div>
-          )}
-          {summary.daysSinceLatest !== null && (
-            <div className="text-[10px] text-zinc-400 mt-2">
-              最終記録:{" "}
-              {summary.daysSinceLatest === 0
-                ? "今日"
-                : `${summary.daysSinceLatest} 日前`}
-            </div>
-          )}
-        </Link>
-
-        {/* 体組成 推移グラフ ショートカット */}
-        {summary.latest && (
           <Link
-            href="/body-metrics/chart"
-            className="block bg-white border border-[#e8ebe9] rounded-2xl px-4 py-3 mb-3 text-sm text-[#00695c] font-bold hover:border-[#00897b] transition-colors"
+            href="/body-metrics"
+            className="block bg-[#00897b] text-white rounded-2xl px-4 py-3.5 text-center text-[14px] font-bold hover:bg-[#00695c] transition-colors"
           >
-            📈 推移グラフを見る
+            記録する
           </Link>
-        )}
-
-        {/* 月次添削 カード */}
-        <Link
-          href="/monthly-review"
-          className="block bg-white border border-[#e8ebe9] rounded-2xl p-5 mb-3 hover:border-[#00897b] transition-colors"
-        >
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-zinc-900 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#0369a1]" />
-              月次添削
-            </h2>
-            <span className="text-xs text-[#00695c] font-bold">確認する →</span>
-          </div>
-          <p className="text-xs text-zinc-500 mt-2 leading-relaxed">
-            月 1 回、 17 項目に回答 → のり氏が動画で返信
-          </p>
-        </Link>
         </div>
-      </div>
+      </main>
     </>
-  );
-}
-
-function SumItem({
-  label,
-  value,
-  unit,
-}: {
-  label: string;
-  value: number | null;
-  unit: string;
-}) {
-  return (
-    <div>
-      <div className="text-[9px] text-zinc-500 mb-0.5">{label}</div>
-      <div className="text-base font-bold text-zinc-900 font-mono">
-        {value !== null ? value : "—"}
-        {value !== null && (
-          <span className="text-[10px] text-zinc-500 ml-0.5">{unit}</span>
-        )}
-      </div>
-    </div>
   );
 }
