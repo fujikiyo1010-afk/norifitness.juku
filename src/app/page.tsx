@@ -60,23 +60,13 @@ export default async function Home() {
         <div className="text-[17px] font-bold tracking-[0.04em] text-[#004d40]">
           筋肉塾
         </div>
-        <div className="flex items-center gap-3.5">
-          <button
-            type="button"
-            aria-label="お知らせ (準備中)"
-            disabled
-            className="w-[26px] h-[26px] flex items-center justify-center text-zinc-400 cursor-not-allowed"
-          >
-            <MailIcon />
-          </button>
-          <Link
-            href="/account"
-            aria-label="プロフィール"
-            className="w-[26px] h-[26px] rounded-full bg-[#00897b] text-white flex items-center justify-center text-[12px] font-bold"
-          >
-            {displayName.charAt(0)}
-          </Link>
-        </div>
+        <Link
+          href="/account"
+          aria-label="プロフィール"
+          className="w-[26px] h-[26px] rounded-full bg-[#00897b] text-white flex items-center justify-center text-[12px] font-bold"
+        >
+          {displayName.charAt(0)}
+        </Link>
       </header>
 
       {/* ヒーロー帯 */}
@@ -102,13 +92,13 @@ export default async function Home() {
         <ContinueCTA lastWatched={lastWatched} />
       </div>
 
-      {/* 4 機能ブロック */}
+      {/* 3 機能ブロック (LINE サポートは線② で復活予定) */}
       <SectionLabel>機能</SectionLabel>
-      <div className="grid grid-cols-2 gap-2 px-4">
+      <div className="grid grid-cols-3 gap-2 px-4">
         <FeatureBlock
           href="/courses"
           name="コース一覧"
-          desc="動画レッスンを見る"
+          desc="動画を見る"
           icon={<BookIcon />}
         />
         <FeatureBlock
@@ -116,12 +106,6 @@ export default async function Home() {
           name="学習"
           desc="振り返りと進捗"
           icon={<PencilIcon />}
-        />
-        <FeatureBlock
-          name="LINE サポート"
-          desc="準備中"
-          icon={<ChatIcon />}
-          disabled
         />
         <FeatureBlock
           href="/tools"
@@ -184,17 +168,12 @@ export default async function Home() {
         </div>
       </div>
 
-      {/* 数値 3 枠 */}
-      <div className="grid grid-cols-3 gap-2 px-4 pt-3">
+      {/* 数値 2 枠 (視聴時間は加算ロジック未実装 = 線② で復活) */}
+      <div className="grid grid-cols-2 gap-2 px-4 pt-3">
         <StatCell
           num={stats?.completedLessons ?? 0}
           unit="レッスン"
           label="完了"
-        />
-        <StatCell
-          num={formatWatchedTime(stats?.watchedSeconds ?? null)}
-          unit={stats?.watchedSeconds != null ? "時間" : ""}
-          label="視聴時間"
         />
         <StatCell
           num={(stats?.daysSinceJoined ?? 0) + 1}
@@ -428,17 +407,6 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 // ユーティリティ
 // =====================================================================
 
-/**
- * watched_seconds → 「N.N」(時間) 表示。
- * null = 加算ロジック未実装 → 「—」を返す。
- */
-function formatWatchedTime(seconds: number | null): string {
-  if (seconds == null) return "—";
-  const hours = seconds / 3600;
-  if (hours < 10) return hours.toFixed(1);
-  return Math.floor(hours).toString();
-}
-
 // =====================================================================
 // アイコン (線画黒一色、 許可絵文字は ✓ ▶ → ← のみ)
 // =====================================================================
@@ -451,15 +419,6 @@ const ICO_PROPS = {
   strokeLinecap: "round" as const,
   strokeLinejoin: "round" as const,
 };
-
-function MailIcon() {
-  return (
-    <svg {...ICO_PROPS} width="22" height="22">
-      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-      <polyline points="22,6 12,13 2,6" />
-    </svg>
-  );
-}
 
 function MailMiniIcon() {
   return (
@@ -484,14 +443,6 @@ function PencilIcon() {
     <svg {...ICO_PROPS} width="24" height="24">
       <path d="M12 20h9" />
       <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z" />
-    </svg>
-  );
-}
-
-function ChatIcon() {
-  return (
-    <svg {...ICO_PROPS} width="24" height="24">
-      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
     </svg>
   );
 }

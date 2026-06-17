@@ -40,7 +40,7 @@ export default async function MyLogPage() {
         {/* フラッシュバックカード(過去の振り返り再表示) */}
         {flashback && <FlashbackCard review={flashback} />}
 
-        {/* ハブカード */}
+        {/* ハブカード (ブックマーク = 線② 復活予定 / 実践リスト = 翌日復活予定) */}
         <section className="grid grid-cols-2 gap-3">
           <HubCard
             href="/my-log/reviews"
@@ -50,21 +50,11 @@ export default async function MyLogPage() {
             countLabel="件記入"
           />
           <HubCard
-            icon={<BookmarkIcon />}
-            title="ブックマーク"
-            comingSoon
-          />
-          <HubCard
-            icon={<DumbbellIcon />}
-            title="実践リスト"
-            comingSoon
-          />
-          <HubCard
+            href="/my-log/completed"
             icon={<CheckCircleIcon />}
             title="完了履歴"
             count={completedCount ?? 0}
             countLabel="レッスン完了"
-            comingSoon
           />
         </section>
       </div>
@@ -219,27 +209,6 @@ function PenIcon() {
     <svg {...ICO_PROPS} width="20" height="20">
       <path d="M12 20h9" />
       <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z" />
-    </svg>
-  );
-}
-
-function BookmarkIcon() {
-  return (
-    <svg {...ICO_PROPS} width="20" height="20">
-      <path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-    </svg>
-  );
-}
-
-function DumbbellIcon() {
-  return (
-    <svg {...ICO_PROPS} width="20" height="20">
-      <path d="M6.5 6.5h11" />
-      <path d="M6.5 17.5h11" />
-      <path d="M4 9v6" />
-      <path d="M20 9v6" />
-      <path d="M2 11v2" />
-      <path d="M22 11v2" />
     </svg>
   );
 }

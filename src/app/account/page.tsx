@@ -79,22 +79,20 @@ export default async function AccountPage() {
           </Link>
         </div>
 
-        {/* アカウント */}
+        {/* アカウント (アプリ通知 / LINE 連携 = 線② で復活、 メール変更 = 明日実装) */}
         <Section title="アカウント">
           <LinkRow icon={<UserIcon />} label="プロフィール編集" href="/account/profile" />
-          <PreparingRow icon={<LockIcon />} label="パスワード変更" />
-          <PreparingRow icon={<MailIcon />} label="メールアドレス変更" last />
+          <LinkRow icon={<LockIcon />} label="パスワード変更" href="/account/password" last />
         </Section>
 
         {/* 通知 */}
         <Section title="通知">
-          <PreparingRow icon={<BellIcon />} label="アプリ通知" />
           <ToggleRow
             icon={<MailIcon />}
             label="メール通知"
             slot={<EmailNotificationToggle initial={emailNotificationEnabled} />}
+            last
           />
-          <PreparingRow icon={<LineIcon />} label="LINE 連携" rightText="未連携" last />
         </Section>
 
         {/* その他 */}
@@ -163,33 +161,6 @@ function LinkRow({
   );
 }
 
-function PreparingRow({
-  icon,
-  label,
-  rightText,
-  last,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  rightText?: string;
-  last?: boolean;
-}) {
-  return (
-    <div
-      className={`flex items-center gap-3 px-4 py-3 ${
-        last ? "" : "border-b border-[#e8ebe9]"
-      } opacity-60`}
-    >
-      <span className="w-4 h-4 text-zinc-700">{icon}</span>
-      <span className="flex-1 text-[13px] text-zinc-900">{label}</span>
-      {rightText ? (
-        <span className="text-[10px] text-zinc-400 font-bold">{rightText}</span>
-      ) : null}
-      <span className="text-[10px] text-zinc-400 font-bold">準備中</span>
-    </div>
-  );
-}
-
 function ToggleRow({
   icon,
   label,
@@ -239,21 +210,6 @@ function MailIcon() {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
       <polyline points="22,6 12,13 2,6" />
-    </svg>
-  );
-}
-function BellIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-    </svg>
-  );
-}
-function LineIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="#00b900" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 12c0 3-4 5-9 5l-4 3v-3.5c-2-1.5-5-3-5-4.5C3 7 7 4 12 4s9 3 9 8z" />
     </svg>
   );
 }
