@@ -5,14 +5,15 @@ import type { BodyMetricRow } from "@/lib/body-metrics/queries";
 import { BodyMetricsChart } from "./BodyMetricsChart";
 
 /**
- * 体組成 詳細カード + 期間タブ + SVG グラフ (2026-06-17 あすけん風リデザイン)
+ * 体組成 詳細カード + 期間タブ + SVG グラフ (2026-06-17 あすけん風リデザイン v2)
  *
- * 期間タブ: 1週間 / 1ヶ月 / 3ヶ月 / 1年
- * 第 2 軸切替: 体脂肪率 / ウエスト (体重と並列表示)
- * 目標線: 目標シートの target_weight_kg があれば破線で描画
+ * きよむさん指示 (2026-06-17):
+ *   - 用語: スタート→入会時 / 成果→変化
+ *   - 主軸切替: 体重 / 体脂肪率 / ウエスト の 3-way 単一選択
+ *     (旧第 2 軸切替は撤回 ・ 選んだものをメインで大表示 + グラフも 1 本)
  */
 
-export type SecondaryMetric = "body_fat_percent" | "waist_cm";
+export type MetricKey = "weight_kg" | "body_fat_percent" | "waist_cm";
 
 const PERIOD_OPTIONS = [
   { key: "1w", label: "1週間", days: 7 },
@@ -23,7 +24,8 @@ const PERIOD_OPTIONS = [
 
 type PeriodKey = (typeof PERIOD_OPTIONS)[number]["key"];
 
-const SECONDARY_OPTIONS: { key: SecondaryMetric; label: string; unit: string }[] = [
+const METRIC_OPTIONS: { key: MetricKey; label: string; unit: string }[] = [
+  { key: "weight_kg", label: "体重", unit: "kg" },
   { key: "body_fat_percent", label: "体脂肪率", unit: "%" },
   { key: "waist_cm", label: "ウエスト", unit: "cm" },
 ];
@@ -36,10 +38,10 @@ export function BodyMetricsHero({
   targetWeightKg: number | null;
 }) {
   const [period, setPeriod] = useState<PeriodKey>("1m");
-  const [secondary, setSecondary] = useState<SecondaryMetric>("body_fat_percent");
+  const [metric, setMetric] = useState<MetricKey>("weight_kg");
 
   const periodDef = PERIOD_OPTIONS.find((p) => p.key === period)!;
-  const secondaryDef = SECONDARY_OPTIONS.find((s) => s.key === secondary)!;
+  const metricDef = METRIC_OPTIONS.find((m) => m.key === metric)!;
 
   // 期間 filter (recorded_at から逆算)
   const filtered = useMemo(() => {
@@ -53,13 +55,12 @@ export function BodyMetricsHero({
   const latest = rows.length > 0 ? rows[rows.length - 1] : null;
   const startRow = rows.length > 0 ? rows[0] : null;
 
-  const startWeight = startRow?.weight_kg ?? null;
-  const currentWeight = latest?.weight_kg ?? null;
-  const weightDelta =
-    startWeight !== null && currentWeight !== null
-      ? Math.round((currentWeight - startWeight) * 10) / 10
+  const startValue = startRow?.[metric] ?? null;
+  const currentValue = latest?.[metric] ?? null;
+  const delta =
+    startValue !== null && currentValue !== null
+      ? Math.round((currentValue - startValue) * 10) / 10
       : null;
-  const secondaryValue = latest?.[secondary] ?? null;
 
   const latestDate = latest
     ? new Date(latest.recorded_at).toLocaleDateString("ja-JP", {
@@ -68,6 +69,9 @@ export function BodyMetricsHero({
         weekday: "short",
       })
     : "—";
+
+  // 体重以外を選択中は目標線非表示 (= 目標シートは体重のみ管理)
+  const targetForChart = metric === "weight_kg" ? targetWeightKg : null;
 
   return (
     <div className="space-y-3">
@@ -79,57 +83,49 @@ export function BodyMetricsHero({
 
         <div className="flex items-end justify-center gap-2.5">
           <span className="text-[14px] font-bold text-[#00695c] self-center">
-            体重
+            {metricDef.label}
           </span>
           <span className="text-[40px] font-bold text-zinc-900 leading-none font-mono tracking-tight">
-            {currentWeight !== null ? currentWeight.toFixed(1) : "—"}
+            {currentValue !== null ? currentValue.toFixed(1) : "—"}
           </span>
           <span className="text-[14px] font-bold text-zinc-600 leading-none pb-1">
-            kg
+            {metricDef.unit}
           </span>
         </div>
 
         {startRow ? (
           <div className="flex items-center justify-center gap-3 mt-3 text-[12px]">
             <span className="text-zinc-500">
-              スタート{" "}
+              入会時{" "}
               <span className="font-bold text-zinc-900 font-mono">
-                {startWeight !== null ? startWeight.toFixed(1) : "—"}
-                <span className="text-[10px] ml-0.5">kg</span>
+                {startValue !== null ? startValue.toFixed(1) : "—"}
+                <span className="text-[10px] ml-0.5">{metricDef.unit}</span>
               </span>
             </span>
             <span className="text-zinc-300">|</span>
             <span className="text-zinc-500">
-              成果{" "}
+              変化{" "}
               <span
                 className={`font-bold font-mono ${
-                  weightDelta !== null && weightDelta < 0
+                  delta !== null && delta < 0
                     ? "text-[#00695c]"
-                    : weightDelta !== null && weightDelta > 0
+                    : delta !== null && delta > 0
                       ? "text-rose-600"
                       : "text-zinc-700"
                 }`}
               >
-                {weightDelta !== null
-                  ? `${weightDelta > 0 ? "+" : ""}${weightDelta.toFixed(1)}`
+                {delta !== null
+                  ? `${delta > 0 ? "+" : ""}${delta.toFixed(1)}`
                   : "—"}
-                <span className="text-[10px] ml-0.5">kg</span>
+                <span className="text-[10px] ml-0.5">{metricDef.unit}</span>
               </span>
             </span>
           </div>
         ) : null}
 
-        {/* 第 2 軸切替 + 値 */}
-        <div className="border-t border-[#e8ebe9] mt-4 pt-3 flex items-center justify-between gap-3">
-          <SecondarySelector value={secondary} onChange={setSecondary} />
-          <div className="text-right">
-            <span className="text-[24px] font-bold text-zinc-900 font-mono leading-none">
-              {secondaryValue !== null ? secondaryValue.toFixed(1) : "—.—"}
-            </span>
-            <span className="text-[12px] text-zinc-600 font-bold ml-1">
-              {secondaryDef.unit}
-            </span>
-          </div>
+        {/* 主軸 3-way 切替 */}
+        <div className="border-t border-[#e8ebe9] mt-4 pt-3">
+          <MetricSelector value={metric} onChange={setMetric} />
         </div>
       </div>
 
@@ -163,8 +159,10 @@ export function BodyMetricsHero({
         ) : (
           <BodyMetricsChart
             rows={filtered}
-            secondary={secondary}
-            targetWeightKg={targetWeightKg}
+            metric={metric}
+            metricLabel={metricDef.label}
+            metricUnit={metricDef.unit}
+            targetWeightKg={targetForChart}
           />
         )}
       </div>
@@ -172,26 +170,26 @@ export function BodyMetricsHero({
   );
 }
 
-function SecondarySelector({
+function MetricSelector({
   value,
   onChange,
 }: {
-  value: SecondaryMetric;
-  onChange: (next: SecondaryMetric) => void;
+  value: MetricKey;
+  onChange: (next: MetricKey) => void;
 }) {
   return (
-    <div className="flex gap-1.5">
-      {SECONDARY_OPTIONS.map((opt) => {
+    <div className="flex gap-1.5 justify-center">
+      {METRIC_OPTIONS.map((opt) => {
         const active = opt.key === value;
         return (
           <button
             key={opt.key}
             type="button"
             onClick={() => onChange(opt.key)}
-            className={`px-3 py-1 rounded-full text-[11px] font-bold transition-colors ${
+            className={`flex-1 px-3 py-1.5 rounded-full text-[12px] font-bold transition-colors ${
               active
-                ? "bg-[#ede9fe] text-[#7c3aed] border border-[#c4b5fd]"
-                : "bg-zinc-100 text-zinc-500 border border-transparent hover:bg-zinc-200"
+                ? "bg-[#00695c] text-white"
+                : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
             }`}
           >
             {opt.label}
