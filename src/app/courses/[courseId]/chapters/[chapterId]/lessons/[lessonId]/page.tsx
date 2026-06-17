@@ -9,7 +9,7 @@ import {
   getAdjacentLessons,
 } from "@/lib/courses/queries";
 import { VimeoEmbed } from "@/components/VimeoEmbed";
-import { BackLink } from "@/components/BackLink";
+import { MemberHeader } from "@/components/MemberHeader";
 import { CompleteButton } from "./CompleteButton";
 import { ReviewAccordion } from "./ReviewAccordion";
 
@@ -23,13 +23,11 @@ type RouteParams = Promise<{
 
 export default async function StudentLessonPage({
   params,
-  searchParams,
 }: {
   params: RouteParams;
   searchParams: Promise<{ from?: string; focus?: string }>;
 }) {
   const { courseId, chapterId, lessonId } = await params;
-  const { from } = await searchParams;
 
   const [course, chapter, lesson] = await Promise.all([
     getPublicCourse(courseId),
@@ -60,31 +58,41 @@ export default async function StudentLessonPage({
   );
 
   return (
-    <main className="flex flex-1 flex-col p-4 sm:p-6 bg-zinc-50">
-      <div className="mx-auto w-full max-w-[460px] space-y-4">
+    <>
+      <MemberHeader
+        title="レッスン"
+        fallbackHref={`/courses/${courseId}`}
+        rightIcon={
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="12" cy="12" r="1" />
+            <circle cx="19" cy="12" r="1" />
+            <circle cx="5" cy="12" r="1" />
+          </svg>
+        }
+      />
+      <main className="flex flex-1 flex-col p-4 sm:p-6 bg-zinc-50">
+        <div className="mx-auto w-full max-w-[460px] space-y-4">
         <header className="space-y-2">
-          <BackLink
-            from={from}
-            className="inline-flex items-center gap-1 text-xs text-zinc-600 hover:text-[#00695c]"
-          />
-          {/* パンくず ・ モック準拠 (章名強調 + 現在地 L<n> 表示) */}
-          <nav className="text-[11px] text-zinc-500">
+          {/* レッスンタイトル + 章名 (パンくずは AppHeader 戻る矢印で代替) */}
+          <div className="text-[11px] text-zinc-500">
             <Link
               href={`/courses/${courseId}`}
-              className="hover:text-zinc-700"
-            >
-              {course.title}
-            </Link>
-            <span className="mx-1">&gt;</span>
-            <Link
-              href={`/courses/${courseId}`}
-              className="hover:text-zinc-700 font-bold text-zinc-700"
+              className="hover:text-zinc-700 font-bold"
             >
               {chapter.title}
             </Link>
             <span className="mx-1">&gt;</span>
             <span className="text-zinc-700">L{lesson.sort_order}</span>
-          </nav>
+          </div>
           <h1 className="text-xl font-bold tracking-tight text-zinc-900 leading-tight">
             {lesson.title}
           </h1>
@@ -298,7 +306,8 @@ export default async function StudentLessonPage({
             ← {course.title} の章一覧へ
           </Link>
         </div>
-      </div>
-    </main>
+        </div>
+      </main>
+    </>
   );
 }

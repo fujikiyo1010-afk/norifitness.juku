@@ -4,6 +4,7 @@ import {
   getMyFlashbackReview,
   type MyReviewWithContext,
 } from "@/lib/courses/queries";
+import { MemberHeader } from "@/components/MemberHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -28,23 +29,13 @@ export default async function MyLogPage() {
     ]);
 
   return (
-    <main className="flex flex-1 flex-col bg-zinc-50 min-h-screen">
-      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e8ebe9] bg-white p-6 space-y-6">
-        <header className="space-y-2">
-          <nav className="text-xs text-zinc-500">
-            <Link href="/" className="underline hover:text-zinc-700 dark:hover:text-zinc-300">
-              ホーム
-            </Link>
-            <span> / 学習</span>
-          </nav>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
-            <ChartIcon />
-            学習
-          </h1>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            あなたの学びの軌跡を一覧できます。
-          </p>
-        </header>
+    <>
+      <MemberHeader title="学習" fallbackHref="/" />
+      <main className="flex flex-1 flex-col bg-zinc-50 min-h-screen">
+        <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e8ebe9] bg-white p-6 space-y-6">
+        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+          あなたの学びの軌跡を一覧できます。
+        </p>
 
         {/* フラッシュバックカード(過去の振り返り再表示) */}
         {flashback && <FlashbackCard review={flashback} />}
@@ -78,6 +69,7 @@ export default async function MyLogPage() {
         </section>
       </div>
     </main>
+    </>
   );
 }
 

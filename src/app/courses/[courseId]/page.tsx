@@ -8,6 +8,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { type AccordionChapter } from "./CourseAccordion";
 import { CourseDetailView } from "./CourseDetailView";
+import { MemberHeader } from "@/components/MemberHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -105,21 +106,10 @@ export default async function StudentCoursePage({
     totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
   return (
-    <main className="flex flex-1 flex-col p-4 sm:p-6 bg-zinc-50">
-      <div className="mx-auto w-full max-w-[460px] space-y-4">
-        {/* パンくず */}
-        <nav className="text-xs text-zinc-500">
-          <Link href="/" className="underline hover:text-zinc-700">
-            ホーム
-          </Link>
-          <span> / </span>
-          <Link href="/courses" className="underline hover:text-zinc-700">
-            コース一覧
-          </Link>
-          <span> / </span>
-          <span className="text-zinc-700">{course.title}</span>
-        </nav>
-
+    <>
+      <MemberHeader title="コース詳細" fallbackHref="/courses" />
+      <main className="flex flex-1 flex-col p-4 sm:p-6 bg-zinc-50">
+        <div className="mx-auto w-full max-w-[460px] space-y-4">
         {/* ヒーロー (モック準拠 ・ 緑グラデ + 大サムネ + 進捗 + 続きから CTA) */}
         <section className="rounded-2xl overflow-hidden bg-gradient-to-br from-[#00897b] to-[#00695c] text-white p-5">
           {/* 大サムネ枠 */}
@@ -183,7 +173,8 @@ export default async function StudentCoursePage({
           initialProgress={initialProgress}
           currentLessonId={firstUnfinished?.lessonId ?? null}
         />
-      </div>
-    </main>
+        </div>
+      </main>
+    </>
   );
 }

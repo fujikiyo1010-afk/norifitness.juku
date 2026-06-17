@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getMyGoalSheet } from "@/lib/goal-sheet/queries";
+import { MemberHeader } from "@/components/MemberHeader";
 import {
   SECTION_META,
   countFilledSections,
@@ -32,21 +33,11 @@ export default async function GoalSheetPage() {
   // === シート未作成: 初回記入 CTA ===
   if (!sheet) {
     return (
-      <main className="flex flex-1 flex-col p-6 sm:p-8 bg-[#e8ebec]">
-        <div className="mx-auto w-full max-w-[460px]">
-          <header className="mb-6 space-y-2">
-            <nav className="text-xs text-zinc-500">
-              <Link href="/" className="underline hover:text-zinc-700">
-                ホーム
-              </Link>
-              <span> / 目標管理シート</span>
-            </nav>
-            <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
-              目標管理シート
-            </h1>
-          </header>
-
-          <div className="rounded-xl bg-white border border-[#e8ebe9] p-8 text-center space-y-4">
+      <>
+        <MemberHeader title="目標管理シート" fallbackHref="/" />
+        <main className="flex flex-1 flex-col p-6 sm:p-8 bg-[#e8ebec]">
+          <div className="mx-auto w-full max-w-[460px]">
+            <div className="rounded-xl bg-white border border-[#e8ebe9] p-8 text-center space-y-4">
             <div className="mx-auto w-12 h-12 text-[#00897b]">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
                 <circle cx="12" cy="12" r="10" />
@@ -72,6 +63,7 @@ export default async function GoalSheetPage() {
           </div>
         </div>
       </main>
+      </>
     );
   }
 
@@ -89,17 +81,11 @@ export default async function GoalSheetPage() {
   });
 
   return (
-    <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#e8ebec]">
+    <>
+      <MemberHeader title="目標管理シート" fallbackHref="/" />
+      <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#e8ebec]">
       <SavedToast />
       <div className="mx-auto w-full max-w-[980px] space-y-4">
-        {/* パンくず */}
-        <nav className="text-xs text-zinc-500 px-1">
-          <Link href="/" className="underline hover:text-zinc-700">
-            ホーム
-          </Link>
-          <span> / 目標管理シート</span>
-        </nav>
-
         {/* ドキュメントフレーム */}
         <div className="bg-white border border-[#d4d4d4] rounded-md shadow-sm overflow-hidden">
           {/* ① ヘッダー帯 */}
@@ -254,6 +240,7 @@ export default async function GoalSheetPage() {
         </div>
       </div>
     </main>
+    </>
   );
 }
 

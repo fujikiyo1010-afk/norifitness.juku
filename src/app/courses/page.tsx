@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   listPublicCourses,
   countPublicChapters,
@@ -6,6 +5,7 @@ import {
   getMyLessonProgress,
 } from "@/lib/courses/queries";
 import { CoursesView } from "./CoursesView";
+import { MemberHeader } from "@/components/MemberHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -35,22 +35,13 @@ export default async function CoursesPage() {
   );
 
   return (
-    <main className="flex flex-1 flex-col p-6 sm:p-8">
-      <div className="mx-auto w-full max-w-[460px] space-y-6">
-        <header className="space-y-2">
-          <nav className="text-xs text-zinc-500">
-            <Link href="/" className="underline hover:text-zinc-700 dark:hover:text-zinc-300">
-              ホーム
-            </Link>
-            <span> / コース一覧</span>
-          </nav>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            コース一覧
-          </h1>
-        </header>
-
-        <CoursesView initialCourses={summaries} />
-      </div>
-    </main>
+    <>
+      <MemberHeader title="コース" fallbackHref="/" />
+      <main className="flex flex-1 flex-col p-4 sm:p-6">
+        <div className="mx-auto w-full max-w-[460px] space-y-4">
+          <CoursesView initialCourses={summaries} />
+        </div>
+      </main>
+    </>
   );
 }

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { listMyBodyMetrics } from "@/lib/body-metrics/queries";
 import { BodyMetricsForm } from "./_components/BodyMetricsForm";
+import { MemberHeader } from "@/components/MemberHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -19,25 +20,17 @@ export default async function BodyMetricsPage() {
   const latest = records[0] ?? null;
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <div className="mx-auto max-w-[460px] px-4 py-6">
-        {/* ヘッダー */}
-        <header className="mb-5">
-          <div className="text-xs text-zinc-500 mb-1">
-            <Link href="/" className="hover:underline">
-              ホーム
-            </Link>
-            <span className="mx-1.5 text-zinc-300">/</span>
-            <span className="text-zinc-700">体組成</span>
-          </div>
-          <h1 className="text-xl font-bold text-zinc-900">体組成 記録</h1>
-          <p className="text-xs text-zinc-500 mt-1">
+    <>
+      <MemberHeader title="体組成 記録" fallbackHref="/" />
+      <div className="min-h-screen bg-zinc-50">
+        <div className="mx-auto max-w-[460px] px-4 py-6">
+          {/* 副題 (パンくずは AppHeader 戻る矢印で代替) */}
+          <p className="text-xs text-zinc-500 mb-1 mt-1">
             毎日 or 週 1 で記録 ・ 推移はグラフでチェック
           </p>
-          <p className="text-xs text-zinc-500 mt-0.5">
+          <p className="text-xs text-zinc-500 mb-5">
             リアルタイムで共有されます
           </p>
-        </header>
 
         {/* 入力フォーム */}
         <BodyMetricsForm
@@ -87,6 +80,7 @@ export default async function BodyMetricsPage() {
         </Link>
       </div>
     </div>
+    </>
   );
 }
 
