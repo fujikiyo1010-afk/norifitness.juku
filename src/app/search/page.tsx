@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { searchLessons } from "@/lib/courses/search";
+import { MemberHeader } from "@/components/MemberHeader";
 import { getMyLessonProgress } from "@/lib/courses/queries";
 import { SearchBox } from "@/app/courses/SearchBox";
 import { SearchResultCard } from "@/components/SearchResultCard";
@@ -20,34 +21,15 @@ export default async function SearchPage({
   const progressMap = await getMyLessonProgress(results.map((r) => r.id));
 
   return (
-    <main className="flex flex-1 flex-col p-6 sm:p-8">
-      <div className="mx-auto w-full max-w-[460px] space-y-6">
-        <header className="space-y-2">
-          <nav className="text-xs text-zinc-500 space-x-1">
-            <Link href="/" className="underline hover:text-zinc-700 dark:hover:text-zinc-300">
-              ホーム
-            </Link>
-            <span>/</span>
-            <Link href="/courses" className="underline hover:text-zinc-700 dark:hover:text-zinc-300">
-              コース一覧
-            </Link>
-            <span>/</span>
-            <span className="text-zinc-700 dark:text-zinc-300">検索結果</span>
-          </nav>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            🔍 検索結果
-            {query.length > 0 && (
-              <>
-                <span className="ml-2 text-zinc-600 dark:text-zinc-400 font-normal">
-                  「{query}」
-                </span>
-                <span className="ml-2 text-sm text-zinc-500 font-normal">
-                  ({results.length} 件)
-                </span>
-              </>
-            )}
-          </h1>
-        </header>
+    <>
+      <MemberHeader title="検索" fallbackHref="/" />
+      <main className="flex flex-1 flex-col p-6 sm:p-8">
+        <div className="mx-auto w-full max-w-[460px] space-y-6">
+        {query.length > 0 && (
+          <div className="text-sm text-zinc-700">
+            「{query}」 の結果 ({results.length} 件)
+          </div>
+        )}
 
         {/* 再検索ボックス(submit モード、Enter or ボタンで /search 再遷移) */}
         <SearchBox />
@@ -80,8 +62,9 @@ export default async function SearchPage({
             ← コース一覧へ戻る
           </Link>
         </div>
-      </div>
-    </main>
+        </div>
+      </main>
+    </>
   );
 }
 

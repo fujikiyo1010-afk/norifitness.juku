@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MemberHeader } from "@/components/MemberHeader";
 import {
   getMyCurrentMonthAudit,
   listMyAudits,
@@ -35,26 +36,10 @@ export default async function MonthlyReviewHistoryPage() {
     : allAudits;
 
   return (
-    <main className="flex flex-1 flex-col bg-[#fafbfa] min-h-screen">
-      <div className="mx-auto w-full max-w-[460px] bg-white border-x border-[#e8ebe9]">
-        {/* ヘッダー */}
-        <div className="px-4 py-3 border-b border-[#e8ebe9] flex items-center justify-between bg-white">
-          <Link href="/" className="text-zinc-900">
-            <svg
-              className="w-5 h-5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </Link>
-          <div className="text-sm font-bold text-zinc-900">月次添削 履歴</div>
-          <div className="w-5" />
-        </div>
+    <>
+      <MemberHeader title="月次添削 履歴" fallbackHref="/" />
+      <main className="flex flex-1 flex-col bg-[#fafbfa] min-h-screen">
+        <div className="mx-auto w-full max-w-[460px] bg-white border-x border-[#e8ebe9]">
 
         {/* スクロール本体 */}
         <div className="bg-[#fafbfa] pb-20">
@@ -84,6 +69,7 @@ export default async function MonthlyReviewHistoryPage() {
         </div>
       </div>
     </main>
+    </>
   );
 }
 
