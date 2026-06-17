@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { sendPasswordChangedEmail } from "@/lib/email/password-changed";
 
 /**
  * /account 設定画面のサーバーアクション (2026-06-17 線① 新設)
@@ -96,6 +98,23 @@ export async function updatePassword(
   });
   if (updateError) {
     return { ok: false, error: updateError.message };
+  }
+
+  // 3) security_events に記録 + 通知メール送信 (失敗しても主処理は成功扱い)
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) {
+    try {
+      const admin = createAdminClient();
+      await admin.from("security_events").insert({
+        user_id: user.id,
+        event_type: "password_changed",
+      });
+    } catch (e) {
+      console.error("security_events insert failed:", e);
+    }
+    await sendPasswordChangedEmail(user.id);
   }
 
   revalidatePath("/account");

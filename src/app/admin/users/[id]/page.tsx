@@ -36,6 +36,10 @@ import {
   listGoalSheetRevisionsForUser,
 } from "@/lib/goal-sheet/queries";
 import { countFilledSections } from "@/lib/goal-sheet/types";
+import {
+  listSecurityEventsForUser,
+  labelForSecurityEventType,
+} from "@/lib/security/queries";
 import { Sparkline } from "./_components/Sparkline";
 import { MonthlyAuditSection } from "./MonthlyAuditSection";
 
@@ -94,7 +98,7 @@ export default async function AdminUserHubPage({
   const age = birthday ? calcAge(birthday) : null;
   const ageBand = birthday ? calcAgeBand(birthday) : null;
 
-  // 8 リソースを並列取得 (body_metrics 追加 = 「現在の最新値」 を日々記録から補完)
+  // 9 リソースを並列取得 (body_metrics 追加 = 「現在の最新値」 を日々記録から補完)
   const [
     carte,
     currentMenu,
@@ -104,6 +108,7 @@ export default async function AdminUserHubPage({
     revisions,
     pendingCounts,
     latestBodyMetric,
+    securityEvents,
   ] = await Promise.all([
     getCarteForAdmin(userId),
     getCurrentMenuForAdmin(userId),
@@ -113,6 +118,7 @@ export default async function AdminUserHubPage({
     listGoalSheetRevisionsForUser(userId, 2), // 前回値比較用 (最新1件 = 1 つ前の編集)
     countPendingRequestsForUser(userId),
     getLatestBodyMetricSummary(userId), // body_metrics (日々記録) の最新値
+    listSecurityEventsForUser(userId, 10), // セキュリティ履歴 (直近 10 件)
   ]);
 
   // 体組成推移データ (sparkline + 前月比較は monthly_audits 由来のまま)
@@ -582,6 +588,36 @@ export default async function AdminUserHubPage({
 
         </div>
         {/* /4 セクション グリッド終了 */}
+
+        {/* セキュリティ履歴 (2026-06-18 #3-b 線①) */}
+        <section className="rounded-[14px] border border-[#e8ebe9] bg-white p-5">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="h-5 w-1 rounded-full bg-[#00897b]" />
+            <h2 className="text-sm font-semibold text-zinc-900">セキュリティ履歴</h2>
+            <span className="text-[10px] text-zinc-500">直近 10 件</span>
+          </div>
+          {securityEvents.length === 0 ? (
+            <p className="text-xs text-zinc-500">
+              セキュリティ関連の操作履歴はまだありません。
+            </p>
+          ) : (
+            <ul className="space-y-1.5">
+              {securityEvents.map((e) => (
+                <li
+                  key={e.id}
+                  className="flex items-baseline gap-3 text-xs border-b border-zinc-100 last:border-0 pb-1.5 last:pb-0"
+                >
+                  <span className="font-mono text-zinc-500 tabular-nums whitespace-nowrap">
+                    {formatDistributionDateTime(e.occurred_at)}
+                  </span>
+                  <span className="text-zinc-900 font-medium">
+                    {labelForSecurityEventType(e.event_type)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
 
         {/* 注記 (基本情報はヘッダに統合済み) */}
         <div className="rounded-[14px] border border-dashed border-zinc-300 bg-white p-4 text-xs text-zinc-500">
