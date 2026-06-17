@@ -25,10 +25,12 @@ export function CourseDetailView({
   courseId,
   chapters,
   initialProgress,
+  currentLessonId = null,
 }: {
   courseId: string;
   chapters: AccordionChapter[];
   initialProgress: Record<string, boolean>;
+  currentLessonId?: string | null;
 }) {
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
@@ -113,6 +115,7 @@ export function CourseDetailView({
               courseId={courseId}
               chapters={chapters}
               initialProgress={initialProgress}
+              currentLessonId={currentLessonId}
             />
           )}
         </section>

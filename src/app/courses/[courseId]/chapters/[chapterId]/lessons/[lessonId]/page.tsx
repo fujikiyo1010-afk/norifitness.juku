@@ -6,6 +6,7 @@ import {
   getPublicLesson,
   getMyLessonProgress,
   getMyLessonReview,
+  getAdjacentLessons,
 } from "@/lib/courses/queries";
 import { VimeoEmbed } from "@/components/VimeoEmbed";
 import { BackLink } from "@/components/BackLink";
@@ -39,134 +40,262 @@ export default async function StudentLessonPage({
     notFound();
   }
 
-  const [progressMap, review] = await Promise.all([
+  const [progressMap, review, adjacent] = await Promise.all([
     getMyLessonProgress([lesson.id]),
     getMyLessonReview(lesson.id),
+    getAdjacentLessons(courseId, lesson.id),
   ]);
   const isCompleted = progressMap.get(lesson.id) === true;
 
+  // 【テスト】 レッスン判定 ・ vimeo なし + meta_tags に「テスト」 含む
+  // 試験機能 UI 実装まで「準備中」 表示で仮置き (線① ローンチ前にフル実装に置換)
+  const isExam =
+    (lesson.meta_tags?.includes("テスト") ?? false) && !lesson.vimeo_url;
+
+  // 配布資料 統合 (description + sub_image_url + summary_video_url)
+  const hasAttachment = !!(
+    lesson.description ||
+    lesson.sub_image_url ||
+    lesson.summary_video_url
+  );
+
   return (
-    <main className="flex flex-1 flex-col p-6 sm:p-8">
-      <div className="mx-auto w-full max-w-[460px] space-y-6">
+    <main className="flex flex-1 flex-col p-4 sm:p-6 bg-zinc-50">
+      <div className="mx-auto w-full max-w-[460px] space-y-4">
         <header className="space-y-2">
-          <BackLink from={from} className="inline-flex items-center gap-1 text-xs text-zinc-600 hover:text-[#00695c] mb-1" />
-          <nav className="text-xs text-zinc-500 space-x-1">
-            <Link href="/" className="underline hover:text-zinc-700 dark:hover:text-zinc-300">
-              ホーム
-            </Link>
-            <span>/</span>
-            <Link href="/courses" className="underline hover:text-zinc-700 dark:hover:text-zinc-300">
-              コース一覧
-            </Link>
-            <span>/</span>
+          <BackLink
+            from={from}
+            className="inline-flex items-center gap-1 text-xs text-zinc-600 hover:text-[#00695c]"
+          />
+          {/* パンくず ・ モック準拠 (章名強調 + 現在地 L<n> 表示) */}
+          <nav className="text-[11px] text-zinc-500">
             <Link
               href={`/courses/${courseId}`}
-              className="underline hover:text-zinc-700 dark:hover:text-zinc-300"
+              className="hover:text-zinc-700"
             >
               {course.title}
             </Link>
-            <span>/</span>
+            <span className="mx-1">&gt;</span>
             <Link
-              href={`/courses/${courseId}/chapters/${chapterId}`}
-              className="underline hover:text-zinc-700 dark:hover:text-zinc-300"
+              href={`/courses/${courseId}`}
+              className="hover:text-zinc-700 font-bold text-zinc-700"
             >
               {chapter.title}
             </Link>
-            <span>/</span>
-            <span className="text-zinc-700 dark:text-zinc-300">{lesson.title}</span>
+            <span className="mx-1">&gt;</span>
+            <span className="text-zinc-700">L{lesson.sort_order}</span>
           </nav>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+          <h1 className="text-xl font-bold tracking-tight text-zinc-900 leading-tight">
             {lesson.title}
           </h1>
-          {lesson.meta_tags && lesson.meta_tags.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {lesson.meta_tags.map((tag) => (
-                <Link
-                  key={tag}
-                  href={`/search?q=${encodeURIComponent(tag)}`}
-                  className="text-xs rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 px-2 py-0.5 hover:bg-zinc-200 dark:hover:bg-zinc-700"
-                >
-                  {tag}
-                </Link>
-              ))}
-            </div>
-          )}
+          {/* 講師 + メタタグ */}
+          <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-600">
+            <span className="inline-flex items-center gap-1.5">
+              <span className="w-5 h-5 rounded-full bg-[#004d40] text-white text-[10px] flex items-center justify-center font-bold">
+                の
+              </span>
+              のり社長
+            </span>
+            {lesson.meta_tags && lesson.meta_tags.length > 0 && (
+              <>
+                <span className="text-zinc-300">・</span>
+                <span className="flex flex-wrap gap-1">
+                  {lesson.meta_tags.map((tag) => (
+                    <Link
+                      key={tag}
+                      href={`/search?q=${encodeURIComponent(tag)}`}
+                      className="text-[10px] rounded bg-zinc-100 text-zinc-700 px-1.5 py-0.5 hover:bg-zinc-200"
+                    >
+                      {tag}
+                    </Link>
+                  ))}
+                </span>
+              </>
+            )}
+          </div>
         </header>
 
-        {/* 動画 */}
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-            🎥 動画
-          </h2>
-          {lesson.vimeo_url ? (
-            <VimeoEmbed url={lesson.vimeo_url} />
+        {/* 動画 or 試験準備中 or 動画 URL なし */}
+        {isExam ? (
+          <section className="rounded-xl bg-amber-50 border border-amber-200 p-5 text-center">
+            <div className="text-sm font-bold text-amber-800 mb-1">
+              理解度テスト ・ 準備中
+            </div>
+            <div className="text-xs text-amber-700 leading-relaxed">
+              この章の理解度テストは近日中に実装予定です。
+              <br />
+              先に動画レッスンを視聴して内容を学んでください。
+            </div>
+          </section>
+        ) : lesson.vimeo_url ? (
+          <VimeoEmbed url={lesson.vimeo_url} />
+        ) : (
+          <div className="rounded-xl bg-zinc-100 border border-zinc-200 p-6 text-center text-sm text-zinc-500">
+            動画 URL が設定されていません。
+          </div>
+        )}
+
+        {/* 完了ボタン (試験は対象外) */}
+        {!isExam && (
+          <section>
+            <CompleteButton
+              lessonId={lesson.id}
+              initialCompleted={isCompleted}
+            />
+          </section>
+        )}
+
+        {/* 3 行振り返り (試験は対象外) */}
+        {!isExam && (
+          <section>
+            <ReviewAccordion lessonId={lesson.id} initial={review} />
+          </section>
+        )}
+
+        {/* 配布資料 (description + sub_image_url + summary_video_url 統合) */}
+        {!isExam && hasAttachment && (
+          <details className="rounded-xl bg-white border border-zinc-200 p-3 group">
+            <summary className="flex items-center justify-between cursor-pointer text-sm font-semibold text-zinc-900 list-none">
+              <span className="inline-flex items-center gap-2">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21.44 11.05 12.25 20.24a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+                </svg>
+                配布資料
+              </span>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="group-open:rotate-180 transition-transform"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </summary>
+            <div className="mt-3 space-y-3 text-sm text-zinc-700">
+              {lesson.description && (
+                <div className="whitespace-pre-wrap leading-relaxed">
+                  {lesson.description}
+                </div>
+              )}
+              {lesson.sub_image_url && (
+                <div>
+                  <a
+                    href={lesson.sub_image_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-[#00695c] underline break-all"
+                  >
+                    補助画像を開く ↗
+                  </a>
+                </div>
+              )}
+              {lesson.summary_video_url && (
+                <div>
+                  <a
+                    href={lesson.summary_video_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-[#00695c] underline break-all"
+                  >
+                    全まとめ動画を開く ↗
+                  </a>
+                </div>
+              )}
+            </div>
+          </details>
+        )}
+
+        {/* 次のレッスン (モック準拠 薄緑カード) ・ コース末は完了画面ふう */}
+        <section className="space-y-2 pt-2">
+          {adjacent.next ? (
+            <Link
+              href={`/courses/${courseId}/chapters/${adjacent.next.chapter_id}/lessons/${adjacent.next.lesson_id}`}
+              className="flex items-center justify-between bg-[#f0f9f8] border border-[#00897b] rounded-xl px-4 py-3.5 hover:bg-[#e0f2f1] transition-colors"
+            >
+              <div className="min-w-0">
+                <div className="text-[10px] text-zinc-500 mb-0.5">
+                  次のレッスン →
+                </div>
+                <div className="text-sm font-bold text-[#00695c] truncate">
+                  {adjacent.next.lesson_title}
+                </div>
+              </div>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#00695c"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="flex-shrink-0 ml-2"
+              >
+                <path d="m9 18 6-6-6-6" />
+              </svg>
+            </Link>
           ) : (
-            <p className="text-sm text-zinc-500">動画 URL が設定されていません。</p>
+            <div className="rounded-xl bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] border border-[#00897b]/30 p-5 text-center">
+              <div className="text-base font-bold text-[#004d40] mb-1">
+                コースを完走しました ✓
+              </div>
+              <div className="text-xs text-zinc-600 mb-3">
+                おつかれさまでした ・ 別のコースも視聴してみましょう。
+              </div>
+              <Link
+                href="/courses"
+                className="inline-block rounded-md bg-[#00897b] hover:bg-[#00695c] text-white px-4 py-2 text-xs font-bold transition-colors"
+              >
+                コース一覧へ
+              </Link>
+            </div>
+          )}
+          {adjacent.prev && (
+            <Link
+              href={`/courses/${courseId}/chapters/${adjacent.prev.chapter_id}/lessons/${adjacent.prev.lesson_id}`}
+              className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-700 px-1 py-2"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+              前のレッスン:&nbsp;
+              <span className="truncate max-w-[200px]">
+                {adjacent.prev.lesson_title}
+              </span>
+            </Link>
           )}
         </section>
 
-        {/* 学習完了ボタン */}
-        <section className="space-y-2">
-          <CompleteButton lessonId={lesson.id} initialCompleted={isCompleted} />
-        </section>
-
-        {/* 3 行振り返り (アコーディオン) */}
-        <section className="space-y-2">
-          <ReviewAccordion lessonId={lesson.id} initial={review} />
-        </section>
-
-        {/* 説明 */}
-        {lesson.description && (
-          <section className="space-y-2">
-            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-              📝 説明
-            </h2>
-            <p className="text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap leading-relaxed">
-              {lesson.description}
-            </p>
-          </section>
-        )}
-
-        {/* 補助画像 */}
-        {lesson.sub_image_url && (
-          <section className="space-y-2">
-            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-              🖼 補助画像
-            </h2>
-            <a
-              href={lesson.sub_image_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-zinc-900 dark:text-zinc-50 underline break-all"
-            >
-              {lesson.sub_image_url} ↗
-            </a>
-          </section>
-        )}
-
-        {/* 全まとめ動画 */}
-        {lesson.summary_video_url && (
-          <section className="space-y-2">
-            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-              📼 全まとめ動画
-            </h2>
-            <a
-              href={lesson.summary_video_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-zinc-900 dark:text-zinc-50 underline break-all"
-            >
-              {lesson.summary_video_url} ↗
-            </a>
-          </section>
-        )}
-
-        <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
+        {/* 章/コースに戻る (補助動線) */}
+        <div className="pt-3 border-t border-zinc-200">
           <Link
-            href={`/courses/${courseId}/chapters/${chapterId}`}
-            className="text-sm text-zinc-600 dark:text-zinc-400 underline"
+            href={`/courses/${courseId}`}
+            className="text-xs text-zinc-500 underline hover:text-zinc-700"
           >
-            ← {chapter.title} に戻る
+            ← {course.title} の章一覧へ
           </Link>
         </div>
       </div>

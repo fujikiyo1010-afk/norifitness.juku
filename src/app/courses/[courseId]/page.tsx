@@ -57,12 +57,37 @@ export default async function StudentCoursePage({
     allLessonIds = (lessons ?? []).map((l) => l.id as string);
   }
 
-  // 進捗マップ取得
+  // 進捗マップ
   const progressMap = await getMyLessonProgress(allLessonIds);
   const initialProgress: Record<string, boolean> = {};
   progressMap.forEach((v, k) => {
     initialProgress[k] = v;
   });
+
+  // 章 sort_order → レッスン sort_order の順で「最初の未完了レッスン」 を探す ・ 「続きから」 CTA 用
+  let firstUnfinished: {
+    chapterId: string;
+    lessonId: string;
+    chapterSortOrder: number;
+    lessonSortOrder: number;
+    title: string;
+  } | null = null;
+  for (const ch of chapters) {
+    const lessons = lessonsByChapter.get(ch.id) ?? [];
+    for (const l of lessons) {
+      if (!initialProgress[l.id]) {
+        firstUnfinished = {
+          chapterId: ch.id,
+          lessonId: l.id,
+          chapterSortOrder: ch.sort_order,
+          lessonSortOrder: l.sort_order,
+          title: l.title,
+        };
+        break;
+      }
+    }
+    if (firstUnfinished) break;
+  }
 
   // AccordionChapter 形式に組み立て
   const accordionChapters: AccordionChapter[] = chapters.map((c) => ({
@@ -80,56 +105,83 @@ export default async function StudentCoursePage({
     totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
   return (
-    <main className="flex flex-1 flex-col p-6 sm:p-8">
-      <div className="mx-auto w-full max-w-[460px] space-y-6">
-        <header className="space-y-2">
-          <nav className="text-xs text-zinc-500 space-x-1">
-            <Link href="/" className="underline hover:text-zinc-700 dark:hover:text-zinc-300">
-              ホーム
-            </Link>
-            <span>/</span>
-            <Link href="/courses" className="underline hover:text-zinc-700 dark:hover:text-zinc-300">
-              コース一覧
-            </Link>
-            <span>/</span>
-            <span className="text-zinc-700 dark:text-zinc-300">{course.title}</span>
-          </nav>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            📖 {course.title}
-          </h1>
-          {course.description && (
-            <p className="text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap">
-              {course.description}
-            </p>
-          )}
+    <main className="flex flex-1 flex-col p-4 sm:p-6 bg-zinc-50">
+      <div className="mx-auto w-full max-w-[460px] space-y-4">
+        {/* パンくず */}
+        <nav className="text-xs text-zinc-500">
+          <Link href="/" className="underline hover:text-zinc-700">
+            ホーム
+          </Link>
+          <span> / </span>
+          <Link href="/courses" className="underline hover:text-zinc-700">
+            コース一覧
+          </Link>
+          <span> / </span>
+          <span className="text-zinc-700">{course.title}</span>
+        </nav>
 
-          {/* コース全体の進捗 */}
-          <div className="pt-2 space-y-1">
-            <div className="flex items-baseline justify-between gap-3 text-xs">
-              <span className="text-zinc-600 dark:text-zinc-400">
-                全体進捗: {completedLessons} / {totalLessons} レッスン
-              </span>
-              <span className="font-mono text-zinc-700 dark:text-zinc-300">
-                {coursePercent}%
-              </span>
-            </div>
-            <div className="h-2.5 rounded-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden">
-              <div
-                className={`h-full transition-all duration-500 ${
-                  coursePercent === 100 && totalLessons > 0
-                    ? "bg-emerald-500"
-                    : "bg-zinc-900 dark:bg-zinc-300"
-                }`}
-                style={{ width: `${coursePercent}%` }}
-              />
-            </div>
+        {/* ヒーロー (モック準拠 ・ 緑グラデ + 大サムネ + 進捗 + 続きから CTA) */}
+        <section className="rounded-2xl overflow-hidden bg-gradient-to-br from-[#00897b] to-[#00695c] text-white p-5">
+          {/* 大サムネ枠 */}
+          <div className="w-full aspect-[16/9] rounded-xl bg-white/15 flex items-center justify-center mb-3">
+            <svg
+              width="56"
+              height="56"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-white/95"
+            >
+              <circle cx="13" cy="4" r="2" />
+              <path d="M4 22 8.5 11l3 3 4-6 6 9" />
+              <path d="m11.5 10.5 2-7" />
+            </svg>
           </div>
-        </header>
+          <h1 className="text-lg font-bold leading-tight mb-1">
+            {course.title}
+          </h1>
+          <div className="text-[11px] opacity-90 mb-2.5">
+            {chapters.length} 章 ・ {totalLessons} レッスン ・ 全体{" "}
+            {coursePercent}% ({completedLessons}/{totalLessons})
+          </div>
+          {/* 進捗バー */}
+          <div className="h-1.5 rounded-full bg-white/25 overflow-hidden mb-3">
+            <div
+              className="h-full bg-white rounded-full transition-all duration-500"
+              style={{ width: `${coursePercent}%` }}
+            />
+          </div>
+          {/* 続きから CTA */}
+          {firstUnfinished ? (
+            <Link
+              href={`/courses/${courseId}/chapters/${firstUnfinished.chapterId}/lessons/${firstUnfinished.lessonId}`}
+              className="block rounded-xl bg-white text-[#00695c] py-3 px-4 text-sm font-bold text-center shadow-[0_4px_0_rgba(0,77,64,0.5)] hover:bg-zinc-50 transition-colors"
+            >
+              ▶ 続きから ・ L{firstUnfinished.lessonSortOrder}「
+              {firstUnfinished.title}」
+            </Link>
+          ) : totalLessons > 0 ? (
+            <div className="rounded-xl bg-white/90 text-[#004d40] py-3 px-4 text-sm font-bold text-center">
+              ✓ 全レッスン完了
+            </div>
+          ) : null}
+        </section>
+
+        {/* 説明 (任意) */}
+        {course.description && (
+          <p className="text-xs text-zinc-700 whitespace-pre-wrap leading-relaxed px-1">
+            {course.description}
+          </p>
+        )}
 
         <CourseDetailView
           courseId={courseId}
           chapters={accordionChapters}
           initialProgress={initialProgress}
+          currentLessonId={firstUnfinished?.lessonId ?? null}
         />
       </div>
     </main>

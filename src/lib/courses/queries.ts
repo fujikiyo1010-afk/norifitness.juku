@@ -456,3 +456,97 @@ export async function listLessonIdsInCourse(courseId: string): Promise<string[]>
     .or(`released_at.is.null,released_at.lte.${now}`);
   return (lessons ?? []).map((l) => l.id as string);
 }
+
+/**
+ * コース内全レッスンを 章 sort_order → レッスン sort_order の順で
+ * フラットリストとして返す ・ 「次のレッスン / 前のレッスン」 ナビに使う
+ */
+type FlatLesson = {
+  chapter_id: string;
+  chapter_title: string;
+  chapter_sort_order: number;
+  lesson_id: string;
+  lesson_title: string;
+  lesson_sort_order: number;
+};
+
+export async function listLessonsFlatInCourse(courseId: string): Promise<FlatLesson[]> {
+  const supabase = await createClient();
+  const now = nowIso();
+  const { data: chapters } = await supabase
+    .from("chapters")
+    .select("id, title, sort_order")
+    .eq("course_id", courseId)
+    .or(`released_at.is.null,released_at.lte.${now}`)
+    .order("sort_order", { ascending: true });
+  const chapterIds = (chapters ?? []).map((c) => c.id as string);
+  if (chapterIds.length === 0) return [];
+
+  const { data: lessons } = await supabase
+    .from("lessons")
+    .select("id, chapter_id, title, sort_order")
+    .in("chapter_id", chapterIds)
+    .or(`released_at.is.null,released_at.lte.${now}`)
+    .order("sort_order", { ascending: true });
+
+  const chapterMap = new Map(
+    (chapters ?? []).map((c) => [
+      c.id as string,
+      { title: c.title as string, sort_order: c.sort_order as number },
+    ]),
+  );
+
+  return (lessons ?? [])
+    .map((l) => {
+      const chap = chapterMap.get(l.chapter_id as string);
+      return {
+        chapter_id: l.chapter_id as string,
+        chapter_title: chap?.title ?? "",
+        chapter_sort_order: chap?.sort_order ?? 0,
+        lesson_id: l.id as string,
+        lesson_title: l.title as string,
+        lesson_sort_order: l.sort_order as number,
+      };
+    })
+    .sort((a, b) => {
+      if (a.chapter_sort_order !== b.chapter_sort_order) {
+        return a.chapter_sort_order - b.chapter_sort_order;
+      }
+      return a.lesson_sort_order - b.lesson_sort_order;
+    });
+}
+
+/**
+ * 指定レッスンの 前 / 次 を返す ( 章境界跨ぎ対応 )
+ *  - 章末で次レッスン要求 → 次の章 の最初のレッスン
+ *  - コース末 → next: null ( コース完了)
+ *  - コース先頭 → prev: null
+ */
+export async function getAdjacentLessons(
+  courseId: string,
+  currentLessonId: string,
+): Promise<{
+  prev: { chapter_id: string; lesson_id: string; lesson_title: string } | null;
+  next: { chapter_id: string; lesson_id: string; lesson_title: string } | null;
+}> {
+  const flat = await listLessonsFlatInCourse(courseId);
+  const idx = flat.findIndex((l) => l.lesson_id === currentLessonId);
+  if (idx < 0) return { prev: null, next: null };
+  const prev =
+    idx > 0
+      ? {
+          chapter_id: flat[idx - 1].chapter_id,
+          lesson_id: flat[idx - 1].lesson_id,
+          lesson_title: flat[idx - 1].lesson_title,
+        }
+      : null;
+  const next =
+    idx < flat.length - 1
+      ? {
+          chapter_id: flat[idx + 1].chapter_id,
+          lesson_id: flat[idx + 1].lesson_id,
+          lesson_title: flat[idx + 1].lesson_title,
+        }
+      : null;
+  return { prev, next };
+}

@@ -47,9 +47,6 @@ export default async function CoursesPage() {
           <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
             コース一覧
           </h1>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            学びたいコースを選んでください。 検索ボックスから動画を直接探すこともできます。
-          </p>
         </header>
 
         <CoursesView initialCourses={summaries} />
