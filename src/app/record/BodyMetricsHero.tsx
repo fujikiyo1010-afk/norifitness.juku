@@ -77,18 +77,16 @@ export function BodyMetricsHero({
           {latestDate}
         </div>
 
-        <div className="text-center">
-          <div className="inline-block">
-            <span className="text-[14px] font-bold text-[#00695c] align-top mr-1.5">
-              体重
-            </span>
-            <span className="text-[40px] font-bold text-zinc-900 leading-none font-mono tracking-tight">
-              {currentWeight !== null ? currentWeight.toFixed(1) : "—"}
-            </span>
-            <span className="text-[14px] font-bold text-zinc-600 align-top ml-1">
-              kg
-            </span>
-          </div>
+        <div className="flex items-end justify-center gap-2.5">
+          <span className="text-[14px] font-bold text-[#00695c] self-center">
+            体重
+          </span>
+          <span className="text-[40px] font-bold text-zinc-900 leading-none font-mono tracking-tight">
+            {currentWeight !== null ? currentWeight.toFixed(1) : "—"}
+          </span>
+          <span className="text-[14px] font-bold text-zinc-600 leading-none pb-1">
+            kg
+          </span>
         </div>
 
         {startRow ? (
