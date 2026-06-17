@@ -93,3 +93,57 @@ export function buildTrend(audits: MonthlyAuditRow[]): TrendPoint[] {
     })
     .filter((p): p is TrendPoint => p !== null);
 }
+
+export type CategoryTrendPoint = {
+  targetMonth: string;
+  monthLabel: string;
+  average: number | null; // null = 全項目未記入
+};
+
+export type CategoryTrendSeries = {
+  category: AuditCategoryKey;
+  label: string;
+  points: CategoryTrendPoint[];
+};
+
+/**
+ * カテゴリ別 月次推移 (4 カテゴリ × 月数)。
+ * 食事 / 運動 / 休息 / マインド・学習 の 4 折れ線をまとめて返す。
+ * #4 採用 (2026-06-17 きよむさん指示)。
+ */
+export function buildCategoryTrend(audits: MonthlyAuditRow[]): CategoryTrendSeries[] {
+  const sortedAudits = [...audits]
+    .filter((a) => a.submitted_at !== null)
+    .sort((a, b) => a.target_month.localeCompare(b.target_month));
+
+  return (Object.keys(AUDIT_CATEGORIES) as AuditCategoryKey[])
+    .filter((cat) => SCORE_QUESTIONS_BY_CATEGORY.has(cat))
+    .map((cat) => {
+      const qKeys = SCORE_QUESTIONS_BY_CATEGORY.get(cat) ?? [];
+      const points = sortedAudits.map((a) => {
+        const scores = qKeys
+          .map(
+            (k) =>
+              (a.items[k as keyof MonthlyAuditItems] as ScoreAnswer | undefined)
+                ?.score
+          )
+          .filter((s): s is number => typeof s === "number");
+        const avg =
+          scores.length === 0
+            ? null
+            : Math.round((scores.reduce((sum, x) => sum + x, 0) / scores.length) * 10) /
+              10;
+        const d = new Date(a.target_month);
+        return {
+          targetMonth: a.target_month,
+          monthLabel: `${d.getMonth() + 1}月`,
+          average: avg,
+        };
+      });
+      return {
+        category: cat,
+        label: AUDIT_CATEGORIES[cat].label,
+        points,
+      };
+    });
+}

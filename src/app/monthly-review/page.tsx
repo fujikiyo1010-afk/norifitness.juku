@@ -12,10 +12,12 @@ import {
   type AuditStatus,
 } from "@/lib/monthly-audit/types";
 import {
+  buildCategoryTrend,
   buildTrend,
   getCategoryAverages,
 } from "@/lib/monthly-audit/aggregations";
 import { CategoryScoresBlock } from "./CategoryScoresBlock";
+import { CategoryTrendChart } from "./CategoryTrendChart";
 import { TrendChart } from "./TrendChart";
 
 export const dynamic = "force-dynamic";
@@ -48,6 +50,7 @@ export default async function MonthlyReviewHistoryPage() {
     ? getCategoryAverages(latestSubmittedAudit.items)
     : null;
   const trend = buildTrend(allAudits);
+  const categoryTrend = buildCategoryTrend(allAudits);
   const hasAnyAudit = trend.length > 0 || categoryAverages !== null;
 
   return (
@@ -72,12 +75,21 @@ export default async function MonthlyReviewHistoryPage() {
             )}
           </BlockWrapper>
 
-          {/* ====== ブロック B-2: 月次推移グラフ (2026-06-17 1 件目から単独点表示) ====== */}
-          <BlockWrapper title="月次推移 (17 項目 平均)" icon="line">
+          {/* ====== ブロック B-2: カテゴリ別 推移 (#4 採用 ・ 2026-06-17) ====== */}
+          <BlockWrapper title="カテゴリ別 推移" icon="line">
+            {hasAnyAudit ? (
+              <CategoryTrendChart series={categoryTrend} />
+            ) : (
+              <PlaceholderBlock text="月次添削を 1 件提出すると、 カテゴリ別の推移が表示されます" />
+            )}
+          </BlockWrapper>
+
+          {/* ====== ブロック B-3: 全体推移 (17 項目 平均、 2026-06-17 1 件目から単独点表示) ====== */}
+          <BlockWrapper title="全体推移 (17 項目 平均)" icon="line">
             {hasAnyAudit ? (
               <TrendChart trend={trend} />
             ) : (
-              <PlaceholderBlock text="月次添削を 1 件提出すると、 ここに推移グラフが表示されます" />
+              <PlaceholderBlock text="月次添削を 1 件提出すると、 ここに全体の推移グラフが表示されます" />
             )}
           </BlockWrapper>
 
