@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { requireAdmin } from "@/lib/auth/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendMonthlyAuditPublishedEmail } from "@/lib/email/monthly-audit-published";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 90; // transcode 完了ポーリングのため
@@ -113,12 +114,24 @@ export async function POST(request: NextRequest) {
     return jsonError("DB 更新中に例外発生", 500);
   }
 
+  // ===== Step 3: 公開メール送信 (受講生に通知 ・ 2026-06-17 メール作戦) =====
+  // 失敗しても finalize 全体は成功扱い (= upload は無事完了している)
+  const emailResult = await sendMonthlyAuditPublishedEmail(auditId);
+  if (!emailResult.sent) {
+    console.warn(
+      "[monthly-audit-published-email] not sent:",
+      emailResult.reason
+    );
+  }
+
   return Response.json({
     ok: true,
     vimeoUrl: watchUrl,
     playerEmbedUrl,
     vimeoId,
     transcodeCompleted: finalLink !== null,
+    emailSent: emailResult.sent,
+    emailReason: emailResult.reason ?? null,
   });
 }
 
