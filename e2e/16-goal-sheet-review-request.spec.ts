@@ -144,40 +144,13 @@ test("16-1. 初回フロー: 送信して添削を依頼 → /goal-sheet 遷移 
     await submitButton.click();
     await studentPage.waitForURL(/\/goal-sheet$/, { timeout: 15_000 });
 
-    // 4. 管理者ホームダッシュ: 「目標シート 再添削依頼」 タグ表示
-    await adminPage.goto("/admin");
-    await expect(adminPage.locator("body")).toContainText("目標シート 再添削依頼");
-    await expect(adminPage.locator("body")).toContainText("E2E テスト受講生");
+    // 4. (2026-06-17 撤回) 「再添削依頼」 タグ機能は撤回 ・ B 案によりここでは検証しない
+    // 旧期待: 管理者ホームに「目標シート 再添削依頼」 + 受講生名表示
   } finally {
     await studentContext.close();
     await adminContext.close();
   }
 });
 
-test("16-2. 2 回目フロー: 送信して再添削を依頼 (動的文言切替)", async ({
-  browser,
-}) => {
-  const e2eUserId = await getE2EUserId();
-  await seedGoalSheet(e2eUserId, /* withAudits */ true);
-
-  const studentContext: BrowserContext = await browser.newContext({
-    storageState: STUDENT_STATE,
-  });
-
-  try {
-    const studentPage = await studentContext.newPage();
-
-    await studentPage.goto("/goal-sheet/edit");
-    const submitButton = studentPage.locator(
-      'button:has-text("送信して再添削を依頼")'
-    );
-    await expect(submitButton).toBeVisible();
-
-    // 初回文言 「送信して添削を依頼」 (再添削なし) は出ていない
-    await expect(
-      studentPage.locator('button:has-text("送信して添削を依頼"):not(:has-text("再添削"))')
-    ).toHaveCount(0);
-  } finally {
-    await studentContext.close();
-  }
-});
+// 16-2 (2 回目フロー / 動的文言「再添削を依頼」) は 2026-06-17 きよむさん判断で機能撤回 ・ test 削除済
+// ボタン文言は常時「送信して添削を依頼」 で統一
