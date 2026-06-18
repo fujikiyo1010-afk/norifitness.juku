@@ -20,11 +20,16 @@ export const dynamic = "force-dynamic";
  */
 export default async function AdminCartePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ from?: string; requestId?: string }>;
 }) {
   await requireAdmin();
   const { id: userId } = await params;
+  const sp = await searchParams;
+  const fromRequest = sp.from === "request" && !!sp.requestId;
+  const requestId = fromRequest ? (sp.requestId as string) : null;
 
   // 受講生情報取得 (admin client で取得、RLS バイパス)
   const admin = createAdminClient();
@@ -96,6 +101,26 @@ export default async function AdminCartePage({
         </div>
       </header>
 
+      {/* リクエスト処理中バナー (= /admin/requests から「カルテを編集」 で来た時のみ) */}
+      {fromRequest && (
+        <div className="mx-auto max-w-3xl px-4 pt-4">
+          <div className="rounded-[10px] border border-amber-300 bg-amber-50 px-4 py-3 flex items-center justify-between gap-3">
+            <div className="text-sm text-amber-900">
+              <span className="font-bold">リクエスト処理中です</span>
+              <span className="ml-2 text-xs text-amber-800">
+                編集 → 保存 → 返信フォームに自動で戻ります
+              </span>
+            </div>
+            <Link
+              href={`/admin/requests?id=${requestId}&type=carte`}
+              className="text-xs text-amber-900 underline hover:no-underline"
+            >
+              リクエストに戻る →
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* 注意: birthday 未設定の警告 */}
       {!birthday && (
         <div className="mx-auto max-w-3xl px-4 pt-4">
@@ -114,6 +139,8 @@ export default async function AdminCartePage({
           userId={userId}
           userName={userRow.nickname || userRow.name}
           initialCarte={carte}
+          fromRequest={fromRequest}
+          requestId={requestId}
         />
       </main>
     </div>

@@ -1,7 +1,6 @@
 import { NextRequest } from "next/server";
 import { requireAdmin } from "@/lib/auth/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendMonthlyAuditPublishedEmail } from "@/lib/email/monthly-audit-published";
 import { sendPushToUser } from "@/lib/push/send";
 
 export const dynamic = "force-dynamic";
@@ -115,17 +114,8 @@ export async function POST(request: NextRequest) {
     return jsonError("DB 更新中に例外発生", 500);
   }
 
-  // ===== Step 3: 公開メール送信 (受講生に通知 ・ 2026-06-17 メール作戦) =====
-  // 失敗しても finalize 全体は成功扱い (= upload は無事完了している)
-  const emailResult = await sendMonthlyAuditPublishedEmail(auditId);
-  if (!emailResult.sent) {
-    console.warn(
-      "[monthly-audit-published-email] not sent:",
-      emailResult.reason
-    );
-  }
-
-  // ===== Step 4: push 通知 (= 2026-06-18 #2 push 横展開) =====
+  // ===== Step 3: push 通知 (= 2026-06-18 通知方針 ・ メール削除 Push 一択) =====
+  // (旧 sendMonthlyAuditPublishedEmail は agreement に従い削除、 関数自体は線② で復活余地あり)
   // user_id + target_month は audit から逆引き
   try {
     const admin = createAdminClient();
@@ -158,8 +148,6 @@ export async function POST(request: NextRequest) {
     playerEmbedUrl,
     vimeoId,
     transcodeCompleted: finalLink !== null,
-    emailSent: emailResult.sent,
-    emailReason: emailResult.reason ?? null,
   });
 }
 

@@ -85,10 +85,14 @@ export function CarteEditor({
   userId,
   userName,
   initialCarte,
+  fromRequest = false,
+  requestId = null,
 }: {
   userId: string;
   userName: string;
   initialCarte: CarteWithAgeBand | null;
+  fromRequest?: boolean;
+  requestId?: string | null;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -144,6 +148,12 @@ export function CarteEditor({
       const result = await saveCarteAsAdmin(input);
       if (result.ok) {
         setMessage({ type: "ok", text: "保存しました" });
+        // リクエスト経由なら 返信フォームへ自動で戻す (= /admin/requests 右ペイン展開)
+        if (fromRequest && requestId) {
+          router.push(`/admin/requests?id=${requestId}&type=carte`);
+          router.refresh();
+          return;
+        }
         router.refresh();
       } else {
         setMessage({ type: "error", text: result.message });
@@ -335,7 +345,11 @@ export function CarteEditor({
             disabled={isPending}
             className="rounded-[4px] bg-[#00897b] px-6 py-2.5 text-sm font-medium text-white hover:bg-[#00695c] disabled:opacity-50"
           >
-            {isPending ? "保存中…" : "保存"}
+            {isPending
+              ? "保存中…"
+              : fromRequest
+                ? "保存して 返信フォームへ →"
+                : "保存"}
           </button>
         </div>
       </div>
