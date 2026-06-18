@@ -23,7 +23,28 @@ type Review = {
 
 type Mode = "latest" | "by_course";
 
-function formatJst(iso: string): string {
+/**
+ * 振り返り 一覧 Client (2026-06-18 Phase 3 ・モック準拠リデザイン)
+ *
+ * モード:
+ *   - latest: 日付ヘッダ + カード (タイムライン形式)
+ *   - by_course: コース → 章 でグループ化
+ *
+ * カード: タグ pill (= コース・章) + タイトル + 学んだこと + 印象・気づき + アクション 2 ボタン (緑 pill ▶ / オフホワイト ✏)
+ */
+
+function formatJstFull(iso: string): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  const jst = new Date(d.getTime() + 9 * 3600 * 1000);
+  const y = jst.getUTCFullYear();
+  const m = String(jst.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(jst.getUTCDate()).padStart(2, "0");
+  return `${y} / ${m} / ${day}`;
+}
+
+function formatJstShort(iso: string): string {
   if (!iso) return "—";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "—";
@@ -48,7 +69,7 @@ function Highlight({ text, query }: { text: string; query: string }) {
         part.toLowerCase() === query.toLowerCase() ? (
           <mark
             key={i}
-            className="bg-yellow-200 dark:bg-yellow-700 text-inherit rounded px-0.5"
+            className="bg-yellow-200 text-inherit rounded px-0.5"
           >
             {part}
           </mark>
@@ -60,15 +81,10 @@ function Highlight({ text, query }: { text: string; query: string }) {
   );
 }
 
-export function ReviewsListView({
-  reviews,
-}: {
-  reviews: Review[];
-}) {
+export function ReviewsListView({ reviews }: { reviews: Review[] }) {
   const [mode, setMode] = useState<Mode>("latest");
   const [query, setQuery] = useState("");
 
-  // クエリで振り返りを絞り込む
   const filteredReviews = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (q.length === 0) return reviews;
@@ -97,13 +113,13 @@ export function ReviewsListView({
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="振り返りを検索(キーワード、レッスン名 等)"
-          className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-[#fffdf8] dark:bg-zinc-950 pl-10 pr-3 py-2 text-sm"
+          placeholder="振り返りを検索 (キーワード、 レッスン名 等)"
+          className="w-full rounded-md border border-[#e7dcc9] bg-[#fffdf8] pl-10 pr-3 py-2 text-sm focus:outline-none focus:border-[#4a875b]"
         />
       </div>
 
       {/* モード切替タブ */}
-      <div className="flex gap-1 border-b border-zinc-200 dark:border-zinc-800">
+      <div className="flex gap-4">
         <ModeTab
           active={mode === "latest"}
           onClick={() => setMode("latest")}
@@ -121,13 +137,12 @@ export function ReviewsListView({
       {/* 検索中の表示 */}
       {query.trim().length > 0 && (
         <p className="text-xs text-[#6a6256] inline-flex items-center gap-1.5">
-          <SearchIcon /> 「{query}」でフィルタ中 ({filteredReviews.length} 件)
+          <SearchIcon /> 「{query}」 でフィルタ中 ({filteredReviews.length} 件)
         </p>
       )}
 
-      {/* リスト本体 */}
       {mode === "latest" && (
-        <LatestList reviews={filteredReviews} query={query} />
+        <LatestTimeline reviews={filteredReviews} query={query} />
       )}
       {mode === "by_course" && (
         <CourseGroupedList reviews={filteredReviews} query={query} />
@@ -151,36 +166,76 @@ function ModeTab({
     <button
       type="button"
       onClick={onClick}
-      className={`px-3 py-2 text-sm font-medium border-b-2 transition-colors -mb-px ${
+      className={`pb-2.5 text-[14px] font-bold transition-colors border-b-2 ${
         active
-          ? "border-zinc-900 dark:border-zinc-50 text-[#2b2620] dark:text-zinc-50"
-          : "border-transparent text-[#6a6256] hover:text-zinc-700 dark:hover:text-zinc-300"
+          ? "text-[#2b2620] border-[#4a875b]"
+          : "text-[#a59b8c] border-transparent hover:text-[#6a6256]"
       }`}
     >
       {label}
-      <span className="ml-1.5 text-xs rounded-full px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-[#a59b8c]">
+      <span
+        className={`ml-1.5 text-[13px] font-mono font-bold ${
+          active ? "text-[#34603f]" : "text-[#a59b8c]"
+        }`}
+      >
         {count}
       </span>
     </button>
   );
 }
 
-function LatestList({ reviews, query }: { reviews: Review[]; query: string }) {
+/**
+ * 新しい順 タイムライン
+ * - 日付ヘッダ (= 2026/06/18) + カード で 1 ブロック
+ * - 同日複数あれば 1 つの日付ヘッダの下にカード並ぶ
+ */
+function LatestTimeline({
+  reviews,
+  query,
+}: {
+  reviews: Review[];
+  query: string;
+}) {
   if (reviews.length === 0) {
     return (
       <p className="text-sm text-[#6a6256] p-4 text-center">
         {query.trim().length > 0
           ? "該当する振り返りが見つかりませんでした。"
-          : "まだ振り返りがありません。レッスン視聴後に書いてみましょう。"}
+          : "まだ振り返りがありません。 レッスン視聴後に書いてみましょう。"}
       </p>
     );
   }
+
+  // 同じ日 (= JST 日付) を 1 グループに
+  const groups: { dateKey: string; dateLabel: string; reviews: Review[] }[] =
+    [];
+  for (const r of reviews) {
+    const label = formatJstShort(r.created_at);
+    const last = groups[groups.length - 1];
+    if (last && last.dateKey === label) {
+      last.reviews.push(r);
+    } else {
+      groups.push({
+        dateKey: label,
+        dateLabel: formatJstFull(r.created_at),
+        reviews: [r],
+      });
+    }
+  }
+
   return (
-    <ul className="space-y-3">
-      {reviews.map((r) => (
-        <ReviewCard key={r.id} review={r} query={query} />
+    <div className="space-y-4">
+      {groups.map((g) => (
+        <div key={g.dateKey} className="space-y-2.5">
+          <div className="text-[11px] text-[#a59b8c] tracking-wider font-mono">
+            {g.dateLabel}
+          </div>
+          {g.reviews.map((r) => (
+            <ReviewCard key={r.id} review={r} query={query} />
+          ))}
+        </div>
       ))}
-    </ul>
+    </div>
   );
 }
 
@@ -201,7 +256,6 @@ function CourseGroupedList({
     );
   }
 
-  // コース → 章 → レッスン でグループ化
   type ChapterGroup = {
     chapter_id: string;
     chapter_title: string;
@@ -252,7 +306,7 @@ function CourseGroupedList({
         );
         return (
           <div key={course.course_id} className="space-y-3">
-            <h3 className="text-sm font-semibold text-[#2b2620] dark:text-zinc-50 inline-flex items-center gap-1.5">
+            <h3 className="text-[14px] font-bold text-[#2b2620] inline-flex items-center gap-1.5">
               <BookIcon /> {course.course_title}
             </h3>
             {sortedChapters.map((chapter) => {
@@ -261,14 +315,14 @@ function CourseGroupedList({
               );
               return (
                 <div key={chapter.chapter_id} className="ml-4 space-y-2">
-                  <h4 className="text-xs text-zinc-600 dark:text-[#a59b8c] inline-flex items-center gap-1.5">
+                  <h4 className="text-[12px] text-[#6a6256] inline-flex items-center gap-1.5">
                     <ChapterMarkIcon /> {chapter.chapter_title}
                   </h4>
-                  <ul className="space-y-2">
+                  <div className="space-y-2.5">
                     {sortedReviews.map((r) => (
-                      <ReviewCard key={r.id} review={r} query={query} compact />
+                      <ReviewCard key={r.id} review={r} query={query} />
                     ))}
-                  </ul>
+                  </div>
                 </div>
               );
             })}
@@ -279,72 +333,70 @@ function CourseGroupedList({
   );
 }
 
-function ReviewCard({
-  review,
-  query,
-  compact = false,
-}: {
-  review: Review;
-  query: string;
-  compact?: boolean;
-}) {
+/**
+ * 振り返りカード (= モック準拠の単一形式)
+ */
+function ReviewCard({ review, query }: { review: Review; query: string }) {
   return (
-    <li className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-[#fffdf8] dark:bg-zinc-900 p-4 space-y-2">
-      <div className="flex items-baseline justify-between gap-3">
-        <Link
-          href={`/courses/${review.course_id}/chapters/${review.chapter_id}/lessons/${review.lesson_id}?from=reviews`}
-          className="group flex-1 min-w-0"
-        >
-          <p className="font-medium text-[#2b2620] dark:text-zinc-50 group-hover:underline">
-            <Highlight text={review.lesson_title} query={query} />
-          </p>
-          {!compact && (
-            <p className="text-xs text-[#6a6256] mt-0.5 inline-flex items-center gap-1.5 flex-wrap">
-              <BookIcon />
-              <Highlight text={review.course_title} query={query} />
-              <span>/</span>
-              <ChapterMarkIcon />
-              <Highlight text={review.chapter_title} query={query} />
-            </p>
-          )}
-        </Link>
-        <span className="shrink-0 text-xs text-[#6a6256]">
-          {formatJst(review.updated_at)}
+    <div
+      className="bg-[#fffdf8] border border-[#e7dcc9] rounded-[16px] p-4"
+      style={{ boxShadow: "0 8px 20px rgba(60,45,25,.05)" }}
+    >
+      {/* タグ pill (= コース) */}
+      <div className="mb-2">
+        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#34603f] bg-[#e9f1e9] rounded-full px-2.5 py-0.5 max-w-full overflow-hidden whitespace-nowrap text-ellipsis">
+          <BookIcon />
+          <span className="truncate">
+            <Highlight text={review.course_title} query={query} />
+            {" ・ "}
+            <Highlight text={review.chapter_title} query={query} />
+          </span>
         </span>
       </div>
 
+      {/* タイトル */}
+      <div className="text-[16px] font-bold text-[#2b2620] leading-[1.4] mb-3">
+        <Highlight text={review.lesson_title} query={query} />
+      </div>
+
+      {/* 学んだこと */}
       {review.learned && (
-        <div className="text-sm text-zinc-700 dark:text-zinc-300">
-          <span className="text-xs text-[#6a6256] mr-1">学んだ:</span>
-          <Highlight text={review.learned} query={query} />
+        <div className="mb-2.5">
+          <div className="text-[11px] font-bold text-[#d9743f] tracking-wider mb-0.5">
+            学んだこと
+          </div>
+          <div className="text-[14.5px] text-[#2b2620] leading-[1.75] whitespace-pre-wrap">
+            <Highlight text={review.learned} query={query} />
+          </div>
         </div>
       )}
+
+      {/* 印象・気づき */}
       {review.impressed && (
-        <div className="text-sm text-zinc-700 dark:text-zinc-300">
-          <span className="text-xs text-[#6a6256] mr-1">印象:</span>
-          <Highlight text={review.impressed} query={query} />
+        <div className="mb-2.5">
+          <div className="text-[11px] font-bold text-[#d9743f] tracking-wider mb-0.5">
+            印象・気づき
+          </div>
+          <div className="text-[14.5px] text-[#2b2620] leading-[1.75] whitespace-pre-wrap">
+            <Highlight text={review.impressed} query={query} />
+          </div>
         </div>
       )}
-      {/* アクション 2 ボタン */}
-      <div className="mt-3 pt-2.5 border-t border-zinc-100 dark:border-zinc-800 flex gap-2">
+
+      {/* アクション 2 ボタン (上に境界線) */}
+      <div className="mt-3 pt-3 border-t border-[#e7dcc9] flex gap-2">
         <Link
           href={`/courses/${review.course_id}/chapters/${review.chapter_id}/lessons/${review.lesson_id}?from=reviews`}
-          className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-[#fffdf8] dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg text-xs font-semibold text-[#2b2620] dark:text-zinc-50 hover:border-[#4a875b] hover:bg-[#4a875b]/8 hover:text-[#34603f]"
+          className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 bg-[#4a875b] hover:bg-[#34603f] text-white rounded-[10px] text-[12.5px] font-bold transition-colors"
         >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className="text-[#34603f]"
-          >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
             <polygon points="6 3 20 12 6 21 6 3" />
           </svg>
           レッスンを見る
         </Link>
         <Link
           href={`/courses/${review.course_id}/chapters/${review.chapter_id}/lessons/${review.lesson_id}?from=reviews&focus=review`}
-          className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-[#fffdf8] dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg text-xs font-semibold text-[#2b2620] dark:text-zinc-50 hover:border-[#4a875b] hover:bg-[#4a875b]/8 hover:text-[#34603f]"
+          className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 bg-[#fffdf8] hover:bg-[#f0e6d3] text-[#2b2620] border border-[#e7dcc9] rounded-[10px] text-[12.5px] font-bold transition-colors"
         >
           <svg
             width="14"
@@ -355,21 +407,16 @@ function ReviewCard({
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-[#34603f]"
           >
             <path d="M12 20h9" />
             <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
           </svg>
-          振り返りを編集
+          編集
         </Link>
       </div>
-    </li>
+    </div>
   );
 }
-
-// =====================================================================
-// アイコン (線画黒一色、 許可絵文字は ✓ ▶ → ← のみ)
-// =====================================================================
 
 const ICO_PROPS = {
   viewBox: "0 0 24 24",
@@ -391,9 +438,9 @@ function SearchIcon() {
 
 function BookIcon() {
   return (
-    <svg {...ICO_PROPS} width="14" height="14" className="flex-shrink-0">
-      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+    <svg {...ICO_PROPS} width="12" height="12" className="flex-shrink-0">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
     </svg>
   );
 }

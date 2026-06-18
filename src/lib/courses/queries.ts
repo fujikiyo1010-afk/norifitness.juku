@@ -394,6 +394,119 @@ export async function listMyUnreviewedCompletedLessons(): Promise<UnreviewedComp
 }
 
 /**
+ * 振り返り 達成バンド用 集計 (2026-06-18 Phase 3)
+ *
+ * - total: 全件数
+ * - thisWeek: 今週書いた (created_at >= 今週月曜 0:00 JST)
+ * - streakDays: 連続日数 (= 今日まで連続して書いた日数。 今日 or 昨日に書いてなければ 0)
+ * - nextMilestone: 次の節目 (5 件単位)
+ * - milestoneProgress: 現節目までの達成率
+ */
+export type ReviewsStats = {
+  total: number;
+  thisWeek: number;
+  streakDays: number;
+  nextMilestone: number;
+  milestoneProgress: number;
+};
+
+export async function getReviewsStats(): Promise<ReviewsStats> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return {
+      total: 0,
+      thisWeek: 0,
+      streakDays: 0,
+      nextMilestone: 5,
+      milestoneProgress: 0,
+    };
+  }
+
+  const { data: rows } = await supabase
+    .from("lesson_reviews")
+    .select("created_at")
+    .order("created_at", { ascending: false });
+  const all = (rows ?? []) as { created_at: string }[];
+
+  const total = all.length;
+
+  // JST 今週月曜 0:00
+  const now = new Date();
+  const jstOffsetMs = 9 * 3600 * 1000;
+  const jstNow = new Date(now.getTime() + jstOffsetMs);
+  const dayOfWeek = jstNow.getUTCDay(); // 0=Sun..6=Sat
+  const daysSinceMonday = (dayOfWeek + 6) % 7;
+  const jstMondayMidnight = new Date(jstNow);
+  jstMondayMidnight.setUTCDate(jstNow.getUTCDate() - daysSinceMonday);
+  jstMondayMidnight.setUTCHours(0, 0, 0, 0);
+  const mondayUtcIso = new Date(
+    jstMondayMidnight.getTime() - jstOffsetMs
+  ).toISOString();
+
+  const thisWeek = all.filter((r) => r.created_at >= mondayUtcIso).length;
+
+  // 連続日数 (JST 日付ベース)
+  // - 今日 or 昨日 に書いたものから始まる連続日数
+  // - 今日も昨日もなければ 0
+  const dateSet = new Set<string>();
+  for (const r of all) {
+    const jstDate = new Date(new Date(r.created_at).getTime() + jstOffsetMs);
+    const y = jstDate.getUTCFullYear();
+    const m = jstDate.getUTCMonth();
+    const d = jstDate.getUTCDate();
+    dateSet.add(`${y}-${m}-${d}`);
+  }
+  const jstTodayY = jstNow.getUTCFullYear();
+  const jstTodayM = jstNow.getUTCMonth();
+  const jstTodayD = jstNow.getUTCDate();
+  // 今日 or 昨日 がなければ streak=0
+  const todayKey = `${jstTodayY}-${jstTodayM}-${jstTodayD}`;
+  const yesterdayJst = new Date(jstNow);
+  yesterdayJst.setUTCDate(jstNow.getUTCDate() - 1);
+  const yKey = `${yesterdayJst.getUTCFullYear()}-${yesterdayJst.getUTCMonth()}-${yesterdayJst.getUTCDate()}`;
+  let streakDays = 0;
+  if (dateSet.has(todayKey)) {
+    streakDays = 1;
+    const cursor = new Date(jstNow);
+    while (true) {
+      cursor.setUTCDate(cursor.getUTCDate() - 1);
+      const key = `${cursor.getUTCFullYear()}-${cursor.getUTCMonth()}-${cursor.getUTCDate()}`;
+      if (dateSet.has(key)) streakDays++;
+      else break;
+    }
+  } else if (dateSet.has(yKey)) {
+    streakDays = 1;
+    const cursor = new Date(yesterdayJst);
+    while (true) {
+      cursor.setUTCDate(cursor.getUTCDate() - 1);
+      const key = `${cursor.getUTCFullYear()}-${cursor.getUTCMonth()}-${cursor.getUTCDate()}`;
+      if (dateSet.has(key)) streakDays++;
+      else break;
+    }
+  }
+
+  const nextMilestone = Math.max(5, Math.ceil((total + 1) / 5) * 5);
+  const prevMilestone = nextMilestone - 5;
+  const milestoneProgress =
+    nextMilestone === prevMilestone
+      ? 100
+      : Math.round(
+          ((total - prevMilestone) / (nextMilestone - prevMilestone)) * 100
+        );
+
+  return {
+    total,
+    thisWeek,
+    streakDays,
+    nextMilestone,
+    milestoneProgress: Math.max(0, Math.min(100, milestoneProgress)),
+  };
+}
+
+/**
  * フラッシュバック用に過去の振り返りを 1 件ランダムに返す。
  * 直近 1 日以内の振り返りは除外(直近すぎると驚きがない)。
  * 全部直近なら null。
