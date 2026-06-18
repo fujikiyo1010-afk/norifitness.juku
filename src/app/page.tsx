@@ -4,6 +4,7 @@ import { getMyAlerts, type MemberAlert, type MemberAlertKey } from "@/lib/member
 import { getMyHomeStats } from "@/lib/member/home-stats";
 import { getMyLastWatchedLesson } from "@/lib/member/last-watched";
 import { getMyGoalSheetStatus } from "@/lib/member/goal-sheet-status";
+import { getMyUnreadCount } from "@/lib/chat/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -30,13 +31,15 @@ export const dynamic = "force-dynamic";
  *   - 目標シート添削数 = 既読管理未実装のため 数字なし「添削あり」表示のみ
  */
 export default async function Home() {
-  const [alerts, stats, lastWatched, goalSheet, admin] = await Promise.all([
-    getMyAlerts(),
-    getMyHomeStats(),
-    getMyLastWatchedLesson(),
-    getMyGoalSheetStatus(),
-    getAdminInfo(),
-  ]);
+  const [alerts, stats, lastWatched, goalSheet, admin, chatUnread] =
+    await Promise.all([
+      getMyAlerts(),
+      getMyHomeStats(),
+      getMyLastWatchedLesson(),
+      getMyGoalSheetStatus(),
+      getAdminInfo(),
+      getMyUnreadCount(),
+    ]);
 
   const displayName = stats?.displayName ?? "受講生";
   const joinedAtLabel = stats
@@ -91,9 +94,9 @@ export default async function Home() {
         <ContinueCTA lastWatched={lastWatched} />
       </div>
 
-      {/* 3 機能ブロック (LINE サポートは線② で復活予定) */}
+      {/* 4 機能ブロック (2026-06-18 #2 で チャット 復活) */}
       <SectionLabel>機能</SectionLabel>
-      <div className="grid grid-cols-3 gap-2 px-4">
+      <div className="grid grid-cols-2 gap-2 px-4">
         <FeatureBlock
           href="/courses"
           name="コース一覧"
@@ -105,6 +108,13 @@ export default async function Home() {
           name="学習"
           desc="振り返りと進捗"
           icon={<PencilIcon />}
+        />
+        <FeatureBlock
+          href="/messages"
+          name="のり氏チャット"
+          desc="質問・相談"
+          icon={<ChatIcon />}
+          badge={chatUnread}
         />
         <FeatureBlock
           href="/tools"
@@ -321,17 +331,24 @@ function FeatureBlock({
   desc,
   icon,
   disabled,
+  badge,
 }: {
   href?: string;
   name: string;
   desc: string;
   icon: React.ReactNode;
   disabled?: boolean;
+  badge?: number;
 }) {
   const inner = (
     <>
-      <div className="w-10 h-10 mx-auto mb-2.5 flex items-center justify-center text-[#2b2620]">
+      <div className="relative w-10 h-10 mx-auto mb-2.5 flex items-center justify-center text-[#2b2620]">
         {icon}
+        {badge !== undefined && badge > 0 && (
+          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-[#d9743f] text-white text-[10px] font-bold rounded-full px-1 flex items-center justify-center font-mono">
+            {badge > 99 ? "99+" : badge}
+          </span>
+        )}
       </div>
       <div className="text-[12px] font-semibold text-[#2b2620] mb-0.5">
         {name}
@@ -434,6 +451,23 @@ function PencilIcon() {
     <svg {...ICO_PROPS} width="24" height="24">
       <path d="M12 20h9" />
       <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z" />
+    </svg>
+  );
+}
+
+function ChatIcon() {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
     </svg>
   );
 }
