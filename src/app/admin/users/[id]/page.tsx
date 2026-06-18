@@ -152,7 +152,16 @@ export default async function AdminUserHubPage({
 
   // 対応事項の総件数 (対応事項セクションで使用)
   const hasCarteFlag = !!carte?.menu_review_needed;
-  const totalActions = pendingCounts.total + (hasCarteFlag ? 1 : 0);
+  // β: 目標シート 「送信して添削を依頼」 押下後で未対応の状態を検知
+  //   = last_review_requested_at が reviewed_at より新しい (or 未添削)
+  const hasGoalSheetReReviewFlag =
+    !!goalSheet?.last_review_requested_at &&
+    (!goalSheet.reviewed_at ||
+      goalSheet.last_review_requested_at > goalSheet.reviewed_at);
+  const totalActions =
+    pendingCounts.total +
+    (hasCarteFlag ? 1 : 0) +
+    (hasGoalSheetReReviewFlag ? 1 : 0);
 
   const displayName = userRow.nickname || userRow.name;
   const isCarteReady =
@@ -384,6 +393,26 @@ export default async function AdminUserHubPage({
                         className="rounded-[4px] bg-amber-100 hover:bg-amber-200 px-3 py-1.5 text-[11px] font-bold text-amber-800 whitespace-nowrap"
                       >
                         受信箱で対応 →
+                      </Link>
+                    </div>
+                  )}
+
+                  {/* β: 目標シート 再添削依頼 (= 受講生が編集 + 「送信して添削を依頼」 押下) */}
+                  {hasGoalSheetReReviewFlag && (
+                    <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 flex items-center gap-3">
+                      <div className="flex-1">
+                        <div className="text-xs font-bold text-amber-900 mb-0.5">
+                          目標シート 更新あり / 再添削依頼
+                        </div>
+                        <div className="text-[11px] text-amber-800">
+                          受講生が目標シートを編集し、 添削を依頼しています。
+                        </div>
+                      </div>
+                      <Link
+                        href={`/admin/users/${userId}/goal-sheet`}
+                        className="rounded-[4px] bg-amber-100 hover:bg-amber-200 px-3 py-1.5 text-[11px] font-bold text-amber-800 whitespace-nowrap"
+                      >
+                        添削する →
                       </Link>
                     </div>
                   )}

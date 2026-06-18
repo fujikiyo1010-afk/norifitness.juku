@@ -26,7 +26,7 @@ export async function getMyGoalSheet(): Promise<GoalSheetRow | null> {
   const { data } = await supabase
     .from("goal_sheets")
     .select(
-      "user_id, content, admin_notes, reviewed_by, reviewed_at, created_at, updated_at"
+      "user_id, content, admin_notes, reviewed_by, reviewed_at, last_review_requested_at, created_at, updated_at"
     )
     .eq("user_id", user.id)
     .maybeSingle();
@@ -39,6 +39,8 @@ export async function getMyGoalSheet(): Promise<GoalSheetRow | null> {
     admin_notes: (data.admin_notes as string | null) ?? null,
     reviewed_by: (data.reviewed_by as string | null) ?? null,
     reviewed_at: (data.reviewed_at as string | null) ?? null,
+    last_review_requested_at:
+      (data.last_review_requested_at as string | null) ?? null,
     created_at: data.created_at as string,
     updated_at: data.updated_at as string,
   };
@@ -56,7 +58,7 @@ export async function getGoalSheetForUser(
   const { data } = await supabase
     .from("goal_sheets")
     .select(
-      "user_id, content, admin_notes, reviewed_by, reviewed_at, created_at, updated_at"
+      "user_id, content, admin_notes, reviewed_by, reviewed_at, last_review_requested_at, created_at, updated_at"
     )
     .eq("user_id", userId)
     .maybeSingle();
@@ -69,6 +71,8 @@ export async function getGoalSheetForUser(
     admin_notes: (data.admin_notes as string | null) ?? null,
     reviewed_by: (data.reviewed_by as string | null) ?? null,
     reviewed_at: (data.reviewed_at as string | null) ?? null,
+    last_review_requested_at:
+      (data.last_review_requested_at as string | null) ?? null,
     created_at: data.created_at as string,
     updated_at: data.updated_at as string,
   };

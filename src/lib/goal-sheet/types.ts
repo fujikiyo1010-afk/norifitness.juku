@@ -152,6 +152,7 @@ export type GoalSheetRow = {
   admin_notes: string | null;        // 既存カラム (現在は audits を優先するため未使用)
   reviewed_by: string | null;        // 既存カラム (admin_user の uuid)
   reviewed_at: string | null;        // 既存カラム
+  last_review_requested_at: string | null;  // 受講生「送信して添削を依頼」 押下時にセット (β: 個人バナー浮上に使用)
   created_at: string;
   updated_at: string;
 };
