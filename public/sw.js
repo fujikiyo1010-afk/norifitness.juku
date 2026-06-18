@@ -41,29 +41,49 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const targetUrl = (event.notification.data && event.notification.data.url) || "/";
+  const rawUrl = (event.notification.data && event.notification.data.url) || "/";
+  // iOS PWA で cold-start 時に相対 URL が失敗するケースがあるため絶対化
+  const absoluteUrl = new URL(rawUrl, self.location.origin).href;
+
   event.waitUntil(
-    self.clients
-      .matchAll({ type: "window", includeUncontrolled: true })
-      .then((clientList) => {
-        // 既に開いてるクライアントがあれば focus & navigate
+    (async () => {
+      try {
+        const clientList = await self.clients.matchAll({
+          type: "window",
+          includeUncontrolled: true,
+        });
+        // 既存ウィンドウあり → focus + navigate (await で race 抑止)
         for (const client of clientList) {
-          if ("focus" in client) {
-            client.focus();
+          if (!("focus" in client)) continue;
+          try {
+            await client.focus();
             if ("navigate" in client) {
               try {
-                client.navigate(targetUrl);
+                await client.navigate(absoluteUrl);
               } catch (e) {
-                // navigate 不能環境はそのまま focus のみ
+                // navigate 不能 (cross-origin 等) は focus のみ
               }
             }
             return;
+          } catch (e) {
+            // この client は suspended 等 → 次へ
           }
         }
-        // なければ新規 open
-        if (self.clients.openWindow) {
-          return self.clients.openWindow(targetUrl);
+        // 既存ウィンドウなし → openWindow (= iOS PWA cold-start 失敗対策で 1 回リトライ)
+        if (!self.clients.openWindow) return;
+        try {
+          await self.clients.openWindow(absoluteUrl);
+        } catch (e) {
+          await new Promise((r) => setTimeout(r, 250));
+          try {
+            await self.clients.openWindow(absoluteUrl);
+          } catch (e2) {
+            console.error("[sw] openWindow failed twice", e2);
+          }
         }
-      })
+      } catch (e) {
+        console.error("[sw] notificationclick failed", e);
+      }
+    })()
   );
 });
