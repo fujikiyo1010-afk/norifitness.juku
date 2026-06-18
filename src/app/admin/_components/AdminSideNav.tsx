@@ -88,6 +88,12 @@ export function AdminSideNav({
       icon: <MailIcon />,
     },
     {
+      label: "アナウンス",
+      href: "/admin/announcements",
+      matchPrefix: "/admin/announcements",
+      icon: <MegaphoneIcon />,
+    },
+    {
       label: "設定",
       href: "/admin/settings",
       matchPrefix: "/admin/settings",
@@ -237,6 +243,15 @@ function MailIcon() {
     <svg {...iconProps}>
       <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
       <polyline points="22,6 12,13 2,6" />
+    </svg>
+  );
+}
+
+function MegaphoneIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M3 11l18-5v12L3 13z" />
+      <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" />
     </svg>
   );
 }

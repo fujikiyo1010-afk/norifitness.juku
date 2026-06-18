@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendShipmentShippedEmail } from "@/lib/email/shipment-shipped";
+import { sendPushToUser } from "@/lib/push/send";
 
 type ActionResult = { ok: true } | { ok: false; message: string };
 
@@ -31,6 +33,27 @@ export async function markAsShipped(shipmentId: string): Promise<ActionResult> {
 
   revalidatePath("/admin/shipments");
   revalidatePath("/admin");
+
+  // 受講生に Mail + Push 通知 (= B-5、 失敗してもメイン処理は成功扱い)
+  // shipmentId から user_id 逆引きは email module / push 側でやる
+  const { data: shipmentRow } = await supabase
+    .from("shipments")
+    .select("user_id")
+    .eq("id", shipmentId)
+    .maybeSingle();
+  const targetUserId = (shipmentRow as { user_id?: string } | null)?.user_id;
+  if (targetUserId) {
+    void sendShipmentShippedEmail(shipmentId).catch((e) =>
+      console.error("[email] shipment shipped failed", e)
+    );
+    void sendPushToUser(targetUserId, {
+      title: "プロテインを発送しました",
+      body: "歓迎ギフトを本日発送しました。 1〜3 日以内にお届け予定です",
+      url: "/",
+      tag: `shipment-${shipmentId}`,
+    }).catch((e) => console.error("[push] shipment shipped failed", e));
+  }
+
   return { ok: true };
 }
 
