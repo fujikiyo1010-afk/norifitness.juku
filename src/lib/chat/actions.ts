@@ -4,8 +4,12 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAdminInfo } from "@/lib/auth/admin";
+import type { ChatMessage } from "./types";
 
 type ActionResult = { ok: true } | { ok: false; message: string };
+type SendResult =
+  | { ok: true; message: ChatMessage }
+  | { ok: false; message: string };
 
 const MAX_BODY = 2000;
 
@@ -17,8 +21,8 @@ function validateBody(body: string): string | null {
   return null;
 }
 
-/** 受講生 ・自分の conversation にメッセージ送信 */
-export async function sendMessageAsUser(body: string): Promise<ActionResult> {
+/** 受講生 ・自分の conversation にメッセージ送信。 成功時は message 行を返す (= 楽観的 UI 更新用) */
+export async function sendMessageAsUser(body: string): Promise<SendResult> {
   const err = validateBody(body);
   if (err) return { ok: false, message: err };
 
@@ -48,25 +52,28 @@ export async function sendMessageAsUser(body: string): Promise<ActionResult> {
   if (!conversationId)
     return { ok: false, message: "会話の作成に失敗しました" };
 
-  const { error } = await supabase.from("messages").insert({
-    conversation_id: conversationId,
-    sender_kind: "user",
-    sender_id: user.id,
-    body: body.trim(),
-  });
+  const { data, error } = await supabase
+    .from("messages")
+    .insert({
+      conversation_id: conversationId,
+      sender_kind: "user",
+      sender_id: user.id,
+      body: body.trim(),
+    })
+    .select("*")
+    .single();
   if (error) return { ok: false, message: error.message };
 
-  revalidatePath("/messages");
   revalidatePath("/admin/messages");
   revalidatePath(`/admin/messages/${conversationId}`);
-  return { ok: true };
+  return { ok: true, message: data as ChatMessage };
 }
 
-/** admin ・特定 conversation にメッセージ送信 */
+/** admin ・特定 conversation にメッセージ送信。 成功時は message 行を返す (= 楽観的 UI 更新用) */
 export async function sendMessageAsAdmin(
   conversationId: string,
   body: string
-): Promise<ActionResult> {
+): Promise<SendResult> {
   const err = validateBody(body);
   if (err) return { ok: false, message: err };
 
@@ -74,18 +81,21 @@ export async function sendMessageAsAdmin(
   if (!me) return { ok: false, message: "管理者権限が必要です" };
 
   const admin = createAdminClient();
-  const { error } = await admin.from("messages").insert({
-    conversation_id: conversationId,
-    sender_kind: "admin",
-    sender_id: me.id,
-    body: body.trim(),
-  });
+  const { data, error } = await admin
+    .from("messages")
+    .insert({
+      conversation_id: conversationId,
+      sender_kind: "admin",
+      sender_id: me.id,
+      body: body.trim(),
+    })
+    .select("*")
+    .single();
   if (error) return { ok: false, message: error.message };
 
-  revalidatePath("/messages");
   revalidatePath("/admin/messages");
   revalidatePath(`/admin/messages/${conversationId}`);
-  return { ok: true };
+  return { ok: true, message: data as ChatMessage };
 }
 
 /** 受講生 ・既読をセット */

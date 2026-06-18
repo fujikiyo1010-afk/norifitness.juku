@@ -54,8 +54,13 @@ export function MessagesClient({
       if (!r.ok) {
         alert(r.message);
         setText(body);
+        return;
       }
-      // Realtime で自分の message も自動的に push されるが、 念のため
+      // 楽観的更新: 自分の送信を即時表示 (= Realtime が動かない時の保険)
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === r.message.id)) return prev;
+        return [...prev, r.message];
+      });
     });
   }
 
