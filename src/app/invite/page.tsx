@@ -47,7 +47,7 @@ export default async function InvitePage({
   }
 
   return (
-    <main className="flex flex-1 flex-col items-center justify-center p-6">
+    <main className="flex flex-1 flex-col items-center justify-center p-6 bg-[#f9f5ed]">
       <div className="w-full max-w-md space-y-6">
         <header className="space-y-2 text-center">
           <h1 className="text-2xl font-bold tracking-tight text-[#2b2620] dark:text-zinc-50">
@@ -84,7 +84,7 @@ function InviteError({
   showLoginLink?: boolean;
 }) {
   return (
-    <main className="flex flex-1 flex-col items-center justify-center p-6">
+    <main className="flex flex-1 flex-col items-center justify-center p-6 bg-[#f9f5ed]">
       <div className="w-full max-w-md space-y-4 text-center">
         <h1 className="text-xl font-bold text-[#2b2620] dark:text-zinc-50">⚠️ {title}</h1>
         <p className="text-sm text-zinc-600 dark:text-[#a59b8c]">{message}</p>

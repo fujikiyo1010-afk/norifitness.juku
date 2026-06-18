@@ -42,11 +42,17 @@ export function MemberBottomNav() {
 
   return (
     <>
-      {/* スペーサー: タブと同じ高さの空ブロックを末尾に挟む。
-          layout で {children} の後ろに配置することで、 ページ末尾コンテンツが
-          fixed のタブと被らない。 各ページへの pb-24 追加が不要。
-          2026-06-18: h-24 (96px) → h-16 (64px) に縮小 (= nav 上の空き削減)。 */}
-      <div aria-hidden className="h-16 flex-shrink-0" />
+      {/* スペーサー: タブの物理高さに合わせて末尾に確保 (= 末尾コンテンツが nav に隠れない保証)。
+          ブラウザ通常: 60px (= nav 自身 55-60px をカバー)
+          PWA + iPhone: 60 + safe-area-inset-bottom (= 34px) = 94px (= nav + ホームインジケータをカバー)
+          2026-06-18 改: 固定 h-16 (64px) では PWA で隠れる問題があり動的計算に。 */}
+      <div
+        aria-hidden
+        className="flex-shrink-0"
+        style={{
+          height: "calc(60px + env(safe-area-inset-bottom))",
+        }}
+      />
 
       <nav className="fixed bottom-0 inset-x-0 z-40 bg-[#fffdf8] border-t border-[#e7dcc9] safe-bottom">
         <div className="mx-auto max-w-md flex">

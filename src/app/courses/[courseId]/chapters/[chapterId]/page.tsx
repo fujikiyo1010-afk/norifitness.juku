@@ -34,7 +34,7 @@ export default async function StudentChapterPage({
     totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   return (
-    <main className="flex flex-1 flex-col p-6 sm:p-8">
+    <main className="flex flex-1 flex-col p-6 sm:p-8 bg-[#f9f5ed]">
       <div className="mx-auto w-full max-w-[460px] space-y-6">
         <header className="space-y-2">
           <nav className="text-xs text-[#6a6256] space-x-1">

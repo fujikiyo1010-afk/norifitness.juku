@@ -37,7 +37,7 @@ export default async function CoursesPage() {
   return (
     <>
       <MemberHeader title="コース" fallbackHref="/" />
-      <main className="flex flex-1 flex-col p-4 sm:p-6">
+      <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#f9f5ed]">
         <div className="mx-auto w-full max-w-[460px] space-y-4">
           <CoursesView initialCourses={summaries} />
         </div>

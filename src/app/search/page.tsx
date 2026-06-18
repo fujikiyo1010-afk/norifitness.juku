@@ -23,7 +23,7 @@ export default async function SearchPage({
   return (
     <>
       <MemberHeader title="検索" fallbackHref="/" />
-      <main className="flex flex-1 flex-col p-6 sm:p-8">
+      <main className="flex flex-1 flex-col p-6 sm:p-8 bg-[#f9f5ed]">
         <div className="mx-auto w-full max-w-[460px] space-y-6">
         {query.length > 0 && (
           <div className="text-sm text-zinc-700">

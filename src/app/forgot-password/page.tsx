@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 
 export default function ForgotPasswordPage() {
   return (
-    <main className="flex flex-1 flex-col items-center justify-center p-6">
+    <main className="flex flex-1 flex-col items-center justify-center p-6 bg-[#f9f5ed]">
       <div className="w-full max-w-md space-y-6">
         <header className="space-y-2 text-center">
           <h1 className="text-2xl font-bold tracking-tight text-[#2b2620] dark:text-zinc-50">
