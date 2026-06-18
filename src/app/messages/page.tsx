@@ -5,7 +5,6 @@ import {
   getOrCreateMyConversation,
   listMyMessages,
 } from "@/lib/chat/queries";
-import { markReadAsUser } from "@/lib/chat/actions";
 import { MemberHeader } from "@/components/MemberHeader";
 import { MessagesClient } from "./MessagesClient";
 
@@ -44,8 +43,11 @@ export default async function MessagesPage() {
 
   const messages = await listMyMessages(conversation.id, 200);
 
-  // 既読セット (Server Action ・表示と同時に admin 発の未読をクリア)
-  await markReadAsUser();
+  // 既読セット (直接 update ・「use server」 action 経由だと revalidatePath が render 中に走るので直接更新)
+  await supabase
+    .from("conversations")
+    .update({ last_read_at_user: new Date().toISOString() })
+    .eq("user_id", user.id);
 
   // 受講生氏名 (= 自分の表示色用、 大きく display しない予定)
   const { data: userRow } = await supabase
