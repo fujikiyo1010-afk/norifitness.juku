@@ -13,6 +13,13 @@ import {
 
 type Tab = "untried" | "tried";
 
+/**
+ * 実践リスト Client (2026-06-18 Phase 2 ・モック準拠リデザイン)
+ *
+ * - タブ + 「+ 新規追加」 緑 pill
+ * - カード新形式: 緑円大 ✓ + タイトル + タグ pill + 振り返りボックス + 試した日 + 編集/削除
+ * - チェック → 即タブ移動 + 振り返りモーダル即出
+ */
 export function ActionsClient({
   untried,
   tried,
@@ -35,27 +42,31 @@ export function ActionsClient({
 
   return (
     <>
-      {/* タブ + 新規追加ボタン */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="inline-flex rounded-full bg-zinc-100 p-1">
+      {/* タブ + 新規追加 ボタン (モック準拠 ・下線タブ + 緑 pill) */}
+      <div className="flex items-end justify-between mb-3.5">
+        <div className="flex gap-4">
           <TabBtn
             active={tab === "untried"}
             onClick={() => setTab("untried")}
-            label={`試してない (${untried.length})`}
+            label="試してない"
+            count={untried.length}
           />
           <TabBtn
             active={tab === "tried"}
             onClick={() => setTab("tried")}
-            label={`試した (${tried.length})`}
+            label="試した"
+            count={tried.length}
           />
         </div>
         <button
           type="button"
           onClick={() => setShowNew(true)}
-          className="text-[12px] font-bold text-[#34603f] hover:text-[#004d40] flex items-center gap-1"
+          className="inline-flex items-center gap-1.5 text-[13px] font-bold text-white bg-[#4a875b] hover:bg-[#34603f] rounded-[11px] px-3.5 py-2 transition-colors"
         >
-          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#4a875b] text-white text-[12px]">
-            +
+          <span className="inline-block w-3.5 h-3.5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
           </span>
           新規追加
         </button>
@@ -71,13 +82,12 @@ export function ActionsClient({
             : "まだ試した記録はありません。"}
         </div>
       ) : (
-        <ul className="space-y-2.5">
+        <ul className="space-y-3.5">
           {list.map((row) => (
             <ActionCard
               key={row.id}
               row={row}
               onCheck={() => {
-                // 試してない → 試した
                 startTryToggle(row.id, true, () => {
                   setReflectTarget(row);
                   setTab("tried");
@@ -91,9 +101,7 @@ export function ActionsClient({
               }}
               onOpenReflect={() => setReflectTarget(row)}
               onDelete={() => {
-                if (
-                  !confirm("このアクションを削除します。 よろしいですか?")
-                )
+                if (!confirm("このアクションを削除します。 よろしいですか?"))
                   return;
                 deleteAction(row.id).then((r) => {
                   if (r.ok) router.refresh();
@@ -114,7 +122,7 @@ export function ActionsClient({
             placeholder="例: ジムで RPE 8 まで追い込む"
             rows={3}
             maxLength={280}
-            className="w-full rounded-md border border-zinc-300 p-3 text-sm focus:outline-none focus:border-[#4a875b]"
+            className="w-full rounded-md border border-[#e7dcc9] bg-[#fffdf8] p-3 text-sm focus:outline-none focus:border-[#4a875b]"
           />
           <p className="mt-1 text-[10px] text-[#6a6256] text-right">
             {newText.length} / 280
@@ -123,7 +131,7 @@ export function ActionsClient({
             <button
               type="button"
               onClick={() => setShowNew(false)}
-              className="px-4 py-2 text-[12px] text-zinc-600 hover:text-zinc-800"
+              className="px-4 py-2 text-[12px] text-[#6a6256] hover:text-[#2b2620]"
             >
               キャンセル
             </button>
@@ -143,7 +151,7 @@ export function ActionsClient({
                   }
                 });
               }}
-              className="rounded-full bg-[#4a875b] px-5 py-2 text-[12px] font-bold text-white hover:bg-[#34603f] disabled:bg-zinc-300"
+              className="rounded-full bg-[#4a875b] px-5 py-2 text-[12px] font-bold text-white hover:bg-[#34603f] disabled:bg-[#a59b8c]"
             >
               {savingNew ? "保存中..." : "宣言する"}
             </button>
@@ -165,11 +173,7 @@ export function ActionsClient({
     </>
   );
 
-  function startTryToggle(
-    id: string,
-    next: boolean,
-    onDone: () => void
-  ) {
+  function startTryToggle(id: string, next: boolean, onDone: () => void) {
     toggleTried(id, next).then((r) => {
       if (r.ok) onDone();
       else alert(r.message);
@@ -181,22 +185,31 @@ function TabBtn({
   active,
   onClick,
   label,
+  count,
 }: {
   active: boolean;
   onClick: () => void;
   label: string;
+  count: number;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={
+      className={`pb-2.5 text-[14px] font-bold transition-colors border-b-2 ${
         active
-          ? "px-4 py-1.5 rounded-full bg-[#fffdf8] text-[#34603f] text-[12px] font-bold shadow-sm"
-          : "px-4 py-1.5 rounded-full text-[#6a6256] text-[12px] font-medium hover:text-zinc-700"
-      }
+          ? "text-[#2b2620] border-[#4a875b]"
+          : "text-[#a59b8c] border-transparent hover:text-[#6a6256]"
+      }`}
     >
       {label}
+      <span
+        className={`ml-1.5 text-[13px] font-mono font-bold ${
+          active ? "text-[#34603f]" : "text-[#a59b8c]"
+        }`}
+      >
+        {count}
+      </span>
     </button>
   );
 }
@@ -219,7 +232,7 @@ function EmptyHero({ onAddClick }: { onAddClick: () => void }) {
         </button>
         <Link
           href="/courses"
-          className="rounded-full border border-zinc-300 text-zinc-700 px-4 py-2 text-[12px] font-bold hover:bg-[#f0e6d3]"
+          className="rounded-full border border-[#e7dcc9] text-[#6a6256] px-4 py-2 text-[12px] font-bold hover:bg-[#f0e6d3]"
         >
           コースから始める →
         </Link>
@@ -245,70 +258,103 @@ function ActionCard({
     row.course_id && row.chapter_id && row.lesson_id
       ? `/courses/${row.course_id}/chapters/${row.chapter_id}/lessons/${row.lesson_id}`
       : null;
+  const isSelf = !lessonHref;
 
   return (
-    <li className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl px-4 py-3.5">
-      <div className="flex items-center gap-3.5">
-        <button
-          type="button"
-          onClick={row.tried ? onUncheck : onCheck}
-          className={
-            row.tried
-              ? "flex-shrink-0 w-9 h-9 rounded-full bg-[#4a875b] text-white text-[18px] font-bold flex items-center justify-center hover:bg-[#34603f] self-center"
-              : "flex-shrink-0 w-9 h-9 rounded-full border-2 border-zinc-300 hover:border-[#4a875b] flex items-center justify-center text-zinc-300 hover:text-[#4a875b] self-center"
-          }
-          aria-label={row.tried ? "未試行に戻す" : "試したにする"}
-          title={row.tried ? "未試行に戻す" : "試したにする"}
-        >
-          {row.tried ? "✓" : ""}
-        </button>
-        <div className="flex-1 min-w-0">
-          <p className="text-[14px] text-[#2b2620] leading-snug whitespace-pre-wrap">
-            {row.planned_action}
-          </p>
-          {lessonHref ? (
+    <li
+      className="bg-[#fffdf8] border border-[#e7dcc9] rounded-[16px] p-4 flex gap-3.5"
+      style={{ boxShadow: "0 8px 20px rgba(60,45,25,.05)" }}
+    >
+      <button
+        type="button"
+        onClick={row.tried ? onUncheck : onCheck}
+        className={
+          row.tried
+            ? "flex-shrink-0 w-[38px] h-[38px] rounded-full bg-[#4a875b] text-white flex items-center justify-center hover:bg-[#34603f] self-center"
+            : "flex-shrink-0 w-[38px] h-[38px] rounded-full border-[2px] border-[#a59b8c] hover:border-[#4a875b] flex items-center justify-center self-center"
+        }
+        aria-label={row.tried ? "未試行に戻す" : "試したにする"}
+        title={row.tried ? "未試行に戻す" : "試したにする"}
+      >
+        {row.tried && (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        )}
+      </button>
+
+      <div className="flex-1 min-w-0">
+        {/* タイトル */}
+        <div className="text-[16px] font-bold text-[#2b2620] leading-[1.4] mb-2">
+          {row.planned_action}
+        </div>
+
+        {/* タグ pill */}
+        <div className="mb-2.5">
+          {isSelf ? (
+            <span className="inline-flex items-center text-[11px] font-bold text-[#6a6256] bg-[#efe9dd] rounded-full px-2.5 py-0.5">
+              自発アクション
+            </span>
+          ) : (
             <Link
               href={lessonHref}
-              className="text-[10px] text-[#6a6256] hover:text-zinc-700 mt-1 inline-block truncate max-w-full"
+              className="inline-flex items-center gap-1 text-[11px] font-bold text-[#34603f] bg-[#e9f1e9] rounded-full px-2.5 py-0.5 max-w-full overflow-hidden whitespace-nowrap text-ellipsis hover:bg-[#dde9dd] transition-colors"
             >
-              {row.course_title} ・ {row.chapter_title} ・ {row.lesson_title}
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+              </svg>
+              <span className="truncate">
+                {row.course_title} ・ {row.chapter_title}
+              </span>
             </Link>
-          ) : (
-            <p className="text-[10px] text-[#a59b8c] mt-1">自発アクション</p>
           )}
-          {row.tried && row.reflection && (
-            <p className="text-[12px] text-zinc-700 mt-2 bg-[#f9f5ed] rounded-md p-2 leading-relaxed whitespace-pre-wrap">
-              <span className="text-[10px] text-[#6a6256] mr-1">
-                振り返り:
-              </span>
+        </div>
+
+        {/* 振り返り (試した + reflection あるとき) */}
+        {row.tried && row.reflection && (
+          <div className="mb-3">
+            <div className="text-[11px] font-bold text-[#d9743f] tracking-wider mb-0.5">
+              振り返り
+            </div>
+            <div className="text-[14.5px] text-[#2b2620] leading-[1.75] whitespace-pre-wrap">
               {row.reflection}
-            </p>
+            </div>
+          </div>
+        )}
+
+        {/* meta 行: 試した日 + 編集 + × (上に境界線) */}
+        <div className="pt-2.5 border-t border-[#e7dcc9] flex items-center gap-3">
+          {row.tried && row.tried_at ? (
+            <div className="text-[11.5px] text-[#6a6256]">
+              試した日{" "}
+              <b className="font-bold font-mono text-[#6a6256]">
+                {new Date(row.tried_at).toLocaleDateString("ja-JP")}
+              </b>
+            </div>
+          ) : (
+            <div className="text-[11.5px] text-[#a59b8c]">宣言済</div>
           )}
-          <div className="mt-2 flex items-center gap-3 text-[10px]">
-            {row.tried && row.tried_at && (
-              <span className="text-[#a59b8c] font-mono">
-                試した日 {new Date(row.tried_at).toLocaleDateString("ja-JP")}
-              </span>
-            )}
-            {row.tried && (
-              <button
-                type="button"
-                onClick={onOpenReflect}
-                className="text-[#34603f] hover:text-[#004d40] font-bold"
-              >
-                {row.reflection ? "振り返りを編集" : "振り返りを書く"}
-              </button>
-            )}
+          {row.tried && (
             <button
               type="button"
-              onClick={onDelete}
-              className="ml-auto text-[#a59b8c] hover:text-rose-600"
-              aria-label="削除"
-              title="削除"
+              onClick={onOpenReflect}
+              className="text-[12.5px] font-bold text-[#34603f] hover:text-[#2b4c2d]"
             >
-              ×
+              {row.reflection ? "振り返りを編集" : "振り返りを書く"}
             </button>
-          </div>
+          )}
+          <button
+            type="button"
+            onClick={onDelete}
+            className="ml-auto text-[#a59b8c] hover:text-[#d9743f]"
+            aria-label="削除"
+            title="削除"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
         </div>
       </div>
     </li>
@@ -338,7 +384,7 @@ function Modal({
           <button
             type="button"
             onClick={onClose}
-            className="text-[#a59b8c] hover:text-zinc-700 text-xl leading-none"
+            className="text-[#a59b8c] hover:text-[#2b2620] text-xl leading-none"
             aria-label="閉じる"
           >
             ×
@@ -373,7 +419,7 @@ function ReflectionModal({
         placeholder="やってみて分かったこと、 感想、 次に活かすこと..."
         rows={5}
         maxLength={1000}
-        className="w-full rounded-md border border-zinc-300 p-3 text-sm focus:outline-none focus:border-[#4a875b]"
+        className="w-full rounded-md border border-[#e7dcc9] bg-[#fffdf8] p-3 text-sm focus:outline-none focus:border-[#4a875b]"
       />
       <p className="mt-1 text-[10px] text-[#6a6256] text-right">
         {text.length} / 1000
@@ -382,7 +428,7 @@ function ReflectionModal({
         <button
           type="button"
           onClick={onClose}
-          className="px-4 py-2 text-[12px] text-zinc-600 hover:text-zinc-800"
+          className="px-4 py-2 text-[12px] text-[#6a6256] hover:text-[#2b2620]"
         >
           {row.reflection ? "キャンセル" : "後で書く"}
         </button>
@@ -396,7 +442,7 @@ function ReflectionModal({
               else alert(r.message);
             });
           }}
-          className="rounded-full bg-[#4a875b] px-5 py-2 text-[12px] font-bold text-white hover:bg-[#34603f] disabled:bg-zinc-300"
+          className="rounded-full bg-[#4a875b] px-5 py-2 text-[12px] font-bold text-white hover:bg-[#34603f] disabled:bg-[#a59b8c]"
         >
           {saving ? "保存中..." : "保存"}
         </button>

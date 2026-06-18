@@ -151,6 +151,89 @@ export async function listMyActionsForLesson(
   return (data ?? []) as RealWorldActionRow[];
 }
 
+/**
+ * 達成バンド用 集計 (2026-06-18 Phase 2)
+ *
+ * - triedTotal: 試した累計 (tried=true)
+ * - triedThisWeek: 今週試した (tried_at >= 今週月曜 0:00 JST)
+ * - implementationRate: 宣言→実践率 (tried=true / total * 100、 0 件のとき 0)
+ * - nextMilestone: 次の節目 (5 件単位、 直近の 5/10/15... の倍数)
+ * - milestoneProgress: 現節目までの達成率 (= triedTotal % 5 = 4 のとき 80%、 等)
+ */
+export type ActionsStats = {
+  triedTotal: number;
+  triedThisWeek: number;
+  totalCount: number;
+  implementationRate: number;
+  nextMilestone: number;
+  milestoneProgress: number;
+};
+
+export async function getActionsStats(): Promise<ActionsStats> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return {
+      triedTotal: 0,
+      triedThisWeek: 0,
+      totalCount: 0,
+      implementationRate: 0,
+      nextMilestone: 5,
+      milestoneProgress: 0,
+    };
+  }
+
+  const { data: rows } = await supabase
+    .from("real_world_actions")
+    .select("tried, tried_at")
+    .eq("user_id", user.id);
+  const all = (rows ?? []) as { tried: boolean; tried_at: string | null }[];
+
+  const triedTotal = all.filter((r) => r.tried).length;
+  const totalCount = all.length;
+
+  // 今週月曜 0:00 JST
+  const now = new Date();
+  const jstOffsetMs = 9 * 3600 * 1000;
+  const jstNow = new Date(now.getTime() + jstOffsetMs);
+  const dayOfWeek = jstNow.getUTCDay(); // 0 = Sun ... 6 = Sat
+  const daysSinceMonday = (dayOfWeek + 6) % 7; // Mon=0
+  const jstMondayMidnight = new Date(jstNow);
+  jstMondayMidnight.setUTCDate(jstNow.getUTCDate() - daysSinceMonday);
+  jstMondayMidnight.setUTCHours(0, 0, 0, 0);
+  const mondayUtcIso = new Date(
+    jstMondayMidnight.getTime() - jstOffsetMs
+  ).toISOString();
+
+  const triedThisWeek = all.filter(
+    (r) => r.tried && r.tried_at !== null && r.tried_at >= mondayUtcIso
+  ).length;
+
+  const implementationRate =
+    totalCount === 0 ? 0 : Math.round((triedTotal / totalCount) * 100);
+
+  // 次の節目 = 直近の 5 の倍数 (= 0→5, 5→10, ..., 12→15)
+  const nextMilestone = Math.max(5, Math.ceil((triedTotal + 1) / 5) * 5);
+  const prevMilestone = nextMilestone - 5;
+  const milestoneProgress =
+    nextMilestone === prevMilestone
+      ? 100
+      : Math.round(
+          ((triedTotal - prevMilestone) / (nextMilestone - prevMilestone)) * 100
+        );
+
+  return {
+    triedTotal,
+    triedThisWeek,
+    totalCount,
+    implementationRate,
+    nextMilestone,
+    milestoneProgress: Math.max(0, Math.min(100, milestoneProgress)),
+  };
+}
+
 /** 単件取得 (= 振り返りモーダル用) */
 export async function getMyAction(
   id: string
