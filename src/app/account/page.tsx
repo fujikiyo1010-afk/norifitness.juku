@@ -79,10 +79,11 @@ export default async function AccountPage() {
           </Link>
         </div>
 
-        {/* アカウント (アプリ通知 / LINE 連携 = 線② で復活、 メール変更 = 明日実装) */}
+        {/* アカウント (アプリ通知 / LINE 連携 = 線② で復活) */}
         <Section title="アカウント">
           <LinkRow icon={<UserIcon />} label="プロフィール編集" href="/account/profile" />
-          <LinkRow icon={<LockIcon />} label="パスワード変更" href="/account/password" last />
+          <LinkRow icon={<LockIcon />} label="パスワード変更" href="/account/password" />
+          <LinkRow icon={<MailIcon />} label="メールアドレス変更" href="/account/email" last />
         </Section>
 
         {/* 通知 */}

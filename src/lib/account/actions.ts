@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { sendPasswordChangedEmail } from "@/lib/email/password-changed";
+import { sendEmailChangeRequestNotice } from "@/lib/email/email-changed";
 
 /**
  * /account 設定画面のサーバーアクション (2026-06-17 線① 新設)
@@ -105,6 +106,86 @@ export async function updatePassword(
   } = await supabase.auth.getUser();
   if (user) {
     await sendPasswordChangedEmail(user.id);
+  }
+
+  revalidatePath("/account");
+  return { ok: true };
+}
+
+/**
+ * メールアドレス変更申請 (2026-06-18 線① #8)
+ *
+ * 流れ:
+ *   1. 現在パスワードで本人確認 (signInWithPassword)
+ *   2. Supabase に新メール変更を申請 (= auth.updateUser({ email }))
+ *   3. 旧メールに「変更要求があります」 通知メール送信
+ *   4. 受講生は新メールに届く確認リンクをクリックして完了
+ *
+ * - リンクをクリックするまで auth.users.email は不変 (= 旧メールでログイン可、 ロックアウトなし)
+ * - リンククリック後、 trg_sync_auth_email で public.users.email も自動同期
+ */
+export async function requestEmailChange(
+  currentEmail: string,
+  newEmail: string,
+  currentPassword: string
+): Promise<ActionResult> {
+  const newTrimmed = (newEmail ?? "").trim().toLowerCase();
+  const oldTrimmed = (currentEmail ?? "").trim().toLowerCase();
+  if (!newTrimmed) return { ok: false, error: "新しいメールアドレスを入力してください" };
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newTrimmed)) {
+    return { ok: false, error: "メールアドレスの形式が正しくありません" };
+  }
+  if (newTrimmed === oldTrimmed) {
+    return { ok: false, error: "現在と同じメールアドレスです" };
+  }
+  if (!currentPassword) {
+    return { ok: false, error: "現在のパスワードを入力してください" };
+  }
+
+  const supabase = await createClient();
+
+  // 1) 本人確認 (= 現在 PW で signIn)
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email: oldTrimmed,
+    password: currentPassword,
+  });
+  if (signInError) {
+    return { ok: false, error: "現在のパスワードが正しくありません" };
+  }
+
+  // 2) Supabase にメール変更申請 (= 新メールに確認リンク送信)
+  const { error: updateError } = await supabase.auth.updateUser({
+    email: newTrimmed,
+  });
+  if (updateError) {
+    // Supabase の重複メアドエラー等
+    return {
+      ok: false,
+      error:
+        updateError.message.includes("already") ||
+        updateError.message.includes("registered")
+          ? "このメールアドレスは既に使われています"
+          : updateError.message,
+    };
+  }
+
+  // 3) 旧メール宛通知 (= 申請時点で即送信、 乗っ取り早期発見)
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) {
+    const { data: userRow } = await supabase
+      .from("users")
+      .select("name")
+      .eq("id", user.id)
+      .maybeSingle();
+    const userName =
+      (userRow as { name?: string | null } | null)?.name ?? "受講生";
+    await sendEmailChangeRequestNotice({
+      oldEmail: oldTrimmed,
+      newEmail: newTrimmed,
+      userName,
+    });
   }
 
   revalidatePath("/account");
