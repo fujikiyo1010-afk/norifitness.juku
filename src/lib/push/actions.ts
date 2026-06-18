@@ -72,7 +72,15 @@ export async function deleteSubscription(
   return { ok: true };
 }
 
-export async function sendTestPushToMe(): Promise<ActionResult> {
+type TestPushOptions = {
+  delaySec?: number;     // Server Action 内で待機 (= 10 秒後送信デモ用、 推奨 0-30)
+  url?: string;          // タップで開く URL (= リンク付き通知デモ用)
+  title?: string;        // 上書き
+  body?: string;         // 上書き
+  tag?: string;          // 同 tag は端末側で上書き
+};
+
+async function _sendTestPush(opts: TestPushOptions): Promise<ActionResult> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -80,11 +88,15 @@ export async function sendTestPushToMe(): Promise<ActionResult> {
   if (!user) return { ok: false, error: "ログインが必要です" };
 
   try {
+    if (opts.delaySec && opts.delaySec > 0) {
+      const ms = Math.min(opts.delaySec, 50) * 1000; // Vercel 60s 制限手前で頭打ち
+      await new Promise((r) => setTimeout(r, ms));
+    }
     const result = await sendPushToUser(user.id, {
-      title: "筋肉塾 ・ テスト通知",
-      body: "通知の動作確認です。 これが見えれば成功!",
-      url: "/",
-      tag: "test",
+      title: opts.title ?? "筋肉塾 ・ テスト通知",
+      body: opts.body ?? "通知の動作確認です。 これが見えれば成功!",
+      url: opts.url ?? "/",
+      tag: opts.tag ?? "test",
     });
     if (result.attempted === 0) {
       return {
@@ -99,6 +111,28 @@ export async function sendTestPushToMe(): Promise<ActionResult> {
       error: e instanceof Error ? e.message : "送信に失敗しました",
     };
   }
+}
+
+export async function sendTestPushToMe(): Promise<ActionResult> {
+  return _sendTestPush({});
+}
+
+export async function sendTestPushDelayed(): Promise<ActionResult> {
+  return _sendTestPush({
+    delaySec: 10,
+    title: "筋肉塾 ・ 10 秒後テスト",
+    body: "ロック中でも届きました。 タップでアプリが開きます",
+    tag: "test-delayed",
+  });
+}
+
+export async function sendTestPushWithLink(): Promise<ActionResult> {
+  return _sendTestPush({
+    title: "筋肉塾 ・ リンク付きテスト",
+    body: "タップ or 左スワイプ → 「開く」 で 筋トレ画面 へ",
+    url: "/workout",
+    tag: "test-link",
+  });
 }
 
 /**

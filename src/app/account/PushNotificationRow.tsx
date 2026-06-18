@@ -10,6 +10,8 @@ import {
   saveSubscription,
   deleteSubscription,
   sendTestPushToMe,
+  sendTestPushDelayed,
+  sendTestPushWithLink,
 } from "@/lib/push/actions";
 
 /**
@@ -86,6 +88,33 @@ export function PushNotificationRow() {
     });
   }
 
+  function handleTestDelayed() {
+    setError(null);
+    setInfo("10 秒後に送信します。 端末をスリープしてお待ちください...");
+    startTransition(async () => {
+      const r = await sendTestPushDelayed();
+      if (!r.ok) {
+        setError(r.error);
+        setInfo(null);
+        return;
+      }
+      setInfo("10 秒後通知を送信しました");
+    });
+  }
+
+  function handleTestWithLink() {
+    setError(null);
+    setInfo(null);
+    startTransition(async () => {
+      const r = await sendTestPushWithLink();
+      if (!r.ok) {
+        setError(r.error);
+        return;
+      }
+      setInfo("リンク付き通知を送信しました");
+    });
+  }
+
   function handleDisable() {
     setError(null);
     setInfo(null);
@@ -133,6 +162,22 @@ export function PushNotificationRow() {
             className="px-3 py-1.5 rounded-lg bg-[#4a875b] text-white text-[11px] font-bold hover:bg-[#34603f] transition-colors disabled:opacity-60"
           >
             {pending ? "送信中..." : "テスト通知を送る"}
+          </button>
+          <button
+            type="button"
+            onClick={handleTestDelayed}
+            disabled={pending}
+            className="px-3 py-1.5 rounded-lg bg-[#fffdf8] border border-[#4a875b] text-[#34603f] text-[11px] font-bold hover:bg-[rgba(0,137,123,0.08)] transition-colors disabled:opacity-60"
+          >
+            10 秒後に送信
+          </button>
+          <button
+            type="button"
+            onClick={handleTestWithLink}
+            disabled={pending}
+            className="px-3 py-1.5 rounded-lg bg-[#fffdf8] border border-[#4a875b] text-[#34603f] text-[11px] font-bold hover:bg-[rgba(0,137,123,0.08)] transition-colors disabled:opacity-60"
+          >
+            リンク付きを送信
           </button>
           <button
             type="button"
