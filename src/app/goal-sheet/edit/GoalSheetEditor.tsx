@@ -174,6 +174,33 @@ export function GoalSheetEditor({
     writeDraft(content);
   }, [content, hydrated]);
 
+  // ===== 自動保存 (debounce 1.5s ・ 2026-06-18 下書きボタン削除に伴う対応) =====
+  // 「下書き保存」 ボタンを廃止して 1 ボタン化したため、 編集内容の永続化は
+  // ここで自動で行う。 saveMyGoalSheet(content, { notify: false }) で
+  // 静かに DB upsert (= last_review_requested_at は触らない、 admin に浮上しない)。
+  //   - 連続編集中は最後のタイミングだけ走らせる (debounce)
+  //   - hydration 前 / 送信中は何もしない
+  //   - エラーは silent (= 下書きと同じ性質、 ユーザーには触らない)
+  const autoSaveTimerRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (!hydrated) return;
+    if (isPending) return; // 「送信して添削を依頼」 実行中はスキップ
+    if (autoSaveTimerRef.current !== null) {
+      window.clearTimeout(autoSaveTimerRef.current);
+    }
+    autoSaveTimerRef.current = window.setTimeout(() => {
+      // fire-and-forget (= UI は止めない)
+      saveMyGoalSheet(content, { notify: false }).catch((e) => {
+        console.warn("[goal-sheet] auto-save failed", e);
+      });
+    }, 1500);
+    return () => {
+      if (autoSaveTimerRef.current !== null) {
+        window.clearTimeout(autoSaveTimerRef.current);
+      }
+    };
+  }, [content, hydrated, isPending]);
+
   // ===== 体脂肪率 自動計算 (B1: アメリカ海軍式) =====
   // 必要 4 項目 (体重 / 身長 / ウエスト / 首回り) + gender が全部揃った時、
   // calculateBodyFat を呼んで current_status.body_fat_pct に書き込む。
@@ -277,29 +304,24 @@ export function GoalSheetEditor({
   };
 
   // ===== 保存処理 =====
-  // asDraft=true → 下書き保存 (DB upsert + content のみ、 通知なし、 トースト)
-  // asDraft=false → 「送信して [再]添削を依頼」 (DB upsert + last_review_requested_at、 管理者アラート、 ホーム遷移)
-  const handleSave = (asDraft: boolean) => {
+  // 「送信して添削を依頼」 のみ (= notify=true で last_review_requested_at セット)
+  //   - 下書き保存ボタンは 2026-06-18 廃止 (= 編集内容は自動保存で常時 DB に同期)
+  //   - 本送信後は ドラフト破棄 → 閲覧モードへ遷移
+  const handleSubmit = () => {
     setError(null);
     setSavedMessage(null);
     startTransition(async () => {
-      const result = await saveMyGoalSheet(content, { notify: !asDraft });
+      const result = await saveMyGoalSheet(content, { notify: true });
       if (!result.ok) {
         setError(result.message);
         return;
       }
-      if (asDraft) {
-        showToast("下書きを保存しました");
-      } else {
-        // 本保存後はドラフト破棄 → 閲覧モードへ遷移
-        clearDraft();
-        // E: 閲覧モードでトースト表示するためフラグを書く (= SavedToast が読んで removeItem)
-        try {
-          sessionStorage.setItem("goal-sheet-just-saved", "1");
-        } catch {}
-        router.push("/goal-sheet");
-        router.refresh();
-      }
+      clearDraft();
+      try {
+        sessionStorage.setItem("goal-sheet-just-saved", "1");
+      } catch {}
+      router.push("/goal-sheet");
+      router.refresh();
     });
   };
 
@@ -616,24 +638,19 @@ export function GoalSheetEditor({
         </div>
       )}
 
-      {/* 保存バー */}
-      <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2 sticky bottom-[calc(64px+env(safe-area-inset-bottom))]">
+      {/* 保存バー (= 「送信して添削を依頼」 のみ ・ 下書きは自動保存に移行) */}
+      <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 sticky bottom-[calc(64px+env(safe-area-inset-bottom))]">
         <button
           type="button"
           disabled={isPending}
-          onClick={() => handleSave(true)}
-          className="px-3 py-3 bg-[#fffdf8] text-[#2b2620] border border-[#e7dcc9] rounded-2xl text-[11px] font-bold disabled:opacity-50"
-        >
-          下書き保存
-        </button>
-        <button
-          type="button"
-          disabled={isPending}
-          onClick={() => handleSave(false)}
-          className="flex-1 px-3 py-3 bg-[#4a875b] hover:bg-[#34603f] text-white rounded-2xl text-sm font-bold disabled:opacity-50 transition-colors"
+          onClick={handleSubmit}
+          className="w-full px-3 py-3 bg-[#4a875b] hover:bg-[#34603f] text-white rounded-2xl text-sm font-bold disabled:opacity-50 transition-colors"
         >
           {isPending ? "送信中..." : reviewButtonLabel}
         </button>
+        <p className="text-[10px] text-[#a59b8c] text-center mt-2">
+          編集内容は自動保存されています ・ 添削を依頼する時にこのボタンを押してください
+        </p>
       </div>
     </div>
   );
