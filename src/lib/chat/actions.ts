@@ -98,6 +98,32 @@ export async function sendMessageAsAdmin(
   return { ok: true, message: data as ChatMessage };
 }
 
+/** 受講生 ・自分の conversation の messages 全件取得 (= ポーリング用、 Realtime フォールバック) */
+export async function fetchMyLatestMessages(
+  conversationId: string
+): Promise<ChatMessage[]> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  // 自分の conversation かどうか念のため検証 (RLS でも守られるが)
+  const { data: conv } = await supabase
+    .from("conversations")
+    .select("user_id")
+    .eq("id", conversationId)
+    .maybeSingle();
+  if (!conv || (conv as { user_id: string }).user_id !== user.id) return [];
+
+  const { data } = await supabase
+    .from("messages")
+    .select("*")
+    .eq("conversation_id", conversationId)
+    .order("created_at", { ascending: true });
+  return (data ?? []) as ChatMessage[];
+}
+
 /** 受講生 ・既読をセット */
 export async function markReadAsUser(): Promise<ActionResult> {
   const supabase = await createClient();

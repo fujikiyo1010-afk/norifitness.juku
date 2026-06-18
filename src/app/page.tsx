@@ -111,8 +111,8 @@ export default async function Home() {
         />
         <FeatureBlock
           href="/messages"
-          name="のり氏チャット"
-          desc="質問・相談"
+          name="チャット"
+          desc="のり氏に質問・相談"
           icon={<ChatIcon />}
           badge={chatUnread}
         />

@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition, useCallback } from "react";
-import { sendMessageAsUser } from "@/lib/chat/actions";
+import {
+  sendMessageAsUser,
+  fetchMyLatestMessages,
+} from "@/lib/chat/actions";
 import { useRealtimeMessages } from "@/lib/chat/useRealtimeMessages";
 import type { ChatMessage } from "@/lib/chat/types";
 
@@ -39,6 +42,20 @@ export function MessagesClient({
     });
   }, []);
   useRealtimeMessages(conversationId, handleNew);
+
+  // フォールバック ・5 秒ごとポーリング (= Realtime 動かなくても admin 返信を取り込む)
+  useEffect(() => {
+    if (!conversationId) return;
+    const interval = setInterval(async () => {
+      const latest = await fetchMyLatestMessages(conversationId);
+      setMessages((prev) => {
+        if (latest.length === prev.length) return prev;
+        // 件数違いの時のみ反映 (= ID で重複避けつつ最新で上書き)
+        return latest;
+      });
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [conversationId]);
 
   // 新着 or 自分送信時に最下部へスクロール
   useEffect(() => {
@@ -85,7 +102,7 @@ export function MessagesClient({
       </div>
 
       {/* 送信フォーム (固定下) */}
-      <div className="border-t border-[#e7dcc9] bg-[#fffdf8] px-3 py-2.5 sticky bottom-0">
+      <div className="border-t border-[#d3dac8] bg-[#fffdf8] px-3 py-2.5 sticky bottom-0">
         <div className="flex items-end gap-2">
           <textarea
             value={text}
@@ -99,7 +116,7 @@ export function MessagesClient({
             placeholder="メッセージを入力 (Cmd+Enter で送信)"
             rows={1}
             maxLength={2000}
-            className="flex-1 resize-none rounded-[14px] border border-[#e7dcc9] bg-[#f9f5ed] px-3 py-2 text-[14px] leading-[1.5] max-h-[120px] focus:outline-none focus:border-[#4a875b]"
+            className="flex-1 resize-none rounded-[14px] border border-[#d3dac8] bg-[#fffdf8] px-3 py-2 text-[14px] leading-[1.5] max-h-[120px] focus:outline-none focus:border-[#4a875b]"
           />
           <button
             type="button"
@@ -127,8 +144,8 @@ function MessageBubble({ message }: { message: ChatMessage }) {
       <div
         className={
           isUser
-            ? "max-w-[78%] bg-[#4a875b] text-white rounded-[16px] rounded-tr-[4px] px-3.5 py-2"
-            : "max-w-[78%] bg-[#fffdf8] border border-[#e7dcc9] text-[#2b2620] rounded-[16px] rounded-tl-[4px] px-3.5 py-2"
+            ? "max-w-[78%] bg-[#a3c98e] text-[#2b2620] rounded-[16px] rounded-tr-[4px] px-3.5 py-2"
+            : "max-w-[78%] bg-[#fffdf8] text-[#2b2620] rounded-[16px] rounded-tl-[4px] px-3.5 py-2 shadow-sm"
         }
       >
         <p className="text-[14px] leading-[1.55] whitespace-pre-wrap break-words">
@@ -136,7 +153,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         </p>
         <p
           className={`text-[10px] mt-1 font-mono ${
-            isUser ? "text-white/70" : "text-[#a59b8c]"
+            isUser ? "text-[#34603f]/70" : "text-[#a59b8c]"
           }`}
         >
           {formatJstTime(message.created_at)}

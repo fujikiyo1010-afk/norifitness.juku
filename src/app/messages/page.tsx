@@ -60,8 +60,8 @@ export default async function MessagesPage() {
 
   return (
     <>
-      <MemberHeader title="のり氏チャット" fallbackHref="/" />
-      <main className="flex flex-col flex-1 bg-[#f9f5ed]">
+      <MemberHeader title="チャット" fallbackHref="/" />
+      <main className="flex flex-col flex-1 bg-[#e8efe1]">
         <div className="mx-auto w-full max-w-[460px] flex-1 flex flex-col">
           {/* 説明 */}
           <div className="px-4 pt-3 pb-1">
