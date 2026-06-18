@@ -3,6 +3,7 @@ import { Noto_Sans_JP, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 import { MemberBottomNav } from "@/components/MemberBottomNav";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 
 const notoSansJp = Noto_Sans_JP({
   variable: "--font-noto-sans-jp",
@@ -56,6 +57,7 @@ export default function RootLayout({
         {children}
         <PWAInstallBanner />
         <MemberBottomNav />
+        <ServiceWorkerRegister />
       </body>
     </html>
   );
