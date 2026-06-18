@@ -34,7 +34,7 @@ export default async function RequestCompletePage({
       >
         <div className="mx-auto flex min-h-screen max-w-[460px] flex-col items-center justify-center px-6 py-12">
         {/* キャラ画像 (140px 円形、scale 1.2 で黒円を枠外に追い出す) */}
-        <div className="w-[140px] h-[140px] rounded-full shadow-lg mb-6 overflow-hidden bg-white relative">
+        <div className="w-[140px] h-[140px] rounded-full shadow-lg mb-6 overflow-hidden bg-[#fffdf8] relative">
           <Image
             src="/images/nori-character.png"
             alt="のりキャラクター"
@@ -47,7 +47,7 @@ export default async function RequestCompletePage({
         </div>
 
         {/* ✓ チェック */}
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#00897b]">
+        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#4a875b]">
           <svg
             width="28"
             height="28"
@@ -62,7 +62,7 @@ export default async function RequestCompletePage({
           </svg>
         </div>
 
-        <h1 className="mb-3 text-center text-lg font-semibold text-zinc-900 leading-tight">
+        <h1 className="mb-3 text-center text-lg font-semibold text-[#2b2620] leading-tight">
           {title}
         </h1>
 
@@ -71,7 +71,7 @@ export default async function RequestCompletePage({
         </p>
 
         {/* ステータスカード */}
-        <div className="mb-8 w-full max-w-sm rounded-[14px] border border-[#e8ebe9] bg-white p-4">
+        <div className="mb-8 w-full max-w-sm rounded-[14px] border border-[#e7dcc9] bg-[#fffdf8] p-4">
           <div className="flex items-center justify-between">
             <span className="text-xs text-zinc-600">ステータス</span>
             <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800">
@@ -84,13 +84,13 @@ export default async function RequestCompletePage({
         <div className="flex w-full max-w-sm flex-col gap-3">
           <Link
             href={backHref}
-            className="rounded-[4px] bg-[#00897b] px-6 py-3 text-center text-sm font-medium text-white hover:bg-[#00695c]"
+            className="rounded-[4px] bg-[#4a875b] px-6 py-3 text-center text-sm font-medium text-white hover:bg-[#34603f]"
           >
             {backLabel}
           </Link>
           <Link
             href="/"
-            className="rounded-[4px] border border-zinc-300 bg-white px-6 py-3 text-center text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+            className="rounded-[4px] border border-zinc-300 bg-[#fffdf8] px-6 py-3 text-center text-sm font-medium text-zinc-700 hover:bg-[#f9f5ed]"
           >
             ホームに戻る
           </Link>

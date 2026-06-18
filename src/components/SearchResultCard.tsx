@@ -21,7 +21,7 @@ export function SearchResultCard({
   isCompleted: boolean;
 }) {
   return (
-    <li className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
+    <li className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-[#fffdf8] dark:bg-zinc-900 p-4">
       <div className="flex items-start gap-3">
         {/* 完了アイコン */}
         <span
@@ -29,7 +29,7 @@ export function SearchResultCard({
           className={`shrink-0 mt-0.5 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
             isCompleted
               ? "bg-emerald-500 text-white"
-              : "border border-zinc-300 dark:border-zinc-700 text-zinc-400"
+              : "border border-zinc-300 dark:border-zinc-700 text-[#a59b8c]"
           }`}
         >
           {isCompleted ? "✓" : ""}
@@ -43,15 +43,15 @@ export function SearchResultCard({
             <h3
               className={`font-medium text-base group-hover:underline ${
                 isCompleted
-                  ? "text-zinc-500 dark:text-zinc-400"
-                  : "text-zinc-900 dark:text-zinc-50"
+                  ? "text-[#6a6256] dark:text-[#a59b8c]"
+                  : "text-[#2b2620] dark:text-zinc-50"
               }`}
             >
               <Highlight text={result.title} query={query} />
             </h3>
           </Link>
 
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-[#6a6256]">
             📖 {result.course_title} / 📑 {result.chapter_title}
           </p>
 
@@ -70,7 +70,7 @@ export function SearchResultCard({
           )}
 
           {result.description && (
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2">
+            <p className="text-sm text-zinc-600 dark:text-[#a59b8c] line-clamp-2">
               <Highlight text={result.description} query={query} />
             </p>
           )}

@@ -48,11 +48,11 @@ export default async function MonthlyReviewCompletePage() {
       <MemberHeader title="月次添削 送信完了" fallbackHref="/monthly-review" />
       <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#e8ebec]">
         <div className="mx-auto w-full max-w-[460px]">
-          <div className="bg-white border border-[#e8ebe9] rounded-2xl overflow-hidden min-h-[640px] flex flex-col">
+          <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl overflow-hidden min-h-[640px] flex flex-col">
           {/* 完了画面本体 (温かいグラデ背景) */}
           <div className="flex-1 bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] flex flex-col items-center justify-center px-7 py-10 text-center">
             {/* キャラ画像 (140px 円形、scale 1.2 で黒円を枠外に追い出す) */}
-            <div className="w-[140px] h-[140px] rounded-full shadow-lg mb-6 overflow-hidden bg-white relative">
+            <div className="w-[140px] h-[140px] rounded-full shadow-lg mb-6 overflow-hidden bg-[#fffdf8] relative">
               <Image
                 src="/images/nori-character.png"
                 alt="のりキャラクター"
@@ -65,7 +65,7 @@ export default async function MonthlyReviewCompletePage() {
             </div>
 
             {/* チェックマーク (ティール緑円 + 白チェック) */}
-            <div className="w-14 h-14 rounded-full bg-[#00897b] text-white flex items-center justify-center mb-4 shadow-[0_4px_12px_rgba(0,137,123,0.25)]">
+            <div className="w-14 h-14 rounded-full bg-[#4a875b] text-white flex items-center justify-center mb-4 shadow-[0_4px_12px_rgba(0,137,123,0.25)]">
               <svg
                 className="w-7 h-7"
                 viewBox="0 0 24 24"
@@ -80,7 +80,7 @@ export default async function MonthlyReviewCompletePage() {
             </div>
 
             {/* メイン文言 */}
-            <div className="text-[22px] font-bold text-zinc-900 mb-2">
+            <div className="text-[22px] font-bold text-[#2b2620] mb-2">
               送信完了!
             </div>
             <div className="text-sm text-zinc-700 mb-8">
@@ -88,19 +88,19 @@ export default async function MonthlyReviewCompletePage() {
             </div>
 
             {/* ステータスカード */}
-            <div className="bg-white/85 border border-[rgba(0,137,123,0.15)] rounded-2xl px-4 py-3.5 mb-7 w-full max-w-[340px] space-y-2">
+            <div className="bg-[#fffdf8]/85 border border-[rgba(0,137,123,0.15)] rounded-2xl px-4 py-3.5 mb-7 w-full max-w-[340px] space-y-2">
               <div className="flex items-center gap-2.5 text-xs text-zinc-700">
-                <span className="text-[#00897b] font-bold">✓</span>
+                <span className="text-[#4a875b] font-bold">✓</span>
                 <span className="flex-1 text-left">
-                  <b className="text-[#00695c] font-bold">{monthLabel}</b> 送信完了
+                  <b className="text-[#34603f] font-bold">{monthLabel}</b> 送信完了
                 </span>
-                <span className="text-[10px] text-zinc-500 font-mono whitespace-nowrap">
+                <span className="text-[10px] text-[#6a6256] font-mono whitespace-nowrap">
                   {submittedAtLabel}
                 </span>
               </div>
               <div className="flex items-center gap-2.5 text-xs text-zinc-700">
                 <svg
-                  className="w-3.5 h-3.5 flex-shrink-0 text-zinc-500"
+                  className="w-3.5 h-3.5 flex-shrink-0 text-[#6a6256]"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -113,12 +113,12 @@ export default async function MonthlyReviewCompletePage() {
                 </svg>
                 <span className="flex-1 text-left">
                   のりfitness が{" "}
-                  <b className="text-[#00695c] font-bold">確認中</b>...
+                  <b className="text-[#34603f] font-bold">確認中</b>...
                 </span>
               </div>
               <div className="flex items-center gap-2.5 text-xs text-zinc-700">
                 <svg
-                  className="w-3.5 h-3.5 flex-shrink-0 text-zinc-500"
+                  className="w-3.5 h-3.5 flex-shrink-0 text-[#6a6256]"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -130,7 +130,7 @@ export default async function MonthlyReviewCompletePage() {
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
                 <span className="flex-1 text-left">
-                  返信は <b className="text-[#00695c] font-bold">数日以内</b>{" "}
+                  返信は <b className="text-[#34603f] font-bold">数日以内</b>{" "}
                   にお届けします
                 </span>
               </div>
@@ -139,7 +139,7 @@ export default async function MonthlyReviewCompletePage() {
             {/* CTA ボタン: 履歴を見る */}
             <Link
               href="/monthly-review"
-              className="bg-[#00897b] hover:bg-[#00695c] text-white rounded-2xl px-6 py-3.5 text-[13px] font-bold w-full max-w-[340px] flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(0,137,123,0.25)] transition-colors"
+              className="bg-[#4a875b] hover:bg-[#34603f] text-white rounded-2xl px-6 py-3.5 text-[13px] font-bold w-full max-w-[340px] flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(0,137,123,0.25)] transition-colors"
             >
               月次添削履歴を見る
               <span className="text-base">→</span>
@@ -148,7 +148,7 @@ export default async function MonthlyReviewCompletePage() {
             {/* サブリンク: ホームに戻る */}
             <Link
               href="/"
-              className="mt-3.5 text-[11px] text-zinc-500 hover:text-zinc-700 underline"
+              className="mt-3.5 text-[11px] text-[#6a6256] hover:text-zinc-700 underline"
             >
               ホームに戻る
             </Link>

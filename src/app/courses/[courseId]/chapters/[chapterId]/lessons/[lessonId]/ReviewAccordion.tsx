@@ -87,22 +87,22 @@ export function ReviewAccordion({
   }
 
   const textareaClass =
-    "w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 focus:border-zinc-900 dark:focus:border-zinc-50 focus:outline-none disabled:opacity-50 resize-y";
+    "w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-[#fffdf8] dark:bg-zinc-950 px-3 py-2 text-sm text-[#2b2620] dark:text-zinc-50 focus:border-zinc-900 dark:focus:border-zinc-50 focus:outline-none disabled:opacity-50 resize-y";
 
   return (
-    <div ref={sectionRef} className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden scroll-mt-4">
+    <div ref={sectionRef} className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-[#fffdf8] dark:bg-zinc-900 overflow-hidden scroll-mt-4">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full text-left px-4 py-3 flex items-center gap-2 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+        className="w-full text-left px-4 py-3 flex items-center gap-2 hover:bg-[#f9f5ed] dark:hover:bg-zinc-800/50 transition-colors"
       >
-        <span className="text-zinc-500 text-sm shrink-0">
+        <span className="text-[#6a6256] text-sm shrink-0">
           {isOpen ? "▼" : "▶"}
         </span>
-        <span className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
+        <span className="text-base font-semibold text-[#2b2620] dark:text-zinc-50">
           📝 2 行で振り返り
         </span>
-        <span className="text-xs text-zinc-500">(任意)</span>
+        <span className="text-xs text-[#6a6256]">(任意)</span>
         {hasReview && !isOpen && (
           <span className="ml-auto text-xs rounded-full bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-100 px-2 py-0.5">
             記入済み
@@ -112,7 +112,7 @@ export function ReviewAccordion({
 
       {isOpen && (
         <div className="border-t border-zinc-200 dark:border-zinc-800 p-4 space-y-4">
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-[#6a6256]">
             今日の学びを自分の言葉で書いてみよう。書く行為で記憶が定着しやすくなります(Feynman 技法)。
           </p>
           <form onSubmit={handleSubmit} className="space-y-3">
@@ -142,7 +142,7 @@ export function ReviewAccordion({
                 className={textareaClass}
               />
             </div>
-            <p className="text-[11px] text-zinc-500 leading-relaxed">
+            <p className="text-[11px] text-[#6a6256] leading-relaxed">
               「次にやってみたいこと」 は ↓「今週これを試す」 (実践リスト) で宣言してください。
             </p>
 
@@ -161,12 +161,12 @@ export function ReviewAccordion({
               <button
                 type="submit"
                 disabled={pending || !hasChanges || allEmpty}
-                className="rounded-md bg-zinc-900 dark:bg-zinc-50 px-4 py-2 text-sm font-medium text-white dark:text-zinc-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-md bg-zinc-900 dark:bg-[#f9f5ed] px-4 py-2 text-sm font-medium text-white dark:text-[#2b2620] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {pending ? "保存中…" : hasReview ? "💾 更新する" : "💾 保存する"}
               </button>
               {lastSavedAt && (
-                <p className="text-xs text-zinc-500">
+                <p className="text-xs text-[#6a6256]">
                   最終更新: {formatJst(lastSavedAt)}
                 </p>
               )}

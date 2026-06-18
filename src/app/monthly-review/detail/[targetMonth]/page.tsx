@@ -92,14 +92,14 @@ export default async function MonthlyReviewDetailPage({
     <>
       <MemberHeader title="月次添削 詳細" fallbackHref="/monthly-review" />
       <main className="flex flex-1 flex-col bg-[#fafbfa] min-h-screen">
-        <div className="mx-auto w-full max-w-[460px] bg-white border-x border-[#e8ebe9]">
+        <div className="mx-auto w-full max-w-[460px] bg-[#fffdf8] border-x border-[#e7dcc9]">
 
         {/* ヒーロー帯 (温かいグラデ) */}
-        <div className="bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] px-5 py-4 border-b border-[#e8ebe9]">
+        <div className="bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] px-5 py-4 border-b border-[#e7dcc9]">
           <div className="text-[22px] font-bold text-[#004d40] mb-1">
             {reportLabel}
           </div>
-          <div className="text-[11px] text-zinc-500 font-mono">
+          <div className="text-[11px] text-[#6a6256] font-mono">
             送信日 {submittedLabel}
             {publishedLabel && ` ・ 返信日 ${publishedLabel}`}
           </div>
@@ -175,7 +175,7 @@ export default async function MonthlyReviewDetailPage({
           <div className="mx-4 my-4 flex flex-col gap-2">
             <Link
               href="/monthly-review"
-              className="block w-full text-center py-3 rounded-2xl bg-white text-[#00695c] border border-[#00897b] text-xs font-bold hover:bg-[#f8f9fa] transition-colors"
+              className="block w-full text-center py-3 rounded-2xl bg-[#fffdf8] text-[#34603f] border border-[#4a875b] text-xs font-bold hover:bg-[#f8f9fa] transition-colors"
             >
               履歴一覧に戻る
             </Link>
@@ -223,8 +223,8 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-white mx-4 my-4 border border-[#e8ebe9] rounded-2xl px-5 py-4">
-      <div className="text-xs font-bold text-zinc-700 tracking-wide flex items-center gap-1.5 mb-3 pb-2 border-b border-[#e8ebe9]">
+    <div className="bg-[#fffdf8] mx-4 my-4 border border-[#e7dcc9] rounded-2xl px-5 py-4">
+      <div className="text-xs font-bold text-zinc-700 tracking-wide flex items-center gap-1.5 mb-3 pb-2 border-b border-[#e7dcc9]">
         {icon}
         {title}
       </div>
@@ -281,7 +281,7 @@ function ReplySection({
           )}
         </div>
       ) : (
-        <div className="w-full aspect-video bg-zinc-100 rounded-xl flex items-center justify-center text-zinc-500 text-xs mb-3">
+        <div className="w-full aspect-video bg-zinc-100 rounded-xl flex items-center justify-center text-[#6a6256] text-xs mb-3">
           動画返信を準備中です
         </div>
       )}
@@ -301,10 +301,10 @@ function ReplySection({
 function ScoreCell({ num, label }: { num: string; label: string }) {
   return (
     <div className="bg-[#f8f9fa] rounded-lg px-2 py-2.5">
-      <span className="block text-xl font-bold text-[#00695c] font-mono leading-none">
+      <span className="block text-xl font-bold text-[#34603f] font-mono leading-none">
         {num}
       </span>
-      <div className="text-[10px] text-zinc-500 mt-1">{label}</div>
+      <div className="text-[10px] text-[#6a6256] mt-1">{label}</div>
     </div>
   );
 }
@@ -319,7 +319,7 @@ function QuestionAnswerList({ items }: { items: MonthlyAuditItems }) {
           const questions = AUDIT_QUESTIONS.filter((q) => q.category === catKey);
           return (
             <div key={catKey} className="mt-3.5 first:mt-0">
-              <div className="text-[11px] font-bold text-[#00695c] mb-1.5 tracking-wide">
+              <div className="text-[11px] font-bold text-[#34603f] mb-1.5 tracking-wide">
                 {cat.label}
               </div>
               {questions.map((q) => (
@@ -344,28 +344,28 @@ function QuestionItem({
   answer: BodyMeasureAnswer | ScoreAnswer | TextAnswer | undefined;
 }) {
   return (
-    <div className="grid grid-cols-[1fr_auto] items-start py-2 border-b border-[#e8ebe9] last:border-b-0 gap-3">
+    <div className="grid grid-cols-[1fr_auto] items-start py-2 border-b border-[#e7dcc9] last:border-b-0 gap-3">
       <div className="text-xs text-zinc-700 leading-snug">
-        <span className="text-zinc-400 font-mono mr-1.5">
+        <span className="text-[#a59b8c] font-mono mr-1.5">
           {question.key.toUpperCase()}.
         </span>
         {question.label}
       </div>
 
       {question.type === "body_measure" && (
-        <div className="text-xs text-[#00695c] font-bold font-mono text-right whitespace-nowrap">
+        <div className="text-xs text-[#34603f] font-bold font-mono text-right whitespace-nowrap">
           {formatBodyMeasure(answer as BodyMeasureAnswer | undefined, question.unit)}
         </div>
       )}
 
       {question.type === "score" && (
-        <div className="text-base font-bold text-[#00897b] font-mono text-right">
+        <div className="text-base font-bold text-[#4a875b] font-mono text-right">
           {(answer as ScoreAnswer | undefined)?.score ?? "—"}
         </div>
       )}
 
       {question.type === "text" && (
-        <div className="text-xs text-zinc-400 text-right">—</div>
+        <div className="text-xs text-[#a59b8c] text-right">—</div>
       )}
 
       {/* 自由記述 (任意で表示) */}

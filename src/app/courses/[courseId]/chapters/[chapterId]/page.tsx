@@ -37,7 +37,7 @@ export default async function StudentChapterPage({
     <main className="flex flex-1 flex-col p-6 sm:p-8">
       <div className="mx-auto w-full max-w-[460px] space-y-6">
         <header className="space-y-2">
-          <nav className="text-xs text-zinc-500 space-x-1">
+          <nav className="text-xs text-[#6a6256] space-x-1">
             <Link href="/" className="underline hover:text-zinc-700 dark:hover:text-zinc-300">
               ホーム
             </Link>
@@ -55,7 +55,7 @@ export default async function StudentChapterPage({
             <span>/</span>
             <span className="text-zinc-700 dark:text-zinc-300">{chapter.title}</span>
           </nav>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+          <h1 className="text-2xl font-bold tracking-tight text-[#2b2620] dark:text-zinc-50">
             🎬 {chapter.title}
           </h1>
           {chapter.description && (
@@ -65,7 +65,7 @@ export default async function StudentChapterPage({
           )}
           <div className="pt-1 space-y-1">
             <div className="flex items-baseline justify-between gap-3 text-xs">
-              <span className="text-zinc-600 dark:text-zinc-400">
+              <span className="text-zinc-600 dark:text-[#a59b8c]">
                 {completedCount} / {totalCount} レッスン完了
               </span>
               <span className="font-mono text-zinc-700 dark:text-zinc-300">
@@ -86,11 +86,11 @@ export default async function StudentChapterPage({
         </header>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+          <h2 className="text-lg font-semibold text-[#2b2620] dark:text-zinc-50">
             レッスン一覧
           </h2>
           {lessons.length === 0 ? (
-            <p className="text-sm text-zinc-500">
+            <p className="text-sm text-[#6a6256]">
               現在公開中のレッスンはありません。
             </p>
           ) : (
@@ -100,14 +100,14 @@ export default async function StudentChapterPage({
                 return (
                   <li
                     key={l.id}
-                    className="rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 flex items-start gap-3"
+                    className="rounded-md border border-zinc-200 dark:border-zinc-800 bg-[#fffdf8] dark:bg-zinc-900 p-4 flex items-start gap-3"
                   >
                     <span
                       aria-label={done ? "完了済み" : "未完了"}
                       className={`shrink-0 mt-0.5 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
                         done
                           ? "bg-emerald-500 text-white"
-                          : "border border-zinc-300 dark:border-zinc-700 text-zinc-400"
+                          : "border border-zinc-300 dark:border-zinc-700 text-[#a59b8c]"
                       }`}
                     >
                       {done ? "✓" : ""}
@@ -120,8 +120,8 @@ export default async function StudentChapterPage({
                         <h3
                           className={`font-medium group-hover:underline ${
                             done
-                              ? "text-zinc-500 dark:text-zinc-400"
-                              : "text-zinc-900 dark:text-zinc-50"
+                              ? "text-[#6a6256] dark:text-[#a59b8c]"
+                              : "text-[#2b2620] dark:text-zinc-50"
                           }`}
                         >
                           {l.title}
@@ -141,7 +141,7 @@ export default async function StudentChapterPage({
                         </div>
                       )}
                       {l.description && (
-                        <p className="text-sm text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap line-clamp-2">
+                        <p className="text-sm text-zinc-600 dark:text-[#a59b8c] whitespace-pre-wrap line-clamp-2">
                           {l.description}
                         </p>
                       )}

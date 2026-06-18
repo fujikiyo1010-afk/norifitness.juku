@@ -105,15 +105,15 @@ export function CourseDetailView({
       {!isSearching ? (
         <section className="space-y-3">
           <div className="flex items-baseline justify-between gap-3">
-            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+            <h2 className="text-lg font-semibold text-[#2b2620] dark:text-zinc-50">
               章一覧 ({chapters.length} 章)
             </h2>
             {chapters.length > 0 && (
-              <p className="text-xs text-zinc-500">章をクリックで開閉</p>
+              <p className="text-xs text-[#6a6256]">章をクリックで開閉</p>
             )}
           </div>
           {chapters.length === 0 ? (
-            <p className="text-sm text-zinc-500">
+            <p className="text-sm text-[#6a6256]">
               現在公開中の章はありません。新しい章の公開をお待ちください。
             </p>
           ) : (

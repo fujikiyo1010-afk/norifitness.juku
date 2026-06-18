@@ -51,7 +51,7 @@ export function SearchBox({
     <form onSubmit={handleSubmit} className="w-full">
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#a59b8c] pointer-events-none">
             🔍
           </span>
           {/*
@@ -71,14 +71,14 @@ export function SearchBox({
             }}
             placeholder={placeholder}
             autoFocus={autoFocus}
-            className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 pl-10 pr-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 focus:border-zinc-900 dark:focus:border-zinc-50 focus:outline-none"
+            className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-[#fffdf8] dark:bg-zinc-950 pl-10 pr-3 py-2 text-sm text-[#2b2620] dark:text-zinc-50 focus:border-zinc-900 dark:focus:border-zinc-50 focus:outline-none"
           />
         </div>
         {submitOnEnter && (
           <button
             type="submit"
             disabled={!hasValue}
-            className="rounded-md bg-zinc-900 dark:bg-zinc-50 px-4 py-2 text-sm font-medium text-white dark:text-zinc-900 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-md bg-zinc-900 dark:bg-[#f9f5ed] px-4 py-2 text-sm font-medium text-white dark:text-[#2b2620] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             検索
           </button>

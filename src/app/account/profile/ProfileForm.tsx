@@ -58,9 +58,9 @@ export function ProfileForm({
           maxLength={40}
           autoComplete="name"
           required
-          className="w-full bg-white border border-[#e8ebe9] rounded-xl px-4 py-3 text-[14px] text-zinc-900 outline-none focus:border-[#00897b]"
+          className="w-full bg-[#fffdf8] border border-[#e7dcc9] rounded-xl px-4 py-3 text-[14px] text-[#2b2620] outline-none focus:border-[#4a875b]"
         />
-        <p className="text-[10px] text-zinc-400 mt-1">
+        <p className="text-[10px] text-[#a59b8c] mt-1">
           {name.trim().length} / 40 文字
         </p>
       </div>
@@ -74,9 +74,9 @@ export function ProfileForm({
           value={email}
           readOnly
           aria-readonly
-          className="w-full bg-zinc-50 border border-[#e8ebe9] rounded-xl px-4 py-3 text-[14px] text-zinc-500 outline-none cursor-not-allowed"
+          className="w-full bg-[#f9f5ed] border border-[#e7dcc9] rounded-xl px-4 py-3 text-[14px] text-[#6a6256] outline-none cursor-not-allowed"
         />
-        <p className="text-[10px] text-zinc-400 mt-1">
+        <p className="text-[10px] text-[#a59b8c] mt-1">
           メールアドレスの変更は準備中です。
         </p>
       </div>
@@ -92,14 +92,14 @@ export function ProfileForm({
           type="button"
           onClick={() => router.push("/account")}
           disabled={pending}
-          className="flex-1 bg-white border border-[#e8ebe9] rounded-2xl px-4 py-3 text-[13px] font-bold text-zinc-700 hover:bg-zinc-50 transition-colors disabled:opacity-60"
+          className="flex-1 bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl px-4 py-3 text-[13px] font-bold text-zinc-700 hover:bg-[#f9f5ed] transition-colors disabled:opacity-60"
         >
           キャンセル
         </button>
         <button
           type="submit"
           disabled={!dirty || !valid || pending}
-          className="flex-1 bg-[#00897b] text-white rounded-2xl px-4 py-3 text-[13px] font-bold hover:bg-[#00695c] transition-colors disabled:opacity-50"
+          className="flex-1 bg-[#4a875b] text-white rounded-2xl px-4 py-3 text-[13px] font-bold hover:bg-[#34603f] transition-colors disabled:opacity-50"
         >
           {pending ? "保存中..." : "保存する"}
         </button>

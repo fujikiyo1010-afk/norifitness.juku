@@ -51,7 +51,7 @@ export function BodyMetricsChart({
 
   if (allValues.length === 0) {
     return (
-      <div className="text-center text-[12px] text-zinc-500 py-10">
+      <div className="text-center text-[12px] text-[#6a6256] py-10">
         この期間の {metricLabel} 記録はありません
       </div>
     );
@@ -128,7 +128,7 @@ export function BodyMetricsChart({
           x={PADDING.left - 4}
           y={t.y + 3}
           textAnchor="end"
-          fill="#00695c"
+          fill="#34603f"
           fontSize="9"
           fontFamily="ui-monospace, monospace"
         >
@@ -178,7 +178,7 @@ export function BodyMetricsChart({
         <path
           d={linePath}
           fill="none"
-          stroke="#00897b"
+          stroke="#4a875b"
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -193,7 +193,7 @@ export function BodyMetricsChart({
           cy={p.y}
           r="3.5"
           fill="white"
-          stroke="#00897b"
+          stroke="#4a875b"
           strokeWidth="2"
         />
       ))}

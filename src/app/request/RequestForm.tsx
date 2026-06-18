@@ -49,10 +49,10 @@ export function RequestForm() {
           value={name}
           onChange={(e) => setName(e.target.value)}
           disabled={isPending}
-          className="border border-zinc-300 rounded-[10px] px-3 py-2.5 text-[13px] bg-white text-zinc-900 outline-none focus:border-[#00897b] focus:ring-2 focus:ring-[#00897b]/30"
+          className="border border-zinc-300 rounded-[10px] px-3 py-2.5 text-[13px] bg-[#fffdf8] text-[#2b2620] outline-none focus:border-[#4a875b] focus:ring-2 focus:ring-[#4a875b]/30"
           required
         />
-        <p className="text-[10px] text-zinc-500 pl-0.5">
+        <p className="text-[10px] text-[#6a6256] pl-0.5">
           <strong>LINE と同じ名前を入れてください</strong>
         </p>
       </div>
@@ -74,10 +74,10 @@ export function RequestForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           disabled={isPending}
-          className="border border-zinc-300 rounded-[10px] px-3 py-2.5 text-[13px] bg-white text-zinc-900 outline-none focus:border-[#00897b] focus:ring-2 focus:ring-[#00897b]/30"
+          className="border border-zinc-300 rounded-[10px] px-3 py-2.5 text-[13px] bg-[#fffdf8] text-[#2b2620] outline-none focus:border-[#4a875b] focus:ring-2 focus:ring-[#4a875b]/30"
           required
         />
-        <p className="text-[10px] text-zinc-500 pl-0.5">
+        <p className="text-[10px] text-[#6a6256] pl-0.5">
           アカウント有効化リンクをお送りします
         </p>
       </div>
@@ -91,7 +91,7 @@ export function RequestForm() {
       <button
         type="submit"
         disabled={!isValid || isPending}
-        className="mt-1.5 w-full bg-[#00897b] hover:bg-[#00695c] disabled:bg-zinc-300 disabled:cursor-not-allowed text-white rounded-xl py-3 text-[13px] font-bold shadow-md shadow-[#00897b]/25 transition-colors"
+        className="mt-1.5 w-full bg-[#4a875b] hover:bg-[#34603f] disabled:bg-zinc-300 disabled:cursor-not-allowed text-white rounded-xl py-3 text-[13px] font-bold shadow-md shadow-[#4a875b]/25 transition-colors"
       >
         {isPending ? "送信中..." : "申請する"}
       </button>

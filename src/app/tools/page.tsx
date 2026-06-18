@@ -15,7 +15,7 @@ export const metadata = {
  *   - 順序固定 (体脂肪率 → カロリー → 期間 → PFC、目標シートを自然に埋めるフロー)
  *
  * 配色:
- *   - ツール群はインディゴ #3949ab (受講生 UI 全体のティール緑 #00897b と区別、
+ *   - ツール群はインディゴ #3949ab (受講生 UI 全体のティール緑 #4a875b と区別、
  *     「ここは計算する場所」を直感的に伝えるための役割色分け、合意の正典セクション 4)
  *
  * 認証: middleware (src/proxy.ts) で自動。このページ自身では何もしない。
@@ -28,7 +28,7 @@ export default function ToolsIndexPage() {
 
       <div className="flex-1 max-w-[460px] mx-auto w-full pb-12">
         {/* ヒーロー帯 */}
-        <section className="bg-gradient-to-br from-[#e8eaf6] to-[#fffbe6] border-b border-[#e8ebe9] px-6 py-5">
+        <section className="bg-gradient-to-br from-[#e8eaf6] to-[#fffbe6] border-b border-[#e7dcc9] px-6 py-5">
           <h2 className="text-xl font-bold text-[#1a237e] mb-1.5 flex items-center gap-2">
             <svg
               viewBox="0 0 24 24"
@@ -119,11 +119,11 @@ function ToolCard({
   return (
     <Link
       href={href}
-      className="bg-white border border-[#e8ebe9] rounded-xl px-4 py-4 flex items-center gap-3.5 hover:border-[#3949ab] transition-colors cursor-pointer"
+      className="bg-[#fffdf8] border border-[#e7dcc9] rounded-xl px-4 py-4 flex items-center gap-3.5 hover:border-[#3949ab] transition-colors cursor-pointer"
     >
       <div className="flex-1 min-w-0">
-        <div className="text-[15px] font-bold text-zinc-900 mb-0.5">{name}</div>
-        <div className="text-[11px] text-zinc-500 leading-relaxed">{desc}</div>
+        <div className="text-[15px] font-bold text-[#2b2620] mb-0.5">{name}</div>
+        <div className="text-[11px] text-[#6a6256] leading-relaxed">{desc}</div>
       </div>
       <div className="text-[#3949ab] font-mono text-sm flex-shrink-0">→</div>
     </Link>

@@ -82,11 +82,11 @@ export default async function StudentLessonPage({
           </svg>
         }
       />
-      <main className="flex flex-1 flex-col p-4 sm:p-6 bg-zinc-50">
+      <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#f9f5ed]">
         <div className="mx-auto w-full max-w-[460px] space-y-4">
         <header className="space-y-2">
           {/* レッスンタイトル + 章名 (パンくずは AppHeader 戻る矢印で代替) */}
-          <div className="text-[11px] text-zinc-500">
+          <div className="text-[11px] text-[#6a6256]">
             <Link
               href={`/courses/${courseId}`}
               className="hover:text-zinc-700 font-bold"
@@ -96,7 +96,7 @@ export default async function StudentLessonPage({
             <span className="mx-1">&gt;</span>
             <span className="text-zinc-700">L{lesson.sort_order}</span>
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-zinc-900 leading-tight">
+          <h1 className="text-xl font-bold tracking-tight text-[#2b2620] leading-tight">
             {lesson.title}
           </h1>
           {lesson.meta_tags && lesson.meta_tags.length > 0 && (
@@ -129,7 +129,7 @@ export default async function StudentLessonPage({
         ) : lesson.vimeo_url ? (
           <VimeoEmbed url={lesson.vimeo_url} />
         ) : (
-          <div className="rounded-xl bg-zinc-100 border border-zinc-200 p-6 text-center text-sm text-zinc-500">
+          <div className="rounded-xl bg-zinc-100 border border-zinc-200 p-6 text-center text-sm text-[#6a6256]">
             動画 URL が設定されていません。
           </div>
         )}
@@ -163,8 +163,8 @@ export default async function StudentLessonPage({
 
         {/* 配布資料 (description + sub_image_url + summary_video_url 統合) */}
         {!isExam && hasAttachment && (
-          <details className="rounded-xl bg-white border border-zinc-200 p-3 group">
-            <summary className="flex items-center justify-between cursor-pointer text-sm font-semibold text-zinc-900 list-none">
+          <details className="rounded-xl bg-[#fffdf8] border border-zinc-200 p-3 group">
+            <summary className="flex items-center justify-between cursor-pointer text-sm font-semibold text-[#2b2620] list-none">
               <span className="inline-flex items-center gap-2">
                 <svg
                   width="16"
@@ -206,7 +206,7 @@ export default async function StudentLessonPage({
                     href={lesson.sub_image_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-[#00695c] underline break-all"
+                    className="inline-flex items-center gap-1 text-xs text-[#34603f] underline break-all"
                   >
                     補助画像を開く ↗
                   </a>
@@ -218,7 +218,7 @@ export default async function StudentLessonPage({
                     href={lesson.summary_video_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-[#00695c] underline break-all"
+                    className="inline-flex items-center gap-1 text-xs text-[#34603f] underline break-all"
                   >
                     全まとめ動画を開く ↗
                   </a>
@@ -233,13 +233,13 @@ export default async function StudentLessonPage({
           {adjacent.next ? (
             <Link
               href={`/courses/${courseId}/chapters/${adjacent.next.chapter_id}/lessons/${adjacent.next.lesson_id}`}
-              className="flex items-center justify-between bg-[#f0f9f8] border border-[#00897b] rounded-xl px-4 py-3.5 hover:bg-[#e0f2f1] transition-colors"
+              className="flex items-center justify-between bg-[#f0f9f8] border border-[#4a875b] rounded-xl px-4 py-3.5 hover:bg-[#e0f2f1] transition-colors"
             >
               <div className="min-w-0">
-                <div className="text-[10px] text-zinc-500 mb-0.5">
+                <div className="text-[10px] text-[#6a6256] mb-0.5">
                   次のレッスン →
                 </div>
-                <div className="text-sm font-bold text-[#00695c] truncate">
+                <div className="text-sm font-bold text-[#34603f] truncate">
                   {adjacent.next.lesson_title}
                 </div>
               </div>
@@ -248,7 +248,7 @@ export default async function StudentLessonPage({
                 height="20"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#00695c"
+                stroke="#34603f"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -258,7 +258,7 @@ export default async function StudentLessonPage({
               </svg>
             </Link>
           ) : (
-            <div className="rounded-xl bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] border border-[#00897b]/30 p-5 text-center">
+            <div className="rounded-xl bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] border border-[#4a875b]/30 p-5 text-center">
               <div className="text-base font-bold text-[#004d40] mb-1">
                 コースを完走しました ✓
               </div>
@@ -267,7 +267,7 @@ export default async function StudentLessonPage({
               </div>
               <Link
                 href="/courses"
-                className="inline-block rounded-md bg-[#00897b] hover:bg-[#00695c] text-white px-4 py-2 text-xs font-bold transition-colors"
+                className="inline-block rounded-md bg-[#4a875b] hover:bg-[#34603f] text-white px-4 py-2 text-xs font-bold transition-colors"
               >
                 コース一覧へ
               </Link>
@@ -276,7 +276,7 @@ export default async function StudentLessonPage({
           {adjacent.prev && (
             <Link
               href={`/courses/${courseId}/chapters/${adjacent.prev.chapter_id}/lessons/${adjacent.prev.lesson_id}`}
-              className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-700 px-1 py-2"
+              className="flex items-center gap-1 text-xs text-[#6a6256] hover:text-zinc-700 px-1 py-2"
             >
               <svg
                 width="14"
@@ -302,7 +302,7 @@ export default async function StudentLessonPage({
         <div className="pt-3 border-t border-zinc-200">
           <Link
             href={`/courses/${courseId}`}
-            className="text-xs text-zinc-500 underline hover:text-zinc-700"
+            className="text-xs text-[#6a6256] underline hover:text-zinc-700"
           >
             ← {course.title} の章一覧へ
           </Link>

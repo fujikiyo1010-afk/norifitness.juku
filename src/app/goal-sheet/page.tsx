@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
  *
  * 設計元:
  *   - /tmp/goal_sheet_overview.html (Phase 2-7 モック)
- *   - Phase 2-7 デザイン方針: ティール緑 #00897b + Nike エッセンス + 線画 SVG
+ *   - Phase 2-7 デザイン方針: ティール緑 #4a875b + Nike エッセンス + 線画 SVG
  *
  * 画面切替:
  *   - シート未作成 → 初回記入 CTA
@@ -37,8 +37,8 @@ export default async function GoalSheetPage() {
         <MemberHeader title="目標管理シート" fallbackHref="/" />
         <main className="flex flex-1 flex-col p-6 sm:p-8 bg-[#e8ebec]">
           <div className="mx-auto w-full max-w-[460px]">
-            <div className="rounded-xl bg-white border border-[#e8ebe9] p-8 text-center space-y-4">
-            <div className="mx-auto w-12 h-12 text-[#00897b]">
+            <div className="rounded-xl bg-[#fffdf8] border border-[#e7dcc9] p-8 text-center space-y-4">
+            <div className="mx-auto w-12 h-12 text-[#4a875b]">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
                 <circle cx="12" cy="12" r="10" />
                 <circle cx="12" cy="12" r="6" />
@@ -46,7 +46,7 @@ export default async function GoalSheetPage() {
               </svg>
             </div>
             <div className="space-y-2">
-              <h2 className="text-base font-bold text-zinc-900">
+              <h2 className="text-base font-bold text-[#2b2620]">
                 まずは目標を立てるところから
               </h2>
               <p className="text-sm text-zinc-600 leading-relaxed">
@@ -56,7 +56,7 @@ export default async function GoalSheetPage() {
             </div>
             <Link
               href="/goal-sheet/edit"
-              className="inline-block rounded-md bg-[#00897b] hover:bg-[#00695c] text-white px-6 py-3 text-sm font-bold tracking-wide transition-colors"
+              className="inline-block rounded-md bg-[#4a875b] hover:bg-[#34603f] text-white px-6 py-3 text-sm font-bold tracking-wide transition-colors"
             >
               記入を始める
             </Link>
@@ -87,20 +87,20 @@ export default async function GoalSheetPage() {
       <SavedToast />
       <div className="mx-auto w-full max-w-[980px] space-y-4">
         {/* ドキュメントフレーム */}
-        <div className="bg-white border border-[#d4d4d4] rounded-md shadow-sm overflow-hidden">
+        <div className="bg-[#fffdf8] border border-[#d4d4d4] rounded-md shadow-sm overflow-hidden">
           {/* ① ヘッダー帯 */}
-          <div className="px-5 py-4 border-b border-[#e8ebe9] grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-center">
-            <div className="text-lg font-bold text-zinc-900 tracking-tight">
+          <div className="px-5 py-4 border-b border-[#e7dcc9] grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-center">
+            <div className="text-lg font-bold text-[#2b2620] tracking-tight">
               目標管理シート
             </div>
-            <div className="text-xs text-zinc-500 leading-relaxed sm:text-right">
+            <div className="text-xs text-[#6a6256] leading-relaxed sm:text-right">
               提出 {submittedDate}<br />
               記入状況 {filledCount} / 5 セクション
             </div>
           </div>
 
           {/* ② KPI サマリーバー (4 セル) */}
-          <div className="px-5 py-3 bg-[#fafafa] border-b border-[#e8ebe9] grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="px-5 py-3 bg-[#fafafa] border-b border-[#e7dcc9] grid grid-cols-2 sm:grid-cols-4 gap-2">
             <Kpi label="現状体重" num={cs?.weight_kg ?? "—"} unit="kg" />
             <Kpi label="目標体重" num={gs?.target_weight_kg ?? "—"} unit="kg" highlighted />
             <Kpi label="期限" num={gs?.target_date ? formatShortDate(gs.target_date) : "—"} />
@@ -216,7 +216,7 @@ export default async function GoalSheetPage() {
           </div>
 
           {/* ⑤ フッター */}
-          <div className="px-5 py-3 bg-[#fafafa] border-t border-[#e8ebe9] flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+          <div className="px-5 py-3 bg-[#fafafa] border-t border-[#e7dcc9] flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
             <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
               <FooterLink href="#" label="編集履歴" />
               <FooterLink href="#" label="変化を見る" />
@@ -225,13 +225,13 @@ export default async function GoalSheetPage() {
             <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
               <Link
                 href="/goal-sheet/edit"
-                className="inline-block text-center rounded-md border border-zinc-300 bg-white hover:bg-zinc-50 text-zinc-700 px-4 py-2 text-xs font-bold tracking-wide transition-colors"
+                className="inline-block text-center rounded-md border border-zinc-300 bg-[#fffdf8] hover:bg-[#f9f5ed] text-zinc-700 px-4 py-2 text-xs font-bold tracking-wide transition-colors"
               >
                 修正する
               </Link>
               <Link
                 href="/"
-                className="inline-block text-center rounded-md bg-[#00897b] hover:bg-[#00695c] text-white px-4 py-2 text-xs font-bold tracking-wide transition-colors"
+                className="inline-block text-center rounded-md bg-[#4a875b] hover:bg-[#34603f] text-white px-4 py-2 text-xs font-bold tracking-wide transition-colors"
               >
                 ホームに戻る
               </Link>
@@ -260,19 +260,19 @@ function Kpi({
   highlighted?: boolean;
 }) {
   return (
-    <div className="bg-white border border-[#e8ebe9] rounded-md px-3 py-2">
-      <div className="text-[10px] text-zinc-500 tracking-wide mb-1">{label}</div>
-      <div className={`font-medium text-zinc-900 leading-none ${highlighted ? "font-bold" : ""}`}>
+    <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-md px-3 py-2">
+      <div className="text-[10px] text-[#6a6256] tracking-wide mb-1">{label}</div>
+      <div className={`font-medium text-[#2b2620] leading-none ${highlighted ? "font-bold" : ""}`}>
         <span
           className={`text-base ${
             highlighted
-              ? "inline-block border-b-2 border-[#00897b] pb-0.5"
+              ? "inline-block border-b-2 border-[#4a875b] pb-0.5"
               : ""
           }`}
         >
           {num}
         </span>
-        {unit && <span className="text-[11px] text-zinc-500 ml-1 font-normal">{unit}</span>}
+        {unit && <span className="text-[11px] text-[#6a6256] ml-1 font-normal">{unit}</span>}
       </div>
     </div>
   );
@@ -280,12 +280,12 @@ function Kpi({
 
 function SummaryBar({ audit }: { audit: AuditComment }) {
   return (
-    <div className="px-5 py-3 bg-[rgba(255,235,59,0.12)] border-b border-[#e8ebe9]">
+    <div className="px-5 py-3 bg-[rgba(255,235,59,0.12)] border-b border-[#e7dcc9]">
       <div className="flex justify-between items-center mb-1">
         <div className="text-[10px] text-[#b8860b] font-medium tracking-wide">
           {audit.who} 総評
         </div>
-        <div className="text-[10px] text-zinc-500 font-mono">{audit.date}</div>
+        <div className="text-[10px] text-[#6a6256] font-mono">{audit.date}</div>
       </div>
       <div className="text-[11px] text-zinc-700 leading-relaxed">{audit.text}</div>
     </div>
@@ -297,7 +297,7 @@ function SectionBand({ num, title }: { num: string; title: string }) {
     <thead>
       <tr>
         <td colSpan={2} className="bg-black text-white px-4 py-2 text-[10px] tracking-widest font-semibold">
-          <span className="text-[#00897b] font-mono mr-2">{num}</span>
+          <span className="text-[#4a875b] font-mono mr-2">{num}</span>
           {title}
         </td>
       </tr>
@@ -318,12 +318,12 @@ function DataRow({
 }) {
   return (
     <tr>
-      <td className="w-[150px] bg-[#fafafa] text-zinc-500 border-r border-[#e8ebe9] border-b border-[#e8ebe9] px-4 py-2 text-[10px] font-medium tracking-wide align-top">
+      <td className="w-[150px] bg-[#fafafa] text-[#6a6256] border-r border-[#e7dcc9] border-b border-[#e7dcc9] px-4 py-2 text-[10px] font-medium tracking-wide align-top">
         {label}
       </td>
-      <td className="border-b border-[#e8ebe9] px-4 py-2 text-[11px] text-zinc-900 align-top">
+      <td className="border-b border-[#e7dcc9] px-4 py-2 text-[11px] text-[#2b2620] align-top">
         <span className="font-medium">{value}</span>
-        {muted && <span className="text-[10px] text-zinc-500 ml-1">{muted}</span>}
+        {muted && <span className="text-[10px] text-[#6a6256] ml-1">{muted}</span>}
         {auditTag && (
           <span className="inline-block bg-[rgba(255,235,59,0.12)] text-[#b8860b] border border-[rgba(255,235,59,0.55)] px-2 py-px text-[9px] rounded-full font-semibold ml-2 align-middle">
             {auditTag}
@@ -352,14 +352,14 @@ function PfcRow({
   const pct = totalKcal ? Math.round((kcal / totalKcal) * 100) : 0;
   return (
     <tr>
-      <td className="w-[150px] bg-[#fafafa] text-zinc-500 border-r border-[#e8ebe9] border-b border-[#e8ebe9] px-4 py-2 text-[10px] font-medium tracking-wide align-top">
+      <td className="w-[150px] bg-[#fafafa] text-[#6a6256] border-r border-[#e7dcc9] border-b border-[#e7dcc9] px-4 py-2 text-[10px] font-medium tracking-wide align-top">
         {label}
       </td>
-      <td className="border-b border-[#e8ebe9] px-4 py-2 text-[11px] text-zinc-900 align-top">
+      <td className="border-b border-[#e7dcc9] px-4 py-2 text-[11px] text-[#2b2620] align-top">
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-[#00897b] flex-shrink-0"></div>
+          <div className="w-2 h-2 rounded-full bg-[#4a875b] flex-shrink-0"></div>
           <div className="font-bold font-mono min-w-[50px]">{g} g</div>
-          <div className="text-[10px] text-zinc-500">/ {kcal.toLocaleString()} kcal{totalKcal && ` / ${pct} %`}</div>
+          <div className="text-[10px] text-[#6a6256]">/ {kcal.toLocaleString()} kcal{totalKcal && ` / ${pct} %`}</div>
         </div>
       </td>
     </tr>
@@ -369,10 +369,10 @@ function PfcRow({
 function AuditRow({ audit }: { audit: AuditComment }) {
   return (
     <tr>
-      <td className="w-[150px] bg-[#fafafa] text-zinc-500 border-r border-[#e8ebe9] border-b border-[#e8ebe9] px-4 py-2 text-[10px] font-medium tracking-wide align-top">
+      <td className="w-[150px] bg-[#fafafa] text-[#6a6256] border-r border-[#e7dcc9] border-b border-[#e7dcc9] px-4 py-2 text-[10px] font-medium tracking-wide align-top">
         添削
       </td>
-      <td className="bg-[rgba(255,235,59,0.12)] border-b border-[#e8ebe9] px-4 py-2 align-top">
+      <td className="bg-[rgba(255,235,59,0.12)] border-b border-[#e7dcc9] px-4 py-2 align-top">
         <div className="text-[10px] text-[#b8860b] font-medium mb-1">{audit.who}</div>
         <div className="text-[11px] text-zinc-700 leading-relaxed">{audit.text}</div>
       </td>

@@ -33,10 +33,10 @@ export function UploadIndicator() {
   return (
     <div className="fixed bottom-4 right-4 z-50 max-w-sm">
       {job.status === "uploading" && (
-        <div className="bg-white border border-[#e8ebe9] rounded-xl shadow-lg px-4 py-3 flex items-center gap-3">
+        <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-xl shadow-lg px-4 py-3 flex items-center gap-3">
           <Spinner />
           <div className="flex-1 min-w-0">
-            <div className="text-xs font-bold text-zinc-900 mb-0.5">
+            <div className="text-xs font-bold text-[#2b2620] mb-0.5">
               送信中
             </div>
             <div className="text-[11px] text-zinc-600 truncate">
@@ -48,14 +48,14 @@ export function UploadIndicator() {
 
       {job.status === "success" && (
         <div
-          className="bg-[#e0f2f1] border border-[#00897b] rounded-xl shadow-lg px-4 py-3 flex items-center gap-3 animate-fade-in cursor-pointer"
+          className="bg-[#e0f2f1] border border-[#4a875b] rounded-xl shadow-lg px-4 py-3 flex items-center gap-3 animate-fade-in cursor-pointer"
           onClick={() => {
             dismiss();
             router.refresh();
           }}
           title="クリックで閉じる"
         >
-          <div className="w-8 h-8 rounded-full bg-[#00897b] text-white flex items-center justify-center flex-shrink-0">
+          <div className="w-8 h-8 rounded-full bg-[#4a875b] text-white flex items-center justify-center flex-shrink-0">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
               <polyline points="20 6 9 17 4 12" />
             </svg>
@@ -64,7 +64,7 @@ export function UploadIndicator() {
             <div className="text-xs font-bold text-[#004d40] mb-0.5">
               送信完了
             </div>
-            <div className="text-[11px] text-[#00695c] truncate">
+            <div className="text-[11px] text-[#34603f] truncate">
               {job.userName} さんに動画を配信しました
             </div>
           </div>
@@ -72,7 +72,7 @@ export function UploadIndicator() {
       )}
 
       {job.status === "error" && (
-        <div className="bg-white border border-[#d32f2f] rounded-xl shadow-lg px-4 py-3 flex flex-col gap-2 max-w-sm">
+        <div className="bg-[#fffdf8] border border-[#d32f2f] rounded-xl shadow-lg px-4 py-3 flex flex-col gap-2 max-w-sm">
           <div className="flex items-start gap-3">
             <div className="w-8 h-8 rounded-full bg-[#fef5f5] text-[#d32f2f] flex items-center justify-center flex-shrink-0">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
@@ -92,13 +92,13 @@ export function UploadIndicator() {
           <div className="flex gap-2 justify-end pt-1">
             <button
               onClick={dismiss}
-              className="text-[11px] px-3 py-1.5 bg-white text-zinc-600 border border-[#e8ebe9] rounded-md hover:bg-zinc-100"
+              className="text-[11px] px-3 py-1.5 bg-[#fffdf8] text-zinc-600 border border-[#e7dcc9] rounded-md hover:bg-zinc-100"
             >
               破棄
             </button>
             <button
               onClick={retry}
-              className="text-[11px] px-3 py-1.5 bg-[#00897b] text-white rounded-md hover:bg-[#00695c]"
+              className="text-[11px] px-3 py-1.5 bg-[#4a875b] text-white rounded-md hover:bg-[#34603f]"
             >
               リトライ
             </button>
@@ -112,7 +112,7 @@ export function UploadIndicator() {
 function Spinner() {
   return (
     <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
-      <div className="w-5 h-5 border-2 border-[#e8ebe9] border-t-[#00897b] rounded-full animate-spin" />
+      <div className="w-5 h-5 border-2 border-[#e7dcc9] border-t-[#4a875b] rounded-full animate-spin" />
     </div>
   );
 }

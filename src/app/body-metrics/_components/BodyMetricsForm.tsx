@@ -67,19 +67,19 @@ export function BodyMetricsForm({
   }
 
   return (
-    <div className="bg-white border border-[#e8ebe9] rounded-2xl p-5">
-      <h2 className="text-sm font-bold text-zinc-900 mb-4">
+    <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl p-5">
+      <h2 className="text-sm font-bold text-[#2b2620] mb-4">
         今日の体組成を記録
       </h2>
 
       {/* 記録日 */}
       <div className="mb-3">
-        <label className="block text-xs text-zinc-500 mb-1.5">記録日</label>
+        <label className="block text-xs text-[#6a6256] mb-1.5">記録日</label>
         <input
           type="date"
           value={recordedAt}
           onChange={(e) => setRecordedAt(e.target.value)}
-          className="w-full px-3 py-2.5 border border-[#e8ebe9] rounded-lg text-sm focus:outline-none focus:border-[#00897b]"
+          className="w-full px-3 py-2.5 border border-[#e7dcc9] rounded-lg text-sm focus:outline-none focus:border-[#4a875b]"
           max={todayString()}
         />
       </div>
@@ -87,7 +87,7 @@ export function BodyMetricsForm({
       {/* 3 項目グリッド */}
       <div className="grid grid-cols-3 gap-2 mb-3">
         <div>
-          <label className="block text-xs text-zinc-500 mb-1.5">
+          <label className="block text-xs text-[#6a6256] mb-1.5">
             体重 (kg)
           </label>
           <input
@@ -96,12 +96,12 @@ export function BodyMetricsForm({
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
             placeholder="60.5"
-            className="w-full px-3 py-2.5 border border-[#e8ebe9] rounded-lg text-base font-mono focus:outline-none focus:border-[#00897b]"
+            className="w-full px-3 py-2.5 border border-[#e7dcc9] rounded-lg text-base font-mono focus:outline-none focus:border-[#4a875b]"
             inputMode="decimal"
           />
         </div>
         <div>
-          <label className="block text-xs text-zinc-500 mb-1.5">
+          <label className="block text-xs text-[#6a6256] mb-1.5">
             体脂肪 (%)
           </label>
           <input
@@ -110,12 +110,12 @@ export function BodyMetricsForm({
             value={bodyFat}
             onChange={(e) => setBodyFat(e.target.value)}
             placeholder="22.4"
-            className="w-full px-3 py-2.5 border border-[#e8ebe9] rounded-lg text-base font-mono focus:outline-none focus:border-[#00897b]"
+            className="w-full px-3 py-2.5 border border-[#e7dcc9] rounded-lg text-base font-mono focus:outline-none focus:border-[#4a875b]"
             inputMode="decimal"
           />
         </div>
         <div>
-          <label className="block text-xs text-zinc-500 mb-1.5">
+          <label className="block text-xs text-[#6a6256] mb-1.5">
             ウエスト (cm)
           </label>
           <input
@@ -124,7 +124,7 @@ export function BodyMetricsForm({
             value={waist}
             onChange={(e) => setWaist(e.target.value)}
             placeholder="85.0"
-            className="w-full px-3 py-2.5 border border-[#e8ebe9] rounded-lg text-base font-mono focus:outline-none focus:border-[#00897b]"
+            className="w-full px-3 py-2.5 border border-[#e7dcc9] rounded-lg text-base font-mono focus:outline-none focus:border-[#4a875b]"
             inputMode="decimal"
           />
         </div>
@@ -132,7 +132,7 @@ export function BodyMetricsForm({
 
       {/* メモ */}
       <div className="mb-3">
-        <label className="block text-xs text-zinc-500 mb-1.5">
+        <label className="block text-xs text-[#6a6256] mb-1.5">
           メモ (任意)
         </label>
         <input
@@ -140,13 +140,13 @@ export function BodyMetricsForm({
           value={note}
           onChange={(e) => setNote(e.target.value)}
           placeholder="昨日たくさん食べた、 等"
-          className="w-full px-3 py-2.5 border border-[#e8ebe9] rounded-lg text-sm focus:outline-none focus:border-[#00897b]"
+          className="w-full px-3 py-2.5 border border-[#e7dcc9] rounded-lg text-sm focus:outline-none focus:border-[#4a875b]"
           maxLength={200}
         />
       </div>
 
       {/* 注意 */}
-      <div className="text-[10px] text-zinc-500 mb-3 leading-relaxed">
+      <div className="text-[10px] text-[#6a6256] mb-3 leading-relaxed">
         同じ日に複数回記録すると、 最後の値で上書きされます。
         <br />
         少なくとも 1 項目入力してください。
@@ -171,7 +171,7 @@ export function BodyMetricsForm({
         disabled={
           isPending || (!weight.trim() && !bodyFat.trim() && !waist.trim())
         }
-        className="w-full px-4 py-3 bg-[#00897b] hover:bg-[#00695c] text-white rounded-2xl text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="w-full px-4 py-3 bg-[#4a875b] hover:bg-[#34603f] text-white rounded-2xl text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         {isPending ? "保存中..." : "記録する"}
       </button>

@@ -57,7 +57,7 @@ export default async function MonthlyReviewHistoryPage() {
     <>
       <MemberHeader title="月次添削 履歴" fallbackHref="/" />
       <main className="flex flex-1 flex-col bg-[#fafbfa] min-h-screen">
-        <div className="mx-auto w-full max-w-[460px] bg-white border-x border-[#e8ebe9]">
+        <div className="mx-auto w-full max-w-[460px] bg-[#fffdf8] border-x border-[#e7dcc9]">
 
         {/* スクロール本体 */}
         <div className="bg-[#fafbfa] pb-20">
@@ -119,13 +119,13 @@ function BlockWrapper({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-white mx-4 my-4 border border-[#e8ebe9] rounded-2xl overflow-hidden">
+    <div className="bg-[#fffdf8] mx-4 my-4 border border-[#e7dcc9] rounded-2xl overflow-hidden">
       <div className="px-5 pt-4 pb-2 flex items-center justify-between">
         <div className="text-xs font-bold text-zinc-700 tracking-wide flex items-center gap-1.5">
           <BlockIcon name={icon} />
           {title}
         </div>
-        {hint && <div className="text-[11px] text-zinc-500">{hint}</div>}
+        {hint && <div className="text-[11px] text-[#6a6256]">{hint}</div>}
       </div>
       <div className="px-5 pb-5">{children}</div>
     </div>
@@ -197,11 +197,11 @@ function CurrentMonthCard({
 // 状態 A: 未記入
 function StateCardA() {
   return (
-    <div className="bg-white border border-[#e8ebe9] rounded-2xl px-4 py-4">
-      <span className="inline-flex items-center justify-center leading-none text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#f8f9fa] text-zinc-700 border border-[#e8ebe9]">
+    <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl px-4 py-4">
+      <span className="inline-flex items-center justify-center leading-none text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#f8f9fa] text-zinc-700 border border-[#e7dcc9]">
         今月分
       </span>
-      <div className="text-sm font-medium text-zinc-900 mt-2 mb-1.5">
+      <div className="text-sm font-medium text-[#2b2620] mt-2 mb-1.5">
         月次添削が届いています
       </div>
       <div className="text-[11px] text-zinc-600 leading-relaxed mb-3">
@@ -210,7 +210,7 @@ function StateCardA() {
       </div>
       <Link
         href="/monthly-review/form"
-        className="block w-full text-center py-2.5 rounded-lg bg-[#00897b] hover:bg-[#00695c] text-white text-xs font-medium transition-colors"
+        className="block w-full text-center py-2.5 rounded-lg bg-[#4a875b] hover:bg-[#34603f] text-white text-xs font-medium transition-colors"
       >
         記入を始める
       </Link>
@@ -233,16 +233,16 @@ function StateCardB({ audit }: { audit: MonthlyAuditRow }) {
       })
     : "—";
   return (
-    <div className="bg-white border border-[#00897b] rounded-2xl px-4 py-4">
-      <span className="inline-flex items-center justify-center leading-none text-[10px] font-medium px-2 py-0.5 rounded-full bg-[rgba(0,137,123,0.1)] text-[#00695c] border border-[#00897b]">
+    <div className="bg-[#fffdf8] border border-[#4a875b] rounded-2xl px-4 py-4">
+      <span className="inline-flex items-center justify-center leading-none text-[10px] font-medium px-2 py-0.5 rounded-full bg-[rgba(0,137,123,0.1)] text-[#34603f] border border-[#4a875b]">
         記入中
       </span>
-      <div className="text-sm font-medium text-zinc-900 mt-2 mb-2">
+      <div className="text-sm font-medium text-[#2b2620] mt-2 mb-2">
         {filled} / {total} 項目まで進んでいます
       </div>
       <div className="h-1 bg-[#f0f2f1] rounded-full overflow-hidden mb-2.5">
         <div
-          className="h-full bg-[#00897b] rounded-full"
+          className="h-full bg-[#4a875b] rounded-full"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -253,7 +253,7 @@ function StateCardB({ audit }: { audit: MonthlyAuditRow }) {
       </div>
       <Link
         href="/monthly-review/form"
-        className="block w-full text-center py-2.5 rounded-lg bg-[#00897b] hover:bg-[#00695c] text-white text-xs font-medium transition-colors"
+        className="block w-full text-center py-2.5 rounded-lg bg-[#4a875b] hover:bg-[#34603f] text-white text-xs font-medium transition-colors"
       >
         続きから記入する
       </Link>
@@ -273,20 +273,20 @@ function StateCardC({ audit }: { audit: MonthlyAuditRow }) {
     (Date.now() - submittedAt.getTime()) / (1000 * 60 * 60 * 24)
   );
   return (
-    <div className="bg-[#fafafa] border border-[#e8ebe9] rounded-2xl px-4 py-4">
-      <span className="inline-flex items-center justify-center leading-none text-base font-bold px-3 py-1 rounded-full bg-white text-zinc-500 border border-[#e8ebe9]">
+    <div className="bg-[#fafafa] border border-[#e7dcc9] rounded-2xl px-4 py-4">
+      <span className="inline-flex items-center justify-center leading-none text-base font-bold px-3 py-1 rounded-full bg-[#fffdf8] text-[#6a6256] border border-[#e7dcc9]">
         提出済み
       </span>
-      <div className="text-sm font-medium text-zinc-900 mt-2 mb-2 flex items-center">
+      <div className="text-sm font-medium text-[#2b2620] mt-2 mb-2 flex items-center">
         のりfitness が動画返信を準備中
         <span className="ml-2 inline-flex gap-0.5">
-          <span className="w-1 h-1 rounded-full bg-zinc-500 animate-pulse" />
+          <span className="w-1 h-1 rounded-full bg-[#f9f5ed]0 animate-pulse" />
           <span
-            className="w-1 h-1 rounded-full bg-zinc-500 animate-pulse"
+            className="w-1 h-1 rounded-full bg-[#f9f5ed]0 animate-pulse"
             style={{ animationDelay: "0.2s" }}
           />
           <span
-            className="w-1 h-1 rounded-full bg-zinc-500 animate-pulse"
+            className="w-1 h-1 rounded-full bg-[#f9f5ed]0 animate-pulse"
             style={{ animationDelay: "0.4s" }}
           />
         </span>
@@ -301,7 +301,7 @@ function StateCardC({ audit }: { audit: MonthlyAuditRow }) {
       >
         提出した内容を見直す
       </Link>
-      <div className="text-[10px] text-zinc-500 text-center mt-2 font-mono">
+      <div className="text-[10px] text-[#6a6256] text-center mt-2 font-mono">
         提出 {submittedLabel} ・ 経過 {daysSince} 日
       </div>
     </div>
@@ -325,7 +325,7 @@ function StateCardD({ audit }: { audit: MonthlyAuditRow }) {
       <span className="inline-flex items-center justify-center leading-none text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#b8860b] text-white">
         のりfitness から返信
       </span>
-      <div className="text-sm font-medium text-zinc-900 mt-2 mb-1.5">
+      <div className="text-sm font-medium text-[#2b2620] mt-2 mb-1.5">
         動画返信が届きました
       </div>
       <div className="text-[11px] text-zinc-600 leading-relaxed mb-3">
@@ -336,9 +336,9 @@ function StateCardD({ audit }: { audit: MonthlyAuditRow }) {
         href={`/monthly-review/detail/${audit.target_month}`}
         className="flex items-center justify-center gap-2 w-full text-center py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium transition-colors"
       >
-        <span className="text-[#00897b]">▶</span> {monthLabel} 月次添削動画を開く
+        <span className="text-[#4a875b]">▶</span> {monthLabel} 月次添削動画を開く
       </Link>
-      <div className="text-[10px] text-zinc-500 text-center mt-2 font-mono">
+      <div className="text-[10px] text-[#6a6256] text-center mt-2 font-mono">
         返信 {publishedLabel}
       </div>
     </div>
@@ -350,9 +350,9 @@ function StateCardD({ audit }: { audit: MonthlyAuditRow }) {
 // =====================================================================
 function PlaceholderBlock({ text }: { text: string }) {
   return (
-    <div className="bg-[#fafbfa] border border-dashed border-[#e8ebe9] rounded-lg px-4 py-6 text-center">
+    <div className="bg-[#fafbfa] border border-dashed border-[#e7dcc9] rounded-lg px-4 py-6 text-center">
       <svg
-        className="w-7 h-7 mx-auto mb-2 text-zinc-400"
+        className="w-7 h-7 mx-auto mb-2 text-[#a59b8c]"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -363,7 +363,7 @@ function PlaceholderBlock({ text }: { text: string }) {
         <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
         <polyline points="16 7 22 7 22 13" />
       </svg>
-      <div className="text-[11px] text-zinc-500 leading-relaxed">{text}</div>
+      <div className="text-[11px] text-[#6a6256] leading-relaxed">{text}</div>
     </div>
   );
 }
@@ -374,7 +374,7 @@ function PlaceholderBlock({ text }: { text: string }) {
 function PastAuditList({ audits }: { audits: MonthlyAuditRow[] }) {
   if (audits.length === 0) {
     return (
-      <div className="py-6 text-center text-[11px] text-zinc-500">
+      <div className="py-6 text-center text-[11px] text-[#6a6256]">
         まだ過去の月次添削はありません
       </div>
     );
@@ -391,15 +391,15 @@ function PastAuditList({ audits }: { audits: MonthlyAuditRow[] }) {
           <Link
             key={audit.id}
             href={`/monthly-review/detail/${audit.target_month}`}
-            className="flex items-center justify-between py-3 border-b border-[#e8ebe9] last:border-b-0 hover:bg-[#fafbfa] transition-colors -mx-1 px-1"
+            className="flex items-center justify-between py-3 border-b border-[#e7dcc9] last:border-b-0 hover:bg-[#fafbfa] transition-colors -mx-1 px-1"
           >
             <div className="flex items-center gap-2.5">
-              <span className="font-semibold text-zinc-900 font-mono text-sm">
+              <span className="font-semibold text-[#2b2620] font-mono text-sm">
                 {monthLabel}
               </span>
               <PastBadge status={status} filledCount={filled} />
             </div>
-            <span className="text-zinc-400 font-mono text-xs">▶</span>
+            <span className="text-[#a59b8c] font-mono text-xs">▶</span>
           </Link>
         );
       })}
@@ -416,7 +416,7 @@ function PastBadge({
 }) {
   if (status === "d_replied") {
     return (
-      <span className="inline-flex items-center justify-center leading-none text-[10px] px-2 py-0.5 rounded-full bg-[rgba(0,137,123,0.1)] text-[#00695c]">
+      <span className="inline-flex items-center justify-center leading-none text-[10px] px-2 py-0.5 rounded-full bg-[rgba(0,137,123,0.1)] text-[#34603f]">
         ✓ 返信あり
       </span>
     );
@@ -430,14 +430,14 @@ function PastBadge({
   }
   if (status === "b_in_progress") {
     return (
-      <span className="inline-flex items-center justify-center leading-none text-[10px] px-2 py-0.5 rounded-full bg-[#f8f9fa] text-zinc-500">
+      <span className="inline-flex items-center justify-center leading-none text-[10px] px-2 py-0.5 rounded-full bg-[#f8f9fa] text-[#6a6256]">
         記入中 ({filledCount}/17)
       </span>
     );
   }
   // a_empty (基本ここには来ない、過去月で未記入は表示されない想定)
   return (
-    <span className="inline-flex items-center justify-center leading-none text-[10px] px-2 py-0.5 rounded-full bg-[#f8f9fa] text-zinc-500">
+    <span className="inline-flex items-center justify-center leading-none text-[10px] px-2 py-0.5 rounded-full bg-[#f8f9fa] text-[#6a6256]">
       未記入
     </span>
   );

@@ -179,7 +179,7 @@ export function CalorieToolClient({
   // input の className (前回値で薄色、触ったら通常色)
   const inputClass = (key: string) =>
     `flex-1 border-none outline-none py-2.5 text-base bg-transparent font-mono ${
-      touched[key] || !prevInputs ? "text-zinc-900" : "text-zinc-400"
+      touched[key] || !prevInputs ? "text-[#2b2620]" : "text-[#a59b8c]"
     }`;
 
   // select の className (前回値で薄色、触ったら通常色)
@@ -191,11 +191,11 @@ export function CalorieToolClient({
     <main className="min-h-screen bg-[#fafbfa] flex flex-col">
       <div className="flex-1 max-w-[460px] mx-auto w-full pb-10">
         {/* ヒーロー帯 */}
-        <section className="bg-gradient-to-br from-[#e8eaf6] to-[#fffbe6] border-b border-[#e8ebe9] px-6 py-5">
+        <section className="bg-gradient-to-br from-[#e8eaf6] to-[#fffbe6] border-b border-[#e7dcc9] px-6 py-5">
           <h2 className="text-xl font-bold text-[#1a237e] mb-1">
             必要カロリー計算
           </h2>
-          <p className="text-[11px] text-zinc-500 leading-relaxed">
+          <p className="text-[11px] text-[#6a6256] leading-relaxed">
             ハリスベネディクト式 (改訂版) ・ 基礎代謝 + 4 パターン算出
           </p>
           {previous && (
@@ -206,8 +206,8 @@ export function CalorieToolClient({
         </section>
 
         {/* 入力カード */}
-        <section className="bg-white border border-[#e8ebe9] rounded-xl mx-4 my-4 px-5 py-4">
-          <h3 className="text-xs font-bold text-zinc-600 tracking-wide mb-3.5 pb-2.5 border-b border-[#e8ebe9]">
+        <section className="bg-[#fffdf8] border border-[#e7dcc9] rounded-xl mx-4 my-4 px-5 py-4">
+          <h3 className="text-xs font-bold text-zinc-600 tracking-wide mb-3.5 pb-2.5 border-b border-[#e7dcc9]">
             あなたの情報
           </h3>
 
@@ -228,7 +228,7 @@ export function CalorieToolClient({
                   className={`py-3 px-1 rounded text-[13px] font-bold border transition-colors ${
                     gender === g
                       ? "bg-[#3949ab] border-[#3949ab] text-white"
-                      : "bg-white border-[#e8ebe9] text-zinc-600 hover:border-[#3949ab]"
+                      : "bg-[#fffdf8] border-[#e7dcc9] text-zinc-600 hover:border-[#3949ab]"
                   }`}
                 >
                   {g === "male" ? "男性" : g === "female" ? "女性" : "その他"}
@@ -256,7 +256,7 @@ export function CalorieToolClient({
                     className={`py-2.5 rounded text-xs font-bold border transition-colors ${
                       formula === f
                         ? "bg-[#3949ab] border-[#3949ab] text-white"
-                        : "bg-white border-[#e8ebe9] text-zinc-600 hover:border-[#3949ab]"
+                        : "bg-[#fffdf8] border-[#e7dcc9] text-zinc-600 hover:border-[#3949ab]"
                     }`}
                   >
                     {f === "male" ? "男性式で計算" : "女性式で計算"}
@@ -312,7 +312,7 @@ export function CalorieToolClient({
               className={`border rounded-lg px-3 transition-colors ${
                 missingFields.has("activity")
                   ? "border-[#d32f2f] bg-[#fef5f5] focus-within:border-[#d32f2f]"
-                  : "border-[#e8ebe9] bg-white focus-within:border-[#3949ab]"
+                  : "border-[#e7dcc9] bg-[#fffdf8] focus-within:border-[#3949ab]"
               }`}
             >
               <select
@@ -324,10 +324,10 @@ export function CalorieToolClient({
                 }}
                 className={`w-full border-none outline-none py-2.5 text-[13px] bg-transparent appearance-none cursor-pointer ${
                   !activityLevel
-                    ? "text-zinc-400"
+                    ? "text-[#a59b8c]"
                     : isActivityTouched
-                      ? "text-zinc-900"
-                      : "text-zinc-400"
+                      ? "text-[#2b2620]"
+                      : "text-[#a59b8c]"
                 }`}
               >
                 <option value="" disabled>
@@ -367,7 +367,7 @@ export function CalorieToolClient({
         {/* 結果カード */}
         {result && (
           <section className="bg-gradient-to-br from-[#e8eaf6] to-[#fffbe6] border border-[rgba(255,235,59,0.4)] rounded-xl mx-4 mb-3 px-5 py-4">
-            <h3 className="text-xs font-bold text-[#283593] tracking-wide mb-3 pb-2.5 border-b border-[#e8ebe9]">
+            <h3 className="text-xs font-bold text-[#283593] tracking-wide mb-3 pb-2.5 border-b border-[#e7dcc9]">
               ✓ 計算結果
             </h3>
 
@@ -379,7 +379,7 @@ export function CalorieToolClient({
                   <>
                     ダイエット時
                     <br />
-                    <span className="text-[9px] text-zinc-500">
+                    <span className="text-[9px] text-[#6a6256]">
                       (−500 kcal)
                     </span>
                   </>
@@ -392,7 +392,7 @@ export function CalorieToolClient({
                   <>
                     増量時
                     <br />
-                    <span className="text-[9px] text-zinc-500">
+                    <span className="text-[9px] text-[#6a6256]">
                       (+500 kcal)
                     </span>
                   </>
@@ -433,7 +433,7 @@ export function CalorieToolClient({
                 );
                 router.push("/goal-sheet/edit");
               }}
-              className="w-full py-3.5 bg-[#00897b] text-white rounded text-sm font-bold hover:bg-[#00695c] transition-colors"
+              className="w-full py-3.5 bg-[#4a875b] text-white rounded text-sm font-bold hover:bg-[#34603f] transition-colors"
             >
               目標シートに適用 →
             </button>
@@ -449,7 +449,7 @@ export function CalorieToolClient({
             <button
               onClick={handleSave}
               disabled={saving}
-              className="w-full py-3.5 bg-white border border-[#3949ab] text-[#3949ab] rounded text-sm font-bold hover:bg-[#3949ab]/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full py-3.5 bg-[#fffdf8] border border-[#3949ab] text-[#3949ab] rounded text-sm font-bold hover:bg-[#3949ab]/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {saving
                 ? "保存中..."
@@ -497,7 +497,7 @@ function InputRow({
         className={`flex items-center gap-2.5 border rounded-lg px-3 transition-colors ${
           hasError
             ? "border-[#d32f2f] bg-[#fef5f5] focus-within:border-[#d32f2f]"
-            : "border-[#e8ebe9] bg-white focus-within:border-[#3949ab]"
+            : "border-[#e7dcc9] bg-[#fffdf8] focus-within:border-[#3949ab]"
         }`}
       >
         <input
@@ -510,7 +510,7 @@ function InputRow({
         />
         <span
           className={`text-xs flex-shrink-0 ${
-            hasError ? "text-[#d32f2f]" : "text-zinc-500"
+            hasError ? "text-[#d32f2f]" : "text-[#6a6256]"
           }`}
         >
           {unit}
@@ -534,7 +534,7 @@ function ResultCell({
       className={`rounded-lg px-3 py-3 text-center border ${
         highlight
           ? "bg-[#3949ab]/8 border-[#3949ab]/25"
-          : "bg-white/60 border-white/90"
+          : "bg-[#fffdf8]/60 border-white/90"
       }`}
     >
       <div className="text-[10px] text-zinc-600 leading-tight mb-1 min-h-[2.4em]">
@@ -542,12 +542,12 @@ function ResultCell({
       </div>
       <div
         className={`font-mono font-bold text-[22px] leading-none ${
-          highlight ? "text-[#1a237e]" : "text-zinc-900"
+          highlight ? "text-[#1a237e]" : "text-[#2b2620]"
         }`}
       >
         {value.toLocaleString()}
       </div>
-      <div className="text-[10px] text-zinc-500 mt-1">kcal / 日</div>
+      <div className="text-[10px] text-[#6a6256] mt-1">kcal / 日</div>
     </div>
   );
 }

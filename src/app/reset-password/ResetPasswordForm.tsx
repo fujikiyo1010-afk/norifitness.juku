@@ -91,7 +91,7 @@ export function ResetPasswordForm() {
 
   if (sessionState === "loading") {
     return (
-      <p className="text-sm text-zinc-500 text-center py-8">
+      <p className="text-sm text-[#6a6256] text-center py-8">
         リンクを確認中です…
       </p>
     );
@@ -110,7 +110,7 @@ export function ResetPasswordForm() {
         </div>
         <Link
           href="/forgot-password"
-          className="block text-center text-sm text-zinc-900 dark:text-zinc-50 underline"
+          className="block text-center text-sm text-[#2b2620] dark:text-zinc-50 underline"
         >
           → パスワード再設定をやり直す
         </Link>
@@ -143,7 +143,7 @@ export function ResetPasswordForm() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           disabled={pending}
-          className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 focus:border-zinc-900 dark:focus:border-zinc-50 focus:outline-none disabled:opacity-50"
+          className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-[#fffdf8] dark:bg-zinc-950 px-3 py-2 text-sm text-[#2b2620] dark:text-zinc-50 focus:border-zinc-900 dark:focus:border-zinc-50 focus:outline-none disabled:opacity-50"
         />
         {tooShort && (
           <p className="text-xs text-amber-600">
@@ -169,14 +169,14 @@ export function ResetPasswordForm() {
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
           disabled={pending}
-          className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 focus:border-zinc-900 dark:focus:border-zinc-50 focus:outline-none disabled:opacity-50"
+          className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-[#fffdf8] dark:bg-zinc-950 px-3 py-2 text-sm text-[#2b2620] dark:text-zinc-50 focus:border-zinc-900 dark:focus:border-zinc-50 focus:outline-none disabled:opacity-50"
         />
         {passwordsMismatch && (
           <p className="text-xs text-amber-600">パスワードが一致しません</p>
         )}
       </div>
 
-      <label className="flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400">
+      <label className="flex items-center gap-2 text-xs text-zinc-600 dark:text-[#a59b8c]">
         <input
           type="checkbox"
           checked={showPassword}
@@ -200,7 +200,7 @@ export function ResetPasswordForm() {
       <button
         type="submit"
         disabled={!canSubmit}
-        className="w-full rounded-md bg-zinc-900 dark:bg-zinc-50 px-4 py-2.5 text-sm font-medium text-white dark:text-zinc-900 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full rounded-md bg-zinc-900 dark:bg-[#f9f5ed] px-4 py-2.5 text-sm font-medium text-white dark:text-[#2b2620] disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {pending ? "更新中…" : "新しいパスワードに更新"}
       </button>

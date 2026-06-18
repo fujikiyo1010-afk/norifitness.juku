@@ -40,7 +40,7 @@ export function SearchResultsList({
           <button
             type="button"
             onClick={onClear}
-            className="shrink-0 text-xs text-zinc-600 dark:text-zinc-400 underline hover:text-zinc-900 dark:hover:text-zinc-100"
+            className="shrink-0 text-xs text-zinc-600 dark:text-[#a59b8c] underline hover:text-[#2b2620] dark:hover:text-zinc-100"
           >
             {clearLabel}
           </button>
@@ -54,11 +54,11 @@ export function SearchResultsList({
       )}
 
       {!loading && results.length === 0 && !error ? (
-        <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 text-center space-y-2">
+        <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-[#fffdf8] dark:bg-zinc-900 p-6 text-center space-y-2">
           <p className="text-sm text-zinc-700 dark:text-zinc-300">
             該当するレッスンが見つかりませんでした。
           </p>
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-[#6a6256]">
             別のキーワード(部位名、種目名 等)でお試しください。
           </p>
         </div>

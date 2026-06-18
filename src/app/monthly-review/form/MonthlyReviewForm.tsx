@@ -149,10 +149,10 @@ export function MonthlyReviewForm({
   }, []);
 
   return (
-    <div className="bg-white border border-[#e8ebe9] rounded-2xl overflow-hidden">
+    <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl overflow-hidden">
       {/* ヘッダー */}
-      <div className="px-4 py-3 border-b border-[#e8ebe9] flex items-center gap-2">
-        <Link href="/monthly-review" className="text-zinc-900">
+      <div className="px-4 py-3 border-b border-[#e7dcc9] flex items-center gap-2">
+        <Link href="/monthly-review" className="text-[#2b2620]">
           <svg
             className="w-5 h-5"
             viewBox="0 0 24 24"
@@ -165,7 +165,7 @@ export function MonthlyReviewForm({
             <path d="m15 18-6-6 6-6" />
           </svg>
         </Link>
-        <div className="flex-1 text-center text-sm font-bold text-zinc-900">
+        <div className="flex-1 text-center text-sm font-bold text-[#2b2620]">
           月次添削
         </div>
         <div className="w-5 h-5" />
@@ -174,8 +174,8 @@ export function MonthlyReviewForm({
       {mode === "form" ? (
         <>
           {/* ヘッダー統合ブロック (温かいグラデ) */}
-          <div className="px-4 py-4 bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] border-b border-[#e8ebe9] text-center">
-            <div className="text-xs font-bold text-[#00695c] mb-2.5 tracking-wide flex items-center justify-center gap-1.5">
+          <div className="px-4 py-4 bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] border-b border-[#e7dcc9] text-center">
+            <div className="text-xs font-bold text-[#34603f] mb-2.5 tracking-wide flex items-center justify-center gap-1.5">
               <svg
                 className="w-3.5 h-3.5"
                 viewBox="0 0 24 24"
@@ -190,33 +190,33 @@ export function MonthlyReviewForm({
               </svg>
               のりfitness の月次添削
             </div>
-            <div className="text-2xl font-bold text-zinc-900 mb-2 tracking-wide leading-tight">
+            <div className="text-2xl font-bold text-[#2b2620] mb-2 tracking-wide leading-tight">
               {monthLabel}
             </div>
             <div className="text-xs text-zinc-700 mb-3">
               受付中 ・ 毎月 1 日が、振り返りの日です。
             </div>
-            <div className="text-[11px] text-zinc-500 leading-relaxed pt-2.5 border-t border-[#e8ebe9]">
+            <div className="text-[11px] text-[#6a6256] leading-relaxed pt-2.5 border-t border-[#e7dcc9]">
               0〜10 点で各自評価をお願いします。
               <br />
-              <b className="text-[#00695c] font-bold">0</b> = 全然できなかった ・{" "}
-              <b className="text-[#00695c] font-bold">10</b> = よくできた
+              <b className="text-[#34603f] font-bold">0</b> = 全然できなかった ・{" "}
+              <b className="text-[#34603f] font-bold">10</b> = よくできた
               <br />
               毎月振り返ることで、自己モニタリングできます。
             </div>
           </div>
 
           {/* 進捗バー */}
-          <div className="px-4 py-3 bg-[#f8f9fa] border-b border-[#e8ebe9]">
-            <div className="flex justify-between text-[11px] text-zinc-500 mb-1.5">
+          <div className="px-4 py-3 bg-[#f8f9fa] border-b border-[#e7dcc9]">
+            <div className="flex justify-between text-[11px] text-[#6a6256] mb-1.5">
               <span>記入状況</span>
-              <span className="font-bold text-zinc-900 font-mono">
+              <span className="font-bold text-[#2b2620] font-mono">
                 {filledCount} / {totalCount} 項目
               </span>
             </div>
-            <div className="h-1.5 bg-white border border-[#e8ebe9] rounded-full overflow-hidden">
+            <div className="h-1.5 bg-[#fffdf8] border border-[#e7dcc9] rounded-full overflow-hidden">
               <div
-                className="h-full bg-[#00897b] transition-all"
+                className="h-full bg-[#4a875b] transition-all"
                 style={{ width: `${(filledCount / totalCount) * 100}%` }}
               />
             </div>
@@ -224,7 +224,7 @@ export function MonthlyReviewForm({
 
           {/* 最終保存通知 */}
           {lastSavedAt && (
-            <div className="px-4 py-2.5 bg-[#f8f9fa] text-[10px] text-zinc-500 text-center border-b border-[#e8ebe9]">
+            <div className="px-4 py-2.5 bg-[#f8f9fa] text-[10px] text-[#6a6256] text-center border-b border-[#e7dcc9]">
               自動下書き保存しました ・{" "}
               {new Date(lastSavedAt).toLocaleString("ja-JP", {
                 month: "2-digit",
@@ -236,7 +236,7 @@ export function MonthlyReviewForm({
           )}
 
           {/* カテゴリ別 17 項目 */}
-          <div className="bg-white">
+          <div className="bg-[#fffdf8]">
             {(Object.keys(AUDIT_CATEGORIES) as AuditCategoryKey[])
               .sort((a, b) => AUDIT_CATEGORIES[a].order - AUDIT_CATEGORIES[b].order)
               .map((catKey) => {
@@ -279,12 +279,12 @@ export function MonthlyReviewForm({
           )}
 
           {/* 保存バー (フォームモード) */}
-          <div className="bg-white border-t border-[#e8ebe9] px-4 py-3 flex gap-2 sticky bottom-0">
+          <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2 sticky bottom-0">
             <button
               type="button"
               disabled={isPending}
               onClick={handleSaveDraft}
-              className="px-4 py-3 bg-white text-zinc-900 border border-[#e8ebe9] rounded-2xl text-[12px] font-bold disabled:opacity-50"
+              className="px-4 py-3 bg-[#fffdf8] text-[#2b2620] border border-[#e7dcc9] rounded-2xl text-[12px] font-bold disabled:opacity-50"
             >
               下書き保存
             </button>
@@ -292,7 +292,7 @@ export function MonthlyReviewForm({
               type="button"
               disabled={isPending}
               onClick={handlePreview}
-              className="flex-1 px-4 py-3 bg-[#00897b] hover:bg-[#00695c] text-white rounded-2xl text-sm font-bold disabled:opacity-50 transition-colors"
+              className="flex-1 px-4 py-3 bg-[#4a875b] hover:bg-[#34603f] text-white rounded-2xl text-sm font-bold disabled:opacity-50 transition-colors"
             >
               プレビューを確認する
             </button>
@@ -330,11 +330,11 @@ function PreviewView({
 }) {
   return (
     <>
-      <div className="px-4 py-4 bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] border-b border-[#e8ebe9] text-center">
-        <div className="text-xs font-bold text-[#00695c] mb-2 tracking-wide">
+      <div className="px-4 py-4 bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] border-b border-[#e7dcc9] text-center">
+        <div className="text-xs font-bold text-[#34603f] mb-2 tracking-wide">
           プレビュー (送信前の確認)
         </div>
-        <div className="text-xl font-bold text-zinc-900 mb-1 tracking-wide">
+        <div className="text-xl font-bold text-[#2b2620] mb-1 tracking-wide">
           {monthLabel}
         </div>
         <div className="text-[11px] text-zinc-600 leading-relaxed mt-2">
@@ -343,7 +343,7 @@ function PreviewView({
         </div>
       </div>
 
-      <div className="bg-white">
+      <div className="bg-[#fffdf8]">
         {(Object.keys(AUDIT_CATEGORIES) as AuditCategoryKey[])
           .sort((a, b) => AUDIT_CATEGORIES[a].order - AUDIT_CATEGORIES[b].order)
           .map((catKey) => {
@@ -365,12 +365,12 @@ function PreviewView({
       </div>
 
       {/* 修正 / 送信ボタン */}
-      <div className="bg-white border-t border-[#e8ebe9] px-4 py-3 flex gap-2 sticky bottom-0">
+      <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2 sticky bottom-0">
         <button
           type="button"
           disabled={isPending}
           onClick={onEdit}
-          className="px-4 py-3 bg-white text-zinc-900 border border-[#e8ebe9] rounded-2xl text-[12px] font-bold disabled:opacity-50"
+          className="px-4 py-3 bg-[#fffdf8] text-[#2b2620] border border-[#e7dcc9] rounded-2xl text-[12px] font-bold disabled:opacity-50"
         >
           修正する
         </button>
@@ -378,7 +378,7 @@ function PreviewView({
           type="button"
           disabled={isPending}
           onClick={onSubmit}
-          className="flex-1 px-4 py-3 bg-[#00897b] hover:bg-[#00695c] text-white rounded-2xl text-sm font-bold disabled:opacity-50 transition-colors"
+          className="flex-1 px-4 py-3 bg-[#4a875b] hover:bg-[#34603f] text-white rounded-2xl text-sm font-bold disabled:opacity-50 transition-colors"
         >
           {isPending ? "送信中..." : "送信する"}
         </button>
@@ -395,7 +395,7 @@ function CategoryBand({ label, count }: { label: string; count: number }) {
   return (
     <div className="bg-zinc-900 text-white px-4 py-2.5 text-[11px] font-semibold tracking-widest flex items-center gap-2">
       <span>{label}</span>
-      <span className="ml-auto text-[#00897b] font-mono">{count}</span>
+      <span className="ml-auto text-[#4a875b] font-mono">{count}</span>
     </div>
   );
 }
@@ -417,14 +417,14 @@ function ItemCard({
   const num = question.key.replace("q", "");
   return (
     <div
-      className={`p-4 border-b border-[#e8ebe9] ${
+      className={`p-4 border-b border-[#e7dcc9] ${
         missing ? "bg-red-50" : ""
       }`}
     >
-      <div className="text-[11px] text-zinc-500 font-bold font-mono mb-1">
+      <div className="text-[11px] text-[#6a6256] font-bold font-mono mb-1">
         Q{num} / 17
       </div>
-      <div className="text-[13px] font-bold text-zinc-900 leading-snug mb-2.5 flex justify-between items-start gap-2">
+      <div className="text-[13px] font-bold text-[#2b2620] leading-snug mb-2.5 flex justify-between items-start gap-2">
         <span>{question.label}</span>
         {question.required ? (
           <span className="text-red-500 text-[11px] flex-shrink-0">★</span>
@@ -467,7 +467,7 @@ function ItemCard({
           placeholder={question.textPlaceholder ?? ""}
           onChange={(e) => onChange({ text: e.target.value })}
           rows={2}
-          className="w-full mt-2.5 px-3 py-2.5 text-xs border border-[#e8ebe9] rounded-lg bg-white text-zinc-900 resize-none focus:outline-none focus:border-[#00897b]"
+          className="w-full mt-2.5 px-3 py-2.5 text-xs border border-[#e7dcc9] rounded-lg bg-[#fffdf8] text-[#2b2620] resize-none focus:outline-none focus:border-[#4a875b]"
         />
       )}
     </div>
@@ -583,7 +583,7 @@ function BodyMeasureColumn({
 
   return (
     <div>
-      <div className="text-[10px] text-zinc-500 text-center mb-1 font-semibold">
+      <div className="text-[10px] text-[#6a6256] text-center mb-1 font-semibold">
         {label}
       </div>
       <div className="flex gap-1 items-center">
@@ -616,9 +616,9 @@ function BodyMeasureColumn({
               onChange(undefined);
             }
           }}
-          className="flex-1 px-2 py-2 text-sm border border-[#e8ebe9] rounded-lg bg-white text-zinc-900 text-center font-bold font-mono focus:outline-none focus:border-[#00897b]"
+          className="flex-1 px-2 py-2 text-sm border border-[#e7dcc9] rounded-lg bg-[#fffdf8] text-[#2b2620] text-center font-bold font-mono focus:outline-none focus:border-[#4a875b]"
         />
-        <span className="text-[11px] text-zinc-500">{unit}</span>
+        <span className="text-[11px] text-[#6a6256]">{unit}</span>
       </div>
     </div>
   );
@@ -643,8 +643,8 @@ function ScoreInput({
               onClick={() => onChange({ score: n })}
               className={`aspect-square min-w-0 rounded-md text-[11px] font-bold font-mono transition-colors flex items-center justify-center ${
                 active
-                  ? "bg-[#00897b] text-white border border-[#00897b]"
-                  : "bg-white text-zinc-600 border border-[#e8ebe9] hover:border-[#00897b]"
+                  ? "bg-[#4a875b] text-white border border-[#4a875b]"
+                  : "bg-[#fffdf8] text-zinc-600 border border-[#e7dcc9] hover:border-[#4a875b]"
               }`}
             >
               {n}
@@ -652,7 +652,7 @@ function ScoreInput({
           );
         })}
       </div>
-      <div className="flex justify-between text-[9px] text-zinc-500 px-1">
+      <div className="flex justify-between text-[9px] text-[#6a6256] px-1">
         <span>0 全然できなかった</span>
         <span>10 よくできた</span>
       </div>
@@ -677,7 +677,7 @@ function TextOnlyInput({
       placeholder={placeholder}
       onChange={(e) => onChange({ text: e.target.value })}
       rows={large ? 4 : 2}
-      className={`w-full px-3 py-2.5 text-xs border border-[#e8ebe9] rounded-lg bg-white text-zinc-900 resize-none focus:outline-none focus:border-[#00897b] ${
+      className={`w-full px-3 py-2.5 text-xs border border-[#e7dcc9] rounded-lg bg-[#fffdf8] text-[#2b2620] resize-none focus:outline-none focus:border-[#4a875b] ${
         large ? "min-h-[80px]" : ""
       }`}
     />
@@ -696,11 +696,11 @@ function PreviewItem({
 }) {
   const num = question.key.replace("q", "");
   return (
-    <div className="p-4 border-b border-[#e8ebe9]">
-      <div className="text-[11px] text-zinc-500 font-bold font-mono mb-1">
+    <div className="p-4 border-b border-[#e7dcc9]">
+      <div className="text-[11px] text-[#6a6256] font-bold font-mono mb-1">
         Q{num} / 17
       </div>
-      <div className="text-[13px] font-bold text-zinc-900 leading-snug mb-2.5">
+      <div className="text-[13px] font-bold text-[#2b2620] leading-snug mb-2.5">
         {question.label}
       </div>
 
@@ -715,23 +715,23 @@ function PreviewItem({
               }`}
             >
               {hasLast && (
-                <div className="bg-[#f8f9fa] border border-[#e8ebe9] rounded-lg p-2 text-center">
-                  <div className="text-[10px] text-zinc-500 mb-0.5">先月</div>
-                  <div className="text-sm font-bold text-zinc-900 font-mono">
+                <div className="bg-[#f8f9fa] border border-[#e7dcc9] rounded-lg p-2 text-center">
+                  <div className="text-[10px] text-[#6a6256] mb-0.5">先月</div>
+                  <div className="text-sm font-bold text-[#2b2620] font-mono">
                     {bodyAnswer?.last_value}
-                    <span className="text-[10px] text-zinc-500 ml-1 font-normal">
+                    <span className="text-[10px] text-[#6a6256] ml-1 font-normal">
                       {question.unit}
                     </span>
                   </div>
                 </div>
               )}
-              <div className="bg-[rgba(0,137,123,0.08)] border border-[#00897b] rounded-lg p-2 text-center">
-                <div className="text-[10px] text-[#00695c] mb-0.5 font-semibold">
+              <div className="bg-[rgba(0,137,123,0.08)] border border-[#4a875b] rounded-lg p-2 text-center">
+                <div className="text-[10px] text-[#34603f] mb-0.5 font-semibold">
                   今月
                 </div>
-                <div className="text-sm font-bold text-[#00695c] font-mono">
+                <div className="text-sm font-bold text-[#34603f] font-mono">
                   {bodyAnswer?.current_value ?? "—"}
-                  <span className="text-[10px] text-[#00695c] ml-1 font-normal">
+                  <span className="text-[10px] text-[#34603f] ml-1 font-normal">
                     {question.unit}
                   </span>
                 </div>
@@ -742,16 +742,16 @@ function PreviewItem({
 
       {question.type === "score" && (
         <div className="flex items-center gap-3 mb-2">
-          <div className="text-3xl font-bold text-[#00695c] font-mono">
+          <div className="text-3xl font-bold text-[#34603f] font-mono">
             {(answer as ScoreAnswer | undefined)?.score ?? "—"}
           </div>
-          <div className="text-[10px] text-zinc-500">/ 10 点</div>
+          <div className="text-[10px] text-[#6a6256]">/ 10 点</div>
         </div>
       )}
 
       <div className="text-[12px] text-zinc-700 leading-relaxed whitespace-pre-wrap min-h-[1.2em] bg-[#f8f9fa] rounded-md px-2.5 py-2">
         {(answer as { text?: string } | undefined)?.text ?? (
-          <span className="text-zinc-400">(自由記述 なし)</span>
+          <span className="text-[#a59b8c]">(自由記述 なし)</span>
         )}
       </div>
     </div>

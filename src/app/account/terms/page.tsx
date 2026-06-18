@@ -9,12 +9,12 @@ export const dynamic = "force-static";
  */
 export default function TermsPage() {
   return (
-    <main className="flex flex-1 flex-col bg-zinc-50 min-h-screen">
-      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e8ebe9] bg-white">
+    <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
+      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9] bg-[#fffdf8]">
         <MemberHeader title="利用規約" fallbackHref="/account" />
 
         <div className="px-4 pt-5 pb-8 space-y-4 text-[12px] text-zinc-700 leading-[1.8]">
-          <p className="text-[10px] text-zinc-400 font-mono">
+          <p className="text-[10px] text-[#a59b8c] font-mono">
             最終更新 ・ 2026 年 6 月 17 日
           </p>
 
@@ -60,7 +60,7 @@ export default function TermsPage() {
             本規約の解釈にあたっては日本法を準拠法とし、 本サービスに関して紛争が生じた場合、 当方所在地を管轄する裁判所を専属的合意管轄とします。
           </Section>
 
-          <p className="pt-3 text-[11px] text-zinc-500">
+          <p className="pt-3 text-[11px] text-[#6a6256]">
             お問い合わせ ・ LINE サポートまたは公式メール
           </p>
         </div>
@@ -72,7 +72,7 @@ export default function TermsPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h2 className="text-[13px] font-bold text-zinc-900 mb-1.5">{title}</h2>
+      <h2 className="text-[13px] font-bold text-[#2b2620] mb-1.5">{title}</h2>
       <div>{children}</div>
     </div>
   );

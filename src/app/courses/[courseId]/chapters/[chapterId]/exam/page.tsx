@@ -54,14 +54,14 @@ export default async function ExamPage({
   if (!exam) notFound();
 
   return (
-    <main className="flex flex-1 flex-col bg-zinc-50 min-h-screen">
-      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e8ebe9] bg-white">
+    <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
+      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9] bg-[#fffdf8]">
         <MemberHeader
           title="テスト"
           fallbackHref={`/courses/${courseId}`}
         />
 
-        <div className="px-4 pt-3 pb-2 text-[11px] text-zinc-500">
+        <div className="px-4 pt-3 pb-2 text-[11px] text-[#6a6256]">
           <Link href={`/courses/${courseId}`} className="hover:underline">
             ← {chapterRow?.title ?? "章に戻る"}
           </Link>

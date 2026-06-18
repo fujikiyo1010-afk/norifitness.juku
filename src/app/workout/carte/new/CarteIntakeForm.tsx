@@ -281,10 +281,10 @@ export function CarteIntakeForm() {
 
   return (
     <div className="mx-auto max-w-[460px] px-4 py-6">
-      <div className="bg-white border border-[#e8ebe9] rounded-2xl overflow-hidden">
+      <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl overflow-hidden">
         {/* ヘッダー */}
-        <div className="px-4 py-3 border-b border-[#e8ebe9] flex items-center gap-2">
-          <Link href="/" className="text-zinc-900">
+        <div className="px-4 py-3 border-b border-[#e7dcc9] flex items-center gap-2">
+          <Link href="/" className="text-[#2b2620]">
             <svg
               className="w-5 h-5"
               viewBox="0 0 24 24"
@@ -297,7 +297,7 @@ export function CarteIntakeForm() {
               <path d="m15 18-6-6 6-6" />
             </svg>
           </Link>
-          <div className="flex-1 text-center text-sm font-bold text-zinc-900">
+          <div className="flex-1 text-center text-sm font-bold text-[#2b2620]">
             筋トレカルテ
           </div>
           <div className="w-5 h-5" />
@@ -306,8 +306,8 @@ export function CarteIntakeForm() {
         {mode === "form" ? (
           <>
             {/* 温かいグラデ説明ブロック */}
-            <div className="px-4 py-4 bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] border-b border-[#e8ebe9] text-center">
-              <div className="text-xs font-bold text-[#00695c] mb-2.5 tracking-wide flex items-center justify-center gap-1.5">
+            <div className="px-4 py-4 bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] border-b border-[#e7dcc9] text-center">
+              <div className="text-xs font-bold text-[#34603f] mb-2.5 tracking-wide flex items-center justify-center gap-1.5">
                 <svg
                   className="w-3.5 h-3.5"
                   viewBox="0 0 24 24"
@@ -322,13 +322,13 @@ export function CarteIntakeForm() {
                 </svg>
                 のりfitness の筋トレカルテ
               </div>
-              <div className="text-2xl font-bold text-zinc-900 mb-2 tracking-wide leading-tight">
+              <div className="text-2xl font-bold text-[#2b2620] mb-2 tracking-wide leading-tight">
                 あなたのカルテ
               </div>
               <div className="text-xs text-zinc-700 mb-3">
                 オリジナルメニューを作るための、はじめの 1 歩。
               </div>
-              <div className="text-[11px] text-zinc-500 leading-relaxed pt-2.5 border-t border-[#e8ebe9]">
+              <div className="text-[11px] text-[#6a6256] leading-relaxed pt-2.5 border-t border-[#e7dcc9]">
                 記入後、のりfitness が確認してメニューを作成します。
                 <br />
                 提出後は変更できないので、慎重にお選びください。
@@ -336,16 +336,16 @@ export function CarteIntakeForm() {
             </div>
 
             {/* 進捗バー */}
-            <div className="px-4 py-3 bg-[#f8f9fa] border-b border-[#e8ebe9]">
-              <div className="flex justify-between text-[11px] text-zinc-500 mb-1.5">
+            <div className="px-4 py-3 bg-[#f8f9fa] border-b border-[#e7dcc9]">
+              <div className="flex justify-between text-[11px] text-[#6a6256] mb-1.5">
                 <span>記入状況</span>
-                <span className="font-bold text-zinc-900 font-mono">
+                <span className="font-bold text-[#2b2620] font-mono">
                   {filledCount} / {TOTAL_QUESTIONS} 項目
                 </span>
               </div>
-              <div className="h-1.5 bg-white border border-[#e8ebe9] rounded-full overflow-hidden">
+              <div className="h-1.5 bg-[#fffdf8] border border-[#e7dcc9] rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-[#00897b] transition-all"
+                  className="h-full bg-[#4a875b] transition-all"
                   style={{ width: `${(filledCount / TOTAL_QUESTIONS) * 100}%` }}
                 />
               </div>
@@ -353,7 +353,7 @@ export function CarteIntakeForm() {
 
             {/* 下書き保存通知 */}
             {draftSavedAt && (
-              <div className="px-4 py-2.5 bg-[#f8f9fa] text-[10px] text-zinc-500 text-center border-b border-[#e8ebe9]">
+              <div className="px-4 py-2.5 bg-[#f8f9fa] text-[10px] text-[#6a6256] text-center border-b border-[#e7dcc9]">
                 下書きを保存しました ・{" "}
                 {new Date(draftSavedAt).toLocaleString("ja-JP", {
                   month: "2-digit",
@@ -365,7 +365,7 @@ export function CarteIntakeForm() {
             )}
 
             {/* セクション別 8 項目 */}
-            <div className="bg-white">
+            <div className="bg-[#fffdf8]">
               {(Object.keys(CARTE_SECTIONS) as SectionKey[])
                 .sort(
                   (a, b) => CARTE_SECTIONS[a].order - CARTE_SECTIONS[b].order
@@ -423,12 +423,12 @@ export function CarteIntakeForm() {
             )}
 
             {/* 保存バー */}
-            <div className="bg-white border-t border-[#e8ebe9] px-4 py-3 flex gap-2 sticky bottom-0">
+            <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2 sticky bottom-0">
               <button
                 type="button"
                 disabled={isPending}
                 onClick={handleSaveDraft}
-                className="px-4 py-3 bg-white text-zinc-900 border border-[#e8ebe9] rounded-2xl text-[12px] font-bold disabled:opacity-50"
+                className="px-4 py-3 bg-[#fffdf8] text-[#2b2620] border border-[#e7dcc9] rounded-2xl text-[12px] font-bold disabled:opacity-50"
               >
                 下書き保存
               </button>
@@ -436,7 +436,7 @@ export function CarteIntakeForm() {
                 type="button"
                 disabled={isPending}
                 onClick={handlePreview}
-                className="flex-1 px-4 py-3 bg-[#00897b] hover:bg-[#00695c] text-white rounded-2xl text-sm font-bold disabled:opacity-50 transition-colors"
+                className="flex-1 px-4 py-3 bg-[#4a875b] hover:bg-[#34603f] text-white rounded-2xl text-sm font-bold disabled:opacity-50 transition-colors"
               >
                 プレビューを確認する
               </button>
@@ -476,11 +476,11 @@ function PreviewView({
 }) {
   return (
     <>
-      <div className="px-4 py-4 bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] border-b border-[#e8ebe9] text-center">
-        <div className="text-xs font-bold text-[#00695c] mb-2 tracking-wide">
+      <div className="px-4 py-4 bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] border-b border-[#e7dcc9] text-center">
+        <div className="text-xs font-bold text-[#34603f] mb-2 tracking-wide">
           プレビュー (送信前の確認)
         </div>
-        <div className="text-xl font-bold text-zinc-900 mb-1 tracking-wide">
+        <div className="text-xl font-bold text-[#2b2620] mb-1 tracking-wide">
           このカルテで提出します
         </div>
         <div className="text-[11px] text-zinc-600 leading-relaxed mt-2">
@@ -490,7 +490,7 @@ function PreviewView({
         </div>
       </div>
 
-      <div className="bg-white">
+      <div className="bg-[#fffdf8]">
         {(Object.keys(CARTE_SECTIONS) as SectionKey[])
           .sort((a, b) => CARTE_SECTIONS[a].order - CARTE_SECTIONS[b].order)
           .map((secKey) => {
@@ -517,12 +517,12 @@ function PreviewView({
       )}
 
       {/* 修正 / 送信ボタン */}
-      <div className="bg-white border-t border-[#e8ebe9] px-4 py-3 flex gap-2 sticky bottom-0">
+      <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2 sticky bottom-0">
         <button
           type="button"
           disabled={isPending}
           onClick={onEdit}
-          className="px-4 py-3 bg-white text-zinc-900 border border-[#e8ebe9] rounded-2xl text-[12px] font-bold disabled:opacity-50"
+          className="px-4 py-3 bg-[#fffdf8] text-[#2b2620] border border-[#e7dcc9] rounded-2xl text-[12px] font-bold disabled:opacity-50"
         >
           修正する
         </button>
@@ -530,7 +530,7 @@ function PreviewView({
           type="button"
           disabled={isPending}
           onClick={onSubmit}
-          className="flex-1 px-4 py-3 bg-[#00897b] hover:bg-[#00695c] text-white rounded-2xl text-sm font-bold disabled:opacity-50 transition-colors"
+          className="flex-1 px-4 py-3 bg-[#4a875b] hover:bg-[#34603f] text-white rounded-2xl text-sm font-bold disabled:opacity-50 transition-colors"
         >
           {isPending ? "送信中..." : "送信する"}
         </button>
@@ -547,7 +547,7 @@ function CategoryBand({ label, count }: { label: string; count: number }) {
   return (
     <div className="bg-zinc-900 text-white px-4 py-2.5 text-[11px] font-semibold tracking-widest flex items-center gap-2">
       <span>{label}</span>
-      <span className="ml-auto text-[#00897b] font-mono">{count}</span>
+      <span className="ml-auto text-[#4a875b] font-mono">{count}</span>
     </div>
   );
 }
@@ -570,18 +570,18 @@ function ItemCard({
 
   return (
     <div
-      className={`p-4 border-b border-[#e8ebe9] ${
+      className={`p-4 border-b border-[#e7dcc9] ${
         missing ? "bg-red-50" : ""
       }`}
     >
-      <div className="text-[11px] text-zinc-500 font-bold font-mono mb-1">
+      <div className="text-[11px] text-[#6a6256] font-bold font-mono mb-1">
         Q{question.num} / 8
       </div>
-      <div className="text-[13px] font-bold text-zinc-900 leading-snug mb-2.5 flex justify-between items-start gap-2">
+      <div className="text-[13px] font-bold text-[#2b2620] leading-snug mb-2.5 flex justify-between items-start gap-2">
         <span>
           {question.label}
           {question.helper && (
-            <span className="ml-2 text-[10px] text-zinc-500 font-normal">
+            <span className="ml-2 text-[10px] text-[#6a6256] font-normal">
               {question.helper}
             </span>
           )}
@@ -617,8 +617,8 @@ function ItemCard({
               }}
               className={`rounded-md border px-3 py-2 text-xs font-bold transition-colors ${
                 selected
-                  ? "border-[#00897b] bg-[rgba(0,137,123,0.08)] text-[#00695c]"
-                  : "border-[#e8ebe9] bg-white text-zinc-700 hover:border-[#00897b]"
+                  ? "border-[#4a875b] bg-[rgba(0,137,123,0.08)] text-[#34603f]"
+                  : "border-[#e7dcc9] bg-[#fffdf8] text-zinc-700 hover:border-[#4a875b]"
               }`}
             >
               {selected && question.multi && (
@@ -669,19 +669,19 @@ function BirthdayCard({
   }
 
   const selectClass =
-    "flex-1 rounded-md border border-[#e8ebe9] bg-white text-zinc-900 px-2 py-2 text-sm font-bold focus:border-[#00897b] focus:outline-none";
+    "flex-1 rounded-md border border-[#e7dcc9] bg-[#fffdf8] text-[#2b2620] px-2 py-2 text-sm font-bold focus:border-[#4a875b] focus:outline-none";
 
   return (
     <div
-      className={`p-4 border-b border-[#e8ebe9] ${missing ? "bg-red-50" : ""}`}
+      className={`p-4 border-b border-[#e7dcc9] ${missing ? "bg-red-50" : ""}`}
     >
-      <div className="text-[11px] text-zinc-500 font-bold font-mono mb-1">
+      <div className="text-[11px] text-[#6a6256] font-bold font-mono mb-1">
         Q1 / {TOTAL_QUESTIONS}
       </div>
-      <div className="text-[13px] font-bold text-zinc-900 leading-snug mb-2.5 flex justify-between items-start gap-2">
+      <div className="text-[13px] font-bold text-[#2b2620] leading-snug mb-2.5 flex justify-between items-start gap-2">
         <span>
           生年月日
-          <span className="ml-2 text-[10px] text-zinc-500 font-normal">
+          <span className="ml-2 text-[10px] text-[#6a6256] font-normal">
             年齢層からメニュー最適化に使います
           </span>
         </span>
@@ -741,14 +741,14 @@ function BirthdayPreviewItem({ value }: { value: string | null }) {
       })
     : "(未記入)";
   return (
-    <div className="p-4 border-b border-[#e8ebe9]">
-      <div className="text-[11px] text-zinc-500 font-bold font-mono mb-1">
+    <div className="p-4 border-b border-[#e7dcc9]">
+      <div className="text-[11px] text-[#6a6256] font-bold font-mono mb-1">
         Q1 / {TOTAL_QUESTIONS}
       </div>
-      <div className="text-[13px] font-bold text-zinc-900 leading-snug mb-2.5">
+      <div className="text-[13px] font-bold text-[#2b2620] leading-snug mb-2.5">
         生年月日
       </div>
-      <div className="text-[13px] text-zinc-900 leading-relaxed bg-[#f8f9fa] rounded-md px-3 py-2">
+      <div className="text-[13px] text-[#2b2620] leading-relaxed bg-[#f8f9fa] rounded-md px-3 py-2">
         {display}
       </div>
     </div>
@@ -775,14 +775,14 @@ function PreviewItem({
   }
 
   return (
-    <div className="p-4 border-b border-[#e8ebe9]">
-      <div className="text-[11px] text-zinc-500 font-bold font-mono mb-1">
+    <div className="p-4 border-b border-[#e7dcc9]">
+      <div className="text-[11px] text-[#6a6256] font-bold font-mono mb-1">
         Q{question.num} / 8
       </div>
-      <div className="text-[13px] font-bold text-zinc-900 leading-snug mb-2.5">
+      <div className="text-[13px] font-bold text-[#2b2620] leading-snug mb-2.5">
         {question.label}
       </div>
-      <div className="text-[13px] text-zinc-900 leading-relaxed bg-[#f8f9fa] rounded-md px-3 py-2">
+      <div className="text-[13px] text-[#2b2620] leading-relaxed bg-[#f8f9fa] rounded-md px-3 py-2">
         {display}
       </div>
     </div>

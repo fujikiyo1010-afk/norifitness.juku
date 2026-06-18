@@ -21,8 +21,8 @@ export default async function PasswordChangePage() {
   if (!user) redirect("/login?next=/account/password");
 
   return (
-    <main className="flex flex-1 flex-col bg-zinc-50 min-h-screen">
-      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e8ebe9] bg-white">
+    <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
+      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9] bg-[#fffdf8]">
         <MemberHeader title="パスワード変更" fallbackHref="/account" />
 
         <div className="px-4 pt-5 pb-6 space-y-5">

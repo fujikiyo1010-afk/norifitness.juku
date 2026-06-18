@@ -131,12 +131,12 @@ export default async function StudentCoursePage({
   return (
     <>
       <MemberHeader title="コース詳細" fallbackHref="/courses" />
-      <main className="flex flex-1 flex-col p-4 sm:p-6 bg-zinc-50">
+      <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#f9f5ed]">
         <div className="mx-auto w-full max-w-[460px] space-y-4">
         {/* ヒーロー (モック準拠 ・ 緑グラデ + 大サムネ + 進捗 + 続きから CTA) */}
-        <section className="rounded-2xl overflow-hidden bg-gradient-to-br from-[#00897b] to-[#00695c] text-white p-5">
+        <section className="rounded-2xl overflow-hidden bg-gradient-to-br from-[#4a875b] to-[#34603f] text-white p-5">
           {/* 大サムネ枠 */}
-          <div className="w-full aspect-[16/9] rounded-xl bg-white/15 flex items-center justify-center mb-3">
+          <div className="w-full aspect-[16/9] rounded-xl bg-[#fffdf8]/15 flex items-center justify-center mb-3">
             <svg
               width="56"
               height="56"
@@ -161,9 +161,9 @@ export default async function StudentCoursePage({
             {coursePercent}% ({completedLessons}/{totalLessons})
           </div>
           {/* 進捗バー */}
-          <div className="h-1.5 rounded-full bg-white/25 overflow-hidden mb-3">
+          <div className="h-1.5 rounded-full bg-[#fffdf8]/25 overflow-hidden mb-3">
             <div
-              className="h-full bg-white rounded-full transition-all duration-500"
+              className="h-full bg-[#fffdf8] rounded-full transition-all duration-500"
               style={{ width: `${coursePercent}%` }}
             />
           </div>
@@ -171,13 +171,13 @@ export default async function StudentCoursePage({
           {firstUnfinished ? (
             <Link
               href={`/courses/${courseId}/chapters/${firstUnfinished.chapterId}/lessons/${firstUnfinished.lessonId}`}
-              className="block rounded-xl bg-white text-[#00695c] py-3 px-4 text-sm font-bold text-center shadow-[0_4px_0_rgba(0,77,64,0.5)] hover:bg-zinc-50 transition-colors"
+              className="block rounded-xl bg-[#fffdf8] text-[#34603f] py-3 px-4 text-sm font-bold text-center shadow-[0_4px_0_rgba(0,77,64,0.5)] hover:bg-[#f9f5ed] transition-colors"
             >
               ▶ 続きから ・ L{firstUnfinished.lessonSortOrder}「
               {firstUnfinished.title}」
             </Link>
           ) : totalLessons > 0 ? (
-            <div className="rounded-xl bg-white/90 text-[#004d40] py-3 px-4 text-sm font-bold text-center">
+            <div className="rounded-xl bg-[#fffdf8]/90 text-[#004d40] py-3 px-4 text-sm font-bold text-center">
               ✓ 全レッスン完了
             </div>
           ) : null}

@@ -308,31 +308,31 @@ export function GoalSheetEditor({
   const reviewButtonLabel = "送信して添削を依頼";
 
   return (
-    <div className="bg-white border border-[#e8ebe9] rounded-2xl overflow-hidden">
+    <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl overflow-hidden">
       {/* ヘッダー */}
-      <div className="px-4 py-3 border-b border-[#e8ebe9] flex items-center gap-2">
-        <Link href="/goal-sheet" className="text-zinc-900">
+      <div className="px-4 py-3 border-b border-[#e7dcc9] flex items-center gap-2">
+        <Link href="/goal-sheet" className="text-[#2b2620]">
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="m15 18-6-6 6-6" />
           </svg>
         </Link>
-        <div className="flex-1 text-center text-sm font-bold text-zinc-900">
+        <div className="flex-1 text-center text-sm font-bold text-[#2b2620]">
           目標管理シート
         </div>
         <div className="w-5 h-5" />
       </div>
 
       {/* 進捗バー */}
-      <div className="px-4 py-3 border-b border-[#e8ebe9]">
-        <div className="flex justify-between text-[11px] text-zinc-500 mb-1.5">
+      <div className="px-4 py-3 border-b border-[#e7dcc9]">
+        <div className="flex justify-between text-[11px] text-[#6a6256] mb-1.5">
           <span>記入状況</span>
-          <span className="font-bold text-zinc-900 font-mono">
+          <span className="font-bold text-[#2b2620] font-mono">
             {filledCount} / 5 セクション
           </span>
         </div>
         <div className="h-1 bg-zinc-100 rounded-full overflow-hidden">
           <div
-            className="h-full bg-[#00897b] rounded-full transition-all"
+            className="h-full bg-[#4a875b] rounded-full transition-all"
             style={{ width: `${(filledCount / 5) * 100}%` }}
           />
         </div>
@@ -510,19 +510,19 @@ export function GoalSheetEditor({
 
         {/* ⑤ セルフイメージ改善 */}
         <SectionWrapper sectionKey="self_image" filled={!!content.filled_sections?.includes("self_image")}>
-          <div className="text-[11px] text-zinc-500 mb-2 leading-relaxed">
+          <div className="text-[11px] text-[#6a6256] mb-2 leading-relaxed">
             8 項目それぞれを「今 (改善前)」 と「目標 (改善後)」 で 0-10 点で評価。
           </div>
-          <div className="text-[10px] text-zinc-400 mb-3 leading-relaxed">
+          <div className="text-[10px] text-[#a59b8c] mb-3 leading-relaxed">
             スコア: 0 = まったく / 5 = ときどき / 10 = いつもできている。
             <br />
             改善前 = 今のリアルな実感で (高くつけすぎ注意)、 改善後 = 想像で OK (後で修正できます)。
           </div>
           <div className="grid grid-cols-2 gap-2 mb-3">
-            <div className="text-[10px] font-bold text-center py-1 px-2 rounded bg-white text-zinc-500 border border-[#e8ebe9]">
+            <div className="text-[10px] font-bold text-center py-1 px-2 rounded bg-[#fffdf8] text-[#6a6256] border border-[#e7dcc9]">
               改善前 (今)
             </div>
-            <div className="text-[10px] font-bold text-center py-1 px-2 rounded bg-[#f8f9fa] text-[#00695c] border border-[#00897b]">
+            <div className="text-[10px] font-bold text-center py-1 px-2 rounded bg-[#f8f9fa] text-[#34603f] border border-[#4a875b]">
               改善後 (目標)
             </div>
           </div>
@@ -530,11 +530,11 @@ export function GoalSheetEditor({
             const item = content.self_image?.find((i) => i.key === meta.key);
             const hint = SELF_IMAGE_HINTS[meta.key];
             return (
-              <div key={meta.key} className="py-2.5 border-b border-dashed border-[#e8ebe9] last:border-b-0">
+              <div key={meta.key} className="py-2.5 border-b border-dashed border-[#e7dcc9] last:border-b-0">
                 <div className="text-[11px] text-zinc-700 leading-snug mb-2">
                   {meta.label}
                   {hint && (
-                    <span className="block text-[10px] text-zinc-400 mt-0.5">
+                    <span className="block text-[10px] text-[#a59b8c] mt-0.5">
                       ・ {hint}
                     </span>
                   )}
@@ -563,9 +563,9 @@ export function GoalSheetEditor({
           <div className="bg-[rgba(255,235,59,0.12)] border border-[rgba(255,235,59,0.55)] rounded-2xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <div className="text-sm font-bold text-[#b8860b]">{audits.summary.who}</div>
-              <div className="ml-auto text-[10px] text-zinc-500 font-mono">{audits.summary.date}</div>
+              <div className="ml-auto text-[10px] text-[#6a6256] font-mono">{audits.summary.date}</div>
             </div>
-            <div className="text-[13px] text-zinc-900 leading-relaxed whitespace-pre-wrap">
+            <div className="text-[13px] text-[#2b2620] leading-relaxed whitespace-pre-wrap">
               {audits.summary.text}
             </div>
           </div>
@@ -576,9 +576,9 @@ export function GoalSheetEditor({
           <Link
             href="#"
             onClick={(e) => { e.preventDefault(); alert("編集履歴は Phase 3 後半で実装予定です"); }}
-            className="bg-white border border-[#e8ebe9] rounded-2xl p-3.5 text-center text-[11px] font-semibold text-zinc-900 flex flex-col items-center gap-1.5 hover:border-[#00897b] transition-colors"
+            className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl p-3.5 text-center text-[11px] font-semibold text-[#2b2620] flex flex-col items-center gap-1.5 hover:border-[#4a875b] transition-colors"
           >
-            <svg className="w-5 h-5 text-zinc-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg className="w-5 h-5 text-[#2b2620]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" />
               <path d="M12 8v4l3 3" />
             </svg>
@@ -587,9 +587,9 @@ export function GoalSheetEditor({
           <Link
             href="#"
             onClick={(e) => { e.preventDefault(); alert("変化を見るページは Phase 3 後半で実装予定です"); }}
-            className="bg-white border border-[#e8ebe9] rounded-2xl p-3.5 text-center text-[11px] font-semibold text-zinc-900 flex flex-col items-center gap-1.5 hover:border-[#00897b] transition-colors"
+            className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl p-3.5 text-center text-[11px] font-semibold text-[#2b2620] flex flex-col items-center gap-1.5 hover:border-[#4a875b] transition-colors"
           >
-            <svg className="w-5 h-5 text-zinc-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg className="w-5 h-5 text-[#2b2620]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
             </svg>
             変化を見る
@@ -617,12 +617,12 @@ export function GoalSheetEditor({
       )}
 
       {/* 保存バー */}
-      <div className="bg-white border-t border-[#e8ebe9] px-4 py-3 flex gap-2 sticky bottom-0">
+      <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2 sticky bottom-0">
         <button
           type="button"
           disabled={isPending}
           onClick={() => handleSave(true)}
-          className="px-3 py-3 bg-white text-zinc-900 border border-[#e8ebe9] rounded-2xl text-[11px] font-bold disabled:opacity-50"
+          className="px-3 py-3 bg-[#fffdf8] text-[#2b2620] border border-[#e7dcc9] rounded-2xl text-[11px] font-bold disabled:opacity-50"
         >
           下書き保存
         </button>
@@ -630,7 +630,7 @@ export function GoalSheetEditor({
           type="button"
           disabled={isPending}
           onClick={() => handleSave(false)}
-          className="flex-1 px-3 py-3 bg-[#00897b] hover:bg-[#00695c] text-white rounded-2xl text-sm font-bold disabled:opacity-50 transition-colors"
+          className="flex-1 px-3 py-3 bg-[#4a875b] hover:bg-[#34603f] text-white rounded-2xl text-sm font-bold disabled:opacity-50 transition-colors"
         >
           {isPending ? "送信中..." : reviewButtonLabel}
         </button>
@@ -654,17 +654,17 @@ function SectionWrapper({
 }) {
   const meta = SECTION_META[sectionKey];
   return (
-    <div className="bg-white border border-[#e8ebe9] rounded-2xl overflow-hidden">
-      <div className="px-4 py-3 border-b border-[#e8ebe9] flex items-center gap-2.5">
+    <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-[#e7dcc9] flex items-center gap-2.5">
         <div className="w-6 h-6 rounded-full bg-zinc-900 text-white text-[11px] font-bold flex items-center justify-center font-mono">
           {meta.num}
         </div>
-        <div className="flex-1 text-[13px] font-bold text-zinc-900">{meta.title}</div>
+        <div className="flex-1 text-[13px] font-bold text-[#2b2620]">{meta.title}</div>
         <div
           className={`text-[10px] font-bold px-2 py-0.5 rounded ${
             filled
-              ? "border border-[#00897b] text-[#00695c] bg-white"
-              : "border border-zinc-300 text-zinc-500 bg-white"
+              ? "border border-[#4a875b] text-[#34603f] bg-[#fffdf8]"
+              : "border border-zinc-300 text-[#6a6256] bg-[#fffdf8]"
           }`}
         >
           {filled ? "✓ 記入済" : "未記入"}
@@ -690,14 +690,14 @@ function Field({
 }) {
   return (
     <div>
-      <div className="flex items-center justify-between text-[11px] font-semibold text-zinc-500 mb-1.5 gap-1.5">
+      <div className="flex items-center justify-between text-[11px] font-semibold text-[#6a6256] mb-1.5 gap-1.5">
         <span>
           {label}
           {required && <span className="text-red-500 ml-1">★</span>}
         </span>
         <div className="flex items-center gap-1.5">
           {autoTag && (
-            <span className="text-[9px] text-zinc-500 bg-[#f8f9fa] border border-[#e8ebe9] px-1.5 py-0.5 rounded font-medium">
+            <span className="text-[9px] text-[#6a6256] bg-[#f8f9fa] border border-[#e7dcc9] px-1.5 py-0.5 rounded font-medium">
               {autoTag}
             </span>
           )}
@@ -785,11 +785,11 @@ function NumberInput({
             onChange(undefined);
           }
         }}
-        className={`flex-1 px-3 py-2.5 text-[13px] border border-[#e8ebe9] rounded-lg bg-white text-zinc-900 ${
+        className={`flex-1 px-3 py-2.5 text-[13px] border border-[#e7dcc9] rounded-lg bg-[#fffdf8] text-[#2b2620] ${
           readOnly ? "bg-[#f8f9fa] font-bold" : ""
         }`}
       />
-      {unit && <span className="text-[11px] text-zinc-500">{unit}</span>}
+      {unit && <span className="text-[11px] text-[#6a6256]">{unit}</span>}
       {/* step / min / max はキーボードショートカット用に保持 (text input なので step 機能はないが、設定値として将来用) */}
       <input type="hidden" data-step={step} data-min={min} data-max={max} />
     </div>
@@ -814,7 +814,7 @@ function TextInput({
       readOnly={readOnly}
       placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
-      className={`w-full px-3 py-2.5 text-[13px] border border-[#e8ebe9] rounded-lg bg-white text-zinc-900 ${
+      className={`w-full px-3 py-2.5 text-[13px] border border-[#e7dcc9] rounded-lg bg-[#fffdf8] text-[#2b2620] ${
         readOnly ? "bg-[#f8f9fa] font-bold" : ""
       }`}
     />
@@ -836,7 +836,7 @@ function TextArea({
       placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
       rows={3}
-      className="w-full px-3 py-2.5 text-[13px] border border-[#e8ebe9] rounded-lg bg-white text-zinc-900 resize-none"
+      className="w-full px-3 py-2.5 text-[13px] border border-[#e7dcc9] rounded-lg bg-[#fffdf8] text-[#2b2620] resize-none"
     />
   );
 }
@@ -859,11 +859,11 @@ function SliderWithValue({
         max={10}
         value={isUnset ? 5 : value}
         onChange={(e) => onChange(parseInt(e.target.value, 10))}
-        className={`w-full accent-[#00897b] ${isUnset ? "opacity-30" : ""}`}
+        className={`w-full accent-[#4a875b] ${isUnset ? "opacity-30" : ""}`}
       />
       <div
         className={`text-center text-[13px] font-mono ${
-          isUnset ? "text-zinc-400 font-normal" : "text-[#00695c] font-bold"
+          isUnset ? "text-[#a59b8c] font-normal" : "text-[#34603f] font-bold"
         }`}
       >
         {isUnset ? "— 未記入" : value}
@@ -895,14 +895,14 @@ function NutritionVisualization({ nutrition }: { nutrition?: Nutrition }) {
   // ツール未反映 (値が空) の時は空状態表示
   if (!p || !f || !c) {
     return (
-      <div className="bg-[#f8f9fa] border border-dashed border-[#e8ebe9] rounded-lg px-4 py-6 text-center">
-        <svg className="w-8 h-8 mx-auto mb-2 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <div className="bg-[#f8f9fa] border border-dashed border-[#e7dcc9] rounded-lg px-4 py-6 text-center">
+        <svg className="w-8 h-8 mx-auto mb-2 text-[#a59b8c]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" />
           <circle cx="12" cy="12" r="6" />
           <circle cx="12" cy="12" r="2" />
         </svg>
         <div className="text-[12px] text-zinc-600 mb-1 font-bold">栄養設計はこれから</div>
-        <div className="text-[11px] text-zinc-500 leading-relaxed">
+        <div className="text-[11px] text-[#6a6256] leading-relaxed">
           下の「PFC・カーボサイクル設定」ツールで計算 →<br />
           結果がここに反映されます
         </div>
@@ -918,7 +918,7 @@ function NutritionVisualization({ nutrition }: { nutrition?: Nutrition }) {
   return (
     <div className="space-y-3">
       {/* 目標カード (深緑→緑グラデ) */}
-      <div className="bg-gradient-to-br from-[#004d40] to-[#00897b] text-white rounded-2xl px-4 py-4">
+      <div className="bg-gradient-to-br from-[#004d40] to-[#4a875b] text-white rounded-2xl px-4 py-4">
         <div className="text-[11px] opacity-90 mb-2.5 font-semibold tracking-wider flex items-center gap-1.5">
           <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="12" cy="12" r="10" />
@@ -928,25 +928,25 @@ function NutritionVisualization({ nutrition }: { nutrition?: Nutrition }) {
           私が目指す 1 日の数字
         </div>
         <div className="grid grid-cols-2 gap-2.5">
-          <div className="bg-white/15 px-2.5 py-2 rounded-md">
+          <div className="bg-[#fffdf8]/15 px-2.5 py-2 rounded-md">
             <div className="text-[9px] opacity-85 mb-0.5">カロリー</div>
             <div className="text-base font-bold font-mono">
               {displayCal.toLocaleString()} <span className="text-[11px] font-normal opacity-90">kcal</span>
             </div>
           </div>
-          <div className="bg-white/15 px-2.5 py-2 rounded-md">
+          <div className="bg-[#fffdf8]/15 px-2.5 py-2 rounded-md">
             <div className="text-[9px] opacity-85 mb-0.5">P (たんぱく質)</div>
             <div className="text-base font-bold font-mono">
               {p} <span className="text-[11px] font-normal opacity-90">g</span>
             </div>
           </div>
-          <div className="bg-white/15 px-2.5 py-2 rounded-md">
+          <div className="bg-[#fffdf8]/15 px-2.5 py-2 rounded-md">
             <div className="text-[9px] opacity-85 mb-0.5">F (脂質)</div>
             <div className="text-base font-bold font-mono">
               {f} <span className="text-[11px] font-normal opacity-90">g</span>
             </div>
           </div>
-          <div className="bg-white/15 px-2.5 py-2 rounded-md">
+          <div className="bg-[#fffdf8]/15 px-2.5 py-2 rounded-md">
             <div className="text-[9px] opacity-85 mb-0.5">C (糖質)</div>
             <div className="text-base font-bold font-mono">
               {c} <span className="text-[11px] font-normal opacity-90">g</span>
@@ -963,21 +963,21 @@ function NutritionVisualization({ nutrition }: { nutrition?: Nutrition }) {
       </div>
 
       {/* 合計カロリー */}
-      <div className="bg-[#f8f9fa] border border-[#e8ebe9] rounded-lg px-3.5 py-3 flex justify-between items-center">
-        <div className="text-[11px] text-zinc-500 font-semibold">合計カロリー</div>
-        <div className="text-base font-bold text-zinc-900 font-mono">
+      <div className="bg-[#f8f9fa] border border-[#e7dcc9] rounded-lg px-3.5 py-3 flex justify-between items-center">
+        <div className="text-[11px] text-[#6a6256] font-semibold">合計カロリー</div>
+        <div className="text-base font-bold text-[#2b2620] font-mono">
           {totalKcal.toLocaleString()} kcal
         </div>
       </div>
 
       {/* PFC 公式 */}
-      <div className="text-[10px] text-zinc-500 text-center font-mono">
+      <div className="text-[10px] text-[#6a6256] text-center font-mono">
         P = 4 kcal/g  /  F = 9 kcal/g  /  C = 4 kcal/g
       </div>
 
       {/* 結果の読み方 */}
-      <div className="bg-[#f8f9fa] border border-dashed border-[#e8ebe9] rounded-lg px-3.5 py-3">
-        <div className="text-zinc-900 font-bold mb-2 text-xs flex items-center gap-1.5">
+      <div className="bg-[#f8f9fa] border border-dashed border-[#e7dcc9] rounded-lg px-3.5 py-3">
+        <div className="text-[#2b2620] font-bold mb-2 text-xs flex items-center gap-1.5">
           <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 18h6" />
             <path d="M10 22h4" />
@@ -987,7 +987,7 @@ function NutritionVisualization({ nutrition }: { nutrition?: Nutrition }) {
         </div>
         <div className="text-[13px] text-zinc-700 text-center">
           あなたは 1 日に{" "}
-          <b className="text-[#00695c] text-2xl font-bold font-mono px-1 align-middle">
+          <b className="text-[#34603f] text-2xl font-bold font-mono px-1 align-middle">
             C = {c}g
           </b>{" "}
           の糖質が必要です。
@@ -1009,15 +1009,15 @@ function PfcCard({
   pct: number;
 }) {
   return (
-    <div className="bg-white border border-[#e8ebe9] rounded-lg px-3.5 py-3 grid grid-cols-[12px_1fr_auto] gap-2.5 items-center">
-      <div className="w-2.5 h-2.5 rounded-full bg-[#00897b]" />
+    <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-lg px-3.5 py-3 grid grid-cols-[12px_1fr_auto] gap-2.5 items-center">
+      <div className="w-2.5 h-2.5 rounded-full bg-[#4a875b]" />
       <div>
-        <div className="text-[11px] text-zinc-500">{label}</div>
-        <div className="text-base font-bold text-zinc-900 font-mono">{g} g</div>
+        <div className="text-[11px] text-[#6a6256]">{label}</div>
+        <div className="text-base font-bold text-[#2b2620] font-mono">{g} g</div>
       </div>
-      <div className="text-right text-[11px] text-zinc-500 leading-tight">
-        <div className="font-semibold text-zinc-900">{kcal.toLocaleString()} kcal</div>
-        <div className="text-[#00695c] font-bold font-mono">{pct} %</div>
+      <div className="text-right text-[11px] text-[#6a6256] leading-tight">
+        <div className="font-semibold text-[#2b2620]">{kcal.toLocaleString()} kcal</div>
+        <div className="text-[#34603f] font-bold font-mono">{pct} %</div>
       </div>
     </div>
   );
@@ -1035,11 +1035,11 @@ function ToolButton({
   return (
     <Link
       href={href}
-      className="w-full bg-[#00897b] hover:bg-[#00695c] text-white px-3.5 py-3 rounded-md text-xs font-bold mt-2.5 flex justify-between items-center tracking-wide transition-colors"
+      className="w-full bg-[#4a875b] hover:bg-[#34603f] text-white px-3.5 py-3 rounded-md text-xs font-bold mt-2.5 flex justify-between items-center tracking-wide transition-colors"
     >
       <span>{label}</span>
       {applied && (
-        <span className="text-[9px] bg-white/25 px-1.5 py-0.5 rounded font-semibold">
+        <span className="text-[9px] bg-[#fffdf8]/25 px-1.5 py-0.5 rounded font-semibold">
           反映済
         </span>
       )}
@@ -1052,9 +1052,9 @@ function SectionAudit({ audit }: { audit: AuditComment }) {
     <div className="bg-[rgba(255,235,59,0.12)] border border-[rgba(255,235,59,0.55)] rounded-lg p-3 mt-3.5 text-xs">
       <div className="flex items-center gap-2 mb-1.5">
         <div className="text-[11px] font-bold text-[#b8860b]">のりfitness の添削</div>
-        <div className="ml-auto text-[10px] text-zinc-500 font-mono">{audit.date}</div>
+        <div className="ml-auto text-[10px] text-[#6a6256] font-mono">{audit.date}</div>
       </div>
-      <div className="text-zinc-900 leading-relaxed">{audit.text}</div>
+      <div className="text-[#2b2620] leading-relaxed">{audit.text}</div>
     </div>
   );
 }

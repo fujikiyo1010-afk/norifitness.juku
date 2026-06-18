@@ -3,6 +3,19 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* のりfitness 受講生 UI カラーパレット (2026-06-18 確定 ・ クリーム + フォレスト緑) */
+  --nf-bg-outer: #e8dec9;   /* body 外側余白 (PC/iPad で見える濃ベージュ) */
+  --nf-bg-app:   #f9f5ed;   /* コンテンツ背景 = スマホは画面全部これ (クリーム) */
+  --nf-bg-card:  #fffdf8;   /* カード背景 (オフホワイト) */
+  --nf-ink:      #2b2620;   /* 本文 (黒茶) */
+  --nf-ink2:     #6a6256;   /* 補助 */
+  --nf-ink3:     #a59b8c;   /* 薄 */
+  --nf-line:     #e7dcc9;   /* 線 (ベージュ) */
+  --nf-grn:      #4a875b;   /* メイン緑 (フォレスト) */
+  --nf-grn-d:    #34603f;   /* 濃緑 */
+  --nf-coral:    #d9743f;   /* アクセント コーラル */
+  --nf-coral-soft: #f4e6da; /* アクセント 薄 */
 }
 
 @theme inline {
@@ -12,16 +25,11 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* ダークモード対応は 線① では行わない (= 受講生 UI はクリーム固定) */
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--nf-bg-outer);   /* PC/iPad は外側ベージュ */
+  color: var(--nf-ink);
   font-family: var(--font-noto-sans-jp), "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", system-ui, sans-serif;
 }
 

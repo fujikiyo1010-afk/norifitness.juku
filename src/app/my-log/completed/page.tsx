@@ -99,27 +99,27 @@ export default async function CompletedLessonsPage() {
   return (
     <>
       <MemberHeader title="完了履歴" fallbackHref="/my-log" />
-      <main className="min-h-screen bg-zinc-50">
+      <main className="min-h-screen bg-[#f9f5ed]">
         <div className="mx-auto max-w-[460px] px-4 py-5">
           {/* サマリ */}
           <div className="mb-5 px-1">
-            <p className="text-[12px] text-zinc-500">
+            <p className="text-[12px] text-[#6a6256]">
               これまでに視聴完了したレッスン
             </p>
-            <p className="text-[28px] font-bold text-[#00695c] font-mono leading-none mt-1">
+            <p className="text-[28px] font-bold text-[#34603f] font-mono leading-none mt-1">
               {rows.length}
-              <span className="text-[12px] text-zinc-500 ml-1">レッスン</span>
+              <span className="text-[12px] text-[#6a6256] ml-1">レッスン</span>
             </p>
             {orphanCount > 0 ? (
-              <p className="text-[10px] text-zinc-400 mt-1">
+              <p className="text-[10px] text-[#a59b8c] mt-1">
                 ※ {orphanCount} 件は元レッスンが非公開のため詳細を表示できません
               </p>
             ) : null}
           </div>
 
           {entries.length === 0 ? (
-            <div className="bg-white border border-dashed border-[#e8ebe9] rounded-2xl p-8 text-center">
-              <p className="text-[13px] text-zinc-500 leading-relaxed">
+            <div className="bg-[#fffdf8] border border-dashed border-[#e7dcc9] rounded-2xl p-8 text-center">
+              <p className="text-[13px] text-[#6a6256] leading-relaxed">
                 {rows.length === 0
                   ? "まだ完了したレッスンはありません。"
                   : "表示できる完了レッスンがありません。"}
@@ -128,7 +128,7 @@ export default async function CompletedLessonsPage() {
               </p>
               <Link
                 href="/courses"
-                className="inline-block mt-4 bg-[#00897b] text-white rounded-xl px-5 py-2.5 text-[12px] font-bold hover:bg-[#00695c] transition-colors"
+                className="inline-block mt-4 bg-[#4a875b] text-white rounded-xl px-5 py-2.5 text-[12px] font-bold hover:bg-[#34603f] transition-colors"
               >
                 コース一覧へ →
               </Link>
@@ -143,20 +143,20 @@ export default async function CompletedLessonsPage() {
                         ? `/courses/${e.courseId}/chapters/${e.chapterId}/lessons/${e.lessonId}`
                         : "#"
                     }
-                    className="block bg-white border border-[#e8ebe9] rounded-2xl px-4 py-3.5 hover:border-[#00897b] transition-colors"
+                    className="block bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl px-4 py-3.5 hover:border-[#4a875b] transition-colors"
                   >
                     <div className="flex items-start gap-3">
-                      <span className="w-7 h-7 rounded-full bg-[#00897b] text-white text-[12px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="w-7 h-7 rounded-full bg-[#4a875b] text-white text-[12px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                         ✓
                       </span>
                       <div className="flex-1 min-w-0">
-                        <div className="text-[10px] text-zinc-500 truncate mb-0.5">
+                        <div className="text-[10px] text-[#6a6256] truncate mb-0.5">
                           {e.courseTitle} ・ {e.chapterTitle}
                         </div>
-                        <div className="text-[13px] font-bold text-zinc-900 leading-snug">
+                        <div className="text-[13px] font-bold text-[#2b2620] leading-snug">
                           {e.lessonTitle}
                         </div>
-                        <div className="text-[10px] text-zinc-400 font-mono mt-1">
+                        <div className="text-[10px] text-[#a59b8c] font-mono mt-1">
                           {new Date(e.completedDate).toLocaleDateString("ja-JP", {
                             year: "numeric",
                             month: "2-digit",
@@ -164,7 +164,7 @@ export default async function CompletedLessonsPage() {
                           })}
                         </div>
                       </div>
-                      <span className="text-zinc-400 text-sm flex-shrink-0">
+                      <span className="text-[#a59b8c] text-sm flex-shrink-0">
                         →
                       </span>
                     </div>

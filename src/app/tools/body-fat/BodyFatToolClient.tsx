@@ -155,16 +155,16 @@ export function BodyFatToolClient({
   // input の className (前回値で薄色、触ったら通常色)
   const inputClass = (key: string) =>
     `flex-1 border-none outline-none py-2.5 text-base bg-transparent font-mono ${
-      touched[key] || !prevInputs ? "text-zinc-900" : "text-zinc-400"
+      touched[key] || !prevInputs ? "text-[#2b2620]" : "text-[#a59b8c]"
     }`;
 
   return (
     <main className="min-h-screen bg-[#fafbfa] flex flex-col">
       <div className="flex-1 max-w-[460px] mx-auto w-full pb-10">
         {/* ヒーロー帯 */}
-        <section className="bg-gradient-to-br from-[#e8eaf6] to-[#fffbe6] border-b border-[#e8ebe9] px-6 py-5">
+        <section className="bg-gradient-to-br from-[#e8eaf6] to-[#fffbe6] border-b border-[#e7dcc9] px-6 py-5">
           <h2 className="text-xl font-bold text-[#1a237e] mb-1">体脂肪率計算</h2>
-          <p className="text-[11px] text-zinc-500 leading-relaxed">
+          <p className="text-[11px] text-[#6a6256] leading-relaxed">
             アメリカ海軍式 ・ ウエストと首回りから計算します
           </p>
           {previous && (
@@ -175,8 +175,8 @@ export function BodyFatToolClient({
         </section>
 
         {/* 入力カード */}
-        <section className="bg-white border border-[#e8ebe9] rounded-xl mx-4 my-4 px-5 py-4">
-          <h3 className="text-xs font-bold text-zinc-600 tracking-wide mb-3.5 pb-2.5 border-b border-[#e8ebe9]">
+        <section className="bg-[#fffdf8] border border-[#e7dcc9] rounded-xl mx-4 my-4 px-5 py-4">
+          <h3 className="text-xs font-bold text-zinc-600 tracking-wide mb-3.5 pb-2.5 border-b border-[#e7dcc9]">
             あなたの情報
           </h3>
 
@@ -197,7 +197,7 @@ export function BodyFatToolClient({
                   className={`py-3 px-1 rounded text-[13px] font-bold border transition-colors ${
                     gender === g
                       ? "bg-[#3949ab] border-[#3949ab] text-white"
-                      : "bg-white border-[#e8ebe9] text-zinc-600 hover:border-[#3949ab]"
+                      : "bg-[#fffdf8] border-[#e7dcc9] text-zinc-600 hover:border-[#3949ab]"
                   }`}
                 >
                   {g === "male" ? "男性" : g === "female" ? "女性" : "その他"}
@@ -225,7 +225,7 @@ export function BodyFatToolClient({
                     className={`py-2.5 rounded text-xs font-bold border transition-colors ${
                       formula === f
                         ? "bg-[#3949ab] border-[#3949ab] text-white"
-                        : "bg-white border-[#e8ebe9] text-zinc-600 hover:border-[#3949ab]"
+                        : "bg-[#fffdf8] border-[#e7dcc9] text-zinc-600 hover:border-[#3949ab]"
                     }`}
                   >
                     {f === "male" ? "男性式で計算" : "女性式で計算"}
@@ -298,7 +298,7 @@ export function BodyFatToolClient({
             label={
               <>
                 体重{" "}
-                <span className="text-zinc-500 text-[10px]">
+                <span className="text-[#6a6256] text-[10px]">
                   (任意・体脂肪量/除脂肪量も出ます)
                 </span>
               </>
@@ -338,7 +338,7 @@ export function BodyFatToolClient({
         {/* 結果カード */}
         {result && (
           <section className="bg-gradient-to-br from-[#e8eaf6] to-[#fffbe6] border border-[rgba(255,235,59,0.4)] rounded-xl mx-4 mb-3 px-5 py-4">
-            <h3 className="text-xs font-bold text-[#283593] tracking-wide mb-3 pb-2.5 border-b border-[#e8ebe9]">
+            <h3 className="text-xs font-bold text-[#283593] tracking-wide mb-3 pb-2.5 border-b border-[#e7dcc9]">
               ✓ 計算結果
             </h3>
             <div className="text-center py-2">
@@ -350,18 +350,18 @@ export function BodyFatToolClient({
             </div>
             {result.body_fat_kg !== undefined && result.lean_mass_kg !== undefined && (
               <div className="grid grid-cols-2 gap-2 mt-3.5">
-                <div className="bg-white/60 rounded-lg px-3 py-2.5 text-center">
-                  <div className="text-[10px] text-zinc-500 mb-0.5">体脂肪量</div>
-                  <div className="font-mono font-bold text-[17px] text-zinc-900">
+                <div className="bg-[#fffdf8]/60 rounded-lg px-3 py-2.5 text-center">
+                  <div className="text-[10px] text-[#6a6256] mb-0.5">体脂肪量</div>
+                  <div className="font-mono font-bold text-[17px] text-[#2b2620]">
                     {result.body_fat_kg.toFixed(1)}
-                    <span className="text-[11px] text-zinc-500 ml-0.5">kg</span>
+                    <span className="text-[11px] text-[#6a6256] ml-0.5">kg</span>
                   </div>
                 </div>
-                <div className="bg-white/60 rounded-lg px-3 py-2.5 text-center">
-                  <div className="text-[10px] text-zinc-500 mb-0.5">除脂肪量</div>
-                  <div className="font-mono font-bold text-[17px] text-zinc-900">
+                <div className="bg-[#fffdf8]/60 rounded-lg px-3 py-2.5 text-center">
+                  <div className="text-[10px] text-[#6a6256] mb-0.5">除脂肪量</div>
+                  <div className="font-mono font-bold text-[17px] text-[#2b2620]">
                     {result.lean_mass_kg.toFixed(1)}
-                    <span className="text-[11px] text-zinc-500 ml-0.5">kg</span>
+                    <span className="text-[11px] text-[#6a6256] ml-0.5">kg</span>
                   </div>
                 </div>
               </div>
@@ -391,7 +391,7 @@ export function BodyFatToolClient({
             <button
               onClick={handleSave}
               disabled={saving}
-              className="w-full py-3.5 bg-white border border-[#3949ab] text-[#3949ab] rounded text-sm font-bold hover:bg-[#3949ab]/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full py-3.5 bg-[#fffdf8] border border-[#3949ab] text-[#3949ab] rounded text-sm font-bold hover:bg-[#3949ab]/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {saving
                 ? "保存中..."
@@ -441,7 +441,7 @@ function InputRow({
         className={`flex items-center gap-2.5 border rounded-lg px-3 transition-colors ${
           hasError
             ? "border-[#d32f2f] bg-[#fef5f5] focus-within:border-[#d32f2f]"
-            : "border-[#e8ebe9] bg-white focus-within:border-[#3949ab]"
+            : "border-[#e7dcc9] bg-[#fffdf8] focus-within:border-[#3949ab]"
         }`}
       >
         <input
@@ -454,7 +454,7 @@ function InputRow({
         />
         <span
           className={`text-xs flex-shrink-0 ${
-            hasError ? "text-[#d32f2f]" : "text-zinc-500"
+            hasError ? "text-[#d32f2f]" : "text-[#6a6256]"
           }`}
         >
           {unit}

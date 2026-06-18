@@ -25,7 +25,7 @@ export function LogoutButton() {
       type="button"
       onClick={handleClick}
       disabled={pending}
-      className="w-full bg-white border border-[#e8ebe9] rounded-2xl px-4 py-3 text-[13px] font-bold text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-60"
+      className="w-full bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl px-4 py-3 text-[13px] font-bold text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-60"
     >
       {pending ? "ログアウト中..." : "ログアウト"}
     </button>

@@ -46,7 +46,7 @@ export function MemberBottomNav() {
           fixed のタブと被らない。 各ページへの pb-24 追加が不要。 */}
       <div aria-hidden className="h-24 flex-shrink-0" />
 
-      <nav className="fixed bottom-0 inset-x-0 z-40 bg-white border-t border-[#e8ebe9] safe-bottom">
+      <nav className="fixed bottom-0 inset-x-0 z-40 bg-[#fffdf8] border-t border-[#e7dcc9] safe-bottom">
         <div className="mx-auto max-w-md flex">
           {TABS.map((tab) => {
             const isActive = tab.exact
@@ -58,13 +58,13 @@ export function MemberBottomNav() {
                 href={tab.href}
                 className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 px-1 text-[10px] font-bold transition-colors ${
                   isActive
-                    ? "text-[#00695c]"
-                    : "text-zinc-500 hover:text-zinc-900"
+                    ? "text-[#34603f]"
+                    : "text-[#6a6256] hover:text-[#2b2620]"
                 }`}
               >
                 <span
                   className={`w-6 h-6 flex items-center justify-center ${
-                    isActive ? "text-[#00897b]" : ""
+                    isActive ? "text-[#4a875b]" : ""
                   }`}
                 >
                   {tab.icon}

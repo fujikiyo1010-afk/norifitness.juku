@@ -106,22 +106,22 @@ export function CourseAccordion({
         return (
           <div
             key={ch.id}
-            className="rounded-lg border border-zinc-200 bg-white overflow-hidden shadow-sm"
+            className="rounded-lg border border-zinc-200 bg-[#fffdf8] overflow-hidden shadow-sm"
           >
             {/* 章ヘッダー (タップで開閉) */}
             <button
               type="button"
               onClick={() => toggleChapter(ch.id)}
-              className="w-full text-left px-4 py-3.5 grid grid-cols-[auto_1fr_auto] gap-2.5 items-center hover:bg-zinc-50 transition-colors"
+              className="w-full text-left px-4 py-3.5 grid grid-cols-[auto_1fr_auto] gap-2.5 items-center hover:bg-[#f9f5ed] transition-colors"
             >
               {/* 章番号バッジ (完了=ティール緑塗り / 進行中=薄緑 / 未着手=淡) */}
               <span
                 className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 transition-colors ${
                   isFullyDone
-                    ? "bg-[#00897b] text-white"
+                    ? "bg-[#4a875b] text-white"
                     : isInProgress
                       ? "bg-[#E0F2F1] text-[#004d40]"
-                      : "bg-zinc-100 text-zinc-400"
+                      : "bg-zinc-100 text-[#a59b8c]"
                 }`}
               >
                 {ch.sort_order}
@@ -129,7 +129,7 @@ export function CourseAccordion({
               <div className="min-w-0">
                 <h3
                   className={`text-sm font-bold leading-snug ${
-                    isNotStarted ? "text-zinc-500" : "text-zinc-900"
+                    isNotStarted ? "text-[#6a6256]" : "text-[#2b2620]"
                   }`}
                 >
                   {ch.title}
@@ -137,10 +137,10 @@ export function CourseAccordion({
                 <div
                   className={`text-[11px] mt-0.5 ${
                     isFullyDone
-                      ? "text-[#00695c]"
+                      ? "text-[#34603f]"
                       : isInProgress
                         ? "text-[#004d40]"
-                        : "text-zinc-400"
+                        : "text-[#a59b8c]"
                   }`}
                 >
                   {isFullyDone
@@ -160,7 +160,7 @@ export function CourseAccordion({
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className={`text-zinc-400 transition-transform ${isOpen ? "rotate-90" : ""}`}
+                className={`text-[#a59b8c] transition-transform ${isOpen ? "rotate-90" : ""}`}
               >
                 <path d="m9 18 6-6-6-6" />
               </svg>
@@ -168,14 +168,14 @@ export function CourseAccordion({
 
             {/* 展開時のレッスン一覧 */}
             {isOpen && (
-              <div className="border-t border-zinc-200 bg-zinc-50/50">
+              <div className="border-t border-zinc-200 bg-[#f9f5ed]/50">
                 {ch.description && (
                   <div className="px-4 pt-3 pb-1 text-xs text-zinc-600 whitespace-pre-wrap">
                     {ch.description}
                   </div>
                 )}
                 {ch.lessons.length === 0 ? (
-                  <p className="px-4 py-3 text-sm text-zinc-500">
+                  <p className="px-4 py-3 text-sm text-[#6a6256]">
                     公開中のレッスンはありません。
                   </p>
                 ) : (
@@ -201,10 +201,10 @@ export function CourseAccordion({
                             }
                             className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold transition-colors disabled:opacity-50 ${
                               done
-                                ? "bg-[#00897b] text-white hover:bg-[#00695c]"
+                                ? "bg-[#4a875b] text-white hover:bg-[#34603f]"
                                 : isCurrent
-                                  ? "bg-amber-300 text-zinc-900 hover:bg-amber-400"
-                                  : "bg-white border border-zinc-300 text-zinc-400 hover:border-zinc-500"
+                                  ? "bg-amber-300 text-[#2b2620] hover:bg-amber-400"
+                                  : "bg-[#fffdf8] border border-zinc-300 text-[#a59b8c] hover:border-zinc-500"
                             }`}
                           >
                             {isPending ? "…" : done ? "✓" : isCurrent ? "▶" : ""}
@@ -221,11 +221,11 @@ export function CourseAccordion({
                                   isCurrent
                                     ? "text-[#004d40] font-bold"
                                     : done
-                                      ? "text-zinc-500"
+                                      ? "text-[#6a6256]"
                                       : "text-zinc-700"
                                 }`}
                               >
-                                <span className="font-mono text-[10px] text-zinc-400 mr-1">
+                                <span className="font-mono text-[10px] text-[#a59b8c] mr-1">
                                   L{l.sort_order}
                                 </span>
                                 {l.title}
@@ -248,7 +248,7 @@ export function CourseAccordion({
 
                           {/* 「続きから」 黄バッジ */}
                           {isCurrent && (
-                            <span className="text-[10px] bg-amber-300 text-zinc-900 px-1.5 py-0.5 rounded font-bold flex-shrink-0">
+                            <span className="text-[10px] bg-amber-300 text-[#2b2620] px-1.5 py-0.5 rounded font-bold flex-shrink-0">
                               続きから
                             </span>
                           )}
@@ -290,10 +290,10 @@ function ExamRow({
       <span
         className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold ${
           passed
-            ? "bg-[#00897b] text-white"
+            ? "bg-[#4a875b] text-white"
             : attempted
-              ? "bg-amber-400 text-zinc-900"
-              : "bg-white border border-amber-300 text-amber-600"
+              ? "bg-amber-400 text-[#2b2620]"
+              : "bg-[#fffdf8] border border-amber-300 text-amber-600"
         }`}
         aria-label={passed ? "テスト合格" : attempted ? "テスト挑戦中" : "テスト未受験"}
       >
@@ -304,13 +304,13 @@ function ExamRow({
           href={`/courses/${courseId}/chapters/${chapterId}/exam`}
           className="group block"
         >
-          <p className="text-xs leading-snug text-zinc-900 font-bold group-hover:underline flex items-center gap-1.5">
+          <p className="text-xs leading-snug text-[#2b2620] font-bold group-hover:underline flex items-center gap-1.5">
             <span aria-hidden>📋</span>
             <span>テスト ・ {info.name}</span>
           </p>
         </Link>
         {attempted ? (
-          <div className="mt-0.5 text-[10px] text-zinc-500">
+          <div className="mt-0.5 text-[10px] text-[#6a6256]">
             {passed ? "合格済 ・ 再挑戦可" : "再挑戦してみよう"}
           </div>
         ) : null}

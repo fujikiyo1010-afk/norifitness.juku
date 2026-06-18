@@ -35,7 +35,7 @@ export function CategoryTrendChart({
   const allPoints = series.flatMap((s) => s.points);
   if (allPoints.length === 0) {
     return (
-      <div className="text-center text-[12px] text-zinc-500 py-8">
+      <div className="text-center text-[12px] text-[#6a6256] py-8">
         提出済みの月次添削がまだありません
       </div>
     );
@@ -166,7 +166,7 @@ export function CategoryTrendChart({
             className="flex items-center gap-1.5 text-[10px] text-zinc-600"
           >
             <span
-              className="w-2.5 h-2.5 rounded-full border-2 bg-white"
+              className="w-2.5 h-2.5 rounded-full border-2 bg-[#fffdf8]"
               style={{ borderColor: s.color }}
             />
             <span className="font-bold">{s.label}</span>

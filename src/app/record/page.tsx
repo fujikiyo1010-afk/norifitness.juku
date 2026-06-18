@@ -43,13 +43,13 @@ export default async function RecordHubPage() {
   return (
     <>
       <MemberHeader title="記録" fallbackHref="/" />
-      <main className="min-h-screen bg-zinc-50">
+      <main className="min-h-screen bg-[#f9f5ed]">
         <div className="mx-auto max-w-[460px] px-4 py-4 space-y-4">
           <BodyMetricsHero rows={sorted} targetWeightKg={targetWeightKg} />
 
           <Link
             href="/body-metrics"
-            className="block bg-[#00897b] text-white rounded-2xl px-4 py-3.5 text-center text-[14px] font-bold hover:bg-[#00695c] transition-colors"
+            className="block bg-[#4a875b] text-white rounded-2xl px-4 py-3.5 text-center text-[14px] font-bold hover:bg-[#34603f] transition-colors"
           >
             記録する
           </Link>

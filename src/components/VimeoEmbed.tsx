@@ -73,7 +73,7 @@ export function VimeoEmbed({ url }: { url: string }) {
           title="動画プレイヤー"
         />
       </div>
-      <p className="text-xs text-zinc-500">
+      <p className="text-xs text-[#6a6256]">
         💡 再生速度の変更: 動画再生中、右下の⚙(歯車アイコン) → 再生速度 を選択
       </p>
     </div>

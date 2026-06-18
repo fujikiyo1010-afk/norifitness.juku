@@ -53,17 +53,17 @@ export default async function Home() {
       : 0;
 
   return (
-    <main className="flex flex-1 flex-col bg-zinc-50 min-h-screen">
-      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e8ebe9] bg-white">
+    <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
+      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9] bg-[#fffdf8]">
       {/* ヘッダー */}
-      <header className="flex items-center justify-between px-[18px] py-[14px] border-b border-[#e8ebe9] bg-white sticky top-0 z-10">
+      <header className="flex items-center justify-between px-[18px] py-[14px] border-b border-[#e7dcc9] bg-[#fffdf8] sticky top-0 z-10">
         <div className="text-[17px] font-bold tracking-[0.04em] text-[#004d40]">
           筋肉塾
         </div>
         <Link
           href="/account"
           aria-label="プロフィール"
-          className="w-[26px] h-[26px] rounded-full bg-[#00897b] text-white flex items-center justify-center text-[12px] font-bold"
+          className="w-[26px] h-[26px] rounded-full bg-[#4a875b] text-white flex items-center justify-center text-[12px] font-bold"
         >
           {displayName.charAt(0)}
         </Link>
@@ -71,10 +71,10 @@ export default async function Home() {
 
       {/* ヒーロー帯 */}
       <section className="bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] px-5 py-[22px]">
-        <h1 className="text-[18px] font-bold text-zinc-900 mb-1">
+        <h1 className="text-[18px] font-bold text-[#2b2620] mb-1">
           こんにちは、{displayName} さん
         </h1>
-        <div className="text-[11px] text-zinc-500 font-mono">
+        <div className="text-[11px] text-[#6a6256] font-mono">
           入会 {joinedAtLabel}
           {stats && ` ・ ${stats.daysSinceJoined + 1} 日目`}
         </div>
@@ -119,13 +119,13 @@ export default async function Home() {
       <div className="px-4 pt-2">
         <Link
           href="/goal-sheet"
-          className="bg-white border border-[#e8ebe9] rounded-[14px] px-[18px] py-4 flex items-center gap-3 hover:border-[#00897b] transition-colors"
+          className="bg-[#fffdf8] border border-[#e7dcc9] rounded-[14px] px-[18px] py-4 flex items-center gap-3 hover:border-[#4a875b] transition-colors"
         >
-          <div className="w-10 h-10 rounded-full bg-[#00897b1a] flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-full bg-[#4a875b1a] flex items-center justify-center flex-shrink-0">
             <TargetIcon />
           </div>
           <div className="flex-1">
-            <div className="text-[13px] font-bold text-zinc-900 mb-0.5 flex items-center gap-1.5">
+            <div className="text-[13px] font-bold text-[#2b2620] mb-0.5 flex items-center gap-1.5">
               目標管理シート
               {goalSheet.hasReviewNotice && (
                 <span className="bg-[#b8860b] text-white text-[9px] px-1.5 py-[1px] rounded-full inline-flex items-center gap-1">
@@ -133,7 +133,7 @@ export default async function Home() {
                 </span>
               )}
             </div>
-            <div className="text-[10px] text-zinc-500">
+            <div className="text-[10px] text-[#6a6256]">
               {goalSheet.hasContent
                 ? goalSheet.hasReviewNotice
                   ? "のりfitness から添削が届いています"
@@ -141,27 +141,27 @@ export default async function Home() {
                 : "まだ記入されていません"}
             </div>
           </div>
-          <span className="text-zinc-400 font-mono text-xs">→</span>
+          <span className="text-[#a59b8c] font-mono text-xs">→</span>
         </Link>
       </div>
 
       {/* 全体進捗バー */}
       <div className="px-4 pt-[18px]">
-        <div className="bg-white border border-[#e8ebe9] rounded-xl px-4 py-3.5">
+        <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-xl px-4 py-3.5">
           <div className="flex justify-between items-baseline mb-2">
             <div className="text-[11px] font-semibold text-zinc-600">
               全体進捗
             </div>
-            <div className="font-mono text-base font-bold text-[#00695c]">
+            <div className="font-mono text-base font-bold text-[#34603f]">
               {progressPct}%
-              <span className="text-[10px] text-zinc-500 ml-1">
+              <span className="text-[10px] text-[#6a6256] ml-1">
                 ({stats?.completedLessons ?? 0} / {stats?.totalLessons ?? 0})
               </span>
             </div>
           </div>
           <div className="h-1.5 bg-[#f0f2f1] rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-[#00897b] to-[#00695c] rounded-full transition-[width] duration-500"
+              className="h-full bg-gradient-to-r from-[#4a875b] to-[#34603f] rounded-full transition-[width] duration-500"
               style={{ width: `${progressPct}%` }}
             />
           </div>
@@ -187,7 +187,7 @@ export default async function Home() {
         {admin && (
           <Link
             href="/admin"
-            className="text-[11px] text-zinc-500 hover:text-[#00695c] transition-colors"
+            className="text-[11px] text-[#6a6256] hover:text-[#34603f] transition-colors"
           >
             管理画面へ →
           </Link>
@@ -195,7 +195,7 @@ export default async function Home() {
         <form action={signOut}>
           <button
             type="submit"
-            className="text-[11px] text-zinc-400 hover:text-zinc-700 transition-colors"
+            className="text-[11px] text-[#a59b8c] hover:text-zinc-700 transition-colors"
           >
             ログアウト
           </button>
@@ -253,7 +253,7 @@ function NoticeBanner({ alert }: { alert: MemberAlert }) {
   return (
     <Link
       href={cfg.href}
-      className="px-3.5 py-3 bg-gradient-to-br from-[rgba(255,235,59,0.18)] to-[rgba(255,235,59,0.10)] border border-[rgba(255,235,59,0.55)] rounded-[10px] flex items-center gap-2.5 text-[12px] text-zinc-900"
+      className="px-3.5 py-3 bg-gradient-to-br from-[rgba(255,235,59,0.18)] to-[rgba(255,235,59,0.10)] border border-[rgba(255,235,59,0.55)] rounded-[10px] flex items-center gap-2.5 text-[12px] text-[#2b2620]"
     >
       <span className="flex-shrink-0 w-[18px] h-[18px] text-zinc-700">
         {cfg.icon}
@@ -280,7 +280,7 @@ function ContinueCTA({
     return (
       <Link
         href={lastWatched.href}
-        className="block bg-gradient-to-br from-[#00897b] to-[#00695c] rounded-[14px] px-[18px] py-4 text-white shadow-[0_4px_14px_rgba(0,137,123,0.22)] relative overflow-hidden"
+        className="block bg-gradient-to-br from-[#4a875b] to-[#34603f] rounded-[14px] px-[18px] py-4 text-white shadow-[0_4px_14px_rgba(0,137,123,0.22)] relative overflow-hidden"
       >
         <div className="text-[11px] opacity-90 mb-1 tracking-[0.03em] flex items-center gap-1">
           <span className="font-mono">▶</span> 続きから学ぶ
@@ -291,7 +291,7 @@ function ContinueCTA({
         <div className="text-[11px] opacity-85 pr-12 line-clamp-1">
           {lastWatched.courseTitle} ・ {lastWatched.chapterTitle}
         </div>
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-sm">
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-[#fffdf8]/20 flex items-center justify-center text-sm">
           ▶
         </div>
       </Link>
@@ -302,7 +302,7 @@ function ContinueCTA({
   return (
     <Link
       href="/courses"
-      className="block bg-gradient-to-br from-[#00897b] to-[#00695c] rounded-[14px] px-[18px] py-4 text-white shadow-[0_4px_14px_rgba(0,137,123,0.22)] relative overflow-hidden"
+      className="block bg-gradient-to-br from-[#4a875b] to-[#34603f] rounded-[14px] px-[18px] py-4 text-white shadow-[0_4px_14px_rgba(0,137,123,0.22)] relative overflow-hidden"
     >
       <div className="text-[11px] opacity-90 mb-1 tracking-[0.03em] flex items-center gap-1">
         <span className="font-mono">▶</span> 最初のレッスンへ
@@ -313,7 +313,7 @@ function ContinueCTA({
       <div className="text-[11px] opacity-85 pr-12">
         まずは 1 本見てみましょう
       </div>
-      <div className="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-sm">
+      <div className="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-[#fffdf8]/20 flex items-center justify-center text-sm">
         ▶
       </div>
     </Link>
@@ -339,17 +339,17 @@ function FeatureBlock({
 }) {
   const inner = (
     <>
-      <div className="w-10 h-10 mx-auto mb-2.5 flex items-center justify-center text-zinc-900">
+      <div className="w-10 h-10 mx-auto mb-2.5 flex items-center justify-center text-[#2b2620]">
         {icon}
       </div>
-      <div className="text-[12px] font-semibold text-zinc-900 mb-0.5">
+      <div className="text-[12px] font-semibold text-[#2b2620] mb-0.5">
         {name}
       </div>
-      <div className="text-[9px] text-zinc-500 leading-tight">{desc}</div>
+      <div className="text-[9px] text-[#6a6256] leading-tight">{desc}</div>
     </>
   );
   const base =
-    "bg-white border border-[#e8ebe9] rounded-[4px] px-3 pt-5 pb-4 text-center transition-[border-color,transform] duration-150";
+    "bg-[#fffdf8] border border-[#e7dcc9] rounded-[4px] px-3 pt-5 pb-4 text-center transition-[border-color,transform] duration-150";
   if (disabled || !href) {
     return (
       <div className={`${base} opacity-60 cursor-not-allowed`}>{inner}</div>
@@ -358,7 +358,7 @@ function FeatureBlock({
   return (
     <Link
       href={href}
-      className={`${base} hover:border-[#00897b] hover:-translate-y-px`}
+      className={`${base} hover:border-[#4a875b] hover:-translate-y-px`}
     >
       {inner}
     </Link>
@@ -379,12 +379,12 @@ function StatCell({
   label: string;
 }) {
   return (
-    <div className="bg-white border border-[#e8ebe9] rounded-xl px-1.5 py-3 text-center">
+    <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-xl px-1.5 py-3 text-center">
       <div className="font-mono text-[22px] font-bold text-[#004d40] leading-none">
         {num}
       </div>
       {unit && (
-        <div className="text-[10px] text-zinc-500 mt-1">{unit}</div>
+        <div className="text-[10px] text-[#6a6256] mt-1">{unit}</div>
       )}
       <div className="text-[10px] text-zinc-600 mt-1">{label}</div>
     </div>
@@ -397,7 +397,7 @@ function StatCell({
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="text-[11px] text-zinc-500 font-bold tracking-[0.06em] mx-4 mt-[18px] mb-2 pl-1">
+    <div className="text-[11px] text-[#6a6256] font-bold tracking-[0.06em] mx-4 mt-[18px] mb-2 pl-1">
       {children}
     </div>
   );
@@ -461,7 +461,7 @@ function TargetIcon() {
       {...ICO_PROPS}
       width="20"
       height="20"
-      className="text-[#00897b]"
+      className="text-[#4a875b]"
     >
       <circle cx="12" cy="12" r="10" />
       <circle cx="12" cy="12" r="6" />

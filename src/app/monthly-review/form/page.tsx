@@ -47,8 +47,8 @@ export default async function MonthlyReviewFormPage() {
 
         {submitted ? (
           // 提出済の場合は編集不可、履歴ページへ誘導
-          <div className="bg-white border border-[#e8ebe9] rounded-2xl p-6 text-center space-y-3">
-            <div className="text-base font-bold text-zinc-900">
+          <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl p-6 text-center space-y-3">
+            <div className="text-base font-bold text-[#2b2620]">
               {formatTargetMonthLabel(targetMonth)} は提出済みです
             </div>
             <div className="text-sm text-zinc-600">
@@ -56,7 +56,7 @@ export default async function MonthlyReviewFormPage() {
             </div>
             <Link
               href="/monthly-review"
-              className="inline-block rounded-md bg-[#00897b] hover:bg-[#00695c] text-white px-5 py-2.5 text-sm font-bold tracking-wide transition-colors"
+              className="inline-block rounded-md bg-[#4a875b] hover:bg-[#34603f] text-white px-5 py-2.5 text-sm font-bold tracking-wide transition-colors"
             >
               履歴を見る
             </Link>

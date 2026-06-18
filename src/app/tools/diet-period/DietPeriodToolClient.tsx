@@ -175,16 +175,16 @@ export function DietPeriodToolClient({
   // 入力 className (前回値で薄色、触ったら通常色)
   const inputClass = (key: string) =>
     `flex-1 border-none outline-none py-2.5 text-base bg-transparent font-mono ${
-      touched[key] || !prevInputs ? "text-zinc-900" : "text-zinc-400"
+      touched[key] || !prevInputs ? "text-[#2b2620]" : "text-[#a59b8c]"
     }`;
 
   return (
     <main className="min-h-screen bg-[#fafbfa] flex flex-col">
       <div className="flex-1 max-w-[460px] mx-auto w-full pb-10">
         {/* ヒーロー帯 */}
-        <section className="bg-gradient-to-br from-[#e8eaf6] to-[#fffbe6] border-b border-[#e8ebe9] px-6 py-5">
+        <section className="bg-gradient-to-br from-[#e8eaf6] to-[#fffbe6] border-b border-[#e7dcc9] px-6 py-5">
           <h2 className="text-xl font-bold text-[#1a237e] mb-1">減量期間逆算</h2>
-          <p className="text-[11px] text-zinc-500 leading-relaxed">
+          <p className="text-[11px] text-[#6a6256] leading-relaxed">
             目標体重まで何週間? いつ達成?
           </p>
           {previous && (
@@ -195,8 +195,8 @@ export function DietPeriodToolClient({
         </section>
 
         {/* 入力カード */}
-        <section className="bg-white border border-[#e8ebe9] rounded-xl mx-4 my-4 px-5 py-4">
-          <h3 className="text-xs font-bold text-zinc-600 tracking-wide mb-3.5 pb-2.5 border-b border-[#e8ebe9]">
+        <section className="bg-[#fffdf8] border border-[#e7dcc9] rounded-xl mx-4 my-4 px-5 py-4">
+          <h3 className="text-xs font-bold text-zinc-600 tracking-wide mb-3.5 pb-2.5 border-b border-[#e7dcc9]">
             目標設定
           </h3>
 
@@ -230,7 +230,7 @@ export function DietPeriodToolClient({
             label={
               <>
                 1 週間の減量ペース{" "}
-                <span className="text-zinc-500 text-[10px] font-normal">
+                <span className="text-[#6a6256] text-[10px] font-normal">
                   (推奨 0.5)
                 </span>
               </>
@@ -256,7 +256,7 @@ export function DietPeriodToolClient({
               className={`flex items-center gap-2.5 border rounded-lg px-3 transition-colors ${
                 missingFields.has("start")
                   ? "border-[#d32f2f] bg-[#fef5f5] focus-within:border-[#d32f2f]"
-                  : "border-[#e8ebe9] bg-white focus-within:border-[#3949ab]"
+                  : "border-[#e7dcc9] bg-[#fffdf8] focus-within:border-[#3949ab]"
               }`}
             >
               <input
@@ -269,8 +269,8 @@ export function DietPeriodToolClient({
                 }}
                 className={`flex-1 border-none outline-none py-2.5 text-sm bg-transparent ${
                   touched["start"] || !prevInputs
-                    ? "text-zinc-900"
-                    : "text-zinc-400"
+                    ? "text-[#2b2620]"
+                    : "text-[#a59b8c]"
                 }`}
               />
             </div>
@@ -305,12 +305,12 @@ export function DietPeriodToolClient({
 
             {/* 結果カード */}
             <section className="bg-gradient-to-br from-[#e8eaf6] to-[#fffbe6] border border-[rgba(255,235,59,0.4)] rounded-xl mx-4 mb-3 px-5 py-4">
-              <h3 className="text-xs font-bold text-[#283593] tracking-wide mb-3 pb-2.5 border-b border-[#e8ebe9]">
+              <h3 className="text-xs font-bold text-[#283593] tracking-wide mb-3 pb-2.5 border-b border-[#e7dcc9]">
                 ✓ 計算結果
               </h3>
 
               {/* 3 項目を 1 ブロックに統合 (A-1 罫線あり / B-1 均一スタイル / C-2 日数のみ / D-3 到達日アイコンのみ) */}
-              <div className="bg-white/80 rounded-lg mb-3.5 divide-y divide-[#e8ebe9]">
+              <div className="bg-[#fffdf8]/80 rounded-lg mb-3.5 divide-y divide-[#e7dcc9]">
                 <ResultRow label="必要な減量">
                   {result.needed_kg.toFixed(1)} kg
                 </ResultRow>
@@ -341,7 +341,7 @@ export function DietPeriodToolClient({
               </div>
 
               {/* 進捗カード */}
-              <div className="bg-white/80 rounded-lg px-3.5 py-3">
+              <div className="bg-[#fffdf8]/80 rounded-lg px-3.5 py-3">
                 <div className="flex justify-between items-center mb-2">
                   <div className="text-[11px] font-bold text-zinc-600">
                     1 週間あたりの進捗
@@ -350,7 +350,7 @@ export function DietPeriodToolClient({
                     {result.weekly_progress_pct.toFixed(1)} %
                   </div>
                 </div>
-                <div className="w-full h-1.5 bg-[#e8ebe9] rounded-full overflow-hidden">
+                <div className="w-full h-1.5 bg-[#e7dcc9] rounded-full overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-[#3949ab] to-[#283593] rounded-full"
                     style={{
@@ -358,7 +358,7 @@ export function DietPeriodToolClient({
                     }}
                   />
                 </div>
-                <p className="mt-1.5 text-[10px] text-zinc-500">
+                <p className="mt-1.5 text-[10px] text-[#6a6256]">
                   1 週間 {parseFloat(pace).toFixed(1)} kg ずつ、目標まで{" "}
                   {result.needed_kg.toFixed(1)} kg の進み方
                 </p>
@@ -367,7 +367,7 @@ export function DietPeriodToolClient({
 
             {/* タイムライン */}
             <section className="mx-4 mb-4">
-              <h4 className="text-sm font-bold text-zinc-900 mb-2.5 pl-1 flex items-center gap-1.5">
+              <h4 className="text-sm font-bold text-[#2b2620] mb-2.5 pl-1 flex items-center gap-1.5">
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -395,7 +395,7 @@ export function DietPeriodToolClient({
               {result.weeks > 6 && (
                 <button
                   onClick={() => setShowAllWeeks((v) => !v)}
-                  className="w-full mt-2 py-2.5 bg-white border border-[#e8ebe9] rounded text-xs font-bold text-[#283593] hover:bg-[#3949ab]/5 transition-colors"
+                  className="w-full mt-2 py-2.5 bg-[#fffdf8] border border-[#e7dcc9] rounded text-xs font-bold text-[#283593] hover:bg-[#3949ab]/5 transition-colors"
                 >
                   {showAllWeeks
                     ? "節目だけ表示する"
@@ -427,7 +427,7 @@ export function DietPeriodToolClient({
                     );
                     router.push("/goal-sheet/edit");
                   }}
-                  className="w-full py-3.5 bg-[#00897b] text-white rounded text-sm font-bold hover:bg-[#00695c] transition-colors"
+                  className="w-full py-3.5 bg-[#4a875b] text-white rounded text-sm font-bold hover:bg-[#34603f] transition-colors"
                 >
                   目標シートに適用 →
                 </button>
@@ -443,7 +443,7 @@ export function DietPeriodToolClient({
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="w-full py-3.5 bg-white border border-[#3949ab] text-[#3949ab] rounded text-sm font-bold hover:bg-[#3949ab]/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="w-full py-3.5 bg-[#fffdf8] border border-[#3949ab] text-[#3949ab] rounded text-sm font-bold hover:bg-[#3949ab]/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {saving
                     ? "保存中..."
@@ -493,7 +493,7 @@ function InputRow({
         className={`flex items-center gap-2.5 border rounded-lg px-3 transition-colors ${
           hasError
             ? "border-[#d32f2f] bg-[#fef5f5] focus-within:border-[#d32f2f]"
-            : "border-[#e8ebe9] bg-white focus-within:border-[#3949ab]"
+            : "border-[#e7dcc9] bg-[#fffdf8] focus-within:border-[#3949ab]"
         }`}
       >
         <input
@@ -506,7 +506,7 @@ function InputRow({
         />
         <span
           className={`text-xs flex-shrink-0 ${
-            hasError ? "text-[#d32f2f]" : "text-zinc-500"
+            hasError ? "text-[#d32f2f]" : "text-[#6a6256]"
           }`}
         >
           {unit}
@@ -679,7 +679,7 @@ function WeekCard({ row }: { row: WeekRow }) {
       ? "bg-[#e8eaf6] border-[#3949ab]/25"
       : row.kind === "goal"
         ? "bg-[#fff9e6] border-[#f5c842]"
-        : "bg-white border-[#e8ebe9]";
+        : "bg-[#fffdf8] border-[#e7dcc9]";
   const weightCls =
     row.kind === "goal"
       ? "text-[#b8860b]"
@@ -689,10 +689,10 @@ function WeekCard({ row }: { row: WeekRow }) {
     <div className={`rounded-lg px-3.5 py-3 border ${cardCls}`}>
       <div className="flex items-center justify-between gap-2.5">
         <div className="flex flex-col gap-0.5">
-          <div className="text-xs font-bold text-zinc-900">
+          <div className="text-xs font-bold text-[#2b2620]">
             {row.week} 週目
           </div>
-          <div className="text-[10px] text-zinc-500 font-mono">
+          <div className="text-[10px] text-[#6a6256] font-mono">
             {formatDateShort(row.date)}
           </div>
         </div>

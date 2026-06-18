@@ -28,7 +28,7 @@ export function BackLink({
       href={target.href}
       className={
         className ??
-        "inline-flex items-center gap-1 text-xs text-zinc-600 hover:text-[#00695c] underline decoration-zinc-300 hover:decoration-[#00897b] underline-offset-2"
+        "inline-flex items-center gap-1 text-xs text-zinc-600 hover:text-[#34603f] underline decoration-zinc-300 hover:decoration-[#4a875b] underline-offset-2"
       }
     >
       <svg

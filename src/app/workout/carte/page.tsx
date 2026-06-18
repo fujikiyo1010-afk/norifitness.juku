@@ -38,20 +38,20 @@ export default async function WorkoutCartePage() {
       <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#e8ebec]">
         <div className="mx-auto w-full max-w-[980px] space-y-4">
         {/* ドキュメントフレーム */}
-        <div className="bg-white border border-[#d4d4d4] rounded-md shadow-sm overflow-hidden">
+        <div className="bg-[#fffdf8] border border-[#d4d4d4] rounded-md shadow-sm overflow-hidden">
           {/* ① ヘッダー帯 */}
-          <div className="px-5 py-4 border-b border-[#e8ebe9] grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-center">
-            <div className="text-lg font-bold text-zinc-900 tracking-tight">
+          <div className="px-5 py-4 border-b border-[#e7dcc9] grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-center">
+            <div className="text-lg font-bold text-[#2b2620] tracking-tight">
               筋トレカルテ
             </div>
-            <div className="text-xs text-zinc-500 leading-relaxed sm:text-right">
+            <div className="text-xs text-[#6a6256] leading-relaxed sm:text-right">
               提出 {submittedDate}<br />
               ステータス {hasMenu ? "メニュー配布済み" : "メニュー作成中"}
             </div>
           </div>
 
           {/* ② KPI サマリーバー (4 セル) */}
-          <div className="px-5 py-3 bg-[#fafafa] border-b border-[#e8ebe9] grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="px-5 py-3 bg-[#fafafa] border-b border-[#e7dcc9] grid grid-cols-2 sm:grid-cols-4 gap-2">
             <Kpi label="性別" num={carte.gender} />
             <Kpi
               label="頻度"
@@ -82,9 +82,9 @@ export default async function WorkoutCartePage() {
 
           {/* ③ メニュー状態バナー */}
           {hasMenu ? (
-            <div className="px-5 py-3 bg-[rgba(0,137,123,0.08)] border-b border-[#e8ebe9] flex items-center justify-between gap-3">
+            <div className="px-5 py-3 bg-[rgba(0,137,123,0.08)] border-b border-[#e7dcc9] flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[#00897b]">
+                <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[#4a875b]">
                   <svg
                     width="14"
                     height="14"
@@ -99,7 +99,7 @@ export default async function WorkoutCartePage() {
                   </svg>
                 </div>
                 <div>
-                  <div className="text-[11px] font-bold text-[#00695c] tracking-wide">
+                  <div className="text-[11px] font-bold text-[#34603f] tracking-wide">
                     メニュー配布済み
                   </div>
                   <div className="text-[10px] text-zinc-600">
@@ -109,13 +109,13 @@ export default async function WorkoutCartePage() {
               </div>
               <Link
                 href="/workout"
-                className="rounded-md bg-[#00897b] hover:bg-[#00695c] text-white px-4 py-2 text-xs font-bold tracking-wide transition-colors flex-shrink-0"
+                className="rounded-md bg-[#4a875b] hover:bg-[#34603f] text-white px-4 py-2 text-xs font-bold tracking-wide transition-colors flex-shrink-0"
               >
                 メニューを見る
               </Link>
             </div>
           ) : (
-            <div className="px-5 py-3 bg-[rgba(255,235,59,0.12)] border-b border-[#e8ebe9] flex items-center gap-3">
+            <div className="px-5 py-3 bg-[rgba(255,235,59,0.12)] border-b border-[#e7dcc9] flex items-center gap-3">
               <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[rgba(255,235,59,0.4)]">
                 <svg
                   width="13"
@@ -201,7 +201,7 @@ export default async function WorkoutCartePage() {
           </div>
 
           {/* ⑤ フッター */}
-          <div className="px-5 py-3 bg-[#fafafa] border-t border-[#e8ebe9] flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+          <div className="px-5 py-3 bg-[#fafafa] border-t border-[#e7dcc9] flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
             <div className="text-[10px] text-zinc-600 leading-relaxed">
               内容を変更したい時は、右のボタンから
               <br className="sm:hidden" />
@@ -209,7 +209,7 @@ export default async function WorkoutCartePage() {
             </div>
             <Link
               href="/workout/carte/request"
-              className="inline-flex items-center justify-center gap-1.5 rounded-md bg-white border border-[#00897b] text-[#00695c] hover:bg-[rgba(0,137,123,0.08)] px-4 py-2 text-xs font-bold tracking-wide transition-colors flex-shrink-0"
+              className="inline-flex items-center justify-center gap-1.5 rounded-md bg-[#fffdf8] border border-[#4a875b] text-[#34603f] hover:bg-[rgba(0,137,123,0.08)] px-4 py-2 text-xs font-bold tracking-wide transition-colors flex-shrink-0"
             >
               <svg
                 className="w-3.5 h-3.5"
@@ -247,19 +247,19 @@ function Kpi({
   highlighted?: boolean;
 }) {
   return (
-    <div className="bg-white border border-[#e8ebe9] rounded-md px-3 py-2">
-      <div className="text-[10px] text-zinc-500 tracking-wide mb-1">
+    <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-md px-3 py-2">
+      <div className="text-[10px] text-[#6a6256] tracking-wide mb-1">
         {label}
       </div>
       <div
-        className={`font-medium text-zinc-900 leading-none ${
+        className={`font-medium text-[#2b2620] leading-none ${
           highlighted ? "font-bold" : ""
         }`}
       >
         <span
           className={`text-sm ${
             highlighted
-              ? "inline-block border-b-2 border-[#00897b] pb-0.5"
+              ? "inline-block border-b-2 border-[#4a875b] pb-0.5"
               : ""
           }`}
         >
@@ -278,7 +278,7 @@ function SectionBand({ num, title }: { num: string; title: string }) {
           colSpan={2}
           className="bg-black text-white px-4 py-2 text-[10px] tracking-widest font-semibold"
         >
-          <span className="text-[#00897b] font-mono mr-2">{num}</span>
+          <span className="text-[#4a875b] font-mono mr-2">{num}</span>
           {title}
         </td>
       </tr>
@@ -289,10 +289,10 @@ function SectionBand({ num, title }: { num: string; title: string }) {
 function DataRow({ label, value }: { label: string; value: string }) {
   return (
     <tr>
-      <td className="w-[150px] bg-[#fafafa] text-zinc-500 border-r border-[#e8ebe9] border-b border-[#e8ebe9] px-4 py-2 text-[10px] font-medium tracking-wide align-top">
+      <td className="w-[150px] bg-[#fafafa] text-[#6a6256] border-r border-[#e7dcc9] border-b border-[#e7dcc9] px-4 py-2 text-[10px] font-medium tracking-wide align-top">
         {label}
       </td>
-      <td className="border-b border-[#e8ebe9] px-4 py-2 text-[11px] text-zinc-900 align-top">
+      <td className="border-b border-[#e7dcc9] px-4 py-2 text-[11px] text-[#2b2620] align-top">
         <span className="font-medium">{value}</span>
       </td>
     </tr>

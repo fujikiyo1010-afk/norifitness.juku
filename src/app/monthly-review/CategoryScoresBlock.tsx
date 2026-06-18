@@ -22,20 +22,20 @@ export function CategoryScoresBlock({
               <span className="text-[11px] text-zinc-700 font-bold">
                 {a.label}
               </span>
-              <span className="text-[12px] font-bold text-[#00695c] font-mono">
+              <span className="text-[12px] font-bold text-[#34603f] font-mono">
                 {filled ? (
                   <>
                     {a.average!.toFixed(1)}
-                    <span className="text-[9px] text-zinc-400 ml-0.5">/10</span>
+                    <span className="text-[9px] text-[#a59b8c] ml-0.5">/10</span>
                   </>
                 ) : (
-                  <span className="text-zinc-400">—</span>
+                  <span className="text-[#a59b8c]">—</span>
                 )}
               </span>
             </div>
             <div className="h-2 rounded-full bg-zinc-100 overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-[#00897b] to-[#00695c] rounded-full transition-[width] duration-500"
+                className="h-full bg-gradient-to-r from-[#4a875b] to-[#34603f] rounded-full transition-[width] duration-500"
                 style={{ width: `${pct}%` }}
               />
             </div>

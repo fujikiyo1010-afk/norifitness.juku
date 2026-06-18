@@ -38,12 +38,12 @@ export function MemberHeader({
   }
 
   return (
-    <header className="bg-white border-b border-[#e8ebe9] sticky top-0 z-10 grid grid-cols-[32px_1fr_32px] items-center gap-2 px-4 py-3">
+    <header className="bg-[#fffdf8] border-b border-[#e7dcc9] sticky top-0 z-10 grid grid-cols-[32px_1fr_32px] items-center gap-2 px-4 py-3">
       <button
         type="button"
         onClick={handleBack}
         aria-label="戻る"
-        className="w-8 h-8 flex items-center justify-center text-zinc-900 hover:bg-zinc-100 rounded-full transition-colors cursor-pointer"
+        className="w-8 h-8 flex items-center justify-center text-[#2b2620] hover:bg-zinc-100 rounded-full transition-colors cursor-pointer"
       >
         <svg
           width="20"
@@ -61,7 +61,7 @@ export function MemberHeader({
       <h1 className="text-center text-sm font-bold text-[#004d40] truncate">
         {title}
       </h1>
-      <div className="w-8 h-8 flex items-center justify-center text-zinc-500">
+      <div className="w-8 h-8 flex items-center justify-center text-[#6a6256]">
         {rightIcon}
       </div>
     </header>

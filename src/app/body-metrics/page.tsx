@@ -22,13 +22,13 @@ export default async function BodyMetricsPage() {
   return (
     <>
       <MemberHeader title="体組成 記録" fallbackHref="/" />
-      <div className="min-h-screen bg-zinc-50">
+      <div className="min-h-screen bg-[#f9f5ed]">
         <div className="mx-auto max-w-[460px] px-4 py-6">
           {/* 副題 (パンくずは AppHeader 戻る矢印で代替) */}
-          <p className="text-xs text-zinc-500 mb-1 mt-1">
+          <p className="text-xs text-[#6a6256] mb-1 mt-1">
             毎日 or 週 1 で記録 ・ 推移はグラフでチェック
           </p>
-          <p className="text-xs text-zinc-500 mb-5">
+          <p className="text-xs text-[#6a6256] mb-5">
             リアルタイムで共有されます
           </p>
 
@@ -43,7 +43,7 @@ export default async function BodyMetricsPage() {
         {records.length > 0 && (
           <Link
             href="/record"
-            className="flex items-center justify-center gap-2 mt-4 px-4 py-3 bg-white border border-[#e8ebe9] rounded-2xl text-sm font-bold text-[#00695c] hover:border-[#00897b] hover:bg-[#00897b]/5 transition-colors"
+            className="flex items-center justify-center gap-2 mt-4 px-4 py-3 bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl text-sm font-bold text-[#34603f] hover:border-[#4a875b] hover:bg-[#4a875b]/5 transition-colors"
           >
             <TrendingUpIcon />
             変化を見る (推移グラフ)
@@ -52,12 +52,12 @@ export default async function BodyMetricsPage() {
 
         {/* 履歴 */}
         <section className="mt-6">
-          <h2 className="text-sm font-bold text-zinc-900 mb-3">
+          <h2 className="text-sm font-bold text-[#2b2620] mb-3">
             最近の記録 ({records.length} 件)
           </h2>
           {records.length === 0 ? (
-            <div className="bg-white border border-dashed border-[#e8ebe9] rounded-2xl p-6 text-center">
-              <p className="text-sm text-zinc-500">
+            <div className="bg-[#fffdf8] border border-dashed border-[#e7dcc9] rounded-2xl p-6 text-center">
+              <p className="text-sm text-[#6a6256]">
                 まだ記録がありません。<br />
                 上のフォームから最初の記録をどうぞ。
               </p>
@@ -74,7 +74,7 @@ export default async function BodyMetricsPage() {
         {/* ホームに戻る */}
         <Link
           href="/"
-          className="flex items-center justify-center mt-6 px-4 py-3 bg-[#00897b] hover:bg-[#00695c] rounded-2xl text-sm font-bold text-white transition-colors"
+          className="flex items-center justify-center mt-6 px-4 py-3 bg-[#4a875b] hover:bg-[#34603f] rounded-2xl text-sm font-bold text-white transition-colors"
         >
           ホームに戻る
         </Link>
@@ -110,14 +110,14 @@ function RecordCard({
       className={`rounded-2xl border p-3.5 ${
         isRecent
           ? "bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] border-[#b2dfdb]"
-          : "bg-white border-[#e8ebe9]"
+          : "bg-[#fffdf8] border-[#e7dcc9]"
       }`}
     >
       <div className="flex items-center justify-between mb-2">
         <div className="text-xs text-zinc-700 font-bold">
           {dateLabel} ({dayLabel})
         </div>
-        <div className="text-[10px] text-zinc-500">
+        <div className="text-[10px] text-[#6a6256]">
           {daysAgo === 0 ? "今日" : `${daysAgo} 日前`}
         </div>
       </div>
@@ -146,11 +146,11 @@ function Metric({
 }) {
   return (
     <div>
-      <div className="text-[9px] text-zinc-500 mb-0.5">{label}</div>
-      <div className="text-base font-bold text-zinc-900 font-mono">
+      <div className="text-[9px] text-[#6a6256] mb-0.5">{label}</div>
+      <div className="text-base font-bold text-[#2b2620] font-mono">
         {value !== null ? value : "—"}
         {value !== null && (
-          <span className="text-[10px] text-zinc-500 ml-0.5">{unit}</span>
+          <span className="text-[10px] text-[#6a6256] ml-0.5">{unit}</span>
         )}
       </div>
     </div>

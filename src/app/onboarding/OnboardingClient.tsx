@@ -61,13 +61,13 @@ export function OnboardingClient({
   }
 
   return (
-    <main className="flex flex-1 flex-col bg-zinc-50 min-h-screen">
-      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e8ebe9] bg-white">
+    <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
+      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9] bg-[#fffdf8]">
         <div
           className="flex-1 flex flex-col px-5 pt-6 pb-4 relative overflow-hidden"
           style={{ background: "linear-gradient(135deg, #e0f2f1, #fffbe6)" }}
         >
-          <div className="absolute -top-20 -right-20 w-[200px] h-[200px] rounded-full bg-[#00897b]/[0.04] pointer-events-none" />
+          <div className="absolute -top-20 -right-20 w-[200px] h-[200px] rounded-full bg-[#4a875b]/[0.04] pointer-events-none" />
 
           <StepIndicator current={step} total={TOTAL_STEPS} />
 
@@ -145,10 +145,10 @@ export function OnboardingClient({
               nextFaded={step === 7}
             />
           ) : (
-            <div className="z-10 pt-3 border-t border-dashed border-[#00897b]/15">
+            <div className="z-10 pt-3 border-t border-dashed border-[#4a875b]/15">
               <button
                 onClick={finish}
-                className="w-full bg-[#00897b] hover:bg-[#00695c] text-white rounded-xl py-3.5 text-sm font-bold shadow-md shadow-[#00897b]/25 transition-colors"
+                className="w-full bg-[#4a875b] hover:bg-[#34603f] text-white rounded-xl py-3.5 text-sm font-bold shadow-md shadow-[#4a875b]/25 transition-colors"
               >
                 筋肉塾を始める →
               </button>
@@ -176,10 +176,10 @@ function StepIndicator({ current, total }: { current: number; total: number }) {
             key={idx}
             className={`w-[18px] h-[4px] rounded-sm transition-colors ${
               state === "todo"
-                ? "bg-[#00897b]/[0.18]"
+                ? "bg-[#4a875b]/[0.18]"
                 : state === "active"
-                  ? "bg-[#00897b]"
-                  : "bg-[#00695c]"
+                  ? "bg-[#4a875b]"
+                  : "bg-[#34603f]"
             }`}
           />
         );
@@ -208,11 +208,11 @@ function Footer({
   nextFaded?: boolean;
 }) {
   return (
-    <div className="z-10 flex items-center justify-between gap-3 pt-3 border-t border-dashed border-[#00897b]/15">
+    <div className="z-10 flex items-center justify-between gap-3 pt-3 border-t border-dashed border-[#4a875b]/15">
       <button
         type="button"
         onClick={onBack}
-        className={`text-xs text-zinc-500 px-3 py-2 ${showBack ? "" : "invisible"}`}
+        className={`text-xs text-[#6a6256] px-3 py-2 ${showBack ? "" : "invisible"}`}
       >
         ← 戻る
       </button>
@@ -220,7 +220,7 @@ function Footer({
         type="button"
         onClick={onNext}
         disabled={nextDisabled}
-        className={`bg-[#00897b] hover:bg-[#00695c] text-white rounded-xl px-5 py-2.5 text-[12.5px] font-bold shadow-md shadow-[#00897b]/25 transition-colors ${
+        className={`bg-[#4a875b] hover:bg-[#34603f] text-white rounded-xl px-5 py-2.5 text-[12.5px] font-bold shadow-md shadow-[#4a875b]/25 transition-colors ${
           nextDisabled ? "opacity-45 cursor-not-allowed" : ""
         } ${nextFaded ? "opacity-50" : ""}`}
       >
@@ -237,7 +237,7 @@ function Footer({
 function Step1() {
   return (
     <div className="flex-1 flex flex-col items-center justify-center text-center z-10 pb-4">
-      <div className="w-[110px] h-[110px] rounded-full shadow-lg shadow-[#00897b]/20 mb-5 overflow-hidden bg-white anim-char-pop">
+      <div className="w-[110px] h-[110px] rounded-full shadow-lg shadow-[#4a875b]/20 mb-5 overflow-hidden bg-[#fffdf8] anim-char-pop">
         <div className="w-full h-full relative scale-[1.2]">
           <Image
             src="/images/nori-character.png"
@@ -286,7 +286,7 @@ function Step2() {
         </b>
         します
       </p>
-      <p className="text-[10px] text-zinc-500 mt-3 anim-fade-up anim-delay-3">
+      <p className="text-[10px] text-[#6a6256] mt-3 anim-fade-up anim-delay-3">
         これが筋肉塾の最大の特徴です
       </p>
     </div>
@@ -321,9 +321,9 @@ function StepIntro({
       <p className="text-xs text-zinc-600 leading-relaxed mb-2 anim-fade-up anim-delay-2">
         {lead}
       </p>
-      <p className="text-[11px] text-zinc-500 leading-relaxed anim-fade-up anim-delay-2">{detail}</p>
+      <p className="text-[11px] text-[#6a6256] leading-relaxed anim-fade-up anim-delay-2">{detail}</p>
 
-      <div className="mt-5 bg-[#00897b]/[0.06] border-l-[3px] border-[#00897b] rounded-sm px-3.5 py-2.5 text-[11px] text-[#004d40] anim-fade-up anim-delay-3">
+      <div className="mt-5 bg-[#4a875b]/[0.06] border-l-[3px] border-[#4a875b] rounded-sm px-3.5 py-2.5 text-[11px] text-[#004d40] anim-fade-up anim-delay-3">
         {after}
       </div>
     </div>
@@ -357,7 +357,7 @@ function Step6Form({
 }) {
   return (
     <div className="flex-1 flex flex-col z-10 pb-3">
-      <div className="text-[13px] font-bold text-[#004d40] bg-[#00897b]/[0.06] border-l-[3px] border-[#00897b] rounded-sm px-2.5 py-1.5 mb-3">
+      <div className="text-[13px] font-bold text-[#004d40] bg-[#4a875b]/[0.06] border-l-[3px] border-[#4a875b] rounded-sm px-2.5 py-1.5 mb-3">
         プロテイン発送先の登録
       </div>
 
@@ -446,7 +446,7 @@ function Field({
           <span className="text-[#c44] text-[8.5px] font-bold">必須</span>
         )}
         {hint && (
-          <span className="text-[9px] text-zinc-400 font-normal ml-1">
+          <span className="text-[9px] text-[#a59b8c] font-normal ml-1">
             ({hint})
           </span>
         )}
@@ -459,7 +459,7 @@ function Field({
         autoComplete={autoComplete}
         inputMode={inputMode}
         disabled={disabled}
-        className="border border-zinc-300 rounded-md px-2.5 py-1.5 text-[11.5px] bg-white text-zinc-900 outline-none focus:border-[#00897b] focus:ring-2 focus:ring-[#00897b]/30"
+        className="border border-zinc-300 rounded-md px-2.5 py-1.5 text-[11.5px] bg-[#fffdf8] text-[#2b2620] outline-none focus:border-[#4a875b] focus:ring-2 focus:ring-[#4a875b]/30"
       />
     </div>
   );
@@ -478,7 +478,7 @@ function Step7Permission({
 }) {
   return (
     <div className="flex-1 flex flex-col items-center justify-center text-center z-10 pb-4">
-      <div className="w-20 h-20 mb-4 rounded-2xl border border-[#00897b]/20 bg-[#00897b]/[0.08] flex items-center justify-center">
+      <div className="w-20 h-20 mb-4 rounded-2xl border border-[#4a875b]/20 bg-[#4a875b]/[0.08] flex items-center justify-center">
         <BellIcon />
       </div>
       <h1 className="text-[20px] font-bold text-[#004d40] leading-snug mb-2.5">
@@ -498,14 +498,14 @@ function Step7Permission({
         <button
           type="button"
           onClick={onPermit}
-          className="w-full bg-[#00897b] hover:bg-[#00695c] text-white rounded-xl py-3 text-[13px] font-bold shadow-md shadow-[#00897b]/25 transition-colors mb-2"
+          className="w-full bg-[#4a875b] hover:bg-[#34603f] text-white rounded-xl py-3 text-[13px] font-bold shadow-md shadow-[#4a875b]/25 transition-colors mb-2"
         >
           メール通知を ON にする
         </button>
         <button
           type="button"
           onClick={onSkip}
-          className="block w-full text-[11px] text-zinc-400 py-1.5 hover:text-zinc-600 transition-colors"
+          className="block w-full text-[11px] text-[#a59b8c] py-1.5 hover:text-zinc-600 transition-colors"
         >
           OFF のまま進む (後で /設定 から変更可)
         </button>
@@ -521,7 +521,7 @@ function Step7Permission({
 function Step8() {
   return (
     <div className="flex-1 flex flex-col items-center justify-center text-center z-10 pb-4">
-      <div className="w-[110px] h-[110px] rounded-full shadow-lg shadow-[#00897b]/20 mb-5 overflow-hidden bg-white anim-char-pop">
+      <div className="w-[110px] h-[110px] rounded-full shadow-lg shadow-[#4a875b]/20 mb-5 overflow-hidden bg-[#fffdf8] anim-char-pop">
         <div className="w-full h-full relative scale-[1.2]">
           <Image
             src="/images/nori-character.png"

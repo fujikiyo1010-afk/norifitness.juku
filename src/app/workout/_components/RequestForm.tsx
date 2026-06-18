@@ -122,12 +122,12 @@ export function RequestForm({
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-[#f9f5ed]">
       <div className="mx-auto max-w-[460px] px-4 py-6">
-        <div className="bg-white border border-[#e8ebe9] rounded-2xl overflow-hidden">
+        <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl overflow-hidden">
           {/* ヘッダー */}
-          <div className="px-4 py-3 border-b border-[#e8ebe9] flex items-center gap-2">
-            <Link href={config.backHref} className="text-zinc-900">
+          <div className="px-4 py-3 border-b border-[#e7dcc9] flex items-center gap-2">
+            <Link href={config.backHref} className="text-[#2b2620]">
               <svg
                 className="w-5 h-5"
                 viewBox="0 0 24 24"
@@ -140,18 +140,18 @@ export function RequestForm({
                 <path d="m15 18-6-6 6-6" />
               </svg>
             </Link>
-            <div className="flex-1 text-center text-sm font-bold text-zinc-900">
+            <div className="flex-1 text-center text-sm font-bold text-[#2b2620]">
               {config.title}
             </div>
             <div className="w-5 h-5" />
           </div>
 
           {/* ヒーロー */}
-          <div className="px-4 py-5 bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] border-b border-[#e8ebe9] text-center">
-            <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white border border-[#e8ebe9] mb-2.5 text-[#00695c]">
+          <div className="px-4 py-5 bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] border-b border-[#e7dcc9] text-center">
+            <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#fffdf8] border border-[#e7dcc9] mb-2.5 text-[#34603f]">
               {config.heroIcon}
             </div>
-            <div className="text-base font-bold text-zinc-900 leading-tight mb-2">
+            <div className="text-base font-bold text-[#2b2620] leading-tight mb-2">
               {config.heroTitle}
             </div>
             <div className="text-[11px] text-zinc-700 leading-relaxed">
@@ -160,15 +160,15 @@ export function RequestForm({
           </div>
 
           {/* 現状情報 */}
-          <div className="m-4 p-3.5 rounded-[10px] bg-[#fafafa] border border-[#e8ebe9]">
-            <div className="text-[10px] font-bold text-zinc-500 tracking-widest mb-1.5">
+          <div className="m-4 p-3.5 rounded-[10px] bg-[#fafafa] border border-[#e7dcc9]">
+            <div className="text-[10px] font-bold text-[#6a6256] tracking-widest mb-1.5">
               {config.currentInfoLabel}
             </div>
             <dl className="grid grid-cols-[80px_1fr] gap-y-1 gap-x-3 text-xs">
               {currentInfo.map((item) => (
                 <div key={item.label} className="contents">
-                  <dt className="text-zinc-500 text-[11px]">{item.label}</dt>
-                  <dd className="text-zinc-900 font-semibold m-0">
+                  <dt className="text-[#6a6256] text-[11px]">{item.label}</dt>
+                  <dd className="text-[#2b2620] font-semibold m-0">
                     {item.value}
                   </dd>
                 </div>
@@ -179,12 +179,12 @@ export function RequestForm({
           {/* テキストエリア */}
           <div className="px-4 pb-4">
             <div className="flex items-baseline gap-1.5 mb-2">
-              <label className="text-xs font-bold text-zinc-900">
+              <label className="text-xs font-bold text-[#2b2620]">
                 変更したい内容
               </label>
               <span className="text-[10px] text-rose-600 font-medium">必須</span>
             </div>
-            <p className="text-[11px] text-zinc-500 leading-relaxed mb-2.5">
+            <p className="text-[11px] text-[#6a6256] leading-relaxed mb-2.5">
               {config.inputHint}
             </p>
             <textarea
@@ -193,9 +193,9 @@ export function RequestForm({
               placeholder={config.placeholder}
               rows={6}
               maxLength={2000}
-              className="w-full px-3 py-2.5 text-[13px] border border-[#e8ebe9] rounded-[10px] bg-white text-zinc-900 resize-y leading-relaxed focus:outline-none focus:border-[#00897b]"
+              className="w-full px-3 py-2.5 text-[13px] border border-[#e7dcc9] rounded-[10px] bg-[#fffdf8] text-[#2b2620] resize-y leading-relaxed focus:outline-none focus:border-[#4a875b]"
             />
-            <div className="mt-1.5 text-[10px] text-zinc-400 text-right">
+            <div className="mt-1.5 text-[10px] text-[#a59b8c] text-right">
               {text.length} / 2000
             </div>
           </div>
@@ -205,7 +205,7 @@ export function RequestForm({
             <div className="text-[10px] font-bold text-[#b8860b] mb-1.5">
               こんな時にどうぞ
             </div>
-            <ul className="pl-4 text-[11px] text-zinc-900 leading-relaxed space-y-0.5">
+            <ul className="pl-4 text-[11px] text-[#2b2620] leading-relaxed space-y-0.5">
               {config.examples.map((ex, i) => (
                 <li key={i}>{ex}</li>
               ))}
@@ -220,10 +220,10 @@ export function RequestForm({
           )}
 
           {/* フッタ */}
-          <div className="bg-white border-t border-[#e8ebe9] px-4 py-3 flex gap-2 sticky bottom-0">
+          <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2 sticky bottom-0">
             <Link
               href={config.backHref}
-              className="px-4 py-3 bg-white text-zinc-900 border border-[#e8ebe9] rounded-2xl text-[12px] font-bold text-center"
+              className="px-4 py-3 bg-[#fffdf8] text-[#2b2620] border border-[#e7dcc9] rounded-2xl text-[12px] font-bold text-center"
             >
               キャンセル
             </Link>
@@ -231,7 +231,7 @@ export function RequestForm({
               type="button"
               disabled={isPending}
               onClick={handleSubmit}
-              className="flex-1 px-4 py-3 bg-[#00897b] hover:bg-[#00695c] text-white rounded-2xl text-sm font-bold disabled:opacity-50 transition-colors"
+              className="flex-1 px-4 py-3 bg-[#4a875b] hover:bg-[#34603f] text-white rounded-2xl text-sm font-bold disabled:opacity-50 transition-colors"
             >
               {isPending ? "送信中..." : "送信する"}
             </button>

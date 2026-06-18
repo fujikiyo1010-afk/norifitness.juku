@@ -89,15 +89,15 @@ export function ExamView({
     return (
       <div className="px-4 pt-6 pb-8 space-y-5">
         <div className="bg-[#e0f2f1] border border-[#b2dfdb] rounded-2xl px-5 py-4">
-          <div className="text-[10px] font-bold text-[#00695c] tracking-widest mb-1.5">
+          <div className="text-[10px] font-bold text-[#34603f] tracking-widest mb-1.5">
             テスト
           </div>
-          <h1 className="text-[18px] font-bold text-zinc-900 leading-tight">
+          <h1 className="text-[18px] font-bold text-[#2b2620] leading-tight">
             {exam.name}
           </h1>
         </div>
 
-        <div className="bg-white border border-[#e8ebe9] rounded-2xl px-5 py-4 space-y-2">
+        <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl px-5 py-4 space-y-2">
           <Row label="問題数" value={`${total} 問`} />
           <Row label="合格ライン" value={`${exam.passing_score} %`} />
           <Row label="制限時間" value="なし" />
@@ -114,10 +114,10 @@ export function ExamView({
             <div className="text-[10px] font-bold tracking-widest mb-1">
               前回の結果
             </div>
-            <div className="text-[14px] font-bold text-zinc-900">
+            <div className="text-[14px] font-bold text-[#2b2620]">
               {latestAttempt.passed ? "✓ 合格" : "△ 不合格"} ・ {latestAttempt.score_percent} 点
             </div>
-            <div className="text-[10px] text-zinc-500 font-mono mt-1">
+            <div className="text-[10px] text-[#6a6256] font-mono mt-1">
               {new Date(latestAttempt.finished_at).toLocaleString("ja-JP")}
             </div>
           </div>
@@ -126,14 +126,14 @@ export function ExamView({
         <button
           type="button"
           onClick={start}
-          className="w-full bg-[#00897b] text-white rounded-2xl px-4 py-3.5 text-[14px] font-bold hover:bg-[#00695c] transition-colors"
+          className="w-full bg-[#4a875b] text-white rounded-2xl px-4 py-3.5 text-[14px] font-bold hover:bg-[#34603f] transition-colors"
         >
           {latestAttempt ? "もう一度 受ける" : "開始する"}
         </button>
 
         <Link
           href={`/courses/${courseId}`}
-          className="block text-center text-[12px] text-zinc-500 hover:underline"
+          className="block text-center text-[12px] text-[#6a6256] hover:underline"
         >
           ← 章に戻る
         </Link>
@@ -153,7 +153,7 @@ export function ExamView({
       <div className="px-4 pt-5 pb-8 space-y-5">
         {/* 進捗バー */}
         <div>
-          <div className="flex justify-between items-baseline text-[11px] text-zinc-500 mb-1.5">
+          <div className="flex justify-between items-baseline text-[11px] text-[#6a6256] mb-1.5">
             <span className="font-mono">
               問題 {currentIdx + 1} / {total}
             </span>
@@ -161,15 +161,15 @@ export function ExamView({
           </div>
           <div className="h-[5px] rounded-full bg-zinc-100 overflow-hidden">
             <div
-              className="h-full bg-[#00897b] rounded-full transition-[width] duration-300"
+              className="h-full bg-[#4a875b] rounded-full transition-[width] duration-300"
               style={{ width: `${((currentIdx + 1) / total) * 100}%` }}
             />
           </div>
         </div>
 
         {/* 問題文 */}
-        <div className="bg-white border border-[#e8ebe9] rounded-2xl px-5 py-4">
-          <p className="text-[14px] text-zinc-900 leading-[1.7] whitespace-pre-wrap">
+        <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl px-5 py-4">
+          <p className="text-[14px] text-[#2b2620] leading-[1.7] whitespace-pre-wrap">
             {currentQuestion.question_text}
           </p>
         </div>
@@ -186,20 +186,20 @@ export function ExamView({
                 onClick={() => selectAnswer(c.id)}
                 className={`w-full text-left flex items-center gap-3 rounded-2xl px-4 py-3 border transition-colors ${
                   selected
-                    ? "bg-[#e0f2f1] border-[#00897b]"
-                    : "bg-white border-[#e8ebe9] hover:bg-zinc-50"
+                    ? "bg-[#e0f2f1] border-[#4a875b]"
+                    : "bg-[#fffdf8] border-[#e7dcc9] hover:bg-[#f9f5ed]"
                 }`}
               >
                 <span
                   className={`w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-bold flex-shrink-0 ${
                     selected
-                      ? "bg-[#00897b] text-white"
+                      ? "bg-[#4a875b] text-white"
                       : "bg-zinc-100 text-zinc-600"
                   }`}
                 >
                   {labelLetter}
                 </span>
-                <span className="text-[13px] text-zinc-900 leading-[1.6]">
+                <span className="text-[13px] text-[#2b2620] leading-[1.6]">
                   {c.label}
                 </span>
               </button>
@@ -219,7 +219,7 @@ export function ExamView({
             type="button"
             onClick={goPrev}
             disabled={currentIdx === 0 || pending}
-            className="flex-1 bg-white border border-[#e8ebe9] rounded-2xl px-4 py-3 text-[13px] font-bold text-zinc-700 hover:bg-zinc-50 transition-colors disabled:opacity-40"
+            className="flex-1 bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl px-4 py-3 text-[13px] font-bold text-zinc-700 hover:bg-[#f9f5ed] transition-colors disabled:opacity-40"
           >
             ← 前へ
           </button>
@@ -228,7 +228,7 @@ export function ExamView({
               type="button"
               onClick={submitAll}
               disabled={!canSubmit || pending}
-              className="flex-1 bg-[#00897b] text-white rounded-2xl px-4 py-3 text-[13px] font-bold hover:bg-[#00695c] transition-colors disabled:opacity-50"
+              className="flex-1 bg-[#4a875b] text-white rounded-2xl px-4 py-3 text-[13px] font-bold hover:bg-[#34603f] transition-colors disabled:opacity-50"
             >
               {pending ? "採点中..." : "採点する"}
             </button>
@@ -237,14 +237,14 @@ export function ExamView({
               type="button"
               onClick={goNext}
               disabled={!currentAnswer || pending}
-              className="flex-1 bg-[#00897b] text-white rounded-2xl px-4 py-3 text-[13px] font-bold hover:bg-[#00695c] transition-colors disabled:opacity-50"
+              className="flex-1 bg-[#4a875b] text-white rounded-2xl px-4 py-3 text-[13px] font-bold hover:bg-[#34603f] transition-colors disabled:opacity-50"
             >
               次へ →
             </button>
           )}
         </div>
 
-        <p className="text-center text-[10px] text-zinc-400 font-mono">
+        <p className="text-center text-[10px] text-[#a59b8c] font-mono">
           全 {total} 問 ・ 全問回答後に採点
         </p>
       </div>
@@ -274,8 +274,8 @@ export function ExamView({
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-[12px] text-zinc-500">{label}</span>
-      <span className="text-[14px] font-bold text-zinc-900 font-mono">
+      <span className="text-[12px] text-[#6a6256]">{label}</span>
+      <span className="text-[14px] font-bold text-[#2b2620] font-mono">
         {value}
       </span>
     </div>
@@ -330,10 +330,10 @@ function ResultsView({
         <div className="text-[10px] font-bold tracking-widest mb-1.5">
           {passed ? "✓ 合格" : "△ 不合格"}
         </div>
-        <div className="text-[36px] font-bold text-zinc-900 font-mono leading-none mb-1">
+        <div className="text-[36px] font-bold text-[#2b2620] font-mono leading-none mb-1">
           {scorePercent}
         </div>
-        <div className="text-[10px] text-zinc-500 font-mono">/ 100 点</div>
+        <div className="text-[10px] text-[#6a6256] font-mono">/ 100 点</div>
         <div className="text-[11px] text-zinc-600 mt-2">
           合格ライン {exam.passing_score} 点
         </div>
@@ -341,30 +341,30 @@ function ResultsView({
 
       {/* 振り返り */}
       <div>
-        <h2 className="text-[13px] font-bold text-zinc-900 mb-2.5">
+        <h2 className="text-[13px] font-bold text-[#2b2620] mb-2.5">
           振り返り
         </h2>
         <div className="space-y-3">
           {detailed.map((d, idx) => (
             <div
               key={d.question.id}
-              className="bg-white border border-[#e8ebe9] rounded-2xl px-4 py-3.5"
+              className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl px-4 py-3.5"
             >
               <div className="flex items-center gap-2 mb-1.5">
                 <span
                   className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0 ${
                     d.isCorrect
-                      ? "bg-[#00897b] text-white"
+                      ? "bg-[#4a875b] text-white"
                       : "bg-rose-500 text-white"
                   }`}
                 >
                   {d.isCorrect ? "✓" : "×"}
                 </span>
-                <span className="text-[11px] font-bold text-zinc-500 font-mono">
+                <span className="text-[11px] font-bold text-[#6a6256] font-mono">
                   問題 {idx + 1}
                 </span>
               </div>
-              <p className="text-[13px] text-zinc-900 leading-[1.6] mb-2 whitespace-pre-wrap">
+              <p className="text-[13px] text-[#2b2620] leading-[1.6] mb-2 whitespace-pre-wrap">
                 {d.question.question_text}
               </p>
               <ChoicesReview
@@ -372,8 +372,8 @@ function ResultsView({
                 selectedChoiceId={d.selectedChoiceId}
               />
               {d.question.explanation ? (
-                <div className="mt-2.5 bg-[#f8f9fa] border-l-2 border-[#00897b] px-3 py-2 rounded-r">
-                  <div className="text-[10px] font-bold text-[#00695c] tracking-widest mb-0.5">
+                <div className="mt-2.5 bg-[#f8f9fa] border-l-2 border-[#4a875b] px-3 py-2 rounded-r">
+                  <div className="text-[10px] font-bold text-[#34603f] tracking-widest mb-0.5">
                     解説
                   </div>
                   <p className="text-[12px] text-zinc-700 leading-[1.7] whitespace-pre-wrap">
@@ -391,14 +391,14 @@ function ResultsView({
         <button
           type="button"
           onClick={onRetry}
-          className="flex-1 bg-white border border-[#e8ebe9] rounded-2xl px-4 py-3 text-[13px] font-bold text-zinc-700 hover:bg-zinc-50 transition-colors"
+          className="flex-1 bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl px-4 py-3 text-[13px] font-bold text-zinc-700 hover:bg-[#f9f5ed] transition-colors"
         >
           もう一度 受ける
         </button>
         <button
           type="button"
           onClick={() => router.push(`/courses/${courseId}`)}
-          className="flex-1 bg-[#00897b] text-white rounded-2xl px-4 py-3 text-[13px] font-bold hover:bg-[#00695c] transition-colors"
+          className="flex-1 bg-[#4a875b] text-white rounded-2xl px-4 py-3 text-[13px] font-bold hover:bg-[#34603f] transition-colors"
         >
           章に戻る
         </button>
@@ -420,8 +420,8 @@ function ChoicesReview({
         const letter = String.fromCharCode("A".charCodeAt(0) + idx);
         const isSelected = selectedChoiceId === c.id;
         const isCorrect = question.correct_choice_id === c.id;
-        let bg = "bg-white border-zinc-200";
-        if (isCorrect) bg = "bg-[#e0f2f1] border-[#00897b]";
+        let bg = "bg-[#fffdf8] border-zinc-200";
+        if (isCorrect) bg = "bg-[#e0f2f1] border-[#4a875b]";
         else if (isSelected) bg = "bg-rose-50 border-rose-300";
 
         return (
@@ -432,10 +432,10 @@ function ChoicesReview({
             <span
               className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${
                 isCorrect
-                  ? "bg-[#00897b] text-white"
+                  ? "bg-[#4a875b] text-white"
                   : isSelected
                   ? "bg-rose-500 text-white"
-                  : "bg-zinc-100 text-zinc-500"
+                  : "bg-zinc-100 text-[#6a6256]"
               }`}
             >
               {letter}
@@ -444,7 +444,7 @@ function ChoicesReview({
               {c.label}
             </span>
             {isCorrect ? (
-              <span className="text-[10px] font-bold text-[#00897b] flex-shrink-0">
+              <span className="text-[10px] font-bold text-[#4a875b] flex-shrink-0">
                 正解
               </span>
             ) : isSelected ? (

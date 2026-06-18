@@ -66,8 +66,8 @@ export function PWAInstallBanner() {
   return (
     <>
       {/* バナー本体 */}
-      <div className="fixed bottom-[7rem] left-3 right-3 z-40 mx-auto max-w-md bg-white border border-[#e8ebe9] rounded-xl shadow-lg p-3 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg bg-[#00897b] text-white flex items-center justify-center flex-shrink-0">
+      <div className="fixed bottom-[7rem] left-3 right-3 z-40 mx-auto max-w-md bg-[#fffdf8] border border-[#e7dcc9] rounded-xl shadow-lg p-3 flex items-center gap-3">
+        <div className="w-10 h-10 rounded-lg bg-[#4a875b] text-white flex items-center justify-center flex-shrink-0">
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -82,7 +82,7 @@ export function PWAInstallBanner() {
           </svg>
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-bold text-zinc-900 mb-0.5">
+          <div className="text-sm font-bold text-[#2b2620] mb-0.5">
             ホーム画面に追加すると快適
           </div>
           <div className="text-[11px] text-zinc-600">
@@ -92,13 +92,13 @@ export function PWAInstallBanner() {
         <div className="flex flex-col gap-1.5">
           <button
             onClick={() => setShowGuide(true)}
-            className="text-[11px] px-3 py-1.5 bg-[#00897b] text-white rounded-md hover:bg-[#00695c] transition-colors whitespace-nowrap"
+            className="text-[11px] px-3 py-1.5 bg-[#4a875b] text-white rounded-md hover:bg-[#34603f] transition-colors whitespace-nowrap"
           >
             使い方を見る
           </button>
           <button
             onClick={handleDismiss}
-            className="text-[11px] px-3 py-1 text-zinc-500 hover:text-zinc-700"
+            className="text-[11px] px-3 py-1 text-[#6a6256] hover:text-zinc-700"
           >
             閉じる
           </button>
@@ -112,16 +112,16 @@ export function PWAInstallBanner() {
           onClick={() => setShowGuide(false)}
         >
           <div
-            className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[85vh] overflow-y-auto"
+            className="bg-[#fffdf8] rounded-xl shadow-2xl max-w-md w-full max-h-[85vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="px-5 py-4 border-b border-[#e8ebe9] flex items-center justify-between sticky top-0 bg-white">
-              <h2 className="text-base font-bold text-zinc-900">
+            <div className="px-5 py-4 border-b border-[#e7dcc9] flex items-center justify-between sticky top-0 bg-[#fffdf8]">
+              <h2 className="text-base font-bold text-[#2b2620]">
                 ホーム画面に追加する方法
               </h2>
               <button
                 onClick={() => setShowGuide(false)}
-                className="text-zinc-400 hover:text-zinc-700 text-xl leading-none"
+                className="text-[#a59b8c] hover:text-zinc-700 text-xl leading-none"
                 aria-label="閉じる"
               >
                 ✕
@@ -132,20 +132,20 @@ export function PWAInstallBanner() {
               {/* iPhone (Safari) */}
               <section>
                 <h3 className="text-sm font-bold text-[#004d40] mb-2 flex items-center gap-1.5">
-                  <span className="w-1 h-4 bg-[#00897b] rounded-full" />
+                  <span className="w-1 h-4 bg-[#4a875b] rounded-full" />
                   iPhone (Safari) の場合
                 </h3>
                 <ol className="text-xs text-zinc-700 space-y-2 leading-relaxed pl-1">
                   <li>
                     <b>1.</b> Safari でこのページを開いた状態で、画面下中央の
-                    <span className="inline-block mx-1 px-1.5 py-0.5 bg-[#f8f9fa] border border-[#e8ebe9] rounded">
+                    <span className="inline-block mx-1 px-1.5 py-0.5 bg-[#f8f9fa] border border-[#e7dcc9] rounded">
                       共有ボタン (□↑)
                     </span>
                     をタップ
                   </li>
                   <li>
                     <b>2.</b> 出てきたメニューを下にスクロールして
-                    <span className="inline-block mx-1 px-1.5 py-0.5 bg-[#f8f9fa] border border-[#e8ebe9] rounded">
+                    <span className="inline-block mx-1 px-1.5 py-0.5 bg-[#f8f9fa] border border-[#e7dcc9] rounded">
                       ホーム画面に追加
                     </span>
                     を選ぶ
@@ -162,20 +162,20 @@ export function PWAInstallBanner() {
               {/* Android (Chrome) */}
               <section>
                 <h3 className="text-sm font-bold text-[#004d40] mb-2 flex items-center gap-1.5">
-                  <span className="w-1 h-4 bg-[#00897b] rounded-full" />
+                  <span className="w-1 h-4 bg-[#4a875b] rounded-full" />
                   Android (Chrome) の場合
                 </h3>
                 <ol className="text-xs text-zinc-700 space-y-2 leading-relaxed pl-1">
                   <li>
                     <b>1.</b> Chrome でこのページを開いた状態で、画面右上の
-                    <span className="inline-block mx-1 px-1.5 py-0.5 bg-[#f8f9fa] border border-[#e8ebe9] rounded">
+                    <span className="inline-block mx-1 px-1.5 py-0.5 bg-[#f8f9fa] border border-[#e7dcc9] rounded">
                       ︙ (メニュー)
                     </span>
                     をタップ
                   </li>
                   <li>
                     <b>2.</b> メニューから
-                    <span className="inline-block mx-1 px-1.5 py-0.5 bg-[#f8f9fa] border border-[#e8ebe9] rounded">
+                    <span className="inline-block mx-1 px-1.5 py-0.5 bg-[#f8f9fa] border border-[#e7dcc9] rounded">
                       ホーム画面に追加 / アプリをインストール
                     </span>
                     を選ぶ
@@ -197,13 +197,13 @@ export function PWAInstallBanner() {
               </section>
             </div>
 
-            <div className="px-5 py-4 border-t border-[#e8ebe9] flex justify-end gap-2 sticky bottom-0 bg-white">
+            <div className="px-5 py-4 border-t border-[#e7dcc9] flex justify-end gap-2 sticky bottom-0 bg-[#fffdf8]">
               <button
                 onClick={() => {
                   handleDismiss();
                   setShowGuide(false);
                 }}
-                className="text-xs px-4 py-2 bg-[#00897b] text-white rounded-md hover:bg-[#00695c]"
+                className="text-xs px-4 py-2 bg-[#4a875b] text-white rounded-md hover:bg-[#34603f]"
               >
                 わかった、もう表示しない
               </button>

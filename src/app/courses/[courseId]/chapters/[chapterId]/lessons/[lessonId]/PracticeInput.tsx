@@ -32,19 +32,19 @@ export function PracticeInput({
   const [justSaved, setJustSaved] = useState(false);
 
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white overflow-hidden">
+    <div className="rounded-lg border border-zinc-200 bg-[#fffdf8] overflow-hidden">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full text-left px-4 py-3 flex items-center gap-2 hover:bg-zinc-50 transition-colors"
+        className="w-full text-left px-4 py-3 flex items-center gap-2 hover:bg-[#f9f5ed] transition-colors"
       >
-        <span className="text-zinc-500 text-sm shrink-0">
+        <span className="text-[#6a6256] text-sm shrink-0">
           {isOpen ? "▼" : "▶"}
         </span>
-        <span className="text-base font-semibold text-zinc-900">
+        <span className="text-base font-semibold text-[#2b2620]">
           🚀 今週これを試す
         </span>
-        <span className="text-xs text-zinc-500">(任意)</span>
+        <span className="text-xs text-[#6a6256]">(任意)</span>
         {existingCount > 0 && !isOpen && (
           <span className="ml-auto text-xs rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5">
             {existingCount} 件宣言済
@@ -54,13 +54,13 @@ export function PracticeInput({
 
       {isOpen && (
         <div className="border-t border-zinc-200 p-4 space-y-3">
-          <p className="text-xs text-zinc-500 leading-relaxed">
+          <p className="text-xs text-[#6a6256] leading-relaxed">
             このレッスンで学んだことを 1 行で宣言しましょう。 試したら振り返りを残せます。
             <br />
             一覧と振り返り編集は{" "}
             <Link
               href="/my-log/actions"
-              className="text-[#00695c] hover:underline font-bold"
+              className="text-[#34603f] hover:underline font-bold"
             >
               学習 → 実践リスト
             </Link>
@@ -76,10 +76,10 @@ export function PracticeInput({
             placeholder="例: ジムで RPE 8 まで追い込む"
             rows={2}
             maxLength={280}
-            className="w-full rounded-md border border-zinc-300 p-2.5 text-sm focus:outline-none focus:border-[#00897b]"
+            className="w-full rounded-md border border-zinc-300 p-2.5 text-sm focus:outline-none focus:border-[#4a875b]"
           />
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-zinc-500">{text.length} / 280</span>
+            <span className="text-[10px] text-[#6a6256]">{text.length} / 280</span>
             <div className="flex items-center gap-3">
               {justSaved && (
                 <span className="text-xs text-emerald-700 font-medium">
@@ -105,7 +105,7 @@ export function PracticeInput({
                     }
                   });
                 }}
-                className="rounded-full bg-[#00897b] px-4 py-1.5 text-[12px] font-bold text-white hover:bg-[#00695c] disabled:bg-zinc-300"
+                className="rounded-full bg-[#4a875b] px-4 py-1.5 text-[12px] font-bold text-white hover:bg-[#34603f] disabled:bg-zinc-300"
               >
                 {saving ? "保存中..." : "宣言する"}
               </button>

@@ -52,9 +52,9 @@ export function ActionsClient({
         <button
           type="button"
           onClick={() => setShowNew(true)}
-          className="text-[12px] font-bold text-[#00695c] hover:text-[#004d40] flex items-center gap-1"
+          className="text-[12px] font-bold text-[#34603f] hover:text-[#004d40] flex items-center gap-1"
         >
-          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#00897b] text-white text-[12px]">
+          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#4a875b] text-white text-[12px]">
             +
           </span>
           新規追加
@@ -65,7 +65,7 @@ export function ActionsClient({
       {totalCount === 0 ? (
         <EmptyHero onAddClick={() => setShowNew(true)} />
       ) : list.length === 0 ? (
-        <div className="bg-white border border-dashed border-[#e8ebe9] rounded-2xl p-8 text-center text-[12px] text-zinc-500">
+        <div className="bg-[#fffdf8] border border-dashed border-[#e7dcc9] rounded-2xl p-8 text-center text-[12px] text-[#6a6256]">
           {tab === "untried"
             ? "未試行のアクションはありません 🎉"
             : "まだ試した記録はありません。"}
@@ -114,9 +114,9 @@ export function ActionsClient({
             placeholder="例: ジムで RPE 8 まで追い込む"
             rows={3}
             maxLength={280}
-            className="w-full rounded-md border border-zinc-300 p-3 text-sm focus:outline-none focus:border-[#00897b]"
+            className="w-full rounded-md border border-zinc-300 p-3 text-sm focus:outline-none focus:border-[#4a875b]"
           />
-          <p className="mt-1 text-[10px] text-zinc-500 text-right">
+          <p className="mt-1 text-[10px] text-[#6a6256] text-right">
             {newText.length} / 280
           </p>
           <div className="mt-4 flex justify-end gap-2">
@@ -143,7 +143,7 @@ export function ActionsClient({
                   }
                 });
               }}
-              className="rounded-full bg-[#00897b] px-5 py-2 text-[12px] font-bold text-white hover:bg-[#00695c] disabled:bg-zinc-300"
+              className="rounded-full bg-[#4a875b] px-5 py-2 text-[12px] font-bold text-white hover:bg-[#34603f] disabled:bg-zinc-300"
             >
               {savingNew ? "保存中..." : "宣言する"}
             </button>
@@ -192,8 +192,8 @@ function TabBtn({
       onClick={onClick}
       className={
         active
-          ? "px-4 py-1.5 rounded-full bg-white text-[#00695c] text-[12px] font-bold shadow-sm"
-          : "px-4 py-1.5 rounded-full text-zinc-500 text-[12px] font-medium hover:text-zinc-700"
+          ? "px-4 py-1.5 rounded-full bg-[#fffdf8] text-[#34603f] text-[12px] font-bold shadow-sm"
+          : "px-4 py-1.5 rounded-full text-[#6a6256] text-[12px] font-medium hover:text-zinc-700"
       }
     >
       {label}
@@ -203,8 +203,8 @@ function TabBtn({
 
 function EmptyHero({ onAddClick }: { onAddClick: () => void }) {
   return (
-    <div className="bg-white border border-dashed border-[#e8ebe9] rounded-2xl p-8 text-center">
-      <p className="text-[13px] text-zinc-500 leading-relaxed">
+    <div className="bg-[#fffdf8] border border-dashed border-[#e7dcc9] rounded-2xl p-8 text-center">
+      <p className="text-[13px] text-[#6a6256] leading-relaxed">
         実践アクションがまだありません。
         <br />
         レッスン下部から宣言するか、 自発的に追加してみましょう。
@@ -213,13 +213,13 @@ function EmptyHero({ onAddClick }: { onAddClick: () => void }) {
         <button
           type="button"
           onClick={onAddClick}
-          className="rounded-full bg-[#00897b] text-white px-4 py-2 text-[12px] font-bold hover:bg-[#00695c]"
+          className="rounded-full bg-[#4a875b] text-white px-4 py-2 text-[12px] font-bold hover:bg-[#34603f]"
         >
           自発的に追加 →
         </button>
         <Link
           href="/courses"
-          className="rounded-full border border-zinc-300 text-zinc-700 px-4 py-2 text-[12px] font-bold hover:bg-zinc-50"
+          className="rounded-full border border-zinc-300 text-zinc-700 px-4 py-2 text-[12px] font-bold hover:bg-[#f9f5ed]"
         >
           コースから始める →
         </Link>
@@ -247,15 +247,15 @@ function ActionCard({
       : null;
 
   return (
-    <li className="bg-white border border-[#e8ebe9] rounded-2xl px-4 py-3.5">
+    <li className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl px-4 py-3.5">
       <div className="flex items-center gap-3.5">
         <button
           type="button"
           onClick={row.tried ? onUncheck : onCheck}
           className={
             row.tried
-              ? "flex-shrink-0 w-9 h-9 rounded-full bg-[#00897b] text-white text-[18px] font-bold flex items-center justify-center hover:bg-[#00695c] self-center"
-              : "flex-shrink-0 w-9 h-9 rounded-full border-2 border-zinc-300 hover:border-[#00897b] flex items-center justify-center text-zinc-300 hover:text-[#00897b] self-center"
+              ? "flex-shrink-0 w-9 h-9 rounded-full bg-[#4a875b] text-white text-[18px] font-bold flex items-center justify-center hover:bg-[#34603f] self-center"
+              : "flex-shrink-0 w-9 h-9 rounded-full border-2 border-zinc-300 hover:border-[#4a875b] flex items-center justify-center text-zinc-300 hover:text-[#4a875b] self-center"
           }
           aria-label={row.tried ? "未試行に戻す" : "試したにする"}
           title={row.tried ? "未試行に戻す" : "試したにする"}
@@ -263,22 +263,22 @@ function ActionCard({
           {row.tried ? "✓" : ""}
         </button>
         <div className="flex-1 min-w-0">
-          <p className="text-[14px] text-zinc-900 leading-snug whitespace-pre-wrap">
+          <p className="text-[14px] text-[#2b2620] leading-snug whitespace-pre-wrap">
             {row.planned_action}
           </p>
           {lessonHref ? (
             <Link
               href={lessonHref}
-              className="text-[10px] text-zinc-500 hover:text-zinc-700 mt-1 inline-block truncate max-w-full"
+              className="text-[10px] text-[#6a6256] hover:text-zinc-700 mt-1 inline-block truncate max-w-full"
             >
               {row.course_title} ・ {row.chapter_title} ・ {row.lesson_title}
             </Link>
           ) : (
-            <p className="text-[10px] text-zinc-400 mt-1">自発アクション</p>
+            <p className="text-[10px] text-[#a59b8c] mt-1">自発アクション</p>
           )}
           {row.tried && row.reflection && (
-            <p className="text-[12px] text-zinc-700 mt-2 bg-zinc-50 rounded-md p-2 leading-relaxed whitespace-pre-wrap">
-              <span className="text-[10px] text-zinc-500 mr-1">
+            <p className="text-[12px] text-zinc-700 mt-2 bg-[#f9f5ed] rounded-md p-2 leading-relaxed whitespace-pre-wrap">
+              <span className="text-[10px] text-[#6a6256] mr-1">
                 振り返り:
               </span>
               {row.reflection}
@@ -286,7 +286,7 @@ function ActionCard({
           )}
           <div className="mt-2 flex items-center gap-3 text-[10px]">
             {row.tried && row.tried_at && (
-              <span className="text-zinc-400 font-mono">
+              <span className="text-[#a59b8c] font-mono">
                 試した日 {new Date(row.tried_at).toLocaleDateString("ja-JP")}
               </span>
             )}
@@ -294,7 +294,7 @@ function ActionCard({
               <button
                 type="button"
                 onClick={onOpenReflect}
-                className="text-[#00695c] hover:text-[#004d40] font-bold"
+                className="text-[#34603f] hover:text-[#004d40] font-bold"
               >
                 {row.reflection ? "振り返りを編集" : "振り返りを書く"}
               </button>
@@ -302,7 +302,7 @@ function ActionCard({
             <button
               type="button"
               onClick={onDelete}
-              className="ml-auto text-zinc-400 hover:text-rose-600"
+              className="ml-auto text-[#a59b8c] hover:text-rose-600"
               aria-label="削除"
               title="削除"
             >
@@ -330,15 +330,15 @@ function Modal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl w-full max-w-[440px] p-5 max-h-[90vh] overflow-auto"
+        className="bg-[#fffdf8] rounded-2xl w-full max-w-[440px] p-5 max-h-[90vh] overflow-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-[14px] font-bold text-zinc-900">{title}</h3>
+          <h3 className="text-[14px] font-bold text-[#2b2620]">{title}</h3>
           <button
             type="button"
             onClick={onClose}
-            className="text-zinc-400 hover:text-zinc-700 text-xl leading-none"
+            className="text-[#a59b8c] hover:text-zinc-700 text-xl leading-none"
             aria-label="閉じる"
           >
             ×
@@ -364,7 +364,7 @@ function ReflectionModal({
 
   return (
     <Modal title="振り返りを書く (任意)" onClose={onClose}>
-      <p className="text-[11px] text-zinc-500 mb-2 leading-relaxed whitespace-pre-wrap">
+      <p className="text-[11px] text-[#6a6256] mb-2 leading-relaxed whitespace-pre-wrap">
         宣言: {row.planned_action}
       </p>
       <textarea
@@ -373,9 +373,9 @@ function ReflectionModal({
         placeholder="やってみて分かったこと、 感想、 次に活かすこと..."
         rows={5}
         maxLength={1000}
-        className="w-full rounded-md border border-zinc-300 p-3 text-sm focus:outline-none focus:border-[#00897b]"
+        className="w-full rounded-md border border-zinc-300 p-3 text-sm focus:outline-none focus:border-[#4a875b]"
       />
-      <p className="mt-1 text-[10px] text-zinc-500 text-right">
+      <p className="mt-1 text-[10px] text-[#6a6256] text-right">
         {text.length} / 1000
       </p>
       <div className="mt-4 flex justify-end gap-2">
@@ -396,7 +396,7 @@ function ReflectionModal({
               else alert(r.message);
             });
           }}
-          className="rounded-full bg-[#00897b] px-5 py-2 text-[12px] font-bold text-white hover:bg-[#00695c] disabled:bg-zinc-300"
+          className="rounded-full bg-[#4a875b] px-5 py-2 text-[12px] font-bold text-white hover:bg-[#34603f] disabled:bg-zinc-300"
         >
           {saving ? "保存中..." : "保存"}
         </button>

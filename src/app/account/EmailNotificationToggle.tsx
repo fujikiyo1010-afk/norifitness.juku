@@ -34,10 +34,10 @@ export function EmailNotificationToggle({ initial }: { initial: boolean }) {
       aria-label={`メール通知を${enabled ? "オフ" : "オン"}にする`}
       disabled={pending}
       className={`w-9 h-5 rounded-full flex items-center transition-colors px-0.5 ${
-        enabled ? "bg-[#00897b] justify-end" : "bg-zinc-300 justify-start"
+        enabled ? "bg-[#4a875b] justify-end" : "bg-zinc-300 justify-start"
       } disabled:opacity-50`}
     >
-      <span className="w-4 h-4 rounded-full bg-white shadow-sm" />
+      <span className="w-4 h-4 rounded-full bg-[#fffdf8] shadow-sm" />
     </button>
   );
 }

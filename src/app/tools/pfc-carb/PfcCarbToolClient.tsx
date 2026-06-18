@@ -191,7 +191,7 @@ export function PfcCarbToolClient({
   // 入力 className (前回値で薄色、触ったら通常色)
   const inputClass = (key: string) =>
     `flex-1 border-none outline-none py-2.5 text-base bg-transparent font-mono ${
-      touched[key] || !prevInputs ? "text-zinc-900" : "text-zinc-400"
+      touched[key] || !prevInputs ? "text-[#2b2620]" : "text-[#a59b8c]"
     }`;
 
   return (
@@ -199,11 +199,11 @@ export function PfcCarbToolClient({
 
       <div className="flex-1 max-w-[460px] mx-auto w-full pb-10">
         {/* ヒーロー帯 */}
-        <section className="bg-gradient-to-br from-[#e8eaf6] to-[#fffbe6] border-b border-[#e8ebe9] px-6 py-5">
+        <section className="bg-gradient-to-br from-[#e8eaf6] to-[#fffbe6] border-b border-[#e7dcc9] px-6 py-5">
           <h2 className="text-lg font-bold text-[#1a237e] mb-1">
             PFC・カーボサイクル設定
           </h2>
-          <p className="text-[11px] text-zinc-500 leading-relaxed">
+          <p className="text-[11px] text-[#6a6256] leading-relaxed">
             栄養素の数値 + 1 週間の糖質配分 (統合ツール)
           </p>
           {previous && (
@@ -217,8 +217,8 @@ export function PfcCarbToolClient({
         <StepLabel num={1} title="PFC を計算" />
 
         {/* STEP 1 入力カード */}
-        <section className="bg-white border border-[#e8ebe9] rounded-xl mx-4 mb-3 px-5 py-4">
-          <h3 className="text-xs font-bold text-zinc-600 tracking-wide mb-3.5 pb-2.5 border-b border-[#e8ebe9]">
+        <section className="bg-[#fffdf8] border border-[#e7dcc9] rounded-xl mx-4 mb-3 px-5 py-4">
+          <h3 className="text-xs font-bold text-zinc-600 tracking-wide mb-3.5 pb-2.5 border-b border-[#e7dcc9]">
             入力
           </h3>
 
@@ -265,7 +265,7 @@ export function PfcCarbToolClient({
           )}
           {!isFromGoalSheet && calorieHint && (
             <div className="-mt-2.5 mb-3.5">
-              <p className="text-[10px] text-zinc-400 font-mono leading-relaxed">
+              <p className="text-[10px] text-[#a59b8c] font-mono leading-relaxed">
                 前回計算: メンテ {calorieHint.maintenance.toLocaleString()}{" "}
                 kcal / ダイエット時 {calorieHint.diet.toLocaleString()} kcal
               </p>
@@ -295,7 +295,7 @@ export function PfcCarbToolClient({
                   className={`py-2.5 rounded text-[13px] font-bold border transition-colors ${
                     fatRatio === r
                       ? "bg-[#3949ab] border-[#3949ab] text-white"
-                      : "bg-white border-[#e8ebe9] text-zinc-600 hover:border-[#3949ab]"
+                      : "bg-[#fffdf8] border-[#e7dcc9] text-zinc-600 hover:border-[#3949ab]"
                   }`}
                 >
                   {Math.round(r * 100)}%
@@ -309,8 +309,8 @@ export function PfcCarbToolClient({
         <StepLabel num={2} title="カーボサイクル配分" />
 
         {/* STEP 2 入力 (強度) */}
-        <section className="bg-white border border-[#e8ebe9] rounded-xl mx-4 mb-3 px-5 py-4">
-          <h3 className="text-xs font-bold text-zinc-600 tracking-wide mb-3 pb-2.5 border-b border-[#e8ebe9]">
+        <section className="bg-[#fffdf8] border border-[#e7dcc9] rounded-xl mx-4 mb-3 px-5 py-4">
+          <h3 className="text-xs font-bold text-zinc-600 tracking-wide mb-3 pb-2.5 border-b border-[#e7dcc9]">
             トレーニング強度を選択
           </h3>
 
@@ -334,8 +334,8 @@ export function PfcCarbToolClient({
                         ? "bg-[#e65100] border-[#e65100] text-white"
                         : lv === "mid"
                           ? "bg-[#b45309] border-[#b45309] text-white"
-                          : "bg-zinc-500 border-zinc-500 text-white"
-                      : "bg-white border-[#e8ebe9] text-zinc-500 hover:border-[#3949ab]";
+                          : "bg-[#f9f5ed]0 border-zinc-500 text-white"
+                      : "bg-[#fffdf8] border-[#e7dcc9] text-[#6a6256] hover:border-[#3949ab]";
                     return (
                       <button
                         key={lv}
@@ -362,7 +362,7 @@ export function PfcCarbToolClient({
             <br />
             <span className="text-[#b45309] font-bold">中</span> → 腕・肩・有酸素・体幹 (疲労中)
             <br />
-            <span className="text-zinc-500 font-bold">低</span> → 休み・ストレッチ・散歩 (疲労なし)
+            <span className="text-[#6a6256] font-bold">低</span> → 休み・ストレッチ・散歩 (疲労なし)
           </div>
         </section>
 
@@ -391,7 +391,7 @@ export function PfcCarbToolClient({
           <>
             {/* STEP 1 結果カード */}
             <section className="bg-gradient-to-br from-[#e8eaf6] to-[#fffbe6] border border-[rgba(255,235,59,0.4)] rounded-xl mx-4 mb-3 px-5 py-4">
-              <h3 className="text-xs font-bold text-[#283593] tracking-wide mb-3 pb-2.5 border-b border-[#e8ebe9]">
+              <h3 className="text-xs font-bold text-[#283593] tracking-wide mb-3 pb-2.5 border-b border-[#e7dcc9]">
                 ✓ STEP 1 結果
               </h3>
 
@@ -445,12 +445,12 @@ export function PfcCarbToolClient({
 
             {/* STEP 2 結果テーブル */}
             <section className="bg-gradient-to-br from-[#e8eaf6] to-[#fffbe6] border border-[rgba(255,235,59,0.4)] rounded-xl mx-4 mb-3 px-5 py-4">
-              <h3 className="text-xs font-bold text-[#283593] tracking-wide mb-3 pb-2.5 border-b border-[#e8ebe9]">
+              <h3 className="text-xs font-bold text-[#283593] tracking-wide mb-3 pb-2.5 border-b border-[#e7dcc9]">
                 ✓ STEP 2 結果 (1 週間の糖質配分)
               </h3>
 
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse text-center font-mono text-[11px] table-fixed bg-white border border-[#e8ebe9] rounded-lg overflow-hidden">
+                <table className="w-full border-collapse text-center font-mono text-[11px] table-fixed bg-[#fffdf8] border border-[#e7dcc9] rounded-lg overflow-hidden">
                   <thead>
                     <tr>
                       <th className="px-1.5 py-2 bg-[#f8f9fa] text-zinc-700 font-bold text-[10px] border border-[#f0f2f1]" />
@@ -576,7 +576,7 @@ export function PfcCarbToolClient({
                     );
                     router.push("/goal-sheet/edit");
                   }}
-                  className="w-full py-3.5 bg-[#00897b] text-white rounded text-sm font-bold hover:bg-[#00695c] transition-colors"
+                  className="w-full py-3.5 bg-[#4a875b] text-white rounded text-sm font-bold hover:bg-[#34603f] transition-colors"
                 >
                   目標シートに適用 →
                 </button>
@@ -592,7 +592,7 @@ export function PfcCarbToolClient({
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="w-full py-3.5 bg-white border border-[#3949ab] text-[#3949ab] rounded text-sm font-bold hover:bg-[#3949ab]/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="w-full py-3.5 bg-[#fffdf8] border border-[#3949ab] text-[#3949ab] rounded text-sm font-bold hover:bg-[#3949ab]/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {saving
                     ? "保存中..."
@@ -654,7 +654,7 @@ function InputRow({
         className={`flex items-center gap-2.5 border rounded-lg px-3 transition-colors ${
           hasError
             ? "border-[#d32f2f] bg-[#fef5f5] focus-within:border-[#d32f2f]"
-            : "border-[#e8ebe9] bg-white focus-within:border-[#3949ab]"
+            : "border-[#e7dcc9] bg-[#fffdf8] focus-within:border-[#3949ab]"
         }`}
       >
         <input
@@ -667,7 +667,7 @@ function InputRow({
         />
         <span
           className={`text-xs flex-shrink-0 ${
-            hasError ? "text-[#d32f2f]" : "text-zinc-500"
+            hasError ? "text-[#d32f2f]" : "text-[#6a6256]"
           }`}
         >
           {unit}
@@ -693,7 +693,7 @@ function PfcRow({
   pct: number;
 }) {
   return (
-    <div className="flex items-center justify-between bg-white/70 rounded-lg px-3 py-2.5 mb-2 last:mb-0">
+    <div className="flex items-center justify-between bg-[#fffdf8]/70 rounded-lg px-3 py-2.5 mb-2 last:mb-0">
       <div className="flex items-center gap-2.5">
         <div
           className="w-7 h-7 rounded-md flex items-center justify-center text-white font-mono font-bold text-[13px]"
@@ -702,14 +702,14 @@ function PfcRow({
           {badge}
         </div>
         <div>
-          <div className="text-[11px] text-zinc-500">{name}</div>
-          <div className="text-base font-mono font-bold text-zinc-900">
+          <div className="text-[11px] text-[#6a6256]">{name}</div>
+          <div className="text-base font-mono font-bold text-[#2b2620]">
             {grams} g
           </div>
         </div>
       </div>
       <div className="text-right">
-        <div className="text-[11px] text-zinc-500 font-mono">
+        <div className="text-[11px] text-[#6a6256] font-mono">
           {kcal.toLocaleString()} kcal
         </div>
         <div className="text-sm font-mono font-bold text-[#283593]">
@@ -727,7 +727,7 @@ function PfcRow({
 function intensityCellCls(lv: TrainingIntensity | ""): string {
   if (lv === "high") return "bg-[rgba(230,81,0,0.1)] text-[#e65100]";
   if (lv === "mid") return "bg-[rgba(180,83,9,0.1)] text-[#b45309]";
-  if (lv === "low") return "bg-[rgba(136,136,136,0.1)] text-zinc-500";
+  if (lv === "low") return "bg-[rgba(136,136,136,0.1)] text-[#6a6256]";
   return "";
 }
 

@@ -90,7 +90,7 @@ export function ReviewsListView({
     <div className="space-y-4">
       {/* 検索 */}
       <div className="relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none flex items-center">
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#a59b8c] pointer-events-none flex items-center">
           <SearchIcon />
         </span>
         <input
@@ -98,7 +98,7 @@ export function ReviewsListView({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="振り返りを検索(キーワード、レッスン名 等)"
-          className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 pl-10 pr-3 py-2 text-sm"
+          className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-[#fffdf8] dark:bg-zinc-950 pl-10 pr-3 py-2 text-sm"
         />
       </div>
 
@@ -120,7 +120,7 @@ export function ReviewsListView({
 
       {/* 検索中の表示 */}
       {query.trim().length > 0 && (
-        <p className="text-xs text-zinc-500 inline-flex items-center gap-1.5">
+        <p className="text-xs text-[#6a6256] inline-flex items-center gap-1.5">
           <SearchIcon /> 「{query}」でフィルタ中 ({filteredReviews.length} 件)
         </p>
       )}
@@ -153,12 +153,12 @@ function ModeTab({
       onClick={onClick}
       className={`px-3 py-2 text-sm font-medium border-b-2 transition-colors -mb-px ${
         active
-          ? "border-zinc-900 dark:border-zinc-50 text-zinc-900 dark:text-zinc-50"
-          : "border-transparent text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+          ? "border-zinc-900 dark:border-zinc-50 text-[#2b2620] dark:text-zinc-50"
+          : "border-transparent text-[#6a6256] hover:text-zinc-700 dark:hover:text-zinc-300"
       }`}
     >
       {label}
-      <span className="ml-1.5 text-xs rounded-full px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+      <span className="ml-1.5 text-xs rounded-full px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-[#a59b8c]">
         {count}
       </span>
     </button>
@@ -168,7 +168,7 @@ function ModeTab({
 function LatestList({ reviews, query }: { reviews: Review[]; query: string }) {
   if (reviews.length === 0) {
     return (
-      <p className="text-sm text-zinc-500 p-4 text-center">
+      <p className="text-sm text-[#6a6256] p-4 text-center">
         {query.trim().length > 0
           ? "該当する振り返りが見つかりませんでした。"
           : "まだ振り返りがありません。レッスン視聴後に書いてみましょう。"}
@@ -193,7 +193,7 @@ function CourseGroupedList({
 }) {
   if (reviews.length === 0) {
     return (
-      <p className="text-sm text-zinc-500 p-4 text-center">
+      <p className="text-sm text-[#6a6256] p-4 text-center">
         {query.trim().length > 0
           ? "該当する振り返りが見つかりませんでした。"
           : "まだ振り返りがありません。"}
@@ -252,7 +252,7 @@ function CourseGroupedList({
         );
         return (
           <div key={course.course_id} className="space-y-3">
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 inline-flex items-center gap-1.5">
+            <h3 className="text-sm font-semibold text-[#2b2620] dark:text-zinc-50 inline-flex items-center gap-1.5">
               <BookIcon /> {course.course_title}
             </h3>
             {sortedChapters.map((chapter) => {
@@ -261,7 +261,7 @@ function CourseGroupedList({
               );
               return (
                 <div key={chapter.chapter_id} className="ml-4 space-y-2">
-                  <h4 className="text-xs text-zinc-600 dark:text-zinc-400 inline-flex items-center gap-1.5">
+                  <h4 className="text-xs text-zinc-600 dark:text-[#a59b8c] inline-flex items-center gap-1.5">
                     <ChapterMarkIcon /> {chapter.chapter_title}
                   </h4>
                   <ul className="space-y-2">
@@ -289,17 +289,17 @@ function ReviewCard({
   compact?: boolean;
 }) {
   return (
-    <li className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-2">
+    <li className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-[#fffdf8] dark:bg-zinc-900 p-4 space-y-2">
       <div className="flex items-baseline justify-between gap-3">
         <Link
           href={`/courses/${review.course_id}/chapters/${review.chapter_id}/lessons/${review.lesson_id}?from=reviews`}
           className="group flex-1 min-w-0"
         >
-          <p className="font-medium text-zinc-900 dark:text-zinc-50 group-hover:underline">
+          <p className="font-medium text-[#2b2620] dark:text-zinc-50 group-hover:underline">
             <Highlight text={review.lesson_title} query={query} />
           </p>
           {!compact && (
-            <p className="text-xs text-zinc-500 mt-0.5 inline-flex items-center gap-1.5 flex-wrap">
+            <p className="text-xs text-[#6a6256] mt-0.5 inline-flex items-center gap-1.5 flex-wrap">
               <BookIcon />
               <Highlight text={review.course_title} query={query} />
               <span>/</span>
@@ -308,20 +308,20 @@ function ReviewCard({
             </p>
           )}
         </Link>
-        <span className="shrink-0 text-xs text-zinc-500">
+        <span className="shrink-0 text-xs text-[#6a6256]">
           {formatJst(review.updated_at)}
         </span>
       </div>
 
       {review.learned && (
         <div className="text-sm text-zinc-700 dark:text-zinc-300">
-          <span className="text-xs text-zinc-500 mr-1">学んだ:</span>
+          <span className="text-xs text-[#6a6256] mr-1">学んだ:</span>
           <Highlight text={review.learned} query={query} />
         </div>
       )}
       {review.impressed && (
         <div className="text-sm text-zinc-700 dark:text-zinc-300">
-          <span className="text-xs text-zinc-500 mr-1">印象:</span>
+          <span className="text-xs text-[#6a6256] mr-1">印象:</span>
           <Highlight text={review.impressed} query={query} />
         </div>
       )}
@@ -329,14 +329,14 @@ function ReviewCard({
       <div className="mt-3 pt-2.5 border-t border-zinc-100 dark:border-zinc-800 flex gap-2">
         <Link
           href={`/courses/${review.course_id}/chapters/${review.chapter_id}/lessons/${review.lesson_id}?from=reviews`}
-          className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg text-xs font-semibold text-zinc-900 dark:text-zinc-50 hover:border-[#00897b] hover:bg-[#00897b]/8 hover:text-[#00695c]"
+          className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-[#fffdf8] dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg text-xs font-semibold text-[#2b2620] dark:text-zinc-50 hover:border-[#4a875b] hover:bg-[#4a875b]/8 hover:text-[#34603f]"
         >
           <svg
             width="14"
             height="14"
             viewBox="0 0 24 24"
             fill="currentColor"
-            className="text-[#00695c]"
+            className="text-[#34603f]"
           >
             <polygon points="6 3 20 12 6 21 6 3" />
           </svg>
@@ -344,7 +344,7 @@ function ReviewCard({
         </Link>
         <Link
           href={`/courses/${review.course_id}/chapters/${review.chapter_id}/lessons/${review.lesson_id}?from=reviews&focus=review`}
-          className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg text-xs font-semibold text-zinc-900 dark:text-zinc-50 hover:border-[#00897b] hover:bg-[#00897b]/8 hover:text-[#00695c]"
+          className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-[#fffdf8] dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg text-xs font-semibold text-[#2b2620] dark:text-zinc-50 hover:border-[#4a875b] hover:bg-[#4a875b]/8 hover:text-[#34603f]"
         >
           <svg
             width="14"
@@ -355,7 +355,7 @@ function ReviewCard({
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-[#00695c]"
+            className="text-[#34603f]"
           >
             <path d="M12 20h9" />
             <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />

@@ -9,8 +9,8 @@ export const dynamic = "force-static";
  */
 export default function HelpPage() {
   return (
-    <main className="flex flex-1 flex-col bg-zinc-50 min-h-screen">
-      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e8ebe9] bg-white">
+    <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
+      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9] bg-[#fffdf8]">
         <MemberHeader title="ヘルプ" fallbackHref="/account" />
 
         <div className="px-4 pt-5 pb-8 space-y-5">
@@ -35,7 +35,7 @@ export default function HelpPage() {
             a="LINE サポートからご連絡ください。 個別対応します。"
           />
 
-          <div className="mt-6 bg-[#f8f9fa] border border-[#e8ebe9] rounded-2xl px-4 py-4">
+          <div className="mt-6 bg-[#f8f9fa] border border-[#e7dcc9] rounded-2xl px-4 py-4">
             <p className="text-[12px] text-zinc-700 leading-[1.7]">
               ここに載っていない質問は <strong>LINE サポート</strong> までお気軽にどうぞ。 のり氏 ・ 事務局が直接お返事します。
             </p>
@@ -48,12 +48,12 @@ export default function HelpPage() {
 
 function Faq({ q, a }: { q: string; a: string }) {
   return (
-    <details className="bg-white border border-[#e8ebe9] rounded-2xl overflow-hidden group">
+    <details className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl overflow-hidden group">
       <summary className="px-4 py-3 cursor-pointer list-none flex items-center justify-between gap-2">
-        <span className="text-[13px] font-bold text-zinc-900 flex-1">{q}</span>
-        <span className="text-zinc-400 text-sm transition-transform group-open:rotate-90">→</span>
+        <span className="text-[13px] font-bold text-[#2b2620] flex-1">{q}</span>
+        <span className="text-[#a59b8c] text-sm transition-transform group-open:rotate-90">→</span>
       </summary>
-      <div className="px-4 pb-4 pt-1 text-[12px] text-zinc-600 leading-[1.7] border-t border-[#e8ebe9]">
+      <div className="px-4 pb-4 pt-1 text-[12px] text-zinc-600 leading-[1.7] border-t border-[#e7dcc9]">
         {a}
       </div>
     </details>

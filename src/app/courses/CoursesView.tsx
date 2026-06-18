@@ -174,8 +174,8 @@ function CourseFilterTabs({
             onClick={() => onChange(key)}
             className={`rounded-full px-3.5 py-1.5 text-xs whitespace-nowrap border transition-colors ${
               active
-                ? "bg-[#00695c] border-[#00695c] text-white font-bold"
-                : "bg-white border-zinc-200 text-zinc-700 hover:border-zinc-300"
+                ? "bg-[#34603f] border-[#34603f] text-white font-bold"
+                : "bg-[#fffdf8] border-zinc-200 text-zinc-700 hover:border-zinc-300"
             }`}
           >
             {FILTER_LABELS[key]} ({counts[key]})
@@ -204,12 +204,12 @@ function CoursesList({
 
   if (courses.length === 0) {
     return (
-      <p className="text-sm text-zinc-500">現在公開中のコースはありません。</p>
+      <p className="text-sm text-[#6a6256]">現在公開中のコースはありません。</p>
     );
   }
   if (filtered.length === 0) {
     return (
-      <p className="text-sm text-zinc-500 text-center py-8">
+      <p className="text-sm text-[#6a6256] text-center py-8">
         該当するコースはありません。
       </p>
     );
@@ -220,11 +220,11 @@ function CoursesList({
       {filtered.map((c) => (
         <li
           key={c.id}
-          className="rounded bg-white border border-zinc-200 shadow-sm overflow-hidden"
+          className="rounded bg-[#fffdf8] border border-zinc-200 shadow-sm overflow-hidden"
         >
           <Link
             href={`/courses/${c.id}`}
-            className="group flex gap-3 p-3 hover:bg-zinc-50 transition-colors"
+            className="group flex gap-3 p-3 hover:bg-[#f9f5ed] transition-colors"
           >
             <CourseThumb title={c.title} />
             <CourseInfo course={c} />
@@ -248,7 +248,7 @@ function pickCourseTheme(title: string): CourseTheme {
   if (title.includes("ボディメイク") || title.includes("ロードマップ"))
     return {
       bg: "#e0f2f1",
-      stroke: "#00695c",
+      stroke: "#34603f",
       path: "M4 16 9.5 10.5l3.2 3.2L20 6.4 M15.5 6.4H20v4.5",
     };
   // 限定講義 live = 動画 (Video 矩形 + 三角) ・ 薄ラベンダー
@@ -282,7 +282,7 @@ function pickCourseTheme(title: string): CourseTheme {
   // フォールバック = BookOpen ・ ティール緑
   return {
     bg: "#e0f2f1",
-    stroke: "#00695c",
+    stroke: "#34603f",
     path: "M12 6.5C10.5 5 8 4.5 4 4.5v13c4 0 6.5.5 8 2 M12 6.5C13.5 5 16 4.5 20 4.5v13c-4 0-6.5.5-8 2 M12 6.5V21",
   };
 }
@@ -326,20 +326,20 @@ function CourseInfo({ course: c }: { course: CourseSummary }) {
   }
   const progressTextClass =
     state === "not_started"
-      ? "text-zinc-500"
-      : "text-[#00695c]";
+      ? "text-[#6a6256]"
+      : "text-[#34603f]";
 
   return (
     <div className="flex-1 min-w-0">
-      <h2 className="text-[13px] font-bold text-zinc-900 leading-[1.4] mb-1 line-clamp-2 group-hover:underline">
+      <h2 className="text-[13px] font-bold text-[#2b2620] leading-[1.4] mb-1 line-clamp-2 group-hover:underline">
         {c.title}
       </h2>
-      <div className="text-[11px] text-zinc-500 mb-1.5">
+      <div className="text-[11px] text-[#6a6256] mb-1.5">
         {c.chapter_count} 章 ・ {c.total_lessons} レッスン
       </div>
       <div className="h-[5px] rounded-full bg-zinc-100 overflow-hidden mb-1">
         <div
-          className="h-full bg-[#00897b] rounded-full transition-[width] duration-500"
+          className="h-full bg-[#4a875b] rounded-full transition-[width] duration-500"
           style={{ width: `${c.percent}%` }}
         />
       </div>

@@ -38,9 +38,9 @@ export default async function MyLogPage() {
   return (
     <>
       <MemberHeader title="学習" fallbackHref="/" />
-      <main className="flex flex-1 flex-col bg-zinc-50 min-h-screen">
-        <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e8ebe9] bg-white p-6 space-y-6">
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+      <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
+        <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9] bg-[#fffdf8] p-6 space-y-6">
+        <p className="text-sm text-zinc-600 dark:text-[#a59b8c]">
           あなたの学びの軌跡を一覧できます。
         </p>
 
@@ -140,29 +140,29 @@ function HubCard({
     <div
       className={`rounded-lg border p-4 h-full ${
         comingSoon
-          ? "border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 opacity-70"
-          : "border-emerald-300 dark:border-emerald-800 bg-white dark:bg-zinc-900 hover:bg-emerald-50 dark:hover:bg-emerald-950 transition-colors"
+          ? "border-zinc-200 dark:border-zinc-800 bg-[#f9f5ed] dark:bg-zinc-900/50 opacity-70"
+          : "border-emerald-300 dark:border-emerald-800 bg-[#fffdf8] dark:bg-zinc-900 hover:bg-emerald-50 dark:hover:bg-emerald-950 transition-colors"
       }`}
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="flex items-center gap-2">
           <span className="text-zinc-700 dark:text-zinc-300 flex-shrink-0">{icon}</span>
-          <h3 className="font-semibold text-zinc-900 dark:text-zinc-50">
+          <h3 className="font-semibold text-[#2b2620] dark:text-zinc-50">
             {title}
           </h3>
         </div>
         {comingSoon && (
-          <span className="text-xs rounded-full bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 px-2 py-0.5">
+          <span className="text-xs rounded-full bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-[#a59b8c] px-2 py-0.5">
             準備中
           </span>
         )}
       </div>
       {!comingSoon && count !== undefined && (
         <p className="text-sm text-zinc-700 dark:text-zinc-300">
-          <span className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+          <span className="text-2xl font-bold text-[#2b2620] dark:text-zinc-50">
             {count}
           </span>
-          <span className="ml-1 text-xs text-zinc-500">{countLabel}</span>
+          <span className="ml-1 text-xs text-[#6a6256]">{countLabel}</span>
         </p>
       )}
       {!comingSoon && href && (
@@ -171,7 +171,7 @@ function HubCard({
         </p>
       )}
       {comingSoon && (
-        <p className="mt-2 text-xs text-zinc-500">
+        <p className="mt-2 text-xs text-[#6a6256]">
           {count !== undefined && countLabel
             ? `${count} ${countLabel} (Phase 4 以降で実装予定)`
             : "Phase 4 以降で実装予定"}

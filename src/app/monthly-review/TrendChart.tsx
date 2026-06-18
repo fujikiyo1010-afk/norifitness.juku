@@ -20,7 +20,7 @@ const MAX_SCALE = 10;
 export function TrendChart({ trend }: { trend: TrendPoint[] }) {
   if (trend.length === 0) {
     return (
-      <div className="text-center text-[12px] text-zinc-500 py-8">
+      <div className="text-center text-[12px] text-[#6a6256] py-8">
         提出済みの月次添削がまだありません
       </div>
     );
@@ -72,7 +72,7 @@ export function TrendChart({ trend }: { trend: TrendPoint[] }) {
           x={PADDING.left - 4}
           y={yOf(t) + 3}
           textAnchor="end"
-          fill="#00695c"
+          fill="#34603f"
           fontSize="9"
           fontFamily="ui-monospace, monospace"
         >
@@ -85,7 +85,7 @@ export function TrendChart({ trend }: { trend: TrendPoint[] }) {
         <path
           d={linePath}
           fill="none"
-          stroke="#00897b"
+          stroke="#4a875b"
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -100,14 +100,14 @@ export function TrendChart({ trend }: { trend: TrendPoint[] }) {
             cy={p.y}
             r="4.5"
             fill="white"
-            stroke="#00897b"
+            stroke="#4a875b"
             strokeWidth="2.5"
           />
           <text
             x={p.x}
             y={p.y - 9}
             textAnchor="middle"
-            fill="#00695c"
+            fill="#34603f"
             fontSize="10"
             fontWeight="700"
             fontFamily="ui-monospace, monospace"

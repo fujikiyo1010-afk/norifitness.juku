@@ -52,29 +52,29 @@ export default async function AccountPage() {
   );
 
   return (
-    <main className="flex flex-1 flex-col bg-zinc-50 min-h-screen">
-      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e8ebe9] bg-white">
+    <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
+      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9] bg-[#fffdf8]">
         <MemberHeader title="設定" />
 
         {/* プロフィールカード */}
         <div className="px-4 pt-4 pb-2">
           <Link
             href="/account/profile"
-            className="block bg-white border border-[#e8ebe9] rounded-2xl p-4 hover:border-zinc-300 transition-colors"
+            className="block bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl p-4 hover:border-zinc-300 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-[#f8f9fa] flex items-center justify-center text-base font-bold text-zinc-700 border border-[#e8ebe9]">
+              <div className="w-12 h-12 rounded-full bg-[#f8f9fa] flex items-center justify-center text-base font-bold text-zinc-700 border border-[#e7dcc9]">
                 {name.charAt(0)}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-bold text-zinc-900 truncate">
+                <div className="text-sm font-bold text-[#2b2620] truncate">
                   {name}
                 </div>
-                <div className="text-[11px] text-zinc-500 mt-0.5 truncate">
+                <div className="text-[11px] text-[#6a6256] mt-0.5 truncate">
                   {email}
                 </div>
               </div>
-              <span className="text-zinc-400 text-sm">→</span>
+              <span className="text-[#a59b8c] text-sm">→</span>
             </div>
           </Link>
         </div>
@@ -107,7 +107,7 @@ export default async function AccountPage() {
           <LogoutButton />
         </div>
 
-        <p className="text-center text-[10px] text-zinc-400 font-mono mb-6">
+        <p className="text-center text-[10px] text-[#a59b8c] font-mono mb-6">
           のりfitness 筋肉塾 ・ v1.0.0
         </p>
       </div>
@@ -122,10 +122,10 @@ export default async function AccountPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="px-4 pt-4 pb-1">
-      <div className="text-[10px] font-bold text-zinc-500 tracking-widest mb-2">
+      <div className="text-[10px] font-bold text-[#6a6256] tracking-widest mb-2">
         {title}
       </div>
-      <div className="bg-white border border-[#e8ebe9] rounded-2xl overflow-hidden">
+      <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl overflow-hidden">
         {children}
       </div>
     </div>
@@ -150,13 +150,13 @@ function LinkRow({
   return (
     <Link
       href={href}
-      className={`flex items-center gap-3 px-4 py-3 hover:bg-zinc-50 transition-colors ${
-        last ? "" : "border-b border-[#e8ebe9]"
+      className={`flex items-center gap-3 px-4 py-3 hover:bg-[#f9f5ed] transition-colors ${
+        last ? "" : "border-b border-[#e7dcc9]"
       }`}
     >
       <span className="w-4 h-4 text-zinc-700">{icon}</span>
-      <span className="flex-1 text-[13px] text-zinc-900">{label}</span>
-      <span className="text-zinc-400 text-sm">→</span>
+      <span className="flex-1 text-[13px] text-[#2b2620]">{label}</span>
+      <span className="text-[#a59b8c] text-sm">→</span>
     </Link>
   );
 }
@@ -175,11 +175,11 @@ function ToggleRow({
   return (
     <div
       className={`flex items-center gap-3 px-4 py-3 ${
-        last ? "" : "border-b border-[#e8ebe9]"
+        last ? "" : "border-b border-[#e7dcc9]"
       }`}
     >
       <span className="w-4 h-4 text-zinc-700">{icon}</span>
-      <span className="flex-1 text-[13px] text-zinc-900">{label}</span>
+      <span className="flex-1 text-[13px] text-[#2b2620]">{label}</span>
       {slot}
     </div>
   );

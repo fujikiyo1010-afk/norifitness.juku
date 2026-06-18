@@ -36,15 +36,15 @@ export default async function BodyMetricsChartPage({
   return (
     <>
       <MemberHeader title="体組成 推移" fallbackHref="/body-metrics" />
-      <div className="min-h-screen bg-zinc-50">
+      <div className="min-h-screen bg-[#f9f5ed]">
         <div className="mx-auto max-w-[460px] px-4 py-6">
         {/* 副題 */}
         <header className="mb-5">
-          <div className="text-xs text-zinc-500 mb-1">
+          <div className="text-xs text-[#6a6256] mb-1">
             <span className="text-zinc-700">推移グラフ</span>
           </div>
-          <h1 className="text-xl font-bold text-zinc-900">体組成 推移</h1>
-          <p className="text-xs text-zinc-500 mt-1">
+          <h1 className="text-xl font-bold text-[#2b2620]">体組成 推移</h1>
+          <p className="text-xs text-[#6a6256] mt-1">
             体重 ・ 体脂肪率 ・ ウエスト の変化
           </p>
         </header>
@@ -57,13 +57,13 @@ export default async function BodyMetricsChartPage({
         </div>
 
         {filtered.length === 0 ? (
-          <div className="bg-white border border-dashed border-[#e8ebe9] rounded-2xl p-6 text-center">
-            <p className="text-sm text-zinc-500">
+          <div className="bg-[#fffdf8] border border-dashed border-[#e7dcc9] rounded-2xl p-6 text-center">
+            <p className="text-sm text-[#6a6256]">
               この期間の記録がありません。
             </p>
             <Link
               href="/body-metrics"
-              className="inline-block mt-3 text-xs text-[#00695c] underline"
+              className="inline-block mt-3 text-xs text-[#34603f] underline"
             >
               ← 記録画面に戻る
             </Link>
@@ -72,7 +72,7 @@ export default async function BodyMetricsChartPage({
           <>
             <ChartCard
               title="体重 (kg)"
-              dotColor="#00897b"
+              dotColor="#4a875b"
               series={weightSeries}
             />
             <ChartCard
@@ -114,7 +114,7 @@ function RangeTab({
       className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors ${
         active
           ? "bg-zinc-900 text-white border-zinc-900"
-          : "bg-white text-zinc-700 border-[#e8ebe9] hover:border-[#00897b]"
+          : "bg-[#fffdf8] text-zinc-700 border-[#e7dcc9] hover:border-[#4a875b]"
       }`}
     >
       {label}
@@ -139,7 +139,7 @@ function ChartCard({
 }) {
   if (series.length === 0) {
     return (
-      <div className="bg-white border border-[#e8ebe9] rounded-2xl px-3 py-3 mb-2 text-center text-xs text-zinc-400">
+      <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl px-3 py-3 mb-2 text-center text-xs text-[#a59b8c]">
         <span style={{ color: dotColor }}>●</span> {title} ・ 記録なし
       </div>
     );
@@ -151,9 +151,9 @@ function ChartCard({
   const deltaSign = delta > 0 ? "+" : "";
 
   return (
-    <div className="bg-white border border-[#e8ebe9] rounded-2xl px-3.5 py-2.5 mb-2">
+    <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl px-3.5 py-2.5 mb-2">
       <div className="flex items-center justify-between mb-0.5">
-        <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-900">
+        <div className="flex items-center gap-1.5 text-xs font-bold text-[#2b2620]">
           <span
             className="w-2 h-2 rounded-full"
             style={{ background: dotColor }}
@@ -161,13 +161,13 @@ function ChartCard({
           {title}
         </div>
         <div className="text-right">
-          <div className="text-base font-bold font-mono text-zinc-900 leading-none">
+          <div className="text-base font-bold font-mono text-[#2b2620] leading-none">
             {latest.value.toFixed(1)}
           </div>
           {series.length > 1 && (
             <div
               className="text-[9px] font-bold mt-0.5"
-              style={{ color: delta <= 0 ? "#00897b" : "#c2410c" }}
+              style={{ color: delta <= 0 ? "#4a875b" : "#c2410c" }}
             >
               {deltaSign}
               {delta.toFixed(1)} / 期間内
@@ -190,7 +190,7 @@ function Sparkline({
 }) {
   if (series.length < 2) {
     return (
-      <div className="h-[72px] flex items-center justify-center text-[10px] text-zinc-400">
+      <div className="h-[72px] flex items-center justify-center text-[10px] text-[#a59b8c]">
         2 件以上で線が描かれます
       </div>
     );
@@ -230,17 +230,17 @@ function Sparkline({
         y1={h - padBottom}
         x2={w}
         y2={h - padBottom}
-        stroke="#e8ebe9"
+        stroke="#e7dcc9"
       />
       <line
         x1="0"
         y1={h / 2}
         x2={w}
         y2={h / 2}
-        stroke="#e8ebe9"
+        stroke="#e7dcc9"
         strokeDasharray="2 2"
       />
-      <line x1="0" y1={padTop} x2={w} y2={padTop} stroke="#e8ebe9" />
+      <line x1="0" y1={padTop} x2={w} y2={padTop} stroke="#e7dcc9" />
       <polyline
         points={polyline}
         fill="none"
@@ -266,7 +266,7 @@ function XLabels({ series }: { series: SeriesPoint[] }) {
   if (series.length === 0) return null;
   const labels = pickXLabels(series, 6);
   return (
-    <div className="flex justify-between text-[9px] text-zinc-500 font-mono leading-tight mt-0.5">
+    <div className="flex justify-between text-[9px] text-[#6a6256] font-mono leading-tight mt-0.5">
       {labels.map((l, i) => (
         <span key={i}>{l}</span>
       ))}

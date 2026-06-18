@@ -12,7 +12,7 @@ import type { ReactNode, SVGProps } from "react";
  * 使い方:
  *   import { HomeIcon, DumbbellIcon } from "@/components/icons";
  *   <HomeIcon size={22} />
- *   <DumbbellIcon className="text-[#00897b]" />
+ *   <DumbbellIcon className="text-[#4a875b]" />
  *
  * 設計ルール（許可絵文字は ✓ ▶ → ← のみ、の方針は維持）
  */

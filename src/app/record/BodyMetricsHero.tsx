@@ -76,16 +76,16 @@ export function BodyMetricsHero({
   return (
     <div className="space-y-3">
       {/* メインカード */}
-      <div className="bg-white border border-[#e8ebe9] rounded-2xl px-5 py-5">
+      <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl px-5 py-5">
         <div className="text-center text-[12px] font-bold text-zinc-600 mb-1">
           {latestDate}
         </div>
 
         <div className="flex items-end justify-center gap-2.5">
-          <span className="text-[14px] font-bold text-[#00695c] self-center">
+          <span className="text-[14px] font-bold text-[#34603f] self-center">
             {metricDef.label}
           </span>
-          <span className="text-[40px] font-bold text-zinc-900 leading-none font-mono tracking-tight">
+          <span className="text-[40px] font-bold text-[#2b2620] leading-none font-mono tracking-tight">
             {currentValue !== null ? currentValue.toFixed(1) : "—"}
           </span>
           <span className="text-[14px] font-bold text-zinc-600 leading-none pb-1">
@@ -95,20 +95,20 @@ export function BodyMetricsHero({
 
         {startRow ? (
           <div className="flex items-center justify-center gap-3 mt-3 text-[12px]">
-            <span className="text-zinc-500">
+            <span className="text-[#6a6256]">
               入会時{" "}
-              <span className="font-bold text-zinc-900 font-mono">
+              <span className="font-bold text-[#2b2620] font-mono">
                 {startValue !== null ? startValue.toFixed(1) : "—"}
                 <span className="text-[10px] ml-0.5">{metricDef.unit}</span>
               </span>
             </span>
             <span className="text-zinc-300">|</span>
-            <span className="text-zinc-500">
+            <span className="text-[#6a6256]">
               変化{" "}
               <span
                 className={`font-bold font-mono ${
                   delta !== null && delta < 0
-                    ? "text-[#00695c]"
+                    ? "text-[#34603f]"
                     : delta !== null && delta > 0
                       ? "text-rose-600"
                       : "text-zinc-700"
@@ -124,7 +124,7 @@ export function BodyMetricsHero({
         ) : null}
 
         {/* 主軸 3-way 切替 */}
-        <div className="border-t border-[#e8ebe9] mt-4 pt-3">
+        <div className="border-t border-[#e7dcc9] mt-4 pt-3">
           <MetricSelector value={metric} onChange={setMetric} />
         </div>
       </div>
@@ -140,8 +140,8 @@ export function BodyMetricsHero({
               onClick={() => setPeriod(opt.key)}
               className={`flex-1 px-2 py-1.5 rounded-full text-[11px] font-bold transition-colors ${
                 active
-                  ? "bg-[#00695c] text-white"
-                  : "bg-white border border-[#e8ebe9] text-zinc-700 hover:border-zinc-300"
+                  ? "bg-[#34603f] text-white"
+                  : "bg-[#fffdf8] border border-[#e7dcc9] text-zinc-700 hover:border-zinc-300"
               }`}
             >
               {opt.label}
@@ -151,9 +151,9 @@ export function BodyMetricsHero({
       </div>
 
       {/* グラフ */}
-      <div className="bg-white border border-[#e8ebe9] rounded-2xl px-3 pt-4 pb-3">
+      <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl px-3 pt-4 pb-3">
         {filtered.length === 0 ? (
-          <div className="py-10 text-center text-[12px] text-zinc-500">
+          <div className="py-10 text-center text-[12px] text-[#6a6256]">
             この期間の記録はまだありません
           </div>
         ) : (
@@ -188,8 +188,8 @@ function MetricSelector({
             onClick={() => onChange(opt.key)}
             className={`flex-1 px-3 py-1.5 rounded-full text-[12px] font-bold transition-colors ${
               active
-                ? "bg-[#00695c] text-white"
-                : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
+                ? "bg-[#34603f] text-white"
+                : "bg-zinc-100 text-[#6a6256] hover:bg-zinc-200"
             }`}
           >
             {opt.label}
