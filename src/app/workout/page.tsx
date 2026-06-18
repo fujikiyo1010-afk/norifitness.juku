@@ -47,7 +47,7 @@ function WaitingForMenu({ carte }: { carte: NonNullable<Awaited<ReturnType<typeo
   return (
     <>
       <MemberHeader title="筋トレ" fallbackHref="/" />
-      <div className="min-h-screen bg-[#f9f5ed]">
+      <div className="min-h-screen bg-[#ebdfc6]">
         <div className="mx-auto max-w-[460px] px-4 py-6">
           <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl overflow-hidden">
             {/* 温かいグラデ説明 */}

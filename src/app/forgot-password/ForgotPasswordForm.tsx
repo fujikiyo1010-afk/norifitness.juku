@@ -79,7 +79,7 @@ export function ForgotPasswordForm() {
       <button
         type="submit"
         disabled={pending || !email.includes("@")}
-        className="w-full rounded-md bg-zinc-900 dark:bg-[#f9f5ed] px-4 py-2.5 text-sm font-medium text-white dark:text-[#2b2620] disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full rounded-md bg-zinc-900 dark:bg-[#ebdfc6] px-4 py-2.5 text-sm font-medium text-white dark:text-[#2b2620] disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {pending ? "送信中…" : "再設定メールを送信"}
       </button>

@@ -52,7 +52,7 @@ export default async function AccountPage() {
   );
 
   return (
-    <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
+    <main className="flex flex-1 flex-col bg-[#ebdfc6] min-h-screen">
       <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9] bg-[#fffdf8]">
         <MemberHeader title="設定" />
 
@@ -150,7 +150,7 @@ function LinkRow({
   return (
     <Link
       href={href}
-      className={`flex items-center gap-3 px-4 py-3 hover:bg-[#f9f5ed] transition-colors ${
+      className={`flex items-center gap-3 px-4 py-3 hover:bg-[#e0d5be] transition-colors ${
         last ? "" : "border-b border-[#e7dcc9]"
       }`}
     >

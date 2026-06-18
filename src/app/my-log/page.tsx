@@ -38,7 +38,7 @@ export default async function MyLogPage() {
   return (
     <>
       <MemberHeader title="学習" fallbackHref="/" />
-      <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
+      <main className="flex flex-1 flex-col bg-[#ebdfc6] min-h-screen">
         <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9] bg-[#fffdf8] p-6 space-y-6">
         <p className="text-sm text-zinc-600 dark:text-[#a59b8c]">
           あなたの学びの軌跡を一覧できます。
@@ -140,7 +140,7 @@ function HubCard({
     <div
       className={`rounded-lg border p-4 h-full ${
         comingSoon
-          ? "border-zinc-200 dark:border-zinc-800 bg-[#f9f5ed] dark:bg-zinc-900/50 opacity-70"
+          ? "border-zinc-200 dark:border-zinc-800 bg-[#ebdfc6] dark:bg-zinc-900/50 opacity-70"
           : "border-emerald-300 dark:border-emerald-800 bg-[#fffdf8] dark:bg-zinc-900 hover:bg-emerald-50 dark:hover:bg-emerald-950 transition-colors"
       }`}
     >

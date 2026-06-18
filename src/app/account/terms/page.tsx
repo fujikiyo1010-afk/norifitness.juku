@@ -9,7 +9,7 @@ export const dynamic = "force-static";
  */
 export default function TermsPage() {
   return (
-    <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
+    <main className="flex flex-1 flex-col bg-[#ebdfc6] min-h-screen">
       <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9] bg-[#fffdf8]">
         <MemberHeader title="利用規約" fallbackHref="/account" />
 

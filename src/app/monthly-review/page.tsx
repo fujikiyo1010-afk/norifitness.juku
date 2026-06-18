@@ -280,13 +280,13 @@ function StateCardC({ audit }: { audit: MonthlyAuditRow }) {
       <div className="text-sm font-medium text-[#2b2620] mt-2 mb-2 flex items-center">
         のりfitness が動画返信を準備中
         <span className="ml-2 inline-flex gap-0.5">
-          <span className="w-1 h-1 rounded-full bg-[#f9f5ed]0 animate-pulse" />
+          <span className="w-1 h-1 rounded-full bg-[#ebdfc6]0 animate-pulse" />
           <span
-            className="w-1 h-1 rounded-full bg-[#f9f5ed]0 animate-pulse"
+            className="w-1 h-1 rounded-full bg-[#ebdfc6]0 animate-pulse"
             style={{ animationDelay: "0.2s" }}
           />
           <span
-            className="w-1 h-1 rounded-full bg-[#f9f5ed]0 animate-pulse"
+            className="w-1 h-1 rounded-full bg-[#ebdfc6]0 animate-pulse"
             style={{ animationDelay: "0.4s" }}
           />
         </span>

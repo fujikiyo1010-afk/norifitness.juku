@@ -67,7 +67,7 @@ export function CompleteButton({
         type="button"
         onClick={handleToggle}
         disabled={pending}
-        className="w-full rounded-lg bg-zinc-900 dark:bg-[#f9f5ed] px-6 py-4 text-base font-semibold text-white dark:text-[#2b2620] disabled:opacity-50 transition-transform active:scale-[0.98]"
+        className="w-full rounded-lg bg-zinc-900 dark:bg-[#ebdfc6] px-6 py-4 text-base font-semibold text-white dark:text-[#2b2620] disabled:opacity-50 transition-transform active:scale-[0.98]"
       >
         {pending ? "保存中…" : "✓ 学習完了にする"}
       </button>

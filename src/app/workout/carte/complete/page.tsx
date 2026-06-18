@@ -87,7 +87,7 @@ export default async function WorkoutCarteCompletePage() {
         <div className="flex w-full max-w-sm flex-col gap-3">
           <Link
             href="/workout/carte"
-            className="rounded-[4px] border border-zinc-300 bg-[#fffdf8] px-6 py-3 text-center text-sm font-medium text-zinc-700 hover:bg-[#f9f5ed]"
+            className="rounded-[4px] border border-zinc-300 bg-[#fffdf8] px-6 py-3 text-center text-sm font-medium text-zinc-700 hover:bg-[#e0d5be]"
           >
             提出したカルテを見る
           </Link>
