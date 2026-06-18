@@ -81,7 +81,7 @@ function WaitingForMenu({ carte }: { carte: NonNullable<Awaited<ReturnType<typeo
 
           {/* カルテサマリ */}
           <div className="p-4 space-y-3">
-            <div className="bg-[#fafafa] border border-[#e7dcc9] rounded-lg p-4">
+            <div className="bg-[#f9f5ed] border border-[#e7dcc9] rounded-lg p-4">
               <div className="text-[11px] font-bold text-[#6a6256] tracking-wide mb-3">
                 提出したカルテ
               </div>
@@ -122,7 +122,7 @@ function WaitingForMenu({ carte }: { carte: NonNullable<Awaited<ReturnType<typeo
           <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3">
             <button
               disabled
-              className="w-full px-4 py-3 bg-zinc-100 text-[#a59b8c] rounded-2xl text-sm font-bold cursor-not-allowed"
+              className="w-full px-4 py-3 bg-[#e7dcc9] text-[#a59b8c] rounded-2xl text-sm font-bold cursor-not-allowed"
             >
               メニューはまだありません
             </button>

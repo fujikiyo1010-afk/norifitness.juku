@@ -22,7 +22,7 @@ const TABS = [
   { label: "ホーム", href: "/", icon: <HomeIcon />, exact: true },
   { label: "コース", href: "/courses", icon: <BookIcon />, exact: false },
   { label: "記録", href: "/record", icon: <NoteIcon />, exact: false },
-  { label: "月次添削", href: "/monthly-review", icon: <ClipboardCheckIcon />, exact: false },
+  { label: "筋トレ", href: "/workout", icon: <DumbbellIcon />, exact: false },
   { label: "設定", href: "/account", icon: <CogIcon />, exact: false },
 ];
 
@@ -131,12 +131,15 @@ function SearchIcon() {
   );
 }
 
-function ClipboardCheckIcon() {
+function DumbbellIcon() {
   return (
     <svg {...iconProps} width="22" height="22">
-      <rect x="6" y="4" width="12" height="16" rx="2" />
-      <path d="M9 4h6" />
-      <path d="m9.5 12 2 2 3.5-4" />
+      <path d="M6.5 6.5h11" />
+      <path d="M6.5 17.5h11" />
+      <path d="M3 8v8" />
+      <path d="M21 8v8" />
+      <path d="M6.5 8v8" />
+      <path d="M17.5 8v8" />
     </svg>
   );
 }

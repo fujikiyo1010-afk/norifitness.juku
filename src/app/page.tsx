@@ -4,6 +4,7 @@ import { getMyAlerts, type MemberAlert, type MemberAlertKey } from "@/lib/member
 import { getMyHomeStats } from "@/lib/member/home-stats";
 import { getMyLastWatchedLesson } from "@/lib/member/last-watched";
 import { getMyGoalSheetStatus } from "@/lib/member/goal-sheet-status";
+import { getMyMonthlyAuditHomeStatus } from "@/lib/member/monthly-audit-status";
 import { getMyUnreadCount } from "@/lib/chat/queries";
 
 export const dynamic = "force-dynamic";
@@ -31,12 +32,13 @@ export const dynamic = "force-dynamic";
  *   - 目標シート添削数 = 既読管理未実装のため 数字なし「添削あり」表示のみ
  */
 export default async function Home() {
-  const [alerts, stats, lastWatched, goalSheet, admin, chatUnread] =
+  const [alerts, stats, lastWatched, goalSheet, monthlyAudit, admin, chatUnread] =
     await Promise.all([
       getMyAlerts(),
       getMyHomeStats(),
       getMyLastWatchedLesson(),
       getMyGoalSheetStatus(),
+      getMyMonthlyAuditHomeStatus(),
       getAdminInfo(),
       getMyUnreadCount(),
     ]);
@@ -148,6 +150,38 @@ export default async function Home() {
                   ? "のりfitness から添削が届いています"
                   : "記入済 ・ 添削待ち"
                 : "まだ記入されていません"}
+            </div>
+          </div>
+          <span className="text-[#a59b8c] font-mono text-xs">→</span>
+        </Link>
+      </div>
+
+      {/* 横長 月次添削 */}
+      <div className="px-4 pt-2">
+        <Link
+          href="/monthly-review"
+          className="bg-[#fffdf8] border border-[#e7dcc9] rounded-[14px] px-[18px] py-4 flex items-center gap-3 hover:border-[#4a875b] transition-colors"
+        >
+          <div className="w-10 h-10 rounded-full bg-[#4a875b1a] flex items-center justify-center flex-shrink-0">
+            <ClipboardIcon />
+          </div>
+          <div className="flex-1">
+            <div className="text-[13px] font-bold text-[#2b2620] mb-0.5 flex items-center gap-1.5">
+              月次添削
+              {monthlyAudit.hasReviewNotice && (
+                <span className="bg-[#b8860b] text-white text-[9px] px-1.5 py-[1px] rounded-full inline-flex items-center gap-1">
+                  <MailMiniIcon /> 添削あり
+                </span>
+              )}
+            </div>
+            <div className="text-[10px] text-[#6a6256]">
+              {monthlyAudit.status === "d_replied"
+                ? "のりfitness から添削が届いています"
+                : monthlyAudit.status === "c_submitted"
+                  ? "記入済 ・ 添削待ち"
+                  : monthlyAudit.status === "b_in_progress"
+                    ? "記入中 ・ 提出を待っています"
+                    : "今月分はまだ記入されていません"}
             </div>
           </div>
           <span className="text-[#a59b8c] font-mono text-xs">→</span>
@@ -491,6 +525,21 @@ function TargetIcon() {
       <circle cx="12" cy="12" r="10" />
       <circle cx="12" cy="12" r="6" />
       <circle cx="12" cy="12" r="2" />
+    </svg>
+  );
+}
+
+function ClipboardIcon() {
+  return (
+    <svg
+      {...ICO_PROPS}
+      width="20"
+      height="20"
+      className="text-[#4a875b]"
+    >
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+      <rect x="8" y="2" width="8" height="4" rx="1" />
+      <path d="m9.5 13 2 2 3.5-4" />
     </svg>
   );
 }

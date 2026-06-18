@@ -150,7 +150,7 @@ export function MenuView({
 
           {/* 強度選択 (2 つ以上のときだけ) */}
           {cycles.length > 1 && (
-            <div className="bg-[#fafafa] border-t border-b border-[#e7dcc9] px-4 pt-2 pb-3">
+            <div className="bg-[#f9f5ed] border-t border-b border-[#e7dcc9] px-4 pt-2 pb-3">
               <div className="text-[10px] font-bold text-[#6a6256] tracking-widest mb-1.5">
                 強度
               </div>
@@ -239,7 +239,7 @@ function ExerciseRow({ num, ex }: { num: number; ex: Exercise }) {
 
   return (
     <div className="grid grid-cols-[36px_1fr] gap-3 items-center px-4 py-3.5 border-b border-[#e7dcc9] last:border-b-0">
-      <div className="w-8 h-8 rounded-lg bg-zinc-100 text-zinc-700 font-bold font-mono text-sm flex items-center justify-center">
+      <div className="w-8 h-8 rounded-lg bg-[#e7dcc9] text-zinc-700 font-bold font-mono text-sm flex items-center justify-center">
         {num}
       </div>
       <div className="min-w-0">
