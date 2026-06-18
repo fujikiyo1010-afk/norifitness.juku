@@ -212,13 +212,19 @@ export function MenuView({
             )}
           </div>
 
-          {/* フッタ */}
-          <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3">
+          {/* フッタ ・ 2 つのリクエスト動線 (= メニュー変更 / カルテ更新) */}
+          <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2">
             <Link
               href="/workout/menu/request"
-              className="block text-center w-full px-4 py-3 border border-[#4a875b] bg-[#fffdf8] text-[#34603f] rounded-2xl text-xs font-bold hover:bg-[rgba(0,137,123,0.08)] transition-colors"
+              className="flex-1 text-center px-3 py-3 border border-[#4a875b] bg-[#fffdf8] text-[#34603f] rounded-2xl text-xs font-bold hover:bg-[rgba(0,137,123,0.08)] transition-colors"
             >
               メニュー変更リクエスト
+            </Link>
+            <Link
+              href="/workout/carte/request"
+              className="flex-1 text-center px-3 py-3 border border-[#a59b8c] bg-[#fffdf8] text-[#6a6256] rounded-2xl text-xs font-bold hover:bg-[#f0e6d3] transition-colors"
+            >
+              カルテ更新リクエスト
             </Link>
           </div>
         </div>
