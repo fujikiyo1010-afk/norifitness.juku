@@ -91,7 +91,7 @@ export default async function MonthlyReviewDetailPage({
   return (
     <>
       <MemberHeader title="月次添削 詳細" fallbackHref="/monthly-review" />
-      <main className="flex flex-1 flex-col bg-[#fafbfa] min-h-screen">
+      <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
         <div className="mx-auto w-full max-w-[460px] border-x border-[#e7dcc9]">
 
         {/* ヒーロー帯 (温かいグラデ) */}
@@ -105,7 +105,7 @@ export default async function MonthlyReviewDetailPage({
           </div>
         </div>
 
-        <div className="bg-[#fafbfa] pb-20">
+        <div className="bg-[#f9f5ed] pb-20">
           {/* ====== のりfitness 返信 ====== */}
           <ReplySection
             videoUrl={audit.nori_video_vimeo_url}

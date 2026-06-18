@@ -86,8 +86,7 @@ export function MessagesClient({
       {/* メッセージリスト (スクロール) */}
       <div
         ref={listRef}
-        className="flex-1 px-4 py-3 space-y-3 overflow-y-auto"
-        style={{ minHeight: "300px" }}
+        className="flex-1 px-4 py-3 space-y-3 overflow-y-auto min-h-0"
       >
         {messages.length === 0 ? (
           <div className="text-center text-[12px] text-[#6a6256] py-12">
@@ -101,8 +100,11 @@ export function MessagesClient({
         <div ref={bottomRef} />
       </div>
 
-      {/* 送信フォーム (固定下) */}
-      <div className="border-t border-[#d3dac8] bg-[#fffdf8] px-3 py-2.5 sticky bottom-0">
+      {/* 送信フォーム (flex-shrink-0 ・ 画面下端ピッタリ ・ iPhone safe-area 対応) */}
+      <div
+        className="border-t border-[#d3dac8] bg-[#fffdf8] px-3 py-2.5 flex-shrink-0"
+        style={{ paddingBottom: "max(env(safe-area-inset-bottom), 10px)" }}
+      >
         <div className="flex items-end gap-2">
           <textarea
             value={text}

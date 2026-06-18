@@ -35,7 +35,7 @@ export default async function GoalSheetPage() {
     return (
       <>
         <MemberHeader title="目標管理シート" fallbackHref="/" />
-        <main className="flex flex-1 flex-col p-6 sm:p-8 bg-[#e8ebec]">
+        <main className="flex flex-1 flex-col p-6 sm:p-8 bg-[#f9f5ed]">
           <div className="mx-auto w-full max-w-[460px]">
             <div className="rounded-xl bg-[#fffdf8] border border-[#e7dcc9] p-8 text-center space-y-4">
             <div className="mx-auto w-12 h-12 text-[#4a875b]">
@@ -83,7 +83,7 @@ export default async function GoalSheetPage() {
   return (
     <>
       <MemberHeader title="目標管理シート" fallbackHref="/" />
-      <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#e8ebec]">
+      <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#f9f5ed]">
       <SavedToast />
       <div className="mx-auto w-full max-w-[980px] space-y-4">
         {/* ドキュメントフレーム */}

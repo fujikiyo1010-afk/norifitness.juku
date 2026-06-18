@@ -46,7 +46,7 @@ export default async function MonthlyReviewCompletePage() {
   return (
     <>
       <MemberHeader title="月次添削 送信完了" fallbackHref="/monthly-review" />
-      <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#e8ebec]">
+      <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#f9f5ed]">
         <div className="mx-auto w-full max-w-[460px]">
           <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl overflow-hidden min-h-[640px] flex flex-col">
           {/* 完了画面本体 (温かいグラデ背景) */}

@@ -24,7 +24,7 @@ export default function ToolsIndexPage() {
   return (
     <>
       <MemberHeader title="ツール" fallbackHref="/" />
-      <main className="min-h-screen bg-[#fafbfa] flex flex-col">
+      <main className="min-h-screen bg-[#f9f5ed] flex flex-col">
 
       <div className="flex-1 max-w-[460px] mx-auto w-full pb-12">
         {/* ヒーロー帯 */}

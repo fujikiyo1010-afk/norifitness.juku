@@ -42,7 +42,7 @@ export default async function MonthlyReviewFormPage() {
   return (
     <>
       <MemberHeader title="月次添削 記入" fallbackHref="/monthly-review" />
-      <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#e8ebec]">
+      <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#f9f5ed]">
         <div className="mx-auto w-full max-w-[460px]">
 
         {submitted ? (

@@ -56,11 +56,11 @@ export default async function MonthlyReviewHistoryPage() {
   return (
     <>
       <MemberHeader title="月次添削 履歴" fallbackHref="/" />
-      <main className="flex flex-1 flex-col bg-[#fafbfa] min-h-screen">
+      <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
         <div className="mx-auto w-full max-w-[460px] border-x border-[#e7dcc9]">
 
         {/* スクロール本体 */}
-        <div className="bg-[#fafbfa] pb-20">
+        <div className="bg-[#f9f5ed] pb-20">
           {/* ====== ブロック A: 今月の月次添削 (4 状態カード) ====== */}
           <BlockWrapper title="今月の月次添削" icon="clipboard">
             <CurrentMonthCard status={currentStatus} audit={currentAudit} />
@@ -350,7 +350,7 @@ function StateCardD({ audit }: { audit: MonthlyAuditRow }) {
 // =====================================================================
 function PlaceholderBlock({ text }: { text: string }) {
   return (
-    <div className="bg-[#fafbfa] border border-dashed border-[#e7dcc9] rounded-lg px-4 py-6 text-center">
+    <div className="bg-[#f9f5ed] border border-dashed border-[#e7dcc9] rounded-lg px-4 py-6 text-center">
       <svg
         className="w-7 h-7 mx-auto mb-2 text-[#a59b8c]"
         viewBox="0 0 24 24"
@@ -391,7 +391,7 @@ function PastAuditList({ audits }: { audits: MonthlyAuditRow[] }) {
           <Link
             key={audit.id}
             href={`/monthly-review/detail/${audit.target_month}`}
-            className="flex items-center justify-between py-3 border-b border-[#e7dcc9] last:border-b-0 hover:bg-[#fafbfa] transition-colors -mx-1 px-1"
+            className="flex items-center justify-between py-3 border-b border-[#e7dcc9] last:border-b-0 hover:bg-[#f9f5ed] transition-colors -mx-1 px-1"
           >
             <div className="flex items-center gap-2.5">
               <span className="font-semibold text-[#2b2620] font-mono text-sm">

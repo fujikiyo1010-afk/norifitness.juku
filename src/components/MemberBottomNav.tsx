@@ -33,6 +33,7 @@ const HIDDEN_PREFIXES = [
   "/forgot-password",
   "/reset-password",
   "/debug",
+  "/messages", // チャット画面では入力欄を画面下端ピッタリにするためナビ非表示 (2026-06-18 #2)
 ];
 
 export function MemberBottomNav() {

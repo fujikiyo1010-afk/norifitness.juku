@@ -188,7 +188,7 @@ export function CalorieToolClient({
     gender === "female" || (gender === "other" && formula === "female");
 
   return (
-    <main className="min-h-screen bg-[#fafbfa] flex flex-col">
+    <main className="min-h-screen bg-[#f9f5ed] flex flex-col">
       <div className="flex-1 max-w-[460px] mx-auto w-full pb-10">
         {/* ヒーロー帯 */}
         <section className="bg-gradient-to-br from-[#e8eaf6] to-[#fffbe6] border-b border-[#e7dcc9] px-6 py-5">

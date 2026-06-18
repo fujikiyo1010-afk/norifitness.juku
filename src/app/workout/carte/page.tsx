@@ -35,7 +35,7 @@ export default async function WorkoutCartePage() {
   return (
     <>
       <MemberHeader title="筋トレカルテ" fallbackHref="/" />
-      <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#e8ebec]">
+      <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#f9f5ed]">
         <div className="mx-auto w-full max-w-[980px] space-y-4">
         {/* ドキュメントフレーム */}
         <div className="bg-[#fffdf8] border border-[#d4d4d4] rounded-md shadow-sm overflow-hidden">

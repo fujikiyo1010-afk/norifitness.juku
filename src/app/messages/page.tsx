@@ -59,29 +59,27 @@ export default async function MessagesPage() {
     (userRow as { name?: string | null } | null)?.name ?? "あなた";
 
   return (
-    <>
+    <div className="flex flex-col h-[100dvh] bg-[#e8efe1]">
       <MemberHeader title="チャット" fallbackHref="/" />
-      <main className="flex flex-col flex-1 bg-[#e8efe1]">
-        <div className="mx-auto w-full max-w-[460px] flex-1 flex flex-col">
-          {/* 説明 */}
-          <div className="px-4 pt-3 pb-1">
-            <p className="text-[11px] text-[#6a6256] leading-relaxed">
-              のり氏に質問・相談ができます。 返信には数日かかる場合があります。
-              <br />
-              <Link href="/account/help" className="text-[#34603f] underline">
-                よくある質問はこちら
-              </Link>
-            </p>
-          </div>
-
-          <MessagesClient
-            conversationId={conversation.id}
-            initialMessages={messages}
-            myUserId={user.id}
-            myName={myName}
-          />
+      <div className="mx-auto w-full max-w-[460px] flex-1 flex flex-col min-h-0">
+        {/* 説明 (= flex-shrink-0) */}
+        <div className="px-4 pt-3 pb-1 flex-shrink-0">
+          <p className="text-[11px] text-[#6a6256] leading-relaxed">
+            のり氏に質問・相談ができます。 返信には数日かかる場合があります。
+            <br />
+            <Link href="/account/help" className="text-[#34603f] underline">
+              よくある質問はこちら
+            </Link>
+          </p>
         </div>
-      </main>
-    </>
+
+        <MessagesClient
+          conversationId={conversation.id}
+          initialMessages={messages}
+          myUserId={user.id}
+          myName={myName}
+        />
+      </div>
+    </div>
   );
 }
