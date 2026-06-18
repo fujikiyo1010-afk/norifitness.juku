@@ -3,8 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminInfo } from "@/lib/auth/admin";
-import { sendPushToUser } from "@/lib/push/send";
+import { sendPushToUser, sendPushToAllAdmins } from "@/lib/push/send";
 import { validateMenuForDistribution } from "./menu-display";
+
+const REQ_PREVIEW_MAX = 80;
+function shortReqPreview(t: string): string {
+  const x = (t ?? "").replace(/\s+/g, " ").trim();
+  return x.length <= REQ_PREVIEW_MAX ? x : x.slice(0, REQ_PREVIEW_MAX - 1) + "…";
+}
 import {
   type Gender,
   type Environment,
@@ -373,6 +379,25 @@ export async function createWorkoutRequest(
   revalidatePath("/workout", "page");
   revalidatePath("/admin/workout-requests", "page");
 
+  // 全 active admin に push (= のり氏 / きよむさん が即気付く)
+  try {
+    const { data: profile } = await supabase
+      .from("users")
+      .select("name")
+      .eq("id", user.id)
+      .maybeSingle();
+    const senderName =
+      (profile as { name?: string | null } | null)?.name ?? "受講生";
+    void sendPushToAllAdmins({
+      title: `${senderName} さんからメニュー変更リクエスト`,
+      body: shortReqPreview(requestText),
+      url: `/admin/requests?id=${data.id}&type=workout`,
+      tag: `req-workout-${data.id}`,
+    }).catch((e) => console.error("[push] workout-request failed", e));
+  } catch (e) {
+    console.error("[push] workout-request lookup failed", e);
+  }
+
   return { ok: true, request_id: data.id as string };
 }
 
@@ -412,6 +437,25 @@ export async function createCarteRequest(
 
   revalidatePath("/workout", "page");
   revalidatePath("/admin/carte-requests", "page");
+
+  // 全 active admin に push (= のり氏 / きよむさん が即気付く)
+  try {
+    const { data: profile } = await supabase
+      .from("users")
+      .select("name")
+      .eq("id", user.id)
+      .maybeSingle();
+    const senderName =
+      (profile as { name?: string | null } | null)?.name ?? "受講生";
+    void sendPushToAllAdmins({
+      title: `${senderName} さんからカルテ更新リクエスト`,
+      body: shortReqPreview(requestText),
+      url: `/admin/requests?id=${data.id}&type=carte`,
+      tag: `req-carte-${data.id}`,
+    }).catch((e) => console.error("[push] carte-request failed", e));
+  } catch (e) {
+    console.error("[push] carte-request lookup failed", e);
+  }
 
   return { ok: true, request_id: data.id as string };
 }
