@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { requireAdmin } from "@/lib/auth/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendMonthlyAuditPublishedEmail } from "@/lib/email/monthly-audit-published";
+import { sendPushToUser } from "@/lib/push/send";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 90; // transcode 完了ポーリングのため
@@ -122,6 +123,33 @@ export async function POST(request: NextRequest) {
       "[monthly-audit-published-email] not sent:",
       emailResult.reason
     );
+  }
+
+  // ===== Step 4: push 通知 (= 2026-06-18 #2 push 横展開) =====
+  // user_id + target_month は audit から逆引き
+  try {
+    const admin = createAdminClient();
+    const { data: row } = await admin
+      .from("monthly_audits")
+      .select("user_id, target_month")
+      .eq("id", auditId)
+      .maybeSingle();
+    const targetUserId = (row as { user_id?: string } | null)?.user_id;
+    const targetMonth =
+      (row as { target_month?: string } | null)?.target_month ?? null;
+    if (targetUserId) {
+      const monthLabel = targetMonth
+        ? `${new Date(targetMonth).getFullYear()}年${new Date(targetMonth).getMonth() + 1}月`
+        : "今月";
+      void sendPushToUser(targetUserId, {
+        title: `${monthLabel} の月次添削 動画が届きました`,
+        body: "のりfitness からの動画返信をタップで再生",
+        url: targetMonth ? `/monthly-review/detail/${targetMonth}` : "/monthly-review",
+        tag: "monthly-video-published",
+      }).catch((e) => console.error("[push] monthly video failed", e));
+    }
+  } catch (e) {
+    console.error("[push] monthly video lookup failed", e);
   }
 
   return Response.json({

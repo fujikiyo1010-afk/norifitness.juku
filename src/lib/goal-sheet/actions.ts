@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminInfo } from "@/lib/auth/admin";
+import { sendPushToUser } from "@/lib/push/send";
 import type { GoalSheetContent, SectionKey } from "./types";
 import {
   countFilledSections,
@@ -147,6 +148,14 @@ export async function saveGoalSheetAuditByAdmin(
   revalidatePath(`/admin/users/${userId}`, "page");
   revalidatePath(`/admin/users/${userId}/goal-sheet`, "page");
   revalidatePath("/goal-sheet", "page");
+
+  // 受講生に push 通知 (= 「のり氏が見てくれた!」 即タップで確認)
+  void sendPushToUser(userId, {
+    title: "目標シート 添削が届きました",
+    body: "のりfitness からの添削をタップで確認できます",
+    url: "/goal-sheet",
+    tag: "goal-sheet-reviewed",
+  }).catch((e) => console.error("[push] goal-sheet review failed", e));
 
   return {
     ok: true,

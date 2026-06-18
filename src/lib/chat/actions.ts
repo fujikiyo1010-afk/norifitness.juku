@@ -4,7 +4,14 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAdminInfo } from "@/lib/auth/admin";
+import { sendPushToUser, sendPushToAllAdmins } from "@/lib/push/send";
 import type { ChatMessage } from "./types";
+
+const PREVIEW_MAX = 80;
+function shortPreview(text: string): string {
+  const t = (text ?? "").replace(/\s+/g, " ").trim();
+  return t.length <= PREVIEW_MAX ? t : t.slice(0, PREVIEW_MAX - 1) + "…";
+}
 
 type ActionResult = { ok: true } | { ok: false; message: string };
 type SendResult =
@@ -64,6 +71,26 @@ export async function sendMessageAsUser(body: string): Promise<SendResult> {
     .single();
   if (error) return { ok: false, message: error.message };
 
+  // 全 active admin に push 通知 (= のり氏に即気付かせる)
+  // 受講生氏名 取得 (DB を 1 件読むだけなので安価、 失敗してもメッセージ送信は成功扱い)
+  try {
+    const { data: profile } = await supabase
+      .from("users")
+      .select("name")
+      .eq("id", user.id)
+      .maybeSingle();
+    const senderName =
+      (profile as { name?: string | null } | null)?.name ?? "受講生";
+    void sendPushToAllAdmins({
+      title: `${senderName} さんからメッセージ`,
+      body: shortPreview(body),
+      url: `/admin/messages/${conversationId}`,
+      tag: `chat-admin-${conversationId}`,
+    }).catch((e) => console.error("[push] chat→admin failed", e));
+  } catch (e) {
+    console.error("[push] chat→admin lookup failed", e);
+  }
+
   revalidatePath("/admin/messages");
   revalidatePath(`/admin/messages/${conversationId}`);
   return { ok: true, message: data as ChatMessage };
@@ -92,6 +119,26 @@ export async function sendMessageAsAdmin(
     .select("*")
     .single();
   if (error) return { ok: false, message: error.message };
+
+  // 受講生に push 通知 (= LINE 風に即座に届く)
+  try {
+    const { data: conv } = await admin
+      .from("conversations")
+      .select("user_id")
+      .eq("id", conversationId)
+      .maybeSingle();
+    const targetUserId = (conv as { user_id?: string } | null)?.user_id;
+    if (targetUserId) {
+      void sendPushToUser(targetUserId, {
+        title: "のりfitness から新着メッセージ",
+        body: shortPreview(body),
+        url: "/messages",
+        tag: "chat-user",
+      }).catch((e) => console.error("[push] chat→user failed", e));
+    }
+  } catch (e) {
+    console.error("[push] chat→user lookup failed", e);
+  }
 
   revalidatePath("/admin/messages");
   revalidatePath(`/admin/messages/${conversationId}`);

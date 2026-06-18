@@ -96,3 +96,34 @@ export async function sendPushToUser(
 
   return { attempted: subs.length, succeeded, expired, failed };
 }
+
+/**
+ * 全 active admin (= admin_users.is_active=true) に push 配信。
+ * 内部で sendPushToUser を呼ぶだけだが「全 admin に通知」 という意図を明示するため別関数。
+ * チャット新着 / signup_request 等 「admin が即気付きたい」 通知の入口。
+ */
+export async function sendPushToAllAdmins(
+  payload: PushPayload
+): Promise<SendPushResult> {
+  const supabase = createAdminClient();
+  const { data: admins, error } = await supabase
+    .from("admin_users")
+    .select("id")
+    .eq("is_active", true);
+  if (error) throw error;
+  if (!admins || admins.length === 0) {
+    return { attempted: 0, succeeded: 0, expired: 0, failed: 0 };
+  }
+  const results = await Promise.all(
+    admins.map((a) => sendPushToUser(a.id as string, payload))
+  );
+  return results.reduce(
+    (acc, r) => ({
+      attempted: acc.attempted + r.attempted,
+      succeeded: acc.succeeded + r.succeeded,
+      expired: acc.expired + r.expired,
+      failed: acc.failed + r.failed,
+    }),
+    { attempted: 0, succeeded: 0, expired: 0, failed: 0 }
+  );
+}

@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { sendPushToAllAdmins } from "@/lib/push/send";
 
 export type SubmitSignupRequestResult =
   | { ok: true }
@@ -44,6 +45,14 @@ export async function submitSignupRequest(input: {
         "送信に失敗しました。 時間をおいて再度お試しいただくか、 公式 LINE までご連絡ください。",
     };
   }
+
+  // 全 active admin に即時 push 通知 (= A-1 重要、 受講生獲得チャンスを取りこぼさない)
+  void sendPushToAllAdmins({
+    title: "新規入会申請",
+    body: `${name} さん (${email}) から申請が届きました`,
+    url: "/admin/invitations",
+    tag: "signup-request",
+  }).catch((e) => console.error("[push] signup request failed", e));
 
   return { ok: true };
 }

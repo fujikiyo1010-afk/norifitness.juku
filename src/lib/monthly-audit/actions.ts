@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { sendPushToUser } from "@/lib/push/send";
 import {
   countFilledItems,
   canSubmit,
@@ -184,7 +185,27 @@ export async function attachNoriVideo(
   revalidatePath("/admin/monthly-review", "page");
   revalidatePath("/monthly-review", "page");
 
-  // TODO: 受講生に LINE プッシュ通知 + メール通知を発火 (Phase 3 後半で実装)
+  // 受講生に push 通知 (= 「のり氏動画が届いた!」 唯一無二のコア体験)
+  // 対象 user_id は audit から逆引き
+  const { data: auditRow } = await supabase
+    .from("monthly_audits")
+    .select("user_id, target_month")
+    .eq("id", auditId)
+    .maybeSingle();
+  const targetUserId = (auditRow as { user_id?: string } | null)?.user_id;
+  const targetMonth =
+    (auditRow as { target_month?: string } | null)?.target_month ?? null;
+  if (targetUserId) {
+    const monthLabel = targetMonth
+      ? `${new Date(targetMonth).getFullYear()}年${new Date(targetMonth).getMonth() + 1}月`
+      : "今月";
+    void sendPushToUser(targetUserId, {
+      title: `${monthLabel} の月次添削 動画が届きました`,
+      body: "のりfitness からの動画返信をタップで再生",
+      url: targetMonth ? `/monthly-review/detail/${targetMonth}` : "/monthly-review",
+      tag: "monthly-video-published",
+    }).catch((e) => console.error("[push] monthly-video published failed", e));
+  }
 
   return { ok: true, updated_at: data.updated_at as string };
 }

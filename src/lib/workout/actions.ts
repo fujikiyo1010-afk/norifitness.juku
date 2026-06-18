@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminInfo } from "@/lib/auth/admin";
+import { sendPushToUser } from "@/lib/push/send";
 import { validateMenuForDistribution } from "./menu-display";
 import {
   type Gender,
@@ -319,6 +320,14 @@ export async function distributeMenu(
 
   revalidatePath(`/admin/users/${input.user_id}`, "page");
   revalidatePath("/admin/workout-requests", "page");
+
+  // 受講生に push 通知 (= 「新メニュー来た!」 のワクワク感)
+  void sendPushToUser(input.user_id, {
+    title: "のりfitness から新しい筋トレメニュー",
+    body: "今月のメニューが届きました。 タップで開きます",
+    url: "/workout",
+    tag: "menu-distributed",
+  }).catch((e) => console.error("[push] menu distribute failed", e));
 
   return { ok: true, menu_id: newMenu.id as string };
 }
