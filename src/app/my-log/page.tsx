@@ -17,16 +17,23 @@ function daysAgo(iso: string): number {
 export default async function MyLogPage() {
   const supabase = await createClient();
 
-  // 各セクションのカウント取得
-  const [{ count: reviewCount }, { count: completedCount }, flashback] =
-    await Promise.all([
-      supabase.from("lesson_reviews").select("*", { count: "exact", head: true }),
-      supabase
-        .from("lesson_progress")
-        .select("*", { count: "exact", head: true })
-        .eq("is_completed", true),
-      getMyFlashbackReview(),
-    ]);
+  // 各セクションのカウント取得 (= 振り返り + 完了履歴 + 実践リスト 全体件数)
+  const [
+    { count: reviewCount },
+    { count: completedCount },
+    { count: actionsCount },
+    flashback,
+  ] = await Promise.all([
+    supabase.from("lesson_reviews").select("*", { count: "exact", head: true }),
+    supabase
+      .from("lesson_progress")
+      .select("*", { count: "exact", head: true })
+      .eq("is_completed", true),
+    supabase
+      .from("real_world_actions")
+      .select("*", { count: "exact", head: true }),
+    getMyFlashbackReview(),
+  ]);
 
   return (
     <>
@@ -40,7 +47,7 @@ export default async function MyLogPage() {
         {/* フラッシュバックカード(過去の振り返り再表示) */}
         {flashback && <FlashbackCard review={flashback} />}
 
-        {/* ハブカード (ブックマーク = 線② 復活予定 / 実践リスト = 翌日復活予定) */}
+        {/* ハブ 3 カード (Q8-A 採用: 振り返り → 実践リスト → 完了履歴 順 = リアクティブ系上、 履歴下) */}
         <section className="grid grid-cols-2 gap-3">
           <HubCard
             href="/my-log/reviews"
@@ -48,6 +55,13 @@ export default async function MyLogPage() {
             title="振り返り"
             count={reviewCount ?? 0}
             countLabel="件記入"
+          />
+          <HubCard
+            href="/my-log/actions"
+            icon={<RocketIcon />}
+            title="実践リスト"
+            count={actionsCount ?? 0}
+            countLabel="件宣言"
           />
           <HubCard
             href="/my-log/completed"
@@ -218,6 +232,17 @@ function CheckCircleIcon() {
     <svg {...ICO_PROPS} width="20" height="20">
       <circle cx="12" cy="12" r="10" />
       <polyline points="9 12 11 14 15 10" />
+    </svg>
+  );
+}
+
+function RocketIcon() {
+  return (
+    <svg {...ICO_PROPS} width="20" height="20">
+      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+      <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+      <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
+      <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
     </svg>
   );
 }

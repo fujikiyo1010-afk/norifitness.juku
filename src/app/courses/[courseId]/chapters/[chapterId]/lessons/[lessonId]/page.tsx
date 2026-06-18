@@ -12,6 +12,8 @@ import { VimeoEmbed } from "@/components/VimeoEmbed";
 import { MemberHeader } from "@/components/MemberHeader";
 import { CompleteButton } from "./CompleteButton";
 import { ReviewAccordion } from "./ReviewAccordion";
+import { PracticeInput } from "./PracticeInput";
+import { listMyActionsForLesson } from "@/lib/practice/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -38,10 +40,11 @@ export default async function StudentLessonPage({
     notFound();
   }
 
-  const [progressMap, review, adjacent] = await Promise.all([
+  const [progressMap, review, adjacent, practiceActions] = await Promise.all([
     getMyLessonProgress([lesson.id]),
     getMyLessonReview(lesson.id),
     getAdjacentLessons(courseId, lesson.id),
+    listMyActionsForLesson(lesson.id),
   ]);
   const isCompleted = progressMap.get(lesson.id) === true;
 
@@ -145,6 +148,16 @@ export default async function StudentLessonPage({
         {!isExam && (
           <section>
             <ReviewAccordion lessonId={lesson.id} initial={review} />
+          </section>
+        )}
+
+        {/* 実践リスト 「今週これを試す」 (試験は対象外) */}
+        {!isExam && (
+          <section>
+            <PracticeInput
+              lessonId={lesson.id}
+              existing={practiceActions}
+            />
           </section>
         )}
 
