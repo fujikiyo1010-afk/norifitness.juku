@@ -39,6 +39,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
+  viewportFit: "cover",   // PWA standalone で safe-area-inset を有効化 (= 下部ナビが iPhone ホームインジケータの上に浮く)
 };
 
 export default function RootLayout({
