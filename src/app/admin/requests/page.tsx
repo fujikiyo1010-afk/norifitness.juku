@@ -335,6 +335,24 @@ async function DetailPane({
                   ? carte.focus_body_parts.join(" ・ ")
                   : "—"}
               </dd>
+              <dt className="text-zinc-500">目的</dt>
+              <dd className="text-zinc-900 font-semibold m-0">
+                {carte.purposes.length > 0 ? carte.purposes.join(" ・ ") : "—"}
+              </dd>
+              <dt className="text-zinc-500">運動経験</dt>
+              <dd className="text-zinc-900 font-semibold m-0">
+                {carte.experience ?? "—"}
+              </dd>
+              <dt className="text-zinc-500">医師制限</dt>
+              <dd className="text-zinc-900 font-semibold m-0">
+                {carte.medical_limits.length > 0
+                  ? carte.medical_limits.join(" ・ ")
+                  : "なし"}
+              </dd>
+              <dt className="text-zinc-500">目指す身体像</dt>
+              <dd className="text-zinc-900 font-semibold m-0">
+                {carte.ideal_body ?? "—"}
+              </dd>
             </dl>
           </div>
         )}

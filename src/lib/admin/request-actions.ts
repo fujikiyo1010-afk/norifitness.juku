@@ -3,6 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendPushToUser } from "@/lib/push/send";
+
+const PREVIEW_MAX = 80;
+function shortPreview(text: string): string {
+  const t = (text ?? "").replace(/\s+/g, " ").trim();
+  return t.length <= PREVIEW_MAX ? t : t.slice(0, PREVIEW_MAX - 1) + "…";
+}
 
 export type RequestType = "carte" | "workout";
 
@@ -45,7 +52,7 @@ export async function replyToRequest(
     })
     .eq("id", requestId)
     .eq("status", "pending")
-    .select("id")
+    .select("id, user_id")
     .maybeSingle();
 
   if (error) {
@@ -62,5 +69,22 @@ export async function replyToRequest(
   revalidatePath("/admin");
   // 受講生ハブからもアクセスされるので layout 単位で revalidate
   revalidatePath("/admin/users", "layout");
+
+  // 受講生に push 通知 (= リクエストへの対応完了)
+  const targetUserId = (data as { user_id?: string } | null)?.user_id;
+  if (targetUserId) {
+    const title =
+      type === "carte"
+        ? "カルテ更新リクエストへの返信"
+        : "メニュー変更リクエストへの返信";
+    const url = type === "carte" ? "/workout/carte" : "/workout";
+    void sendPushToUser(targetUserId, {
+      title,
+      body: shortPreview(text),
+      url,
+      tag: `request-handled-${type}`,
+    }).catch((e) => console.error("[push] request handled failed", e));
+  }
+
   return { ok: true };
 }
