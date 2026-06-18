@@ -2,8 +2,16 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { requestEmailChange } from "@/lib/account/actions";
+import { createClient } from "@/lib/supabase/client";
+import { notifyEmailChangeRequest } from "./_actions";
 
+/**
+ * メールアドレス変更フォーム (2026-06-18 #8 ・Client 全面実装)
+ *
+ * Auth 操作 (= signInWithPassword + updateUser) は Server Action では cookie 同期で問題が出るため、
+ * Browser Supabase client で直接実行する。
+ * 旧メール宛通知だけ Server Action 経由 (= 副作用、 メール送信のみ)。
+ */
 export function EmailChangeForm({ currentEmail }: { currentEmail: string }) {
   const router = useRouter();
   const [newEmail, setNewEmail] = useState("");
@@ -25,18 +33,62 @@ export function EmailChangeForm({ currentEmail }: { currentEmail: string }) {
     const pwEl = form.elements.namedItem(
       "current_password"
     ) as HTMLInputElement | null;
-    const newEmailVal = newEmailEl?.value ?? newEmail;
+    const newEmailVal = (newEmailEl?.value ?? newEmail).trim().toLowerCase();
     const pwVal = pwEl?.value ?? currentPassword;
 
+    if (!newEmailVal) {
+      setError("新しいメールアドレスを入力してください");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmailVal)) {
+      setError("メールアドレスの形式が正しくありません");
+      return;
+    }
+    if (newEmailVal === currentEmail.toLowerCase()) {
+      setError("現在と同じメールアドレスです");
+      return;
+    }
+    if (!pwVal) {
+      setError("現在のパスワードを入力してください");
+      return;
+    }
+
     startTransition(async () => {
-      const r = await requestEmailChange(currentEmail, newEmailVal, pwVal);
-      if (r.ok) {
-        setSuccess(true);
-        setNewEmail("");
-        setCurrentPassword("");
-      } else {
-        setError(r.error);
+      const supabase = createClient();
+
+      // 1) 本人確認 (= browser context、 cookie 自動同期)
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: currentEmail.toLowerCase(),
+        password: pwVal,
+      });
+      if (signInError) {
+        setError("現在のパスワードが正しくありません");
+        return;
       }
+
+      // 2) Supabase にメール変更申請 (= 新メールに確認リンク送信)
+      const { error: updateError } = await supabase.auth.updateUser({
+        email: newEmailVal,
+      });
+      if (updateError) {
+        const msg = updateError.message ?? "";
+        setError(
+          msg.toLowerCase().includes("already") ||
+            msg.toLowerCase().includes("registered")
+            ? "このメールアドレスは既に使われています"
+            : msg
+        );
+        return;
+      }
+
+      // 3) 旧メール宛通知 (= Server Action ・メール送信副作用のみ)
+      await notifyEmailChangeRequest(newEmailVal).catch(() => {
+        // 通知失敗してもメアド変更自体は成功扱い (= ログに記録だけ)
+      });
+
+      setSuccess(true);
+      setNewEmail("");
+      setCurrentPassword("");
     });
   }
 
@@ -47,7 +99,7 @@ export function EmailChangeForm({ currentEmail }: { currentEmail: string }) {
           ✓ 変更を申請しました
         </div>
         <p className="text-[12px] text-[#6a6256] leading-relaxed">
-          新しいメールアドレスに <b>Supabase からの確認リンク</b> を送信しました。
+          新しいメールアドレスに <b>確認リンク</b> を送信しました。
           <br />
           メールを開いてリンクをクリックすると変更が完了します。
           <br />
