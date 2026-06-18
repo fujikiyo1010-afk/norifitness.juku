@@ -423,7 +423,7 @@ export function CarteIntakeForm() {
             )}
 
             {/* 保存バー */}
-            <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2 sticky bottom-0">
+            <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2 sticky bottom-[calc(64px+env(safe-area-inset-bottom))]">
               <button
                 type="button"
                 disabled={isPending}
@@ -517,7 +517,7 @@ function PreviewView({
       )}
 
       {/* 修正 / 送信ボタン */}
-      <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2 sticky bottom-0">
+      <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2 sticky bottom-[calc(64px+env(safe-area-inset-bottom))]">
         <button
           type="button"
           disabled={isPending}

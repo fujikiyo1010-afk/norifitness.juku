@@ -279,7 +279,7 @@ export function MonthlyReviewForm({
           )}
 
           {/* 保存バー (フォームモード) */}
-          <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2 sticky bottom-0">
+          <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2 sticky bottom-[calc(64px+env(safe-area-inset-bottom))]">
             <button
               type="button"
               disabled={isPending}
@@ -365,7 +365,7 @@ function PreviewView({
       </div>
 
       {/* 修正 / 送信ボタン */}
-      <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2 sticky bottom-0">
+      <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2 sticky bottom-[calc(64px+env(safe-area-inset-bottom))]">
         <button
           type="button"
           disabled={isPending}

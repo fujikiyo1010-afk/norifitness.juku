@@ -220,7 +220,7 @@ export function RequestForm({
           )}
 
           {/* フッタ */}
-          <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2 sticky bottom-0">
+          <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2 sticky bottom-[calc(64px+env(safe-area-inset-bottom))]">
             <Link
               href={config.backHref}
               className="px-4 py-3 bg-[#fffdf8] text-[#2b2620] border border-[#e7dcc9] rounded-2xl text-[12px] font-bold text-center"
