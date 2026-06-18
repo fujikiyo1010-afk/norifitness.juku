@@ -11,12 +11,24 @@ export function LoginForm({ next }: { next: string | null }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
 
+    // ブラウザのオートフィル対策: React state より input の生 value を優先
+    const form = e.currentTarget;
+    const emailEl = form.elements.namedItem("email") as HTMLInputElement | null;
+    const passwordEl = form.elements.namedItem("password") as HTMLInputElement | null;
+    const emailVal = emailEl?.value ?? email;
+    const passwordVal = passwordEl?.value ?? password;
+
+    if (!emailVal || !passwordVal) {
+      setError("メールアドレスとパスワードを入力してください");
+      return;
+    }
+
     startTransition(async () => {
-      const result = await signIn(email, password, next);
+      const result = await signIn(emailVal, passwordVal, next);
       // 成功時は redirect が走るのでここには来ない
       if (result && !result.ok) {
         setError(result.error);
@@ -24,7 +36,8 @@ export function LoginForm({ next }: { next: string | null }) {
     });
   }
 
-  const canSubmit = email.length > 0 && password.length > 0 && !pending;
+  // 押下のみガード (= オートフィルで state 空でもログインできるよう)
+  const canSubmit = !pending;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
