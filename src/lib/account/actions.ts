@@ -2,9 +2,28 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createClient as createBaseSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { sendPasswordChangedEmail } from "@/lib/email/password-changed";
 import { sendEmailChangeRequestNotice } from "@/lib/email/email-changed";
+
+/**
+ * PW 検証専用 client (= cookie に書き込まない = 既存セッション壊さない)
+ * /account/email や /account/password の本人確認に使う。
+ */
+function createVerifyOnlyClient() {
+  return createBaseSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      },
+    }
+  );
+}
 
 /**
  * /account 設定画面のサーバーアクション (2026-06-17 線① 新設)
@@ -80,10 +99,9 @@ export async function updatePassword(
     return { ok: false, error: "新しいパスワードは現在のものと違う必要があります" };
   }
 
-  const supabase = await createClient();
-
-  // 1) 現在パスワード検証
-  const { error: signInError } = await supabase.auth.signInWithPassword({
+  // 1) 現在パスワード検証 (= 別 client で cookie 書き込まない)
+  const verifyClient = createVerifyOnlyClient();
+  const { error: signInError } = await verifyClient.auth.signInWithPassword({
     email: email.toLowerCase(),
     password: currentPassword,
   });
@@ -92,7 +110,8 @@ export async function updatePassword(
     return { ok: false, error: "現在のパスワードが正しくありません" };
   }
 
-  // 2) 新パスワードで更新
+  // 2) 新パスワードで更新 (= 元 session のまま)
+  const supabase = await createClient();
   const { error: updateError } = await supabase.auth.updateUser({
     password: newPassword,
   });
@@ -142,10 +161,9 @@ export async function requestEmailChange(
     return { ok: false, error: "現在のパスワードを入力してください" };
   }
 
-  const supabase = await createClient();
-
-  // 1) 本人確認 (= 現在 PW で signIn)
-  const { error: signInError } = await supabase.auth.signInWithPassword({
+  // 1) 本人確認 (= 別 client で signIn、 cookie 書き込まない = 既存 session 壊さない)
+  const verifyClient = createVerifyOnlyClient();
+  const { error: signInError } = await verifyClient.auth.signInWithPassword({
     email: oldTrimmed,
     password: currentPassword,
   });
@@ -153,7 +171,8 @@ export async function requestEmailChange(
     return { ok: false, error: "現在のパスワードが正しくありません" };
   }
 
-  // 2) Supabase にメール変更申請 (= 新メールに確認リンク送信)
+  // 2) Supabase にメール変更申請 (= 元 session のまま、 新メールに確認リンク送信)
+  const supabase = await createClient();
   const { error: updateError } = await supabase.auth.updateUser({
     email: newTrimmed,
   });
