@@ -4,6 +4,7 @@ import { UploadIndicator } from "@/components/UploadIndicator";
 import { requireAdmin } from "@/lib/auth/admin";
 import { countAdminDashboardMetrics } from "@/lib/workout/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getAdminTotalUnreadCount } from "@/lib/chat/queries";
 import { AdminSideNav } from "./_components/AdminSideNav";
 
 /**
@@ -22,13 +23,14 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   const admin = await requireAdmin();
   const supabase = createAdminClient();
 
-  // metrics + 未発送件数 を並列取得
-  const [metrics, pendingShipmentsRes] = await Promise.all([
+  // metrics + 未発送件数 + チャット未読 を並列取得
+  const [metrics, pendingShipmentsRes, chatUnread] = await Promise.all([
     countAdminDashboardMetrics(),
     supabase
       .from("shipments")
       .select("id", { count: "exact", head: true })
       .eq("status", "pending"),
+    getAdminTotalUnreadCount(),
   ]);
 
   return (
@@ -40,6 +42,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           pendingAudits={metrics.pendingAudits}
           pendingRequests={metrics.pendingTotal}
           pendingShipments={pendingShipmentsRes.count ?? 0}
+          chatUnread={chatUnread}
         />
         <main className="flex-1 min-w-0 overflow-x-auto">{children}</main>
       </div>
