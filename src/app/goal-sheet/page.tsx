@@ -117,15 +117,17 @@ export default async function GoalSheetPage() {
               <SectionBand num="01" title="現状を把握" />
               <tbody>
                 <DataRow label="体重" value={fmt(cs?.weight_kg, "kg")} />
+                {audits?.field_comments?.weight_kg && <AuditRow audit={audits.field_comments.weight_kg} />}
                 <DataRow label="身長" value={fmt(cs?.height_cm, "cm")} muted="(プロフィール連動)" />
+                {audits?.field_comments?.height_cm && <AuditRow audit={audits.field_comments.height_cm} />}
                 <DataRow label="ウエスト" value={fmt(cs?.waist_cm, "cm")} />
+                {audits?.field_comments?.waist_cm && <AuditRow audit={audits.field_comments.waist_cm} />}
                 <DataRow label="首回り" value={fmt(cs?.neck_cm, "cm")} />
-                <DataRow
-                  label="体脂肪率"
-                  value={fmt(cs?.body_fat_pct, "%")}
-                  auditTag={audits?.field_comments?.body_fat_pct ? "添削 1" : undefined}
-                />
+                {audits?.field_comments?.neck_cm && <AuditRow audit={audits.field_comments.neck_cm} />}
+                <DataRow label="体脂肪率" value={fmt(cs?.body_fat_pct, "%")} />
+                {audits?.field_comments?.body_fat_pct && <AuditRow audit={audits.field_comments.body_fat_pct} />}
                 <DataRow label="メンテ kcal" value={cs?.maintenance_kcal ? `${cs.maintenance_kcal.toLocaleString()} kcal/日` : "—"} />
+                {audits?.field_comments?.maintenance_kcal && <AuditRow audit={audits.field_comments.maintenance_kcal} />}
                 {audits?.section_comments?.current_status && (
                   <AuditRow audit={audits.section_comments.current_status} />
                 )}
@@ -146,12 +148,16 @@ export default async function GoalSheetPage() {
                       ? `(${(gs.target_weight_kg - cs.weight_kg).toFixed(1)} kg)`
                       : undefined
                   }
-                  auditTag={audits?.field_comments?.target_weight_kg ? "添削 1" : undefined}
                 />
+                {audits?.field_comments?.target_weight_kg && <AuditRow audit={audits.field_comments.target_weight_kg} />}
                 <DataRow label="到達予定日" value={gs?.target_date ? formatFullDate(gs.target_date) : "—"} />
+                {audits?.field_comments?.target_date && <AuditRow audit={audits.field_comments.target_date} />}
                 <DataRow label="短期目標" value={gs?.short_term ?? "—"} />
+                {audits?.field_comments?.short_term && <AuditRow audit={audits.field_comments.short_term} />}
                 <DataRow label="長期目標" value={gs?.long_term ?? "—"} />
+                {audits?.field_comments?.long_term && <AuditRow audit={audits.field_comments.long_term} />}
                 <DataRow label="プロセス" value={gs?.process ?? "—"} />
+                {audits?.field_comments?.process && <AuditRow audit={audits.field_comments.process} />}
                 {audits?.section_comments?.goal_selection && (
                   <AuditRow audit={audits.section_comments.goal_selection} />
                 )}
@@ -161,9 +167,14 @@ export default async function GoalSheetPage() {
               <SectionBand num="03" title="栄養設計" />
               <tbody>
                 <DataRow label="目標カロリー" value={nt?.target_calorie ? `${nt.target_calorie.toLocaleString()} kcal/日` : "—"} />
+                {audits?.field_comments?.target_calorie && <AuditRow audit={audits.field_comments.target_calorie} />}
                 <PfcRow label="たんぱく質 (P)" g={nt?.pfc?.p} kcalPerG={4} totalKcal={nt?.target_calorie} />
+                {audits?.field_comments?.pfc_p && <AuditRow audit={audits.field_comments.pfc_p} />}
                 <PfcRow label="脂質 (F)" g={nt?.pfc?.f} kcalPerG={9} totalKcal={nt?.target_calorie} />
+                {audits?.field_comments?.pfc_f && <AuditRow audit={audits.field_comments.pfc_f} />}
                 <PfcRow label="糖質 (C)" g={nt?.pfc?.c} kcalPerG={4} totalKcal={nt?.target_calorie} />
+                {audits?.field_comments?.pfc_c && <AuditRow audit={audits.field_comments.pfc_c} />}
+                {audits?.field_comments?.carb_cycle && <AuditRow audit={audits.field_comments.carb_cycle} />}
                 <DataRow
                   label="合計"
                   value={
@@ -184,6 +195,7 @@ export default async function GoalSheetPage() {
                   label="達成時の気持ち"
                   value={content.positive_goals?.achievement_feeling ?? "—"}
                 />
+                {audits?.field_comments?.achievement_feeling && <AuditRow audit={audits.field_comments.achievement_feeling} />}
                 {audits?.section_comments?.positive_goals && (
                   <AuditRow audit={audits.section_comments.positive_goals} />
                 )}
@@ -193,18 +205,20 @@ export default async function GoalSheetPage() {
               <SectionBand num="05" title="セルフイメージ改善" />
               <tbody>
                 {content.self_image && content.self_image.length > 0 ? (
-                  content.self_image.map((item, i) => (
-                    <DataRow
-                      key={item.key ?? i}
-                      label={`項目 ${i + 1}`}
-                      value={
-                        item.before !== undefined && item.after !== undefined
-                          ? `${item.before} → ${item.after} (0-10)`
-                          : "未記入"
-                      }
-                      muted={item.label}
-                    />
-                  ))
+                  content.self_image.map((item, i) => {
+                    // admin の fieldKey = `self_image_${item.key}` (例 self_image_item_1)
+                    const comment = item.key
+                      ? audits?.field_comments?.[`self_image_${item.key}`]
+                      : undefined;
+                    return (
+                      <SelfImageRowWithComment
+                        key={item.key ?? i}
+                        index={i}
+                        item={item}
+                        comment={comment}
+                      />
+                    );
+                  })
                 ) : (
                   <DataRow label="状態" value="" muted="未記入 (8 項目)" />
                 )}
@@ -309,12 +323,10 @@ function DataRow({
   label,
   value,
   muted,
-  auditTag,
 }: {
   label: string;
   value: string;
   muted?: string;
-  auditTag?: string;
 }) {
   return (
     <tr>
@@ -324,13 +336,37 @@ function DataRow({
       <td className="border-b border-[#e7dcc9] px-4 py-2 text-[11px] text-[#2b2620] align-top">
         <span className="font-medium">{value}</span>
         {muted && <span className="text-[10px] text-[#6a6256] ml-1">{muted}</span>}
-        {auditTag && (
-          <span className="inline-block bg-[rgba(255,235,59,0.12)] text-[#b8860b] border border-[rgba(255,235,59,0.55)] px-2 py-px text-[9px] rounded-full font-semibold ml-2 align-middle">
-            {auditTag}
-          </span>
-        )}
       </td>
     </tr>
+  );
+}
+
+/**
+ * セルフイメージ項目行 + 該当 field_comments があれば AuditRow を追加。
+ * map 内で fragment + 2 つの tr を返したいので別コンポーネントに切り出し。
+ */
+function SelfImageRowWithComment({
+  index,
+  item,
+  comment,
+}: {
+  index: number;
+  item: SelfImageItem;
+  comment: AuditComment | undefined;
+}) {
+  return (
+    <>
+      <DataRow
+        label={`項目 ${index + 1}`}
+        value={
+          item.before !== undefined && item.after !== undefined
+            ? `${item.before} → ${item.after} (0-10)`
+            : "未記入"
+        }
+        muted={item.label}
+      />
+      {comment && <AuditRow audit={comment} />}
+    </>
   );
 }
 
