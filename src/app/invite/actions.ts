@@ -3,6 +3,8 @@
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient as createServerClient } from "@/lib/supabase/server";
+import { sendWelcomeEmail } from "@/lib/email/welcome";
+import { sendPushToUser } from "@/lib/push/send";
 
 export type AcceptInvitationResult =
   | { ok: true }
@@ -124,6 +126,20 @@ export async function acceptInvitation(
       error: `アカウント作成は完了しましたが、自動ログインに失敗しました。ログイン画面からお進みください: ${signInError.message}`,
     };
   }
+
+  // ───── 6.5. Welcome 通知 (= 線① B-1 メール + Push、 失敗してもメイン処理は成功扱い) ─────
+  //   - メール: email_notification_enabled に関係なく必ず送る (入会必須通知)
+  //   - Push : この時点では subscription 未登録 (= 設定画面で許可後に登録される) ため、
+  //            送信先 0 件で no-op になる。 初回は機能しないが将来の再ログイン等で意味出る。
+  void sendWelcomeEmail({ email: inv.email, name: inv.name }).catch((e) =>
+    console.error("[email] welcome failed", e)
+  );
+  void sendPushToUser(newUserId, {
+    title: "ようこそ のりfitness 筋肉塾へ",
+    body: `${inv.name} さん、 入会ありがとうございます。 まずは画面右下「設定」 から通知を有効にしてください`,
+    url: "/account",
+    tag: "welcome",
+  }).catch((e) => console.error("[push] welcome failed", e));
 
   // ───── 7. オンボ判定リダイレクト ─────
   // 新規登録なので通常 shipments 行は無い = /onboarding へ
