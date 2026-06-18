@@ -28,7 +28,7 @@
 /* ダークモード対応は 線① では行わない (= 受講生 UI はクリーム固定) */
 
 body {
-  background: var(--nf-bg-outer);   /* PC/iPad は外側ベージュ */
+  background: var(--nf-bg-app);   /* 全画面 F 統一 (= きよむさん 2026-06-18 確定、 outer 色概念は廃止) */
   color: var(--nf-ink);
   font-family: var(--font-noto-sans-jp), "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", system-ui, sans-serif;
 }

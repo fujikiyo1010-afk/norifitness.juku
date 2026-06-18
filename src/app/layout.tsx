@@ -52,7 +52,7 @@ export default function RootLayout({
       lang="ja"
       className={`${notoSansJp.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#e8dec9]">
+      <body className="min-h-full flex flex-col bg-[#f9f5ed]">
         {children}
         <PWAInstallBanner />
         <MemberBottomNav />
