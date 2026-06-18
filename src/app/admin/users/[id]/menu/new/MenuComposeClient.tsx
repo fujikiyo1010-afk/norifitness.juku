@@ -49,6 +49,8 @@ export function MenuComposeClient({
   sourceTemplate,
   backHref,
   backLabel,
+  fromRequest = false,
+  requestId = null,
 }: {
   userId: string;
   userName: string;
@@ -59,6 +61,8 @@ export function MenuComposeClient({
   /** ヘッダ戻るボタンの遷移先。テンプレ採用時は match、現メニュー編集時はハブ */
   backHref: string;
   backLabel: string;
+  fromRequest?: boolean;
+  requestId?: string | null;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -190,6 +194,12 @@ export function MenuComposeClient({
         notes: notes.trim(),
       });
       if (result.ok) {
+        // リクエスト経由なら 返信フォームへ自動で戻す (= /admin/requests 右ペイン展開)
+        if (fromRequest && requestId) {
+          router.push(`/admin/requests?id=${requestId}&type=workout`);
+          router.refresh();
+          return;
+        }
         router.push(`/admin/users/${userId}`);
       } else {
         setErrors([result.message]);
@@ -243,6 +253,26 @@ export function MenuComposeClient({
           )}
         </div>
       </header>
+
+      {/* リクエスト処理中バナー (= /admin/requests から「メニューを編集」 で来た時のみ) */}
+      {fromRequest && (
+        <div className="mx-auto max-w-3xl px-4 pt-4">
+          <div className="rounded-[10px] border border-amber-300 bg-amber-50 px-4 py-3 flex items-center justify-between gap-3">
+            <div className="text-sm text-amber-900">
+              <span className="font-bold">リクエスト処理中です</span>
+              <span className="ml-2 text-xs text-amber-800">
+                配布 → 返信フォームに自動で戻ります
+              </span>
+            </div>
+            <Link
+              href={`/admin/requests?id=${requestId}&type=workout`}
+              className="text-xs text-amber-900 underline hover:no-underline"
+            >
+              リクエストに戻る →
+            </Link>
+          </div>
+        </div>
+      )}
 
       <main className="mx-auto max-w-3xl px-4 py-6 space-y-5 pb-32">
         {/* のり氏メモ編集 */}
@@ -400,7 +430,11 @@ export function MenuComposeClient({
             disabled={isPending}
             className="rounded-[4px] bg-[#00897b] px-6 py-2.5 text-sm font-bold text-white hover:bg-[#00695c] disabled:opacity-50"
           >
-            {isPending ? "配布中..." : "配布する"}
+            {isPending
+              ? "配布中..."
+              : fromRequest
+                ? "配布して 返信フォームへ →"
+                : "配布する"}
           </button>
         </div>
       </div>

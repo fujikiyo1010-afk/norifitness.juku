@@ -34,11 +34,15 @@ export default async function AdminMenuNewPage({
     template?: string;
     from_scratch?: string;
     from_current?: string;
+    from?: string;
+    requestId?: string;
   }>;
 }) {
   await requireAdmin();
   const { id: userId } = await params;
   const sp = await searchParams;
+  const fromRequest = sp.from === "request" && !!sp.requestId;
+  const requestId = fromRequest ? (sp.requestId as string) : null;
 
   // 受講生取得
   const admin = createAdminClient();
@@ -160,6 +164,8 @@ export default async function AdminMenuNewPage({
       sourceTemplate={sourceTemplate}
       backHref={backHref}
       backLabel={backLabel}
+      fromRequest={fromRequest}
+      requestId={requestId}
     />
   );
 }
