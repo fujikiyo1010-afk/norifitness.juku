@@ -2,10 +2,14 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { updatePassword } from "@/lib/account/actions";
+import { createClient } from "@/lib/supabase/client";
+import { notifyPasswordChanged } from "./_actions";
 
 /**
- * パスワード変更フォーム (2026-06-17 線① 新設)
+ * パスワード変更フォーム (2026-06-17 線① 新設 ・ 2026-06-18 Client 全面移行)
+ *
+ * Auth 操作 (= signInWithPassword + updateUser) は browser supabase で実行 (= cookie 自動同期)。
+ * 本人宛通知メールだけ Server Action 経由。
  *
  * - 現在パスワード (検証用)
  * - 新パスワード (8 文字以上)
@@ -32,11 +36,36 @@ export function PasswordForm({ email }: { email: string }) {
     if (!ready) return;
     setError(null);
     startTransition(async () => {
-      const res = await updatePassword(email, currentPassword, newPassword);
-      if (!res.ok) {
-        setError(res.error);
+      const supabase = createClient();
+
+      // 1) 本人確認 (= browser context、 cookie 自動同期)
+      if (currentPassword === newPassword) {
+        setError("新しいパスワードは現在のものと違う必要があります");
         return;
       }
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.toLowerCase(),
+        password: currentPassword,
+      });
+      if (signInError) {
+        setError("現在のパスワードが正しくありません");
+        return;
+      }
+
+      // 2) 新パスワードで更新
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+      if (updateError) {
+        setError(updateError.message);
+        return;
+      }
+
+      // 3) 本人宛通知メール送信 (= Server Action ・副作用のみ)
+      await notifyPasswordChanged().catch(() => {
+        // 通知失敗してもパスワード変更自体は成功扱い
+      });
+
       alert("パスワードを変更しました");
       router.push("/account");
       router.refresh();

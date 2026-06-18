@@ -2,27 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createClient as createBaseSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { sendPasswordChangedEmail } from "@/lib/email/password-changed";
-
-/**
- * PW 検証専用 client (= cookie に書き込まない = 既存セッション壊さない)
- * /account/email や /account/password の本人確認に使う。
- */
-function createVerifyOnlyClient() {
-  return createBaseSupabaseClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-        detectSessionInUrl: false,
-      },
-    }
-  );
-}
 
 /**
  * /account 設定画面のサーバーアクション (2026-06-17 線① 新設)
@@ -75,62 +55,12 @@ export async function toggleEmailNotification(next: boolean): Promise<ActionResu
   return { ok: true };
 }
 
-/**
- * パスワード変更 ・ 現在パスワード検証 → 新パスワード更新 (2026-06-17 線① 新設)
- *
- * 流れ:
- *   1. 現在パスワードで signInWithPassword() 実行 (= 検証)
- *      → 失敗 = 現在パスワード不一致
- *   2. 成功 → updateUser({ password: new }) で新パスワード設定
- *   3. ログイン状態は維持される (= Supabase 仕様)
- */
-export async function updatePassword(
-  email: string,
-  currentPassword: string,
-  newPassword: string
-): Promise<ActionResult> {
-  if (!email) return { ok: false, error: "ログイン状態を確認できませんでした" };
-  if (!currentPassword) return { ok: false, error: "現在のパスワードを入力してください" };
-  if (!newPassword || newPassword.length < 8) {
-    return { ok: false, error: "新しいパスワードは 8 文字以上で設定してください" };
-  }
-  if (currentPassword === newPassword) {
-    return { ok: false, error: "新しいパスワードは現在のものと違う必要があります" };
-  }
+// updatePassword は廃止 (2026-06-18 移行) ・Auth 操作は Client から直接実行に変更:
+// → src/app/account/password/PasswordForm.tsx で browser supabase.auth.signInWithPassword + updateUser を呼ぶ
+// → src/app/account/password/_actions.ts の notifyPasswordChanged が本人宛通知のみ担う
+// (Server Action 内での auth 操作は @supabase/ssr の cookie 同期で session 切れる問題があるため)
 
-  // 1) 現在パスワード検証 (= 別 client で cookie 書き込まない)
-  const verifyClient = createVerifyOnlyClient();
-  const { error: signInError } = await verifyClient.auth.signInWithPassword({
-    email: email.toLowerCase(),
-    password: currentPassword,
-  });
-  if (signInError) {
-    // 不正解の理由を細かく出さない (列挙攻撃対策)
-    return { ok: false, error: "現在のパスワードが正しくありません" };
-  }
-
-  // 2) 新パスワードで更新 (= 元 session のまま)
-  const supabase = await createClient();
-  const { error: updateError } = await supabase.auth.updateUser({
-    password: newPassword,
-  });
-  if (updateError) {
-    return { ok: false, error: updateError.message };
-  }
-
-  // 3) 本人宛セキュリティ通知メール送信 (失敗しても主処理は成功扱い)
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (user) {
-    await sendPasswordChangedEmail(user.id);
-  }
-
-  revalidatePath("/account");
-  return { ok: true };
-}
-
-// requestEmailChange は廃止 (2026-06-18 移行) ・Auth 操作は Client から直接実行に変更:
+// requestEmailChange も同じ理由で廃止:
 // → src/app/account/email/EmailChangeForm.tsx で browser supabase.auth.updateUser を呼ぶ
 // → src/app/account/email/_actions.ts の notifyEmailChangeRequest が旧メール通知のみ担う
 
