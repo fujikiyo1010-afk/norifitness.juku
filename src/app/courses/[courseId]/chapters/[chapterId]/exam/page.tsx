@@ -54,8 +54,8 @@ export default async function ExamPage({
   if (!exam) notFound();
 
   return (
-    <main className="flex flex-1 flex-col bg-[#ebdfc6] min-h-screen">
-      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9] bg-[#fffdf8]">
+    <main className="flex flex-1 flex-col bg-[#f3ecda] min-h-screen">
+      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9]">
         <MemberHeader
           title="テスト"
           fallbackHref={`/courses/${courseId}`}

@@ -123,7 +123,7 @@ export function PasswordForm({ email }: { email: string }) {
           type="button"
           onClick={() => router.push("/account")}
           disabled={pending}
-          className="flex-1 bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl px-4 py-3 text-[13px] font-bold text-zinc-700 hover:bg-[#e0d5be] transition-colors disabled:opacity-60"
+          className="flex-1 bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl px-4 py-3 text-[13px] font-bold text-zinc-700 hover:bg-[#e8dec9] transition-colors disabled:opacity-60"
         >
           キャンセル
         </button>

@@ -99,7 +99,7 @@ export default async function CompletedLessonsPage() {
   return (
     <>
       <MemberHeader title="完了履歴" fallbackHref="/my-log" />
-      <main className="min-h-screen bg-[#ebdfc6]">
+      <main className="min-h-screen bg-[#f3ecda]">
         <div className="mx-auto max-w-[460px] px-4 py-5">
           {/* サマリ */}
           <div className="mb-5 px-1">

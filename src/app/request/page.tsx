@@ -20,8 +20,8 @@ export default async function RequestPage({
   return (
     <>
       <MemberHeader title="入会申請" fallbackHref="/" />
-      <main className="flex flex-1 flex-col bg-[#ebdfc6] min-h-screen">
-      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9] bg-[#fffdf8]">
+      <main className="flex flex-1 flex-col bg-[#f3ecda] min-h-screen">
+      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9]">
         <div
           className="flex-1 px-6 py-7"
           style={{ background: "linear-gradient(135deg, #e0f2f1, #fffbe6)" }}
@@ -60,8 +60,8 @@ export default async function RequestPage({
 
 function RequestComplete() {
   return (
-    <main className="flex flex-1 flex-col bg-[#ebdfc6] min-h-screen">
-      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9] bg-[#fffdf8]">
+    <main className="flex flex-1 flex-col bg-[#f3ecda] min-h-screen">
+      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9]">
         <header className="px-4 py-3 border-b border-[#e7dcc9] text-center">
           <h1 className="text-[15px] font-bold text-[#2b2620]">申請完了</h1>
         </header>

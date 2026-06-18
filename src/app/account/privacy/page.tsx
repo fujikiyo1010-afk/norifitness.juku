@@ -9,8 +9,8 @@ export const dynamic = "force-static";
  */
 export default function PrivacyPage() {
   return (
-    <main className="flex flex-1 flex-col bg-[#ebdfc6] min-h-screen">
-      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9] bg-[#fffdf8]">
+    <main className="flex flex-1 flex-col bg-[#f3ecda] min-h-screen">
+      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9]">
         <MemberHeader title="プライバシーポリシー" fallbackHref="/account" />
 
         <div className="px-4 pt-5 pb-8 space-y-4 text-[12px] text-zinc-700 leading-[1.8]">

@@ -219,7 +219,7 @@ function EmptyHero({ onAddClick }: { onAddClick: () => void }) {
         </button>
         <Link
           href="/courses"
-          className="rounded-full border border-zinc-300 text-zinc-700 px-4 py-2 text-[12px] font-bold hover:bg-[#e0d5be]"
+          className="rounded-full border border-zinc-300 text-zinc-700 px-4 py-2 text-[12px] font-bold hover:bg-[#e8dec9]"
         >
           コースから始める →
         </Link>
@@ -277,7 +277,7 @@ function ActionCard({
             <p className="text-[10px] text-[#a59b8c] mt-1">自発アクション</p>
           )}
           {row.tried && row.reflection && (
-            <p className="text-[12px] text-zinc-700 mt-2 bg-[#ebdfc6] rounded-md p-2 leading-relaxed whitespace-pre-wrap">
+            <p className="text-[12px] text-zinc-700 mt-2 bg-[#f3ecda] rounded-md p-2 leading-relaxed whitespace-pre-wrap">
               <span className="text-[10px] text-[#6a6256] mr-1">
                 振り返り:
               </span>

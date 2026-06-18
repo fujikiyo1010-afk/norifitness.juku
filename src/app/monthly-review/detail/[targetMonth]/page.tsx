@@ -92,7 +92,7 @@ export default async function MonthlyReviewDetailPage({
     <>
       <MemberHeader title="月次添削 詳細" fallbackHref="/monthly-review" />
       <main className="flex flex-1 flex-col bg-[#fafbfa] min-h-screen">
-        <div className="mx-auto w-full max-w-[460px] bg-[#fffdf8] border-x border-[#e7dcc9]">
+        <div className="mx-auto w-full max-w-[460px] border-x border-[#e7dcc9]">
 
         {/* ヒーロー帯 (温かいグラデ) */}
         <div className="bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] px-5 py-4 border-b border-[#e7dcc9]">

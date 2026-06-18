@@ -112,7 +112,7 @@ export function CourseAccordion({
             <button
               type="button"
               onClick={() => toggleChapter(ch.id)}
-              className="w-full text-left px-4 py-3.5 grid grid-cols-[auto_1fr_auto] gap-2.5 items-center hover:bg-[#e0d5be] transition-colors"
+              className="w-full text-left px-4 py-3.5 grid grid-cols-[auto_1fr_auto] gap-2.5 items-center hover:bg-[#e8dec9] transition-colors"
             >
               {/* 章番号バッジ (完了=ティール緑塗り / 進行中=薄緑 / 未着手=淡) */}
               <span
@@ -168,7 +168,7 @@ export function CourseAccordion({
 
             {/* 展開時のレッスン一覧 */}
             {isOpen && (
-              <div className="border-t border-zinc-200 bg-[#ebdfc6]/50">
+              <div className="border-t border-zinc-200 bg-[#f3ecda]/50">
                 {ch.description && (
                   <div className="px-4 pt-3 pb-1 text-xs text-zinc-600 whitespace-pre-wrap">
                     {ch.description}

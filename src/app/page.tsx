@@ -53,8 +53,8 @@ export default async function Home() {
       : 0;
 
   return (
-    <main className="flex flex-1 flex-col bg-[#ebdfc6] min-h-screen">
-      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9] bg-[#fffdf8]">
+    <main className="flex flex-1 flex-col bg-[#f3ecda] min-h-screen">
+      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9]">
       {/* ヘッダー */}
       <header className="flex items-center justify-between px-[18px] py-[14px] border-b border-[#e7dcc9] bg-[#fffdf8] sticky top-0 z-10">
         <div className="text-[17px] font-bold tracking-[0.04em] text-[#004d40]">

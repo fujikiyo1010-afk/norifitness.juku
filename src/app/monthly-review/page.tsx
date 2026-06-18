@@ -57,7 +57,7 @@ export default async function MonthlyReviewHistoryPage() {
     <>
       <MemberHeader title="月次添削 履歴" fallbackHref="/" />
       <main className="flex flex-1 flex-col bg-[#fafbfa] min-h-screen">
-        <div className="mx-auto w-full max-w-[460px] bg-[#fffdf8] border-x border-[#e7dcc9]">
+        <div className="mx-auto w-full max-w-[460px] border-x border-[#e7dcc9]">
 
         {/* スクロール本体 */}
         <div className="bg-[#fafbfa] pb-20">
@@ -280,13 +280,13 @@ function StateCardC({ audit }: { audit: MonthlyAuditRow }) {
       <div className="text-sm font-medium text-[#2b2620] mt-2 mb-2 flex items-center">
         のりfitness が動画返信を準備中
         <span className="ml-2 inline-flex gap-0.5">
-          <span className="w-1 h-1 rounded-full bg-[#ebdfc6]0 animate-pulse" />
+          <span className="w-1 h-1 rounded-full bg-[#f3ecda]0 animate-pulse" />
           <span
-            className="w-1 h-1 rounded-full bg-[#ebdfc6]0 animate-pulse"
+            className="w-1 h-1 rounded-full bg-[#f3ecda]0 animate-pulse"
             style={{ animationDelay: "0.2s" }}
           />
           <span
-            className="w-1 h-1 rounded-full bg-[#ebdfc6]0 animate-pulse"
+            className="w-1 h-1 rounded-full bg-[#f3ecda]0 animate-pulse"
             style={{ animationDelay: "0.4s" }}
           />
         </span>

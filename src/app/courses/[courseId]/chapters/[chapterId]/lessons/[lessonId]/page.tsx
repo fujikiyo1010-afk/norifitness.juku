@@ -82,7 +82,7 @@ export default async function StudentLessonPage({
           </svg>
         }
       />
-      <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#ebdfc6]">
+      <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#f3ecda]">
         <div className="mx-auto w-full max-w-[460px] space-y-4">
         <header className="space-y-2">
           {/* レッスンタイトル + 章名 (パンくずは AppHeader 戻る矢印で代替) */}

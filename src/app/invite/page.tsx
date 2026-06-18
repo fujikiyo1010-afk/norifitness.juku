@@ -58,7 +58,7 @@ export default async function InvitePage({
           </p>
         </header>
 
-        <div className="rounded-md border border-zinc-200 dark:border-zinc-800 bg-[#ebdfc6] dark:bg-zinc-900 p-4 text-sm space-y-1">
+        <div className="rounded-md border border-zinc-200 dark:border-zinc-800 bg-[#f3ecda] dark:bg-zinc-900 p-4 text-sm space-y-1">
           <div className="text-[#6a6256] dark:text-[#a59b8c]">招待先</div>
           <div className="font-medium text-[#2b2620] dark:text-zinc-50">{inv.name}</div>
           <div className="text-zinc-600 dark:text-[#a59b8c] break-all">{inv.email}</div>
@@ -91,7 +91,7 @@ function InviteError({
         {showLoginLink && (
           <a
             href="/login"
-            className="inline-block rounded-md bg-zinc-900 dark:bg-[#ebdfc6] px-4 py-2 text-sm font-medium text-white dark:text-[#2b2620]"
+            className="inline-block rounded-md bg-zinc-900 dark:bg-[#f3ecda] px-4 py-2 text-sm font-medium text-white dark:text-[#2b2620]"
           >
             ログイン画面へ
           </a>

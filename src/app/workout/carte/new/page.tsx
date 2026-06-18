@@ -27,7 +27,7 @@ export default async function WorkoutCarteNewPage() {
   return (
     <>
       <MemberHeader title="カルテ 入力" fallbackHref="/workout" />
-      <div className="min-h-screen bg-[#ebdfc6]">
+      <div className="min-h-screen bg-[#f3ecda]">
         <CarteIntakeForm />
       </div>
     </>

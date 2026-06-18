@@ -225,7 +225,7 @@ export default async function GoalSheetPage() {
             <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
               <Link
                 href="/goal-sheet/edit"
-                className="inline-block text-center rounded-md border border-zinc-300 bg-[#fffdf8] hover:bg-[#e0d5be] text-zinc-700 px-4 py-2 text-xs font-bold tracking-wide transition-colors"
+                className="inline-block text-center rounded-md border border-zinc-300 bg-[#fffdf8] hover:bg-[#e8dec9] text-zinc-700 px-4 py-2 text-xs font-bold tracking-wide transition-colors"
               >
                 修正する
               </Link>

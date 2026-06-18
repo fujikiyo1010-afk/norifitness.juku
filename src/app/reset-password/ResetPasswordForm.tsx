@@ -200,7 +200,7 @@ export function ResetPasswordForm() {
       <button
         type="submit"
         disabled={!canSubmit}
-        className="w-full rounded-md bg-zinc-900 dark:bg-[#ebdfc6] px-4 py-2.5 text-sm font-medium text-white dark:text-[#2b2620] disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full rounded-md bg-zinc-900 dark:bg-[#f3ecda] px-4 py-2.5 text-sm font-medium text-white dark:text-[#2b2620] disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {pending ? "更新中…" : "新しいパスワードに更新"}
       </button>

@@ -334,7 +334,7 @@ export function PfcCarbToolClient({
                         ? "bg-[#e65100] border-[#e65100] text-white"
                         : lv === "mid"
                           ? "bg-[#b45309] border-[#b45309] text-white"
-                          : "bg-[#ebdfc6]0 border-zinc-500 text-white"
+                          : "bg-[#f3ecda]0 border-zinc-500 text-white"
                       : "bg-[#fffdf8] border-[#e7dcc9] text-[#6a6256] hover:border-[#3949ab]";
                     return (
                       <button

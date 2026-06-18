@@ -94,7 +94,7 @@ export function ReviewAccordion({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full text-left px-4 py-3 flex items-center gap-2 hover:bg-[#e0d5be] dark:hover:bg-zinc-800/50 transition-colors"
+        className="w-full text-left px-4 py-3 flex items-center gap-2 hover:bg-[#e8dec9] dark:hover:bg-zinc-800/50 transition-colors"
       >
         <span className="text-[#6a6256] text-sm shrink-0">
           {isOpen ? "▼" : "▶"}
@@ -161,7 +161,7 @@ export function ReviewAccordion({
               <button
                 type="submit"
                 disabled={pending || !hasChanges || allEmpty}
-                className="rounded-md bg-zinc-900 dark:bg-[#ebdfc6] px-4 py-2 text-sm font-medium text-white dark:text-[#2b2620] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-md bg-zinc-900 dark:bg-[#f3ecda] px-4 py-2 text-sm font-medium text-white dark:text-[#2b2620] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {pending ? "保存中…" : hasReview ? "💾 更新する" : "💾 保存する"}
               </button>
