@@ -1,10 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition, useCallback } from "react";
-import {
-  sendMessageAsAdmin,
-  fetchMessagesForAdmin,
-} from "./_actions";
+import { sendMessageAsAdmin } from "@/lib/chat/actions";
+import { fetchMessagesForAdmin } from "./_actions";
 import { useRealtimeMessages } from "@/lib/chat/useRealtimeMessages";
 import type { ChatMessage } from "@/lib/chat/types";
 
