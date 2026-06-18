@@ -4,7 +4,6 @@ import { getMyAlerts, type MemberAlert, type MemberAlertKey } from "@/lib/member
 import { getMyHomeStats } from "@/lib/member/home-stats";
 import { getMyLastWatchedLesson } from "@/lib/member/last-watched";
 import { getMyGoalSheetStatus } from "@/lib/member/goal-sheet-status";
-import { signOut } from "./login/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -182,25 +181,17 @@ export default async function Home() {
         />
       </div>
 
-      {/* フッター (管理者リンク + ログアウト) */}
-      <footer className="mt-auto px-4 pt-8 pb-6 flex flex-col items-center gap-3">
-        {admin && (
+      {/* フッター (管理者リンクのみ ・ ログアウトは /account へ集約 2026-06-18) */}
+      {admin && (
+        <footer className="mt-auto px-4 pt-8 pb-6 flex justify-center">
           <Link
             href="/admin"
             className="text-[11px] text-[#6a6256] hover:text-[#34603f] transition-colors"
           >
             管理画面へ →
           </Link>
-        )}
-        <form action={signOut}>
-          <button
-            type="submit"
-            className="text-[11px] text-[#a59b8c] hover:text-zinc-700 transition-colors"
-          >
-            ログアウト
-          </button>
-        </form>
-      </footer>
+        </footer>
+      )}
       </div>
     </main>
   );
