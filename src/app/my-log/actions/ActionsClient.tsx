@@ -248,14 +248,14 @@ function ActionCard({
 
   return (
     <li className="bg-white border border-[#e8ebe9] rounded-2xl px-4 py-3.5">
-      <div className="flex items-start gap-3">
+      <div className="flex items-center gap-3.5">
         <button
           type="button"
           onClick={row.tried ? onUncheck : onCheck}
           className={
             row.tried
-              ? "flex-shrink-0 w-7 h-7 rounded-full bg-[#00897b] text-white text-[14px] font-bold flex items-center justify-center mt-0.5 hover:bg-[#00695c]"
-              : "flex-shrink-0 w-7 h-7 rounded-full border-2 border-zinc-300 mt-0.5 hover:border-[#00897b] flex items-center justify-center text-zinc-300 hover:text-[#00897b]"
+              ? "flex-shrink-0 w-9 h-9 rounded-full bg-[#00897b] text-white text-[18px] font-bold flex items-center justify-center hover:bg-[#00695c] self-center"
+              : "flex-shrink-0 w-9 h-9 rounded-full border-2 border-zinc-300 hover:border-[#00897b] flex items-center justify-center text-zinc-300 hover:text-[#00897b] self-center"
           }
           aria-label={row.tried ? "未試行に戻す" : "試したにする"}
           title={row.tried ? "未試行に戻す" : "試したにする"}

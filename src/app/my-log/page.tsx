@@ -105,14 +105,6 @@ function FlashbackCard({ review }: { review: MyReviewWithContext }) {
           {review.learned}
         </p>
       )}
-      {review.next_action && (
-        <p className="text-sm text-zinc-800 dark:text-zinc-200 line-clamp-2">
-          <span className="text-xs text-amber-700 dark:text-amber-300 mr-1">
-            次やる:
-          </span>
-          {review.next_action}
-        </p>
-      )}
 
       <div className="flex items-center gap-3 pt-1">
         <Link

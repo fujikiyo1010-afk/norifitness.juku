@@ -43,7 +43,6 @@ export function ReviewAccordion({
   }, []);
   const [learned, setLearned] = useState(initial?.learned ?? "");
   const [impressed, setImpressed] = useState(initial?.impressed ?? "");
-  const [nextAction, setNextAction] = useState(initial?.next_action ?? "");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(
@@ -55,12 +54,10 @@ export function ReviewAccordion({
   const hasReview = initial !== null;
   const hasChanges =
     learned !== (initial?.learned ?? "") ||
-    impressed !== (initial?.impressed ?? "") ||
-    nextAction !== (initial?.next_action ?? "");
+    impressed !== (initial?.impressed ?? "");
   const allEmpty =
     learned.trim() === "" &&
-    impressed.trim() === "" &&
-    nextAction.trim() === "";
+    impressed.trim() === "";
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -76,7 +73,7 @@ export function ReviewAccordion({
       const result = await saveReview(lessonId, {
         learned: learned.trim() || null,
         impressed: impressed.trim() || null,
-        next_action: nextAction.trim() || null,
+        next_action: null,
       });
       if (!result.ok) {
         setError(result.message);
@@ -103,7 +100,7 @@ export function ReviewAccordion({
           {isOpen ? "▼" : "▶"}
         </span>
         <span className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
-          📝 3 行で振り返り
+          📝 2 行で振り返り
         </span>
         <span className="text-xs text-zinc-500">(任意)</span>
         {hasReview && !isOpen && (
@@ -145,19 +142,9 @@ export function ReviewAccordion({
                 className={textareaClass}
               />
             </div>
-            <div className="space-y-1">
-              <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300">
-                3. 次にやってみたいこと
-              </label>
-              <textarea
-                rows={2}
-                value={nextAction}
-                onChange={(e) => setNextAction(e.target.value)}
-                disabled={pending}
-                placeholder="例: 月曜のジムで軽い重量から肩甲骨を意識して試す"
-                className={textareaClass}
-              />
-            </div>
+            <p className="text-[11px] text-zinc-500 leading-relaxed">
+              「次にやってみたいこと」 は ↓「今週これを試す」 (実践リスト) で宣言してください。
+            </p>
 
             {error && (
               <div className="rounded-md border border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-950 p-2 text-xs text-red-800 dark:text-red-100">

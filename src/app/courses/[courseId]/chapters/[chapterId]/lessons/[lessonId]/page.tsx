@@ -156,7 +156,7 @@ export default async function StudentLessonPage({
           <section>
             <PracticeInput
               lessonId={lesson.id}
-              existing={practiceActions}
+              existingCount={practiceActions.length}
             />
           </section>
         )}

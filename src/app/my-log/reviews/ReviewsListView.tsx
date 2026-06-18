@@ -79,7 +79,6 @@ export function ReviewsListView({
         r.course_title,
         r.learned ?? "",
         r.impressed ?? "",
-        r.next_action ?? "",
       ]
         .join(" ")
         .toLowerCase();
@@ -326,22 +325,6 @@ function ReviewCard({
           <Highlight text={review.impressed} query={query} />
         </div>
       )}
-      {review.next_action && (
-        <div className="text-sm text-zinc-700 dark:text-zinc-300">
-          <span className="text-xs text-zinc-500 mr-1">次やる:</span>
-          <span
-            style={{
-              background:
-                "linear-gradient(transparent 58%, rgba(250,204,21,0.45) 58%)",
-              padding: "0 2px",
-              borderRadius: "1px",
-            }}
-          >
-            <Highlight text={review.next_action} query={query} />
-          </span>
-        </div>
-      )}
-
       {/* アクション 2 ボタン */}
       <div className="mt-3 pt-2.5 border-t border-zinc-100 dark:border-zinc-800 flex gap-2">
         <Link
