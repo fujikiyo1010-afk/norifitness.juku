@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { sendPushToAllAdmins } from "@/lib/push/send";
+import { sendSignupRequestNoticeToAdmins } from "@/lib/email/signup-request-notice";
 
 export type SubmitSignupRequestResult =
   | { ok: true }
@@ -53,6 +54,11 @@ export async function submitSignupRequest(input: {
     url: "/admin/invitations",
     tag: "signup-request",
   }).catch((e) => console.error("[push] signup request failed", e));
+
+  // 全 active admin にメール通知 (= Q1 採用、 push と同時に記録としても残す)
+  void sendSignupRequestNoticeToAdmins({ name, email }).catch((e) =>
+    console.error("[email] signup request failed", e)
+  );
 
   return { ok: true };
 }
