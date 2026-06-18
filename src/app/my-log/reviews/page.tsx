@@ -10,7 +10,7 @@ export default async function MyReviewsPage() {
   return (
     <>
       <MemberHeader title="振り返り" fallbackHref="/my-log" />
-      <main className="flex flex-1 flex-col bg-[#f3ecda] min-h-screen">
+      <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
         <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9] p-6 space-y-6">
         <p className="text-sm text-zinc-600 dark:text-[#a59b8c]">
           あなたが書いた振り返りの一覧です。並び替え・検索もできます。

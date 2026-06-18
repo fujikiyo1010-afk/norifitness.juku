@@ -90,7 +90,7 @@ export default async function RequestCompletePage({
           </Link>
           <Link
             href="/"
-            className="rounded-[4px] border border-zinc-300 bg-[#fffdf8] px-6 py-3 text-center text-sm font-medium text-zinc-700 hover:bg-[#e8dec9]"
+            className="rounded-[4px] border border-zinc-300 bg-[#fffdf8] px-6 py-3 text-center text-sm font-medium text-zinc-700 hover:bg-[#f0e6d3]"
           >
             ホームに戻る
           </Link>

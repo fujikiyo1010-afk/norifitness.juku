@@ -122,7 +122,7 @@ export function RequestForm({
   }
 
   return (
-    <div className="min-h-screen bg-[#f3ecda]">
+    <div className="min-h-screen bg-[#f9f5ed]">
       <div className="mx-auto max-w-[460px] px-4 py-6">
         <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl overflow-hidden">
           {/* ヘッダー */}

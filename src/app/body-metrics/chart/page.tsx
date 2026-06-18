@@ -36,7 +36,7 @@ export default async function BodyMetricsChartPage({
   return (
     <>
       <MemberHeader title="体組成 推移" fallbackHref="/body-metrics" />
-      <div className="min-h-screen bg-[#f3ecda]">
+      <div className="min-h-screen bg-[#f9f5ed]">
         <div className="mx-auto max-w-[460px] px-4 py-6">
         {/* 副題 */}
         <header className="mb-5">

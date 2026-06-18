@@ -25,7 +25,7 @@ export default async function ActionsListPage() {
   return (
     <>
       <MemberHeader title="実践リスト" fallbackHref="/my-log" />
-      <main className="min-h-screen bg-[#f3ecda]">
+      <main className="min-h-screen bg-[#f9f5ed]">
         <div className="mx-auto max-w-[460px] px-4 py-5">
           <p className="text-[12px] text-[#6a6256] mb-4">
             レッスンで学んだことを「今週これを試す」 と宣言し、 試したら振り返りを残しましょう。

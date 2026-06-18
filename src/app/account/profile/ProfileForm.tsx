@@ -74,7 +74,7 @@ export function ProfileForm({
           value={email}
           readOnly
           aria-readonly
-          className="w-full bg-[#f3ecda] border border-[#e7dcc9] rounded-xl px-4 py-3 text-[14px] text-[#6a6256] outline-none cursor-not-allowed"
+          className="w-full bg-[#f9f5ed] border border-[#e7dcc9] rounded-xl px-4 py-3 text-[14px] text-[#6a6256] outline-none cursor-not-allowed"
         />
         <p className="text-[10px] text-[#a59b8c] mt-1">
           メールアドレスの変更は準備中です。
@@ -92,7 +92,7 @@ export function ProfileForm({
           type="button"
           onClick={() => router.push("/account")}
           disabled={pending}
-          className="flex-1 bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl px-4 py-3 text-[13px] font-bold text-zinc-700 hover:bg-[#e8dec9] transition-colors disabled:opacity-60"
+          className="flex-1 bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl px-4 py-3 text-[13px] font-bold text-zinc-700 hover:bg-[#f0e6d3] transition-colors disabled:opacity-60"
         >
           キャンセル
         </button>

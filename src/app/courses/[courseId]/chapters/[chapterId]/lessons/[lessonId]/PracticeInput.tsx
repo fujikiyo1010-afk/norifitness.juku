@@ -36,7 +36,7 @@ export function PracticeInput({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full text-left px-4 py-3 flex items-center gap-2 hover:bg-[#e8dec9] transition-colors"
+        className="w-full text-left px-4 py-3 flex items-center gap-2 hover:bg-[#f0e6d3] transition-colors"
       >
         <span className="text-[#6a6256] text-sm shrink-0">
           {isOpen ? "▼" : "▶"}

@@ -187,7 +187,7 @@ export function ExamView({
                 className={`w-full text-left flex items-center gap-3 rounded-2xl px-4 py-3 border transition-colors ${
                   selected
                     ? "bg-[#e0f2f1] border-[#4a875b]"
-                    : "bg-[#fffdf8] border-[#e7dcc9] hover:bg-[#e8dec9]"
+                    : "bg-[#fffdf8] border-[#e7dcc9] hover:bg-[#f0e6d3]"
                 }`}
               >
                 <span
@@ -219,7 +219,7 @@ export function ExamView({
             type="button"
             onClick={goPrev}
             disabled={currentIdx === 0 || pending}
-            className="flex-1 bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl px-4 py-3 text-[13px] font-bold text-zinc-700 hover:bg-[#e8dec9] transition-colors disabled:opacity-40"
+            className="flex-1 bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl px-4 py-3 text-[13px] font-bold text-zinc-700 hover:bg-[#f0e6d3] transition-colors disabled:opacity-40"
           >
             ← 前へ
           </button>
@@ -391,7 +391,7 @@ function ResultsView({
         <button
           type="button"
           onClick={onRetry}
-          className="flex-1 bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl px-4 py-3 text-[13px] font-bold text-zinc-700 hover:bg-[#e8dec9] transition-colors"
+          className="flex-1 bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl px-4 py-3 text-[13px] font-bold text-zinc-700 hover:bg-[#f0e6d3] transition-colors"
         >
           もう一度 受ける
         </button>

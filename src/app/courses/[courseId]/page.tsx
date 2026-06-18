@@ -131,7 +131,7 @@ export default async function StudentCoursePage({
   return (
     <>
       <MemberHeader title="コース詳細" fallbackHref="/courses" />
-      <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#f3ecda]">
+      <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#f9f5ed]">
         <div className="mx-auto w-full max-w-[460px] space-y-4">
         {/* ヒーロー (モック準拠 ・ 緑グラデ + 大サムネ + 進捗 + 続きから CTA) */}
         <section className="rounded-2xl overflow-hidden bg-gradient-to-br from-[#4a875b] to-[#34603f] text-white p-5">
@@ -171,7 +171,7 @@ export default async function StudentCoursePage({
           {firstUnfinished ? (
             <Link
               href={`/courses/${courseId}/chapters/${firstUnfinished.chapterId}/lessons/${firstUnfinished.lessonId}`}
-              className="block rounded-xl bg-[#fffdf8] text-[#34603f] py-3 px-4 text-sm font-bold text-center shadow-[0_4px_0_rgba(0,77,64,0.5)] hover:bg-[#e8dec9] transition-colors"
+              className="block rounded-xl bg-[#fffdf8] text-[#34603f] py-3 px-4 text-sm font-bold text-center shadow-[0_4px_0_rgba(0,77,64,0.5)] hover:bg-[#f0e6d3] transition-colors"
             >
               ▶ 続きから ・ L{firstUnfinished.lessonSortOrder}「
               {firstUnfinished.title}」

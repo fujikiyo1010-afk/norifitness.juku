@@ -100,7 +100,7 @@ export function InviteForm({ token }: { token: string }) {
       <button
         type="submit"
         disabled={!canSubmit}
-        className="w-full rounded-md bg-zinc-900 dark:bg-[#f3ecda] px-4 py-2.5 text-sm font-medium text-white dark:text-[#2b2620] disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full rounded-md bg-zinc-900 dark:bg-[#f9f5ed] px-4 py-2.5 text-sm font-medium text-white dark:text-[#2b2620] disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {pending ? "設定中…" : "パスワードを設定してログイン"}
       </button>

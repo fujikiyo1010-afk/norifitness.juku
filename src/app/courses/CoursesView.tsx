@@ -224,7 +224,7 @@ function CoursesList({
         >
           <Link
             href={`/courses/${c.id}`}
-            className="group flex gap-3 p-3 hover:bg-[#e8dec9] transition-colors"
+            className="group flex gap-3 p-3 hover:bg-[#f0e6d3] transition-colors"
           >
             <CourseThumb title={c.title} />
             <CourseInfo course={c} />

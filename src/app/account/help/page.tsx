@@ -9,7 +9,7 @@ export const dynamic = "force-static";
  */
 export default function HelpPage() {
   return (
-    <main className="flex flex-1 flex-col bg-[#f3ecda] min-h-screen">
+    <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
       <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9]">
         <MemberHeader title="ヘルプ" fallbackHref="/account" />
 
