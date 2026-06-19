@@ -65,10 +65,6 @@ export async function sendWelcomeEmail(input: {
           </div>
         </div>
 
-        <div style="text-align: center; margin: 22px 0;">
-          <a href="https://juku.norifitness.com/" style="display: inline-block; background: #4a875b; color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 14px; font-weight: 700;">筋肉塾を開く →</a>
-        </div>
-
         <p style="font-size: 13px; color: #555; line-height: 1.7;">
           ご不明な点があれば、 アプリ内チャットでいつでもご質問ください。
         </p>
