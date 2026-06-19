@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { checkAndSendForUser, type ReminderResult } from "@/lib/reminders/check";
+import { sendShipmentAlertsToAdmins } from "@/lib/email/shipment-alerts";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // 大量受講生想定で 5 分上限
@@ -57,11 +58,38 @@ export async function GET(req: NextRequest) {
   }
 
   const totalSent = results.reduce((s, r) => s + r.sent.length, 0);
+
+  // ─── A-2 発送忘れアラート (= cron tick 1 回ぽっきり、 同日 dedup) ───
+  // reminder_log に user_id=null + key='a2_shipment_alert_YYYY-MM-DD' で記録
+  const today = new Date().toISOString().slice(0, 10);
+  const alertKey = `a2_shipment_alert_${today}`;
+  let shipmentAlertResult: unknown = null;
+  {
+    const { data: existing } = await admin
+      .from("reminder_log")
+      .select("id")
+      .eq("reminder_key", alertKey)
+      .is("user_id", null)
+      .maybeSingle();
+    if (!existing) {
+      const r = await sendShipmentAlertsToAdmins();
+      shipmentAlertResult = r;
+      if (r.sent) {
+        await admin
+          .from("reminder_log")
+          .insert({ user_id: null, reminder_key: alertKey });
+      }
+    } else {
+      shipmentAlertResult = { skipped: "already sent today" };
+    }
+  }
+
   return Response.json({
     ok: true,
     users_checked: results.length,
     total_sent: totalSent,
     duration_ms: Date.now() - start,
     sample: results.slice(0, 10), // 先頭 10 件だけ詳細
+    shipment_alert: shipmentAlertResult,
   });
 }
