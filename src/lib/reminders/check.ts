@@ -74,7 +74,6 @@ export type ReminderResult = {
 type UserInput = {
   id: string;
   joined_at: string;
-  last_watched_at: string | null;
 };
 
 export async function checkAndSendForUser(
@@ -87,11 +86,20 @@ export async function checkAndSendForUser(
   const daysSinceJoined = daysBetween(joinedAt, now);
 
   // ─── R-1: 学習動画 未視聴 3 日 ─────────────────────────────
-  // 条件: last_watched_at が 3 日前以前 OR 一度も視聴していない
+  // 条件: lesson_progress.last_watched_at の最新が 3 日前以前 OR 一度も視聴していない
   // (= 一度も視聴ない場合は joined_at から 3 日経過で送信)
+  // 注意: last_watched_at は users 列ではなく lesson_progress テーブル ・1 レッスン 1 行
   {
-    const lastWatched = user.last_watched_at
-      ? new Date(user.last_watched_at)
+    const { data: latestLessonRow } = await supabase
+      .from("lesson_progress")
+      .select("last_watched_at")
+      .eq("user_id", user.id)
+      .not("last_watched_at", "is", null)
+      .order("last_watched_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const lastWatched = latestLessonRow
+      ? new Date((latestLessonRow as { last_watched_at: string }).last_watched_at)
       : null;
     const idleDays = lastWatched
       ? daysBetween(lastWatched, now)

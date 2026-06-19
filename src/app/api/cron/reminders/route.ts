@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
   // ─── 全 active 受講生取得 ───
   const { data: users, error: usersError } = await admin
     .from("users")
-    .select("id, joined_at, last_watched_at")
+    .select("id, joined_at")
     .eq("status", "active");
   if (usersError) {
     return Response.json({ ok: false, error: usersError.message }, { status: 500 });
@@ -49,7 +49,6 @@ export async function GET(req: NextRequest) {
       const r = await checkAndSendForUser({
         id: user.id as string,
         joined_at: user.joined_at as string,
-        last_watched_at: (user.last_watched_at as string | null) ?? null,
       });
       results.push(r);
     } catch (e) {
