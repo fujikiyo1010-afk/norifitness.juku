@@ -78,25 +78,31 @@ Push の発射確認は完了 (= 19 件 全件 OK / 2026-06-19 朝)。 残りは
   - 41 テーブル × 140+ policy 監査
   - 40 テーブル ✅ 安全 / 1 件 ⚠️ 試験 correct_choice_id 漏洩 → 線② 格下げ判断
   - memory `project_kinniku_juku_known_security_debt.md` 保存
-- [ ] **D-β Sentry 導入** (1h)
-  - prod エラー追跡 ・ 受講生が遭遇したエラーが即わかる
-- [ ] **D-γ Service Worker 強化** (1.5-2h)
-  - 現状は push 専用 → オフライン時 fallback / キャッシュ戦略
+- [x] **D-β Sentry 導入** (1h) ・ **2026-06-19 完了 (= 線② 修復前提)**
+  - SDK は Next.js 16 + Turbopack で flush 失敗 → 直接 POST 経路は動作確認済
+  - memory `project_kinniku_juku_sentry_sdk_issue.md` 保存
+- [x] **D-γ Service Worker 強化** (1.5-2h) ・ **2026-06-19 完了**
+  - sw.js 拡張 (= キャッシュ戦略 4 つ + offline fallback)
+  - /offline page 新設 (= ティール緑 + 「再接続を試す」 ボタン)
+  - iPhone PWA 動作確認済
 - [ ] **D-δ 招待動線 リハーサル** (1h)
   - 招待発行 → PW 設定 → オンボ → カルテ → メニュー → 目標シート → 月次添削 提出 → 動画返信 通し
-- [ ] **D-ε 軽い系 3 件 まとめて** (30 分)
-  - Supabase signin rate limit を 30/5min → 10/5min に厳格化 (= D-2 約束分)
-  - Resend ドメイン認証 (SPF/DKIM) 完了確認
-  - prod env 最終チェック (= 全シークレット in place + ローテーション要否)
+- [x] **D-ε 軽い系 3 件 まとめて** (30 分) ・ **2026-06-19 完了**
+  - Supabase signin rate limit 30/5min → 10/5min 厳格化済 (= D-2 約束分)
+  - Resend ドメイン認証 (SPF/DKIM/DMARC) 確認済
+  - prod env 11/11 一致確認済
 - [ ] **L-1 Supabase Pro 切替** (30 分 + 課金 $25/月)
   - MAU 上限 100k / daily backups / Point-in-Time Recovery
   - 招待開始日に近づいたら切替
 - [ ] **L-7 Vercel Pro 切替** (30 分 + 課金 $20/月)
   - cron 増設不可制限解除 (= 将来必要)、 bandwidth、 analytics
   - 招待開始日に近づいたら切替
-- [ ] **利用規約 ・ プライバシーポリシー ・ 特商法表記** (1-2h + のり氏確認)
-  - 既存ページ確認 → 内容確定 → 公開
-  - 特商法は入会前ページ + サイト下部に必須 (= 法的義務)
+- [x] **利用規約 ・ プライバシーポリシー ・ 特商法表記** (= ドラフト完了 / のり氏確認待ち)
+  - 利用規約 既存ページ (2026-06-17 線① ドラフト) を確認 → 線① ローンチ水準で使用可
+  - プライバシー 既存ページ (同上) を確認 → 同水準
+  - **特商法ページ 2026-06-19 新規作成** (= /account/tokushoho) + /account 設定リンク追加
+  - チェックリスト `docs/00_premises/_legal_info_checklist.md` 作成 (= のり氏 確認必要事項 一覧)
+  - 残り = のり氏 から事業者名 / 所在地 / 価格 等の実情報受領 → [TBD] 一括置換
 
 ---
 
