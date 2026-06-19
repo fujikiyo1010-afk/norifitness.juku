@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
       tags: { source: "test-endpoint" },
     });
     console.log("[sentry test] captureMessage eventId:", eventId);
-    flushed = await Sentry.flush(5000); // 5 秒待ち
+    flushed = await Sentry.flush(15000); // 15 秒待ち
     console.log("[sentry test] flush result:", flushed);
   } catch (e) {
     flushError = e instanceof Error ? e.message : "unknown";
