@@ -5,6 +5,11 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { saveShipmentAddress } from "./actions";
 import { toggleEmailNotification } from "@/lib/account/actions";
+import {
+  detectBrowserEnv,
+  isStandaloneDisplay,
+  type BrowserEnv,
+} from "@/lib/browser-check";
 
 const TOTAL_STEPS = 8;
 
@@ -18,40 +23,24 @@ export function OnboardingClient({
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
-  // 環境判定 (= 受講生がオンボに進めるかの分岐)
-  //   - "loading": SSR 直後 / 判定中
-  //   - "wrong-browser": iOS Chrome / Firefox 等 = PWA 化不可 → Safari 切替案内
-  //   - "needs-install": iOS Safari ブラウザ = PWA 未追加 → Step 0 共有メニュー案内
-  //   - "ready": PWA standalone 起動 → Step 1 ようこそ から開始
-  type EnvState = "loading" | "wrong-browser" | "needs-install" | "ready";
-  const [env, setEnv] = useState<EnvState>("loading");
+  // 環境判定 (= 共通ヘルパー browser-check.ts を使用)
+  //   - "loading"        : SSR 直後 / 判定中
+  //   - "ready"          : PWA standalone 起動 → Step 1 ようこそ から開始
+  //   - "ios-safari"     : iOS Safari = ホーム追加促し (= Step 0 / 共有メニュー手順)
+  //   - "android-chrome" : Android Chrome = ホーム追加促し (= 三点メニュー手順)
+  //   - "ios-other" / "android-other" / "desktop" : ブラウザ切替案内 (= 別画面)
+  type EnvState = "loading" | "ready" | BrowserEnv;
+  const [envState, setEnvState] = useState<EnvState>("loading");
   const [currentUrl, setCurrentUrl] = useState("");
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-
-    // 1) PWA standalone 判定 (= 既にホーム追加 + アイコンから起動)
-    const matchesStandalone = window.matchMedia("(display-mode: standalone)").matches;
-    const iosLegacyStandalone =
-      "standalone" in window.navigator &&
-      (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
-    if (matchesStandalone || iosLegacyStandalone) {
-      setEnv("ready");
+    if (isStandaloneDisplay()) {
+      setEnvState("ready");
       return;
     }
-
-    // 2) ブラウザ判定 (= iOS で PWA 化できるのは Safari のみ)
-    const ua = window.navigator.userAgent;
-    const isIOS = /iPad|iPhone|iPod/i.test(ua);
-    const isIPadOS = /Macintosh/i.test(ua) && "ontouchend" in document; // iPadOS 13+ は Mac UA に偽装
-    const isIOSChrome = /CriOS/i.test(ua);
-    const isIOSFirefox = /FxiOS/i.test(ua);
-    const isIOSEdge = /EdgiOS/i.test(ua);
-    const isIOSSafari =
-      (isIOS || isIPadOS) && !isIOSChrome && !isIOSFirefox && !isIOSEdge && /Safari/i.test(ua);
-
     setCurrentUrl(window.location.href);
-    setEnv(isIOSSafari ? "needs-install" : "wrong-browser");
+    setEnvState(detectBrowserEnv());
   }, []);
 
   const [postalCode, setPostalCode] = useState("");
@@ -97,18 +86,27 @@ export function OnboardingClient({
   }
 
   // 判定中 (= SSR / hydration 直後) は空白で待つ (= 一瞬のちらつき防止)
-  if (env === "loading") {
+  if (envState === "loading" || envState === "unknown") {
     return <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen" />;
   }
 
-  // iOS Chrome / Firefox / Edge / Android Chrome / PC ブラウザ → Safari 切替案内
-  if (env === "wrong-browser") {
-    return <BrowserSwitchGuide currentUrl={currentUrl} />;
+  // PWA 化不可ブラウザ (= iOS 他 / Android 他 / PC) → 切替案内
+  if (
+    envState === "ios-other" ||
+    envState === "android-other" ||
+    envState === "desktop"
+  ) {
+    return <BrowserSwitchGuide env={envState} currentUrl={currentUrl} />;
   }
 
-  // iOS Safari (= PWA 未追加) → ホーム画面追加促し (= Step 0)
-  if (env === "needs-install") {
-    return <Step0InstallGuide />;
+  // iOS Safari (= PWA 未追加) → 共有メニュー手順 (= Step 0)
+  if (envState === "ios-safari") {
+    return <Step0InstallGuide variant="ios-safari" />;
+  }
+
+  // Android Chrome (= PWA 未追加) → 三点メニュー手順 (= Step 0)
+  if (envState === "android-chrome") {
+    return <Step0InstallGuide variant="android-chrome" />;
   }
 
   return (
@@ -282,13 +280,61 @@ function Footer({
 }
 
 // =====================================================================
-// Step -1: ブラウザ切替案内 (iOS Chrome / Firefox / PC ブラウザ等で開かれた時)
-//   - iOS で PWA 化できるのは Safari のみ
-//   - URL コピーボタンで Safari への切替を支援
+// Step -1: ブラウザ切替案内 (iOS 他 / Android 他 / PC で開かれた時)
+//   - 環境ごとに「正しいブラウザ」 を案内 + URL コピーボタン
 // =====================================================================
 
-function BrowserSwitchGuide({ currentUrl }: { currentUrl: string }) {
+function BrowserSwitchGuide({
+  env,
+  currentUrl,
+}: {
+  env: BrowserEnv;
+  currentUrl: string;
+}) {
   const [copied, setCopied] = useState(false);
+
+  const config =
+    env === "ios-other"
+      ? {
+          title: "Safari で\n開いてください",
+          lead: (
+            <>
+              iPhone のホーム画面追加 (= アプリ化) は
+              <br />
+              <b className="text-[#004d40] font-bold">Safari でのみできます</b>
+            </>
+          ),
+          appName: "Safari",
+          appHint: "青い羅針盤アイコン",
+        }
+      : env === "android-other"
+        ? {
+            title: "Chrome で\n開いてください",
+            lead: (
+              <>
+                Android のホーム画面追加 (= アプリ化) は
+                <br />
+                <b className="text-[#004d40] font-bold">Chrome がおすすめです</b>
+              </>
+            ),
+            appName: "Chrome",
+            appHint: "赤緑黄青の丸アイコン",
+          }
+        : {
+            title: "スマホで\n開いてください",
+            lead: (
+              <>
+                筋肉塾はスマホでお使いいただくサービスです。
+                <br />
+                <b className="text-[#004d40] font-bold">
+                  iPhone Safari か Android Chrome
+                </b>
+                でお進みください
+              </>
+            ),
+            appName: "スマホのブラウザ",
+            appHint: "iPhone Safari か Android Chrome",
+          };
 
   async function handleCopy() {
     if (!currentUrl) return;
@@ -297,7 +343,6 @@ function BrowserSwitchGuide({ currentUrl }: { currentUrl: string }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     } catch {
-      // clipboard 不可な場合は手動コピーを促す (= URL を選択可能に表示)
       setCopied(false);
     }
   }
@@ -312,7 +357,6 @@ function BrowserSwitchGuide({ currentUrl }: { currentUrl: string }) {
           <div className="absolute -top-20 -right-20 w-[200px] h-[200px] rounded-full bg-[#4a875b]/[0.04] pointer-events-none" />
 
           <div className="flex-1 flex flex-col items-center justify-center text-center z-10">
-            {/* キャラクター画像 */}
             <div className="w-[110px] h-[110px] rounded-full shadow-lg shadow-[#4a875b]/20 mb-5 overflow-hidden bg-[#fffdf8] anim-char-pop">
               <div className="w-full h-full relative scale-[1.2]">
                 <Image
@@ -326,21 +370,16 @@ function BrowserSwitchGuide({ currentUrl }: { currentUrl: string }) {
               </div>
             </div>
 
-            <h1 className="text-[20px] font-bold text-[#004d40] leading-snug mb-2.5 anim-fade-up anim-delay-1">
-              Safari で
-              <br />
-              開いてください
+            <h1 className="text-[20px] font-bold text-[#004d40] leading-snug mb-2.5 anim-fade-up anim-delay-1 whitespace-pre-line">
+              {config.title}
             </h1>
             <p className="text-xs text-zinc-600 leading-relaxed anim-fade-up anim-delay-2">
-              iPhone のホーム画面追加 (= アプリ化) は
-              <br />
-              <b className="text-[#004d40] font-bold">Safari でのみできます</b>
+              {config.lead}
             </p>
 
-            {/* URL コピー カード */}
             <div className="mt-6 w-full bg-[#fffdf8] border border-[#4a875b]/15 rounded-xl px-4 py-4 text-left anim-fade-up anim-delay-3">
               <div className="text-[11px] font-bold text-[#004d40] tracking-widest mb-3">
-                Safari で開き直す手順
+                開き直す手順
               </div>
               <ol className="space-y-3 text-[12.5px] text-[#2b2620] leading-relaxed">
                 <li className="flex gap-3">
@@ -354,7 +393,7 @@ function BrowserSwitchGuide({ currentUrl }: { currentUrl: string }) {
                     2
                   </span>
                   <span>
-                    ホーム画面の <b>Safari</b> (青い羅針盤アイコン) を起動
+                    ホーム画面の <b>{config.appName}</b> ({config.appHint}) を起動
                   </span>
                 </li>
                 <li className="flex gap-3">
@@ -375,14 +414,13 @@ function BrowserSwitchGuide({ currentUrl }: { currentUrl: string }) {
                 {copied ? "✓ URL をコピーしました" : "URL をコピー"}
               </button>
 
-              {/* clipboard 不可ケース対応: URL を可視化 */}
               <p className="mt-3 text-[10px] text-[#6a6256] break-all font-mono leading-relaxed">
                 {currentUrl}
               </p>
             </div>
 
             <p className="mt-5 text-[10.5px] text-[#6a6256] leading-relaxed anim-fade-up anim-delay-3">
-              Safari で開き直したら、 そのまま続きから始まります
+              {config.appName} で開き直すと、 そのまま続きから始まります
             </p>
           </div>
         </div>
@@ -392,13 +430,44 @@ function BrowserSwitchGuide({ currentUrl }: { currentUrl: string }) {
 }
 
 // =====================================================================
-// Step 0: ホーム画面追加促し (Safari = PWA 未追加 で開かれた時のみ表示)
-//   - 他のオンボ画面と同じレイアウト構造 (ベージュ + ティール緑 + キャラ)
+// Step 0: ホーム画面追加促し (= PWA 化前の最終ステップ)
+//   - iOS Safari: 画面下の共有ボタン → ホーム画面に追加
+//   - Android Chrome: 三点メニュー → アプリをインストール
 //   - 進行ボタンなし = PWA から開き直すまで先に進めない
-//   - PWA で開かれたら自動的に Step 1 (ようこそ) に切り替わる
 // =====================================================================
 
-function Step0InstallGuide() {
+function Step0InstallGuide({
+  variant,
+}: {
+  variant: "ios-safari" | "android-chrome";
+}) {
+  const isAndroid = variant === "android-chrome";
+
+  const steps = isAndroid
+    ? [
+        <>
+          画面右上の <MoreIcon /> <b>三点メニュー</b> をタップ
+        </>,
+        <>
+          メニューから <b>「アプリをインストール」</b> または{" "}
+          <b>「ホーム画面に追加」</b> を選ぶ
+        </>,
+        <>
+          ホーム画面の <b>筋肉塾アイコン</b> をタップして再開
+        </>,
+      ]
+    : [
+        <>
+          画面下の <ShareIcon /> <b>共有ボタン</b> をタップ
+        </>,
+        <>
+          メニューから <b>「ホーム画面に追加」</b> を選ぶ
+        </>,
+        <>
+          ホーム画面の <b>筋肉塾アイコン</b> をタップして再開
+        </>,
+      ];
+
   return (
     <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
       <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9]">
@@ -409,7 +478,6 @@ function Step0InstallGuide() {
           <div className="absolute -top-20 -right-20 w-[200px] h-[200px] rounded-full bg-[#4a875b]/[0.04] pointer-events-none" />
 
           <div className="flex-1 flex flex-col items-center justify-center text-center z-10">
-            {/* キャラクター画像 (他のオンボ Step と統一) */}
             <div className="w-[110px] h-[110px] rounded-full shadow-lg shadow-[#4a875b]/20 mb-5 overflow-hidden bg-[#fffdf8] anim-char-pop">
               <div className="w-full h-full relative scale-[1.2]">
                 <Image
@@ -434,36 +502,19 @@ function Step0InstallGuide() {
               <b className="text-[#004d40] font-bold">アプリで進めましょう</b>
             </p>
 
-            {/* 手順 ガイド (他のオンボ Step の「after」 ブロックと同系統) */}
             <div className="mt-6 w-full bg-[#fffdf8] border border-[#4a875b]/15 rounded-xl px-4 py-4 text-left anim-fade-up anim-delay-3">
               <div className="text-[11px] font-bold text-[#004d40] tracking-widest mb-3">
                 ホーム画面 追加の手順
               </div>
               <ol className="space-y-3 text-[12.5px] text-[#2b2620] leading-relaxed">
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[#4a875b] text-white flex items-center justify-center text-[11px] font-bold mt-0.5">
-                    1
-                  </span>
-                  <span>
-                    画面下の <ShareIcon /> <b>共有ボタン</b>をタップ
-                  </span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[#4a875b] text-white flex items-center justify-center text-[11px] font-bold mt-0.5">
-                    2
-                  </span>
-                  <span>
-                    メニューから <b>「ホーム画面に追加」</b> を選ぶ
-                  </span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[#4a875b] text-white flex items-center justify-center text-[11px] font-bold mt-0.5">
-                    3
-                  </span>
-                  <span>
-                    ホーム画面の <b>筋肉塾アイコン</b> をタップして再開
-                  </span>
-                </li>
+                {steps.map((s, i) => (
+                  <li key={i} className="flex gap-3">
+                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[#4a875b] text-white flex items-center justify-center text-[11px] font-bold mt-0.5">
+                      {i + 1}
+                    </span>
+                    <span>{s}</span>
+                  </li>
+                ))}
               </ol>
             </div>
 
@@ -479,7 +530,7 @@ function Step0InstallGuide() {
   );
 }
 
-// 共有アイコン (iOS Safari の共有ボタンと同じ意匠 = 四角 + 上矢印)
+// 共有アイコン (iOS Safari = 四角 + 上矢印)
 function ShareIcon() {
   return (
     <svg
@@ -496,6 +547,23 @@ function ShareIcon() {
       <path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7" />
       <polyline points="16 6 12 2 8 6" />
       <line x1="12" y1="2" x2="12" y2="15" />
+    </svg>
+  );
+}
+
+// 三点メニュー アイコン (Android Chrome = 縦 3 点)
+function MoreIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="#4a875b"
+      className="inline-block align-text-bottom mx-0.5"
+    >
+      <circle cx="12" cy="5" r="2" />
+      <circle cx="12" cy="12" r="2" />
+      <circle cx="12" cy="19" r="2" />
     </svg>
   );
 }
