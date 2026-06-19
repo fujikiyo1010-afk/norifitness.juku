@@ -106,7 +106,8 @@ export default async function AccountPage() {
         <Section title="その他">
           <LinkRow icon={<InfoIcon />} label="ヘルプ" href="/account/help" />
           <LinkRow icon={<DocIcon />} label="利用規約" href="/account/terms" />
-          <LinkRow icon={<ShieldIcon />} label="プライバシーポリシー" href="/account/privacy" last />
+          <LinkRow icon={<ShieldIcon />} label="プライバシーポリシー" href="/account/privacy" />
+          <LinkRow icon={<DocIcon />} label="特定商取引法に基づく表記" href="/account/tokushoho" last />
         </Section>
 
         {/* ログアウト */}
