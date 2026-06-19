@@ -25,10 +25,10 @@ export async function sendWelcomeEmail(input: {
       `これから一緒に、 理想の身体と健康な毎日を作っていきましょう。`,
       ``,
       `■ まずやってほしいこと`,
-      `1. ホーム画面追加 (= アプリ化) ・ Safari の共有メニューから「ホーム画面に追加」`,
-      `2. 通知を有効にする ・ 設定画面の「アプリ通知」 を ON`,
-      `3. 筋トレカルテを記入 ・ 専用メニューを作るための質問にお答えください`,
-      `4. 目標管理シートを記入 ・ 現状と目標を整理して のり氏 にフィードバックを受けましょう`,
+      `ホーム画面追加 (= アプリ化) ・ Safari の共有メニューから「ホーム画面に追加」`,
+      ``,
+      `アプリ化が済んだら、 そのままアプリの案内に沿って進めてください。`,
+      `カルテ記入 ・ 目標シート ・ 通知設定 など、 はじめに必要なことはすべてアプリ内でご案内します。`,
       ``,
       `■ アクセス`,
       `https://juku.norifitness.com/`,
@@ -55,12 +55,14 @@ export async function sendWelcomeEmail(input: {
 
         <div style="background: #f9fafb; border-radius: 8px; padding: 18px; margin: 22px 0;">
           <div style="font-size: 12px; color: #00695c; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;">まずやってほしいこと</div>
-          <ol style="font-size: 13px; color: #333; line-height: 1.8; padding-left: 18px; margin: 0;">
-            <li><strong>ホーム画面追加</strong> ・ Safari の共有メニューから「ホーム画面に追加」</li>
-            <li><strong>通知を有効にする</strong> ・ 設定画面の「アプリ通知」 を ON</li>
-            <li><strong>筋トレカルテを記入</strong> ・ 専用メニューを作るための質問にお答えください</li>
-            <li><strong>目標管理シートを記入</strong> ・ 現状と目標を整理して のり氏 にフィードバックを受けましょう</li>
-          </ol>
+          <div style="font-size: 13px; color: #333; line-height: 1.8;">
+            <strong>ホーム画面追加 (= アプリ化)</strong><br>
+            Safari の共有メニューから「ホーム画面に追加」 をタップ
+          </div>
+          <div style="font-size: 12px; color: #555; line-height: 1.7; margin-top: 14px; padding-top: 12px; border-top: 1px solid #e5e7eb;">
+            アプリ化が済んだら、 そのままアプリの案内に沿って進めてください。<br>
+            カルテ記入 ・ 目標シート ・ 通知設定 など、 はじめに必要なことはすべてアプリ内でご案内します。
+          </div>
         </div>
 
         <div style="text-align: center; margin: 22px 0;">
