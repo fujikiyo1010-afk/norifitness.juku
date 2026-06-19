@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* dark: バリアントを class ベースに切替 (デフォルト = prefers-color-scheme media クエリ → 不採用)
+   .dark クラスを付けない方針 = ダーク時の中途半端なミスマッチを防ぐ
+   受講生 UI は ベージュ + ティール緑 で世界観統一 (= 上記方針コメント参照) */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

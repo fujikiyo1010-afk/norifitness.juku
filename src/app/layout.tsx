@@ -41,6 +41,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: "cover",   // PWA standalone で safe-area-inset を有効化 (= 下部ナビが iPhone ホームインジケータの上に浮く)
+  colorScheme: "light",   // 受講生 UI は ベージュ+ティール緑 で世界観統一 = ダークモード時の中途半端なミスマッチを防ぐ
 };
 
 export default function RootLayout({
