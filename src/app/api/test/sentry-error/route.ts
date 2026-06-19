@@ -21,17 +21,20 @@ export async function GET(req: NextRequest) {
   const nodeEnv = process.env.NODE_ENV;
 
   // 明示的に Sentry にエラー送信
+  let eventId: string | undefined;
+  let flushed: boolean | undefined;
+  let flushError: string | undefined;
   try {
-    Sentry.captureMessage("Sentry test message (= explicit captureMessage)", {
+    eventId = Sentry.captureMessage("Sentry test message (= explicit captureMessage)", {
       level: "warning",
       tags: { source: "test-endpoint" },
     });
-    await Sentry.flush(3000); // 強制 flush (= 送信完了待ち)
+    console.log("[sentry test] captureMessage eventId:", eventId);
+    flushed = await Sentry.flush(5000); // 5 秒待ち
+    console.log("[sentry test] flush result:", flushed);
   } catch (e) {
-    return Response.json(
-      { error: "sentry call failed", message: e instanceof Error ? e.message : "unknown" },
-      { status: 500 }
-    );
+    flushError = e instanceof Error ? e.message : "unknown";
+    console.error("[sentry test] flush failed:", flushError);
   }
 
   return Response.json({
@@ -41,6 +44,9 @@ export async function GET(req: NextRequest) {
       dsnPrefix,
       nodeEnv,
       sentryClientLoaded: !!Sentry,
+      eventId,
+      flushed,
+      flushError,
     },
   });
 }
