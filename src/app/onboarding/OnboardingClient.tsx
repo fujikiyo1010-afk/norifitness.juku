@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { saveShipmentAddress } from "./actions";
@@ -17,6 +17,19 @@ export function OnboardingClient({
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+
+  // PWA standalone モード判定 (= ホーム画面追加済 + アプリとして起動)
+  // null = 判定中 / false = Safari (= 未追加) / true = PWA
+  const [isStandalone, setIsStandalone] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const matches = window.matchMedia("(display-mode: standalone)").matches;
+    const iosLegacy =
+      "standalone" in window.navigator &&
+      (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+    setIsStandalone(matches || iosLegacy);
+  }, []);
 
   const [postalCode, setPostalCode] = useState("");
   const [addressLine, setAddressLine] = useState("");
@@ -58,6 +71,18 @@ export function OnboardingClient({
 
   function finish() {
     router.push("/");
+  }
+
+  // 判定中 (= SSR / hydration 直後) は空白で待つ (= 一瞬の Safari 表示ちらつき防止)
+  if (isStandalone === null) {
+    return (
+      <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen" />
+    );
+  }
+
+  // Safari (= PWA 未追加) で開かれた場合 → ホーム画面追加促し (= Step 0) を固定表示
+  if (!isStandalone) {
+    return <Step0InstallGuide />;
   }
 
   return (
@@ -227,6 +252,115 @@ function Footer({
         {nextLabel}
       </button>
     </div>
+  );
+}
+
+// =====================================================================
+// Step 0: ホーム画面追加促し (Safari = PWA 未追加 で開かれた時のみ表示)
+//   - 他のオンボ画面と同じレイアウト構造 (ベージュ + ティール緑 + キャラ)
+//   - 進行ボタンなし = PWA から開き直すまで先に進めない
+//   - PWA で開かれたら自動的に Step 1 (ようこそ) に切り替わる
+// =====================================================================
+
+function Step0InstallGuide() {
+  return (
+    <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
+      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9]">
+        <div
+          className="flex-1 flex flex-col px-5 pt-6 pb-6 relative overflow-hidden"
+          style={{ background: "linear-gradient(135deg, #e0f2f1, #fffbe6)" }}
+        >
+          <div className="absolute -top-20 -right-20 w-[200px] h-[200px] rounded-full bg-[#4a875b]/[0.04] pointer-events-none" />
+
+          <div className="flex-1 flex flex-col items-center justify-center text-center z-10">
+            {/* キャラクター画像 (他のオンボ Step と統一) */}
+            <div className="w-[110px] h-[110px] rounded-full shadow-lg shadow-[#4a875b]/20 mb-5 overflow-hidden bg-[#fffdf8] anim-char-pop">
+              <div className="w-full h-full relative scale-[1.2]">
+                <Image
+                  src="/images/nori-character.png"
+                  alt="のりキャラクター"
+                  fill
+                  sizes="110px"
+                  className="object-cover"
+                  priority
+                />
+              </div>
+            </div>
+
+            <h1 className="text-[20px] font-bold text-[#004d40] leading-snug mb-2.5 anim-fade-up anim-delay-1">
+              アプリとして
+              <br />
+              開いてください
+            </h1>
+            <p className="text-xs text-zinc-600 leading-relaxed anim-fade-up anim-delay-2">
+              はじめに、 ホーム画面に追加して
+              <br />
+              <b className="text-[#004d40] font-bold">アプリで進めましょう</b>
+            </p>
+
+            {/* 手順 ガイド (他のオンボ Step の「after」 ブロックと同系統) */}
+            <div className="mt-6 w-full bg-[#fffdf8] border border-[#4a875b]/15 rounded-xl px-4 py-4 text-left anim-fade-up anim-delay-3">
+              <div className="text-[11px] font-bold text-[#004d40] tracking-widest mb-3">
+                ホーム画面 追加の手順
+              </div>
+              <ol className="space-y-3 text-[12.5px] text-[#2b2620] leading-relaxed">
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[#4a875b] text-white flex items-center justify-center text-[11px] font-bold mt-0.5">
+                    1
+                  </span>
+                  <span>
+                    画面下の <ShareIcon /> <b>共有ボタン</b>をタップ
+                  </span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[#4a875b] text-white flex items-center justify-center text-[11px] font-bold mt-0.5">
+                    2
+                  </span>
+                  <span>
+                    メニューから <b>「ホーム画面に追加」</b> を選ぶ
+                  </span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[#4a875b] text-white flex items-center justify-center text-[11px] font-bold mt-0.5">
+                    3
+                  </span>
+                  <span>
+                    ホーム画面の <b>筋肉塾アイコン</b> をタップして再開
+                  </span>
+                </li>
+              </ol>
+            </div>
+
+            <p className="mt-5 text-[10.5px] text-[#6a6256] leading-relaxed anim-fade-up anim-delay-3">
+              アプリで開き直すと、
+              <br />
+              そのまま続きから始まります
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+// 共有アイコン (iOS Safari の共有ボタンと同じ意匠 = 四角 + 上矢印)
+function ShareIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#4a875b"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="inline-block align-text-bottom mx-0.5"
+    >
+      <path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7" />
+      <polyline points="16 6 12 2 8 6" />
+      <line x1="12" y1="2" x2="12" y2="15" />
+    </svg>
   );
 }
 
