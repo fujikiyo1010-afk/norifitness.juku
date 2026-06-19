@@ -17,7 +17,15 @@ export async function GET(req: NextRequest) {
   if (auth !== `Bearer ${secret}`) return new Response("unauthorized", { status: 401 });
 
   const dsnPresent = !!process.env.NEXT_PUBLIC_SENTRY_DSN;
-  const dsnPrefix = (process.env.NEXT_PUBLIC_SENTRY_DSN ?? "").slice(0, 30);
+  const dsnFull = process.env.NEXT_PUBLIC_SENTRY_DSN ?? "";
+  const dsnPrefix = dsnFull.slice(0, 30);
+  let dsnHost = "?";
+  let dsnPath = "?";
+  try {
+    const u = new URL(dsnFull);
+    dsnHost = u.host;
+    dsnPath = u.pathname;
+  } catch {}
   const nodeEnv = process.env.NODE_ENV;
 
   // 明示的に Sentry にエラー送信
@@ -42,6 +50,8 @@ export async function GET(req: NextRequest) {
     diagnostic: {
       dsnPresent,
       dsnPrefix,
+      dsnHost,
+      dsnPath,
       nodeEnv,
       sentryClientLoaded: !!Sentry,
       eventId,
