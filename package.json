@@ -13,6 +13,7 @@
     "reset:e2e": "node e2e/setup/reset_e2e_student.js"
   },
   "dependencies": {
+    "@sentry/nextjs": "^10.58.0",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.106.0",
     "@types/web-push": "^3.6.4",
