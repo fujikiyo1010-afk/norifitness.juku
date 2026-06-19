@@ -18,17 +18,40 @@ export function OnboardingClient({
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
-  // PWA standalone モード判定 (= ホーム画面追加済 + アプリとして起動)
-  // null = 判定中 / false = Safari (= 未追加) / true = PWA
-  const [isStandalone, setIsStandalone] = useState<boolean | null>(null);
+  // 環境判定 (= 受講生がオンボに進めるかの分岐)
+  //   - "loading": SSR 直後 / 判定中
+  //   - "wrong-browser": iOS Chrome / Firefox 等 = PWA 化不可 → Safari 切替案内
+  //   - "needs-install": iOS Safari ブラウザ = PWA 未追加 → Step 0 共有メニュー案内
+  //   - "ready": PWA standalone 起動 → Step 1 ようこそ から開始
+  type EnvState = "loading" | "wrong-browser" | "needs-install" | "ready";
+  const [env, setEnv] = useState<EnvState>("loading");
+  const [currentUrl, setCurrentUrl] = useState("");
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const matches = window.matchMedia("(display-mode: standalone)").matches;
-    const iosLegacy =
+
+    // 1) PWA standalone 判定 (= 既にホーム追加 + アイコンから起動)
+    const matchesStandalone = window.matchMedia("(display-mode: standalone)").matches;
+    const iosLegacyStandalone =
       "standalone" in window.navigator &&
       (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
-    setIsStandalone(matches || iosLegacy);
+    if (matchesStandalone || iosLegacyStandalone) {
+      setEnv("ready");
+      return;
+    }
+
+    // 2) ブラウザ判定 (= iOS で PWA 化できるのは Safari のみ)
+    const ua = window.navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/i.test(ua);
+    const isIPadOS = /Macintosh/i.test(ua) && "ontouchend" in document; // iPadOS 13+ は Mac UA に偽装
+    const isIOSChrome = /CriOS/i.test(ua);
+    const isIOSFirefox = /FxiOS/i.test(ua);
+    const isIOSEdge = /EdgiOS/i.test(ua);
+    const isIOSSafari =
+      (isIOS || isIPadOS) && !isIOSChrome && !isIOSFirefox && !isIOSEdge && /Safari/i.test(ua);
+
+    setCurrentUrl(window.location.href);
+    setEnv(isIOSSafari ? "needs-install" : "wrong-browser");
   }, []);
 
   const [postalCode, setPostalCode] = useState("");
@@ -73,15 +96,18 @@ export function OnboardingClient({
     router.push("/");
   }
 
-  // 判定中 (= SSR / hydration 直後) は空白で待つ (= 一瞬の Safari 表示ちらつき防止)
-  if (isStandalone === null) {
-    return (
-      <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen" />
-    );
+  // 判定中 (= SSR / hydration 直後) は空白で待つ (= 一瞬のちらつき防止)
+  if (env === "loading") {
+    return <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen" />;
   }
 
-  // Safari (= PWA 未追加) で開かれた場合 → ホーム画面追加促し (= Step 0) を固定表示
-  if (!isStandalone) {
+  // iOS Chrome / Firefox / Edge / Android Chrome / PC ブラウザ → Safari 切替案内
+  if (env === "wrong-browser") {
+    return <BrowserSwitchGuide currentUrl={currentUrl} />;
+  }
+
+  // iOS Safari (= PWA 未追加) → ホーム画面追加促し (= Step 0)
+  if (env === "needs-install") {
     return <Step0InstallGuide />;
   }
 
@@ -252,6 +278,116 @@ function Footer({
         {nextLabel}
       </button>
     </div>
+  );
+}
+
+// =====================================================================
+// Step -1: ブラウザ切替案内 (iOS Chrome / Firefox / PC ブラウザ等で開かれた時)
+//   - iOS で PWA 化できるのは Safari のみ
+//   - URL コピーボタンで Safari への切替を支援
+// =====================================================================
+
+function BrowserSwitchGuide({ currentUrl }: { currentUrl: string }) {
+  const [copied, setCopied] = useState(false);
+
+  async function handleCopy() {
+    if (!currentUrl) return;
+    try {
+      await navigator.clipboard.writeText(currentUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      // clipboard 不可な場合は手動コピーを促す (= URL を選択可能に表示)
+      setCopied(false);
+    }
+  }
+
+  return (
+    <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
+      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9]">
+        <div
+          className="flex-1 flex flex-col px-5 pt-6 pb-6 relative overflow-hidden"
+          style={{ background: "linear-gradient(135deg, #e0f2f1, #fffbe6)" }}
+        >
+          <div className="absolute -top-20 -right-20 w-[200px] h-[200px] rounded-full bg-[#4a875b]/[0.04] pointer-events-none" />
+
+          <div className="flex-1 flex flex-col items-center justify-center text-center z-10">
+            {/* キャラクター画像 */}
+            <div className="w-[110px] h-[110px] rounded-full shadow-lg shadow-[#4a875b]/20 mb-5 overflow-hidden bg-[#fffdf8] anim-char-pop">
+              <div className="w-full h-full relative scale-[1.2]">
+                <Image
+                  src="/images/nori-character.png"
+                  alt="のりキャラクター"
+                  fill
+                  sizes="110px"
+                  className="object-cover"
+                  priority
+                />
+              </div>
+            </div>
+
+            <h1 className="text-[20px] font-bold text-[#004d40] leading-snug mb-2.5 anim-fade-up anim-delay-1">
+              Safari で
+              <br />
+              開いてください
+            </h1>
+            <p className="text-xs text-zinc-600 leading-relaxed anim-fade-up anim-delay-2">
+              iPhone のホーム画面追加 (= アプリ化) は
+              <br />
+              <b className="text-[#004d40] font-bold">Safari でのみできます</b>
+            </p>
+
+            {/* URL コピー カード */}
+            <div className="mt-6 w-full bg-[#fffdf8] border border-[#4a875b]/15 rounded-xl px-4 py-4 text-left anim-fade-up anim-delay-3">
+              <div className="text-[11px] font-bold text-[#004d40] tracking-widest mb-3">
+                Safari で開き直す手順
+              </div>
+              <ol className="space-y-3 text-[12.5px] text-[#2b2620] leading-relaxed">
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[#4a875b] text-white flex items-center justify-center text-[11px] font-bold mt-0.5">
+                    1
+                  </span>
+                  <span>下の <b>URL をコピー</b> ボタンをタップ</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[#4a875b] text-white flex items-center justify-center text-[11px] font-bold mt-0.5">
+                    2
+                  </span>
+                  <span>
+                    ホーム画面の <b>Safari</b> (青い羅針盤アイコン) を起動
+                  </span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[#4a875b] text-white flex items-center justify-center text-[11px] font-bold mt-0.5">
+                    3
+                  </span>
+                  <span>
+                    URL バーを長押し → <b>「ペースト」</b> → 開く
+                  </span>
+                </li>
+              </ol>
+
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="mt-4 w-full bg-[#4a875b] hover:bg-[#34603f] text-white rounded-xl py-3 text-[12.5px] font-bold shadow-md shadow-[#4a875b]/25 transition-colors"
+              >
+                {copied ? "✓ URL をコピーしました" : "URL をコピー"}
+              </button>
+
+              {/* clipboard 不可ケース対応: URL を可視化 */}
+              <p className="mt-3 text-[10px] text-[#6a6256] break-all font-mono leading-relaxed">
+                {currentUrl}
+              </p>
+            </div>
+
+            <p className="mt-5 text-[10.5px] text-[#6a6256] leading-relaxed anim-fade-up anim-delay-3">
+              Safari で開き直したら、 そのまま続きから始まります
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }
 
