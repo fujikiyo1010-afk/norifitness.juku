@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getAdminInfo } from "@/lib/auth/admin";
 import { getMyAlerts, type MemberAlert, type MemberAlertKey } from "@/lib/member/alerts";
 import { getMyHomeStats } from "@/lib/member/home-stats";
@@ -32,6 +35,36 @@ export const dynamic = "force-dynamic";
  *   - 目標シート添削数 = 既読管理未実装のため 数字なし「添削あり」表示のみ
  */
 export default async function Home() {
+  // ───── オンボーディング未完了ガード ─────
+  // 入会直後の受講生が メール / ブラウザ履歴 / URL 直打ち で / に到達するのを防ぎ、
+  // 強制的に /onboarding に送り返す。 shipments 行 = オンボ Step 6 完了マーカー
+  // (= プロテイン発送先入力済) = 「入会動線を最低限通った」 印。
+  // admin (= きよむさん / のり氏) は shipments を持たないが /admin にも /(ホーム) にも
+  // 到達できる必要があるため、 ガード対象外。
+  const sb = await createClient();
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+  const adminSb = createAdminClient();
+  const { data: adminRow } = await adminSb
+    .from("admin_users")
+    .select("id")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (!adminRow) {
+    const { data: shipment } = await adminSb
+      .from("shipments")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (!shipment) {
+      redirect("/onboarding");
+    }
+  }
+
   const [alerts, stats, lastWatched, goalSheet, monthlyAudit, admin, chatUnread] =
     await Promise.all([
       getMyAlerts(),
