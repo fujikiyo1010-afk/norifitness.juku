@@ -626,7 +626,7 @@ export function GoalSheetEditor({
       )}
 
       {/* 保存バー (= 「送信して添削を依頼」 のみ ・ 下書きは自動保存に移行) */}
-      <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 sticky bottom-[calc(64px+env(safe-area-inset-bottom))]">
+      <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3">
         <button
           type="button"
           disabled={isPending}

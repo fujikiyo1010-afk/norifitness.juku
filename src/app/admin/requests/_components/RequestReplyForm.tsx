@@ -69,6 +69,16 @@ export function RequestReplyForm({
         </span>
       </div>
 
+      {/* 編集ボタン (= 返信入力欄の上、 受講生のカルテ表示の直下) */}
+      <div className="mb-4">
+        <a
+          href={editHref}
+          className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-white border-2 border-[#00897b] rounded-md text-sm font-bold text-[#00695c] hover:bg-[#00695c] hover:text-white transition-colors"
+        >
+          {type === "carte" ? "カルテを編集" : "メニューを編集"} →
+        </a>
+      </div>
+
       {/* テンプレ挿入 */}
       <div className="flex flex-wrap items-center gap-1.5 mb-2 text-[11px]">
         <span className="text-zinc-500 font-bold">テンプレ:</span>
@@ -104,19 +114,13 @@ export function RequestReplyForm({
         </div>
       )}
 
-      {/* アクション */}
-      <div className="mt-3 flex items-center gap-2">
-        <a
-          href={editHref}
-          className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-[#e8ebe9] rounded-md text-xs font-semibold text-zinc-900 hover:border-[#00897b] hover:text-[#00695c]"
-        >
-          {type === "carte" ? "カルテを編集" : "メニューを編集"} →
-        </a>
+      {/* アクション (= 送信のみ / 編集ボタンは上部に移動済み) */}
+      <div className="mt-3 flex justify-end">
         <button
           type="button"
           onClick={handleSubmit}
           disabled={isPending || !text.trim()}
-          className="ml-auto inline-flex items-center gap-1.5 px-4 py-2 bg-[#00897b] hover:bg-[#00695c] text-white rounded-md text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#00897b] hover:bg-[#00695c] text-white rounded-md text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isPending ? "送信中..." : "送信 + 対応済"}
         </button>
