@@ -48,8 +48,12 @@ export function OnboardingClient({
   const [building, setBuilding] = useState("");
   const [recipientName, setRecipientName] = useState(defaultRecipientName);
 
+  // 郵便番号は数字部分が 7 桁ジャストでのみ valid (= ハイフンあり/なし両対応)
+  const postalDigits = postalCode.replace(/[^0-9]/g, "");
+  const postalCodeValid = postalDigits.length === 7;
+
   const step6Valid =
-    postalCode.trim().length > 0 &&
+    postalCodeValid &&
     addressLine.trim().length > 0 &&
     recipientName.trim().length > 0;
 
@@ -152,6 +156,11 @@ export function OnboardingClient({
               <Step6Form
                 postalCode={postalCode}
                 onPostalCodeChange={setPostalCode}
+                postalCodeError={
+                  !postalCodeValid && postalCode.length > 0
+                    ? `郵便番号は 7 桁で入力してください (${postalDigits.length}/7 桁)`
+                    : null
+                }
                 addressLine={addressLine}
                 onAddressLineChange={setAddressLine}
                 building={building}
@@ -685,6 +694,7 @@ function StepIntro({
 function Step6Form({
   postalCode,
   onPostalCodeChange,
+  postalCodeError,
   addressLine,
   onAddressLineChange,
   building,
@@ -695,6 +705,7 @@ function Step6Form({
 }: {
   postalCode: string;
   onPostalCodeChange: (v: string) => void;
+  postalCodeError: string | null;
   addressLine: string;
   onAddressLineChange: (v: string) => void;
   building: string;
@@ -721,6 +732,7 @@ function Step6Form({
           required
           value={postalCode}
           onChange={onPostalCodeChange}
+          error={postalCodeError}
           placeholder="123-4567"
           autoComplete="postal-code"
           inputMode="numeric"
@@ -769,6 +781,7 @@ function Field({
   label,
   required,
   hint,
+  error,
   value,
   onChange,
   placeholder,
@@ -779,6 +792,7 @@ function Field({
   label: string;
   required?: boolean;
   hint?: string;
+  error?: string | null;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
@@ -786,6 +800,7 @@ function Field({
   inputMode?: "text" | "numeric" | "email" | "tel";
   disabled?: boolean;
 }) {
+  const hasError = Boolean(error && value.length > 0);
   return (
     <div className="flex flex-col gap-1">
       <label className="text-[10px] font-semibold text-zinc-600 flex items-center gap-1">
@@ -807,8 +822,15 @@ function Field({
         autoComplete={autoComplete}
         inputMode={inputMode}
         disabled={disabled}
-        className="border border-zinc-300 rounded-md px-2.5 py-1.5 text-[11.5px] bg-[#fffdf8] text-[#2b2620] outline-none focus:border-[#4a875b] focus:ring-2 focus:ring-[#4a875b]/30"
+        className={`border rounded-md px-2.5 py-1.5 text-[11.5px] bg-[#fffdf8] text-[#2b2620] outline-none focus:ring-2 ${
+          hasError
+            ? "border-[#c44] focus:border-[#c44] focus:ring-[#c44]/30"
+            : "border-zinc-300 focus:border-[#4a875b] focus:ring-[#4a875b]/30"
+        }`}
       />
+      {hasError && (
+        <p className="text-[9.5px] text-[#c44] font-semibold mt-0.5">{error}</p>
+      )}
     </div>
   );
 }
