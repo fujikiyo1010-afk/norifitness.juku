@@ -36,7 +36,7 @@ export default async function GoalSheetEditPage() {
 
   return (
     <>
-      <MemberHeader title="目標シート 編集" fallbackHref="/goal-sheet" />
+      <MemberHeader title="目標管理シート 編集" fallbackHref="/goal-sheet" />
       <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#f9f5ed]">
         <div className="mx-auto w-full max-w-[460px]">
           <GoalSheetEditor initialContent={initialContent} gender={gender} />

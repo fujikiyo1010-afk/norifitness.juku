@@ -2,7 +2,6 @@
 
 import { useState, useTransition, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { saveDraft, submitAudit } from "@/lib/monthly-audit/actions";
 import { normalizeNumberInput } from "@/lib/utils/normalize-number";
 import {
@@ -150,27 +149,6 @@ export function MonthlyReviewForm({
 
   return (
     <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl overflow-hidden">
-      {/* ヘッダー */}
-      <div className="px-4 py-3 border-b border-[#e7dcc9] flex items-center gap-2">
-        <Link href="/monthly-review" className="text-[#2b2620]">
-          <svg
-            className="w-5 h-5"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="m15 18-6-6 6-6" />
-          </svg>
-        </Link>
-        <div className="flex-1 text-center text-sm font-bold text-[#2b2620]">
-          月次添削
-        </div>
-        <div className="w-5 h-5" />
-      </div>
-
       {mode === "form" ? (
         <>
           {/* ヘッダー統合ブロック (温かいグラデ) */}
@@ -279,7 +257,7 @@ export function MonthlyReviewForm({
           )}
 
           {/* 保存バー (フォームモード) */}
-          <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2 sticky bottom-[calc(64px+env(safe-area-inset-bottom))]">
+          <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2">
             <button
               type="button"
               disabled={isPending}
@@ -365,7 +343,7 @@ function PreviewView({
       </div>
 
       {/* 修正 / 送信ボタン */}
-      <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2 sticky bottom-[calc(64px+env(safe-area-inset-bottom))]">
+      <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2">
         <button
           type="button"
           disabled={isPending}

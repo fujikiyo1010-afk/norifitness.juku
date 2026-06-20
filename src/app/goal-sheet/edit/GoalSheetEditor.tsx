@@ -331,19 +331,6 @@ export function GoalSheetEditor({
 
   return (
     <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl overflow-hidden">
-      {/* ヘッダー */}
-      <div className="px-4 py-3 border-b border-[#e7dcc9] flex items-center gap-2">
-        <Link href="/goal-sheet" className="text-[#2b2620]">
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m15 18-6-6 6-6" />
-          </svg>
-        </Link>
-        <div className="flex-1 text-center text-sm font-bold text-[#2b2620]">
-          目標管理シート
-        </div>
-        <div className="w-5 h-5" />
-      </div>
-
       {/* 進捗バー */}
       <div className="px-4 py-3 border-b border-[#e7dcc9]">
         <div className="flex justify-between text-[11px] text-[#6a6256] mb-1.5">
