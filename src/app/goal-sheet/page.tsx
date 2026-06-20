@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getMyGoalSheet } from "@/lib/goal-sheet/queries";
 import { MemberHeader } from "@/components/MemberHeader";
+import { RefreshOnFocus } from "@/components/RefreshOnFocus";
 import {
   SECTION_META,
   countFilledSections,
@@ -34,6 +35,7 @@ export default async function GoalSheetPage() {
   if (!sheet) {
     return (
       <>
+        <RefreshOnFocus />
         <MemberHeader title="目標管理シート" fallbackHref="/" />
         <main className="flex flex-1 flex-col p-6 sm:p-8 bg-[#f9f5ed]">
           <div className="mx-auto w-full max-w-[460px]">
@@ -82,6 +84,7 @@ export default async function GoalSheetPage() {
 
   return (
     <>
+      <RefreshOnFocus />
       <MemberHeader title="目標管理シート" fallbackHref="/" />
       <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#f9f5ed]">
       <SavedToast />
