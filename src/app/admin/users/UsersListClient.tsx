@@ -152,8 +152,10 @@ export function UsersListClient({ users }: { users: UserListSummary[] }) {
               <thead className="bg-zinc-50 border-b border-[#e8ebe9]">
                 <tr className="text-[10px] font-bold text-zinc-500 tracking-widest">
                   <th className="text-left px-4 py-3">受講生</th>
+                  <th className="text-left px-3 py-3">カルテ</th>
                   <th className="text-left px-3 py-3">月次</th>
                   <th className="text-left px-3 py-3">メニュー</th>
+                  <th className="text-left px-3 py-3">リクエスト</th>
                   <th className="text-left px-3 py-3">対応事項</th>
                   <th className="text-left px-3 py-3">最終アクション</th>
                   <th className="text-right px-4 py-3">操作</th>
@@ -199,6 +201,13 @@ function UserRow({ user: u }: { user: UserListSummary }) {
         </div>
       </td>
       <td className="px-3 py-3">
+        <CarteStatusBadge
+          submitted={u.hasCarteSubmitted}
+          hasMenu={u.hasCurrentMenu}
+          reviewNeeded={u.menuReviewNeeded}
+        />
+      </td>
+      <td className="px-3 py-3">
         <AuditStatusBadge status={u.latestAuditStatus} />
         {u.latestAuditTargetMonth && (
           <div className="text-[9px] text-zinc-400 mt-0.5 font-mono">
@@ -215,6 +224,15 @@ function UserRow({ user: u }: { user: UserListSummary }) {
           <span className="inline-flex rounded-full bg-amber-50 text-amber-700 px-2 py-0.5 text-[10px] font-medium border border-amber-200">
             未配布
           </span>
+        )}
+      </td>
+      <td className="px-3 py-3">
+        {u.pendingRequestCount > 0 ? (
+          <span className="inline-flex rounded-full bg-orange-50 text-orange-700 px-2 py-0.5 text-[10px] font-bold border border-orange-200">
+            未対応 {u.pendingRequestCount} 件
+          </span>
+        ) : (
+          <span className="text-[10px] text-zinc-400">なし</span>
         )}
       </td>
       <td className="px-3 py-3">
@@ -250,6 +268,57 @@ function UserRow({ user: u }: { user: UserListSummary }) {
 // =====================================================================
 // 補助
 // =====================================================================
+
+function CarteStatusBadge({
+  submitted,
+  hasMenu,
+  reviewNeeded,
+}: {
+  submitted: boolean;
+  hasMenu: boolean;
+  reviewNeeded: boolean;
+}) {
+  // 状態判定 (= ハブを開かなくても カルテ→メニュー の流れを 1 目で把握)
+  //   - 未提出: カルテまだ提出されてない (= 受講生がオンボ後カルテ未記入)
+  //   - メニュー作成中: カルテ提出済 + メニュー未配布 = admin 対応待ち
+  //   - 更新依頼あり: 受講生が「カルテ変更依頼」 を出してる = admin 対応
+  //   - 配布済: メニュー配布完了 + 更新依頼なし = 落ち着いた状態
+  const state: "not_submitted" | "menu_pending" | "review_needed" | "delivered" =
+    !submitted
+      ? "not_submitted"
+      : reviewNeeded
+        ? "review_needed"
+        : hasMenu
+          ? "delivered"
+          : "menu_pending";
+
+  const config = {
+    not_submitted: {
+      label: "未提出",
+      cls: "bg-zinc-100 text-zinc-600 border border-zinc-200",
+    },
+    menu_pending: {
+      label: "メニュー作成中",
+      cls: "bg-amber-50 text-amber-800 border border-amber-200 font-bold",
+    },
+    review_needed: {
+      label: "更新依頼あり",
+      cls: "bg-orange-100 text-orange-800 border border-orange-300 font-bold",
+    },
+    delivered: {
+      label: "配布済",
+      cls: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+    },
+  }[state];
+
+  return (
+    <span
+      className={`inline-flex rounded-full px-2 py-0.5 text-[10px] ${config.cls}`}
+    >
+      {config.label}
+    </span>
+  );
+}
 
 function AuditStatusBadge({
   status,

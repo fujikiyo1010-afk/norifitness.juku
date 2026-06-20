@@ -457,6 +457,7 @@ export type UserListSummary = {
   latestAuditStatus: "a_empty" | "b_in_progress" | "c_submitted" | "d_replied";
   latestAuditTargetMonth: string | null;
 
+  hasCarteSubmitted: boolean;
   hasCurrentMenu: boolean;
   pendingRequestCount: number;
   menuReviewNeeded: boolean;
@@ -615,6 +616,7 @@ export async function listAllUsersWithStatus(): Promise<UserListSummary[]> {
       joinedAt,
       latestAuditStatus: latestAudit?.status ?? "a_empty",
       latestAuditTargetMonth: latestAudit?.targetMonth ?? null,
+      hasCarteSubmitted: !!carte,
       hasCurrentMenu: !!menuCreatedAt,
       pendingRequestCount: req?.count ?? 0,
       menuReviewNeeded: !!carte?.flag,
