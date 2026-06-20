@@ -422,8 +422,8 @@ export function CarteIntakeForm() {
               </div>
             )}
 
-            {/* 保存バー */}
-            <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2 sticky bottom-[calc(64px+env(safe-area-inset-bottom))]">
+            {/* 保存バー (= 最後の質問の下に通常配置 / sticky 解除でボタンが質問を隠さない) */}
+            <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2">
               <button
                 type="button"
                 disabled={isPending}
@@ -516,8 +516,8 @@ function PreviewView({
         </div>
       )}
 
-      {/* 修正 / 送信ボタン */}
-      <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2 sticky bottom-[calc(64px+env(safe-area-inset-bottom))]">
+      {/* 修正 / 送信ボタン (= プレビュー末尾に通常配置 / sticky 解除) */}
+      <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2">
         <button
           type="button"
           disabled={isPending}
