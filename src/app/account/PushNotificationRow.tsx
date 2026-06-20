@@ -6,22 +6,18 @@ import {
   unsubscribeFromPush,
   getCurrentSubscriptionEndpoint,
 } from "@/lib/push/client";
-import {
-  saveSubscription,
-  deleteSubscription,
-  sendTestPushToMe,
-  sendTestPushDelayed,
-  sendTestPushWithLink,
-} from "@/lib/push/actions";
+import { saveSubscription, deleteSubscription } from "@/lib/push/actions";
 
 /**
- * /account 「アプリ通知」 行 (2026-06-18 #2 push 基盤デモ版)
+ * /account 「アプリ通知」 行 ・ トグル UI (2026-06-20 線① 受講生 UI 整理)
  *
  * 表示:
- *   - 端末対応外            : 「この端末は対応していません」 (グレー)
- *   - 未許可 + 端末対応      : 「有効にする」 ボタン
- *   - 許可済                : 「テスト通知を送る」 ボタン + 「解除」 リンク
- *   - エラー                : 1 行赤字
+ *   - 端末対応外    : 「この端末は非対応」 (= グレー)
+ *   - 端末対応      : トグル ON/OFF (= メール通知トグルと統一)
+ *   - エラー        : 下に赤字
+ *
+ * 旧仕様 (= 2026-06-18 デモ版) のテストボタン 3 種 (= テスト送信 / 10 秒後 / リンク付き) は
+ * 受講生に出ては困るため完全削除。 動作確認は admin の別経路でのみ実施。
  *
  * iOS Safari 注意:
  *   - ホーム追加した PWA 起動でしか購読不可。 ブラウザでは 「非対応扱い」 にして導線を出す
@@ -30,7 +26,6 @@ export function PushNotificationRow() {
   const [supported, setSupported] = useState<boolean | null>(null);
   const [subscribed, setSubscribed] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [info, setInfo] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
@@ -56,76 +51,38 @@ export function PushNotificationRow() {
     };
   }, []);
 
-  function handleEnable() {
+  function handleToggle() {
+    if (pending) return;
     setError(null);
-    setInfo(null);
-    startTransition(async () => {
-      const r = await subscribeToPush();
-      if (!r.ok) {
-        setError(r.error);
-        return;
-      }
-      const saved = await saveSubscription(r.payload);
-      if (!saved.ok) {
-        setError(saved.error);
-        return;
-      }
+    const next = !subscribed;
+
+    if (next) {
+      // ON 化: iOS 許可ダイアログ → subscription 取得 → DB 保存
+      // 楽観 UI: 即 ON 表示 → 失敗時ロールバック
       setSubscribed(true);
-      setInfo("通知を有効にしました");
-    });
-  }
-
-  function handleTest() {
-    setError(null);
-    setInfo(null);
-    startTransition(async () => {
-      const r = await sendTestPushToMe();
-      if (!r.ok) {
-        setError(r.error);
-        return;
-      }
-      setInfo("テスト通知を送信しました");
-    });
-  }
-
-  function handleTestDelayed() {
-    setError(null);
-    setInfo("10 秒後に送信します。 端末をスリープしてお待ちください...");
-    startTransition(async () => {
-      const r = await sendTestPushDelayed();
-      if (!r.ok) {
-        setError(r.error);
-        setInfo(null);
-        return;
-      }
-      setInfo("10 秒後通知を送信しました");
-    });
-  }
-
-  function handleTestWithLink() {
-    setError(null);
-    setInfo(null);
-    startTransition(async () => {
-      const r = await sendTestPushWithLink();
-      if (!r.ok) {
-        setError(r.error);
-        return;
-      }
-      setInfo("リンク付き通知を送信しました");
-    });
-  }
-
-  function handleDisable() {
-    setError(null);
-    setInfo(null);
-    startTransition(async () => {
-      const { endpoint } = await unsubscribeFromPush();
-      if (endpoint) {
-        await deleteSubscription(endpoint);
-      }
+      startTransition(async () => {
+        const r = await subscribeToPush();
+        if (!r.ok) {
+          setSubscribed(false);
+          setError(r.error);
+          return;
+        }
+        const saved = await saveSubscription(r.payload);
+        if (!saved.ok) {
+          setSubscribed(false);
+          setError(saved.error);
+        }
+      });
+    } else {
+      // OFF 化: 端末 + DB から subscription 削除
       setSubscribed(false);
-      setInfo("通知を解除しました");
-    });
+      startTransition(async () => {
+        const { endpoint } = await unsubscribeFromPush();
+        if (endpoint) {
+          await deleteSubscription(endpoint);
+        }
+      });
+    }
   }
 
   if (supported === null) {
@@ -137,60 +94,30 @@ export function PushNotificationRow() {
       <div className="text-[11px] text-[#a59b8c] text-right leading-tight">
         この端末は非対応
         <br />
-        (ホームに追加して開いてください)
+        (ホームに追加してください)
       </div>
     );
   }
 
   return (
     <div className="flex flex-col items-end gap-1">
-      {!subscribed ? (
-        <button
-          type="button"
-          onClick={handleEnable}
-          disabled={pending}
-          className="px-3 py-1.5 rounded-lg bg-[#4a875b] text-white text-[11px] font-bold hover:bg-[#34603f] transition-colors disabled:opacity-60"
-        >
-          {pending ? "処理中..." : "有効にする"}
-        </button>
-      ) : (
-        <>
-          <button
-            type="button"
-            onClick={handleTest}
-            disabled={pending}
-            className="px-3 py-1.5 rounded-lg bg-[#4a875b] text-white text-[11px] font-bold hover:bg-[#34603f] transition-colors disabled:opacity-60"
-          >
-            {pending ? "送信中..." : "テスト通知を送る"}
-          </button>
-          <button
-            type="button"
-            onClick={handleTestDelayed}
-            disabled={pending}
-            className="px-3 py-1.5 rounded-lg bg-[#fffdf8] border border-[#4a875b] text-[#34603f] text-[11px] font-bold hover:bg-[rgba(0,137,123,0.08)] transition-colors disabled:opacity-60"
-          >
-            10 秒後に送信
-          </button>
-          <button
-            type="button"
-            onClick={handleTestWithLink}
-            disabled={pending}
-            className="px-3 py-1.5 rounded-lg bg-[#fffdf8] border border-[#4a875b] text-[#34603f] text-[11px] font-bold hover:bg-[rgba(0,137,123,0.08)] transition-colors disabled:opacity-60"
-          >
-            リンク付きを送信
-          </button>
-          <button
-            type="button"
-            onClick={handleDisable}
-            disabled={pending}
-            className="text-[10px] text-[#a59b8c] hover:text-[#6a6256] underline-offset-2 hover:underline"
-          >
-            通知を解除
-          </button>
-        </>
+      <button
+        type="button"
+        onClick={handleToggle}
+        aria-pressed={subscribed}
+        aria-label={`アプリ通知を${subscribed ? "オフ" : "オン"}にする`}
+        disabled={pending}
+        className={`w-9 h-5 rounded-full flex items-center transition-colors px-0.5 ${
+          subscribed ? "bg-[#4a875b] justify-end" : "bg-zinc-300 justify-start"
+        } disabled:opacity-50`}
+      >
+        <span className="w-4 h-4 rounded-full bg-[#fffdf8] shadow-sm" />
+      </button>
+      {error && (
+        <div className="text-[10px] text-rose-600 max-w-[180px] text-right leading-tight">
+          {error}
+        </div>
       )}
-      {info && <div className="text-[10px] text-[#34603f]">{info}</div>}
-      {error && <div className="text-[10px] text-rose-600">{error}</div>}
     </div>
   );
 }
