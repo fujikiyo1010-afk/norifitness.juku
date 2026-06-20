@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getMyAudit, listMyAudits } from "@/lib/monthly-audit/queries";
 import { MemberHeader } from "@/components/MemberHeader";
+import { RefreshOnFocus } from "@/components/RefreshOnFocus";
 import {
   AUDIT_QUESTIONS,
   AUDIT_CATEGORIES,
@@ -90,6 +91,7 @@ export default async function MonthlyReviewDetailPage({
 
   return (
     <>
+      <RefreshOnFocus />
       <MemberHeader title="月次添削 詳細" fallbackHref="/monthly-review" />
       <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
         <div className="mx-auto w-full max-w-[460px] border-x border-[#e7dcc9]">
