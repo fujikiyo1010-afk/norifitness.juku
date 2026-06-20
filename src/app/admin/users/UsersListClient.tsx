@@ -153,10 +153,10 @@ export function UsersListClient({ users }: { users: UserListSummary[] }) {
                 <tr className="text-[10px] font-bold text-zinc-500 tracking-widest">
                   <th className="text-left px-4 py-3">受講生</th>
                   <th className="text-left px-3 py-3">カルテ</th>
+                  <th className="text-left px-3 py-3">目標シート</th>
                   <th className="text-left px-3 py-3">月次</th>
                   <th className="text-left px-3 py-3">メニュー</th>
                   <th className="text-left px-3 py-3">リクエスト</th>
-                  <th className="text-left px-3 py-3">対応事項</th>
                   <th className="text-left px-3 py-3">最終アクション</th>
                   <th className="text-right px-4 py-3">操作</th>
                 </tr>
@@ -179,11 +179,6 @@ export function UsersListClient({ users }: { users: UserListSummary[] }) {
 // =====================================================================
 
 function UserRow({ user: u }: { user: UserListSummary }) {
-  const actionsCount =
-    u.pendingRequestCount +
-    (u.menuReviewNeeded ? 1 : 0) +
-    (u.latestAuditStatus === "c_submitted" ? 1 : 0);
-
   return (
     <tr className="border-b border-zinc-100 last:border-b-0 hover:bg-zinc-50 transition-colors">
       <td className="px-4 py-3">
@@ -206,6 +201,9 @@ function UserRow({ user: u }: { user: UserListSummary }) {
           hasMenu={u.hasCurrentMenu}
           reviewNeeded={u.menuReviewNeeded}
         />
+      </td>
+      <td className="px-3 py-3">
+        <GoalSheetStatusBadge state={u.goalSheetState} />
       </td>
       <td className="px-3 py-3">
         <AuditStatusBadge status={u.latestAuditStatus} />
@@ -231,21 +229,6 @@ function UserRow({ user: u }: { user: UserListSummary }) {
           <span className="inline-flex rounded-full bg-orange-50 text-orange-700 px-2 py-0.5 text-[10px] font-bold border border-orange-200">
             未対応 {u.pendingRequestCount} 件
           </span>
-        ) : (
-          <span className="text-[10px] text-zinc-400">なし</span>
-        )}
-      </td>
-      <td className="px-3 py-3">
-        {actionsCount > 0 ? (
-          <div className="flex flex-col gap-0.5">
-            <span className="inline-flex rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-[10px] font-bold w-fit">
-              計 {actionsCount} 件
-            </span>
-            <div className="text-[9px] text-zinc-500">
-              {u.pendingRequestCount > 0 && `要望 ${u.pendingRequestCount}`}
-              {u.menuReviewNeeded && " / カルテ変更"}
-            </div>
-          </div>
         ) : (
           <span className="text-[10px] text-zinc-400">なし</span>
         )}
@@ -307,6 +290,39 @@ function CarteStatusBadge({
     },
     delivered: {
       label: "配布済",
+      cls: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+    },
+  }[state];
+
+  return (
+    <span
+      className={`inline-flex rounded-full px-2 py-0.5 text-[10px] ${config.cls}`}
+    >
+      {config.label}
+    </span>
+  );
+}
+
+function GoalSheetStatusBadge({
+  state,
+}: {
+  state: UserListSummary["goalSheetState"];
+}) {
+  const config = {
+    not_started: {
+      label: "未記入",
+      cls: "bg-zinc-100 text-zinc-600 border border-zinc-200",
+    },
+    in_review: {
+      label: "添削待ち",
+      cls: "bg-amber-50 text-amber-800 border border-amber-200 font-bold",
+    },
+    review_requested: {
+      label: "再添削依頼",
+      cls: "bg-orange-100 text-orange-800 border border-orange-300 font-bold",
+    },
+    reviewed: {
+      label: "添削済",
       cls: "bg-emerald-50 text-emerald-700 border border-emerald-200",
     },
   }[state];

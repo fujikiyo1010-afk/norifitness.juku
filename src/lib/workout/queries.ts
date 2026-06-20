@@ -461,6 +461,8 @@ export type UserListSummary = {
   hasCurrentMenu: boolean;
   pendingRequestCount: number;
   menuReviewNeeded: boolean;
+  /** 目標シート 状態 */
+  goalSheetState: "not_started" | "in_review" | "review_requested" | "reviewed";
 
   /** 最終アクション日時 (各ソースの最新の更新日時の最大値) */
   lastActionAt: string | null;
@@ -486,9 +488,16 @@ export async function listAllUsersWithStatus(): Promise<UserListSummary[]> {
   if (users.length === 0) return [];
   const userIds = users.map((u) => u.id as string);
 
-  // 2-7. 関連テーブルを並列取得
-  const [profilesRes, cartesRes, menusRes, auditsRes, carteReqRes, workoutReqRes] =
-    await Promise.all([
+  // 2-8. 関連テーブルを並列取得
+  const [
+    profilesRes,
+    cartesRes,
+    menusRes,
+    auditsRes,
+    carteReqRes,
+    workoutReqRes,
+    goalSheetsRes,
+  ] = await Promise.all([
       supabase
         .from("user_profiles")
         .select("user_id, birthday")
@@ -519,6 +528,10 @@ export async function listAllUsersWithStatus(): Promise<UserListSummary[]> {
         .select("user_id, created_at")
         .in("user_id", userIds)
         .eq("status", "pending"),
+      supabase
+        .from("goal_sheets")
+        .select("user_id, reviewed_at, last_review_requested_at, updated_at")
+        .in("user_id", userIds),
     ]);
 
   // Map 化
@@ -585,6 +598,33 @@ export async function listAllUsersWithStatus(): Promise<UserListSummary[]> {
     }
   }
 
+  // 目標シート: state 判定
+  //   - 行なし                                                 → not_started
+  //   - 行あり + reviewed_at = null                            → in_review (添削待ち)
+  //   - 行あり + last_review_requested_at > reviewed_at        → review_requested (再添削依頼)
+  //   - 行あり + reviewed_at あり + 再依頼なし                  → reviewed (添削済)
+  const goalSheetMap = new Map<
+    string,
+    {
+      state: "in_review" | "review_requested" | "reviewed";
+      updated_at: string;
+    }
+  >();
+  for (const g of goalSheetsRes.data ?? []) {
+    const uid = g.user_id as string;
+    const reviewedAt = (g.reviewed_at as string | null) ?? null;
+    const lastRequestedAt = (g.last_review_requested_at as string | null) ?? null;
+    const state: "in_review" | "review_requested" | "reviewed" = !reviewedAt
+      ? "in_review"
+      : lastRequestedAt && lastRequestedAt > reviewedAt
+        ? "review_requested"
+        : "reviewed";
+    goalSheetMap.set(uid, {
+      state,
+      updated_at: (g.updated_at as string) ?? reviewedAt ?? lastRequestedAt ?? "",
+    });
+  }
+
   // 合成
   return users.map((u) => {
     const id = u.id as string;
@@ -597,11 +637,13 @@ export async function listAllUsersWithStatus(): Promise<UserListSummary[]> {
     const req = reqCountMap.get(id);
 
     // 最終アクション = 各ソースの updated_at/created_at の最大値
+    const goalSheet = goalSheetMap.get(id);
     const candidates: string[] = [];
     if (carte) candidates.push(carte.updated_at);
     if (menuCreatedAt) candidates.push(menuCreatedAt);
     if (latestAudit) candidates.push(latestAudit.updated_at);
     if (req) candidates.push(req.latest);
+    if (goalSheet?.updated_at) candidates.push(goalSheet.updated_at);
     const lastActionAt =
       candidates.length > 0
         ? candidates.sort().slice(-1)[0]
@@ -620,6 +662,7 @@ export async function listAllUsersWithStatus(): Promise<UserListSummary[]> {
       hasCurrentMenu: !!menuCreatedAt,
       pendingRequestCount: req?.count ?? 0,
       menuReviewNeeded: !!carte?.flag,
+      goalSheetState: goalSheet?.state ?? "not_started",
       lastActionAt,
     };
   });
