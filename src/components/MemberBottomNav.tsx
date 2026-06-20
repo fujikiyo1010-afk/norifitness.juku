@@ -30,6 +30,7 @@ const HIDDEN_PREFIXES = [
   "/admin",
   "/login",
   "/invite",
+  "/onboarding", // オンボ中は受講生用ナビを出さない (= Step の「次へ」 ボタンを隠さない)
   "/forgot-password",
   "/reset-password",
   "/debug",
