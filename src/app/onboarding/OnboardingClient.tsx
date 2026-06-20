@@ -10,6 +10,8 @@ import {
   isStandaloneDisplay,
   type BrowserEnv,
 } from "@/lib/browser-check";
+import { subscribeToPush } from "@/lib/push/client";
+import { saveSubscription } from "@/lib/push/actions";
 
 const TOTAL_STEPS = 8;
 
@@ -173,10 +175,23 @@ export function OnboardingClient({
             {step === 7 && (
               <Step7Permission
                 onPermit={async () => {
+                  // メール = デフォルト true なので明示的に true 設定 (= 触ってきた場合の保険)
                   await toggleEmailNotification(true);
+                  // Push = iOS 許可ダイアログ表示 → subscription 取得 → DB 保存
+                  // 失敗 (許可拒否 / 非対応端末等) でも Step 8 へ進む = 受講生体験を止めない
+                  try {
+                    const result = await subscribeToPush();
+                    if (result.ok) {
+                      await saveSubscription(result.payload);
+                    }
+                    // 拒否 / エラーは無視 (= 後で /設定 から再度有効化可能)
+                  } catch {
+                    // ignore
+                  }
                   setStep(8);
                 }}
                 onSkip={async () => {
+                  // OFF を選んだ受講生はメールも OFF にする (= 明確な拒否意思)
                   await toggleEmailNotification(false);
                   setStep(8);
                 }}
@@ -846,38 +861,66 @@ function Step7Permission({
   onPermit: () => void;
   onSkip: () => void;
 }) {
+  const [pending, setPending] = useState(false);
+
+  async function handlePermit() {
+    if (pending) return;
+    setPending(true);
+    try {
+      await onPermit();
+    } finally {
+      setPending(false);
+    }
+  }
+
   return (
     <div className="flex-1 flex flex-col items-center justify-center text-center z-10 pb-4">
       <div className="w-20 h-20 mb-4 rounded-2xl border border-[#4a875b]/20 bg-[#4a875b]/[0.08] flex items-center justify-center">
         <BellIcon />
       </div>
       <h1 className="text-[20px] font-bold text-[#004d40] leading-snug mb-2.5">
-        メール通知を
+        通知を
         <br />
-        ON にする
+        オンに
       </h1>
       <p className="text-xs text-zinc-600 leading-relaxed">
-        のり氏からの月次添削返信や
+        筋肉塾の通知は、
         <br />
-        大切なお知らせをメールで
-        <br />
-        受け取ります
+        <b className="text-[#004d40] font-bold">
+          学習を続けるための情報インフラ
+        </b>
+        です
       </p>
+      <p className="text-[11px] text-[#6a6256] leading-relaxed mt-2.5">
+        メニュー配布 ・ 添削完了 ・ 月次添削など
+        <br />
+        大切なお知らせを メール + iPhone 通知でお届けします
+      </p>
+
+      <div className="mt-4 bg-[#fffdf8] border border-[#4a875b]/15 rounded-lg px-3 py-2.5 text-left text-[10.5px] text-[#2b2620] leading-relaxed">
+        <b className="text-[#004d40]">受講料の投資を最大化するため</b>、
+        全 ON で使うことを<b className="text-[#004d40]">強く推奨</b>します。
+        <br />
+        うるさいと感じた通知は、 後で <b>設定 → 通知</b> から
+        個別に OFF にできます。
+      </div>
 
       <div className="w-full mt-4">
         <button
           type="button"
-          onClick={onPermit}
-          className="w-full bg-[#4a875b] hover:bg-[#34603f] text-white rounded-xl py-3 text-[13px] font-bold shadow-md shadow-[#4a875b]/25 transition-colors mb-2"
+          onClick={handlePermit}
+          disabled={pending}
+          className="w-full bg-[#4a875b] hover:bg-[#34603f] text-white rounded-xl py-3 text-[13px] font-bold shadow-md shadow-[#4a875b]/25 transition-colors mb-2 disabled:opacity-60"
         >
-          メール通知を ON にする
+          {pending ? "設定中…" : "通知をオンにする ・ 推奨"}
         </button>
         <button
           type="button"
           onClick={onSkip}
-          className="block w-full text-[11px] text-[#a59b8c] py-1.5 hover:text-zinc-600 transition-colors"
+          disabled={pending}
+          className="block w-full text-[11px] text-[#a59b8c] py-1.5 hover:text-zinc-600 transition-colors disabled:opacity-50"
         >
-          OFF のまま進む (後で /設定 から変更可)
+          オフのまま進む (後で設定から変更可)
         </button>
       </div>
     </div>
