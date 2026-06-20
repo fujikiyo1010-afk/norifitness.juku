@@ -87,7 +87,7 @@ export function OnboardingClient({
 
   // 判定中 (= SSR / hydration 直後) は空白で待つ (= 一瞬のちらつき防止)
   if (envState === "loading" || envState === "unknown") {
-    return <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen" />;
+    return <main className="flex flex-col h-[100dvh] bg-[#f9f5ed]" />;
   }
 
   // PWA 化不可ブラウザ (= iOS 他 / Android 他 / PC) → 切替案内
@@ -110,17 +110,21 @@ export function OnboardingClient({
   }
 
   return (
-    <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
-      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9]">
+    <main className="flex flex-col h-[100dvh] bg-[#f9f5ed]">
+      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col min-h-0 border-x border-[#e7dcc9]">
         <div
-          className="flex-1 flex flex-col px-5 pt-6 pb-4 relative overflow-hidden"
-          style={{ background: "linear-gradient(135deg, #e0f2f1, #fffbe6)" }}
+          className="flex-1 flex flex-col px-5 pt-6 pb-4 relative overflow-hidden min-h-0"
+          style={{
+            background: "linear-gradient(135deg, #e0f2f1, #fffbe6)",
+            paddingBottom: "calc(1rem + env(safe-area-inset-bottom))",
+          }}
         >
           <div className="absolute -top-20 -right-20 w-[200px] h-[200px] rounded-full bg-[#4a875b]/[0.04] pointer-events-none" />
 
           <StepIndicator current={step} total={TOTAL_STEPS} />
 
-          <div className="flex-1 flex flex-col z-10 min-h-0">
+          {/* コンテンツエリア = Step 6 等内容が多い時のみ縦スクロール / それ以外は 1 画面に収まる */}
+          <div className="flex-1 flex flex-col z-10 min-h-0 overflow-y-auto">
             {step === 1 && <Step1 />}
             {step === 2 && <Step2 />}
             {step === 3 && <StepIntro
@@ -348,16 +352,19 @@ function BrowserSwitchGuide({
   }
 
   return (
-    <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
-      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9]">
+    <main className="flex flex-col h-[100dvh] bg-[#f9f5ed]">
+      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col min-h-0 border-x border-[#e7dcc9]">
         <div
-          className="flex-1 flex flex-col px-5 pt-6 pb-6 relative overflow-hidden"
-          style={{ background: "linear-gradient(135deg, #e0f2f1, #fffbe6)" }}
+          className="flex-1 flex flex-col px-5 pt-6 relative overflow-hidden min-h-0"
+          style={{
+            background: "linear-gradient(135deg, #e0f2f1, #fffbe6)",
+            paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom))",
+          }}
         >
           <div className="absolute -top-20 -right-20 w-[200px] h-[200px] rounded-full bg-[#4a875b]/[0.04] pointer-events-none" />
 
-          <div className="flex-1 flex flex-col items-center justify-center text-center z-10">
-            <div className="w-[110px] h-[110px] rounded-full shadow-lg shadow-[#4a875b]/20 mb-5 overflow-hidden bg-[#fffdf8] anim-char-pop">
+          <div className="flex-1 flex flex-col items-center justify-center text-center z-10 overflow-y-auto">
+            <div className="w-[110px] h-[110px] rounded-full shadow-lg shadow-[#4a875b]/20 mb-5 overflow-hidden bg-[#fffdf8] anim-char-pop flex-shrink-0">
               <div className="w-full h-full relative scale-[1.2]">
                 <Image
                   src="/images/nori-character.png"
@@ -469,16 +476,19 @@ function Step0InstallGuide({
       ];
 
   return (
-    <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
-      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9]">
+    <main className="flex flex-col h-[100dvh] bg-[#f9f5ed]">
+      <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col min-h-0 border-x border-[#e7dcc9]">
         <div
-          className="flex-1 flex flex-col px-5 pt-6 pb-6 relative overflow-hidden"
-          style={{ background: "linear-gradient(135deg, #e0f2f1, #fffbe6)" }}
+          className="flex-1 flex flex-col px-5 pt-6 relative overflow-hidden min-h-0"
+          style={{
+            background: "linear-gradient(135deg, #e0f2f1, #fffbe6)",
+            paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom))",
+          }}
         >
           <div className="absolute -top-20 -right-20 w-[200px] h-[200px] rounded-full bg-[#4a875b]/[0.04] pointer-events-none" />
 
-          <div className="flex-1 flex flex-col items-center justify-center text-center z-10">
-            <div className="w-[110px] h-[110px] rounded-full shadow-lg shadow-[#4a875b]/20 mb-5 overflow-hidden bg-[#fffdf8] anim-char-pop">
+          <div className="flex-1 flex flex-col items-center justify-center text-center z-10 overflow-y-auto">
+            <div className="w-[110px] h-[110px] rounded-full shadow-lg shadow-[#4a875b]/20 mb-5 overflow-hidden bg-[#fffdf8] anim-char-pop flex-shrink-0">
               <div className="w-full h-full relative scale-[1.2]">
                 <Image
                   src="/images/nori-character.png"
