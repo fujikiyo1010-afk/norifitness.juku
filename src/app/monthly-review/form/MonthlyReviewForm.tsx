@@ -3,6 +3,7 @@
 import { useState, useTransition, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { saveDraft, submitAudit } from "@/lib/monthly-audit/actions";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { normalizeNumberInput } from "@/lib/utils/normalize-number";
 import {
   AUDIT_QUESTIONS,
@@ -358,7 +359,13 @@ function PreviewView({
           onClick={onSubmit}
           className="flex-1 px-4 py-3 bg-[#4a875b] hover:bg-[#34603f] text-white rounded-2xl text-sm font-bold disabled:opacity-50 transition-colors"
         >
-          {isPending ? "送信中..." : "送信する"}
+          {isPending ? (
+            <>
+              <LoadingSpinner /> 送信中…
+            </>
+          ) : (
+            "送信する"
+          )}
         </button>
       </div>
     </>

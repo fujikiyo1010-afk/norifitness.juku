@@ -4,6 +4,7 @@ import { useState, useTransition, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { saveMyGoalSheet } from "@/lib/goal-sheet/actions";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { readDraft, writeDraft, clearDraft } from "@/lib/goal-sheet/draft-storage";
 import { normalizeNumberInput } from "@/lib/utils/normalize-number";
 import { calculateBodyFat } from "@/lib/tools/calculations";
@@ -633,7 +634,13 @@ export function GoalSheetEditor({
           onClick={handleSubmit}
           className="w-full px-3 py-3 bg-[#4a875b] hover:bg-[#34603f] text-white rounded-2xl text-sm font-bold disabled:opacity-50 transition-colors"
         >
-          {isPending ? "送信中..." : reviewButtonLabel}
+          {isPending ? (
+            <>
+              <LoadingSpinner /> 送信中…
+            </>
+          ) : (
+            reviewButtonLabel
+          )}
         </button>
         <p className="text-[10px] text-[#a59b8c] text-center mt-2">
           編集内容は自動保存されています ・ 添削を依頼する時にこのボタンを押してください

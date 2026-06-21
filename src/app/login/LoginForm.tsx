@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { signIn } from "./actions";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 export function LoginForm({ next }: { next: string | null }) {
   const [email, setEmail] = useState("");
@@ -96,7 +97,13 @@ export function LoginForm({ next }: { next: string | null }) {
         disabled={!canSubmit}
         className="w-full rounded-md bg-zinc-900 dark:bg-[#f9f5ed] px-4 py-2.5 text-sm font-medium text-white dark:text-[#2b2620] disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {pending ? "ログイン中…" : "ログイン"}
+        {pending ? (
+          <>
+            <LoadingSpinner /> ログイン中…
+          </>
+        ) : (
+          "ログイン"
+        )}
       </button>
 
       <Link

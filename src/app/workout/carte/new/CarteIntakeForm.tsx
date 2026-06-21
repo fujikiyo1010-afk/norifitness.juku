@@ -4,6 +4,7 @@ import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createMyCarte, type MyCarteInput } from "@/lib/workout/actions";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import type {
   Gender,
   Environment,
@@ -532,7 +533,13 @@ function PreviewView({
           onClick={onSubmit}
           className="flex-1 px-4 py-3 bg-[#4a875b] hover:bg-[#34603f] text-white rounded-2xl text-sm font-bold disabled:opacity-50 transition-colors"
         >
-          {isPending ? "送信中..." : "送信する"}
+          {isPending ? (
+            <>
+              <LoadingSpinner /> 送信中…
+            </>
+          ) : (
+            "送信する"
+          )}
         </button>
       </div>
     </>

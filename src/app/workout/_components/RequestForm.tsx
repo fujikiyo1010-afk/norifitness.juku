@@ -7,6 +7,7 @@ import {
   createCarteRequest,
   createWorkoutRequest,
 } from "@/lib/workout/actions";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 /**
  * カルテ更新 / メニュー変更 リクエスト送信フォーム (Client Component)
@@ -233,7 +234,13 @@ export function RequestForm({
               onClick={handleSubmit}
               className="flex-1 px-4 py-3 bg-[#4a875b] hover:bg-[#34603f] text-white rounded-2xl text-sm font-bold disabled:opacity-50 transition-colors"
             >
-              {isPending ? "送信中..." : "送信する"}
+              {isPending ? (
+                <>
+                  <LoadingSpinner /> 送信中…
+                </>
+              ) : (
+                "送信する"
+              )}
             </button>
           </div>
         </div>
