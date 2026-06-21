@@ -6,6 +6,7 @@ import {
 } from "@/lib/courses/queries";
 import { CoursesView } from "./CoursesView";
 import { MemberHeader } from "@/components/MemberHeader";
+import { RefreshOnFocus } from "@/components/RefreshOnFocus";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +37,7 @@ export default async function CoursesPage() {
 
   return (
     <>
+      <RefreshOnFocus />
       <MemberHeader title="コース" fallbackHref="/" />
       <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#f9f5ed]">
         <div className="mx-auto w-full max-w-[460px] space-y-4">

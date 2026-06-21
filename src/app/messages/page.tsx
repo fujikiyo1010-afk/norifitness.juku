@@ -6,6 +6,7 @@ import {
   listMyMessages,
 } from "@/lib/chat/queries";
 import { MemberHeader } from "@/components/MemberHeader";
+import { RefreshOnFocus } from "@/components/RefreshOnFocus";
 import { MessagesClient } from "./MessagesClient";
 
 export const dynamic = "force-dynamic";
@@ -29,6 +30,7 @@ export default async function MessagesPage() {
   if (!conversation) {
     return (
       <>
+        <RefreshOnFocus />
         <MemberHeader title="チャット" fallbackHref="/" />
         <main className="min-h-screen bg-[#f9f5ed]">
           <div className="mx-auto max-w-[460px] px-4 py-5 text-center">
@@ -59,7 +61,9 @@ export default async function MessagesPage() {
     (userRow as { name?: string | null } | null)?.name ?? "あなた";
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-[#e8efe1]">
+    <>
+      <RefreshOnFocus />
+      <div className="flex flex-col h-[100dvh] bg-[#e8efe1]">
       <MemberHeader title="チャット" fallbackHref="/" />
       <div className="mx-auto w-full max-w-[460px] flex-1 flex flex-col min-h-0">
         {/* 説明 (= flex-shrink-0) */}
@@ -80,6 +84,7 @@ export default async function MessagesPage() {
           myName={myName}
         />
       </div>
-    </div>
+      </div>
+    </>
   );
 }

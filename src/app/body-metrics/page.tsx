@@ -2,6 +2,7 @@ import Link from "next/link";
 import { listMyBodyMetrics } from "@/lib/body-metrics/queries";
 import { BodyMetricsForm } from "./_components/BodyMetricsForm";
 import { MemberHeader } from "@/components/MemberHeader";
+import { RefreshOnFocus } from "@/components/RefreshOnFocus";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,7 @@ export default async function BodyMetricsPage() {
 
   return (
     <>
+      <RefreshOnFocus />
       <MemberHeader title="体組成 記録" fallbackHref="/" />
       <div className="min-h-screen bg-[#f9f5ed]">
         <div className="mx-auto max-w-[460px] px-4 py-6">

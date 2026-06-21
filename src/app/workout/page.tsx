@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getMyCarte, getMyCurrentMenu } from "@/lib/workout/queries";
 import { MenuView } from "./MenuView";
 import { MemberHeader } from "@/components/MemberHeader";
+import { RefreshOnFocus } from "@/components/RefreshOnFocus";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +47,7 @@ function WaitingForMenu({ carte }: { carte: NonNullable<Awaited<ReturnType<typeo
 
   return (
     <>
+      <RefreshOnFocus />
       <MemberHeader title="筋トレ" fallbackHref="/" />
       <div className="min-h-screen bg-[#f9f5ed]">
         <div className="mx-auto max-w-[460px] px-4 py-6">

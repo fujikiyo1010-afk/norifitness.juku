@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getMyCarte, getMyCurrentMenu } from "@/lib/workout/queries";
 import { MemberHeader } from "@/components/MemberHeader";
+import { RefreshOnFocus } from "@/components/RefreshOnFocus";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,7 @@ export default async function WorkoutCartePage() {
 
   return (
     <>
+      <RefreshOnFocus />
       <MemberHeader title="筋トレカルテ" fallbackHref="/" />
       <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#f9f5ed]">
         <div className="mx-auto w-full max-w-[980px] space-y-4">

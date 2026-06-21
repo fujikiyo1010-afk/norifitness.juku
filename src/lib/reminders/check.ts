@@ -109,7 +109,7 @@ export async function checkAndSendForUser(
       await sendPushToUser(user.id, {
         title: "学習が止まっていませんか?",
         body: `${idleDays} 日 動画を見ていません。 続きから 1 本見ましょう`,
-        url: "/",
+        url: "/courses",
         tag: "r1_video_idle",
       });
       await logSent(supabase, user.id, "r1_video_idle");
