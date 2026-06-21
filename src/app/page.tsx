@@ -312,6 +312,12 @@ const ALERT_CONFIG: Record<MemberAlertKey, AlertConfig> = {
     href: "/body-metrics",
     icon: <BarIcon />,
   },
+  notification_off: {
+    strong: "通知が OFF です",
+    tail: "。タップして 設定 → 通知 で ON にしましょう",
+    href: "/account",
+    icon: <BellIcon />,
+  },
 };
 
 function NoticeBanner({ alert }: { alert: MemberAlert }) {
@@ -595,6 +601,15 @@ function BarIcon() {
       <line x1="18" y1="20" x2="18" y2="4" />
       <line x1="6" y1="20" x2="6" y2="16" />
       <line x1="3" y1="20" x2="21" y2="20" />
+    </svg>
+  );
+}
+
+function BellIcon() {
+  return (
+    <svg {...ICO_PROPS} width="18" height="18">
+      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
     </svg>
   );
 }

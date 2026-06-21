@@ -26,7 +26,8 @@ export type MemberAlertKey =
   | "carte_blank"
   | "goal_sheet_blank"
   | "body_metrics_missing"
-  | "body_metrics_stalled";
+  | "body_metrics_stalled"
+  | "notification_off";
 
 export type MemberAlert = {
   key: MemberAlertKey;
@@ -45,7 +46,7 @@ export async function getMyAlerts(): Promise<MemberAlert[]> {
   if (!user) return [];
 
   // RLS が効くので自分の行しか返らない = .eq("user_id", user.id) は念のため
-  const [carte, sheet, body] = await Promise.all([
+  const [carte, sheet, body, userRow, pushSub] = await Promise.all([
     supabase
       .from("user_workout_carte")
       .select("user_id")
@@ -61,6 +62,17 @@ export async function getMyAlerts(): Promise<MemberAlert[]> {
       .select("recorded_at")
       .eq("user_id", user.id)
       .order("recorded_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("users")
+      .select("email_notification_enabled")
+      .eq("id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("push_subscriptions")
+      .select("id")
+      .eq("user_id", user.id)
       .limit(1)
       .maybeSingle(),
   ]);
@@ -79,5 +91,14 @@ export async function getMyAlerts(): Promise<MemberAlert[]> {
       alerts.push({ key: "body_metrics_stalled", daysSinceLatest });
     }
   }
+
+  // 通知 OFF 判定: メール通知が OFF か Push subscription が未登録なら誘導バナー表示
+  // (= どちらか片方でも OFF なら出す = 「全 ON 推奨」 思想と一致)
+  const emailOff = userRow.data?.email_notification_enabled === false;
+  const pushOff = !pushSub.data;
+  if (emailOff || pushOff) {
+    alerts.push({ key: "notification_off" });
+  }
+
   return alerts;
 }
