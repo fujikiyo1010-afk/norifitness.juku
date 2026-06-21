@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createAnnouncementDraft } from "@/lib/announcements/actions";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 /**
  * 一斉アナウンス 新規作成フォーム (2026-06-18 C-1)
@@ -120,7 +121,13 @@ export function AnnouncementForm() {
           disabled={isPending}
           className="rounded-[4px] bg-[#00897b] text-white px-6 py-2.5 text-sm font-bold hover:bg-[#00695c] disabled:opacity-50"
         >
-          {isPending ? "下書き保存中..." : "下書き保存 → 確認画面へ"}
+          {isPending ? (
+            <>
+              <LoadingSpinner /> 保存中…
+            </>
+          ) : (
+            "下書き保存 → 確認画面へ"
+          )}
         </button>
       </div>
     </div>

@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { sendAnnouncement } from "@/lib/announcements/actions";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 /**
  * アナウンス 送信ボタン (Client Component ・ 2026-06-18 C-1)
@@ -40,7 +41,13 @@ export function SendButton({ id }: { id: string }) {
         disabled={isPending}
         className="rounded-[4px] bg-amber-700 hover:bg-amber-800 text-white px-6 py-2.5 text-sm font-bold disabled:opacity-50"
       >
-        {isPending ? "送信中..." : "送信する"}
+        {isPending ? (
+          <>
+            <LoadingSpinner /> 送信中…
+          </>
+        ) : (
+          "送信する"
+        )}
       </button>
       {error && (
         <p className="mt-2 text-xs text-red-700">⚠ {error}</p>

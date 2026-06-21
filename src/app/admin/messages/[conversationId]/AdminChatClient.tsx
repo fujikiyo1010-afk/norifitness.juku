@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition, useCallback } from "react";
 import { sendMessageAsAdmin } from "@/lib/chat/actions";
 import { fetchMessagesForAdmin } from "./_actions";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { useRealtimeMessages } from "@/lib/chat/useRealtimeMessages";
 import type { ChatMessage } from "@/lib/chat/types";
 
@@ -104,7 +105,13 @@ export function AdminChatClient({
             onClick={handleSend}
             className="flex-shrink-0 rounded-md bg-[#00897b] hover:bg-[#00695c] text-white px-5 py-2 text-sm font-bold disabled:bg-zinc-400"
           >
-            送信
+            {sending ? (
+              <>
+                <LoadingSpinner /> 送信中…
+              </>
+            ) : (
+              "送信"
+            )}
           </button>
         </div>
       </div>

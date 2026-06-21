@@ -7,6 +7,7 @@ import {
   clearMenuReviewFlag,
   type CarteInput,
 } from "@/lib/workout/actions";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import type {
   Gender,
   Environment,
@@ -345,11 +346,15 @@ export function CarteEditor({
             disabled={isPending}
             className="rounded-[4px] bg-[#00897b] px-6 py-2.5 text-sm font-medium text-white hover:bg-[#00695c] disabled:opacity-50"
           >
-            {isPending
-              ? "保存中…"
-              : fromRequest
-                ? "保存して 返信フォームへ →"
-                : "保存"}
+            {isPending ? (
+              <>
+                <LoadingSpinner /> 保存中…
+              </>
+            ) : fromRequest ? (
+              "保存して 返信フォームへ →"
+            ) : (
+              "保存"
+            )}
           </button>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { saveGoalSheetAuditByAdmin } from "@/lib/goal-sheet/actions";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import {
   SECTION_META,
   type GoalSheetRow,
@@ -297,7 +298,13 @@ export function GoalSheetAuditEditor({
             disabled={isPending}
             className="rounded-[4px] bg-[#00897b] px-6 py-2.5 text-sm font-bold text-white hover:bg-[#00695c] disabled:opacity-50"
           >
-            {isPending ? "保存中..." : "添削を保存"}
+            {isPending ? (
+              <>
+                <LoadingSpinner /> 保存中…
+              </>
+            ) : (
+              "添削を保存"
+            )}
           </button>
         </div>
       </div>

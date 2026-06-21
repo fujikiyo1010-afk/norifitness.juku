@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { distributeMenu } from "@/lib/workout/actions";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import {
   cleanExerciseName,
   cleanDayLabel,
@@ -430,11 +431,15 @@ export function MenuComposeClient({
             disabled={isPending}
             className="rounded-[4px] bg-[#00897b] px-6 py-2.5 text-sm font-bold text-white hover:bg-[#00695c] disabled:opacity-50"
           >
-            {isPending
-              ? "配布中..."
-              : fromRequest
-                ? "配布して 返信フォームへ →"
-                : "配布する"}
+            {isPending ? (
+              <>
+                <LoadingSpinner /> 配布中…
+              </>
+            ) : fromRequest ? (
+              "配布して 返信フォームへ →"
+            ) : (
+              "配布する"
+            )}
           </button>
         </div>
       </div>

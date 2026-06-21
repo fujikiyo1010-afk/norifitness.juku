@@ -6,6 +6,7 @@ import {
   replyToRequest,
   type RequestType,
 } from "@/lib/admin/request-actions";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 /**
  * リクエスト返信フォーム (Client Component)
@@ -122,7 +123,13 @@ export function RequestReplyForm({
           disabled={isPending || !text.trim()}
           className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#00897b] hover:bg-[#00695c] text-white rounded-md text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isPending ? "送信中..." : "送信 + 対応済"}
+          {isPending ? (
+            <>
+              <LoadingSpinner /> 送信中…
+            </>
+          ) : (
+            "送信 + 対応済"
+          )}
         </button>
       </div>
     </div>
