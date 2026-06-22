@@ -24,7 +24,7 @@ export default async function BodyMetricsPage() {
     <>
       <RefreshOnFocus />
       <MemberHeader title="体組成 記録" fallbackHref="/" />
-      <div className="min-h-screen bg-[#f9f5ed]">
+      <div className="min-h-[100dvh] bg-[#f9f5ed]">
         <div className="mx-auto max-w-[460px] px-4 py-6">
           {/* 副題 (パンくずは AppHeader 戻る矢印で代替) */}
           <p className="text-xs text-[#6a6256] mb-1 mt-1">

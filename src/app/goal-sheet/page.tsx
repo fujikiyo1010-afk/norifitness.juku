@@ -233,12 +233,12 @@ export default async function GoalSheetPage() {
           </div>
 
           {/* ⑤ フッター */}
-          <div className="px-5 py-3 bg-[#fafafa] border-t border-[#e7dcc9] flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
-            <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
-              <FooterLink href="#" label="編集履歴" />
-              <FooterLink href="#" label="変化を見る" />
-              <FooterLink href="#" label="過去の添削履歴 (0)" />
-            </div>
+          {/* TODO 線② / Phase 4: 「編集履歴」「変化を見る」「過去の添削履歴」 を実装
+              - 編集履歴 = goal_sheet_revisions テーブル参照 (= 過去スナップショット閲覧)
+              - 変化を見る = 体組成推移グラフ (/body-metrics/chart) と統合
+              - 過去の添削履歴 = goal_sheet_audits の履歴一覧
+              memory: project_kinniku_juku_phase4_todo.md 参照 */}
+          <div className="px-5 py-3 bg-[#fafafa] border-t border-[#e7dcc9] flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-3">
             <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
               <Link
                 href="/goal-sheet/edit"
@@ -416,17 +416,6 @@ function AuditRow({ audit }: { audit: AuditComment }) {
         <div className="text-[11px] text-zinc-700 leading-relaxed">{audit.text}</div>
       </td>
     </tr>
-  );
-}
-
-function FooterLink({ href, label }: { href: string; label: string }) {
-  return (
-    <Link
-      href={href}
-      className="text-[10px] text-zinc-600 border-b border-transparent hover:border-zinc-600 transition-colors"
-    >
-      {label}
-    </Link>
   );
 }
 

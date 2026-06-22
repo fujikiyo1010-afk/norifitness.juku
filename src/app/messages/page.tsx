@@ -32,7 +32,7 @@ export default async function MessagesPage() {
       <>
         <RefreshOnFocus />
         <MemberHeader title="チャット" fallbackHref="/" />
-        <main className="min-h-screen bg-[#f9f5ed]">
+        <main className="min-h-[100dvh] bg-[#f9f5ed]">
           <div className="mx-auto max-w-[460px] px-4 py-5 text-center">
             <p className="text-sm text-[#6a6256]">
               会話の取得に失敗しました。 もう一度開き直してください。

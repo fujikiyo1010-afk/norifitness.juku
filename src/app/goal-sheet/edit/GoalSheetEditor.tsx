@@ -581,30 +581,10 @@ export function GoalSheetEditor({
           </div>
         )}
 
-        {/* 下部リンク 2 個 (編集履歴 / 変化を見る) */}
-        <div className="grid grid-cols-2 gap-2.5">
-          <Link
-            href="#"
-            onClick={(e) => { e.preventDefault(); alert("編集履歴は Phase 3 後半で実装予定です"); }}
-            className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl p-3.5 text-center text-[11px] font-semibold text-[#2b2620] flex flex-col items-center gap-1.5 hover:border-[#4a875b] transition-colors"
-          >
-            <svg className="w-5 h-5 text-[#2b2620]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 8v4l3 3" />
-            </svg>
-            編集履歴
-          </Link>
-          <Link
-            href="#"
-            onClick={(e) => { e.preventDefault(); alert("変化を見るページは Phase 3 後半で実装予定です"); }}
-            className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl p-3.5 text-center text-[11px] font-semibold text-[#2b2620] flex flex-col items-center gap-1.5 hover:border-[#4a875b] transition-colors"
-          >
-            <svg className="w-5 h-5 text-[#2b2620]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-            </svg>
-            変化を見る
-          </Link>
-        </div>
+        {/* TODO 線② / Phase 4: 「編集履歴」 「変化を見る」 リンク 復活
+            - 編集履歴 = goal_sheet_revisions テーブル参照
+            - 変化を見る = 体組成推移グラフ画面に統合予定
+            memory: project_kinniku_juku_phase4_todo.md 参照 */}
       </div>
 
       {/* エラー / 成功メッセージ */}

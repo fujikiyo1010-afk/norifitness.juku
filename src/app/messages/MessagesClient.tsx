@@ -7,6 +7,7 @@ import {
 } from "@/lib/chat/actions";
 import { useRealtimeMessages } from "@/lib/chat/useRealtimeMessages";
 import type { ChatMessage } from "@/lib/chat/types";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 /**
  * 受講生 チャット Client (2026-06-18 #2)
@@ -128,10 +129,14 @@ export function MessagesClient({
             aria-label="送信"
             title="送信"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 2 11 13" />
-              <path d="M22 2 15 22 11 13 2 9z" />
-            </svg>
+            {sending ? (
+              <LoadingSpinner size={18} />
+            ) : (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 2 11 13" />
+                <path d="M22 2 15 22 11 13 2 9z" />
+              </svg>
+            )}
           </button>
         </div>
       </div>

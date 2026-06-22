@@ -93,7 +93,7 @@ export default async function MonthlyReviewDetailPage({
     <>
       <RefreshOnFocus />
       <MemberHeader title="月次添削 詳細" fallbackHref="/monthly-review" />
-      <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
+      <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-[100dvh]">
         <div className="mx-auto w-full max-w-[460px] border-x border-[#e7dcc9]">
 
         {/* ヒーロー帯 (温かいグラデ) */}

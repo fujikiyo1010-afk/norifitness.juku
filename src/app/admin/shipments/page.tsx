@@ -1,6 +1,7 @@
 import { requireAdmin } from "@/lib/auth/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { markAsShipped, undoShipped } from "@/lib/admin/shipment-actions";
+import { ShipmentMarkButton, ShipmentUndoButton } from "./SubmitButton";
 
 export const dynamic = "force-dynamic";
 
@@ -288,34 +289,12 @@ function ShipmentRowComponent({ row }: { row: ShipmentRow }) {
               </span>
             )}
             <form action={undoActionWith(row.id)}>
-              <button
-                type="submit"
-                className="text-[11px] text-zinc-600 hover:text-zinc-900 underline"
-              >
-                取消
-              </button>
+              <ShipmentUndoButton />
             </form>
           </div>
         ) : (
           <form action={markActionWith(row.id)}>
-            <button
-              type="submit"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#00897b] hover:bg-[#00695c] text-white rounded-md text-xs font-bold"
-            >
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-              発送済にする
-            </button>
+            <ShipmentMarkButton />
           </form>
         )}
       </td>

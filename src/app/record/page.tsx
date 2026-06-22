@@ -43,7 +43,7 @@ export default async function RecordHubPage() {
   return (
     <>
       <MemberHeader title="記録" fallbackHref="/" />
-      <main className="min-h-screen bg-[#f9f5ed]">
+      <main className="min-h-[100dvh] bg-[#f9f5ed]">
         <div className="mx-auto max-w-[460px] px-4 py-4 space-y-4">
           <BodyMetricsHero rows={sorted} targetWeightKg={targetWeightKg} />
 
