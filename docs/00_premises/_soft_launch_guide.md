@@ -4,6 +4,45 @@
 **対象**: 筋肉塾アプリ 線① 完成後 ソフトローンチ (= 社内 3 人 β テスト)
 **読み手**: きよむさん (= テスト管理者)
 
+## 📚 関連資料
+
+- **[_soft_launch_session_script.md](./_soft_launch_session_script.md)** ・ 当日 4 人 誘導台本 (= 90 分 / Phase 0-4 / きよむさんの台本付き)
+- **[_new_vs_old_features.md](./_new_vs_old_features.md)** ・ 旧筋肉塾 vs 新装 比較資料 (= 改善 50+ 項目 / 線② 候補)
+
+## 🔗 最初に 3 人に渡す URL は?
+
+実は **「最初に渡す 1 つの URL」 は存在しません**。 動線はこうです:
+
+```
+1. きよむさんが /admin/invitations で 3 人分招待発行
+2. 各人の Gmail に 個別の招待リンク (= /invite?token=xxx) が届く
+3. 各人がメール内リンクをタップ → Safari で開く
+```
+
+= **アプリへの入り口 = 招待メール経由のみ** (= 完全クローズド)。
+
+### LINE / Slack で 3 人に共有する URL
+
+```
+📩 招待メール届きます (件名「【筋肉塾】受講開始のご案内」)
+↓
+メール内「パスワードを設定する」 をタップ → 入会開始
+
+🔗 全体ガイド (= 任意 / 興味あれば):
+https://github.com/fujikiyo1010-afk/norifitness.juku/blob/main/docs/00_premises/_soft_launch_guide.md
+
+🔗 旧 vs 新装 比較 (= 興味あれば):
+https://github.com/fujikiyo1010-afk/norifitness.juku/blob/main/docs/00_premises/_new_vs_old_features.md
+```
+
+### アプリの本番 URL (= 参考)
+
+| URL | 用途 |
+|---|---|
+| https://juku.norifitness.com | アプリ本番 / 招待トークン無しでは login のみ |
+| https://juku.norifitness.com/admin | 管理画面 / admin 権限のみ入れる |
+| https://juku.norifitness.com/invite?token=xxx | 招待リンク (= メール経由でしか入手不可) |
+
 ---
 
 ## 🎯 ソフトローンチとは
