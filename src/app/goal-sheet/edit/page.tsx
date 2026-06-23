@@ -1,5 +1,6 @@
 import { getMyGoalSheet } from "@/lib/goal-sheet/queries";
 import { MemberHeader } from "@/components/MemberHeader";
+import { VimeoEmbed } from "@/components/VimeoEmbed";
 import { getMyCarte } from "@/lib/workout/queries";
 import type { Gender as CarteGender } from "@/lib/workout/types";
 import type { Gender as ToolGender } from "@/lib/tools/types";
@@ -37,11 +38,34 @@ export default async function GoalSheetEditPage() {
   return (
     <>
       <MemberHeader title="目標管理シート 編集" fallbackHref="/goal-sheet" />
-      <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#f9f5ed]">
+      <main className="flex flex-1 flex-col bg-[#f9f5ed]">
         <div className="mx-auto w-full max-w-[460px]">
-          <GoalSheetEditor initialContent={initialContent} gender={gender} />
+          <VideoIntro />
+          <div className="p-4 sm:p-6">
+            <GoalSheetEditor initialContent={initialContent} gender={gender} />
+          </div>
         </div>
       </main>
     </>
+  );
+}
+
+/**
+ * 動画イントロセクション (= 編集画面 最上部 / 毎回表示 / スクロールでスキップ可)
+ * きよむさん指示 (2026-06-23): モック /tmp/goal-sheet-edit-v3.html 準拠
+ * のり氏の動画 (= 編集中) を載せる枠。 公開時に Vimeo ID を入れる。
+ */
+function VideoIntro() {
+  return (
+    <section className="px-4 pt-5 pb-4 border-b border-[#e7dcc9] bg-gradient-to-b from-[#fffdf8] to-[#f9f5ed]">
+      <h2 className="text-[15px] font-bold text-[#2b2620] mb-1">
+        目標管理シート編集画面
+      </h2>
+      <p className="text-[12px] text-[#6a6256] mb-3">
+        まずこの動画を視聴してください。
+      </p>
+      {/* Vimeo 動画 (= のり氏 / 2026-06-23 きよむさん入稿) */}
+      <VimeoEmbed url="https://vimeo.com/1203693478" />
+    </section>
   );
 }

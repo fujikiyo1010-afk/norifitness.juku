@@ -574,7 +574,7 @@ export function PfcCarbToolClient({
                         carb_cycle: { weekly_pattern: weekly },
                       })
                     );
-                    router.push("/goal-sheet/edit");
+                    router.push("/goal-sheet/edit#tool-pfc-carb");
                   }}
                   className="w-full py-3.5 bg-[#4a875b] text-white rounded text-sm font-bold hover:bg-[#34603f] transition-colors"
                 >

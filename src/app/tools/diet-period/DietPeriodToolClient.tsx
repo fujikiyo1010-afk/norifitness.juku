@@ -425,7 +425,7 @@ export function DietPeriodToolClient({
                       "goal-sheet-reflect-diet-period",
                       JSON.stringify({ target_date: result.end_date })
                     );
-                    router.push("/goal-sheet/edit");
+                    router.push("/goal-sheet/edit#tool-diet-period");
                   }}
                   className="w-full py-3.5 bg-[#4a875b] text-white rounded text-sm font-bold hover:bg-[#34603f] transition-colors"
                 >
