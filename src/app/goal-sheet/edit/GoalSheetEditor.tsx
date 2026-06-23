@@ -392,19 +392,19 @@ export function GoalSheetEditor({
             autoTag="自動計算 (手入力可)"
             audit={audits?.field_comments?.body_fat_pct}
           >
-            <div className="flex gap-2 items-stretch">
+            <div className="flex gap-2 items-center">
               <div className="flex-1 min-w-0">
                 <NumberInput
                   value={content.current_status?.body_fat_pct}
                   onChange={(v) => updateCurrentStatus({ body_fat_pct: v })}
-                  unit="%"
                   decimals={1}
                 />
               </div>
+              <span className="flex-shrink-0 text-[11px] text-[#6a6256]">%</span>
               <button
                 type="button"
                 onClick={handleAutoCalculateBodyFat}
-                className="btn-3d-secondary flex-shrink-0 px-3 rounded-lg text-[11px] font-bold whitespace-nowrap flex items-center gap-1"
+                className="btn-3d-secondary flex-shrink-0 px-3 py-2 rounded-lg text-[11px] font-bold whitespace-nowrap flex items-center gap-1"
               >
                 <RefreshIcon />
                 自動計算
@@ -677,7 +677,7 @@ function SectionWrapper({
 }) {
   const meta = SECTION_META[sectionKey];
   return (
-    <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl overflow-hidden">
+    <div>
       <div className="px-4 py-3 border-b border-[#e7dcc9] flex items-center gap-2.5">
         <div className="w-6 h-6 rounded-full bg-zinc-900 text-white text-[11px] font-bold flex items-center justify-center font-mono">
           {meta.num}
@@ -777,7 +777,7 @@ function NumberInput({
   }, [value, decimals, isFocused]);
 
   return (
-    <div className="flex gap-1.5 items-center">
+    <div className="flex gap-1.5 items-center min-w-0">
       <input
         type="text"
         inputMode="decimal"
@@ -808,11 +808,11 @@ function NumberInput({
             onChange(undefined);
           }
         }}
-        className={`flex-1 px-3 py-2.5 text-[13px] border border-[#e7dcc9] rounded-lg bg-[#fffdf8] text-[#2b2620] ${
+        className={`flex-1 min-w-0 px-3 py-2.5 text-[13px] border border-[#e7dcc9] rounded-lg bg-[#fffdf8] text-[#2b2620] ${
           readOnly ? "bg-[#f8f9fa] font-bold" : ""
         }`}
       />
-      {unit && <span className="text-[11px] text-[#6a6256]">{unit}</span>}
+      {unit && <span className="text-[11px] text-[#6a6256] flex-shrink-0">{unit}</span>}
       {/* step / min / max はキーボードショートカット用に保持 (text input なので step 機能はないが、設定値として将来用) */}
       <input type="hidden" data-step={step} data-min={min} data-max={max} />
     </div>
