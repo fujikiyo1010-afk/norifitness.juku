@@ -202,29 +202,26 @@ export function GoalSheetEditor({
     };
   }, [content, hydrated, isPending]);
 
-  // ===== 体脂肪率 自動計算 (B1: アメリカ海軍式) =====
-  // 必要 4 項目 (体重 / 身長 / ウエスト / 首回り) + gender が全部揃った時、
-  // calculateBodyFat を呼んで current_status.body_fat_pct に書き込む。
-  // - gender が null (= カルテ未提出) なら計算スキップ
-  // - 既存値と一致するなら setContent しない (= 無限ループ防止)
-  // - 計算エラー時は silent skip (= 入力途中の異常値は無視)
-  // - gender = "other" は formula = "male" (男性式) をデフォルトで使う
-  //   (= 別 UI で選ばせるとスコープ膨らむため、 受講生は自己申告で値直す前提)
-  // - readOnly は維持 = 自動計算のみ反映、 手入力は元から不可
-  useEffect(() => {
-    if (!hydrated) return;
-    if (!gender) return;
+  // ===== 体脂肪率 手動計算 (2026-06-23 きよむさん指示で D+c パターンへ変更) =====
+  // 旧: useEffect で 4 項目変更を検知して自動上書き (= readOnly)
+  // 新: ユーザーが「自動計算」 ボタン明示クリックで計算 (= 手入力も可能)
+  // 理由: 「手入力で書き換えたいが ウエスト変えると勝手に上書きされる」 を回避
+  const handleAutoCalculateBodyFat = () => {
+    if (!gender) {
+      alert("カルテで性別を登録してから計算してください。");
+      return;
+    }
     const cs = content.current_status;
-    if (!cs) return;
-    const weight_kg = cs.weight_kg;
-    const height_cm = cs.height_cm;
-    const waist_cm = cs.waist_cm;
-    const neck_cm = cs.neck_cm;
+    const height_cm = cs?.height_cm;
+    const waist_cm = cs?.waist_cm;
+    const neck_cm = cs?.neck_cm;
+    const weight_kg = cs?.weight_kg;
     if (
       typeof height_cm !== "number" ||
       typeof waist_cm !== "number" ||
       typeof neck_cm !== "number"
     ) {
+      alert("身長 ・ ウエスト ・ 首回りを入力してから計算してください。");
       return;
     }
     try {
@@ -236,24 +233,14 @@ export function GoalSheetEditor({
         neck_cm,
         weight_kg,
       });
-      if (cs.body_fat_pct === body_fat_pct) return;
       setContent((prev) => ({
         ...prev,
         current_status: { ...(prev.current_status ?? {}), body_fat_pct },
       }));
     } catch {
-      // 入力値が範囲外等 → silent skip
+      alert("数値が範囲外です。 入力値を確認してください。");
     }
-  }, [
-    hydrated,
-    gender,
-    content.current_status?.weight_kg,
-    content.current_status?.height_cm,
-    content.current_status?.waist_cm,
-    content.current_status?.neck_cm,
-    content.current_status?.body_fat_pct,
-    content.current_status,
-  ]);
+  };
 
   // ===== 各セクションの更新関数 =====
   const updateCurrentStatus = (patch: Partial<CurrentStatus>) => {
@@ -402,28 +389,54 @@ export function GoalSheetEditor({
           </Field>
           <Field
             label="体脂肪率"
-            autoTag="自動計算"
+            autoTag="自動計算 (手入力可)"
             audit={audits?.field_comments?.body_fat_pct}
           >
-            <NumberInput
-              value={content.current_status?.body_fat_pct}
-              onChange={(v) => updateCurrentStatus({ body_fat_pct: v })}
-              unit="%"
-              readOnly
-              decimals={1}
-            />
-          </Field>
-          <Field label="メンテ kcal" autoTag="ツール反映">
-            <NumberInput
-              value={content.current_status?.maintenance_kcal}
-              onChange={(v) => updateCurrentStatus({ maintenance_kcal: v })}
-              unit="kcal"
-              readOnly
-              decimals={0}
-            />
+            <div className="flex gap-2 items-stretch">
+              <div className="flex-1">
+                <NumberInput
+                  value={content.current_status?.body_fat_pct}
+                  onChange={(v) => updateCurrentStatus({ body_fat_pct: v })}
+                  unit="%"
+                  decimals={1}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleAutoCalculateBodyFat}
+                className="btn-3d-secondary px-3 rounded-lg text-[11px] font-bold whitespace-nowrap flex items-center gap-1"
+              >
+                <RefreshIcon />
+                自動計算
+              </button>
+            </div>
+            <p className="text-[10px] text-[#a59b8c] mt-1.5">
+              ※ ウエスト + 首回りから自動計算できます。 手入力での上書きも可能です。
+            </p>
           </Field>
 
-          <ToolButton href="/tools/calorie?return=goal-sheet" label="必要カロリー計算ツール" applied={!!content.current_status?.maintenance_kcal} />
+          {/* メンテ kcal: ツール枠 (= β+γ ハイブリッド) */}
+          <ToolGroup
+            label="メンテナンスカロリー"
+            toolHref="/tools/calorie?return=goal-sheet"
+            toolLabel="必要カロリー計算ツール"
+            applied={!!content.current_status?.maintenance_kcal}
+          >
+            {content.current_status?.maintenance_kcal ? (
+              <div className="bg-white border border-[#4a875b]/20 rounded-md py-3 flex items-baseline gap-1.5 justify-center">
+                <span className="text-[18px] font-bold text-[#2b2620]">
+                  {content.current_status.maintenance_kcal.toLocaleString()}
+                </span>
+                <span className="text-[11px] text-[#6a6256]">kcal</span>
+              </div>
+            ) : (
+              <div className="bg-white/70 border border-dashed border-[#4a875b]/30 rounded-md py-3 text-center">
+                <span className="text-[11px] text-[#a59b8c]">
+                  ツールで設定するとここに反映されます
+                </span>
+              </div>
+            )}
+          </ToolGroup>
 
           {audits?.section_comments?.current_status && (
             <SectionAudit audit={audits.section_comments.current_status} />
@@ -448,21 +461,6 @@ export function GoalSheetEditor({
               decimals={1}
             />
           </Field>
-          <Field label="到達予定日" autoTag="自動">
-            <TextInput
-              value={
-                content.goal_selection?.target_date
-                  ? new Date(content.goal_selection.target_date).toLocaleDateString("ja-JP", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    }) + " ごろ"
-                  : ""
-              }
-              onChange={() => {}}
-              readOnly
-            />
-          </Field>
           <Field label="短期目標" required>
             <TextInput
               value={content.goal_selection?.short_term ?? ""}
@@ -485,7 +483,32 @@ export function GoalSheetEditor({
             />
           </Field>
 
-          <ToolButton href="/tools/diet-period?return=goal-sheet" label="減量期間逆算ツール" applied={!!content.goal_selection?.target_date} />
+          {/* 目標達成日: ツール枠 (= β+γ ハイブリッド) */}
+          <ToolGroup
+            label="目標達成日"
+            toolHref="/tools/diet-period?return=goal-sheet"
+            toolLabel="減量期間逆算ツール"
+            applied={!!content.goal_selection?.target_date}
+          >
+            {content.goal_selection?.target_date ? (
+              <div className="bg-white border border-[#4a875b]/20 rounded-md py-3 text-center">
+                <span className="text-[14px] font-bold text-[#2b2620]">
+                  {new Date(content.goal_selection.target_date).toLocaleDateString("ja-JP", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </span>
+                <span className="text-[11px] text-[#6a6256] ml-1">ごろ</span>
+              </div>
+            ) : (
+              <div className="bg-white/70 border border-dashed border-[#4a875b]/30 rounded-md py-3 text-center">
+                <span className="text-[11px] text-[#a59b8c]">
+                  ツールで設定するとここに反映されます
+                </span>
+              </div>
+            )}
+          </ToolGroup>
 
           {audits?.section_comments?.goal_selection && (
             <SectionAudit audit={audits.section_comments.goal_selection} />
@@ -494,9 +517,15 @@ export function GoalSheetEditor({
 
         {/* ③ 栄養設計 (入力フィールドなし、ツール反映のみ、視覚的表現中心) */}
         <SectionWrapper sectionKey="nutrition" filled={!!content.filled_sections?.includes("nutrition")}>
-          <NutritionVisualization nutrition={content.nutrition} />
-
-          <ToolButton href="/tools/pfc-carb?return=goal-sheet" label="PFC・カーボサイクル設定" applied={!!content.nutrition?.pfc?.c} />
+          {/* PFC: ツール枠 (= β+γ ハイブリッド / 中に既存 NutritionVisualization を内包) */}
+          <ToolGroup
+            label="PFC + カーボサイクル"
+            toolHref="/tools/pfc-carb?return=goal-sheet"
+            toolLabel="PFC・カーボサイクル設定"
+            applied={!!content.nutrition?.pfc?.c}
+          >
+            <NutritionVisualization nutrition={content.nutrition} />
+          </ToolGroup>
 
           {audits?.section_comments?.nutrition && (
             <SectionAudit audit={audits.section_comments.nutrition} />
@@ -612,7 +641,7 @@ export function GoalSheetEditor({
           type="button"
           disabled={isPending}
           onClick={handleSubmit}
-          className="w-full px-3 py-3 bg-[#4a875b] hover:bg-[#34603f] text-white rounded-2xl text-sm font-bold disabled:opacity-50 transition-colors"
+          className="btn-3d-green w-full px-3 py-3.5 rounded-2xl text-sm font-bold disabled:opacity-60"
         >
           {isPending ? (
             <>
@@ -1014,27 +1043,91 @@ function PfcCard({
   );
 }
 
-function ToolButton({
-  href,
+/**
+ * ツール枠 (= β+γ ハイブリッド / 2026-06-23 きよむさん指示)
+ * モック /tmp/goal-sheet-edit-v3.html 準拠。
+ * ヘッダー (= 🔧 ツールから入力) + ラベル + 立体感ボタン (= ツール起動) + 結果表示 (= children)
+ */
+function ToolGroup({
   label,
+  toolHref,
+  toolLabel,
   applied,
+  children,
 }: {
-  href: string;
   label: string;
-  applied?: boolean;
+  toolHref: string;
+  toolLabel: string;
+  applied: boolean;
+  children?: React.ReactNode;
 }) {
   return (
-    <Link
-      href={href}
-      className="w-full bg-[#4a875b] hover:bg-[#34603f] text-white px-3.5 py-3 rounded-md text-xs font-bold mt-2.5 flex justify-between items-center tracking-wide transition-colors"
-    >
-      <span>{label}</span>
-      {applied && (
-        <span className="text-[9px] bg-[#fffdf8]/25 px-1.5 py-0.5 rounded font-semibold">
-          反映済
+    <div className="bg-gradient-to-br from-[#f0f7f2] to-[#e8f1ec] border-2 border-[#4a875b]/40 rounded-xl p-3.5">
+      {/* 枠ヘッダー */}
+      <div className="flex items-center gap-1.5 mb-2.5">
+        <ToolIcon className="text-[#34603f]" />
+        <span className="text-[10px] font-bold text-[#34603f] tracking-wider">
+          ツールから入力
         </span>
-      )}
-    </Link>
+      </div>
+      {/* 項目ラベル */}
+      <div className="text-[12px] font-bold text-[#2b2620] mb-2">{label}</div>
+      {/* γ: ツール起動ボタン (= 立体感) */}
+      <Link
+        href={toolHref}
+        className="btn-3d-green py-3 rounded-md font-bold text-[13px] mb-2.5 flex items-center justify-center gap-2"
+      >
+        <ToolIcon className="text-white" />
+        {toolLabel}
+        <span
+          className={`text-[9px] px-2 py-0.5 rounded-full font-mono ${
+            applied ? "bg-white/25" : "bg-white/40"
+          }`}
+        >
+          {applied ? "✓ 反映済" : "未反映"}
+        </span>
+      </Link>
+      {/* 結果表示 */}
+      {children}
+    </div>
+  );
+}
+
+function ToolIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      width="14"
+      height="14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.2}
+      viewBox="0 0 24 24"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+    </svg>
+  );
+}
+
+function RefreshIcon() {
+  return (
+    <svg
+      width="11"
+      height="11"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.5}
+      viewBox="0 0 24 24"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 12a9 9 0 0 0-15-6.7L3 8" />
+      <polyline points="3 3 3 8 8 8" />
+      <path d="M3 12a9 9 0 0 0 15 6.7l3-2.7" />
+      <polyline points="21 21 21 16 16 16" />
+    </svg>
   );
 }
 

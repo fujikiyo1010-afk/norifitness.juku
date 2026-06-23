@@ -67,3 +67,68 @@ body {
 .anim-delay-1 { animation-delay: 0.25s; }
 .anim-delay-2 { animation-delay: 0.35s; }
 .anim-delay-3 { animation-delay: 0.45s; }
+
+/* =====================================================================
+ * 立体感ボタン (= 目標シート編集画面 ・ ツール起動 / 送信 / 自動計算)
+ * きよむさん指示 (2026-06-23): モック /tmp/goal-sheet-edit-v3.html 準拠
+ * 通常時は「ふっくら浮いた」 / hover で更に浮く / active で沈み込み
+ * ===================================================================== */
+.btn-3d-green {
+  background: linear-gradient(to bottom, #5fa872 0%, #4a875b 50%, #34603f 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.18),
+    0 4px 10px rgba(52, 96, 63, 0.35),
+    0 2px 4px rgba(0, 0, 0, 0.12);
+  color: white;
+  transition: all 0.12s ease;
+}
+.btn-3d-green:hover {
+  background: linear-gradient(to bottom, #6bb27e 0%, #5a9869 50%, #3e7048 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.18),
+    0 6px 14px rgba(52, 96, 63, 0.45),
+    0 3px 6px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+.btn-3d-green:active {
+  background: linear-gradient(to bottom, #34603f 0%, #4a875b 50%, #5fa872 100%);
+  box-shadow:
+    inset 0 2px 5px rgba(0, 0, 0, 0.25),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+    0 2px 4px rgba(52, 96, 63, 0.2);
+  transform: translateY(1px);
+}
+.btn-3d-green:disabled {
+  background: linear-gradient(to bottom, #b0b0b0 0%, #909090 50%, #707070 100%);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-3d-secondary {
+  background: linear-gradient(to bottom, #fffdf8 0%, #f5f1e8 50%, #ebe5d5 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.08),
+    0 2px 5px rgba(74, 135, 91, 0.15),
+    0 1px 2px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(74, 135, 91, 0.3);
+  color: #34603f;
+  transition: all 0.12s ease;
+}
+.btn-3d-secondary:hover {
+  background: linear-gradient(to bottom, #ffffff 0%, #fafaf3 50%, #f0ead8 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.08),
+    0 3px 7px rgba(74, 135, 91, 0.2),
+    0 2px 4px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+.btn-3d-secondary:active {
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.15),
+    0 1px 2px rgba(74, 135, 91, 0.1);
+  transform: translateY(1px);
+}
