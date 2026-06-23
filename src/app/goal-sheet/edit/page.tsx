@@ -1,5 +1,6 @@
 import { getMyGoalSheet } from "@/lib/goal-sheet/queries";
 import { MemberHeader } from "@/components/MemberHeader";
+import { VimeoEmbed } from "@/components/VimeoEmbed";
 import { getMyCarte } from "@/lib/workout/queries";
 import type { Gender as CarteGender } from "@/lib/workout/types";
 import type { Gender as ToolGender } from "@/lib/tools/types";
@@ -63,27 +64,8 @@ function VideoIntro() {
       <p className="text-[12px] text-[#6a6256] mb-3">
         まずこの動画を視聴してください。
       </p>
-      {/* 動画 player プレースホルダー (= のり氏の動画準備中) */}
-      <div className="aspect-video bg-gradient-to-br from-[#2b2620] to-[#1a1a1a] rounded-lg flex flex-col items-center justify-center text-[#a59b8c] text-[12px] relative">
-        <svg
-          width="40"
-          height="40"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          viewBox="0 0 24 24"
-          className="mb-2 opacity-50"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polygon points="23 7 16 12 23 17 23 7" />
-          <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-        </svg>
-        <span className="text-[11px]">動画 準備中</span>
-        <span className="absolute bottom-2 right-2 text-[9px] bg-black/50 text-white px-2 py-0.5 rounded">
-          現在編集中
-        </span>
-      </div>
+      {/* Vimeo 動画 (= のり氏 / 2026-06-23 きよむさん入稿) */}
+      <VimeoEmbed url="https://vimeo.com/1203693478" />
     </section>
   );
 }
