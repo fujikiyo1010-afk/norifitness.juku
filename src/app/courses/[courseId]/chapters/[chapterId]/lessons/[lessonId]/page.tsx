@@ -9,6 +9,10 @@ import {
   getAdjacentLessons,
 } from "@/lib/courses/queries";
 import { VimeoEmbed } from "@/components/VimeoEmbed";
+import {
+  TextLessonRenderer,
+  type TextLessonContent,
+} from "@/components/TextLessonRenderer";
 import { MemberHeader } from "@/components/MemberHeader";
 import { CompleteButton } from "./CompleteButton";
 import { ReviewAccordion } from "./ReviewAccordion";
@@ -114,7 +118,7 @@ export default async function StudentLessonPage({
           )}
         </header>
 
-        {/* 動画 or 試験準備中 or 動画 URL なし */}
+        {/* 動画 or テキストレッスン or 試験準備中 or 動画URLなし */}
         {isExam ? (
           <section className="rounded-xl bg-amber-50 border border-amber-200 p-5 text-center">
             <div className="text-sm font-bold text-amber-800 mb-1">
@@ -128,6 +132,10 @@ export default async function StudentLessonPage({
           </section>
         ) : lesson.vimeo_url ? (
           <VimeoEmbed url={lesson.vimeo_url} />
+        ) : lesson.content_json ? (
+          <TextLessonRenderer
+            content={lesson.content_json as TextLessonContent}
+          />
         ) : (
           <div className="rounded-xl bg-zinc-100 border border-zinc-200 p-6 text-center text-sm text-[#6a6256]">
             動画 URL が設定されていません。

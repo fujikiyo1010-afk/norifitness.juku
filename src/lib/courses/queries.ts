@@ -34,6 +34,8 @@ export type PublicLesson = {
   sub_image_url: string | null;
   meta_tags: string[] | null;
   sort_order: number;
+  /** テキストレッスン用 構造化コンテンツ (= 2026-06-23 追加 / NULL なら動画レッスン) */
+  content_json: unknown | null;
 };
 
 const nowIso = () => new Date().toISOString();
@@ -106,7 +108,7 @@ export async function getPublicLesson(
   const { data } = await supabase
     .from("lessons")
     .select(
-      "id, chapter_id, title, description, vimeo_url, summary_video_url, sub_image_url, meta_tags, sort_order"
+      "id, chapter_id, title, description, vimeo_url, summary_video_url, sub_image_url, meta_tags, sort_order, content_json"
     )
     .eq("id", lessonId)
     .eq("chapter_id", chapterId)
