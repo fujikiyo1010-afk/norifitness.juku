@@ -431,7 +431,7 @@ export function CalorieToolClient({
                   "goal-sheet-reflect-calorie",
                   JSON.stringify({ maintenance_kcal: result.maintenance })
                 );
-                router.push("/goal-sheet/edit");
+                router.push("/goal-sheet/edit#tool-calorie");
               }}
               className="w-full py-3.5 bg-[#4a875b] text-white rounded text-sm font-bold hover:bg-[#34603f] transition-colors"
             >

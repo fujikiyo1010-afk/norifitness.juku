@@ -417,6 +417,7 @@ export function GoalSheetEditor({
 
           {/* メンテ kcal: ツール枠 (= β+γ ハイブリッド) */}
           <ToolGroup
+            id="tool-calorie"
             label="メンテナンスカロリー"
             toolHref="/tools/calorie?return=goal-sheet"
             toolLabel="必要カロリー計算ツール"
@@ -485,6 +486,7 @@ export function GoalSheetEditor({
 
           {/* 目標達成日: ツール枠 (= β+γ ハイブリッド) */}
           <ToolGroup
+            id="tool-diet-period"
             label="目標達成日"
             toolHref="/tools/diet-period?return=goal-sheet"
             toolLabel="減量期間逆算ツール"
@@ -519,6 +521,7 @@ export function GoalSheetEditor({
         <SectionWrapper sectionKey="nutrition" filled={!!content.filled_sections?.includes("nutrition")}>
           {/* PFC: ツール枠 (= β+γ ハイブリッド / 中に既存 NutritionVisualization を内包) */}
           <ToolGroup
+            id="tool-pfc-carb"
             label="PFC + カーボサイクル"
             toolHref="/tools/pfc-carb?return=goal-sheet"
             toolLabel="PFC・カーボサイクル設定"
@@ -1049,12 +1052,15 @@ function PfcCard({
  * ヘッダー (= 🔧 ツールから入力) + ラベル + 立体感ボタン (= ツール起動) + 結果表示 (= children)
  */
 function ToolGroup({
+  id,
   label,
   toolHref,
   toolLabel,
   applied,
   children,
 }: {
+  /** アンカースクロール用 id (= ツール戻り時に #tool-xxx で着地) */
+  id?: string;
   label: string;
   toolHref: string;
   toolLabel: string;
@@ -1062,7 +1068,7 @@ function ToolGroup({
   children?: React.ReactNode;
 }) {
   return (
-    <div className="bg-gradient-to-br from-[#f0f7f2] to-[#e8f1ec] border-2 border-[#4a875b]/40 rounded-xl p-3.5">
+    <div id={id} className="bg-gradient-to-br from-[#f0f7f2] to-[#e8f1ec] border-2 border-[#4a875b]/40 rounded-xl p-3.5 scroll-mt-4">
       {/* 枠ヘッダー */}
       <div className="flex items-center gap-1.5 mb-2.5">
         <ToolIcon className="text-[#34603f]" />
