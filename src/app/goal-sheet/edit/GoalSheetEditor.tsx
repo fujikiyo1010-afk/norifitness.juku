@@ -393,7 +393,7 @@ export function GoalSheetEditor({
             audit={audits?.field_comments?.body_fat_pct}
           >
             <div className="flex gap-2 items-stretch">
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <NumberInput
                   value={content.current_status?.body_fat_pct}
                   onChange={(v) => updateCurrentStatus({ body_fat_pct: v })}
@@ -404,7 +404,7 @@ export function GoalSheetEditor({
               <button
                 type="button"
                 onClick={handleAutoCalculateBodyFat}
-                className="btn-3d-secondary px-3 rounded-lg text-[11px] font-bold whitespace-nowrap flex items-center gap-1"
+                className="btn-3d-secondary flex-shrink-0 px-3 rounded-lg text-[11px] font-bold whitespace-nowrap flex items-center gap-1"
               >
                 <RefreshIcon />
                 自動計算
