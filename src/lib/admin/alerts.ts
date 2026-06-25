@@ -220,18 +220,12 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
       }
     }
 
-    // 3. 体組成 N 日途絶
+    // 3. 体組成途絶: 管理側アラートからは削除 (2026-06-25 きよむ判断)。
+    //    カルテ/目標より緊急度が低くノイズになるため、管理ダッシュ・受講生一覧バッジ・
+    //    受講生ハブのいずれにも出さない。受講生ホームの黄バナー
+    //    (src/lib/member/alerts.ts) は自走促しとして維持。
+    //    bm は下の目標乖離判定 (latestWeight) で引き続き使用。
     const bm = bodyMetricsByUser.get(user.id);
-    if (bm) {
-      const daysSinceLatest = daysBetween(bm.latestDate, now);
-      if (daysSinceLatest >= ALERT_THRESHOLDS.BODY_METRICS_STALLED_DAYS) {
-        tags.push({
-          key: "body_metrics_stalled",
-          label: `体組成 ${daysSinceLatest} 日途絶`,
-          severity: "warn",
-        });
-      }
-    }
 
     // 4. 目標乖離 (体重 vs 目標体重)
     //
@@ -293,14 +287,10 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
       });
     }
 
-    // body_metrics_stalled は「情報表示のみ」 (= 受講生自走に任せる) のため、
-    // ホームダッシュ「今日中に確認」 セクションに出さない (Phase 4 #17 線① 前倒し、 2026-06-15)。
-    // タグ自体は受講生一覧バッジ + 受講生ハブには表示残る (= のり氏は状況を知れる)。
-    // 受講生側は src/lib/member/alerts.ts の body_metrics_stalled 黄バナーで自走を促す。
-    const actionableTags = tags.filter((t) => t.key !== "body_metrics_stalled");
-    const hasUrgent = actionableTags.some((t) => t.severity === "urgent");
+    // 重要度判定。体組成途絶は上記の通り管理側では生成しないので、フィルタ不要。
+    const hasUrgent = tags.some((t) => t.severity === "urgent");
     const topSeverity: AlertSeverity | null =
-      actionableTags.length === 0 ? null : hasUrgent ? "urgent" : "warn";
+      tags.length === 0 ? null : hasUrgent ? "urgent" : "warn";
 
     return {
       userId: user.id,

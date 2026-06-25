@@ -206,39 +206,65 @@ export function GoalSheetEditor({
   // 旧: useEffect で 4 項目変更を検知して自動上書き (= readOnly)
   // 新: ユーザーが「自動計算」 ボタン明示クリックで計算 (= 手入力も可能)
   // 理由: 「手入力で書き換えたいが ウエスト変えると勝手に上書きされる」 を回避
+  // 体脂肪率 計算用の「有効性別」。
+  //   カルテ性別 女/男 → そのまま。その他 → bf_calc_sex(男女トグル)で選んだ方。未登録 → null。
+  const bfCalcSex = content.current_status?.bf_calc_sex ?? null;
+  const effectiveSex: "male" | "female" | null =
+    gender === "female"
+      ? "female"
+      : gender === "male"
+      ? "male"
+      : gender === "other"
+      ? bfCalcSex
+      : null;
+  // ヒップ入力可否 = 有効性別が女性のときだけ (女性式のみヒップを使うため)
+  const hipEditable = effectiveSex === "female";
+
   const handleAutoCalculateBodyFat = () => {
-    if (!gender) {
-      alert("カルテで性別を登録してから計算してください。");
+    if (!effectiveSex) {
+      alert(
+        gender === "other"
+          ? "計算用の性別 (男性 / 女性) を選んでから計算してください。"
+          : "カルテで性別を登録してから計算してください。"
+      );
       return;
     }
     const cs = content.current_status;
     const height_cm = cs?.height_cm;
     const waist_cm = cs?.waist_cm;
     const neck_cm = cs?.neck_cm;
+    const hip_cm = cs?.hip_cm;
     const weight_kg = cs?.weight_kg;
-    if (
-      typeof height_cm !== "number" ||
-      typeof waist_cm !== "number" ||
-      typeof neck_cm !== "number"
-    ) {
+    const isNum = (v: unknown): v is number =>
+      typeof v === "number" && !Number.isNaN(v);
+    if (!isNum(height_cm) || !isNum(waist_cm) || !isNum(neck_cm)) {
       alert("身長 ・ ウエスト ・ 首回りを入力してから計算してください。");
+      return;
+    }
+    if (effectiveSex === "female" && !isNum(hip_cm)) {
+      alert("女性の体脂肪率計算には ヒップ の入力が必要です。");
       return;
     }
     try {
       const { body_fat_pct } = calculateBodyFat({
-        gender,
-        formula: gender === "other" ? "male" : undefined,
+        gender: effectiveSex,
         height_cm,
         waist_cm,
         neck_cm,
+        hip_cm: effectiveSex === "female" ? hip_cm : undefined,
         weight_kg,
       });
       setContent((prev) => ({
         ...prev,
         current_status: { ...(prev.current_status ?? {}), body_fat_pct },
       }));
-    } catch {
-      alert("数値が範囲外です。 入力値を確認してください。");
+    } catch (e) {
+      // 例: ウエスト ≤ 首回り など、個別レンジでは弾けない不整合は具体的に伝える
+      alert(
+        e instanceof Error
+          ? e.message
+          : "計算できませんでした。入力値を確認してください。"
+      );
     }
   };
 
@@ -387,6 +413,53 @@ export function GoalSheetEditor({
               decimals={1}
             />
           </Field>
+          {/* カルテ性別が「その他」の人: 体脂肪率計算に使う男女を選ぶ */}
+          {gender === "other" && (
+            <Field label="計算用の性別">
+              <div className="flex gap-2">
+                {(["male", "female"] as const).map((s) => {
+                  const selected = bfCalcSex === s;
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => updateCurrentStatus({ bf_calc_sex: s })}
+                      className={`flex-1 py-2 rounded-lg text-sm font-bold border transition-colors ${
+                        selected
+                          ? "border-[#4a875b] bg-[#4a875b]/10 text-[#34603f]"
+                          : "border-[#e7dcc9] bg-white text-[#6a6256]"
+                      }`}
+                    >
+                      {s === "male" ? "男性" : "女性"}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-[10px] text-[#a59b8c] mt-1.5">
+                ※ カルテ性別が「その他」のため、体脂肪率の計算式に使う男女を選んでください。
+              </p>
+            </Field>
+          )}
+          <Field label="ヒップ">
+            <div className={hipEditable ? "" : "opacity-50"}>
+              <NumberInput
+                value={content.current_status?.hip_cm}
+                onChange={(v) => updateCurrentStatus({ hip_cm: v })}
+                unit="cm"
+                step={0.5}
+                min={50}
+                max={200}
+                placeholder={hipEditable ? "例: 90.0" : "女性のみ入力"}
+                decimals={1}
+                readOnly={!hipEditable}
+              />
+            </div>
+            <p className="text-[10px] text-[#a59b8c] mt-1.5">
+              {hipEditable
+                ? "※ 女性の体脂肪率計算 (海軍式) に使用します。"
+                : "※ 女性のみ入力します (男性の計算では使いません)。"}
+            </p>
+          </Field>
           <Field
             label="体脂肪率"
             autoTag="自動計算 (手入力可)"
@@ -411,7 +484,7 @@ export function GoalSheetEditor({
               </button>
             </div>
             <p className="text-[10px] text-[#a59b8c] mt-1.5">
-              ※ ウエスト + 首回りから自動計算できます。 手入力での上書きも可能です。
+              ※ ウエスト + 首回り (女性はヒップも) から自動計算できます。 手入力での上書きも可能です。
             </p>
           </Field>
 

@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { execSync } from "child_process";
 import path from "path";
 import fs from "fs";
 
@@ -33,6 +34,15 @@ if (fs.existsSync(envPath)) {
 }
 
 const STUDENT_STATE = path.resolve(__dirname, ".auth/student.json");
+
+test.beforeEach(async () => {
+  // ホーム(/)を検証するため、E2E受講生をオンボ完了状態(shipments 行)にする。
+  // これが無いと / が /onboarding(スマホ専用ゲート)に飛ぶ。
+  execSync("node e2e/setup/onboard_e2e_student.js", {
+    stdio: "inherit",
+    cwd: path.resolve(__dirname, ".."),
+  });
+});
 
 test("18. ホーム 月次添削カード + 下部ナビ 筋トレタブ + /workout 到達", async ({
   browser,

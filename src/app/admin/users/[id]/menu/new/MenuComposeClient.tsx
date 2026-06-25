@@ -170,10 +170,15 @@ export function MenuComposeClient({
     }
   }
 
-  // サイクル切替
+  // 強度(サイクル)切替。今見ている日(activeDayIdx)は維持し、
+  // 切替先の強度に同じ日が無い場合だけ範囲内へ丸める。
+  // (例: B の小 を見ていて 中 を押しても A に飛ばず B のまま中を見られる)
   function handleCycleChange(idx: number) {
     setActiveCycleIdx(idx);
-    setActiveDayIdx(0);
+    setActiveDayIdx((prev) => {
+      const dayCount = cycles[idx]?.["週"]?.length ?? 0;
+      return Math.min(prev, Math.max(0, dayCount - 1));
+    });
   }
 
   // 配布実行

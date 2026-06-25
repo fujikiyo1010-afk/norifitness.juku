@@ -20,6 +20,8 @@ export type CurrentStatus = {
   height_cm?: number;          // 身長 cm (※ user_profiles から自動取得が理想)
   waist_cm?: number;           // ウエスト cm
   neck_cm?: number;            // 首回り cm
+  hip_cm?: number;             // ヒップ cm (女性式の体脂肪率計算に使用。女性のみ入力可)
+  bf_calc_sex?: "male" | "female"; // カルテ性別が「その他」の人の体脂肪率計算用の性別
   body_fat_pct?: number;       // 体脂肪率 % (海軍式で自動計算)
   maintenance_kcal?: number;   // メンテナンスカロリー (必要カロリー計算ツールから反映)
   measured_at?: string;        // 測定日 ISO date (YYYY-MM-DD)
