@@ -36,13 +36,16 @@ import {
 // 「三角筋後部」は背中と肩の両方に紐付く意図 (Python プロトタイプ踏襲)
 // 実データ検証で問題があれば調整 (2026-06-01 レビュー D2)
 const BODY_GROUP_KEYWORDS: Record<BodyPartGroup, string[]> = {
-  全身バランス: [],          // 特殊扱い: 偏りが少ない = 高評価
-  腕:            ["二頭筋", "三頭筋"],
   胸:            ["大胸筋"],
   背中:          ["広背筋", "僧帽筋", "三角筋後部"],
-  脚:            ["脚", "脚全体", "大腿四頭筋", "ハムストリングス", "大殿筋"],
-  腹筋:          ["腹直筋", "腹筋"],
   肩:            ["三角筋", "三角筋後部"],
+  腕:            ["二頭筋", "三頭筋"],
+  脚:            ["脚", "脚全体", "大腿四頭筋", "ハムストリングス", "大殿筋"],
+  // お尻 (2026-06-25 追加): 「脚」は従来通り大殿筋を含めたまま = 既存の脚抽出は不変。
+  // お尻はお尻系キーワードを拾う追加カテゴリ (大殿筋は脚と重複させて影響ゼロ化)。
+  お尻:          ["大殿筋", "大臀筋", "お尻"],
+  腹筋:          ["腹直筋", "腹筋"],
+  全身:          [],          // 特殊扱い: 偏りが少ない = 高評価 (旧「全身バランス」)
 };
 
 // =====================================================================
@@ -53,7 +56,7 @@ const BODY_GROUP_KEYWORDS: Record<BodyPartGroup, string[]> = {
  * テンプレの body_parts_main (主部位カウント) と
  * カルテの focus_body_parts (希望部位) を照合してカバー率を返す (0-1)。
  *
- * 「全身バランス」のみ選択時は、偏りが少ないメニューを高評価する特殊ロジック。
+ * 「全身」のみ選択時は、偏りが少ないメニューを高評価する特殊ロジック。
  */
 export function calcBodyCoverage(
   template: WorkoutTemplateRow,
@@ -62,8 +65,8 @@ export function calcBodyCoverage(
   const counts = template.body_parts_main;
   const total = Object.values(counts).reduce((s, v) => s + v, 0) || 1;
 
-  // 「全身バランス」のみ選択 → 偏りが少ない = 高評価
-  if (focusParts.length === 1 && focusParts[0] === "全身バランス") {
+  // 「全身」のみ選択 → 偏りが少ない = 高評価
+  if (focusParts.length === 1 && focusParts[0] === "全身") {
     const values = Object.values(counts);
     const top = values.length > 0 ? Math.max(...values) : 0;
     return 1 - top / total;
@@ -171,7 +174,7 @@ export function calcEnvironmentScore(
  * @param carteAgeBand     カルテ側の年齢層 (calcAgeBand(user_profiles.birthday) で計算済)
  * @param carteEnvs        カルテ側の利用可能環境
  * @param carteFreqWish    カルテ側の希望頻度
- * @param focusParts       カルテ側の重点部位 (空なら全身バランス扱い)
+ * @param focusParts       カルテ側の重点部位 (空なら全身扱い)
  */
 export function calcMenuScore(
   template: WorkoutTemplateRow,
@@ -180,9 +183,9 @@ export function calcMenuScore(
   carteFreqWish: string | null,
   focusParts: BodyPartGroup[]
 ): MenuCandidate {
-  // 重点部位が空ならフォールバックで「全身バランス」
+  // 重点部位が空ならフォールバックで「全身」
   const effectiveParts: BodyPartGroup[] =
-    focusParts.length > 0 ? focusParts : ["全身バランス"];
+    focusParts.length > 0 ? focusParts : ["全身"];
 
   const coverage = calcBodyCoverage(template, effectiveParts);
   const bodyScore = calcBodyFocusScore(coverage);

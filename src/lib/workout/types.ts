@@ -43,14 +43,16 @@ export type Environment =
   | "ジム"
   | "家トレ";
 
+// 部位8カテゴリ (2026-06-25 統一: 旧「全身バランス」→「全身」、「お尻」追加)
 export type BodyPartGroup =
-  | "全身バランス"
-  | "腕"
   | "胸"
   | "背中"
+  | "肩"
+  | "腕"
   | "脚"
+  | "お尻"
   | "腹筋"
-  | "肩";
+  | "全身";
 
 export type Purpose =
   | "ダイエット"
@@ -82,6 +84,12 @@ export type Exercise = {
   インターバル: string;    // "2分"
   主部位: string[];        // ["脚"]
   補部位: string[];        // ["全身"]
+  // 動画 (W1 配線 2026-06-25):
+  //   - undefined = 種目名からマスター (name_to_url) で既定動画を解決
+  //   - 文字列 = この種目に明示的に紐づけた動画 (管理画面「この動画に変更」= このメニュー限定の上書き)
+  //   - 空文字 "" = 明示的に「動画なし」(既定があっても出さない)
+  // 解決は resolveExerciseVideo() を使う (src/lib/workout/video-master.ts)
+  video_url?: string;
 };
 
 export type DayMenu = {

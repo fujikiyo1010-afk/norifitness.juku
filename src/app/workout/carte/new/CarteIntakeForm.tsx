@@ -43,13 +43,14 @@ const FREQUENCY_OPTIONS: Frequency[] = [
   "任せる",
 ];
 const BODY_PART_OPTIONS: BodyPartGroup[] = [
-  "全身バランス",
-  "腕",
   "胸",
   "背中",
-  "脚",
-  "腹筋",
   "肩",
+  "腕",
+  "脚",
+  "お尻",
+  "腹筋",
+  "全身",
 ];
 const PURPOSE_OPTIONS: Purpose[] = [
   "ダイエット",

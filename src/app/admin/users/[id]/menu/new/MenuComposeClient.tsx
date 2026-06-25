@@ -18,7 +18,7 @@ import type {
   Exercise,
 } from "@/lib/workout/types";
 
-// 主部位マスター (種目編集用、きよむさん確認済 2026-06-02)
+// 主部位マスター (種目編集用、2026-06-25 部位8カテゴリ統一: 体幹→腹筋・有酸素削除)
 const TARGET_PART_OPTIONS = [
   "胸",
   "背中",
@@ -26,9 +26,8 @@ const TARGET_PART_OPTIONS = [
   "腕",
   "脚",
   "お尻",
-  "体幹",
+  "腹筋",
   "全身",
-  "有酸素",
 ] as const;
 
 /**

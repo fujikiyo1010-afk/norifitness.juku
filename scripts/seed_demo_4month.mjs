@@ -229,7 +229,7 @@ async function main() {
     gender: DEMO_GENDER,
     environments: ["ジム"],
     frequency_wish: "週3",
-    focus_body_parts: ["腹", "胸", "背中"],
+    focus_body_parts: ["腹筋", "胸", "背中"],
     purposes: ["ダイエット", "見た目改善"],
     experience: "週次",
     medical_limits: [],

@@ -14,13 +14,14 @@ export const dynamic = "force-dynamic";
 
 // 案 D 部位フィルタ用マスター (BodyPartGroup と一致、+「カルテ通り」)
 const FOCUS_FILTER_OPTIONS: BodyPartGroup[] = [
-  "全身バランス",
-  "腕",
   "胸",
   "背中",
-  "脚",
-  "腹筋",
   "肩",
+  "腕",
+  "脚",
+  "お尻",
+  "腹筋",
+  "全身",
 ];
 
 // 年齢フィルタ用マスター (AgeBand 全種)
