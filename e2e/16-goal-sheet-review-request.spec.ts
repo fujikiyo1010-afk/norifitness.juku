@@ -69,13 +69,39 @@ async function seedGoalSheet(userId: string, withAudits: boolean) {
     auth: { persistSession: false },
   });
 
+  // 2026-06-25: 全項目必須ガード導入に伴い、 happy-path (送信→遷移) を通すため
+  // 完全入力のシートを seed する (= 未入力ガードに引っかからない状態)。
   const content: Record<string, unknown> = {
-    current_status: { weight_kg: 70 },
-    goal_selection: { short_term: "テスト目標", target_weight_kg: 65 },
-    nutrition: {},
-    positive_goals: {},
-    self_image: [],
-    filled_sections: ["current_status", "goal_selection"],
+    current_status: {
+      weight_kg: 70,
+      height_cm: 170,
+      waist_cm: 80,
+      neck_cm: 38,
+      body_fat_pct: 18,
+      maintenance_kcal: 2200,
+    },
+    goal_selection: {
+      target_weight_kg: 65,
+      short_term: "テスト短期目標",
+      long_term: "テスト長期目標",
+      process: "テストプロセス",
+      target_date: "2026-12-31",
+    },
+    nutrition: { target_calorie: 2000, pfc: { p: 150, f: 50, c: 200 } },
+    positive_goals: { achievement_feeling: "テスト達成時の気持ち" },
+    self_image: Array.from({ length: 8 }, (_, i) => ({
+      key: `item_${i + 1}`,
+      label: `項目${i + 1}`,
+      before: 3,
+      after: 8,
+    })),
+    filled_sections: [
+      "current_status",
+      "goal_selection",
+      "nutrition",
+      "positive_goals",
+      "self_image",
+    ],
   };
   if (withAudits) {
     content.audits = {
@@ -152,5 +178,38 @@ test("16-1. 初回フロー: 送信して添削を依頼 → /goal-sheet 遷移 
   }
 });
 
-// 16-2 (2 回目フロー / 動的文言「再添削を依頼」) は 2026-06-17 きよむさん判断で機能撤回 ・ test 削除済
+// 旧 16-2 (2 回目フロー / 動的文言「再添削を依頼」) は 2026-06-17 きよむさん判断で機能撤回 ・ test 削除済
 // ボタン文言は常時「送信して添削を依頼」 で統一
+
+test("16-2. 未入力ガード: 必須が空のまま送信 → 遷移せず未入力リストを表示", async ({
+  browser,
+}) => {
+  // beforeEach の reset で goal_sheets は空 (= 全項目未入力の新規状態)
+  const studentContext: BrowserContext = await browser.newContext({
+    storageState: STUDENT_STATE,
+  });
+  try {
+    const studentPage = await studentContext.newPage();
+    await studentPage.goto("/goal-sheet/edit");
+
+    const submitButton = studentPage.locator(
+      'button:has-text("送信して添削を依頼")'
+    );
+    await expect(submitButton).toBeVisible();
+
+    // 押下 → 全項目必須ガードで止まる (遷移しない)
+    await submitButton.click();
+
+    // 1. /goal-sheet (閲覧) へは遷移していない = 編集画面に留まる
+    await expect(studentPage).toHaveURL(/\/goal-sheet\/edit$/);
+
+    // 2. 未入力エラー + 不足項目リストが表示される
+    await expect(studentPage.locator("body")).toContainText(
+      "未入力の項目があります"
+    );
+    await expect(studentPage.locator("body")).toContainText("現状を把握");
+    await expect(studentPage.locator("body")).toContainText("セルフイメージ改善");
+  } finally {
+    await studentContext.close();
+  }
+});

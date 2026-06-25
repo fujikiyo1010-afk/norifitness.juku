@@ -13,6 +13,7 @@ import {
   SECTION_META,
   SELF_IMAGE_ITEMS,
   countFilledSections,
+  isSelfImageFilled,
   type GoalSheetContent,
   type CurrentStatus,
   type GoalSelection,
@@ -23,6 +24,62 @@ import {
   type AuditComment,
   type SectionKey,
 } from "@/lib/goal-sheet/types";
+
+/**
+ * 送信 (添削依頼) の必須チェック。
+ * 「全項目必須」 (2026-06-25 きよむさん決定) — 未入力があれば送信を止める。
+ * 条件付き: ヒップ = 有効性別が女性のときのみ必須 / 計算用の性別 = カルテ性別がその他のときのみ必須。
+ * 戻り値 = 未入力項目の表示名リスト (空 = すべて入力済み = 送信可)。
+ */
+function getMissingFields(
+  content: GoalSheetContent,
+  gender: ToolGender | null,
+  effectiveSex: "male" | "female" | null
+): string[] {
+  const missing: string[] = [];
+  const num = (v: unknown): v is number =>
+    typeof v === "number" && !Number.isNaN(v);
+  const str = (v: unknown): v is string =>
+    typeof v === "string" && v.trim().length > 0;
+
+  // 1. 現状を把握
+  const cs = content.current_status;
+  if (!num(cs?.weight_kg)) missing.push("1. 現状を把握 › 体重");
+  if (!num(cs?.height_cm)) missing.push("1. 現状を把握 › 身長");
+  if (!num(cs?.waist_cm)) missing.push("1. 現状を把握 › ウエスト");
+  if (!num(cs?.neck_cm)) missing.push("1. 現状を把握 › 首回り");
+  if (gender === "other" && cs?.bf_calc_sex !== "male" && cs?.bf_calc_sex !== "female")
+    missing.push("1. 現状を把握 › 計算用の性別");
+  if (effectiveSex === "female" && !num(cs?.hip_cm))
+    missing.push("1. 現状を把握 › ヒップ");
+  if (!num(cs?.body_fat_pct)) missing.push("1. 現状を把握 › 体脂肪率");
+  if (!num(cs?.maintenance_kcal)) missing.push("1. 現状を把握 › メンテナンスカロリー");
+
+  // 2. 目標の選定
+  const gs = content.goal_selection;
+  if (!num(gs?.target_weight_kg)) missing.push("2. 目標の選定 › 目標体重");
+  if (!str(gs?.short_term)) missing.push("2. 目標の選定 › 短期目標");
+  if (!str(gs?.long_term)) missing.push("2. 目標の選定 › 長期目標");
+  if (!str(gs?.process)) missing.push("2. 目標の選定 › プロセス");
+  if (!str(gs?.target_date)) missing.push("2. 目標の選定 › 目標達成日");
+
+  // 3. 栄養設計
+  const nu = content.nutrition;
+  if (!num(nu?.target_calorie)) missing.push("3. 栄養設計 › 目標カロリー");
+  if (!num(nu?.pfc?.p)) missing.push("3. 栄養設計 › P (たんぱく質)");
+  if (!num(nu?.pfc?.f)) missing.push("3. 栄養設計 › F (脂質)");
+  if (!num(nu?.pfc?.c)) missing.push("3. 栄養設計 › C (糖質)");
+
+  // 4. プラスの感情を含むゴール
+  if (!str(content.positive_goals?.achievement_feeling))
+    missing.push("4. プラスの感情を含むゴール › 達成時の気持ち");
+
+  // 5. セルフイメージ改善
+  if (!isSelfImageFilled(content.self_image))
+    missing.push("5. セルフイメージ改善 › 8 項目すべて (改善前 / 改善後)");
+
+  return missing;
+}
 
 /**
  * 目標管理シート 編集フォーム (Client Component)
@@ -49,6 +106,9 @@ export function GoalSheetEditor({
   const [hydrated, setHydrated] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  // 送信時に未入力だった項目のリスト (= 押下時ガードで表示)
+  const [missingFields, setMissingFields] = useState<string[]>([]);
+  const errorRef = useRef<HTMLDivElement>(null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   // savedMessage のフェード制御 (B2-2 きよむさん指定の「ふわっと」)
   const [savedMessageVisible, setSavedMessageVisible] = useState(false);
@@ -175,6 +235,7 @@ export function GoalSheetEditor({
     writeDraft(content);
   }, [content, hydrated]);
 
+
   // ===== 自動保存 (debounce 1.5s ・ 2026-06-18 下書きボタン削除に伴う対応) =====
   // 「下書き保存」 ボタンを廃止して 1 ボタン化したため、 編集内容の永続化は
   // ここで自動で行う。 saveMyGoalSheet(content, { notify: false }) で
@@ -269,25 +330,35 @@ export function GoalSheetEditor({
   };
 
   // ===== 各セクションの更新関数 =====
+  // 編集を再開したら未入力エラー表示をクリア (再送信で再判定)。
+  // 同値の時は React がバイパスするので余計な再レンダーは起きない。
+  const clearSubmitErrors = () => {
+    setError(null);
+    setMissingFields((m) => (m.length ? [] : m));
+  };
   const updateCurrentStatus = (patch: Partial<CurrentStatus>) => {
+    clearSubmitErrors();
     setContent({
       ...content,
       current_status: { ...(content.current_status ?? {}), ...patch },
     });
   };
   const updateGoalSelection = (patch: Partial<GoalSelection>) => {
+    clearSubmitErrors();
     setContent({
       ...content,
       goal_selection: { ...(content.goal_selection ?? {}), ...patch },
     });
   };
   const updateNutrition = (patch: Partial<Nutrition>) => {
+    clearSubmitErrors();
     setContent({
       ...content,
       nutrition: { ...(content.nutrition ?? {}), ...patch },
     });
   };
   const updatePFC = (patch: Partial<PFC>) => {
+    clearSubmitErrors();
     setContent({
       ...content,
       nutrition: {
@@ -297,12 +368,14 @@ export function GoalSheetEditor({
     });
   };
   const updatePositiveGoals = (patch: Partial<PositiveGoals>) => {
+    clearSubmitErrors();
     setContent({
       ...content,
       positive_goals: { ...(content.positive_goals ?? {}), ...patch },
     });
   };
   const updateSelfImage = (key: string, patch: Partial<SelfImageItem>) => {
+    clearSubmitErrors();
     const existing = content.self_image ?? [];
     const idx = existing.findIndex((i) => i.key === key);
     const meta = SELF_IMAGE_ITEMS.find((m) => m.key === key);
@@ -324,6 +397,19 @@ export function GoalSheetEditor({
   const handleSubmit = () => {
     setError(null);
     setSavedMessage(null);
+    // 全項目必須チェック (押下時に止める / 2026-06-25 きよむさん決定)
+    const missing = getMissingFields(content, gender, effectiveSex);
+    if (missing.length > 0) {
+      setMissingFields(missing);
+      setError(
+        "未入力の項目があります。すべて入力してから「送信して添削を依頼」を押してください。"
+      );
+      requestAnimationFrame(() => {
+        errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+      return;
+    }
+    setMissingFields([]);
     startTransition(async () => {
       const result = await saveMyGoalSheet(content, { notify: true });
       if (!result.ok) {
@@ -415,7 +501,7 @@ export function GoalSheetEditor({
           </Field>
           {/* カルテ性別が「その他」の人: 体脂肪率計算に使う男女を選ぶ */}
           {gender === "other" && (
-            <Field label="計算用の性別">
+            <Field label="計算用の性別" required>
               <div className="flex gap-2">
                 {(["male", "female"] as const).map((s) => {
                   const selected = bfCalcSex === s;
@@ -440,7 +526,7 @@ export function GoalSheetEditor({
               </p>
             </Field>
           )}
-          <Field label="ヒップ">
+          <Field label="ヒップ" required={hipEditable}>
             <div className={hipEditable ? "" : "opacity-50"}>
               <NumberInput
                 value={content.current_status?.hip_cm}
@@ -462,6 +548,7 @@ export function GoalSheetEditor({
           </Field>
           <Field
             label="体脂肪率"
+            required
             autoTag="自動計算 (手入力可)"
             audit={audits?.field_comments?.body_fat_pct}
           >
@@ -495,6 +582,7 @@ export function GoalSheetEditor({
             toolHref="/tools/calorie?return=goal-sheet"
             toolLabel="必要カロリー計算ツール"
             applied={!!content.current_status?.maintenance_kcal}
+            required
           >
             {content.current_status?.maintenance_kcal ? (
               <div className="bg-white border border-[#4a875b]/20 rounded-md py-3 flex items-baseline gap-1.5 justify-center">
@@ -564,6 +652,7 @@ export function GoalSheetEditor({
             toolHref="/tools/diet-period?return=goal-sheet"
             toolLabel="減量期間逆算ツール"
             applied={!!content.goal_selection?.target_date}
+            required
           >
             {content.goal_selection?.target_date ? (
               <div className="bg-white border border-[#4a875b]/20 rounded-md py-3 text-center">
@@ -599,6 +688,7 @@ export function GoalSheetEditor({
             toolHref="/tools/pfc-carb?return=goal-sheet"
             toolLabel="PFC・カーボサイクル設定"
             applied={!!content.nutrition?.pfc?.c}
+            required
           >
             <NutritionVisualization nutrition={content.nutrition} />
           </ToolGroup>
@@ -627,6 +717,7 @@ export function GoalSheetEditor({
         <SectionWrapper sectionKey="self_image" filled={!!content.filled_sections?.includes("self_image")}>
           <div className="text-[11px] text-[#6a6256] mb-2 leading-relaxed">
             8 項目それぞれを「今 (改善前)」 と「目標 (改善後)」 で 0-10 点で評価。
+            <span className="text-red-500 ml-1">★ 全項目必須</span>
           </div>
           <div className="text-[10px] text-[#a59b8c] mb-3 leading-relaxed">
             スコア: 0 = まったく / 5 = ときどき / 10 = いつもできている。
@@ -694,8 +785,18 @@ export function GoalSheetEditor({
 
       {/* エラー / 成功メッセージ */}
       {error && (
-        <div className="mx-4 mb-2 px-3 py-2 bg-red-50 border border-red-200 rounded-md text-xs text-red-800">
-          ⚠ {error}
+        <div
+          ref={errorRef}
+          className="mx-4 mb-2 px-3 py-2.5 bg-red-50 border border-red-200 rounded-md text-xs text-red-800 scroll-mt-4"
+        >
+          <div className="font-bold">⚠ {error}</div>
+          {missingFields.length > 0 && (
+            <ul className="mt-1.5 space-y-0.5 list-disc list-inside leading-relaxed">
+              {missingFields.map((f) => (
+                <li key={f}>{f}</li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
       {savedMessage && (
@@ -1130,6 +1231,7 @@ function ToolGroup({
   toolHref,
   toolLabel,
   applied,
+  required,
   children,
 }: {
   /** アンカースクロール用 id (= ツール戻り時に #tool-xxx で着地) */
@@ -1138,6 +1240,7 @@ function ToolGroup({
   toolHref: string;
   toolLabel: string;
   applied: boolean;
+  required?: boolean;
   children?: React.ReactNode;
 }) {
   return (
@@ -1150,7 +1253,10 @@ function ToolGroup({
         </span>
       </div>
       {/* 項目ラベル */}
-      <div className="text-[12px] font-bold text-[#2b2620] mb-2">{label}</div>
+      <div className="text-[12px] font-bold text-[#2b2620] mb-2">
+        {label}
+        {required && <span className="text-red-500 ml-1">★</span>}
+      </div>
       {/* γ: ツール起動ボタン (= 立体感) */}
       <Link
         href={toolHref}
