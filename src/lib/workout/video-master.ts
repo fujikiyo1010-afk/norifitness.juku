@@ -69,3 +69,17 @@ export function listExerciseMaster(): ExerciseMasterEntry[] {
 export function listExercisesWithVideo(): ExerciseMasterEntry[] {
   return EXERCISES.filter((e) => e.video_url);
 }
+
+// URL → 動画名 の逆引き (表示用: 「▶ ダンベルローイング」のように出す)
+const URL_TO_VIDEO_NAME: Record<string, string> = {};
+for (const e of EXERCISES) {
+  if (e.video_url && !URL_TO_VIDEO_NAME[e.video_url]) {
+    URL_TO_VIDEO_NAME[e.video_url] = e.動画名;
+  }
+}
+
+/** 動画 URL から動画名を引く (表示用)。見つからなければ null。 */
+export function videoNameByUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  return URL_TO_VIDEO_NAME[url] ?? null;
+}

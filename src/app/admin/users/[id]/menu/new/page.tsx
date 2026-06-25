@@ -100,7 +100,7 @@ export default async function AdminMenuNewPage({
         シート名: "",
         週: [
           {
-            日: "A メニュー",
+            日: "1日目",
             種目: [],
           },
         ],

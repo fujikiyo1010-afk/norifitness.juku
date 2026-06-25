@@ -11,6 +11,13 @@ import {
   getExerciseTarget,
   validateMenuForDistribution,
 } from "@/lib/workout/menu-display";
+import {
+  resolveExerciseVideo,
+  listExerciseMaster,
+  listExercisesWithVideo,
+  videoNameByUrl,
+} from "@/lib/workout/video-master";
+import { VimeoEmbed } from "@/components/VimeoEmbed";
 import type {
   WorkoutCycles,
   WorkoutTemplateRow,
@@ -83,6 +90,7 @@ export function MenuComposeClient({
     "順番",
     "主部位",
     "補部位",
+    "video_url", // 動画は同じ種目なら強度間で共通 (2026-06-25 W3a)
   ];
 
   // すべての強度の同じ日 index に mutation を適用 (該当 day がない強度はスキップ)
@@ -167,6 +175,62 @@ export function MenuComposeClient({
         return next;
       });
     }
+  }
+
+  // ===== 日(週)操作: 全強度で同期 (日数を揃える) =====
+  function applyDayOp(op: (week: DayMenu[]) => void) {
+    setCycles((cs) => {
+      const next = structuredClone(cs);
+      next.forEach((cycle) => {
+        if (cycle["週"]) op(cycle["週"]);
+      });
+      return next;
+    });
+  }
+
+  // 空の日を末尾に追加 (全強度)
+  function addDay() {
+    const newIdx = activeCycle?.["週"]?.length ?? 0;
+    applyDayOp((week) => {
+      week.push({ 日: `${week.length + 1}日目`, 種目: [] });
+    });
+    setActiveDayIdx(newIdx);
+  }
+
+  // 今の日を直後に複製 (全強度)
+  function duplicateDay() {
+    const idx = activeDayIdx;
+    applyDayOp((week) => {
+      if (idx < week.length) {
+        week.splice(idx + 1, 0, structuredClone(week[idx]));
+      }
+    });
+    setActiveDayIdx(idx + 1);
+  }
+
+  // 今の日を削除 (全強度・最低1日は残す)
+  function deleteDay() {
+    const idx = activeDayIdx;
+    const len = activeCycle?.["週"]?.length ?? 0;
+    if (len <= 1) return;
+    applyDayOp((week) => {
+      if (week.length > 1 && idx < week.length) week.splice(idx, 1);
+    });
+    setActiveDayIdx(Math.max(0, Math.min(idx, len - 2)));
+  }
+
+  // 日種別の設定/解除 (全強度・休息/パーソナルは種目を空にする)
+  function setDayType(type: "休息" | "パーソナル" | null) {
+    const idx = activeDayIdx;
+    applyDayOp((week) => {
+      if (idx >= week.length) return;
+      if (type) {
+        week[idx]["種別"] = type;
+        week[idx]["種目"] = [];
+      } else {
+        delete week[idx]["種別"];
+      }
+    });
   }
 
   // 強度(サイクル)切替。今見ている日(activeDayIdx)は維持し、
@@ -354,13 +418,93 @@ export function MenuComposeClient({
                 >
                   {cleanDayLabel(w["日"])}
                   <span className="block text-[9px] text-zinc-400 mt-0.5">
-                    {w["種目"]?.length ?? 0} 種目
+                    {w["種別"] ? `${w["種別"]}日` : `${w["種目"]?.length ?? 0} 種目`}
                   </span>
                 </button>
               ))}
             </div>
           </section>
         )}
+
+        {/* 日の操作 (複製/空追加/削除/休息・パーソナル) */}
+        <section className="rounded-[14px] border border-[#e8ebe9] bg-white p-4">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <div className="text-[10px] font-bold text-zinc-500 tracking-widest">
+              日の操作
+            </div>
+            <div className="text-xs text-zinc-600">
+              現在:{" "}
+              <span className="font-bold text-zinc-900">
+                {cleanDayLabel(activeDay?.["日"] ?? "") || `${activeDayIdx + 1}日目`}
+              </span>
+              {activeDay?.["種別"] && (
+                <span className="ml-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700">
+                  {activeDay["種別"]}日
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            <button
+              type="button"
+              onClick={addDay}
+              className="rounded-md border border-dashed border-[#00897b] bg-white px-2.5 py-1.5 text-[11px] font-bold text-[#00695c] hover:bg-[rgba(0,137,123,0.08)]"
+            >
+              ＋空の日
+            </button>
+            <button
+              type="button"
+              onClick={duplicateDay}
+              className="rounded-md border border-[#e8ebe9] bg-white px-2.5 py-1.5 text-[11px] font-bold text-zinc-600 hover:border-[#00897b]"
+            >
+              この日を複製
+            </button>
+            <button
+              type="button"
+              onClick={deleteDay}
+              disabled={dayCount <= 1}
+              className="rounded-md border border-rose-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-rose-500 hover:bg-rose-50 disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              この日を削除
+            </button>
+            <span className="mx-1 w-px self-stretch bg-[#e8ebe9]" />
+            <button
+              type="button"
+              onClick={() =>
+                setDayType(activeDay?.["種別"] === "休息" ? null : "休息")
+              }
+              className={`rounded-md border px-2.5 py-1.5 text-[11px] font-bold ${
+                activeDay?.["種別"] === "休息"
+                  ? "border-amber-400 bg-amber-50 text-amber-700"
+                  : "border-[#e8ebe9] bg-white text-zinc-600 hover:border-amber-400"
+              }`}
+            >
+              {activeDay?.["種別"] === "休息" ? "休息を解除" : "休息日にする"}
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                setDayType(activeDay?.["種別"] === "パーソナル" ? null : "パーソナル")
+              }
+              className={`rounded-md border px-2.5 py-1.5 text-[11px] font-bold ${
+                activeDay?.["種別"] === "パーソナル"
+                  ? "border-amber-400 bg-amber-50 text-amber-700"
+                  : "border-[#e8ebe9] bg-white text-zinc-600 hover:border-amber-400"
+              }`}
+            >
+              {activeDay?.["種別"] === "パーソナル"
+                ? "パーソナルを解除"
+                : "パーソナル日にする"}
+            </button>
+          </div>
+        </section>
+
+        {/* 種目名オートコンプリート候補 (確定代表名198・全行で共有) */}
+        <datalist id="exercise-name-options">
+          {listExerciseMaster().map((e) => (
+            <option key={e.確定代表名} value={e.確定代表名} />
+          ))}
+        </datalist>
 
         {/* 種目編集 */}
         <section className="rounded-[14px] border border-[#e8ebe9] bg-white overflow-hidden">
@@ -374,7 +518,16 @@ export function MenuComposeClient({
             </h2>
           </div>
 
-          {exercises.length === 0 ? (
+          {activeDay?.["種別"] ? (
+            <div className="p-8 text-center text-xs text-zinc-500">
+              この日は「{activeDay["種別"]}」です。
+              {activeDay["種別"] === "パーソナル"
+                ? "受講生は外部のパーソナル指導を受けます。"
+                : "休息日です。"}
+              <br />
+              こちらのメニュー (種目) はありません。
+            </div>
+          ) : exercises.length === 0 ? (
             <div className="p-8 text-center text-xs text-zinc-500">
               この日の種目はまだありません。下の「+ 種目を追加」で追加してください。
             </div>
@@ -396,16 +549,18 @@ export function MenuComposeClient({
             </div>
           )}
 
-          {/* 種目追加 */}
-          <div className="px-4 py-3 border-t border-[#e8ebe9] bg-[#fafafa]">
-            <button
-              type="button"
-              onClick={addExercise}
-              className="w-full px-4 py-2.5 rounded-md border border-dashed border-[#00897b] bg-white text-[#00695c] text-xs font-bold hover:bg-[rgba(0,137,123,0.08)] transition-colors"
-            >
-              + 種目を追加
-            </button>
-          </div>
+          {/* 種目追加 (休息/パーソナル日は非表示) */}
+          {!activeDay?.["種別"] && (
+            <div className="px-4 py-3 border-t border-[#e8ebe9] bg-[#fafafa]">
+              <button
+                type="button"
+                onClick={addExercise}
+                className="w-full px-4 py-2.5 rounded-md border border-dashed border-[#00897b] bg-white text-[#00695c] text-xs font-bold hover:bg-[rgba(0,137,123,0.08)] transition-colors"
+              >
+                + 種目を追加
+              </button>
+            </div>
+          )}
         </section>
 
         {/* エラー (複数項目対応) */}
@@ -477,6 +632,22 @@ function ExerciseEditor({
   const displayName = cleanExerciseName(ex["種目名"]);
   const target = getExerciseTarget(ex["主部位"]);
 
+  // 動画 (W3a): 実効URL・上書き状態・表示名
+  const videoUrl = resolveExerciseVideo(ex);
+  const isVideoOverride = ex.video_url !== undefined; // 既定でなく明示設定あり
+  const videoName = videoNameByUrl(videoUrl);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerQ, setPickerQ] = useState("");
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const videoChoices = listExercisesWithVideo();
+  const filteredChoices = pickerQ.trim()
+    ? videoChoices.filter(
+        (c) =>
+          c.確定代表名.includes(pickerQ.trim()) ||
+          c.動画名.includes(pickerQ.trim())
+      )
+    : videoChoices;
+
   return (
     <div className="px-4 py-4 border-b border-[#e8ebe9] last:border-b-0">
       <div className="flex items-start gap-3">
@@ -487,12 +658,13 @@ function ExerciseEditor({
 
         {/* 編集フィールド */}
         <div className="flex-1 min-w-0 space-y-2">
-          {/* 種目名 */}
+          {/* 種目名 (オートコンプリート: 確定代表名から候補 + 自由入力も可) */}
           <input
             type="text"
             value={displayName}
+            list="exercise-name-options"
             onChange={(e) => onUpdate("種目名", e.target.value)}
-            placeholder="種目名 (例: ベンチプレス)"
+            placeholder="種目名 (入力で候補表示 / 自由入力も可)"
             className="w-full px-3 py-2 text-sm font-bold text-zinc-900 border border-[#e8ebe9] rounded-md bg-white focus:outline-none focus:border-[#00897b]"
           />
 
@@ -558,6 +730,122 @@ function ExerciseEditor({
                 );
               })}
             </div>
+          </div>
+
+          {/* 動画 (W3a): あり/なし表示 + 「この動画に変更」(このメニュー限定) */}
+          <div>
+            <div className="mb-1.5 flex items-center gap-2 flex-wrap">
+              <span className="text-[10px] font-bold text-zinc-500 tracking-widest">
+                動画
+              </span>
+              {videoUrl ? (
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#00695c]">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                  {videoName ?? "あり"}
+                  {isVideoOverride && (
+                    <span className="text-amber-600">(変更済)</span>
+                  )}
+                </span>
+              ) : (
+                <span className="text-[10px] font-bold text-zinc-400">
+                  なし{isVideoOverride && "(手動オフ)"}
+                </span>
+              )}
+              {videoUrl && (
+                <button
+                  type="button"
+                  onClick={() => setPreviewOpen((o) => !o)}
+                  className="rounded-md border border-[#e8ebe9] bg-white px-2 py-1 text-[10px] font-bold text-zinc-600 hover:border-[#00897b] hover:text-[#00695c]"
+                >
+                  {previewOpen ? "プレビューを閉じる" : "プレビュー"}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setPickerOpen((o) => !o)}
+                className="ml-auto rounded-md border border-[#e8ebe9] bg-white px-2 py-1 text-[10px] font-bold text-zinc-600 hover:border-[#00897b] hover:text-[#00695c]"
+              >
+                {videoUrl ? "動画を変更" : "動画を付ける"}
+              </button>
+            </div>
+
+            {/* プレビュー (受講生と同じ埋め込み再生。直リンクは embed 限定で不可のため) */}
+            {previewOpen && videoUrl && (
+              <div className="mb-2 max-w-sm">
+                <VimeoEmbed url={videoUrl} />
+              </div>
+            )}
+
+            {pickerOpen && (
+              <div className="rounded-md border border-[#e8ebe9] bg-[#fafafa] p-2">
+                <input
+                  type="text"
+                  value={pickerQ}
+                  onChange={(e) => setPickerQ(e.target.value)}
+                  placeholder="動画を名前で検索 (例: ローイング)"
+                  className="mb-2 w-full rounded-md border border-[#e8ebe9] bg-white px-2 py-1.5 text-xs text-zinc-900 focus:outline-none focus:border-[#00897b]"
+                />
+                <div className="max-h-40 overflow-y-auto rounded border border-[#eef0ef] bg-white">
+                  {filteredChoices.slice(0, 60).map((c) => {
+                    const isCurrent = c.video_url === videoUrl;
+                    return (
+                      <button
+                        key={c.確定代表名}
+                        type="button"
+                        onClick={() => {
+                          onUpdate("video_url", c.video_url);
+                          setPickerOpen(false);
+                        }}
+                        className={`flex w-full items-center gap-2 border-b border-[#f3f4f3] px-2 py-1.5 text-left text-[11px] last:border-b-0 hover:bg-[rgba(0,137,123,0.06)] ${
+                          isCurrent ? "bg-[rgba(0,137,123,0.08)]" : ""
+                        }`}
+                      >
+                        <span className="font-bold text-zinc-800">
+                          {c.確定代表名}
+                        </span>
+                        <span className="text-[10px] text-zinc-400">
+                          {c.部位}
+                        </span>
+                        {isCurrent && (
+                          <span className="ml-auto text-[10px] font-bold text-[#00695c]">
+                            選択中
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                  {filteredChoices.length === 0 && (
+                    <div className="px-2 py-3 text-center text-[10px] text-zinc-400">
+                      該当する動画がありません
+                    </div>
+                  )}
+                </div>
+                <div className="mt-2 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onUpdate("video_url", undefined);
+                      setPickerOpen(false);
+                    }}
+                    className="flex-1 rounded-md border border-[#e8ebe9] bg-white px-2 py-1.5 text-[10px] font-bold text-zinc-600 hover:border-[#00897b]"
+                  >
+                    既定に戻す
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onUpdate("video_url", "");
+                      setPickerOpen(false);
+                    }}
+                    className="flex-1 rounded-md border border-rose-200 bg-white px-2 py-1.5 text-[10px] font-bold text-rose-500 hover:bg-rose-50"
+                  >
+                    動画なしにする
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

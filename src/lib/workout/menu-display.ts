@@ -188,6 +188,11 @@ export function validateMenuForDistribution(
         const dayLabel = cleanDayLabel(day["日"]) || `${di + 1}日目`;
         const exercises = day["種目"] ?? [];
 
+        // 休息日 / パーソナル日 は「こちらのメニュー無し」が正しい状態 → 種目0でOK
+        if (day["種別"]) {
+          return;
+        }
+
         // 3. 日内の種目 0 件
         if (exercises.length === 0) {
           errors.push(`${cycleLabel} / ${dayLabel}: 種目がありません`);
