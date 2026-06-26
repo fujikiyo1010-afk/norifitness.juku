@@ -177,15 +177,39 @@ export function MenuComposeClient({
     }
   }
 
-  // ===== 日(週)操作: 全強度で同期 (日数を揃える) =====
+  // 位置ベース採番: 並び順から 日 ラベルを「N日目」に振り直す (種別/種目は保持)
+  function renumberDays(week: DayMenu[]) {
+    week.forEach((d, i) => {
+      d["日"] = `${i + 1}日目`;
+    });
+  }
+
+  // ===== 日(週)操作: 全強度で同期 + 毎回 位置ベース採番 =====
   function applyDayOp(op: (week: DayMenu[]) => void) {
     setCycles((cs) => {
       const next = structuredClone(cs);
       next.forEach((cycle) => {
-        if (cycle["週"]) op(cycle["週"]);
+        if (cycle["週"]) {
+          op(cycle["週"]);
+          renumberDays(cycle["週"]); // 複製/移動/削除のたびに 1日目〜 を自動採番
+        }
       });
       return next;
     });
+  }
+
+  // 今の日を左右に移動 (隣と入れ替え・全強度同期・採番は applyDayOp が実施)
+  function moveDay(dir: -1 | 1) {
+    const idx = activeDayIdx;
+    const len = activeCycle?.["週"]?.length ?? 0;
+    const target = idx + dir;
+    if (target < 0 || target >= len) return;
+    applyDayOp((week) => {
+      if (idx < week.length && target < week.length) {
+        [week[idx], week[target]] = [week[target], week[idx]];
+      }
+    });
+    setActiveDayIdx(target);
   }
 
   // 空の日を末尾に追加 (全強度)
@@ -445,6 +469,27 @@ export function MenuComposeClient({
             </div>
           </div>
           <div className="flex flex-wrap gap-1.5">
+            <button
+              type="button"
+              onClick={() => moveDay(-1)}
+              disabled={activeDayIdx === 0}
+              className="rounded-md border border-[#e8ebe9] bg-white px-2.5 py-1.5 text-[11px] font-bold text-zinc-600 hover:border-[#00897b] disabled:opacity-30 disabled:cursor-not-allowed"
+              aria-label="この日を左へ"
+              title="この日を左へ移動"
+            >
+              ← 左へ
+            </button>
+            <button
+              type="button"
+              onClick={() => moveDay(1)}
+              disabled={activeDayIdx >= dayCount - 1}
+              className="rounded-md border border-[#e8ebe9] bg-white px-2.5 py-1.5 text-[11px] font-bold text-zinc-600 hover:border-[#00897b] disabled:opacity-30 disabled:cursor-not-allowed"
+              aria-label="この日を右へ"
+              title="この日を右へ移動"
+            >
+              右へ →
+            </button>
+            <span className="mx-1 w-px self-stretch bg-[#e8ebe9]" />
             <button
               type="button"
               onClick={addDay}
