@@ -270,6 +270,42 @@ export function MenuComposeClient({
     });
   }
 
+  // ===== 強度(段階)操作: 追加(現強度コピー)/削除/改名 (W3c) =====
+  const STRENGTH_PRESETS = ["小", "中", "大", "強化版"] as const;
+  function nextStrengthName(existing: string[]): string {
+    const preset = STRENGTH_PRESETS.find((p) => !existing.includes(p));
+    return preset ?? `強度${existing.length + 1}`;
+  }
+  // 現在の強度をコピーして新強度を追加 (日数・種目が揃う)
+  function addStrength() {
+    const newIdx = cycles.length;
+    setCycles((cs) => {
+      const next = structuredClone(cs);
+      const base = next[activeCycleIdx];
+      if (!base) return next;
+      const copy = structuredClone(base);
+      copy["段階"] = nextStrengthName(next.map((c) => c["段階"] ?? ""));
+      next.push(copy);
+      return next;
+    });
+    setActiveCycleIdx(newIdx);
+  }
+  // 現在の強度を削除 (最低1強度は残す)
+  function deleteStrength() {
+    if (cycles.length <= 1) return;
+    const idx = activeCycleIdx;
+    setCycles((cs) => cs.filter((_, i) => i !== idx));
+    setActiveCycleIdx(Math.max(0, idx - 1));
+  }
+  // 現在の強度の名前を変更
+  function renameStrength(name: string) {
+    setCycles((cs) => {
+      const next = structuredClone(cs);
+      if (next[activeCycleIdx]) next[activeCycleIdx]["段階"] = name;
+      return next;
+    });
+  }
+
   // 配布実行
   function handleDistribute() {
     const validation = validateMenuForDistribution(cycles, notes);
@@ -396,13 +432,33 @@ export function MenuComposeClient({
           </div>
         </section>
 
-        {/* 強度選択 */}
-        {cycles.length > 1 && (
-          <section className="rounded-[14px] border border-[#e8ebe9] bg-white p-4">
-            <div className="text-[10px] font-bold text-zinc-500 tracking-widest mb-1.5">
+        {/* 強度選択 + 追加/削除/改名 (W3c) */}
+        <section className="rounded-[14px] border border-[#e8ebe9] bg-white p-4">
+          <div className="mb-1.5 flex items-center justify-between gap-2">
+            <div className="text-[10px] font-bold text-zinc-500 tracking-widest">
               強度
             </div>
             <div className="flex gap-1.5">
+              <button
+                type="button"
+                onClick={addStrength}
+                className="rounded-md border border-dashed border-[#00897b] bg-white px-2.5 py-1 text-[11px] font-bold text-[#00695c] hover:bg-[rgba(0,137,123,0.08)]"
+              >
+                ＋強度を追加
+              </button>
+              <button
+                type="button"
+                onClick={deleteStrength}
+                disabled={cycles.length <= 1}
+                className="rounded-md border border-rose-200 bg-white px-2.5 py-1 text-[11px] font-bold text-rose-500 hover:bg-rose-50 disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                この強度を削除
+              </button>
+            </div>
+          </div>
+
+          {cycles.length > 1 && (
+            <div className="mb-2 flex gap-1.5">
               {cycles.map((c, i) => (
                 <button
                   key={i}
@@ -424,8 +480,38 @@ export function MenuComposeClient({
                 </button>
               ))}
             </div>
-          </section>
-        )}
+          )}
+
+          {/* 現在の強度の改名 */}
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold text-zinc-500 whitespace-nowrap">
+              強度名
+            </span>
+            <input
+              type="text"
+              value={activeCycle?.["段階"] ?? ""}
+              onChange={(e) => renameStrength(e.target.value)}
+              placeholder="例: 小 / 中 / 大"
+              className="w-24 rounded-md border border-[#e8ebe9] bg-white px-2 py-1 text-xs font-bold text-zinc-900 focus:outline-none focus:border-[#00897b]"
+            />
+            <div className="flex flex-wrap gap-1">
+              {STRENGTH_PRESETS.map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => renameStrength(p)}
+                  className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${
+                    activeCycle?.["段階"] === p
+                      ? "border-[#00897b] bg-[rgba(0,137,123,0.08)] text-[#00695c]"
+                      : "border-[#e8ebe9] bg-white text-zinc-500 hover:border-[#00897b]"
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
 
         {/* 日タブ */}
         {dayCount > 1 && (
@@ -723,16 +809,23 @@ function ExerciseEditor({
             className="w-full px-3 py-2 text-sm font-bold text-zinc-900 border border-[#e8ebe9] rounded-md bg-white focus:outline-none focus:border-[#00897b]"
           />
 
-          {/* スーパーセット (交互) トグル (②) */}
-          <label className="flex w-fit items-center gap-1.5 text-[11px] font-medium text-zinc-600 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={!!ex["superset"]}
-              onChange={(e) => onUpdate("superset", e.target.checked)}
-              className="accent-[#00897b]"
-            />
-            🔁 スーパーセット（交互に行う）
-          </label>
+          {/* スーパーセット トグル + ペア説明 (②③ 2026-06-26) */}
+          <div className="space-y-1">
+            <label className="flex w-fit items-center gap-1.5 text-[11px] font-medium text-zinc-600 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={!!ex["superset"]}
+                onChange={(e) => onUpdate("superset", e.target.checked)}
+                className="accent-[#00897b]"
+              />
+              🔁 スーパーセット（次の種目と続けて）
+            </label>
+            {ex["superset"] && (
+              <div className="border-l-2 border-[#00897b] bg-[rgba(0,137,123,0.06)] py-1 pl-2 text-[10px] text-[#00695c]">
+                ↓ この種目と<b>次の種目</b>を休まず続けて行う（受講生にもペアで表示されます）
+              </div>
+            )}
+          </div>
 
           <div className="grid grid-cols-2 gap-2">
             {/* 回数 */}
