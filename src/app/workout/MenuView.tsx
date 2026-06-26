@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import {
   cleanExerciseName,
@@ -18,6 +18,8 @@ import type {
   Exercise,
 } from "@/lib/workout/types";
 import type { CarteWithAgeBand } from "@/lib/workout/queries";
+import { resolveExerciseVideo } from "@/lib/workout/video-master";
+import { VimeoEmbed } from "@/components/VimeoEmbed";
 
 /**
  * 配布済メニューの本体表示 (Client Component)
@@ -38,6 +40,8 @@ export function MenuView({
   const cycles: CycleStage[] = menu.cycles || [];
   const [activeCycleIdx, setActiveCycleIdx] = useState(0);
   const [activeDayIdx, setActiveDayIdx] = useState(0);
+  // 動画ライトボックス (種目タップで開く)
+  const [lightbox, setLightbox] = useState<{ url: string; name: string } | null>(null);
 
   const activeCycle = cycles[activeCycleIdx];
   const activeDay: DayMenu | undefined = activeCycle?.["週"]?.[activeDayIdx];
@@ -180,35 +184,48 @@ export function MenuView({
           {dayCount > 1 && (
             <div className="flex bg-[#fffdf8] border-b border-[#e7dcc9] overflow-x-auto">
               {activeCycle["週"].map((w, i) => {
-                const label = cleanDayLabel(w["日"]);
+                const kind = w["種別"];
+                const sub = kind ? kind : `${w["種目"]?.length ?? 0}種目`;
                 return (
                   <button
                     key={i}
                     type="button"
                     onClick={() => setActiveDayIdx(i)}
-                    className={`flex-1 min-w-[60px] py-3 px-2 text-xs font-bold whitespace-nowrap border-b-2 transition-colors ${
+                    className={`flex-1 min-w-[62px] py-2.5 px-2 text-xs font-bold whitespace-nowrap border-b-2 transition-colors ${
                       i === activeDayIdx
                         ? "text-[#34603f] border-[#4a875b]"
                         : "text-[#6a6256] border-transparent"
                     }`}
                   >
-                    {label}
+                    {cleanDayLabel(w["日"])}
+                    <span
+                      className={`block text-[9px] font-semibold mt-0.5 ${
+                        kind ? "text-[#c08a2d]" : "text-[#a59b8c]"
+                      }`}
+                    >
+                      {sub}
+                    </span>
                   </button>
                 );
               })}
             </div>
           )}
 
-          {/* 種目リスト (ワンライン型 + 狙い末尾) */}
+          {/* 種目リスト (休息/パーソナルは専用カード ・ スーパーセットはペア表示) */}
           <div className="bg-[#fffdf8]">
-            {exercises.length === 0 ? (
+            {activeDay?.["種別"] === "休息" ? (
+              <RestCard kind="休息" />
+            ) : activeDay?.["種別"] === "パーソナル" ? (
+              <RestCard kind="パーソナル" />
+            ) : exercises.length === 0 ? (
               <div className="p-8 text-center text-xs text-[#6a6256]">
                 この日の種目はありません
               </div>
             ) : (
-              exercises.map((ex, i) => (
-                <ExerciseRow key={i} num={i + 1} ex={ex} />
-              ))
+              <ExerciseList
+                exercises={exercises}
+                onPlay={(url, name) => setLightbox({ url, name })}
+              />
             )}
           </div>
 
@@ -229,6 +246,32 @@ export function MenuView({
           </div>
         </div>
       </div>
+
+      {/* 動画ライトボックス (種目タップで開く) */}
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          onClick={() => setLightbox(null)}
+        >
+          <div
+            className="w-full max-w-[440px] overflow-hidden rounded-xl bg-black"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <VimeoEmbed url={lightbox.url} />
+            <div className="flex items-center justify-between bg-[#111] px-3.5 py-2.5 text-white">
+              <span className="text-[13px] font-bold">{lightbox.name}</span>
+              <button
+                type="button"
+                onClick={() => setLightbox(null)}
+                className="text-lg text-zinc-400 hover:text-white"
+                aria-label="閉じる"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -237,14 +280,85 @@ export function MenuView({
 // 種目 1 行
 // =====================================================================
 
-function ExerciseRow({ num, ex }: { num: number; ex: Exercise }) {
+// 休息日 / パーソナル日 のカード
+function RestCard({ kind }: { kind: "休息" | "パーソナル" }) {
+  const isPersonal = kind === "パーソナル";
+  return (
+    <div className="px-5 py-9 text-center">
+      <div className="text-3xl">{isPersonal ? "🤝" : "🛌"}</div>
+      <div className="mt-2 text-[15px] font-bold text-[#2b2620]">
+        {isPersonal ? "パーソナル日" : "休息日"}
+      </div>
+      <div className="mt-1 text-xs text-[#6a6256] leading-relaxed">
+        {isPersonal
+          ? "外部のパーソナル指導を受ける日です。こちらのメニューはお休みです。"
+          : "今日はしっかり休んで回復に充てましょう。無理せず OK です。"}
+      </div>
+    </div>
+  );
+}
+
+// 種目リスト (スーパーセットは 1種目目+次種目 をペアで括る)
+function ExerciseList({
+  exercises,
+  onPlay,
+}: {
+  exercises: Exercise[];
+  onPlay: (url: string, name: string) => void;
+}) {
+  const blocks: ReactNode[] = [];
+  let i = 0;
+  let num = 0;
+  while (i < exercises.length) {
+    const ex = exercises[i];
+    if (ex["superset"] && i + 1 < exercises.length) {
+      const a = ex;
+      const b = exercises[i + 1];
+      blocks.push(
+        <div
+          key={i}
+          className="border-l-[3px] border-[#4a875b] bg-[rgba(74,135,91,0.05)]"
+        >
+          <div className="flex items-center gap-1 px-3.5 pt-2 text-[10px] font-bold text-[#34603f]">
+            🔁 スーパーセット（休まず続けて）
+          </div>
+          <ExerciseRow num={num + 1} ex={a} onPlay={onPlay} />
+          <ExerciseRow num={num + 2} ex={b} onPlay={onPlay} />
+        </div>
+      );
+      num += 2;
+      i += 2;
+    } else {
+      blocks.push(<ExerciseRow key={i} num={num + 1} ex={ex} onPlay={onPlay} />);
+      num += 1;
+      i += 1;
+    }
+  }
+  return <>{blocks}</>;
+}
+
+function ExerciseRow({
+  num,
+  ex,
+  onPlay,
+}: {
+  num: number;
+  ex: Exercise;
+  onPlay: (url: string, name: string) => void;
+}) {
   const name = cleanExerciseName(ex["種目名"]);
   const reps = cleanReps(ex["回数"]);
   const interval = ex["インターバル"] || "—";
   const target = getExerciseTarget(ex["主部位"]);
+  const videoUrl = resolveExerciseVideo(ex);
 
   return (
-    <div className="grid grid-cols-[36px_1fr] gap-3 items-center px-4 py-3.5 border-b border-[#e7dcc9] last:border-b-0">
+    <div
+      className={`grid grid-cols-[34px_1fr_26px] gap-3 items-center px-4 py-3.5 border-b border-[#e7dcc9] last:border-b-0 ${
+        videoUrl ? "cursor-pointer active:bg-[rgba(0,137,123,0.05)]" : ""
+      }`}
+      onClick={videoUrl ? () => onPlay(videoUrl, name) : undefined}
+    >
       <div className="w-8 h-8 rounded-lg bg-[#e7dcc9] text-zinc-700 font-bold font-mono text-sm flex items-center justify-center">
         {num}
       </div>
@@ -261,6 +375,22 @@ function ExerciseRow({ num, ex }: { num: number; ex: Exercise }) {
           <span className="text-[#34603f] font-bold">{target}</span>
         </div>
       </div>
+      {videoUrl ? (
+        <div
+          className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-[#4a875b]"
+          aria-label="動画あり"
+        >
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="#fff">
+            <polygon points="6 4 20 12 6 20" />
+          </svg>
+        </div>
+      ) : (
+        <div className="text-center text-[9px] leading-tight text-[#a59b8c]">
+          動画
+          <br />
+          なし
+        </div>
+      )}
     </div>
   );
 }
