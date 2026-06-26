@@ -83,3 +83,19 @@ export function videoNameByUrl(url: string | null | undefined): string | null {
   if (!url) return null;
   return URL_TO_VIDEO_NAME[url] ?? null;
 }
+
+// 確定代表名 → 8カテ部位 (主部位の自動補完用)。(不明) や 8カテ外は除外。
+const EIGHT_PARTS = new Set(["胸", "背中", "肩", "腕", "脚", "お尻", "腹筋", "全身"]);
+const NAME_TO_PART: Record<string, string> = {};
+for (const e of EXERCISES) {
+  if (e.部位 && EIGHT_PARTS.has(e.部位)) NAME_TO_PART[e.確定代表名] = e.部位;
+}
+
+/**
+ * 種目名(確定代表名)から 8カテ主部位を引く。
+ * 管理画面で種目を選んだ時の主部位 自動補完に使う。該当なし/不明は null。
+ */
+export function partByExerciseName(name: string | null | undefined): string | null {
+  if (!name) return null;
+  return NAME_TO_PART[name] ?? null;
+}

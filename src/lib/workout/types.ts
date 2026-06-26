@@ -90,6 +90,8 @@ export type Exercise = {
   //   - 空文字 "" = 明示的に「動画なし」(既定があっても出さない)
   // 解決は resolveExerciseVideo() を使う (src/lib/workout/video-master.ts)
   video_url?: string;
+  // スーパーセット (交互に行う) フラグ (2026-06-26 表示・編集対応)
+  superset?: boolean;
 };
 
 export type DayMenu = {

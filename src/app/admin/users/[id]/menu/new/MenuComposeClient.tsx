@@ -16,6 +16,7 @@ import {
   listExerciseMaster,
   listExercisesWithVideo,
   videoNameByUrl,
+  partByExerciseName,
 } from "@/lib/workout/video-master";
 import { VimeoEmbed } from "@/components/VimeoEmbed";
 import type {
@@ -91,6 +92,7 @@ export function MenuComposeClient({
     "主部位",
     "補部位",
     "video_url", // 動画は同じ種目なら強度間で共通 (2026-06-25 W3a)
+    "superset", // スーパーセットも種目の性質なので強度間で共通
   ];
 
   // すべての強度の同じ日 index に mutation を適用 (該当 day がない強度はスキップ)
@@ -703,15 +705,34 @@ function ExerciseEditor({
 
         {/* 編集フィールド */}
         <div className="flex-1 min-w-0 space-y-2">
-          {/* 種目名 (オートコンプリート: 確定代表名から候補 + 自由入力も可) */}
+          {/* 種目名 (オートコンプリート: 確定代表名から候補 + 自由入力も可)
+              種目を選ぶと主部位が空なら自動補完 (③) */}
           <input
             type="text"
             value={displayName}
             list="exercise-name-options"
-            onChange={(e) => onUpdate("種目名", e.target.value)}
+            onChange={(e) => {
+              const v = e.target.value;
+              onUpdate("種目名", v);
+              const part = partByExerciseName(v);
+              if (part && (ex["主部位"] ?? []).length === 0) {
+                onUpdate("主部位", [part]);
+              }
+            }}
             placeholder="種目名 (入力で候補表示 / 自由入力も可)"
             className="w-full px-3 py-2 text-sm font-bold text-zinc-900 border border-[#e8ebe9] rounded-md bg-white focus:outline-none focus:border-[#00897b]"
           />
+
+          {/* スーパーセット (交互) トグル (②) */}
+          <label className="flex w-fit items-center gap-1.5 text-[11px] font-medium text-zinc-600 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={!!ex["superset"]}
+              onChange={(e) => onUpdate("superset", e.target.checked)}
+              className="accent-[#00897b]"
+            />
+            🔁 スーパーセット（交互に行う）
+          </label>
 
           <div className="grid grid-cols-2 gap-2">
             {/* 回数 */}
