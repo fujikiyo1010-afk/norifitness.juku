@@ -57,7 +57,7 @@ export function LessonRow({ lesson }: { lesson: LessonRowData }) {
 
   if (editing) {
     return (
-      <li className="rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 p-4">
+      <li className="rounded-[10px] border border-[#99f6e4] bg-[#f0fdfa] p-4">
         <p className="text-xs text-zinc-500 mb-2">編集中: {lesson.title}</p>
         <LessonForm
           mode={{
@@ -85,35 +85,33 @@ export function LessonRow({ lesson }: { lesson: LessonRowData }) {
   const released = isReleased(lesson.released_at);
 
   return (
-    <li className="rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
+    <li className="rounded-[10px] border border-[#e8ebe9] bg-white p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-medium text-zinc-900 dark:text-zinc-50">
-              {lesson.title}
-            </span>
-            <span className="text-xs text-zinc-500">#{lesson.sort_order}</span>
+            <span className="font-semibold text-zinc-900">{lesson.title}</span>
+            <span className="text-xs text-zinc-400 font-mono">#{lesson.sort_order}</span>
             {released ? (
-              <span className="text-xs rounded-full bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-100 px-2 py-0.5">
+              <span className="text-[11px] font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5">
                 公開中
               </span>
             ) : (
-              <span className="text-xs rounded-full bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-100 px-2 py-0.5">
+              <span className="text-[11px] font-bold rounded-full bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5">
                 予約: {formatJst(lesson.released_at)}
               </span>
             )}
             {!lesson.vimeo_url && (
-              <span className="text-xs rounded-full bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 px-2 py-0.5">
+              <span className="text-[11px] font-bold rounded-full bg-zinc-100 text-zinc-500 border border-zinc-200 px-2 py-0.5">
                 動画未設定
               </span>
             )}
           </div>
           {lesson.meta_tags && lesson.meta_tags.length > 0 && (
-            <div className="mt-1 flex flex-wrap gap-1">
+            <div className="mt-1.5 flex flex-wrap gap-1">
               {lesson.meta_tags.map((tag) => (
                 <span
                   key={tag}
-                  className="text-xs rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 px-1.5 py-0.5"
+                  className="text-[11px] rounded bg-zinc-100 text-zinc-600 px-1.5 py-0.5"
                 >
                   {tag}
                 </span>
@@ -121,20 +119,22 @@ export function LessonRow({ lesson }: { lesson: LessonRowData }) {
             </div>
           )}
           {lesson.description && (
-            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap line-clamp-2">
+            <p className="mt-1 text-sm text-zinc-600 whitespace-pre-wrap line-clamp-2">
               {lesson.description}
             </p>
           )}
           {lesson.vimeo_url && (
-            <p className="mt-1 text-xs text-zinc-500 truncate">🎥 {lesson.vimeo_url}</p>
+            <p className="mt-1.5 text-[11px] text-zinc-400 font-mono truncate">
+              {lesson.vimeo_url}
+            </p>
           )}
         </div>
-        <div className="flex shrink-0 gap-1">
+        <div className="flex shrink-0 gap-1.5">
           <button
             type="button"
             onClick={() => setEditing(true)}
             disabled={pending}
-            className="rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 px-2 py-1 text-xs"
+            className="rounded-md border border-zinc-300 bg-white px-2.5 py-1 text-xs font-medium hover:bg-zinc-50"
           >
             編集
           </button>
@@ -142,13 +142,13 @@ export function LessonRow({ lesson }: { lesson: LessonRowData }) {
             type="button"
             onClick={handleDelete}
             disabled={pending}
-            className="rounded-md border border-red-300 dark:border-red-800 bg-white dark:bg-zinc-950 px-2 py-1 text-xs text-red-700 dark:text-red-300 disabled:opacity-50"
+            className="rounded-md border border-red-300 bg-white px-2.5 py-1 text-xs font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
           >
             {pending ? "..." : "削除"}
           </button>
         </div>
       </div>
-      {error && <p className="mt-2 text-xs text-red-700 dark:text-red-300">❌ {error}</p>}
+      {error && <p className="mt-2 text-xs text-red-700">{error}</p>}
     </li>
   );
 }

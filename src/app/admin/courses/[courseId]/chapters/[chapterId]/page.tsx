@@ -2,7 +2,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { signOut } from "@/app/login/actions";
 import { LessonForm } from "./LessonForm";
 import { LessonRow, type LessonRowData } from "./LessonRow";
 
@@ -15,7 +14,7 @@ export default async function ChapterDetailPage({
 }: {
   params: RouteParams;
 }) {
-  const me = await requireAdmin();
+  await requireAdmin();
   const { courseId, chapterId } = await params;
 
   const supabase = createAdminClient();
@@ -59,81 +58,57 @@ export default async function ChapterDetailPage({
   }));
 
   return (
-    <main className="flex flex-1 flex-col p-6 sm:p-8">
-      <div className="mx-auto w-full max-w-3xl space-y-8">
-        <header className="flex items-start justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <nav className="text-xs text-zinc-500 space-x-1">
-              <Link href="/" className="underline hover:text-zinc-700 dark:hover:text-zinc-300">
-                ホーム
-              </Link>
-              <span>/</span>
-              <Link
-                href="/admin/courses"
-                className="underline hover:text-zinc-700 dark:hover:text-zinc-300"
-              >
-                コース管理
-              </Link>
-              <span>/</span>
-              <Link
-                href={`/admin/courses/${courseId}`}
-                className="underline hover:text-zinc-700 dark:hover:text-zinc-300"
-              >
-                {course?.title ?? "(コース)"}
-              </Link>
-              <span>/</span>
-              <span className="text-zinc-700 dark:text-zinc-300">{chapter.title}</span>
-            </nav>
-            <h1 className="mt-2 text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-              🎬 {chapter.title}
-            </h1>
-            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-              {me.name} さん ({me.role}) としてログイン中 / レッスン数: {rows.length}
-            </p>
-            {chapter.description && (
-              <p className="mt-2 text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap">
-                {chapter.description}
-              </p>
-            )}
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            <form action={signOut}>
-              <button
-                type="submit"
-                className="rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 px-3 py-1.5 text-xs font-medium"
-              >
-                ログアウト
-              </button>
-            </form>
-          </div>
-        </header>
+    <div className="px-7 py-6 max-w-[1180px] mx-auto">
+      <header className="mb-5">
+        <nav className="text-xs text-zinc-500 space-x-1.5">
+          <Link href="/admin/courses" className="hover:text-zinc-700 underline">
+            コース管理
+          </Link>
+          <span>/</span>
+          <Link
+            href={`/admin/courses/${courseId}`}
+            className="hover:text-zinc-700 underline"
+          >
+            {course?.title ?? "(コース)"}
+          </Link>
+          <span>/</span>
+          <span className="text-zinc-700">{chapter.title}</span>
+        </nav>
+        <h1 className="mt-2 text-xl font-bold text-zinc-900">{chapter.title}</h1>
+        {chapter.description && (
+          <p className="mt-1 text-sm text-zinc-600 whitespace-pre-wrap">
+            {chapter.description}
+          </p>
+        )}
+      </header>
 
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-            ➕ 新規レッスン追加
-          </h2>
-          <div className="rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
-            <LessonForm mode={{ kind: "create", courseId, chapterId }} />
-          </div>
-        </section>
+      {/* 新規レッスン追加 */}
+      <section className="bg-gradient-to-br from-white to-[#e0f2f1]/30 border border-[#b2dfdb] rounded-[12px] p-5 mb-7">
+        <h2 className="text-sm font-bold text-zinc-900 mb-3 flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#00897b]" />
+          新規レッスン追加
+        </h2>
+        <LessonForm mode={{ kind: "create", courseId, chapterId }} />
+      </section>
 
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-            📋 レッスン一覧 ({rows.length} 件)
-          </h2>
-          {rows.length === 0 ? (
-            <p className="text-sm text-zinc-500">
-              まだレッスンがありません。上のフォームから追加してください。
-            </p>
-          ) : (
-            <ul className="space-y-2">
-              {rows.map((l) => (
-                <LessonRow key={l.id} lesson={l} />
-              ))}
-            </ul>
-          )}
-        </section>
-      </div>
-    </main>
+      {/* レッスン一覧 */}
+      <section>
+        <div className="flex items-center gap-3 mb-3">
+          <h2 className="text-sm font-bold text-zinc-900">レッスン一覧</h2>
+          <span className="text-[11px] text-zinc-500 font-mono">全 {rows.length} 件</span>
+        </div>
+        {rows.length === 0 ? (
+          <div className="rounded-[10px] border border-dashed border-[#e8ebe9] bg-white p-8 text-center text-sm text-zinc-500">
+            まだレッスンがありません。上のフォームから追加してください。
+          </div>
+        ) : (
+          <ul className="space-y-2">
+            {rows.map((l) => (
+              <LessonRow key={l.id} lesson={l} />
+            ))}
+          </ul>
+        )}
+      </section>
+    </div>
   );
 }

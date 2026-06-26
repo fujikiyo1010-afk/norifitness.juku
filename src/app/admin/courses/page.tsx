@@ -1,14 +1,12 @@
-import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { signOut } from "@/app/login/actions";
 import { CourseForm } from "./CourseForm";
 import { CourseRow, type CourseRowData } from "./CourseRow";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminCoursesPage() {
-  const me = await requireAdmin();
+  await requireAdmin();
 
   const supabase = createAdminClient();
   const { data: courses } = await supabase
@@ -39,59 +37,41 @@ export default async function AdminCoursesPage() {
   }));
 
   return (
-    <main className="flex flex-1 flex-col p-6 sm:p-8">
-      <div className="mx-auto w-full max-w-3xl space-y-8">
-        <header className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs text-zinc-500">管理画面</p>
-            <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-              📚 コース管理
-            </h1>
-            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-              {me.name} さん ({me.role}) としてログイン中
-            </p>
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            <Link href="/" className="text-sm text-zinc-600 dark:text-zinc-400 underline">
-              ← ホームへ
-            </Link>
-            <form action={signOut}>
-              <button
-                type="submit"
-                className="rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 px-3 py-1.5 text-xs font-medium"
-              >
-                ログアウト
-              </button>
-            </form>
-          </div>
-        </header>
+    <div className="px-7 py-6 max-w-[1180px] mx-auto">
+      <header className="mb-5">
+        <h1 className="text-xl font-bold text-zinc-900">コース管理</h1>
+        <p className="text-xs text-zinc-500 mt-1">
+          コース ・ 章 ・ レッスンの追加 / 編集 / 削除ができます
+        </p>
+      </header>
 
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-            ➕ 新規コース追加
-          </h2>
-          <div className="rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
-            <CourseForm mode={{ kind: "create" }} />
-          </div>
-        </section>
+      {/* 新規コース追加 */}
+      <section className="bg-gradient-to-br from-white to-[#e0f2f1]/30 border border-[#b2dfdb] rounded-[12px] p-5 mb-7">
+        <h2 className="text-sm font-bold text-zinc-900 mb-3 flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#00897b]" />
+          新規コース追加
+        </h2>
+        <CourseForm mode={{ kind: "create" }} />
+      </section>
 
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-            📋 コース一覧 ({rows.length} 件)
-          </h2>
-          {rows.length === 0 ? (
-            <p className="text-sm text-zinc-500">
-              まだコースがありません。上のフォームから追加してください。
-            </p>
-          ) : (
-            <ul className="space-y-2">
-              {rows.map((c) => (
-                <CourseRow key={c.id} course={c} />
-              ))}
-            </ul>
-          )}
-        </section>
-      </div>
-    </main>
+      {/* 一覧 */}
+      <section>
+        <div className="flex items-center gap-3 mb-3">
+          <h2 className="text-sm font-bold text-zinc-900">コース一覧</h2>
+          <span className="text-[11px] text-zinc-500 font-mono">全 {rows.length} 件</span>
+        </div>
+        {rows.length === 0 ? (
+          <div className="rounded-[10px] border border-dashed border-[#e8ebe9] bg-white p-8 text-center text-sm text-zinc-500">
+            まだコースがありません。上のフォームから追加してください。
+          </div>
+        ) : (
+          <ul className="space-y-2">
+            {rows.map((c) => (
+              <CourseRow key={c.id} course={c} />
+            ))}
+          </ul>
+        )}
+      </section>
+    </div>
   );
 }
