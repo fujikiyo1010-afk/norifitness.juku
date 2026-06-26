@@ -100,6 +100,12 @@ export function AdminSideNav({
       icon: <BookIcon />,
     },
     {
+      label: "動画ライブラリ",
+      href: "/admin/videos",
+      matchPrefix: "/admin/videos",
+      icon: <FilmIcon />,
+    },
+    {
       label: "管理者",
       href: "/admin/admins",
       matchPrefix: "/admin/admins",
@@ -282,6 +288,15 @@ function BookIcon() {
     <svg {...iconProps}>
       <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
       <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+    </svg>
+  );
+}
+
+function FilmIcon() {
+  return (
+    <svg {...iconProps}>
+      <rect x="2" y="3" width="20" height="18" rx="2" />
+      <path d="M7 3v18M17 3v18M2 8h5M2 16h5M17 8h5M17 16h5" />
     </svg>
   );
 }

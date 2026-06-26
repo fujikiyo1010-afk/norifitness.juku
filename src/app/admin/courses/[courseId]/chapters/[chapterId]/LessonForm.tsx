@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createLesson, updateLesson } from "./actions";
+import { VideoPicker } from "@/app/admin/videos/VideoPicker";
 
 type LessonInitial = {
   title: string;
@@ -161,14 +162,20 @@ export function LessonForm({ mode }: { mode: Mode }) {
 
       <div className="space-y-1">
         <label className={labelClass}>Vimeo URL（メイン動画）</label>
-        <input
-          type="url"
-          value={vimeoUrl}
-          onChange={(e) => setVimeoUrl(e.target.value)}
-          disabled={pending}
-          placeholder="https://vimeo.com/123456789"
-          className={fieldClass}
-        />
+        <div className="flex gap-2">
+          <input
+            type="url"
+            value={vimeoUrl}
+            onChange={(e) => setVimeoUrl(e.target.value)}
+            disabled={pending}
+            placeholder="https://vimeo.com/123456789"
+            className={fieldClass}
+          />
+          <VideoPicker onSelect={(url) => setVimeoUrl(url)} />
+        </div>
+        <p className="text-[11px] text-zinc-400">
+          URL を直接貼るか、「ライブラリから選ぶ」で登録済みの動画を検索して選べます。
+        </p>
       </div>
 
       <div className="space-y-1">
