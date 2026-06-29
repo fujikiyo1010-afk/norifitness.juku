@@ -9,9 +9,10 @@ if (dsn) {
   Sentry.init({
     dsn,
     tracesSampleRate: 0.1,
-    environment: process.env.NEXT_PUBLIC_VERCEL_ENV ?? "production",
+    environment:
+      process.env.VERCEL_ENV ??
+      process.env.NEXT_PUBLIC_VERCEL_ENV ??
+      "production",
     enabled: process.env.NODE_ENV === "production",
-    debug: true, // diagnostic ・ Sentry の送信ログを stderr に出す ・ 動作確認後 false 戻す
   });
-  console.log("[sentry] server init done, dsn host:", new URL(dsn).host);
 }
