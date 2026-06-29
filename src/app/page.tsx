@@ -63,6 +63,29 @@ export default async function Home() {
     if (!shipment) {
       redirect("/onboarding");
     }
+
+    // 層1: カルテ入力を必須化 (= 関所)。新規受講生のみ対象。
+    // 既存受講生 (このカットオフより前に入会) はカルテ未提出でも影響させない。
+    // カットオフ = この機能の本番投入日 (= 必要なら調整)。
+    const CARTE_REQUIRED_SINCE = "2026-06-29T00:00:00+09:00";
+    const { data: u } = await adminSb
+      .from("users")
+      .select("joined_at")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (
+      u?.joined_at &&
+      new Date(u.joined_at) >= new Date(CARTE_REQUIRED_SINCE)
+    ) {
+      const { data: carte } = await adminSb
+        .from("user_workout_carte")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!carte) {
+        redirect("/workout/carte/new");
+      }
+    }
   }
 
   const [alerts, stats, lastWatched, goalSheet, monthlyAudit, admin, chatUnread] =

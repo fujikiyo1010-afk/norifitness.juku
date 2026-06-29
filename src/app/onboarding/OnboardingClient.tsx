@@ -88,7 +88,8 @@ export function OnboardingClient({
   }
 
   function finish() {
-    router.push("/");
+    // 層1: オンボ最後にカルテ入力を必須化 (= カルテ入力ページへ送る関所)
+    router.push("/workout/carte/new");
   }
 
   // 判定中 (= SSR / hydration 直後) は空白で待つ (= 一瞬のちらつき防止)
@@ -138,7 +139,7 @@ export function OnboardingClient({
               title="カルテ"
               lead={<>あなた専用の<br/><b>筋トレメニュー</b>を作るための情報</>}
               detail="性別 / 年齢 / 重点部位 / 環境 / 頻度 / 経験 / けが など"
-              after="ホーム画面からあとで記入してください"
+              after="このあと、最後に入力します"
             />}
             {step === 4 && <StepIntro
               icon={<TargetIcon />}
@@ -227,7 +228,7 @@ export function OnboardingClient({
                 onClick={finish}
                 className="w-full bg-[#4a875b] hover:bg-[#34603f] text-white rounded-xl py-3.5 text-sm font-bold shadow-md shadow-[#4a875b]/25 transition-colors"
               >
-                筋肉塾を始める →
+                カルテを入力する →
               </button>
             </div>
           )}
@@ -946,12 +947,12 @@ function Step8() {
         </div>
       </div>
       <h1 className="text-[20px] font-bold text-[#004d40] leading-snug mb-2.5 anim-fade-up anim-delay-1">
-        準備完了!
+        あと 1 ステップ
       </h1>
       <p className="text-xs text-zinc-600 leading-relaxed anim-fade-up anim-delay-2">
-        さあ、 学びを
+        最後に<b className="text-[#004d40] font-bold">カルテ</b>を入力して
         <br />
-        <b className="text-[#004d40] font-bold">はじめましょう</b>
+        あなた専用メニューを作りましょう
       </p>
     </div>
   );

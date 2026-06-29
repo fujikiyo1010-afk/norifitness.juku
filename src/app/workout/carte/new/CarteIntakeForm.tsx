@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createMyCarte, type MyCarteInput } from "@/lib/workout/actions";
@@ -165,9 +165,9 @@ export function CarteIntakeForm() {
   const [isPending, startTransition] = useTransition();
   const [mode, setMode] = useState<"form" | "preview">("form");
   const [error, setError] = useState<string | null>(null);
-  const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null);
+  const autoSaveSkipRef = useRef(true);
   const [missingKeys, setMissingKeys] = useState<Set<string>>(new Set());
 
   // フォーム state
@@ -198,6 +198,29 @@ export function CarteIntakeForm() {
     setHydrated(true);
   }, []);
 
+  // 入力が変わるたびに自動保存 (debounce 600ms)。手動「下書き保存」ボタンは廃止。
+  useEffect(() => {
+    if (!hydrated) return;
+    // 復元直後の初回は保存しない (= 無意味な上書き回避)
+    if (autoSaveSkipRef.current) {
+      autoSaveSkipRef.current = false;
+      return;
+    }
+    const t = setTimeout(() => {
+      try {
+        const now = new Date().toISOString();
+        localStorage.setItem(
+          DRAFT_KEY,
+          JSON.stringify({ ...draft, _savedAt: now })
+        );
+        setDraftSavedAt(now);
+      } catch {
+        // 保存失敗は黙殺 (= 入力体験を止めない)
+      }
+    }, 600);
+    return () => clearTimeout(t);
+  }, [draft, hydrated]);
+
   function update<K extends keyof DraftState>(key: K, value: DraftState[K]) {
     setDraft((d) => ({ ...d, [key]: value }));
     // 必須項目が埋まったらエラー解除
@@ -213,27 +236,9 @@ export function CarteIntakeForm() {
     return arr.includes(value) ? arr.filter((v) => v !== value) : [...arr, value];
   }
 
-  // 下書き保存
-  function handleSaveDraft() {
-    setError(null);
-    setSavedMessage(null);
-    try {
-      const now = new Date().toISOString();
-      localStorage.setItem(
-        DRAFT_KEY,
-        JSON.stringify({ ...draft, _savedAt: now })
-      );
-      setDraftSavedAt(now);
-      setSavedMessage("下書きを保存しました");
-    } catch {
-      setError("下書き保存に失敗しました");
-    }
-  }
-
   // プレビュー前バリデーション
   function handlePreview() {
     setError(null);
-    setSavedMessage(null);
     const missing = new Set<string>();
     if (!draft.birthday) missing.add("birthday");
     if (draft.environments.length === 0) missing.add("environments");
@@ -331,9 +336,11 @@ export function CarteIntakeForm() {
                 オリジナルメニューを作るための、はじめの 1 歩。
               </div>
               <div className="text-[11px] text-[#6a6256] leading-relaxed pt-2.5 border-t border-[#e7dcc9]">
-                記入後、のりfitness が確認してメニューを作成します。
+                カルテの提出を確認したら、メニューを表示します。
                 <br />
-                提出後は変更できないので、慎重にお選びください。
+                できる限り正確な記入をお願いします。
+                <br />
+                『カルテ変更リクエスト』で後の変更は可能です。
               </div>
             </div>
 
@@ -353,10 +360,11 @@ export function CarteIntakeForm() {
               </div>
             </div>
 
-            {/* 下書き保存通知 */}
+            {/* 自動保存の表示 (入力するたびに自動保存) */}
             {draftSavedAt && (
-              <div className="px-4 py-2.5 bg-[#f8f9fa] text-[10px] text-[#6a6256] text-center border-b border-[#e7dcc9]">
-                下書きを保存しました ・{" "}
+              <div className="px-4 py-2 bg-[#f8f9fa] text-[10px] text-[#6a6256] text-center border-b border-[#e7dcc9]">
+                <span className="text-[#4a875b] font-bold">✓ 自動保存しました</span>
+                {" ・ "}
                 {new Date(draftSavedAt).toLocaleString("ja-JP", {
                   month: "2-digit",
                   day: "2-digit",
@@ -412,28 +420,15 @@ export function CarteIntakeForm() {
                 })}
             </div>
 
-            {/* エラー / 成功メッセージ */}
+            {/* エラーメッセージ */}
             {error && (
               <div className="mx-4 my-2 px-3 py-2 bg-red-50 border border-red-200 rounded-md text-xs text-red-800">
                 ⚠ {error}
               </div>
             )}
-            {savedMessage && (
-              <div className="mx-4 my-2 px-3 py-2 bg-green-50 border border-green-200 rounded-md text-xs text-green-800">
-                ✓ {savedMessage}
-              </div>
-            )}
 
-            {/* 保存バー (= 最後の質問の下に通常配置 / sticky 解除でボタンが質問を隠さない) */}
+            {/* 保存バー (= 入力は自動保存されるため プレビューのみ) */}
             <div className="bg-[#fffdf8] border-t border-[#e7dcc9] px-4 py-3 flex gap-2">
-              <button
-                type="button"
-                disabled={isPending}
-                onClick={handleSaveDraft}
-                className="px-4 py-3 bg-[#fffdf8] text-[#2b2620] border border-[#e7dcc9] rounded-2xl text-[12px] font-bold disabled:opacity-50"
-              >
-                下書き保存
-              </button>
               <button
                 type="button"
                 disabled={isPending}
