@@ -42,12 +42,10 @@ export default async function AccountPage() {
 
   const { data: profile } = await supabase
     .from("users")
-    .select("name, email, email_notification_enabled")
+    .select("email_notification_enabled")
     .eq("id", user.id)
     .maybeSingle();
 
-  const name = (profile?.name as string | null) ?? "受講生";
-  const email = (profile?.email as string | null) ?? user.email ?? "";
   const emailNotificationEnabled = Boolean(
     profile?.email_notification_enabled ?? true
   );
@@ -57,32 +55,8 @@ export default async function AccountPage() {
       <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9]">
         <MemberHeader title="設定" />
 
-        {/* プロフィールカード */}
-        <div className="px-4 pt-4 pb-2">
-          <Link
-            href="/account/profile"
-            className="block bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl p-4 hover:border-zinc-300 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-[#f8f9fa] flex items-center justify-center text-base font-bold text-zinc-700 border border-[#e7dcc9]">
-                {name.charAt(0)}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-bold text-[#2b2620] truncate">
-                  {name}
-                </div>
-                <div className="text-[11px] text-[#6a6256] mt-0.5 truncate">
-                  {email}
-                </div>
-              </div>
-              <span className="text-[#a59b8c] text-sm">→</span>
-            </div>
-          </Link>
-        </div>
-
-        {/* アカウント (アプリ通知 / LINE 連携 = 線② で復活) */}
+        {/* アカウント (氏名/メール表示・編集はプロフィール画面に移管) */}
         <Section title="アカウント">
-          <LinkRow icon={<UserIcon />} label="プロフィール編集" href="/account/profile" />
           <LinkRow icon={<LockIcon />} label="パスワード変更" href="/account/password" />
           <LinkRow icon={<MailIcon />} label="メールアドレス変更" href="/account/email" last />
         </Section>
@@ -197,14 +171,6 @@ function ToggleRow({
 // 線画 SVG アイコン (絵文字禁止ルール準拠)
 // =====================================================================
 
-function UserIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>
-  );
-}
 function LockIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
