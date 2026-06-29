@@ -2,6 +2,7 @@ import { randomBytes } from "crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getResendClient, getFromEmail } from "@/lib/email/resend";
 import { buildInvitationEmail } from "@/lib/email/templates/invitation";
+import { reportError } from "@/lib/observability/report";
 
 const INVITATION_TTL_HOURS = 48;
 
@@ -120,6 +121,10 @@ export async function createInvitation(
     });
 
     if (sendResult.error) {
+      await reportError(
+        new Error(sendResult.error.message ?? "invitation email send failed"),
+        { where: "createInvitation", email: normalizedEmail }
+      );
       await supabase.from("invitations").delete().eq("id", invitation.id);
       return {
         ok: false,
@@ -152,6 +157,10 @@ export async function createInvitation(
       inviteUrl,
     };
   } catch (e) {
+    await reportError(e, {
+      where: "createInvitation:exception",
+      email: normalizedEmail,
+    });
     await supabase.from("invitations").delete().eq("id", invitation.id);
     return {
       ok: false,
