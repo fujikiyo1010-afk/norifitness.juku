@@ -7,8 +7,8 @@ import { getAdminInfo } from "@/lib/auth/admin";
  *
  * 目的: 「エラーが本当に Sentry に届くか」を本番で安全に確かめる。
  * 使い方(どちらでも可):
- *   - 管理者でログイン中に GET /api/_diag/sentry を開く (鍵不要)
- *   - GET /api/_diag/sentry?key=<CRON_SECRET>
+ *   - 管理者でログイン中に GET /api/diag/sentry を開く (鍵不要)
+ *   - GET /api/diag/sentry?key=<CRON_SECRET>
  *   → captureException + captureMessage を flush 付きで送信し、結果を返す。
  * 守り: 管理者セッション or CRON_SECRET 一致時のみ動作。検証が済んだら削除可。
  */
