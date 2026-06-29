@@ -1,18 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { reportError, reportMessage } from "@/lib/observability/report";
+import { getAdminInfo } from "@/lib/auth/admin";
 
 /**
  * Sentry 着弾検証用エンドポイント (2026-06-29)
  *
  * 目的: 「エラーが本当に Sentry に届くか」を本番で安全に確かめる。
- * 使い方: GET /api/_diag/sentry?key=<CRON_SECRET>
+ * 使い方(どちらでも可):
+ *   - 管理者でログイン中に GET /api/_diag/sentry を開く (鍵不要)
+ *   - GET /api/_diag/sentry?key=<CRON_SECRET>
  *   → captureException + captureMessage を flush 付きで送信し、結果を返す。
- * 守り: CRON_SECRET 一致時のみ動作 (= 一般公開しない)。検証が済んだら削除可。
+ * 守り: 管理者セッション or CRON_SECRET 一致時のみ動作。検証が済んだら削除可。
  */
 export async function GET(req: NextRequest) {
   const key = req.nextUrl.searchParams.get("key");
   const secret = process.env.CRON_SECRET;
-  if (!secret || key !== secret) {
+  const admin = await getAdminInfo();
+  const authorized = !!admin || (!!secret && key === secret);
+  if (!authorized) {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
 
