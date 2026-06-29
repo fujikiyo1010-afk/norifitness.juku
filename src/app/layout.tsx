@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Noto_Sans_JP, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
 import "./globals.css";
-import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 import { MemberBottomNav } from "@/components/MemberBottomNav";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { NavigationProgress } from "@/components/NavigationProgress";
@@ -61,7 +60,6 @@ export default function RootLayout({
           <NavigationProgress />
         </Suspense>
         {children}
-        <PWAInstallBanner />
         <MemberBottomNav />
         <ServiceWorkerRegister />
       </body>
