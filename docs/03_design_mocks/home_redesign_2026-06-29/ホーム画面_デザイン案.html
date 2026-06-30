@@ -219,16 +219,14 @@ const NAV_ALT=`<div class="tab on"><div class="d"></div>ホーム</div><div clas
 const PATS={
 'グループ分けカード':()=>HD+`<div class="body">${GREET}${alertBar}${board()}${bm()}${train}<div class="sec">カラダ</div>${rows(KARADA)}<div class="sec">まなび</div>${cont()}${prog()}${rows(MANABI)}<div class="sec">サポート・特典</div>${rows(SUPPORT)}</div>`,
 'グループ分けタイル':()=>HD+`<div class="body">${GREET}${board()}${bm()}${train}<div class="sec">カラダ</div>${grid(KARADA)}<div class="sec">まなび</div>${cont()}${prog()}${grid(MANABI)}<div class="sec">サポート・特典</div>${grid(SUPPORT)}</div>`,
-'2グループ':()=>HD+`<div class="body">${GREET}${board()}${bm()}${train}<div class="sec">トレーニング & まなび</div>${cont()}${prog()}${grid(['food','bmrec','course','learn','tools'])}<div class="sec">サポート・特典</div>${grid(SUPPORT)}</div>`,
-'フラット':()=>HD+`<div class="body">${GREET}${board()}${bm()}${train}${cont()}${prog()}${grid(ALL)}</div>`,
 '1画面ギュッと':()=>HD+`<div class="body">${GREET}${board()}<div style="display:flex;gap:8px">${bmMini}${trainMini}</div>${cont()}${grid3(ALL)}</div>`,
 '折りたたみ':()=>HD+`<div class="body">${GREET}${board()}${bm()}${train}${cont()}${prog()}<div class="sec">よく使う</div>${grid(['food','course'])}<div class="more">すべての機能を見る ▾</div></div>`,
+'フラット':()=>HD+`<div class="body">${GREET}${board()}${bm()}${train}${cont()}${prog()}${grid(ALL)}</div>`,
 '大タイル':()=>HD+`<div class="body">${GREET}${board()}${bm()}${train}${cont()}${prog()}<div class="grid">${ALL.map(k=>tile(k,'big')).join('')}</div></div>`,
 'リスト':()=>HD+`<div class="body">${GREET}${board()}${bm()}${train}${cont()}${prog()}<div class="sec">メニュー</div>${rows(ALL)}</div>`,
 '★統合':()=>HD+`<div class="body">${GREET}${alertBar}${board()}<div class="sec">今日の3つ</div>${bm()}${train}${foodSection()}${cont()}${prog()}<div class="sec">よく使う</div>${grid(['course','learn'])}<div class="more">すべての機能 ▾（ツール・月次・チャット・フォーム・プロテイン・目標）</div></div>`,
-'今日特化(実行)':()=>HD+`<div class="body">${GREET}${board()}<div class="sec">今日のミッション</div><div class="card">${chk(true,'体組成を記録','完了 ・ 68.4kg')}${chk(false,'今日のトレーニング (3日目・中)','胸・背中の日 ▶')}${chk(false,'食事を投稿','朝・昼・夜の写真 ＋')}</div>${cont()}<div class="more">コース・学び・設定はこちら ▾</div></div>`,
-'ストリーク前面':()=>HD+`<div class="body">${GREET}${streakCard}${board()}<div class="sec">今日の3つ</div>${bm()}<div style="display:flex;gap:8px">${trainMini}${foodMini}</div>${prog()}<div class="more">すべての機能 ▾</div></div>`,
-'下ナビ再編':()=>HD+`<div class="body">${GREET}${board()}<div class="sec">今日の3つ</div>${bm()}${train}${foodSection()}${cont()}${prog()}<div class="sec">まなび</div>${grid(['course','learn','tools'])}<div class="more">月次・チャット・フォーム・プロテイン・目標 ▾</div></div>`,
+'今日特化(実行)':()=>HD+`<div class="body">${GREET}${board()}<div class="sec">今日のミッション</div><div class="card">${chk(true,'体組成を記録','完了 ・ 68.4kg')}${chk(false,'今日のトレーニング (3日目)','胸・背中の日 ▶')}${chk(false,'食事を投稿','朝・昼・夜の写真 ＋')}</div>${cont()}<div class="more">コース・学び・設定はこちら ▾</div></div>`,
+'ストリーク前面':()=>HD+`<div class="body">${GREET}${streakCard}${board()}<div class="sec">今日の3つ</div>${bm()}${train}${foodSection()}${prog()}<div class="more">すべての機能 ▾</div></div>`,
 };
 
 const ST={pat:'グループ分けカード',bm:1,food:1,col:1,prog:1,board:1,icon:'line'};
