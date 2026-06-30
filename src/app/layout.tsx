@@ -5,6 +5,7 @@ import "./globals.css";
 import { MemberBottomNav } from "@/components/MemberBottomNav";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { NavigationProgress } from "@/components/NavigationProgress";
+import { BootSplash } from "@/components/BootSplash";
 
 const notoSansJp = Noto_Sans_JP({
   variable: "--font-noto-sans-jp",
@@ -56,6 +57,9 @@ export default function RootLayout({
       className={`${notoSansJp.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#f9f5ed]">
+        <Suspense fallback={null}>
+          <BootSplash />
+        </Suspense>
         <Suspense fallback={null}>
           <NavigationProgress />
         </Suspense>

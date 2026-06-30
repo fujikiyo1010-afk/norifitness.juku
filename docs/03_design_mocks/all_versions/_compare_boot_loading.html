@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>起動ローディング 3版 並べて比較</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; background: #eceff1; color: #263238; padding: 24px; }
+  h1 { font-size: 20px; margin-bottom: 4px; }
+  .lead { font-size: 13px; color: #607d8b; margin-bottom: 20px; }
+  .row { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+  .col { background: #fff; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,.08); overflow: hidden; width: 360px; }
+  .head { padding: 12px 16px; border-bottom: 1px solid #eee; }
+  .badge { display: inline-block; font-weight: 700; font-size: 16px; color: #fff; background: #4a875b; border-radius: 8px; padding: 3px 12px; margin-bottom: 6px; }
+  .badge.final { background: #d84315; }
+  .desc { font-size: 12px; line-height: 1.6; color: #455a64; }
+  .desc b { color: #263238; }
+  .frame-wrap { width: 360px; height: 640px; background: #000; }
+  iframe { width: 360px; height: 640px; border: 0; display: block; }
+  .note { margin-top: 20px; font-size: 12px; color: #607d8b; line-height: 1.7; max-width: 1140px; margin-left: auto; margin-right: auto; }
+</style>
+</head>
+<body>
+  <h1>🚀 起動ローディング画面 ・ 3版 並べて比較</h1>
+  <p class="lead">左から v2 / v3 / v4。動き（ロゴが上がる→文字→ドット点滅）は3版とも同じ。違いは「キャラの円の処理」だけです。</p>
+
+  <div class="row">
+    <div class="col">
+      <div class="head">
+        <span class="badge">v2</span>
+        <div class="desc"><b>キャラ画像なし</b><br>中央はプレースホルダー（丸）。実物キャラが入っていない一番初期の版。</div>
+      </div>
+      <div class="frame-wrap"><iframe src="boot_loading@v2.html"></iframe></div>
+    </div>
+
+    <div class="col">
+      <div class="head">
+        <span class="badge">v3</span>
+        <div class="desc"><b>キャラ画像そのまま</b><br>のりキャラを等倍で表示。背景は少しグレーがかった円。</div>
+      </div>
+      <div class="frame-wrap"><iframe src="boot_loading@v3.html"></iframe></div>
+    </div>
+
+    <div class="col">
+      <div class="head">
+        <span class="badge final">v4 ＝最終</span>
+        <div class="desc"><b>キャラ画像を少し拡大（×1.2）</b><br>円の中いっぱいにキャラを配置。背景はまっ白な円。スクショで送ってくれたのはこれ。</div>
+      </div>
+      <div class="frame-wrap"><iframe src="boot_loading@v4.html"></iframe></div>
+    </div>
+  </div>
+
+  <p class="note">
+    ※ 各枠は実物の起動画面をそのまま埋め込んでいます（アニメは枠を再読み込みすると最初から再生）。<br>
+    ※ 3版とも色は旧ティール緑（#00897b）で作られています。実装時は現行ブランド緑 #4a875b に統一します。<br>
+    ※ 見分け方：v2＝キャラ無し / v3・v4＝キャラ有り。v3 と v4 は「キャラの拡大率と円の白さ」の微差のみ。
+  </p>
+</body>
+</html>

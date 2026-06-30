@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>v4 起動画面 ・ 現行ブランド色プレビュー</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #4a875b;          /* 旧 #00897b → 現行ブランド緑 */
+    --logo: #004d40;             /* ホーム見出し「筋肉塾」と同じ濃緑（維持）*/
+    --ink3: #8a958c;
+    --bg-warm: linear-gradient(135deg, #e6efe8, #fffbe6);  /* ティール味を現行緑寄りに微調整 */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: #eceff1; color: #263238; padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .cap { font-size: 13px; color: #607d8b; text-align: center; max-width: 420px; line-height: 1.7; }
+  .cap b { color: #263238; }
+
+  /* 実寸 iPhone 枠 */
+  .phone { width: 390px; height: 800px; background: #fff; border: 9px solid #1c1c1c; border-radius: 44px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,.22); position: relative; }
+
+  .boot-screen {
+    width: 100%; height: 100%;
+    background: var(--bg-warm);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 40px 28px; position: relative; overflow: hidden;
+  }
+  .boot-screen::before { content:''; position:absolute; top:-100px; right:-120px; width:300px; height:300px; border-radius:50%; background:rgba(74,135,91,.06); }
+  .boot-screen::after  { content:''; position:absolute; bottom:-90px; left:-110px; width:260px; height:260px; border-radius:50%; background:rgba(255,235,59,.06); }
+
+  .character {
+    width: 168px; height: 168px; border-radius: 50%;
+    box-shadow: 0 12px 44px rgba(74,135,91,.20), 0 4px 12px rgba(0,0,0,.06);
+    margin-bottom: 36px; position: relative; z-index: 1; overflow: hidden; background: #fff;
+    animation: charFadeIn 0.6s ease-out;
+  }
+  .character img { width:100%; height:100%; object-fit:cover; display:block; transform: scale(1.2); }
+  @keyframes charFadeIn { 0% { opacity:0; transform: scale(.85);} 100% { opacity:1; transform: scale(1);} }
+
+  .logo { font-size: 32px; font-weight: 700; color: var(--logo); letter-spacing: .1em; margin-bottom: 6px; z-index:1; animation: logoSlideUp .5s ease-out .25s both; }
+  .logo-tag { font-size: 10px; color: var(--ink3); letter-spacing: .22em; margin-bottom: 64px; z-index:1; font-family:'Inter',sans-serif; animation: logoSlideUp .5s ease-out .4s both; }
+  @keyframes logoSlideUp { from { opacity:0; transform: translateY(12px);} to { opacity:1; transform: translateY(0);} }
+
+  .progress-dots { display:flex; gap:7px; z-index:1; animation: dotsFadeIn .4s ease-out .6s both; }
+  .progress-dots span { width:9px; height:9px; border-radius:50%; background: var(--primary); animation: dotPulse 1.4s ease-in-out infinite; }
+  .progress-dots span:nth-child(2){ animation-delay:.2s; }
+  .progress-dots span:nth-child(3){ animation-delay:.4s; }
+  @keyframes dotsFadeIn { from{opacity:0;} to{opacity:1;} }
+  @keyframes dotPulse { 0%,80%,100%{ opacity:.25; transform:scale(1);} 40%{ opacity:1; transform:scale(1.2);} }
+
+  .replay { font-size:12px; color:#4a875b; cursor:pointer; text-decoration:underline; }
+</style>
+</head>
+<body>
+  <p class="cap"><b>v4 ・ 現行ブランド色版</b><br>ロゴ「筋肉塾」＝濃緑 #004d40（ホーム見出しと同色）／ ドット・影・装飾円＝ブランド緑 #4a875b ／ 背景は淡いグラデ。<br>これが実際にアプリ起動時に出るイメージです。</p>
+
+  <div class="phone" id="phone">
+    <div class="boot-screen">
+      <div class="character"><img src="images/nori-character.png" alt="のりキャラクター"></div>
+      <div class="logo">筋肉塾</div>
+      <div class="logo-tag">NORIFITNESS</div>
+      <div class="progress-dots"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+  <span class="replay" onclick="const p=document.getElementById('phone');const c=p.innerHTML;p.innerHTML='';void p.offsetWidth;p.innerHTML=c;">↻ アニメをもう一度再生</span>
+</body>
+</html>

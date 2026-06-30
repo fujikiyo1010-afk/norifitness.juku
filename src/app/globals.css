@@ -132,3 +132,87 @@ body {
     0 1px 2px rgba(74, 135, 91, 0.1);
   transform: translateY(1px);
 }
+
+/* ============================================================
+   起動スプラッシュ (= BootSplash) アニメーション
+   起動/リロード時にブランド画面を 1.4 秒前後表示 → フェード除去
+   ============================================================ */
+@keyframes bootCharFadeIn {
+  0%   { opacity: 0; transform: scale(0.85); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes bootLogoSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes bootDotsFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes bootDotPulse {
+  0%, 80%, 100% { opacity: 0.25; transform: scale(1); }
+  40%           { opacity: 1;    transform: scale(1.2); }
+}
+
+.boot-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 28px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #e6efe8, #fffbe6);
+  opacity: 1;
+  transition: opacity 0.45s ease;
+  /* 安全網: JS が死んでも 3.5s 後に CSS だけで強制的に消える (= 画面ロック防止) */
+  animation: bootSafetyHide 0.5s ease 3.5s forwards;
+}
+@keyframes bootSafetyHide {
+  to { opacity: 0; visibility: hidden; pointer-events: none; }
+}
+.boot-splash.boot-hide { opacity: 0; pointer-events: none; }
+.boot-splash::before {
+  content: ''; position: absolute; top: -100px; right: -120px;
+  width: 300px; height: 300px; border-radius: 50%;
+  background: rgba(74, 135, 91, 0.06); pointer-events: none;
+}
+.boot-splash::after {
+  content: ''; position: absolute; bottom: -90px; left: -110px;
+  width: 260px; height: 260px; border-radius: 50%;
+  background: rgba(255, 235, 59, 0.06); pointer-events: none;
+}
+.boot-char {
+  width: 168px; height: 168px; border-radius: 50%;
+  margin-bottom: 36px; position: relative; z-index: 1;
+  overflow: hidden; background: #fff;
+  box-shadow: 0 12px 44px rgba(74, 135, 91, 0.20), 0 4px 12px rgba(0, 0, 0, 0.06);
+  animation: bootCharFadeIn 0.6s ease-out;
+}
+.boot-char img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transform: scale(1.2); /* 画像内の黒円を枠外に追い出す */
+}
+.boot-logo {
+  font-size: 32px; font-weight: 700; color: #004d40;
+  letter-spacing: 0.1em; margin-bottom: 6px; z-index: 1;
+  animation: bootLogoSlideUp 0.5s ease-out 0.25s both;
+}
+.boot-tag {
+  font-size: 10px; color: #8a958c; letter-spacing: 0.22em;
+  margin-bottom: 64px; z-index: 1;
+  animation: bootLogoSlideUp 0.5s ease-out 0.4s both;
+}
+.boot-dots { display: flex; gap: 7px; z-index: 1; animation: bootDotsFadeIn 0.4s ease-out 0.6s both; }
+.boot-dots span {
+  width: 9px; height: 9px; border-radius: 50%; background: #4a875b;
+  animation: bootDotPulse 1.4s ease-in-out infinite;
+}
+.boot-dots span:nth-child(2) { animation-delay: 0.2s; }
+.boot-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .boot-char, .boot-logo, .boot-tag, .boot-dots, .boot-dots span { animation: none; }
+}
