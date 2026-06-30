@@ -105,15 +105,25 @@
   .nav .tab.on{color:#34603f;}
   .nav .tab .d{width:19px;height:19px;border-radius:6px;background:#eee4d4;margin:0 auto 3px;}
   .nav .tab.on .d{background:#4a875b;}
+  .tabbar{max-width:760px;margin:0 auto 14px;display:flex;gap:8px;background:#fff;border-radius:12px;padding:8px;box-shadow:0 2px 10px rgba(0,0,0,.06);}
+  .tabbar .tb{flex:1;border:none;background:transparent;border-radius:8px;padding:11px;font-size:13px;font-weight:800;color:#6a6256;cursor:pointer;}
+  .tabbar .tb.on{background:#4a875b;color:#fff;}
+  .foodwrap{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;max-width:1180px;margin:0 auto;}
+  .ff-label{text-align:center;font-size:12.5px;font-weight:800;color:#34603f;margin-bottom:7px;}
+  .ff{width:360px;background:#f9f5ed;border-radius:22px;overflow:hidden;border:1px solid #e7dcc9;box-shadow:0 12px 32px rgba(0,0,0,.14);}
 </style>
 </head>
 <body>
+<div class="tabbar">
+  <button class="tb on" data-tab="home" onclick="setTab('home')">ホーム画面</button>
+  <button class="tb" data-tab="food" onclick="setTab('food')">食事添削セクション</button>
+</div>
+<div id="homeview">
 <div class="wrap">
   <div class="panel">
     <div class="title">筋肉塾 ホーム画面 デザイン案</div>
     <div class="pg" id="pats"></div>
     <div class="sub"><div class="lab">体組成の見せ方</div><div class="row1" id="bms"></div></div>
-    <div class="sub"><div class="lab">食事添削の見せ方</div><div class="row1" id="foods"></div></div>
     <div class="sub"><div class="lab">続きから 背景</div><div class="row1" id="cols"></div></div>
     <div class="sub"><div class="lab">学習進捗の見せ方</div><div class="row1" id="progs"></div></div>
     <div class="sub"><div class="lab">掲示板の見せ方</div><div class="row1" id="boards"></div></div>
@@ -122,6 +132,10 @@
   <div class="phone"><div id="screen"></div>
     <div class="nav" id="nav"></div>
   </div>
+</div>
+</div>
+<div id="foodview" style="display:none">
+  <div class="foodwrap" id="foodwrap"></div>
 </div>
 
 <script>
@@ -185,7 +199,7 @@ function cont(){const c=COLORS[ST.col];return `<div class="card slim" style="bac
 function prog(){const s=ST.prog;
  if(s==1)return `<div class="card" style="padding:12px 13px"><span class="cap">学習の進捗</span><div class="pb"><div class="pf"></div></div><div class="three"><div class="b"><div class="n">12</div><div class="l">完了レッスン</div></div><div class="b"><div class="n">—</div><div class="l">視聴時間</div></div><div class="b"><div class="n">5</div><div class="l">入会日数</div></div></div></div>`;
  if(s==2)return `<div class="card" style="padding:12px 13px"><span class="cap">学習の進捗</span><div class="pb"><div class="pf"></div></div><div style="font-size:12px;font-weight:700;color:#34603f">12 / 217 レッスン（35%）</div></div>`;
- if(s==3)return `<div class="card" style="padding:12px 13px;display:flex;align-items:center;gap:14px"><div class="donut"><div class="in">35%</div></div><div><span class="cap">学習の進捗</span><div style="font-size:12px;font-weight:700;margin-top:3px">完了 12 レッスン</div><div style="font-size:10px;color:#6a6256">入会 5 日目</div></div></div>`;
+ if(s==3)return `<div class="card" style="padding:12px 13px;display:flex;align-items:center;gap:14px"><div class="donut"><div class="in">35%</div></div><div><span class="cap">学習の進捗</span><div style="font-size:12px;font-weight:700;margin-top:3px">完了 12 / 217 レッスン</div><div style="font-size:10px;color:#6a6256">入会 5 日目</div></div></div>`;
  if(s==4)return `<div class="three"><div class="b"><div class="n">12</div><div class="l">完了レッスン</div></div><div class="b"><div class="n">35%</div><div class="l">学習進捗</div></div><div class="b"><div class="n">5</div><div class="l">入会日数</div></div></div>`;
  return `<div class="card" style="padding:11px 13px;font-size:11.5px;font-weight:700;color:#34603f">学習 35% ・ 完了12レッスン ・ 入会5日目<div class="pb" style="margin-top:6px"><div class="pf"></div></div></div>`;
 }
@@ -205,8 +219,8 @@ const foodBig=`<div class="card slim" style="background:linear-gradient(135deg,#
 const streakCard=`<div class="card" style="padding:13px;background:linear-gradient(135deg,#fff3e6,#fffbe6);border-color:#f0d9b5"><div style="display:flex;align-items:center;gap:10px;color:#c2693f"><div style="font-size:30px;font-weight:800;display:flex;align-items:center;gap:4px">${flame(26)}5</div><div><div style="font-size:13px;font-weight:800;color:#a5631f">継続5日目</div><div style="font-size:10.5px;color:#6a6256">毎日コツコツ、いい調子です</div></div></div><div style="display:flex;gap:8px;margin-top:10px"><div style="flex:1;text-align:center;background:#fffdf8;border:1px solid #f0d9b5;border-radius:10px;padding:6px;font-size:12px;font-weight:800;color:#c2693f">体組成 5日連続</div><div style="flex:1;text-align:center;background:#fffdf8;border:1px solid #f0d9b5;border-radius:10px;padding:6px;font-size:12px;font-weight:800;color:#c2693f">食事 3日連続</div></div></div>`;
 const foodMini=`<div class="card slim" style="flex:1;background:linear-gradient(135deg,#fdf0e2,#fffbe6);border-color:#f0d9b5"><span class="cap" style="color:#c2693f">食事 ・ 今日</span><div class="t1" style="font-size:12.5px;margin-top:2px">投稿する</div><div class="gobtn" style="color:#c2693f">＋ 写真</div></div>`;
 const chk=(done,t,s)=>`<div class="row"><span style="width:22px;height:22px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;${done?'background:#4a875b;border:2px solid #4a875b;color:#fff;font-size:13px;font-weight:800':'border:2px solid #c9bfa9'}">${done?'✓':''}</span><div class="g"><div class="rt">${t}</div><div class="rs">${s}</div></div></div>`;
-function foodSection(){
- const s=ST.food, head=`<span class="cap" style="color:#c2693f">食事添削 ・ 今日</span>`, gr='background:linear-gradient(135deg,#fdf0e2,#fffbe6);border-color:#f0d9b5';
+function foodSection(n){
+ const s=n||ST.food, head=`<span class="cap" style="color:#c2693f">食事添削 ・ 今日</span>`, gr='background:linear-gradient(135deg,#fdf0e2,#fffbe6);border-color:#f0d9b5';
  if(s==1)return `<div class="card slim" style="${gr}">${head}<div class="t1" style="margin-top:2px">今日の食事を投稿 <span class="nb" style="background:#c2693f">返信あり</span></div><div class="gobtn" style="color:#c2693f">＋ 写真を追加して投稿 →</div></div>`;
  if(s==2)return `<div class="card" style="padding:12px 13px;${gr}">${head}<div style="display:flex;justify-content:space-between;align-items:baseline;margin:3px 0 7px"><span style="font-size:11px;color:#6a6256">合計 <b style="font-size:15px;color:#c2693f">1,180</b> kcal</span><span style="font-size:10px;color:#a5631f">P60 / F35 / C140</span></div><div style="display:flex;gap:6px">${['朝','昼','夕','おやつ'].map(m=>`<div style="flex:1;border:1px dashed #e0c9a8;border-radius:10px;padding:8px 2px;text-align:center"><div style="width:22px;height:22px;border-radius:50%;background:#c2693f;color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;font-weight:800">＋</div><div style="font-size:9px;color:#6a6256">${m}</div></div>`).join('')}</div></div>`;
  if(s==3)return `<div class="card slim" style="${gr}"><div style="display:flex;align-items:center;gap:10px">${ico('food','big')}<div style="flex:1"><div class="rt">食事添削 ・ 今日の食事を投稿</div><div class="rs">昨日分に返信あり</div></div><span class="ar">›</span></div></div>`;
@@ -229,20 +243,35 @@ const PATS={
 'ストリーク前面':()=>HD+`<div class="body">${GREET}${streakCard}${board()}<div class="sec">今日の3つ</div>${bm()}${train}${foodSection()}${prog()}<div class="more">すべての機能 ▾</div></div>`,
 };
 
-const ST={pat:'グループ分けカード',bm:1,food:1,col:1,prog:1,board:1,icon:'line'};
+const ST={pat:'★統合',bm:1,food:1,col:1,prog:1,board:1,icon:'line'};
 const pats=document.getElementById('pats');
 Object.keys(PATS).forEach(k=>{const b=document.createElement('button');b.className='pat';b.textContent=k;b.onclick=()=>{ST.pat=k;render();};b.dataset.k=k;pats.appendChild(b);});
 function chips(id,key){const el=document.getElementById(id);['1','2','3','4','5'].forEach(n=>{const c=document.createElement('span');c.className='chip';c.textContent=n;c.dataset.v=n;c.onclick=()=>{ST[key]=+n;render();};el.appendChild(c);});}
-chips('bms','bm');chips('foods','food');chips('cols','col');chips('progs','prog');chips('boards','board');
+chips('bms','bm');chips('cols','col');chips('progs','prog');chips('boards','board');
 const iconsEl=document.getElementById('icons');
 [['line','線画(単色)'],['color','カラー']].forEach(([v,l])=>{const c=document.createElement('span');c.className='chip';c.textContent=l;c.dataset.v=v;c.onclick=()=>{ST.icon=v;render();};iconsEl.appendChild(c);});
 function render(){
   document.getElementById('screen').innerHTML=PATS[ST.pat]();
   document.getElementById('nav').innerHTML = ST.pat==='下ナビ再編' ? NAV_ALT : NAV_STD;
   document.querySelectorAll('#pats .pat').forEach(b=>b.classList.toggle('on',b.dataset.k===ST.pat));
-  [['bms','bm'],['foods','food'],['cols','col'],['progs','prog'],['boards','board']].forEach(([id,k])=>document.querySelectorAll('#'+id+' .chip').forEach(c=>c.classList.toggle('on',+c.dataset.v===ST[k])));
+  [['bms','bm'],['cols','col'],['progs','prog'],['boards','board']].forEach(([id,k])=>document.querySelectorAll('#'+id+' .chip').forEach(c=>c.classList.toggle('on',+c.dataset.v===ST[k])));
   document.querySelectorAll('#icons .chip').forEach(c=>c.classList.toggle('on',c.dataset.v===ST.icon));
 }
+
+// ===== タブ (ホーム画面 / 食事添削セクション) =====
+const FOOD_NAMES=['大カード','バーンフィット風','行(最小)','PFC強調','添削往復'];
+function renderFood(){
+  document.getElementById('foodwrap').innerHTML=[1,2,3,4,5].map(n=>
+    `<div><div class="ff-label">${'①②③④⑤'[n-1]} ${FOOD_NAMES[n-1]}</div><div class="ff">${HD}<div class="body">${GREET}${foodSection(n)}</div></div></div>`
+  ).join('');
+}
+function setTab(t){
+  document.getElementById('homeview').style.display = t==='home'?'':'none';
+  document.getElementById('foodview').style.display = t==='food'?'':'none';
+  document.querySelectorAll('.tabbar .tb').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
+  if(t==='food') renderFood();
+}
+
 render();
 </script>
 </body>
