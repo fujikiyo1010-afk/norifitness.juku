@@ -184,12 +184,13 @@ body {
   width: 260px; height: 260px; border-radius: 50%;
   background: rgba(255, 235, 59, 0.06); pointer-events: none;
 }
+/* 入場アニメは外し「止め絵」状態で表示 = 層A(静止画)から継ぎ目なく接続。
+   動くのは下のドット点滅のみ。 */
 .boot-char {
   width: 168px; height: 168px; border-radius: 50%;
   margin-bottom: 36px; position: relative; z-index: 1;
   overflow: hidden; background: #fff;
   box-shadow: 0 12px 44px rgba(74, 135, 91, 0.20), 0 4px 12px rgba(0, 0, 0, 0.06);
-  animation: bootCharFadeIn 0.6s ease-out;
 }
 .boot-char img {
   width: 100%; height: 100%; object-fit: cover; display: block;
@@ -198,14 +199,12 @@ body {
 .boot-logo {
   font-size: 32px; font-weight: 700; color: #004d40;
   letter-spacing: 0.1em; margin-bottom: 6px; z-index: 1;
-  animation: bootLogoSlideUp 0.5s ease-out 0.25s both;
 }
 .boot-tag {
   font-size: 10px; color: #8a958c; letter-spacing: 0.22em;
   margin-bottom: 64px; z-index: 1;
-  animation: bootLogoSlideUp 0.5s ease-out 0.4s both;
 }
-.boot-dots { display: flex; gap: 7px; z-index: 1; animation: bootDotsFadeIn 0.4s ease-out 0.6s both; }
+.boot-dots { display: flex; gap: 7px; z-index: 1; }
 .boot-dots span {
   width: 9px; height: 9px; border-radius: 50%; background: #4a875b;
   animation: bootDotPulse 1.4s ease-in-out infinite;
