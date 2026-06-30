@@ -110,13 +110,15 @@
   .tabbar .tb.on{background:#4a875b;color:#fff;}
   .foodwrap{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;max-width:1180px;margin:0 auto;}
   .ff-label{text-align:center;font-size:12.5px;font-weight:800;color:#34603f;margin-bottom:7px;}
+  .foodwrap .ff-sec{width:100%;text-align:center;font-size:14px;font-weight:800;color:#1c1a16;margin:10px 0 2px;}
   .ff{width:360px;background:#f9f5ed;border-radius:22px;overflow:hidden;border:1px solid #e7dcc9;box-shadow:0 12px 32px rgba(0,0,0,.14);}
 </style>
 </head>
 <body>
 <div class="tabbar">
   <button class="tb on" data-tab="home" onclick="setTab('home')">ホーム画面</button>
-  <button class="tb" data-tab="food" onclick="setTab('food')">食事添削セクション</button>
+  <button class="tb" data-tab="food" onclick="setTab('food')">食事</button>
+  <button class="tb" data-tab="body" onclick="setTab('body')">体型変化の記録</button>
 </div>
 <div id="homeview">
 <div class="wrap">
@@ -136,6 +138,9 @@
 </div>
 <div id="foodview" style="display:none">
   <div class="foodwrap" id="foodwrap"></div>
+</div>
+<div id="bodyview" style="display:none">
+  <div class="foodwrap" id="bodywrap"></div>
 </div>
 
 <script>
@@ -220,12 +225,55 @@ const streakCard=`<div class="card" style="padding:13px;background:linear-gradie
 const foodMini=`<div class="card slim" style="flex:1;background:linear-gradient(135deg,#fdf0e2,#fffbe6);border-color:#f0d9b5"><span class="cap" style="color:#c2693f">食事 ・ 今日</span><div class="t1" style="font-size:12.5px;margin-top:2px">投稿する</div><div class="gobtn" style="color:#c2693f">＋ 写真</div></div>`;
 const chk=(done,t,s)=>`<div class="row"><span style="width:22px;height:22px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;${done?'background:#4a875b;border:2px solid #4a875b;color:#fff;font-size:13px;font-weight:800':'border:2px solid #c9bfa9'}">${done?'✓':''}</span><div class="g"><div class="rt">${t}</div><div class="rs">${s}</div></div></div>`;
 function foodSection(n){
- const s=n||ST.food, head=`<span class="cap" style="color:#c2693f">食事添削 ・ 今日</span>`, gr='background:linear-gradient(135deg,#fdf0e2,#fffbe6);border-color:#f0d9b5';
- if(s==1)return `<div class="card slim" style="${gr}">${head}<div class="t1" style="margin-top:2px">今日の食事を投稿 <span class="nb" style="background:#c2693f">返信あり</span></div><div class="gobtn" style="color:#c2693f">＋ 写真を追加して投稿 →</div></div>`;
- if(s==2)return `<div class="card" style="padding:12px 13px;${gr}">${head}<div style="display:flex;justify-content:space-between;align-items:baseline;margin:3px 0 7px"><span style="font-size:11px;color:#6a6256">合計 <b style="font-size:15px;color:#c2693f">1,180</b> kcal</span><span style="font-size:10px;color:#a5631f">P60 / F35 / C140</span></div><div style="display:flex;gap:6px">${['朝','昼','夕','おやつ'].map(m=>`<div style="flex:1;border:1px dashed #e0c9a8;border-radius:10px;padding:8px 2px;text-align:center"><div style="width:22px;height:22px;border-radius:50%;background:#c2693f;color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;font-weight:800">＋</div><div style="font-size:9px;color:#6a6256">${m}</div></div>`).join('')}</div></div>`;
- if(s==3)return `<div class="card slim" style="${gr}"><div style="display:flex;align-items:center;gap:10px">${ico('food','big')}<div style="flex:1"><div class="rt">食事添削 ・ 今日の食事を投稿</div><div class="rs">昨日分に返信あり</div></div><span class="ar">›</span></div></div>`;
- if(s==4)return `<div class="card" style="padding:12px 13px;${gr}">${head}<div style="margin:6px 0">${[['P たんぱく質',70],['F 脂質',55],['C 炭水化物',80]].map(([l,w])=>`<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px"><span style="font-size:9px;color:#6a6256;width:66px">${l}</span><div style="flex:1;height:6px;background:#f0e0cf;border-radius:999px;overflow:hidden"><div style="height:100%;width:${w}%;background:#c2693f"></div></div></div>`).join('')}</div><div class="gobtn" style="color:#c2693f">＋ 写真を追加して投稿 →</div></div>`;
- return `<div class="card" style="padding:12px 13px;${gr}">${head}<div style="display:flex;gap:8px;align-items:flex-start;margin:6px 0"><div style="width:26px;height:26px;border-radius:50%;background:#c2693f;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0">の</div><div style="background:#fff7ef;border-radius:4px 12px 12px 12px;padding:7px 10px;font-size:11.5px;flex:1">昨日の夕食、たんぱく質バッチリ。今日も同じ調子で！</div></div><div class="gobtn" style="color:#c2693f">＋ 今日の分を投稿 →</div></div>`;
+ const s=n||ST.food, head=`<span class="cap" style="color:#2b2620">食事添削 ・ 今日</span>`, gr='background:#ffffff;border-color:#e3e1dc';
+ if(s==1)return `<div class="card slim" style="${gr}">${head}<div class="t1" style="margin-top:2px;color:#1c1a16">今日の食事を投稿 <span class="nb" style="background:#2b2620">返信あり</span></div><div class="gobtn" style="color:#2b2620">＋ 写真を追加して投稿 →</div></div>`;
+ if(s==2)return `<div class="card" style="padding:12px 13px;${gr}">${head}<div style="display:flex;justify-content:space-between;align-items:baseline;margin:3px 0 7px"><span style="font-size:11px;color:#555">合計 <b style="font-size:15px;color:#1c1a16">1,180</b> kcal</span><span style="font-size:10px;color:#555">P60 / F35 / C140</span></div><div style="display:flex;gap:6px">${['朝','昼','夕','おやつ'].map(m=>`<div style="flex:1;border:1px dashed #cfcabf;border-radius:10px;padding:8px 2px;text-align:center"><div style="width:22px;height:22px;border-radius:50%;background:#2b2620;color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;font-weight:800">＋</div><div style="font-size:9px;color:#555">${m}</div></div>`).join('')}</div></div>`;
+ if(s==3)return `<div class="card" style="padding:12px 13px;${gr}">${head}<div style="display:flex;gap:7px;overflow-x:auto;margin-top:8px;padding-bottom:2px">${[0,1,2].map(()=>`<div style="flex:0 0 auto;width:66px;height:66px;border-radius:10px;background:#ededed;display:flex;align-items:center;justify-content:center;color:#9a958c">${ico('food','sm')}</div>`).join('')}<div style="flex:0 0 auto;width:66px;height:66px;border-radius:10px;border:1px dashed #cfcabf;display:flex;align-items:center;justify-content:center;color:#2b2620;font-weight:800;font-size:22px">＋</div></div></div>`;
+ if(s==4)return `<div class="card" style="padding:12px 13px;${gr}">${head}<div style="margin:6px 0">${[['P たんぱく質',70,'#2b2620'],['F 脂質',55,'#8a857c'],['C 炭水化物',80,'#bdb8ae']].map(([l,w,c])=>`<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px"><span style="font-size:9px;color:#555;width:66px">${l}</span><div style="flex:1;height:6px;background:#ededed;border-radius:999px;overflow:hidden"><div style="height:100%;width:${w}%;background:${c}"></div></div></div>`).join('')}</div><div class="gobtn" style="color:#2b2620">＋ 写真を追加して投稿 →</div></div>`;
+ return `<div class="card" style="padding:12px 13px;${gr}">${head}<div style="display:flex;gap:8px;align-items:flex-start;margin:6px 0"><div style="width:26px;height:26px;border-radius:50%;background:#2b2620;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0">の</div><div style="background:#f2f1ee;border-radius:4px 12px 12px 12px;padding:7px 10px;font-size:11.5px;color:#2b2620;flex:1">昨日の夕食、たんぱく質バッチリ。今日も同じ調子で！</div></div><div class="gobtn" style="color:#2b2620">＋ 今日の分を投稿 →</div></div>`;
+}
+// ===== 遷移先：食事の詳細画面 (MyFitnessPal風 PFC) =====
+const DHD=(t)=>`<div class="hd" style="justify-content:flex-start;gap:8px"><span style="color:#2b2620;font-size:17px;line-height:1">‹</span><div class="logo" style="color:#1c1a16;font-size:15px">${t}</div></div>`;
+function pfcBars(){return `<div style="display:flex;gap:10px;margin:4px 0 12px">${[['たんぱく質','2','201',1,'#2b2620'],['脂質','22','92',24,'#8a857c'],['炭水化物','41','47',87,'#bdb8ae']].map(([l,a,b,w,c])=>`<div style="flex:1;text-align:center"><div style="font-size:9.5px;color:#555">${l}</div><div style="height:5px;background:#ededed;border-radius:999px;overflow:hidden;margin:4px 0"><div style="height:100%;width:${w}%;background:${c}"></div></div><div style="font-size:10px;color:#1c1a16;font-weight:700">${a}/${b}g</div></div>`).join('')}</div>`;}
+function foodDetail(n){
+ const slots=`<div style="display:flex;flex-direction:column;gap:7px">${['朝食','昼食','夕食','おやつ'].map(m=>`<div class="card" style="display:flex;align-items:center;gap:10px;padding:11px 13px;border-color:#e3e1dc"><div style="width:26px;height:26px;border-radius:50%;background:#2b2620;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800">＋</div><div style="flex:1;font-size:12.5px;font-weight:700;color:#1c1a16">${m}</div><span style="color:#c9bfa9">›</span></div>`).join('')}</div>`;
+ if(n==1)return DHD('今日の食事')+`<div class="body" style="gap:8px">
+   <div style="font-size:11px;color:#777">火曜日, 6月30日</div><div style="font-size:15px;font-weight:800;color:#1c1a16;margin-top:-3px">今日の摂取量</div>
+   <div style="display:flex;align-items:center;justify-content:space-around;margin:6px 0">
+     <div style="text-align:center"><div style="font-size:17px;font-weight:800;color:#1c1a16">963</div><div style="font-size:9px;color:#777">残り</div></div>
+     <div style="width:100px;height:100px;border-radius:50%;background:conic-gradient(#2b2620 0 47%,#e8e8e8 47% 100%);display:flex;align-items:center;justify-content:center"><div style="width:78px;height:78px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:24px;font-weight:800;color:#1c1a16">865</div><div style="font-size:8px;color:#777">摂取 kcal</div></div></div>
+     <div style="text-align:center"><div style="font-size:17px;font-weight:800;color:#1c1a16">1828</div><div style="font-size:9px;color:#777">目標</div></div>
+   </div>${pfcBars()}${slots}</div>`;
+ return DHD('今日の食事')+`<div class="body" style="gap:8px">
+   <div class="card" style="padding:13px;border-color:#e3e1dc"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:11px;color:#555">今日の摂取</span><span style="font-size:11px;color:#555">目標 1828 kcal</span></div><div style="font-size:30px;font-weight:800;color:#1c1a16;margin:2px 0">865<span style="font-size:12px;color:#777"> kcal</span></div><div style="height:7px;background:#ededed;border-radius:999px;overflow:hidden"><div style="height:100%;width:47%;background:#2b2620"></div></div>${pfcBars()}</div>${slots}</div>`;
+}
+// ===== 体型変化の記録 (MyFitnessPal風) =====
+function bodyDetail(n){
+ const spark=`<svg viewBox="0 0 60 24" width="60" height="22" style="overflow:visible"><polyline points="0,18 12,14 24,16 36,10 48,12 60,6" fill="none" stroke="#2b2620" stroke-width="2"/><circle cx="60" cy="6" r="2.5" fill="#2b2620"/></svg>`;
+ const head=DHD('体型変化の記録');
+ if(n==1)return head+`<div class="body" style="gap:10px">
+   <div class="sec" style="color:#1c1a16">体重 & 体脂肪</div>
+   <div style="display:flex;gap:9px">
+     <div class="card" style="flex:1;padding:12px;border-color:#e3e1dc"><div style="font-size:12px;font-weight:800;color:#1c1a16">体重実測値</div><div style="font-size:9px;color:#777">最近の7回分</div><div style="text-align:right;margin:8px 0">${spark}</div><div style="font-size:20px;font-weight:800;color:#1c1a16">68.4<span style="font-size:11px;color:#777"> kg</span></div></div>
+     <div class="card" style="flex:1;padding:12px;border-color:#e3e1dc"><div style="font-size:12px;font-weight:800;color:#1c1a16">体脂肪率</div><div style="font-size:9px;color:#777">最近の7回分</div><div style="text-align:right;margin:8px 0">${spark}</div><div style="font-size:20px;font-weight:800;color:#1c1a16">18.2<span style="font-size:11px;color:#777"> %</span></div></div>
+   </div>
+   <div class="sec" style="color:#1c1a16">写真 & 体型変化</div>
+   <div style="display:flex;gap:9px">
+     <div class="card" style="flex:1;padding:12px;border-color:#e3e1dc;text-align:center"><div style="height:60px;display:flex;align-items:center;justify-content:center;color:#bbb">${ico('bmrec','big')}</div><div style="font-size:11px;color:#555;margin-top:4px">写真なし ›</div></div>
+     <div class="card" style="flex:1;padding:12px;border-color:#e3e1dc"><div style="font-size:13px;font-weight:800;color:#1c1a16">全身</div><div style="font-size:9px;color:#777">2026年6月30日</div><div style="border-left:3px solid #2b2620;padding-left:7px;margin-top:8px"><div style="font-size:15px;font-weight:800;color:#1c1a16">18.2%</div><div style="font-size:9px;color:#777">体脂肪率</div></div></div>
+   </div></div>`;
+ if(n==2)return head+`<div class="body" style="gap:10px">
+   <div class="card" style="padding:13px;border-color:#e3e1dc"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:12px;font-weight:800;color:#1c1a16">体重の推移</span><span style="font-size:11px;color:#c2693f;font-weight:700">-3.4kg</span></div><svg viewBox="0 0 280 90" width="100%" height="90" style="margin-top:8px"><polyline points="0,70 46,60 93,64 140,40 186,48 233,30 280,20" fill="none" stroke="#2b2620" stroke-width="2.5"/></svg><div style="display:flex;justify-content:space-between;font-size:9px;color:#999">6/1<span>6/30</span></div></div>
+   <div class="card" style="padding:13px;border-color:#e3e1dc"><div style="font-size:12px;font-weight:800;color:#1c1a16">体脂肪率の推移</div><svg viewBox="0 0 280 60" width="100%" height="60" style="margin-top:6px"><polyline points="0,40 46,38 93,34 140,30 186,28 233,22 280,18" fill="none" stroke="#8a857c" stroke-width="2.5"/></svg></div>
+   <div class="card" style="padding:12px;border-color:#e3e1dc"><div style="font-size:11px;font-weight:800;color:#1c1a16;margin-bottom:7px">記録写真</div><div style="display:flex;gap:7px;overflow-x:auto">${[0,1,2].map(()=>`<div style="flex:0 0 auto;width:64px;height:80px;border-radius:8px;background:#ededed"></div>`).join('')}<div style="flex:0 0 auto;width:64px;height:80px;border-radius:8px;border:1px dashed #cfcabf;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#2b2620">＋</div></div></div></div>`;
+ return head+`<div class="body" style="gap:10px">
+   <div class="sec" style="color:#1c1a16">ビフォー / アフター</div>
+   <div style="display:flex;gap:9px">
+     <div style="flex:1;text-align:center"><div style="height:150px;border-radius:12px;background:#ededed;display:flex;align-items:center;justify-content:center;color:#bbb">Before</div><div style="font-size:10px;color:#777;margin-top:4px">6/1 ・ 71.8kg</div></div>
+     <div style="flex:1;text-align:center"><div style="height:150px;border-radius:12px;background:#e3e1dc;display:flex;align-items:center;justify-content:center;color:#999">After</div><div style="font-size:10px;color:#777;margin-top:4px">6/30 ・ 68.4kg</div></div>
+   </div>
+   <div class="card" style="padding:12px;border-color:#e3e1dc;display:flex;justify-content:space-around;text-align:center"><div><div style="font-size:18px;font-weight:800;color:#1c1a16">-3.4kg</div><div style="font-size:9px;color:#777">体重</div></div><div><div style="font-size:18px;font-weight:800;color:#1c1a16">-2.1%</div><div style="font-size:9px;color:#777">体脂肪率</div></div></div>
+   <div style="text-align:center;font-size:11px;color:#2b2620;font-weight:700">＋ 今日の写真を追加</div></div>`;
 }
 const NAV_STD=`<div class="tab on"><div class="d"></div>ホーム</div><div class="tab"><div class="d"></div>コース</div><div class="tab"><div class="d"></div>記録</div><div class="tab"><div class="d"></div>筋トレ</div><div class="tab"><div class="d"></div>プロフィール</div>`;
 const NAV_ALT=`<div class="tab on"><div class="d"></div>ホーム</div><div class="tab"><div class="d"></div>コース</div><div class="tab"><div class="d"></div>食事</div><div class="tab"><div class="d"></div>筋トレ</div><div class="tab"><div class="d"></div>プロフィール</div>`;
@@ -259,17 +307,28 @@ function render(){
 }
 
 // ===== タブ (ホーム画面 / 食事添削セクション) =====
-const FOOD_NAMES=['大カード','バーンフィット風','行(最小)','PFC強調','添削往復'];
+const FOOD_NAMES=['大カード','バーンフィット風','写真サムネ','PFC強調','添削往復'];
+const FOOD_DETAIL_NAMES=['MyFitnessPal風（ドーナツ＋PFC）','カロリーバー＋PFC'];
+const BODY_NAMES=['MyFitnessPal風（カード＋写真）','推移グラフ重視','ビフォーアフター'];
+const NUM='①②③④⑤';
+function frame(label,inner){return `<div><div class="ff-label">${label}</div><div class="ff">${inner}</div></div>`;}
 function renderFood(){
-  document.getElementById('foodwrap').innerHTML=[1,2,3,4,5].map(n=>
-    `<div><div class="ff-label">${'①②③④⑤'[n-1]} ${FOOD_NAMES[n-1]}</div><div class="ff">${HD}<div class="body">${GREET}${foodSection(n)}</div></div></div>`
-  ).join('');
+  let h='<div class="ff-sec">ホーム上の食事カード（5案・白黒）</div>';
+  h+=[1,2,3,4,5].map(n=>frame(`${NUM[n-1]} ${FOOD_NAMES[n-1]}`,`${HD}<div class="body">${foodSection(n)}</div>`)).join('');
+  h+='<div class="ff-sec">遷移先：食事の詳細画面（2案・PFC表示）</div>';
+  h+=[1,2].map(n=>frame(`${NUM[n-1]} ${FOOD_DETAIL_NAMES[n-1]}`,foodDetail(n))).join('');
+  document.getElementById('foodwrap').innerHTML=h;
+}
+function renderBody(){
+  document.getElementById('bodywrap').innerHTML=[1,2,3].map(n=>frame(`${NUM[n-1]} ${BODY_NAMES[n-1]}`,bodyDetail(n))).join('');
 }
 function setTab(t){
   document.getElementById('homeview').style.display = t==='home'?'':'none';
   document.getElementById('foodview').style.display = t==='food'?'':'none';
+  document.getElementById('bodyview').style.display = t==='body'?'':'none';
   document.querySelectorAll('.tabbar .tb').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
   if(t==='food') renderFood();
+  if(t==='body') renderBody();
 }
 
 render();
