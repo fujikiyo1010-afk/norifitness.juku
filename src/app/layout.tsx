@@ -32,6 +32,16 @@ export const metadata: Metadata = {
     // 画像は public/splash/ (Playwright で BootSplash の止め絵を解像度別に書き出し)。
     startupImage: [
       {
+        url: "/splash/apple-splash-640-1136.png",
+        media:
+          "(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)",
+      },
+      {
+        url: "/splash/apple-splash-1080-2340.png",
+        media:
+          "(device-width: 360px) and (device-height: 780px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      {
         url: "/splash/apple-splash-750-1334.png",
         media:
           "(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)",
@@ -94,6 +104,11 @@ export const metadata: Metadata = {
       { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
     ],
     apple: "/icons/apple-touch-icon.png",
+  },
+  // iOS の起動画像 (apple-touch-startup-image) は apple 専用の capable メタが
+  // 無いと表示されないことがある。Next は mobile-web-app-capable しか吐かないため明示追加。
+  other: {
+    "apple-mobile-web-app-capable": "yes",
   },
 };
 
