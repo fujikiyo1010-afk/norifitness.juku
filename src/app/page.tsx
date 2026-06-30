@@ -48,43 +48,37 @@ export default async function Home() {
   if (!user) {
     redirect("/login");
   }
+  // 層1: カルテ入力を必須化 (= 関所)。新規受講生のみ対象。
+  // 既存受講生 (このカットオフより前に入会) はカルテ未提出でも影響させない。
+  // カットオフ = この機能の本番投入日 (= 必要なら調整)。
+  const CARTE_REQUIRED_SINCE = "2026-06-29T00:00:00+09:00";
+
+  // 関所に必要な4つを並列取得 (= 直列だと太平洋を最大4往復するため一括化)。
+  // リダイレクト判定そのものは下記で従来どおり順序を保って評価する。
+  // admin / onboarding 送りの人にも carte 等を余分に読むが user.id 引きの軽い読み取りで無害。
   const adminSb = createAdminClient();
-  const { data: adminRow } = await adminSb
-    .from("admin_users")
-    .select("id")
-    .eq("id", user.id)
-    .maybeSingle();
-  if (!adminRow) {
-    const { data: shipment } = await adminSb
-      .from("shipments")
-      .select("id")
+  const [adminRes, shipmentRes, userRes, carteRes] = await Promise.all([
+    adminSb.from("admin_users").select("id").eq("id", user.id).maybeSingle(),
+    adminSb.from("shipments").select("id").eq("user_id", user.id).maybeSingle(),
+    adminSb.from("users").select("joined_at").eq("id", user.id).maybeSingle(),
+    adminSb
+      .from("user_workout_carte")
+      .select("user_id")
       .eq("user_id", user.id)
-      .maybeSingle();
-    if (!shipment) {
+      .maybeSingle(),
+  ]);
+  const adminRow = adminRes.data;
+  if (!adminRow) {
+    if (!shipmentRes.data) {
       redirect("/onboarding");
     }
-
-    // 層1: カルテ入力を必須化 (= 関所)。新規受講生のみ対象。
-    // 既存受講生 (このカットオフより前に入会) はカルテ未提出でも影響させない。
-    // カットオフ = この機能の本番投入日 (= 必要なら調整)。
-    const CARTE_REQUIRED_SINCE = "2026-06-29T00:00:00+09:00";
-    const { data: u } = await adminSb
-      .from("users")
-      .select("joined_at")
-      .eq("id", user.id)
-      .maybeSingle();
+    const joinedAt = userRes.data?.joined_at;
     if (
-      u?.joined_at &&
-      new Date(u.joined_at) >= new Date(CARTE_REQUIRED_SINCE)
+      joinedAt &&
+      new Date(joinedAt) >= new Date(CARTE_REQUIRED_SINCE) &&
+      !carteRes.data
     ) {
-      const { data: carte } = await adminSb
-        .from("user_workout_carte")
-        .select("user_id")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      if (!carte) {
-        redirect("/workout/carte/new");
-      }
+      redirect("/workout/carte/new");
     }
   }
 
