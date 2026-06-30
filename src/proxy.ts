@@ -11,6 +11,7 @@ const PUBLIC_PATH_PREFIXES = [
   "/forgot-password", // パスワード忘れ → リセットメール送信
   "/reset-password",  // リセットメールリンクの着地点
   "/api", // API は各エンドポイントで個別に認証
+  "/mock", // 社内レビュー用の静的デザインモック (= 認証不要で共有 / レビュー後 削除可)
 ];
 
 function isPublicPath(pathname: string): boolean {
