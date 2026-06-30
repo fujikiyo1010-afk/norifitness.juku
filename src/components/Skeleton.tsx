@@ -51,7 +51,7 @@ export function SkeletonCards({ count = 3 }: { count?: number }) {
  */
 export function MemberPageSkeleton({ cards = 3 }: { cards?: number }) {
   return (
-    <main className="flex flex-1 flex-col bg-[#f9f5ed]">
+    <main className="loading-gate flex flex-1 flex-col bg-[#f9f5ed]">
       <SkeletonHeader />
       <div className="mx-auto w-full max-w-[460px] flex-1 p-4 sm:p-6">
         <SkeletonCards count={cards} />

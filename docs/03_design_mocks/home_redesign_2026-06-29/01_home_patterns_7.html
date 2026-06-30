@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ホーム画面 パターン提案 7種</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#e9e7e2;font-family:-apple-system,"Hiragino Kaku Gothic ProN",sans-serif;color:#2b2620;padding:16px;-webkit-font-smoothing:antialiased;}
+  .bar{max-width:880px;margin:0 auto 10px;background:#fff;border-radius:12px;padding:11px 12px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+  .bar h2{font-size:14px;margin-bottom:8px;}
+  .bar .btns{display:flex;flex-wrap:wrap;gap:6px;}
+  .bar button{border:1px solid #d8d2c4;background:#fff;border-radius:8px;padding:7px 11px;font-size:12px;font-weight:700;color:#4a4034;cursor:pointer;}
+  .bar button.on{background:#4a875b;border-color:#4a875b;color:#fff;}
+  .desc{max-width:880px;margin:0 auto 12px;background:#fffdf8;border:1px dashed #4a875b66;border-radius:10px;padding:9px 13px;font-size:12px;color:#34603f;line-height:1.6;}
+
+  .phone{width:390px;margin:0 auto;background:#f9f5ed;border-radius:24px;overflow:hidden;box-shadow:0 16px 44px rgba(0,0,0,.22);border:1px solid #e7dcc9;min-height:760px;}
+  .hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#fffdf8;border-bottom:1px solid #e7dcc9;}
+  .hd .logo{font-size:16px;font-weight:800;color:#004d40;letter-spacing:.04em;}
+  .hd .cog{width:26px;height:26px;color:#6a6256;}
+  .body{padding:13px;display:flex;flex-direction:column;gap:11px;}
+
+  .card{background:#fffdf8;border:1px solid #e7dcc9;border-radius:16px;}
+  .pad{padding:13px 14px;}
+  .cap{font-size:10px;font-weight:800;color:#a5631f;letter-spacing:.06em;margin-bottom:4px;}
+  .capg{color:#6a6256;}
+  .t1{font-size:14px;font-weight:700;line-height:1.35;}
+  .sub{font-size:11px;color:#6a6256;margin-top:3px;}
+
+  /* 体組成 大 */
+  .bm-big{display:flex;align-items:flex-end;gap:14px;}
+  .bm-big .main{display:flex;align-items:baseline;gap:4px;}
+  .bm-big .num{font-size:40px;font-weight:800;color:#34603f;line-height:1;}
+  .bm-big .u{font-size:12px;color:#6a6256;font-weight:700;}
+  .bm-big .side{font-size:12px;color:#6a6256;}
+  .bm-big .side b{color:#34603f;font-size:15px;}
+  .spark{height:34px;display:flex;align-items:flex-end;gap:3px;margin-top:8px;}
+  .spark i{flex:1;background:#cfe3d6;border-radius:2px 2px 0 0;}
+  .spark i.hi{background:#4a875b;}
+  .recbtn{margin-top:10px;display:block;text-align:center;background:#4a875b;color:#fff;border-radius:11px;padding:9px;font-size:12px;font-weight:700;}
+
+  /* 体組成 3枠 */
+  .bm3{display:flex;gap:9px;}
+  .bm3 .b{flex:1;background:#fffdf8;border:1px solid #e7dcc9;border-radius:14px;padding:12px 6px;text-align:center;}
+  .bm3 .n{font-size:24px;font-weight:800;color:#34603f;}
+  .bm3 .l{font-size:9.5px;color:#6a6256;margin-top:2px;}
+
+  /* 今日のメニュー */
+  .menu{background:linear-gradient(135deg,#e8f3ec,#fffbe6);border:1px solid #cfe3d6;}
+  .pill{display:inline-block;font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:999px;background:#4a875b;color:#fff;}
+  .pillout{display:inline-block;font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:999px;border:1px solid #4a875b;color:#34603f;}
+  .gobtn{display:inline-block;margin-top:8px;font-size:11px;font-weight:700;color:#34603f;}
+
+  /* 行 */
+  .row{display:flex;align-items:center;gap:11px;padding:12px 14px;}
+  .row+.row{border-top:1px solid #f0ead9;}
+  .ic{width:30px;height:30px;border-radius:9px;background:#eef4f0;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#4a875b;font-size:15px;}
+  .row .g{flex:1;min-width:0;}
+  .row .ar{color:#c9bfa9;}
+  .badge{font-size:9px;font-weight:800;background:#c2693f;color:#fff;border-radius:999px;padding:1px 6px;}
+
+  /* チェックリスト */
+  .chk{display:flex;align-items:center;gap:11px;padding:12px 14px;}
+  .chk+.chk{border-top:1px solid #f0ead9;}
+  .box{width:22px;height:22px;border-radius:7px;border:2px solid #c9bfa9;flex-shrink:0;}
+  .box.done{background:#4a875b;border-color:#4a875b;position:relative;}
+  .box.done::after{content:"✓";color:#fff;font-size:13px;font-weight:800;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+  .chk .g{flex:1;}
+  .chk .g1{font-size:13px;font-weight:700;}
+  .chk .g2{font-size:10.5px;color:#6a6256;}
+
+  /* セクション見出し */
+  .sec{font-size:11px;font-weight:800;color:#34603f;padding:2px 2px 0;display:flex;align-items:center;gap:6px;}
+  .sec::before{content:"";width:3px;height:13px;background:#4a875b;border-radius:2px;}
+
+  /* グリッド */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+  .tile{background:#fffdf8;border:1px solid #e7dcc9;border-radius:14px;padding:13px;position:relative;min-height:78px;display:flex;flex-direction:column;justify-content:space-between;}
+  .tile .ti{font-size:18px;}
+  .tile .tl{font-size:12px;font-weight:700;}
+  .tile .ts{font-size:9.5px;color:#6a6256;margin-top:1px;}
+  .tile .nb{position:absolute;top:8px;right:8px;font-size:8px;font-weight:800;background:#c2693f;color:#fff;border-radius:999px;padding:1px 5px;}
+
+  /* タイムライン */
+  .tl-wrap{position:relative;padding-left:8px;}
+  .tl-item{display:flex;gap:11px;padding-bottom:11px;position:relative;}
+  .tl-item::before{content:"";position:absolute;left:6px;top:22px;bottom:-2px;width:2px;background:#e0d8c6;}
+  .tl-item:last-child::before{display:none;}
+  .tl-dot{width:14px;height:14px;border-radius:50%;background:#4a875b;flex-shrink:0;margin-top:4px;z-index:1;border:3px solid #f9f5ed;}
+  .tl-dot.g{background:#cfc8b8;}
+  .tl-time{font-size:9.5px;color:#a59b8c;font-weight:700;}
+
+  /* 伴走 会話 */
+  .talk{display:flex;gap:9px;align-items:flex-start;}
+  .ava{width:34px;height:34px;border-radius:50%;background:#4a875b;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0;}
+  .bub{background:#eef4f0;border-radius:4px 14px 14px 14px;padding:9px 12px;font-size:12px;line-height:1.45;flex:1;}
+
+  /* ヒーロー */
+  .hero{background:linear-gradient(135deg,#e0f2f1,#fffbe6);padding:16px;}
+  .hero .hi{font-size:15px;font-weight:800;color:#2b2620;}
+  .hero .bmline{display:flex;align-items:baseline;gap:6px;margin-top:8px;}
+  .hero .bmline .n{font-size:34px;font-weight:800;color:#34603f;line-height:1;}
+  .hero .bmline .u{font-size:11px;color:#6a6256;font-weight:700;}
+  .hero .bmline .bf{font-size:12px;color:#6a6256;margin-left:6px;}
+
+  /* 下ナビ */
+  .nav{display:flex;background:#fffdf8;border-top:1px solid #e7dcc9;margin-top:4px;}
+  .nav .tab{flex:1;text-align:center;padding:7px 0 9px;font-size:9px;color:#a59b8c;font-weight:600;}
+  .nav .tab.on{color:#34603f;}
+  .nav .tab .d{width:20px;height:20px;border-radius:6px;background:#eee4d4;margin:0 auto 3px;}
+  .nav .tab.on .d{background:#4a875b;}
+  .hide{display:none;}
+  .muted{font-size:10px;color:#a59b8c;text-align:center;padding:4px;}
+</style>
+</head>
+<body>
+  <div class="bar">
+    <h2>ホーム画面 パターン提案（7種）</h2>
+    <div class="btns" id="btns"></div>
+  </div>
+  <div class="desc" id="desc"></div>
+  <div class="phone"><div id="screen"></div><div class="nav" id="nav"></div></div>
+
+<script>
+const COG='<svg class="cog" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
+const HD=`<div class="hd"><div class="logo">筋肉塾</div>${COG}</div>`;
+const SPARK='<div class="spark"><i style="height:40%"></i><i style="height:55%"></i><i style="height:48%"></i><i style="height:62%"></i><i style="height:58%"></i><i style="height:70%"></i><i class="hi" style="height:66%"></i></div>';
+
+// 共通パーツ
+const bmBig = `<div class="card pad"><div class="cap capg">今のからだ</div>
+  <div class="bm-big"><div class="main"><span class="num">68.4</span><span class="u">kg</span></div>
+  <div class="side">体脂肪 <b>18.2%</b><br>前週比 <b>-0.6kg</b></div></div>
+  ${SPARK}<span class="recbtn">タップして体組成を記録</span></div>`;
+const bm3 = `<div class="bm3"><div class="b"><div class="n">68.4</div><div class="l">体重 kg</div></div>
+  <div class="b"><div class="n">18.2</div><div class="l">体脂肪 %</div></div>
+  <div class="b"><div class="n">35%</div><div class="l">学習進捗</div></div></div>`;
+const menuCard = `<div class="card menu pad"><div class="cap">今日のメニュー ・ 3日目</div>
+  <div class="t1">胸・背中の日 <span class="pill">中</span></div>
+  <div class="sub">膝つき腕立て / ローイング / スクワット ほか3種目</div>
+  <div class="gobtn">▶ 実施を記録する →</div></div>`;
+const tsuki = (icon='🎬')=>`<div class="row"><div class="ic">${icon}</div><div class="g"><div class="t1" style="font-size:13px">トレーナーの動画返信が届いています</div><div class="sub">月次添削 ・ タップして見る</div></div><span class="badge">NEW</span></div>`;
+const meal = `<div class="row"><div class="ic">🍱</div><div class="g"><div class="t1" style="font-size:13px">今日の食事を投稿</div><div class="sub">食事添削 ・ 昨日分に返信あり</div></div><span class="ar">›</span></div>`;
+const lesson = `<div class="row"><div class="ic">📖</div><div class="g"><div class="t1" style="font-size:13px">第3章 L4 PFCバランスの基礎</div><div class="sub">続きから ・ 学習進捗 35%</div></div><span class="ar">›</span></div>`;
+const form = `<div class="row"><div class="ic">🎥</div><div class="g"><div class="t1" style="font-size:13px">初回無料 フォーム添削</div><div class="sub">オンラインで直接指導</div></div><span class="ar">›</span></div>`;
+const protein = `<div class="row"><div class="ic">🥤</div><div class="g"><div class="t1" style="font-size:13px">プロテインを購入</div><div class="sub">受講生特典 永久10%オフ</div></div><span class="ar">›</span></div>`;
+const goal = `<div class="row"><div class="ic">🎯</div><div class="g"><div class="t1" style="font-size:13px">目標管理シート</div><div class="sub">今月の目標を確認</div></div><span class="ar">›</span></div>`;
+
+const PAT = {
+1:{name:"1 ダッシュボード型",desc:"数値ファースト。最上部に大きな体組成カード(ミニグラフ付)→今日のメニュー→各機能。「今の自分」が主役。トレクラ/バーンフィット寄り。",
+ html:()=>HD+`<div class="body">
+  <div style="font-size:15px;font-weight:800;padding:2px 2px 0">こんにちは、太郎さん</div>
+  ${bmBig}${menuCard}
+  <div class="card">${tsuki()}${meal}${lesson}</div>
+  <div class="card">${form}${protein}</div></div>`},
+
+2:{name:"2 今日やること型",desc:"To-Doファースト。「今日のミッション」チェックリストを一番上に置き、行動を促す。習慣化アプリ的。",
+ html:()=>HD+`<div class="body">
+  <div style="font-size:15px;font-weight:800;padding:2px 2px 0">今日のミッション</div>
+  <div class="card">
+   <div class="chk"><div class="box done"></div><div class="g"><div class="g1">体組成を記録</div><div class="g2">完了 ・ 68.4kg</div></div></div>
+   <div class="chk"><div class="box"></div><div class="g"><div class="g1">今日のメニュー(3日目・中)</div><div class="g2">胸・背中 6種目 ▶</div></div></div>
+   <div class="chk"><div class="box"></div><div class="g"><div class="g1">食事を投稿</div><div class="g2">朝・昼・夜の写真</div></div></div>
+  </div>
+  ${bm3}
+  <div class="card">${tsuki()}${lesson}</div>
+  <div class="card">${form}${protein}</div></div>`},
+
+3:{name:"3 ヒーロー統合型",desc:"挨拶帯の中に体重・体脂肪を大きく溶け込ませる。今のホームの延長で、最小の変更で「現状が即見える」を実現。",
+ html:()=>HD+`<div class="hero"><div class="hi">こんにちは、太郎さん</div>
+   <div class="bmline"><span class="n">68.4</span><span class="u">kg</span><span class="bf">体脂肪 18.2% ・ 前週 -0.6kg</span></div>
+   ${SPARK}<span class="recbtn" style="margin-top:9px">体組成を記録</span></div>
+  <div class="body">${menuCard}
+  <div class="card">${tsuki()}${meal}${lesson}</div>
+  <div class="card">${form}${protein}</div></div>`},
+
+4:{name:"4 2大ハブ型(カラダ/まなび)",desc:"上=カラダ(体組成・メニュー・食事)、下=まなび(レッスン・月次)、最後=特典。情報を2(+1)グループに整理して迷わせない。",
+ html:()=>HD+`<div class="body">
+  <div style="font-size:14px;font-weight:800;padding:2px">こんにちは、太郎さん</div>
+  <div class="sec">カラダ</div>${bm3}${menuCard}<div class="card">${meal}</div>
+  <div class="sec">まなび</div><div class="card">${tsuki()}${lesson}</div>
+  <div class="sec">特典・サポート</div><div class="card">${form}${protein}</div></div>`},
+
+5:{name:"5 タイムライン型(今日の流れ)",desc:"朝→トレ→食事→夜、と1日の流れで縦に並ぶ。日記的で「今日これをこなす」が直感的。",
+ html:()=>HD+`<div class="body">
+  <div style="font-size:14px;font-weight:800;padding:2px">太郎さんの今日 ・ 6/29(日)</div>
+  <div class="card pad"><div class="tl-wrap">
+   <div class="tl-item"><div class="tl-dot"></div><div class="g"><div class="tl-time">朝</div><div class="t1" style="font-size:13px">体組成を記録 <span class="pillout">68.4kg 入力済</span></div></div></div>
+   <div class="tl-item"><div class="tl-dot"></div><div class="g"><div class="tl-time">トレーニング</div><div class="t1" style="font-size:13px">今日のメニュー(3日目・中) ▶</div><div class="sub">胸・背中 6種目</div></div></div>
+   <div class="tl-item"><div class="tl-dot g"></div><div class="g"><div class="tl-time">食事</div><div class="t1" style="font-size:13px">食事を投稿する</div><div class="sub">添削が返ってきます</div></div></div>
+   <div class="tl-item"><div class="tl-dot g"></div><div class="g"><div class="tl-time">夜</div><div class="t1" style="font-size:13px">レッスンの続き / 月次添削を見る</div></div></div>
+  </div></div>
+  <div class="card">${form}${protein}</div></div>`},
+
+6:{name:"6 機能グリッド型(タイル)",desc:"体組成ミニ帯+機能タイルを一覧。全機能が一目で見つかる発見性重視。機能が増えてもタイルを足すだけで拡張しやすい。",
+ html:()=>HD+`<div class="body">
+  <div style="font-size:14px;font-weight:800;padding:2px">こんにちは、太郎さん</div>${bm3}
+  <div class="grid">
+   <div class="tile" style="background:linear-gradient(135deg,#e8f3ec,#fffbe6)"><div class="ti">🏋️</div><div><div class="tl">今日のメニュー</div><div class="ts">3日目・中 ▶</div></div></div>
+   <div class="tile"><span class="nb">NEW</span><div class="ti">🎬</div><div><div class="tl">月次添削</div><div class="ts">動画返信 届いた</div></div></div>
+   <div class="tile"><span class="nb">返信</span><div class="ti">🍱</div><div><div class="tl">食事添削</div><div class="ts">今日の食事を投稿</div></div></div>
+   <div class="tile"><div class="ti">📖</div><div><div class="tl">コース</div><div class="ts">続き 進捗35%</div></div></div>
+   <div class="tile"><div class="ti">🎥</div><div><div class="tl">フォーム添削</div><div class="ts">初回無料</div></div></div>
+   <div class="tile"><div class="ti">🥤</div><div><div class="tl">プロテイン</div><div class="ts">永久10%オフ</div></div></div>
+  </div></div>`},
+
+7:{name:"7 伴走強調型",desc:"「のりfitnessから」(月次・食事の返信)を会話的に前面。直接指導・伴走の世界観を主役にして満足度の核を見せる。",
+ html:()=>HD+`<div class="body">
+  <div style="font-size:14px;font-weight:800;padding:2px">こんにちは、太郎さん</div>
+  <div class="sec">のりfitnessから</div>
+  <div class="card pad" style="display:flex;flex-direction:column;gap:11px">
+   <div class="talk"><div class="ava">の</div><div class="bub"><b>月次添削の動画</b>が届きました。今月もよく頑張りましたね！タップして確認 ▶</div></div>
+   <div class="talk"><div class="ava">社</div><div class="bub">昨日の<b>食事添削</b>に返信しました。夕食のたんぱく質、いい感じです👍</div></div>
+  </div>
+  ${bm3}${menuCard}
+  <div class="card">${meal}${lesson}</div></div>`},
+};
+
+const NAV=(p)=>`<div class="tab on"><div class="d"></div>ホーム</div><div class="tab"><div class="d"></div>コース</div><div class="tab"><div class="d"></div>記録</div><div class="tab"><div class="d"></div>筋トレ</div><div class="tab"><div class="d"></div>プロフィール</div>`;
+
+const btns=document.getElementById('btns');
+Object.keys(PAT).forEach(k=>{
+  const b=document.createElement('button');b.textContent=PAT[k].name;b.onclick=()=>show(k);b.id='b'+k;btns.appendChild(b);
+});
+function show(k){
+  document.getElementById('screen').innerHTML=PAT[k].html();
+  document.getElementById('nav').innerHTML=NAV(k);
+  document.getElementById('desc').innerHTML='<b>'+PAT[k].name+'</b>　'+PAT[k].desc;
+  Object.keys(PAT).forEach(x=>document.getElementById('b'+x).classList.toggle('on',x===k));
+}
+show('1');
+</script>
+</body>
+</html>

@@ -1,21 +1,13 @@
-import { SkeletonBox } from "@/components/Skeleton";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
-// 管理画面の待ち画面 (= デスクトップ前提・ニュートラルな配色)
+// 管理画面の待ち画面 = くるくる(円形スピナー)のみ。
+// loading-gate で最初の250msは透明 → 速いページでは出ない。
 export default function AdminLoading() {
   return (
-    <div className="p-6">
-      <div className="mx-auto w-full max-w-5xl space-y-6">
-        <SkeletonBox className="h-7 w-48" />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <SkeletonBox key={i} className="h-24 w-full rounded-2xl" />
-          ))}
-        </div>
-        <div className="space-y-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <SkeletonBox key={i} className="h-12 w-full rounded-xl" />
-          ))}
-        </div>
+    <div className="loading-gate flex min-h-[60vh] items-center justify-center text-[#4a875b]">
+      <div className="flex flex-col items-center gap-3">
+        <LoadingSpinner size={40} />
+        <span className="text-sm text-zinc-500">読み込み中…</span>
       </div>
     </div>
   );

@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ホーム 全項目反映 5種</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#e9e7e2;font-family:-apple-system,"Hiragino Kaku Gothic ProN",sans-serif;color:#2b2620;padding:16px;-webkit-font-smoothing:antialiased;}
+  .bar{max-width:760px;margin:0 auto 10px;background:#fff;border-radius:12px;padding:11px 12px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+  .bar h2{font-size:14px;margin-bottom:8px;}
+  .bar .btns{display:flex;flex-wrap:wrap;gap:6px;}
+  .bar button{border:1px solid #d8d2c4;background:#fff;border-radius:8px;padding:7px 11px;font-size:12px;font-weight:700;color:#4a4034;cursor:pointer;}
+  .bar button.on{background:#4a875b;border-color:#4a875b;color:#fff;}
+  .desc{max-width:760px;margin:0 auto 12px;background:#fffdf8;border:1px dashed #4a875b66;border-radius:10px;padding:9px 13px;font-size:12px;color:#34603f;line-height:1.6;}
+
+  .phone{width:390px;margin:0 auto;background:#f9f5ed;border-radius:24px;overflow:hidden;box-shadow:0 16px 44px rgba(0,0,0,.22);border:1px solid #e7dcc9;}
+  .scrollnote{width:390px;margin:6px auto 0;text-align:center;font-size:10px;color:#a59b8c;}
+  .hd{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:#fffdf8;border-bottom:1px solid #e7dcc9;position:sticky;top:0;z-index:5;}
+  .hd .logo{font-size:16px;font-weight:800;color:#004d40;letter-spacing:.04em;}
+  .hd .cog{width:23px;height:23px;color:#6a6256;}
+  .body{padding:12px;display:flex;flex-direction:column;gap:10px;}
+  .card{background:#fffdf8;border:1px solid #e7dcc9;border-radius:15px;}
+  .hi{font-size:15px;font-weight:800;padding:2px 2px 0;}
+  .sec{font-size:11px;font-weight:800;color:#34603f;display:flex;align-items:center;gap:6px;padding:4px 2px 0;}
+  .sec::before{content:"";width:3px;height:13px;background:#4a875b;border-radius:2px;}
+
+  .alertbar{display:flex;align-items:center;gap:8px;background:#fffbe6;border:1px solid #f0e0a8;border-radius:11px;padding:8px 11px;font-size:11.5px;color:#8a6d1f;}
+  .alertbar .ab{font-size:8px;font-weight:800;background:#caa12f;color:#fff;border-radius:999px;padding:1px 6px;margin-left:auto;}
+
+  /* 掲示板 */
+  .board{background:#fffdf8;border:1px solid #e7dcc9;border-radius:15px;padding:11px 12px;display:flex;flex-direction:column;gap:9px;}
+  .board .bhd{font-size:10.5px;font-weight:800;color:#34603f;display:flex;align-items:center;gap:6px;}
+  .board .live{width:7px;height:7px;border-radius:50%;background:#4a875b;box-shadow:0 0 0 3px #4a875b22;}
+  .talk{display:flex;gap:8px;align-items:flex-start;}
+  .ava{width:30px;height:30px;border-radius:50%;background:#4a875b;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;}
+  .bub{background:#eef4f0;border-radius:4px 12px 12px 12px;padding:7px 10px;font-size:11.5px;line-height:1.45;flex:1;}
+  .bub .nb{font-size:8px;font-weight:800;background:#c2693f;color:#fff;border-radius:999px;padding:1px 5px;margin-left:3px;vertical-align:middle;}
+  .boardbar{background:#eef4f0;border:1px solid #cfe3d6;border-radius:12px;padding:9px 12px;display:flex;align-items:center;gap:9px;}
+  .boardbar .av{width:24px;height:24px;border-radius:50%;background:#4a875b;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;}
+
+  /* 体組成 */
+  .bmcard .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+  .cap{font-size:10px;font-weight:800;color:#6a6256;letter-spacing:.05em;}
+  .lnk{font-size:10px;color:#4a875b;font-weight:700;}
+  .bmrow{display:flex;align-items:baseline;gap:8px;padding:5px 0;}
+  .bmrow+.bmrow{border-top:1px dashed #ede5d4;}
+  .bmrow .lbl{width:36px;font-size:11px;color:#a59b8c;font-weight:700;}
+  .bmrow .num{font-size:27px;font-weight:800;color:#34603f;line-height:1;}
+  .bmrow .u{font-size:11px;color:#6a6256;font-weight:700;}
+  .bmrow .goal{margin-left:auto;font-size:11px;color:#6a6256;text-align:right;}
+  .bmrow .goal b{color:#c2693f;font-size:13px;}
+  .recbtn{margin-top:9px;display:block;text-align:center;background:#4a875b;color:#fff;border-radius:10px;padding:8px;font-size:11.5px;font-weight:700;}
+  .bmmini{display:flex;gap:12px;align-items:center;}
+  .bmmini .n{font-size:21px;font-weight:800;color:#34603f;}
+  .bmmini .u{font-size:9px;color:#6a6256;font-weight:700;}
+  .bmmini .g{font-size:9px;color:#c2693f;font-weight:700;}
+
+  /* トレ */
+  .train{background:linear-gradient(135deg,#e8f3ec,#fffbe6);border:1px solid #cfe3d6;}
+  .pill{display:inline-block;font-size:9px;font-weight:800;padding:2px 7px;border-radius:999px;background:#4a875b;color:#fff;}
+  .t1{font-size:14px;font-weight:700;}
+  .sub{font-size:10.5px;color:#6a6256;margin-top:2px;}
+  .gobtn{display:inline-block;margin-top:7px;font-size:11px;font-weight:700;color:#34603f;}
+
+  /* 続きから CTA */
+  .cont{background:#fffdf8;border:1px solid #e7dcc9;border-radius:15px;padding:12px 13px;display:flex;align-items:center;gap:11px;}
+  .cont .play{width:36px;height:36px;border-radius:50%;background:#4a875b;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cont .ct{font-size:10px;color:#a5631f;font-weight:800;}
+  .cont .cn{font-size:13px;font-weight:700;line-height:1.3;}
+
+  /* 学習進捗 */
+  .prog{padding:12px 13px;}
+  .prog .pb{height:7px;background:#eee4d4;border-radius:999px;overflow:hidden;margin:7px 0 9px;}
+  .prog .pf{height:100%;width:35%;background:#4a875b;border-radius:999px;}
+  .prog .three{display:flex;gap:8px;}
+  .prog .three .b{flex:1;text-align:center;background:#f8f9fa;border:1px solid #eee4d4;border-radius:10px;padding:7px 4px;}
+  .prog .three .n{font-size:16px;font-weight:800;color:#34603f;}
+  .prog .three .l{font-size:8.5px;color:#6a6256;margin-top:1px;}
+
+  /* 行 */
+  .row{display:flex;align-items:center;gap:10px;padding:11px 13px;}
+  .row+.row{border-top:1px solid #f0ead9;}
+  .ic{width:30px;height:30px;border-radius:9px;background:#eef4f0;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;}
+  .row .g{flex:1;min-width:0;}
+  .row .rt{font-size:12.5px;font-weight:700;}
+  .row .rs{font-size:10px;color:#6a6256;margin-top:1px;}
+  .row .ar{color:#c9bfa9;}
+  .nb{font-size:8px;font-weight:800;background:#c2693f;color:#fff;border-radius:999px;padding:1px 5px;}
+
+  /* タイル */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;}
+  .tile{background:#fffdf8;border:1px solid #e7dcc9;border-radius:13px;padding:11px;position:relative;min-height:70px;display:flex;flex-direction:column;justify-content:space-between;}
+  .tile.sm{min-height:62px;padding:9px;}
+  .tile .ti{font-size:17px;}
+  .tile.sm .ti{font-size:15px;}
+  .tile .tl{font-size:11.5px;font-weight:700;}
+  .tile.sm .tl{font-size:10.5px;}
+  .tile .ts{font-size:9px;color:#6a6256;margin-top:1px;}
+  .tile .tnb{position:absolute;top:6px;right:6px;font-size:7.5px;font-weight:800;background:#c2693f;color:#fff;border-radius:999px;padding:1px 4px;}
+
+  .nav{display:flex;background:#fffdf8;border-top:1px solid #e7dcc9;}
+  .nav .tab{flex:1;text-align:center;padding:7px 0 9px;font-size:9px;color:#a59b8c;font-weight:600;}
+  .nav .tab.on{color:#34603f;}
+  .nav .tab .d{width:19px;height:19px;border-radius:6px;background:#eee4d4;margin:0 auto 3px;}
+  .nav .tab.on .d{background:#4a875b;}
+</style>
+</head>
+<body>
+  <div class="bar"><h2>ホーム 全項目反映（P1〜P5）</h2><div class="btns" id="btns"></div></div>
+  <div class="desc" id="desc"></div>
+  <div class="phone"><div id="screen"></div>
+    <div class="nav"><div class="tab on"><div class="d"></div>ホーム</div><div class="tab"><div class="d"></div>コース</div><div class="tab"><div class="d"></div>記録</div><div class="tab"><div class="d"></div>筋トレ</div><div class="tab"><div class="d"></div>プロフィール</div></div>
+  </div>
+  <div class="scrollnote" id="snote"></div>
+
+<script>
+const COG='<svg class="cog" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
+const HD=`<div class="hd"><div class="logo">筋肉塾</div>${COG}</div>`;
+const alertBar=`<div class="alertbar">目標管理シートが未記入です ・ タップして記入<span class="ab">!</span></div>`;
+const board=`<div class="board"><div class="bhd"><span class="live"></span>のりfitnessから ・ いつも見ています</div>
+  <div class="talk"><div class="ava">の</div><div class="bub">月次添削の動画が届きました。今月もよく頑張りましたね！<span class="nb">NEW</span></div></div>
+  <div class="talk"><div class="ava">社</div><div class="bub">昨日の食事添削に返信しました。夕食のたんぱく質いい感じ👍</div></div></div>`;
+const boardBar=`<div class="boardbar"><div class="av">の</div><div style="flex:1;font-size:11.5px"><b>動画返信</b>＋<b>食事添削の返信</b>が届いています</div><span class="nb">2</span></div>`;
+const bm=`<div class="card bmcard" style="padding:12px 13px"><div class="top"><span class="cap">今のからだ</span><span class="lnk">詳細・グラフ →</span></div>
+  <div class="bmrow"><span class="lbl">体重</span><span class="num">68.4</span><span class="u">kg</span><span class="goal">目標まで <b>-3.4kg</b></span></div>
+  <div class="bmrow"><span class="lbl">体脂肪</span><span class="num">18.2</span><span class="u">%</span><span class="goal">目標まで <b>-3.2%</b></span></div>
+  <span class="recbtn">タップして記録 ・ グラフを見る</span></div>`;
+const bmMini=`<div class="card" style="padding:11px 13px;flex:1"><span class="cap">今のからだ</span>
+  <div class="bmmini" style="margin-top:6px"><div><span class="n">68.4</span><span class="u">kg</span> <span class="g">-3.4</span></div><div><span class="n">18.2</span><span class="u">%</span> <span class="g">-3.2</span></div></div></div>`;
+const train=`<div class="card train" style="padding:12px 13px"><span class="cap" style="color:#a5631f">今日のトレーニング ・ 3日目</span>
+  <div class="t1" style="margin-top:2px">胸・背中の日 <span class="pill">中</span></div>
+  <div class="sub">膝つき腕立て / ローイング / スクワット ほか3種目</div><div class="gobtn">▶ 実施を記録する →</div></div>`;
+const trainMini=`<div class="card train" style="padding:11px 13px;flex:1"><span class="cap" style="color:#a5631f">今日のトレ・3日目</span><div class="t1" style="font-size:12.5px;margin-top:2px">胸・背中 <span class="pill">中</span></div><div class="gobtn">▶ 記録</div></div>`;
+const cont=`<div class="cont"><div class="play"><svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><polygon points="6 4 20 12 6 20"/></svg></div><div><div class="ct">続きから学ぶ</div><div class="cn">第3章 L4 PFCバランスの基礎</div></div></div>`;
+const prog=`<div class="card prog"><span class="cap">学習の進捗</span><div class="pb"><div class="pf"></div></div>
+  <div class="three"><div class="b"><div class="n">12</div><div class="l">完了レッスン</div></div><div class="b"><div class="n">—</div><div class="l">視聴時間</div></div><div class="b"><div class="n">5</div><div class="l">入会日数</div></div></div></div>`;
+
+// 行/タイル データ
+const ITEMS={
+ food:{i:'🍱',t:'食事添削',s:'今日の食事を投稿',nb:'返信'},
+ bmrec:{i:'📊',t:'体組成の記録',s:'推移グラフを見る'},
+ course:{i:'📚',t:'コース一覧',s:'動画レッスン'},
+ learn:{i:'📝',t:'学習(マイ記録)',s:'振り返り・実践'},
+ tools:{i:'🧮',t:'ツール',s:'カロリー/PFC 計算'},
+ monthly:{i:'🎬',t:'月次添削',s:'動画返信・履歴',nb:'NEW'},
+ chat:{i:'💬',t:'チャット',s:'質問・連絡'},
+ form:{i:'🎥',t:'フォーム添削',s:'初回無料'},
+ protein:{i:'🥤',t:'プロテイン',s:'永久10%オフ'},
+ goal:{i:'🎯',t:'目標シート',s:'今月の目標'},
+};
+const row=(k)=>{const x=ITEMS[k];return `<div class="row"><div class="ic">${x.i}</div><div class="g"><div class="rt">${x.t}</div><div class="rs">${x.s}</div></div>${x.nb?`<span class="nb">${x.nb}</span>`:'<span class="ar">›</span>'}</div>`;};
+const rows=(ks)=>`<div class="card">${ks.map(row).join('')}</div>`;
+const tile=(k,sm)=>{const x=ITEMS[k];return `<div class="tile${sm?' sm':''}">${x.nb?`<span class="tnb">${x.nb}</span>`:''}<div class="ti">${x.i}</div><div><div class="tl">${x.t}</div><div class="ts">${x.s}</div></div></div>`;};
+const grid=(ks)=>`<div class="grid">${ks.map(k=>tile(k)).join('')}</div>`;
+const grid3=(ks)=>`<div class="grid3">${ks.map(k=>tile(k,true)).join('')}</div>`;
+
+const KARADA=['food','bmrec'];
+const MANABI=['course','learn','tools'];
+const SUPPORT=['monthly','chat','form','protein','goal'];
+
+const PAT={
+P1:{name:"P1 3グループ・カード積み",scroll:"スクロールあり",desc:"3グループ(カラダ/まなび/サポート)を見出し付きカードで縦に。読みやすさ重視。",
+ html:()=>HD+`<div class="body"><div class="hi">こんにちは、太郎さん</div>${alertBar}${board}${bm}${train}
+  <div class="sec">カラダ</div>${rows(KARADA)}
+  <div class="sec">まなび</div>${cont}${prog}${rows(MANABI)}
+  <div class="sec">サポート・特典</div>${rows(SUPPORT)}</div>`},
+P2:{name:"P2 3グループ・タイル",scroll:"ややコンパクト",desc:"3グループを2列タイルで。カード積みよりコンパクト。",
+ html:()=>HD+`<div class="body"><div class="hi">こんにちは、太郎さん</div>${board}${bm}${train}
+  <div class="sec">カラダ</div>${grid(KARADA)}
+  <div class="sec">まなび</div>${cont}${prog}${grid(MANABI)}
+  <div class="sec">サポート・特典</div>${grid(SUPPORT)}</div>`},
+P3:{name:"P3 2グループ",scroll:"スクロールあり",desc:"グループを2つに集約(トレ&まなび / サポート・特典)。見出しを減らしてスッキリ。",
+ html:()=>HD+`<div class="body"><div class="hi">こんにちは、太郎さん</div>${board}${bm}${train}
+  <div class="sec">トレーニング & まなび</div>${cont}${prog}${grid(['food','bmrec','course','learn','tools'])}
+  <div class="sec">サポート・特典</div>${grid(SUPPORT)}</div>`},
+P4:{name:"P4 グループなし・フラット",scroll:"スクロールあり",desc:"見出しなしで全項目を1つのタイル一覧に。一覧性・発見性重視。",
+ html:()=>HD+`<div class="body"><div class="hi">こんにちは、太郎さん</div>${board}${bm}${train}${cont}${prog}
+  ${grid(['food','bmrec','course','learn','tools','monthly','chat','form','protein','goal'])}</div>`},
+P5:{name:"P5 1画面ギュッと",scroll:"1画面に収める狙い",desc:"上部を最小化(掲示板1行+体組成/トレ ミニ横並び)し、機能は3列の小タイルで密に。なるべくファーストビュー完結。",
+ html:()=>HD+`<div class="body"><div class="hi" style="font-size:14px">こんにちは、太郎さん</div>${boardBar}
+  <div style="display:flex;gap:8px">${bmMini}${trainMini}</div>
+  <div class="card prog" style="padding:10px 12px"><span class="cap">学習の進捗 35%</span><div class="pb"><div class="pf"></div></div></div>
+  ${grid3(['food','bmrec','course','learn','tools','monthly','chat','form','protein','goal'])}</div>`},
+};
+const btns=document.getElementById('btns');
+Object.keys(PAT).forEach(k=>{const b=document.createElement('button');b.textContent=PAT[k].name;b.onclick=()=>show(k);b.id='b'+k;btns.appendChild(b);});
+function show(k){
+  document.getElementById('screen').innerHTML=PAT[k].html();
+  document.getElementById('desc').innerHTML='<b>'+PAT[k].name+'</b>　'+PAT[k].desc;
+  document.getElementById('snote').textContent='縦スクロールのみ ・ '+PAT[k].scroll;
+  Object.keys(PAT).forEach(x=>document.getElementById('b'+x).classList.toggle('on',x===k));
+}
+show('P1');
+</script>
+</body>
+</html>

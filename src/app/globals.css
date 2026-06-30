@@ -215,3 +215,19 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .boot-char, .boot-logo, .boot-tag, .boot-dots, .boot-dots span { animation: none; }
 }
+
+/* ============================================================
+   ローディング遅延ゲート (= loading.tsx 用)
+   最初の 250ms は透明 → それでもまだ読込中なら ふわっと表示。
+   速いページでは見えないまま消える = チラつき防止 / 自然な表示。
+   ============================================================ */
+.loading-gate {
+  opacity: 0;
+  animation: loadingGateIn 0.2s ease 250ms forwards;
+}
+@keyframes loadingGateIn {
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loading-gate { animation-duration: 0.01s; }
+}

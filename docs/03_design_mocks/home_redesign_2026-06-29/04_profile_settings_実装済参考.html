@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>プロフィール / 設定 モック</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#e9e7e2;font-family:-apple-system,"Hiragino Kaku Gothic ProN",sans-serif;color:#2b2620;padding:16px;}
+  .bar{max-width:430px;margin:0 auto 12px;background:#fff;border-radius:12px;padding:10px 12px;box-shadow:0 2px 8px rgba(0,0,0,.06);display:flex;gap:8px;align-items:center;}
+  .bar b{font-size:12px;color:#6a6256;}
+  .bar button{flex:1;border:1px solid #d8d2c4;background:#fff;border-radius:8px;padding:8px;font-size:12.5px;font-weight:700;color:#4a4034;cursor:pointer;}
+  .bar button.on{background:#4a875b;border-color:#4a875b;color:#fff;}
+  .note{max-width:430px;margin:0 auto 12px;background:#fffdf8;border:1px dashed #4a875b6e;border-radius:10px;padding:9px 12px;font-size:11px;color:#34603f;line-height:1.6;}
+
+  .phone{width:390px;margin:0 auto;background:#f9f5ed;border-radius:22px;overflow:hidden;box-shadow:0 14px 40px rgba(0,0,0,.2);border:1px solid #e7dcc9;}
+  .hdr{background:#fffdf8;border-bottom:1px solid #e7dcc9;padding:13px 16px;text-align:center;font-weight:800;font-size:15px;position:relative;}
+  .hdr .bk{position:absolute;left:14px;top:13px;color:#2b2620;font-size:16px;}
+  .body{padding:14px;display:flex;flex-direction:column;gap:12px;min-height:560px;}
+
+  .card{background:#fffdf8;border:1px solid #e7dcc9;border-radius:16px;overflow:hidden;}
+  .cap{font-size:10.5px;font-weight:800;color:#6a6256;letter-spacing:.08em;padding:0 4px 6px;}
+
+  /* 基本情報 */
+  .prof{display:flex;align-items:center;gap:12px;padding:14px;}
+  .ava{width:54px;height:54px;border-radius:50%;background:#4a875b;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;flex-shrink:0;}
+  .prof .nm{font-size:16px;font-weight:800;}
+  .prof .ml{font-size:11px;color:#6a6256;margin-top:2px;font-family:monospace;}
+  .prof .jo{font-size:10.5px;color:#a59b8c;margin-top:3px;}
+  .editbtn{margin-left:auto;border:1px solid #d8d2c4;background:#fff;border-radius:8px;padding:6px 11px;font-size:11px;font-weight:700;color:#4a4034;}
+
+  /* セクション行 */
+  .row{display:flex;align-items:center;gap:11px;padding:13px 14px;border-top:1px solid #f0ead9;}
+  .row:first-child{border-top:none;}
+  .ic{width:20px;height:20px;flex-shrink:0;stroke:#4a875b;fill:none;}
+  .row .lb{flex:1;font-size:13px;font-weight:600;}
+  .row .ar{color:#c9bfa9;font-size:16px;}
+  .row .val{font-size:11.5px;color:#6a6256;}
+
+  /* カルテ */
+  .carte-hd{display:flex;align-items:center;gap:8px;padding:13px 14px 8px;}
+  .carte-hd .t{font-size:13.5px;font-weight:800;}
+  .badge{font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:999px;background:#e8f3ec;color:#2f6b45;}
+  .carte-sum{display:grid;grid-template-columns:auto 1fr;gap:5px 10px;padding:4px 16px 12px;font-size:11.5px;}
+  .carte-sum .k{color:#a59b8c;}
+  .carte-sum .v{font-weight:600;}
+  .carte-btns{display:flex;gap:8px;padding:0 14px 14px;}
+  .carte-btns a{flex:1;text-align:center;padding:10px;border-radius:11px;font-size:11.5px;font-weight:700;text-decoration:none;}
+  .b-out{border:1px solid #4a875b;color:#34603f;background:#fff;}
+  .b-fill{background:#4a875b;color:#fff;}
+
+  .addr{padding:13px 14px;}
+  .addr .a{font-size:12px;line-height:1.6;color:#2b2620;}
+  .addr .pc{font-size:11px;color:#6a6256;font-family:monospace;}
+
+  /* 設定: トグル */
+  .tg{display:flex;align-items:center;gap:11px;padding:13px 14px;border-top:1px solid #f0ead9;}
+  .tg:first-child{border-top:none;}
+  .tg .lb{flex:1;font-size:13px;font-weight:600;}
+  .sw{width:42px;height:25px;border-radius:999px;background:#4a875b;position:relative;flex-shrink:0;}
+  .sw.off{background:#cfc8b8;}
+  .sw::after{content:"";position:absolute;top:2.5px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;right:2.5px;}
+  .sw.off::after{right:auto;left:2.5px;}
+  .logout{text-align:center;color:#c0392b;font-weight:700;font-size:13px;padding:14px;background:#fffdf8;border:1px solid #e7dcc9;border-radius:14px;}
+
+  /* 下ナビ */
+  .nav{display:flex;background:#fffdf8;border-top:1px solid #e7dcc9;}
+  .nav .tab{flex:1;text-align:center;padding:8px 0 10px;font-size:10px;color:#a59b8c;font-weight:600;}
+  .nav .tab.on{color:#4a875b;}
+  .nav .tab svg{width:21px;height:21px;display:block;margin:0 auto 3px;stroke:currentColor;fill:none;stroke-width:2;}
+  .nav .tab.changed{position:relative;}
+  .nav .tab.changed::after{content:"NEW";position:absolute;top:0;right:18px;font-size:7px;font-weight:800;color:#fff;background:#c2693f;border-radius:3px;padding:1px 3px;}
+  .hide{display:none;}
+</style>
+</head>
+<body>
+  <div class="bar">
+    <b>画面</b>
+    <button id="bP" class="on" onclick="show('P')">プロフィール（新）</button>
+    <button id="bS" onclick="show('S')">設定（スリム化）</button>
+  </div>
+  <div class="note" id="note"></div>
+
+  <!-- ===== プロフィール ===== -->
+  <div class="phone" id="P">
+    <div class="hdr"><span class="bk">‹</span>プロフィール</div>
+    <div class="body">
+      <!-- 基本情報 -->
+      <div class="card">
+        <div class="prof">
+          <div class="ava">岩</div>
+          <div>
+            <div class="nm">岩山 太郎</div>
+            <div class="ml">iwayama@example.com</div>
+            <div class="jo">入会日 2026/06/29</div>
+          </div>
+          <button class="editbtn">氏名を編集</button>
+        </div>
+      </div>
+
+      <!-- カルテ -->
+      <div>
+        <div class="cap">カルテ</div>
+        <div class="card">
+          <div class="carte-hd">
+            <div class="t">筋トレカルテ</div>
+            <span class="badge">提出済み ・ 6/29</span>
+          </div>
+          <div class="carte-sum">
+            <span class="k">性別</span><span class="v">男性</span>
+            <span class="k">重点部位</span><span class="v">胸 ・ 背中</span>
+            <span class="k">環境</span><span class="v">ダンベル ・ 家トレ</span>
+            <span class="k">頻度</span><span class="v">週3</span>
+          </div>
+          <div class="carte-btns">
+            <a class="b-out" href="#">カルテを見る</a>
+            <a class="b-fill" href="#">変更をリクエスト</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- プロテイン発送状況 (発送準備中) -->
+      <div>
+        <div class="cap">プロテイン発送</div>
+        <div class="card">
+          <div class="carte-hd">
+            <div class="t">入塾特典プロテイン</div>
+            <span class="badge" style="background:#fff3e0;color:#a5631f;">発送準備中</span>
+          </div>
+          <div class="addr" style="padding-top:4px;">
+            <div class="pc">〒123-4567</div>
+            <div class="a">東京都渋谷区神宮前 1-2-3 ○○マンション101</div>
+          </div>
+          <div class="row" style="border-top:1px solid #f0ead9;">
+            <svg class="ic" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            <span class="lb">住所を変更</span><span class="ar">›</span>
+          </div>
+          <div style="padding:0 14px 12px;font-size:10px;color:#a59b8c;line-height:1.5;">
+            発送前なら変更できます（のりfitnessの発送画面に即反映）。発送後は変更できません。
+          </div>
+        </div>
+      </div>
+
+      <!-- 発送済みになった後の見え方 (参考) -->
+      <div>
+        <div class="cap">プロテイン発送（発送後の見え方）</div>
+        <div class="card">
+          <div class="carte-hd">
+            <div class="t">入塾特典プロテイン</div>
+            <span class="badge">✓ 発送済み ・ 7/1</span>
+          </div>
+          <div class="addr" style="padding-top:4px;">
+            <div class="pc">〒123-4567</div>
+            <div class="a">東京都渋谷区神宮前 1-2-3 ○○マンション101</div>
+          </div>
+          <div style="padding:0 14px 12px;font-size:10px;color:#a59b8c;">
+            発送が完了したため、変更ボタンは表示されません。
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nav" id="navP"></div>
+  </div>
+
+  <!-- ===== 設定 ===== -->
+  <div class="phone hide" id="S">
+    <div class="hdr"><span class="bk">‹</span>設定</div>
+    <div class="body">
+      <div>
+        <div class="cap">アカウント</div>
+        <div class="card">
+          <div class="row"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="lb">パスワード変更</span><span class="ar">›</span></div>
+          <div class="row"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><span class="lb">メールアドレス変更</span><span class="ar">›</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="cap">通知</div>
+        <div class="card">
+          <div class="tg"><span class="lb">アプリ通知</span><div class="sw"></div></div>
+          <div class="tg"><span class="lb">メール通知</span><div class="sw"></div></div>
+        </div>
+      </div>
+      <div>
+        <div class="cap">その他</div>
+        <div class="card">
+          <div class="row"><span class="lb">ヘルプ</span><span class="ar">›</span></div>
+          <div class="row"><span class="lb">利用規約</span><span class="ar">›</span></div>
+          <div class="row"><span class="lb">プライバシーポリシー</span><span class="ar">›</span></div>
+          <div class="row"><span class="lb">特定商取引法に基づく表記</span><span class="ar">›</span></div>
+        </div>
+      </div>
+      <div class="logout">ログアウト</div>
+    </div>
+    <div class="nav" id="navS"></div>
+  </div>
+
+<script>
+function navHTML(active){
+  const tabs=[
+    {k:'home',l:'ホーム',svg:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>'},
+    {k:'course',l:'コース',svg:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"/>'},
+    {k:'rec',l:'記録',svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>'},
+    {k:'wk',l:'筋トレ',svg:'<path d="M6.5 6.5 17.5 17.5M4 9l-1 1 2 2-2 2 1 1M20 15l1-1-2-2 2-2-1-1"/>'},
+    {k:'prof',l:'プロフィール',changed:true,svg:'<circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/>'},
+  ];
+  return tabs.map(t=>`<div class="tab ${t.k===active?'on':''} ${t.changed?'changed':''}"><svg viewBox="0 0 24 24">${t.svg}</svg>${t.l}</div>`).join('');
+}
+document.getElementById('navP').innerHTML=navHTML('prof');
+document.getElementById('navS').innerHTML=navHTML('prof');
+const NOTES={
+  P:'下ナビ右端を「設定」→「<b>プロフィール</b>」に変更（人物アイコン・NEW）。ここにカルテ・住所・基本情報を集約。体組成は「記録」タブ、目標はホームのまま。',
+  S:'ホーム右上のアイコンを「プロフィール」→「<b>設定</b>」に変更。中身は今の/accountから“データ系”を抜いた、アカウント・通知・規約・ログアウトのみ。'
+};
+function show(s){
+  document.getElementById('P').classList.toggle('hide',s!=='P');
+  document.getElementById('S').classList.toggle('hide',s!=='S');
+  document.getElementById('bP').classList.toggle('on',s==='P');
+  document.getElementById('bS').classList.toggle('on',s==='S');
+  document.getElementById('note').innerHTML=NOTES[s];
+}
+show('P');
+</script>
+</body>
+</html>

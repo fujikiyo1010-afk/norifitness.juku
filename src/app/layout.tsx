@@ -4,7 +4,6 @@ import { Suspense } from "react";
 import "./globals.css";
 import { MemberBottomNav } from "@/components/MemberBottomNav";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
-import { NavigationProgress } from "@/components/NavigationProgress";
 import { BootSplash } from "@/components/BootSplash";
 
 const notoSansJp = Noto_Sans_JP({
@@ -134,9 +133,6 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-[#f9f5ed]">
         <Suspense fallback={null}>
           <BootSplash />
-        </Suspense>
-        <Suspense fallback={null}>
-          <NavigationProgress />
         </Suspense>
         {children}
         <MemberBottomNav />

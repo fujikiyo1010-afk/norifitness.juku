@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ホーム メイン案 + 候補</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#e9e7e2;font-family:-apple-system,"Hiragino Kaku Gothic ProN",sans-serif;color:#2b2620;padding:16px;-webkit-font-smoothing:antialiased;}
+  .bar{max-width:760px;margin:0 auto 10px;background:#fff;border-radius:12px;padding:11px 12px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+  .bar h2{font-size:14px;margin-bottom:8px;}
+  .bar .btns{display:flex;flex-wrap:wrap;gap:6px;}
+  .bar button{border:1px solid #d8d2c4;background:#fff;border-radius:8px;padding:7px 11px;font-size:12px;font-weight:700;color:#4a4034;cursor:pointer;}
+  .bar button.on{background:#4a875b;border-color:#4a875b;color:#fff;}
+  .desc{max-width:760px;margin:0 auto 12px;background:#fffdf8;border:1px dashed #4a875b66;border-radius:10px;padding:9px 13px;font-size:12px;color:#34603f;line-height:1.6;}
+
+  .phone{width:390px;margin:0 auto;background:#f9f5ed;border-radius:24px;overflow:hidden;box-shadow:0 16px 44px rgba(0,0,0,.22);border:1px solid #e7dcc9;}
+  .hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#fffdf8;border-bottom:1px solid #e7dcc9;}
+  .hd .logo{font-size:16px;font-weight:800;color:#004d40;letter-spacing:.04em;}
+  .hd .cog{width:24px;height:24px;color:#6a6256;}
+  .body{padding:13px;display:flex;flex-direction:column;gap:11px;}
+  .card{background:#fffdf8;border:1px solid #e7dcc9;border-radius:16px;}
+  .pad{padding:13px 14px;}
+  .cap{font-size:10px;font-weight:800;color:#6a6256;letter-spacing:.05em;}
+  .sec{font-size:11px;font-weight:800;color:#34603f;display:flex;align-items:center;gap:6px;padding:2px;}
+  .sec::before{content:"";width:3px;height:13px;background:#4a875b;border-radius:2px;}
+  .hi{font-size:15px;font-weight:800;padding:2px 2px 0;}
+
+  /* 掲示板 */
+  .board{background:#fffdf8;border:1px solid #e7dcc9;border-radius:16px;padding:12px 13px;display:flex;flex-direction:column;gap:10px;}
+  .board .bhd{font-size:10.5px;font-weight:800;color:#34603f;display:flex;align-items:center;gap:6px;}
+  .board .live{width:7px;height:7px;border-radius:50%;background:#4a875b;box-shadow:0 0 0 3px #4a875b22;}
+  .talk{display:flex;gap:9px;align-items:flex-start;}
+  .ava{width:32px;height:32px;border-radius:50%;background:#4a875b;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0;}
+  .bub{background:#eef4f0;border-radius:4px 13px 13px 13px;padding:8px 11px;font-size:12px;line-height:1.45;flex:1;}
+  .bub .nb{font-size:8px;font-weight:800;background:#c2693f;color:#fff;border-radius:999px;padding:1px 5px;margin-left:4px;vertical-align:middle;}
+  .boardbar{background:#eef4f0;border:1px solid #cfe3d6;border-radius:13px;padding:10px 13px;display:flex;align-items:center;gap:9px;}
+  .boardbar .av{width:26px;height:26px;border-radius:50%;background:#4a875b;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;}
+
+  /* 体組成 (グラフなし・目標まで) */
+  .bmcard{position:relative;}
+  .bmcard .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;}
+  .bmcard .lnk{font-size:10px;color:#4a875b;font-weight:700;}
+  .bmrow{display:flex;align-items:baseline;gap:8px;padding:6px 0;}
+  .bmrow+.bmrow{border-top:1px dashed #ede5d4;}
+  .bmrow .lbl{width:38px;font-size:11px;color:#a59b8c;font-weight:700;}
+  .bmrow .num{font-size:30px;font-weight:800;color:#34603f;line-height:1;}
+  .bmrow .u{font-size:11px;color:#6a6256;font-weight:700;}
+  .bmrow .goal{margin-left:auto;font-size:11px;color:#6a6256;text-align:right;}
+  .bmrow .goal b{color:#c2693f;font-size:13px;}
+  .recbtn{margin-top:10px;display:block;text-align:center;background:#4a875b;color:#fff;border-radius:11px;padding:9px;font-size:12px;font-weight:700;}
+  .bmmini{display:flex;gap:14px;align-items:center;}
+  .bmmini .it{display:flex;align-items:baseline;gap:3px;}
+  .bmmini .n{font-size:22px;font-weight:800;color:#34603f;}
+  .bmmini .u{font-size:10px;color:#6a6256;font-weight:700;}
+  .bmmini .g{font-size:9.5px;color:#c2693f;font-weight:700;}
+
+  /* トレーニング */
+  .train{background:linear-gradient(135deg,#e8f3ec,#fffbe6);border:1px solid #cfe3d6;}
+  .pill{display:inline-block;font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:999px;background:#4a875b;color:#fff;}
+  .t1{font-size:15px;font-weight:700;}
+  .sub{font-size:11px;color:#6a6256;margin-top:3px;}
+  .gobtn{display:inline-block;margin-top:8px;font-size:11px;font-weight:700;color:#34603f;}
+
+  /* グリッド */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+  .tile{background:#fffdf8;border:1px solid #e7dcc9;border-radius:14px;padding:12px;position:relative;min-height:74px;display:flex;flex-direction:column;justify-content:space-between;}
+  .tile .ti{font-size:18px;}
+  .tile .tl{font-size:12px;font-weight:700;}
+  .tile .ts{font-size:9.5px;color:#6a6256;margin-top:1px;}
+  .tile .nb{position:absolute;top:7px;right:7px;font-size:8px;font-weight:800;background:#c2693f;color:#fff;border-radius:999px;padding:1px 5px;}
+  .hscroll{display:flex;gap:9px;overflow-x:auto;padding-bottom:2px;}
+  .hscroll .tile{min-width:120px;flex:0 0 auto;}
+
+  .nav{display:flex;background:#fffdf8;border-top:1px solid #e7dcc9;}
+  .nav .tab{flex:1;text-align:center;padding:7px 0 9px;font-size:9px;color:#a59b8c;font-weight:600;}
+  .nav .tab.on{color:#34603f;}
+  .nav .tab .d{width:20px;height:20px;border-radius:6px;background:#eee4d4;margin:0 auto 3px;}
+  .nav .tab.on .d{background:#4a875b;}
+</style>
+</head>
+<body>
+  <div class="bar">
+    <h2>ホーム メイン案 ＋ 候補</h2>
+    <div class="btns" id="btns"></div>
+  </div>
+  <div class="desc" id="desc"></div>
+  <div class="phone"><div id="screen"></div>
+    <div class="nav"><div class="tab on"><div class="d"></div>ホーム</div><div class="tab"><div class="d"></div>コース</div><div class="tab"><div class="d"></div>記録</div><div class="tab"><div class="d"></div>筋トレ</div><div class="tab"><div class="d"></div>プロフィール</div></div>
+  </div>
+
+<script>
+const COG='<svg class="cog" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
+const HD=`<div class="hd"><div class="logo">筋肉塾</div>${COG}</div>`;
+
+// 掲示板 (フル)
+const board = `<div class="board">
+  <div class="bhd"><span class="live"></span>のりfitnessから ・ いつも見ています</div>
+  <div class="talk"><div class="ava">の</div><div class="bub">月次添削の動画が届きました。今月もよく頑張りましたね！<span class="nb">NEW</span></div></div>
+  <div class="talk"><div class="ava">社</div><div class="bub">昨日の食事添削に返信しました。夕食のたんぱく質いい感じ👍</div></div>
+</div>`;
+// 掲示板 (コンパクト1行)
+const boardBar = `<div class="boardbar"><div class="av">の</div><div style="flex:1;font-size:12px"><b>動画返信</b>＋<b>食事添削の返信</b>が届いています</div><span style="font-size:8px;font-weight:800;background:#c2693f;color:#fff;border-radius:999px;padding:2px 6px">2件</span></div>`;
+
+// 体組成 (グラフなし・目標まで・タップで詳細)
+const bm = `<div class="card pad bmcard">
+  <div class="top"><span class="cap">今のからだ</span><span class="lnk">詳細・グラフを見る →</span></div>
+  <div class="bmrow"><span class="lbl">体重</span><span class="num">68.4</span><span class="u">kg</span><span class="goal">目標まで あと <b>3.4kg</b></span></div>
+  <div class="bmrow"><span class="lbl">体脂肪</span><span class="num">18.2</span><span class="u">%</span><span class="goal">目標まで あと <b>3.2%</b></span></div>
+  <span class="recbtn">タップして記録 ・ グラフを見る</span>
+</div>`;
+// 体組成 (ミニ・横並び用)
+const bmMini = `<div class="card pad"><span class="cap">今のからだ</span>
+  <div class="bmmini" style="margin-top:7px">
+   <div><div class="it"><span class="n">68.4</span><span class="u">kg</span></div><div class="g">あと-3.4</div></div>
+   <div><div class="it"><span class="n">18.2</span><span class="u">%</span></div><div class="g">あと-3.2</div></div>
+  </div></div>`;
+
+// 今日のトレーニング
+const train = `<div class="card train pad"><span class="cap" style="color:#a5631f">今日のトレーニング ・ 3日目</span>
+  <div class="t1" style="margin-top:3px">胸・背中の日 <span class="pill">中</span></div>
+  <div class="sub">膝つき腕立て / ローイング / スクワット ほか3種目</div>
+  <div class="gobtn">▶ 実施を記録する →</div></div>`;
+const trainMini = `<div class="card train pad" style="flex:1"><span class="cap" style="color:#a5631f">今日のトレ・3日目</span>
+  <div class="t1" style="font-size:13px;margin-top:3px">胸・背中 <span class="pill">中</span></div>
+  <div class="gobtn">▶ 記録する</div></div>`;
+
+// グリッド (上で出した 体組成/トレ/月次 は除外)
+const tiles = `
+  <div class="tile"><span class="nb">返信</span><div class="ti">🍱</div><div><div class="tl">食事添削</div><div class="ts">今日の食事を投稿</div></div></div>
+  <div class="tile"><div class="ti">📖</div><div><div class="tl">コース(学び)</div><div class="ts">続き 進捗35%</div></div></div>
+  <div class="tile"><div class="ti">🎯</div><div><div class="tl">目標シート</div><div class="ts">今月の目標</div></div></div>
+  <div class="tile"><div class="ti">🎥</div><div><div class="tl">フォーム添削</div><div class="ts">初回無料</div></div></div>
+  <div class="tile"><div class="ti">🥤</div><div><div class="tl">プロテイン</div><div class="ts">永久10%オフ</div></div></div>`;
+const grid = `<div class="grid">${tiles}</div>`;
+const gridScroll = `<div class="hscroll">${tiles}</div>`;
+
+const PAT={
+A:{name:"A メイン案",desc:"掲示板 → 体組成(目標まで・グラフ無/タップで詳細) → 今日のトレーニング → 残りをグリッド。ご指定の構成そのまま。",
+ html:()=>HD+`<div class="body"><div class="hi">こんにちは、太郎さん</div>${board}${bm}${train}<div class="sec">メニュー</div>${grid}</div>`},
+B:{name:"B 体組成ファースト",desc:"体組成を一番上に、掲示板はコンパクト1行に。「開いた瞬間に今の自分」を最優先。",
+ html:()=>HD+`<div class="body"><div class="hi">こんにちは、太郎さん</div>${bm}${boardBar}${train}<div class="sec">メニュー</div>${grid}</div>`},
+C:{name:"C 上部2カラム",desc:"体組成と今日のトレを上部で横並び(情報密度高め)→掲示板→グリッド。1画面に多く収まる。",
+ html:()=>HD+`<div class="body"><div class="hi">こんにちは、太郎さん</div>
+  <div style="display:flex;gap:9px;align-items:stretch">${bmMini}${trainMini}</div>
+  ${board}<div class="sec">メニュー</div>${grid}</div>`},
+D:{name:"D グリッド横スクロール",desc:"掲示板→体組成→トレまでは縦、残り機能は横スクロールのタイルにして縦を短く。スクロール量を減らす。",
+ html:()=>HD+`<div class="body"><div class="hi">こんにちは、太郎さん</div>${board}${bm}${train}<div class="sec">メニュー</div>${gridScroll}</div>`},
+E:{name:"E 掲示板を主役(伴走最大)",desc:"掲示板を大きめ＋体組成ミニ帯を直下に。直接指導/伴走の世界観を最前面に。トレ・機能はその下。",
+ html:()=>HD+`<div class="body"><div class="hi">こんにちは、太郎さん</div>${board}
+  <div style="display:flex;gap:9px;align-items:stretch">${bmMini}${trainMini}</div>
+  <div class="sec">メニュー</div>${grid}</div>`},
+};
+const btns=document.getElementById('btns');
+Object.keys(PAT).forEach(k=>{const b=document.createElement('button');b.textContent=PAT[k].name;b.onclick=()=>show(k);b.id='b'+k;btns.appendChild(b);});
+function show(k){
+  document.getElementById('screen').innerHTML=PAT[k].html();
+  document.getElementById('desc').innerHTML='<b>'+PAT[k].name+'</b>　'+PAT[k].desc;
+  Object.keys(PAT).forEach(x=>document.getElementById('b'+x).classList.toggle('on',x===k));
+}
+show('A');
+</script>
+</body>
+</html>
