@@ -119,7 +119,7 @@
     <div class="sub"><div class="lab">アイコン</div><div class="row1" id="icons"></div></div>
   </div>
   <div class="phone"><div id="screen"></div>
-    <div class="nav"><div class="tab on"><div class="d"></div>ホーム</div><div class="tab"><div class="d"></div>コース</div><div class="tab"><div class="d"></div>記録</div><div class="tab"><div class="d"></div>筋トレ</div><div class="tab"><div class="d"></div>プロフィール</div></div>
+    <div class="nav" id="nav"></div>
   </div>
 </div>
 
@@ -197,15 +197,29 @@ const grid=(ks,cls='')=>`<div class="grid">${ks.map(k=>tile(k,cls)).join('')}</d
 const grid3=(ks)=>`<div class="grid3">${ks.map(k=>tile(k,'s')).join('')}</div>`;
 const KARADA=['food','bmrec'],MANABI=['course','learn','tools'],SUPPORT=['monthly','chat','form','protein','goal'],ALL=['food','bmrec','course','learn','tools','monthly','chat','form','protein','goal'];
 
+// ===== 全部入り用パーツ =====
+const flame=(s)=>`<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="currentColor" stroke="none"><path d="M12 2c.8 2.5 3.5 3.7 3.5 7.2A3.5 3.5 0 0 1 12 12.7 3 3 0 0 1 9.2 9c-.9.8-1.4 2-1.4 3.4a4.2 4.2 0 1 0 8.4 0c0-3.6-2.6-5.6-4.2-10.4z"/></svg>`;
+const GREET=`<div style="display:flex;justify-content:space-between;align-items:center;padding:2px 2px 0"><span class="hi">こんにちは、太郎さん</span><span style="font-size:11px;font-weight:800;color:#c2693f;display:flex;align-items:center;gap:3px">${flame(13)}継続5日目</span></div>`;
+const foodBig=`<div class="card slim" style="background:linear-gradient(135deg,#fdf0e2,#fffbe6);border-color:#f0d9b5"><span class="cap" style="color:#c2693f">食事添削 ・ 今日</span><div class="t1" style="margin-top:2px">今日の食事を投稿 <span class="nb" style="background:#c2693f">返信あり</span></div><div class="gobtn" style="color:#c2693f">＋ 写真を追加して投稿 →</div></div>`;
+const streakCard=`<div class="card" style="padding:13px;background:linear-gradient(135deg,#fff3e6,#fffbe6);border-color:#f0d9b5"><div style="display:flex;align-items:center;gap:10px;color:#c2693f"><div style="font-size:30px;font-weight:800;display:flex;align-items:center;gap:4px">${flame(26)}5</div><div><div style="font-size:13px;font-weight:800;color:#a5631f">継続5日目</div><div style="font-size:10.5px;color:#6a6256">毎日コツコツ、いい調子です</div></div></div><div style="display:flex;gap:8px;margin-top:10px"><div style="flex:1;text-align:center;background:#fffdf8;border:1px solid #f0d9b5;border-radius:10px;padding:6px;font-size:12px;font-weight:800;color:#c2693f">体組成 5日連続</div><div style="flex:1;text-align:center;background:#fffdf8;border:1px solid #f0d9b5;border-radius:10px;padding:6px;font-size:12px;font-weight:800;color:#c2693f">食事 3日連続</div></div></div>`;
+const foodMini=`<div class="card slim" style="flex:1;background:linear-gradient(135deg,#fdf0e2,#fffbe6);border-color:#f0d9b5"><span class="cap" style="color:#c2693f">食事 ・ 今日</span><div class="t1" style="font-size:12.5px;margin-top:2px">投稿する</div><div class="gobtn" style="color:#c2693f">＋ 写真</div></div>`;
+const chk=(done,t,s)=>`<div class="row"><span style="width:22px;height:22px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;${done?'background:#4a875b;border:2px solid #4a875b;color:#fff;font-size:13px;font-weight:800':'border:2px solid #c9bfa9'}">${done?'✓':''}</span><div class="g"><div class="rt">${t}</div><div class="rs">${s}</div></div></div>`;
+const NAV_STD=`<div class="tab on"><div class="d"></div>ホーム</div><div class="tab"><div class="d"></div>コース</div><div class="tab"><div class="d"></div>記録</div><div class="tab"><div class="d"></div>筋トレ</div><div class="tab"><div class="d"></div>プロフィール</div>`;
+const NAV_ALT=`<div class="tab on"><div class="d"></div>ホーム</div><div class="tab"><div class="d"></div>コース</div><div class="tab"><div class="d"></div>食事</div><div class="tab"><div class="d"></div>筋トレ</div><div class="tab"><div class="d"></div>プロフィール</div>`;
+
 const PATS={
-'グループ分けカード':()=>HD+`<div class="body"><div class="hi">こんにちは、太郎さん</div>${alertBar}${board()}${bm()}${train}<div class="sec">カラダ</div>${rows(KARADA)}<div class="sec">まなび</div>${cont()}${prog()}${rows(MANABI)}<div class="sec">サポート・特典</div>${rows(SUPPORT)}</div>`,
-'グループ分けタイル':()=>HD+`<div class="body"><div class="hi">こんにちは、太郎さん</div>${board()}${bm()}${train}<div class="sec">カラダ</div>${grid(KARADA)}<div class="sec">まなび</div>${cont()}${prog()}${grid(MANABI)}<div class="sec">サポート・特典</div>${grid(SUPPORT)}</div>`,
-'2グループ':()=>HD+`<div class="body"><div class="hi">こんにちは、太郎さん</div>${board()}${bm()}${train}<div class="sec">トレーニング & まなび</div>${cont()}${prog()}${grid(['food','bmrec','course','learn','tools'])}<div class="sec">サポート・特典</div>${grid(SUPPORT)}</div>`,
-'フラット':()=>HD+`<div class="body"><div class="hi">こんにちは、太郎さん</div>${board()}${bm()}${train}${cont()}${prog()}${grid(ALL)}</div>`,
-'1画面ギュッと':()=>HD+`<div class="body"><div class="hi" style="font-size:14px">こんにちは、太郎さん</div>${board()}<div style="display:flex;gap:8px">${bmMini}${trainMini}</div>${cont()}${grid3(ALL)}</div>`,
-'折りたたみ':()=>HD+`<div class="body"><div class="hi">こんにちは、太郎さん</div>${board()}${bm()}${train}${cont()}${prog()}<div class="sec">よく使う</div>${grid(['food','course'])}<div class="more">すべての機能を見る ▾</div></div>`,
-'大タイル':()=>HD+`<div class="body"><div class="hi">こんにちは、太郎さん</div>${board()}${bm()}${train}${cont()}${prog()}<div class="grid">${ALL.map(k=>tile(k,'big')).join('')}</div></div>`,
-'リスト':()=>HD+`<div class="body"><div class="hi">こんにちは、太郎さん</div>${board()}${bm()}${train}${cont()}${prog()}<div class="sec">メニュー</div>${rows(ALL)}</div>`,
+'グループ分けカード':()=>HD+`<div class="body">${GREET}${alertBar}${board()}${bm()}${train}<div class="sec">カラダ</div>${rows(KARADA)}<div class="sec">まなび</div>${cont()}${prog()}${rows(MANABI)}<div class="sec">サポート・特典</div>${rows(SUPPORT)}</div>`,
+'グループ分けタイル':()=>HD+`<div class="body">${GREET}${board()}${bm()}${train}<div class="sec">カラダ</div>${grid(KARADA)}<div class="sec">まなび</div>${cont()}${prog()}${grid(MANABI)}<div class="sec">サポート・特典</div>${grid(SUPPORT)}</div>`,
+'2グループ':()=>HD+`<div class="body">${GREET}${board()}${bm()}${train}<div class="sec">トレーニング & まなび</div>${cont()}${prog()}${grid(['food','bmrec','course','learn','tools'])}<div class="sec">サポート・特典</div>${grid(SUPPORT)}</div>`,
+'フラット':()=>HD+`<div class="body">${GREET}${board()}${bm()}${train}${cont()}${prog()}${grid(ALL)}</div>`,
+'1画面ギュッと':()=>HD+`<div class="body">${GREET}${board()}<div style="display:flex;gap:8px">${bmMini}${trainMini}</div>${cont()}${grid3(ALL)}</div>`,
+'折りたたみ':()=>HD+`<div class="body">${GREET}${board()}${bm()}${train}${cont()}${prog()}<div class="sec">よく使う</div>${grid(['food','course'])}<div class="more">すべての機能を見る ▾</div></div>`,
+'大タイル':()=>HD+`<div class="body">${GREET}${board()}${bm()}${train}${cont()}${prog()}<div class="grid">${ALL.map(k=>tile(k,'big')).join('')}</div></div>`,
+'リスト':()=>HD+`<div class="body">${GREET}${board()}${bm()}${train}${cont()}${prog()}<div class="sec">メニュー</div>${rows(ALL)}</div>`,
+'★おすすめ統合':()=>HD+`<div class="body">${GREET}${alertBar}${board()}<div class="sec">今日の3つ</div>${bm()}${train}${foodBig}${cont()}${prog()}<div class="sec">よく使う</div>${grid(['course','learn'])}<div class="more">すべての機能 ▾（ツール・月次・チャット・フォーム・プロテイン・目標）</div></div>`,
+'今日特化(実行)':()=>HD+`<div class="body">${GREET}${board()}<div class="sec">今日のミッション</div><div class="card">${chk(true,'体組成を記録','完了 ・ 68.4kg')}${chk(false,'今日のトレーニング (3日目・中)','胸・背中の日 ▶')}${chk(false,'食事を投稿','朝・昼・夜の写真 ＋')}</div>${cont()}<div class="more">コース・学び・設定はこちら ▾</div></div>`,
+'ストリーク前面':()=>HD+`<div class="body">${GREET}${streakCard}${board()}<div class="sec">今日の3つ</div>${bm()}<div style="display:flex;gap:8px">${trainMini}${foodMini}</div>${prog()}<div class="more">すべての機能 ▾</div></div>`,
+'下ナビ再編':()=>HD+`<div class="body">${GREET}${board()}<div class="sec">今日の3つ</div>${bm()}${train}${foodBig}${cont()}${prog()}<div class="sec">まなび</div>${grid(['course','learn','tools'])}<div class="more">月次・チャット・フォーム・プロテイン・目標 ▾</div></div>`,
 };
 
 const ST={pat:'グループ分けカード',bm:1,col:1,prog:1,board:1,icon:'line'};
@@ -217,6 +231,7 @@ const iconsEl=document.getElementById('icons');
 [['line','線画(単色)'],['color','カラー']].forEach(([v,l])=>{const c=document.createElement('span');c.className='chip';c.textContent=l;c.dataset.v=v;c.onclick=()=>{ST.icon=v;render();};iconsEl.appendChild(c);});
 function render(){
   document.getElementById('screen').innerHTML=PATS[ST.pat]();
+  document.getElementById('nav').innerHTML = ST.pat==='下ナビ再編' ? NAV_ALT : NAV_STD;
   document.querySelectorAll('#pats .pat').forEach(b=>b.classList.toggle('on',b.dataset.k===ST.pat));
   [['bms','bm'],['cols','col'],['progs','prog'],['boards','board']].forEach(([id,k])=>document.querySelectorAll('#'+id+' .chip').forEach(c=>c.classList.toggle('on',+c.dataset.v===ST[k])));
   document.querySelectorAll('#icons .chip').forEach(c=>c.classList.toggle('on',c.dataset.v===ST.icon));
