@@ -383,14 +383,19 @@ function mapTagToAction(
         icon: <DocIcon className="w-3.5 h-3.5 text-[#00695c]" />,
       };
     case "goal_sheet_blank":
-    case "goal_deviation":
       return {
         label: "目標シート",
         href: `/admin/users/${userId}/goal-sheet`,
         icon: <TargetIcon className="w-3.5 h-3.5 text-[#00695c]" />,
       };
-    case "no_learning":
+    case "weight_gain":
     case "body_metrics_stalled":
+      return {
+        label: "体組成",
+        href: `/admin/users/${userId}/metrics`,
+        icon: <TargetIcon className="w-3.5 h-3.5 text-[#00695c]" />,
+      };
+    case "no_learning":
     case "long_no_login":
       return null;
   }

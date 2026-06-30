@@ -4,15 +4,16 @@ import { createAdminClient } from "@/lib/supabase/admin";
  * 管理画面 アラートタグ集計
  *
  * 仕様: docs/00_premises/admin_alert_tags_spec_2026-06-11.md
+ *       (2026-06-30 きよむさん指示で「目標乖離」を廃止 →「体重増加」に置換 ・ 閾値見直し)
  *
- * 8 種のうち 6 種を実装、 2 種は体組成 DB 未実装のため TODO スタブ:
+ * 実装中のアラート:
  *   ✅ monthly_overdue_soon / monthly_overdue (月次未提出)
- *   ✅ carte_blank (カルテ未記入)
- *   ✅ goal_sheet_blank (目標シート空)
- *   ✅ long_no_login (最終ログイン放置)
- *   ✅ no_learning (学習未着手)
- *   ⏳ body_metrics_stalled (体組成 N 日途絶) - 体組成 DB 未実装
- *   ⏳ goal_deviation (目標乖離) - 体組成 DB 未実装
+ *   ✅ carte_blank (カルテ未記入 ・ 入塾翌日=1日で urgent)
+ *   ✅ goal_sheet_blank (目標シート空 ・ 入塾3日で warn)
+ *   ✅ weight_gain (体重増加 ・ ベスト〔最低〕記録から +3kg で warn)
+ *   ✅ body_metrics_stalled (体組成 5日記録なし / 未記入は入会5日 ・ warn)
+ *   ✅ long_no_login (最終ログイン 7日放置 ・ warn)
+ *   ✅ no_learning (学習 14日未着手 ・ warn)
  *
  * 閾値はコード直書き (Phase 4 で /admin/settings/alerts から変更可能化予定)
  */
@@ -27,7 +28,7 @@ export type AlertTagKey =
   | "monthly_overdue_soon"
   | "monthly_overdue"
   | "body_metrics_stalled"
-  | "goal_deviation"
+  | "weight_gain"
   | "carte_blank"
   | "goal_sheet_blank"
   | "long_no_login"
@@ -55,14 +56,14 @@ export type UserWithAlerts = {
 export const ALERT_THRESHOLDS = {
   /** 月次未提出: 期限 N 日前から警告 */
   MONTHLY_OVERDUE_SOON_DAYS: 3,
-  /** 体組成: N 日記録なしで警告 */
-  BODY_METRICS_STALLED_DAYS: 7,
-  /** 目標乖離: N % で警告 */
-  GOAL_DEVIATION_PERCENT: 7,
-  /** カルテ未記入: 入塾後 N 日経過で警告 */
-  CARTE_BLANK_DAYS: 3,
+  /** 体重増加: ベスト(最低)記録から N kg 増で警告 */
+  WEIGHT_GAIN_KG: 3,
+  /** 体組成: 最新記録から N 日 (未記入は入会から N 日) で警告 */
+  BODY_METRICS_OVERDUE_DAYS: 5,
+  /** カルテ未記入: 入塾後 N 日経過で警告 (= 翌日) */
+  CARTE_BLANK_DAYS: 1,
   /** 目標シート空: 入塾後 N 日経過で警告 */
-  GOAL_SHEET_BLANK_DAYS: 7,
+  GOAL_SHEET_BLANK_DAYS: 3,
   /** 最終ログイン: N 日前で警告 */
   NO_LOGIN_DAYS: 7,
   /** 学習未着手: 入塾後 N 日経過で警告 */
@@ -111,39 +112,21 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
   if (!users || users.length === 0) return [];
 
   // 関連データを並列取得
-  const [
-    audits,
-    cartes,
-    sheets,
-    lessons,
-    authList,
-    bodyMetrics,
-    sheetsWithContent,
-  ] = await Promise.all([
-    admin.from("monthly_audits").select("user_id, target_month, submitted_at"),
-    admin.from("user_workout_carte").select("user_id, purposes"),
-    admin.from("goal_sheets").select("user_id"),
-    admin.from("lesson_progress").select("user_id").eq("is_completed", true),
-    admin.auth.admin.listUsers({ perPage: 1000 }),
-    admin
-      .from("body_metrics")
-      .select("user_id, recorded_at, weight_kg")
-      .order("recorded_at", { ascending: false }),
-    admin.from("goal_sheets").select("user_id, content"),
-  ]);
+  const [audits, cartes, sheets, lessons, authList, bodyMetrics] =
+    await Promise.all([
+      admin.from("monthly_audits").select("user_id, target_month, submitted_at"),
+      admin.from("user_workout_carte").select("user_id"),
+      admin.from("goal_sheets").select("user_id"),
+      admin.from("lesson_progress").select("user_id").eq("is_completed", true),
+      admin.auth.admin.listUsers({ perPage: 1000 }),
+      admin
+        .from("body_metrics")
+        .select("user_id, recorded_at, weight_kg")
+        .order("recorded_at", { ascending: false }),
+    ]);
 
   // 高速ルックアップ用の Set / Map
   const carteUserIds = new Set(cartes.data?.map((c) => c.user_id) ?? []);
-  // ダイエット目的かどうか (goal_deviation アラート対象判定用)
-  // ダイエット系の目的 (ダイエット / 見た目改善) を持つ受講生のみ体重乖離を警告
-  const isDietGoalByUser = new Map<string, boolean>();
-  for (const c of cartes.data ?? []) {
-    const purposes = (c.purposes as string[] | null) ?? [];
-    const isDiet = purposes.some(
-      (p) => p === "ダイエット" || p === "見た目改善"
-    );
-    isDietGoalByUser.set(c.user_id, isDiet);
-  }
   const sheetUserIds = new Set(sheets.data?.map((s) => s.user_id) ?? []);
   const learningUserIds = new Set(lessons.data?.map((l) => l.user_id) ?? []);
   const lastLoginByUser = new Map<string, Date>();
@@ -160,35 +143,31 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
     auditsByUser.set(a.user_id, arr);
   }
 
-  // body_metrics: ユーザーごとに最新記録日 + 最新体重
+  // body_metrics: ユーザーごとに「最新記録日」「最新体重」「最低体重(ベスト)」
   const bodyMetricsByUser = new Map<
     string,
-    { latestDate: Date; latestWeight: number | null }
+    { latestDate: Date; latestWeight: number | null; minWeight: number | null }
   >();
   for (const m of bodyMetrics.data ?? []) {
-    const existing = bodyMetricsByUser.get(m.user_id);
     const date = new Date(m.recorded_at as string);
-    if (!existing || date > existing.latestDate) {
+    const w = m.weight_kg as number | null;
+    const existing = bodyMetricsByUser.get(m.user_id);
+    if (!existing) {
       bodyMetricsByUser.set(m.user_id, {
         latestDate: date,
-        latestWeight: m.weight_kg as number | null,
+        latestWeight: w,
+        minWeight: w,
       });
+    } else {
+      if (date > existing.latestDate) {
+        existing.latestDate = date;
+        existing.latestWeight = w;
+      }
+      if (w != null && (existing.minWeight == null || w < existing.minWeight)) {
+        existing.minWeight = w;
+      }
     }
   }
-
-  // goal_sheets: ユーザーごとに目標体重 (kg)
-  const targetWeightByUser = new Map<string, number>();
-  for (const g of sheetsWithContent.data ?? []) {
-    const content = g.content as
-      | { goal_selection?: { target_weight_kg?: number } }
-      | null;
-    const target = content?.goal_selection?.target_weight_kg;
-    if (target && target > 0) targetWeightByUser.set(g.user_id, target);
-  }
-
-  // (2026-06-17 「再添削依頼」 機能を撤回 ・ きよむさん判断 B 案)
-  // last_review_requested_at 列は DB に残置 (将来の内部運用余地)、 ただし admin アラートには使わない
-
 
   return users.map((user) => {
     const tags: AlertTag[] = [];
@@ -196,7 +175,6 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
     const daysSinceJoined = daysBetween(joinedAt, now);
 
     // 1-2. 月次未提出 (期限間近 / 期限後)
-    // 当月分または直近の未提出月次を探す
     const userAudits = auditsByUser.get(user.id) ?? [];
     const pendingAudit = userAudits
       .filter((a) => !a.submitted_at)
@@ -220,34 +198,43 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
       }
     }
 
-    // 3. 体組成途絶: 管理側アラートからは削除 (2026-06-25 きよむ判断)。
-    //    カルテ/目標より緊急度が低くノイズになるため、管理ダッシュ・受講生一覧バッジ・
-    //    受講生ハブのいずれにも出さない。受講生ホームの黄バナー
-    //    (src/lib/member/alerts.ts) は自走促しとして維持。
-    //    bm は下の目標乖離判定 (latestWeight) で引き続き使用。
     const bm = bodyMetricsByUser.get(user.id);
 
-    // 4. 目標乖離 (体重 vs 目標体重)
-    //
-    // ⚠️ 暫定実装 (2026-06-11 v5):
-    //   - 体重ベースの判定のため、 ダイエット系目的者のみ対象
-    //   - カルテの purposes に「ダイエット」または「見た目改善」を含む場合のみ判定
-    //   - 筋肉増 / 健康維持 / 体力向上が目的の受講生では誤作動するため除外
-    //   - KPI 本体 (実施完工率) には昇格させない (社長確認待ち)
-    const target = targetWeightByUser.get(user.id);
-    const isDietGoal = isDietGoalByUser.get(user.id) ?? false;
-    if (isDietGoal && bm?.latestWeight && target) {
-      const deviation = Math.abs(((bm.latestWeight - target) / target) * 100);
-      if (deviation >= ALERT_THRESHOLDS.GOAL_DEVIATION_PERCENT) {
+    // 3. 体重増加 (ベスト〔最低〕記録から +3kg)
+    //    2026-06-30 きよむ指示: 旧「目標乖離」を廃止し、シンプルに体重リバウンドを検知。
+    //    全受講生対象 (目的によらない)。最低体重との差で判定 = いつでも計算可。
+    if (bm?.latestWeight != null && bm.minWeight != null) {
+      const gain = bm.latestWeight - bm.minWeight;
+      if (gain >= ALERT_THRESHOLDS.WEIGHT_GAIN_KG) {
         tags.push({
-          key: "goal_deviation",
-          label: `目標乖離 ${deviation.toFixed(0)}%`,
-          severity: "urgent",
+          key: "weight_gain",
+          label: `体重 +${gain.toFixed(1)}kg`,
+          severity: "warn",
         });
       }
     }
 
-    // 5. カルテ未記入
+    // 4. 体組成 記録なし/途絶 (最新記録が N 日以上前 ・ 未記入は入会から N 日)
+    if (!bm) {
+      if (daysSinceJoined >= ALERT_THRESHOLDS.BODY_METRICS_OVERDUE_DAYS) {
+        tags.push({
+          key: "body_metrics_stalled",
+          label: "体組成 未記入",
+          severity: "warn",
+        });
+      }
+    } else {
+      const gap = daysBetween(bm.latestDate, now);
+      if (gap >= ALERT_THRESHOLDS.BODY_METRICS_OVERDUE_DAYS) {
+        tags.push({
+          key: "body_metrics_stalled",
+          label: `体組成 ${gap} 日記録なし`,
+          severity: "warn",
+        });
+      }
+    }
+
+    // 5. カルテ未記入 (= 翌日)
     if (!carteUserIds.has(user.id) && daysSinceJoined >= ALERT_THRESHOLDS.CARTE_BLANK_DAYS) {
       tags.push({
         key: "carte_blank",
@@ -287,7 +274,6 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
       });
     }
 
-    // 重要度判定。体組成途絶は上記の通り管理側では生成しないので、フィルタ不要。
     const hasUrgent = tags.some((t) => t.severity === "urgent");
     const topSeverity: AlertSeverity | null =
       tags.length === 0 ? null : hasUrgent ? "urgent" : "warn";

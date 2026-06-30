@@ -16,10 +16,10 @@ import { createClient } from "@/lib/supabase/server";
  *   - body_metrics_missing  : 体組成 記録なし (1 件も)
  *   - body_metrics_stalled  : 体組成 7 日以上記録なし (継続中の途絶)
  *
- * missing と stalled は排他関係:
- *   - body_metrics 行が 0 件 → missing
- *   - body_metrics 行が 1 件以上 + 最新 recorded_at が 7 日以上前 → stalled
- *   - body_metrics 行が 1 件以上 + 最新 recorded_at が 7 日以内 → アラートなし
+ * missing と stalled は排他関係 (2026-06-30 きよむ指示で 7→3 日):
+ *   - body_metrics 行が 0 件 + 入会から 3 日以上 → missing
+ *   - body_metrics 行が 1 件以上 + 最新 recorded_at が 3 日以上前 → stalled
+ *   - body_metrics 行が 1 件以上 + 最新 recorded_at が 3 日以内 → アラートなし
  */
 
 export type MemberAlertKey =
@@ -35,8 +35,10 @@ export type MemberAlert = {
   daysSinceLatest?: number;
 };
 
-/** 体組成 N 日記録なしで「途絶」 と判定する閾値 (管理者用 admin/alerts.ts と同期) */
-const BODY_METRICS_STALLED_DAYS = 7;
+/** 体組成 N 日記録なしで「途絶」 と判定する閾値 (受講生バナー ・ 2026-06-30 きよむ指示で 3 日) */
+const BODY_METRICS_STALLED_DAYS = 3;
+/** 体組成 未記入 (0 件) を出すまでの入会後 猶予日数 (= 入会直後は煽らない) */
+const BODY_METRICS_MISSING_GRACE_DAYS = 3;
 
 export async function getMyAlerts(): Promise<MemberAlert[]> {
   const supabase = await createClient();
@@ -66,7 +68,7 @@ export async function getMyAlerts(): Promise<MemberAlert[]> {
       .maybeSingle(),
     supabase
       .from("users")
-      .select("email_notification_enabled")
+      .select("email_notification_enabled, joined_at")
       .eq("id", user.id)
       .maybeSingle(),
     supabase
@@ -81,7 +83,16 @@ export async function getMyAlerts(): Promise<MemberAlert[]> {
   if (!carte.data) alerts.push({ key: "carte_blank" });
   if (!sheet.data) alerts.push({ key: "goal_sheet_blank" });
   if (!body.data) {
-    alerts.push({ key: "body_metrics_missing" });
+    // 未記入: 入会から 3 日の猶予を過ぎてから表示 (= 入会直後は煽らない)
+    const joinedAt = userRow.data?.joined_at
+      ? new Date(userRow.data.joined_at as string)
+      : null;
+    const daysSinceJoined = joinedAt
+      ? Math.floor((Date.now() - joinedAt.getTime()) / (1000 * 60 * 60 * 24))
+      : 999;
+    if (daysSinceJoined >= BODY_METRICS_MISSING_GRACE_DAYS) {
+      alerts.push({ key: "body_metrics_missing" });
+    }
   } else {
     const latest = new Date(body.data.recorded_at as string);
     const daysSinceLatest = Math.floor(
