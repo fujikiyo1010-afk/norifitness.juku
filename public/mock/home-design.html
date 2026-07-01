@@ -119,6 +119,7 @@
   <button class="tb on" data-tab="home" onclick="setTab('home')">ホーム画面</button>
   <button class="tb" data-tab="food" onclick="setTab('food')">食事</button>
   <button class="tb" data-tab="body" onclick="setTab('body')">体型変化の記録</button>
+  <button class="tb" data-tab="final" onclick="setTab('final')">確定版（仮）6/30</button>
 </div>
 <div id="homeview">
 <div class="wrap">
@@ -141,6 +142,11 @@
 </div>
 <div id="bodyview" style="display:none">
   <div class="foodwrap" id="bodywrap"></div>
+</div>
+<div id="finalview" style="display:none">
+  <div style="display:flex;justify-content:center;padding:20px 0">
+    <div class="phone"><div id="finalscreen"></div><div class="nav" id="finalnav"></div></div>
+  </div>
 </div>
 
 <script>
@@ -275,7 +281,7 @@ function bodyDetail(n){
    <div class="card" style="padding:12px;border-color:#e3e1dc;display:flex;justify-content:space-around;text-align:center"><div><div style="font-size:18px;font-weight:800;color:#1c1a16">-3.4kg</div><div style="font-size:9px;color:#777">体重</div></div><div><div style="font-size:18px;font-weight:800;color:#1c1a16">-2.1%</div><div style="font-size:9px;color:#777">体脂肪率</div></div></div>
    <div style="text-align:center;font-size:11px;color:#2b2620;font-weight:700">＋ 今日の写真を追加</div></div>`;
 }
-const NAV_STD=`<div class="tab on"><div class="d"></div>ホーム</div><div class="tab"><div class="d"></div>コース</div><div class="tab"><div class="d"></div>記録</div><div class="tab"><div class="d"></div>筋トレ</div><div class="tab"><div class="d"></div>プロフィール</div>`;
+const NAV_STD=`<div class="tab on"><div class="d"></div>ホーム</div><div class="tab"><div class="d"></div>コース</div><div class="tab"><div class="d"></div>チャット</div><div class="tab"><div class="d"></div>筋トレ</div><div class="tab"><div class="d"></div>プロフィール</div>`;
 const NAV_ALT=`<div class="tab on"><div class="d"></div>ホーム</div><div class="tab"><div class="d"></div>コース</div><div class="tab"><div class="d"></div>食事</div><div class="tab"><div class="d"></div>筋トレ</div><div class="tab"><div class="d"></div>プロフィール</div>`;
 
 const PATS={
@@ -322,13 +328,23 @@ function renderFood(){
 function renderBody(){
   document.getElementById('bodywrap').innerHTML=[1,2,3].map(n=>frame(NUM[n-1],bodyDetail(n))).join('');
 }
+// 確定版(仮): 大タイル + 決定オプション固定で描画 (トグルの影響を受けない)
+function renderFinal(){
+  const saved={...ST};
+  Object.assign(ST,{pat:'大タイル',bm:3,col:3,prog:3,board:1,icon:'color'});
+  document.getElementById('finalscreen').innerHTML=PATS['大タイル']();
+  document.getElementById('finalnav').innerHTML=NAV_STD;
+  Object.assign(ST,saved);
+}
 function setTab(t){
   document.getElementById('homeview').style.display = t==='home'?'':'none';
   document.getElementById('foodview').style.display = t==='food'?'':'none';
   document.getElementById('bodyview').style.display = t==='body'?'':'none';
+  document.getElementById('finalview').style.display = t==='final'?'':'none';
   document.querySelectorAll('.tabbar .tb').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
   if(t==='food') renderFood();
   if(t==='body') renderBody();
+  if(t==='final') renderFinal();
 }
 
 render();
