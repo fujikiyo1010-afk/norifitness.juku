@@ -291,7 +291,7 @@ const PATS={
 'ストリーク前面':()=>HD+`<div class="body">${GREET}${streakCard}${board()}<div class="sec">今日の3つ</div>${bm()}${train}${foodSection()}${prog()}<div class="more">すべての機能 ▾</div></div>`,
 };
 
-const ST={pat:'★統合',bm:1,food:1,col:1,prog:1,board:1,icon:'line'};
+const ST={pat:'大タイル',bm:3,food:1,col:3,prog:3,board:1,icon:'color'};
 const pats=document.getElementById('pats');
 Object.keys(PATS).forEach(k=>{const b=document.createElement('button');b.className='pat';b.textContent=k;b.onclick=()=>{ST.pat=k;render();};b.dataset.k=k;pats.appendChild(b);});
 function chips(id,key){const el=document.getElementById(id);['1','2','3','4','5'].forEach(n=>{const c=document.createElement('span');c.className='chip';c.textContent=n;c.dataset.v=n;c.onclick=()=>{ST[key]=+n;render();};el.appendChild(c);});}
