@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>達成予測の見せ方 ・ 3案</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800&family=Inter:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f9f5ed;--card:#fffdf8;--line:#e7dcc9;--ink:#2b2620;--ink2:#6a6256;--ink3:#a59b8c;--grn:#4a875b;--grnd:#004d40;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Noto Sans JP',sans-serif;background:#ece0cf;color:var(--ink);padding:20px 12px 60px;}
+  .head{max-width:900px;margin:0 auto 16px;text-align:center;}
+  .head h1{font-size:20px;font-weight:800;margin-bottom:4px;}
+  .head p{font-size:12px;color:#7a6f5c;}
+  .tabbar{max-width:720px;margin:0 auto 22px;display:flex;gap:8px;background:#fff;border-radius:12px;padding:8px;box-shadow:0 2px 10px rgba(0,0,0,.08);}
+  .tb{flex:1;border:none;background:transparent;border-radius:8px;padding:11px 6px;font-size:13px;font-weight:800;color:var(--ink2);cursor:pointer;line-height:1.35;}
+  .tb.on{background:var(--grn);color:#fff;}
+  .stage{display:none;} .stage.on{display:block;}
+  .wrap{max-width:420px;margin:0 auto;}
+  .phone{background:var(--bg);border:8px solid #1c1c1c;border-radius:34px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.2);}
+  .sbar{background:#1c1c1c;color:#fff;text-align:center;font-size:10px;padding:4px;font-family:'Inter';}
+  .scr{padding:16px 14px 22px;}
+  .apphdr{display:flex;align-items:center;justify-content:space-between;padding:2px 2px 12px;}
+  .apphdr .back{font-size:13px;color:var(--ink2);font-weight:700;}
+  .apphdr .t{font-size:13px;font-weight:800;color:var(--grnd);}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px;}
+  .u{font-size:12px;color:var(--ink2);font-weight:700;}
+  /* リング(小・共通の上部サマリ) */
+  .ringrow{display:flex;align-items:center;gap:14px;}
+  .ring{position:relative;width:88px;height:88px;flex:0 0 auto;}
+  .ring .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .ring .ctr .n{font-size:17px;font-weight:800;font-family:'Inter';color:var(--ink);line-height:1;}
+  .ring .ctr .s{font-size:9px;color:var(--ink2);font-weight:700;margin-top:2px;}
+  .sub3{display:flex;justify-content:space-around;font-size:11px;margin-top:2px;}
+  .sub3 b{font-size:14px;}
+  .desc{font-size:11px;color:#7a6f5c;text-align:center;line-height:1.6;margin-top:6px;}
+  .badge{font-size:10px;font-weight:800;color:var(--grnd);background:#eef5f0;border-radius:20px;padding:3px 10px;display:inline-block;}
+
+  /* 案A カウントダウン */
+  .cd{background:linear-gradient(135deg,#eef5f0,#fffbe6);border:1px solid #d7e6db;border-radius:14px;padding:16px;text-align:center;}
+  .cd .lbl{font-size:12px;color:var(--ink2);font-weight:700;}
+  .cd .days{font-size:44px;font-weight:800;color:var(--grnd);font-family:'Inter';line-height:1;margin:4px 0;}
+  .cd .days small{font-size:16px;}
+  .cd .date{font-size:14px;font-weight:800;color:var(--ink);}
+  .cd .pace{font-size:11px;color:var(--ink2);margin-top:6px;}
+
+  /* 案B タイムライン */
+  .tlbar{position:relative;height:8px;background:#e9e2d3;border-radius:6px;margin:26px 6px 4px;}
+  .tlbar .fill{position:absolute;left:0;top:0;height:8px;width:50%;background:var(--grn);border-radius:6px;}
+  .tlbar .now{position:absolute;left:50%;top:-5px;width:18px;height:18px;border-radius:50%;background:#fff;border:3px solid var(--grn);transform:translateX(-50%);}
+  .tlbar .goal{position:absolute;right:0;top:-4px;width:16px;height:16px;border-radius:50%;background:var(--grnd);transform:translateX(50%);display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;}
+  .tlbar .cap{position:absolute;top:-22px;font-size:10px;font-weight:800;color:var(--ink2);}
+  .tlbar .cap.l{left:0;} .tlbar .cap.n{left:50%;transform:translateX(-50%);color:var(--grn);} .tlbar .cap.r{right:0;}
+  .tllabels{display:flex;justify-content:space-between;font-size:10px;color:var(--ink3);margin:0 2px;}
+  .tlmsg{text-align:center;font-size:13px;font-weight:800;color:var(--grnd);margin-top:12px;}
+
+  /* 案C 具体日+マイルストーン */
+  .datebig{display:flex;align-items:center;gap:12px;background:#eef5f0;border-radius:12px;padding:12px 14px;}
+  .datebig .cal{width:44px;height:48px;border-radius:8px;background:#fff;border:1px solid #cfe0d4;flex:0 0 auto;overflow:hidden;text-align:center;}
+  .datebig .cal .m{background:var(--grn);color:#fff;font-size:9px;font-weight:800;padding:2px;}
+  .datebig .cal .d{font-size:20px;font-weight:800;color:var(--grnd);font-family:'Inter';line-height:1.4;}
+  .datebig .txt .h{font-size:15px;font-weight:800;color:var(--ink);}
+  .datebig .txt .s{font-size:11px;color:var(--ink2);margin-top:2px;}
+  .mile{display:flex;align-items:center;gap:8px;margin-top:10px;padding:10px 12px;border:1px dashed #cfc7b5;border-radius:10px;font-size:12px;color:var(--ink);}
+  .mile b{color:var(--grnd);}
+
+  .foot{max-width:720px;margin:18px auto 0;font-size:11px;color:#7a6f5c;line-height:1.7;text-align:center;}
+</style>
+</head>
+<body>
+<div class="head">
+  <h1>達成予測の見せ方 ・ 3案</h1>
+  <p>詳細画面（追加案1）の予測ブロックだけ差し替え。実測ペース（週-0.4kg）で 残り3.4kg → 約60日先を予測</p>
+</div>
+<div class="tabbar">
+  <button class="tb on" data-s="a" onclick="setS('a')">案A<br>カウントダウン</button>
+  <button class="tb" data-s="b" onclick="setS('b')">案B<br>タイムライン</button>
+  <button class="tb" data-s="c" onclick="setS('c')">案C<br>具体日＋節目</button>
+</div>
+
+<!-- 共通の上部サマリ(リング) を各案の上に置く -->
+<script>
+  const RING = `<div class="card"><div class="ringrow">
+    <div class="ring"><svg width="88" height="88"><circle cx="44" cy="44" r="36" fill="none" stroke="#eee4d4" stroke-width="9"/><circle cx="44" cy="44" r="36" fill="none" stroke="#4a875b" stroke-width="9" stroke-linecap="round" stroke-dasharray="226" stroke-dashoffset="113" transform="rotate(-90 44 44)"/></svg><div class="ctr"><div class="n">68.4<span style="font-size:10px">kg</span></div><div class="s">達成50%</div></div></div>
+    <div style="flex:1"><div class="sub3"><span style="color:#6a6256">入会時<br><b style="color:#2b2620">71.8</b></span><span style="color:#6a6256">現在<br><b style="color:#004d40">68.4</b></span><span style="color:#6a6256">目標<br><b style="color:#004d40">65.0</b></span></div><div class="desc">残り <b style="color:#004d40">3.4kg</b> ・ 今のペース 週 -0.4kg</div></div>
+  </div></div>`;
+</script>
+
+<div class="stage on" id="s-a"><div class="wrap"><div class="phone"><div class="sbar">9:41</div><div class="scr">
+  <div class="apphdr"><span class="back">‹ 体組成</span><span class="t">体型変化の記録</span><span style="width:20px"></span></div>
+  <div id="ra"></div>
+  <div class="card" style="padding:14px">
+    <div class="cd">
+      <div class="lbl">🎯 目標達成まで</div>
+      <div class="days">60<small> 日</small></div>
+      <div class="date">9月上旬（9/5 ごろ）見込み</div>
+      <div class="pace">今のペース 週 -0.4kg ・ 残り 3.4kg</div>
+    </div>
+  </div>
+</div></div></div></div>
+
+<div class="stage" id="s-b"><div class="wrap"><div class="phone"><div class="sbar">9:41</div><div class="scr">
+  <div class="apphdr"><span class="back">‹ 体組成</span><span class="t">体型変化の記録</span><span style="width:20px"></span></div>
+  <div id="rb"></div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:#5b5344;margin-bottom:4px">目標までの道のり</div>
+    <div class="tlbar">
+      <div class="fill"></div><div class="now"></div><div class="goal">🏁</div>
+      <span class="cap l">入会 6/1</span><span class="cap n">今 7/2</span><span class="cap r">目標</span>
+    </div>
+    <div class="tllabels"><span>71.8kg</span><span>68.4kg</span><span>65.0kg</span></div>
+    <div class="tlmsg">このまま進むと <span style="color:#2b2620">9月上旬</span> に到達見込み</div>
+    <div class="desc">残り3.4kg ・ 約60日 ・ 週 -0.4kg ペース</div>
+  </div>
+</div></div></div></div>
+
+<div class="stage" id="s-c"><div class="wrap"><div class="phone"><div class="sbar">9:41</div><div class="scr">
+  <div class="apphdr"><span class="back">‹ 体組成</span><span class="t">体型変化の記録</span><span style="width:20px"></span></div>
+  <div id="rc"></div>
+  <div class="card">
+    <div class="datebig">
+      <div class="cal"><div class="m">9月</div><div class="d">5</div></div>
+      <div class="txt"><div class="h">9月上旬ごろ 達成見込み</div><div class="s">今のペース（週 -0.4kg）で計算 ・ あと約60日</div></div>
+    </div>
+    <div class="mile">👣 直近の節目：<b>67.0kg</b> まで あと <b>約2.5週間</b></div>
+  </div>
+</div></div></div></div>
+
+<div class="foot">
+  ※ 予測は「実測ペース」ベース（減量計画ではない）。記録が増えるほど精度UP。<br>
+  ペース停滞・増加中は日付を出さず「記録を続けよう」に切替（誤った期待を出さない）。数値はサンプル。
+</div>
+
+<script>
+  document.getElementById('ra').innerHTML=RING;
+  document.getElementById('rb').innerHTML=RING;
+  document.getElementById('rc').innerHTML=RING;
+  function setS(s){document.querySelectorAll('.stage').forEach(el=>el.classList.toggle('on',el.id==='s-'+s));document.querySelectorAll('.tb').forEach(b=>b.classList.toggle('on',b.dataset.s===s));}
+</script>
+</body>
+</html>
