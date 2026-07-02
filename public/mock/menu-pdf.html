@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>1週間メニュー PDF レイアウト案 v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800;900&family=Inter:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f9f5ed;--card:#fffdf8;--line:#e2d7c2;--ink:#2b2620;--ink2:#6a6256;--ink3:#a59b8c;--grn:#4a875b;--grnd:#004d40;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Noto Sans JP',sans-serif;background:#cfc3ae;color:var(--ink);padding:24px 0;}
+  .page{width:794px;min-height:1123px;background:var(--bg);margin:0 auto 26px;padding:44px 48px;box-shadow:0 6px 22px rgba(0,0,0,.22);position:relative;}
+  .pfoot{position:absolute;bottom:24px;left:48px;right:48px;display:flex;justify-content:space-between;font-size:11px;color:var(--ink3);border-top:1px solid var(--line);padding-top:9px;}
+  /* 表紙 */
+  .cvtitle{font-size:36px;font-weight:900;line-height:1.3;}
+  .cvsub{font-size:14px;color:var(--ink2);margin-top:14px;line-height:1.8;}
+  .cvsub b{color:var(--grnd);}
+  .cvbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin-top:22px;}
+  .cvbox h3{font-size:14px;font-weight:800;color:var(--grnd);margin-bottom:12px;border-left:4px solid var(--grn);padding-left:10px;}
+  .cvrow{font-size:14px;line-height:2;color:var(--ink);}
+  .cvrow b{color:var(--grnd);}
+  .goalbig{font-size:19px;font-weight:800;color:var(--ink);margin:4px 0 2px;}
+  .goalbig b{color:var(--grnd);font-family:'Inter';font-size:22px;}
+  /* カーボサイクル週帯 (単色) */
+  .cyc{display:flex;gap:7px;margin-top:14px;}
+  .cyc .d{flex:1;text-align:center;border:1px solid var(--line);border-radius:10px;padding:9px 2px;background:#fff;}
+  .cyc .d .w{font-size:13px;font-weight:800;color:var(--ink);}
+  .cyc .d .lv{font-size:13px;font-weight:900;margin-top:3px;color:var(--grnd);}
+  .cyc .d .c{font-size:10px;color:var(--ink2);margin-top:2px;font-family:'Inter';}
+  .cyc .d.high{border-color:var(--grn);border-width:2px;}
+  .note{font-size:11.5px;color:var(--ink3);line-height:1.8;margin-top:20px;border-top:1px dashed #cabfa9;padding-top:14px;}
+  /* 日ページ ヘッダー */
+  .dayhdr{display:flex;align-items:flex-end;justify-content:space-between;border-bottom:3px solid var(--grn);padding-bottom:14px;margin-bottom:18px;}
+  .dayhdr .day{font-size:34px;font-weight:900;line-height:1;}
+  .dayhdr .lv{font-size:15px;font-weight:800;color:var(--grnd);border:2px solid var(--grn);border-radius:20px;padding:3px 16px;margin-left:14px;}
+  .daytot{text-align:right;}
+  .daytot .goal{font-size:12.5px;color:var(--ink2);font-weight:700;margin-bottom:3px;}
+  .daytot .goal b{font-family:'Inter';color:var(--ink);}
+  .daytot .k{font-size:30px;font-weight:900;font-family:'Inter';color:var(--grnd);line-height:1;}
+  .daytot .k span{font-size:15px;}
+  .daytot .m{font-size:15px;color:var(--ink);font-weight:800;margin-top:5px;}
+  .daytot .m b{font-family:'Inter';color:var(--grnd);}
+  /* 食事カード */
+  .meal{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:15px 18px;margin-bottom:12px;}
+  .meal .top{display:flex;align-items:center;gap:11px;margin-bottom:8px;}
+  .tag{font-size:13px;font-weight:800;color:#fff;background:var(--grnd);border-radius:6px;padding:3px 12px;flex:0 0 auto;}
+  .tag.snack{background:var(--ink2);}
+  .meal .name{font-size:17px;font-weight:800;color:var(--ink);}
+  .meal .chip{margin-left:auto;font-size:14px;font-weight:800;color:var(--grnd);font-family:'Inter';flex:0 0 auto;white-space:nowrap;}
+  .meal .ing{font-size:13px;color:var(--ink2);line-height:1.7;margin-bottom:7px;}
+  .meal .ing b{color:var(--ink);font-weight:700;}
+  .meal ol{margin:0 0 0 20px;padding:0;}
+  .meal li{font-size:13px;color:var(--ink);line-height:1.75;margin-bottom:3px;}
+  /* 作り置き */
+  .prep{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--grn);border-radius:12px;padding:18px 20px;margin-bottom:16px;}
+  .prep h3{font-size:18px;font-weight:800;color:var(--grnd);margin-bottom:8px;}
+  .prep .ing{font-size:13px;color:var(--ink2);margin-bottom:10px;line-height:1.7;}
+  .prep ol{margin-left:20px;} .prep li{font-size:13.5px;line-height:1.8;margin-bottom:4px;}
+  .sech{font-size:24px;font-weight:900;margin-bottom:5px;}
+  .secsub{font-size:13.5px;color:var(--ink2);margin-bottom:20px;}
+</style>
+</head>
+<body>
+
+<!-- 表紙 -->
+<div class="page">
+  <div class="cvtitle">あなたのための、<br>1週間メニュー</div>
+  <div class="cvsub">のりが、のりfitness AI とともに <b>動画455本・論文308本</b> を読み込み、<br>あなた一人のために一食ずつ組み上げました。</div>
+
+  <div class="cvbox">
+    <h3>あなたの条件</h3>
+    <div class="cvrow">
+      男性・42歳／172cm／現在 <b>78.0kg</b>・体脂肪24% → 目標 <b>70.0kg</b><br>
+      目的：痩せる・引き締め／続く習慣　　嫌い：パクチー・生魚<br>
+      自炊：週数回（週末作り置きOK）／昼はコンビニ可／お酒：週2回
+    </div>
+  </div>
+
+  <div class="cvbox">
+    <h3>1日の目標</h3>
+    <div class="goalbig">たんぱく質 <b>156g</b>　・　脂質 <b>56g</b>　（毎日キープ）</div>
+    <div class="cvrow">糖質は曜日で増減（カーボサイクル）／食物繊維は毎日 <b>20〜25g</b></div>
+    <div class="cyc">
+      <div class="d"><div class="w">月</div><div class="lv">中</div><div class="c">C199</div></div>
+      <div class="d high"><div class="w">火</div><div class="lv">高</div><div class="c">C368</div></div>
+      <div class="d"><div class="w">水</div><div class="lv">低</div><div class="c">C100</div></div>
+      <div class="d"><div class="w">木</div><div class="lv">中</div><div class="c">C199</div></div>
+      <div class="d high"><div class="w">金</div><div class="lv">高</div><div class="c">C368</div></div>
+      <div class="d"><div class="w">土</div><div class="lv">低</div><div class="c">C100</div></div>
+      <div class="d"><div class="w">日</div><div class="lv">中</div><div class="c">C199</div></div>
+    </div>
+  </div>
+
+  <div class="note">※本メニューはあくまで参考です。持病・服薬がある方の食事調整は、必ず医師の判断に従ってください。本サービスは医療行為・診断を行うものではありません。　数値は日本食品標準成分表（八訂）準拠で計算。</div>
+  <div class="pfoot"><span>のりfitness × のりfitness AI</span><span>表紙</span></div>
+</div>
+
+<!-- 作り置き -->
+<div class="page">
+  <div class="sech">まず作る「作り置き」2品</div>
+  <div class="secsub">週末に仕込むと、平日がぐっとラクになります。</div>
+
+  <div class="prep">
+    <h3>A. 鶏むねチャーシュー（むね1.5kg分）</h3>
+    <div class="ing"><b>材料</b>：鶏むね1.5kg／しょうゆ大3／酒大3／おろし生姜小2／おろしにんにく小2／黒こしょう・一味 少々／白ねぎ青い部分</div>
+    <ol>
+      <li>むね肉をフォークで刺し、厚い所は開いて厚みを均一に。</li>
+      <li>ポリ袋に調味料・ねぎ・肉を入れ、もんで30分置く。</li>
+      <li>沸騰した湯を火から下ろし、袋ごと沈めて蓋・余熱で40〜45分。</li>
+      <li>薄切りにして1食120〜200gに小分け（冷蔵3日／冷凍2週）。</li>
+    </ol>
+  </div>
+
+  <div class="prep">
+    <h3>B. 低脂質スパイスカレーの具（4〜5食分）</h3>
+    <div class="ing"><b>材料</b>：鶏むね600g／玉ねぎ2／なす2／ピーマン2／トマト缶1／クミン・コリアンダー・ターメリック 各小2／塩小1／生姜・にんにく 各小1</div>
+    <ol>
+      <li>鶏むねと野菜を一口大に切る。</li>
+      <li>玉ねぎを飴色近くまで炒め、生姜・にんにく・スパイスを30秒炒める。</li>
+      <li>鶏→野菜→トマト缶→水200mlの順で入れ、塩で調え15分煮る。</li>
+      <li>1食ずつ小分けして冷凍。食べる時はレンジ加熱。</li>
+    </ol>
+  </div>
+  <div class="pfoot"><span>のりfitness × のりfitness AI</span><span>作り置き</span></div>
+</div>
+
+<!-- 月(中) -->
+<div class="page">
+  <div class="dayhdr">
+    <div style="display:flex;align-items:baseline"><span class="day">月曜</span><span class="lv">中の日</span></div>
+    <div class="daytot">
+      <div class="goal">目標：1,920kcal ／ P<b>156</b>・F<b>56</b>・C<b>199</b></div>
+      <div class="k">1,906 <span>kcal</span></div>
+      <div class="m">P <b>161</b>・F <b>58</b>・C <b>207</b>　／　食物繊維 <b>26g</b></div>
+    </div>
+  </div>
+
+  <div class="meal">
+    <div class="top"><span class="tag">朝</span><span class="name">プロテイン・オーバーナイトオーツ</span><span class="chip">437kcal ・ P47/F7/C51</span></div>
+    <div class="ing"><b>材料</b>：オートミール40g／無脂肪ヨーグルト150g／バナナ50g／プロテイン30g／きなこ10g</div>
+    <ol><li>容器にオートミール・ヨーグルト・水50mlを混ぜ、冷蔵で一晩（急ぐ時は5分ふやかす）。</li><li>食べる前にプロテインときなこを混ぜ、輪切りバナナをのせる。</li></ol>
+  </div>
+
+  <div class="meal">
+    <div class="top"><span class="tag">昼</span><span class="name">鶏むねとブロッコリーの塩だれ丼</span><span class="chip">597kcal ・ P48/F12/C80</span></div>
+    <div class="ing"><b>材料</b>：作り置きA 170g／白米200g／オリーブ油8g／ブロッコリー100g／わかめ30g</div>
+    <ol><li>ブロッコリーは小房にして600Wで2分レンチン。</li><li>オリーブ油でチャーシューとブロッコリーをさっと炒め、黒こしょうで締める。</li><li>ご飯にのせ、戻したわかめを添える。</li></ol>
+  </div>
+
+  <div class="meal">
+    <div class="top"><span class="tag">夜</span><span class="name">豚ヒレステーキ アボカド添え</span><span class="chip">677kcal ・ P48/F27/C70</span></div>
+    <div class="ing"><b>材料</b>：豚ヒレ150g／白米160g／卵1個／アボカド60g／ほうれん草80g／キムチ40g／オリーブ油5g</div>
+    <ol><li>豚ヒレを1.5cm厚に切り塩こしょう、オリーブ油で両面を焼く。</li><li>ほうれん草はお浸し、卵は目玉焼きに。</li><li>豚・スライスアボカド・卵・ほうれん草・キムチを盛り、ご飯を添える。</li></ol>
+  </div>
+
+  <div class="meal">
+    <div class="top"><span class="tag snack">間食</span><span class="name">素焼きアーモンド＋プロテイン</span><span class="chip">195kcal ・ P19/F11/C6</span></div>
+    <div class="ing"><b>材料</b>：アーモンド20g／プロテイン20g　→　シェイクしてアーモンドと一緒に。</div>
+  </div>
+  <div class="pfoot"><span>のりfitness × のりfitness AI</span><span>月曜（中）</span></div>
+</div>
+
+<!-- 火(高) -->
+<div class="page">
+  <div class="dayhdr">
+    <div style="display:flex;align-items:baseline"><span class="day">火曜</span><span class="lv">高の日</span></div>
+    <div class="daytot">
+      <div class="goal">目標：2,600kcal ／ P<b>156</b>・F<b>56</b>・C<b>368</b></div>
+      <div class="k">2,494 <span>kcal</span></div>
+      <div class="m">P <b>151</b>・F <b>49</b>・C <b>386</b>　／　食物繊維 <b>36g</b></div>
+    </div>
+  </div>
+
+  <div class="meal">
+    <div class="top"><span class="tag">朝</span><span class="name">納豆もち麦ごはん＋卵</span><span class="chip">567kcal ・ P29/F19/C72</span></div>
+    <div class="ing"><b>材料</b>：卵2個／もち麦飯200g／納豆1P／わかめ30g／きなこ10g</div>
+    <ol><li>もち麦飯を炊く（白米にもち麦を混ぜても可）。</li><li>卵はスクランブルor温泉卵に。</li><li>ごはんに納豆・卵・わかめをのせる。</li></ol>
+  </div>
+
+  <div class="meal">
+    <div class="top"><span class="tag">昼</span><span class="name">鶏むねカレー（作り置きB）大盛り</span><span class="chip">753kcal ・ P50/F13/C117</span></div>
+    <div class="ing"><b>材料</b>：作り置きB 1食／白米300g／ブロッコリー80g／キムチ40g／オリーブ油8g</div>
+    <ol><li>カレーの具をレンジ加熱。</li><li>ブロッコリーはレンチンしオリーブ油をからめる。</li><li>大盛りご飯にかけ、キムチを添える（高強度日は糖質しっかり）。</li></ol>
+  </div>
+
+  <div class="meal">
+    <div class="top"><span class="tag">夜</span><span class="name">豚ヒレの生姜焼き丼</span><span class="chip">775kcal ・ P47/F16/C123</span></div>
+    <div class="ing"><b>材料</b>：豚ヒレ160g／白米300g／しめじ60g／キャベツ80g／アボカド50g</div>
+    <ol><li>豚ヒレ薄切りをしょうゆ・酒・みりん各小2＋生姜で下味。</li><li>豚としめじを炒め、火が通ったらタレをからめる。</li><li>千切りキャベツを敷いたご飯にのせ、アボカドを添える。</li></ol>
+  </div>
+
+  <div class="meal">
+    <div class="top"><span class="tag snack">間食</span><span class="name">さつまいも＋バナナプロテイン</span><span class="chip">399kcal ・ P25/F2/C73</span></div>
+    <div class="ing"><b>材料</b>：さつまいも150g／バナナ100g／プロテイン30g　→　さつまいもはレンチン4〜5分。トレ後に。</div>
+  </div>
+  <div class="pfoot"><span>のりfitness × のりfitness AI</span><span>火曜（高）</span></div>
+</div>
+
+</body>
+</html>
