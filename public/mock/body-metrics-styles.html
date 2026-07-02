@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>体組成 詳細 ・ スタイル5案</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800&family=Inter:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f9f5ed;--card:#fffdf8;--line:#e7dcc9;--ink:#2b2620;--ink2:#6a6256;--ink3:#a59b8c;--grn:#4a875b;--grnd:#004d40;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Noto Sans JP',sans-serif;background:#ece0cf;color:var(--ink);padding:20px 12px 60px;}
+  .head{max-width:1100px;margin:0 auto 14px;text-align:center;}
+  .head h1{font-size:20px;font-weight:800;margin-bottom:4px;}
+  .head p{font-size:12px;color:#7a6f5c;}
+  .tabbar{max-width:900px;margin:0 auto 22px;display:flex;gap:6px;background:#fff;border-radius:12px;padding:7px;box-shadow:0 2px 10px rgba(0,0,0,.08);}
+  .tb{flex:1;border:none;background:transparent;border-radius:8px;padding:10px 4px;font-size:12px;font-weight:800;color:var(--ink2);cursor:pointer;line-height:1.3;}
+  .tb.on{background:var(--grn);color:#fff;}
+  .stage{display:none;} .stage.on{display:block;}
+  .cols{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;max-width:1100px;margin:0 auto;}
+  .col{display:flex;flex-direction:column;align-items:center;}
+  .cap{font-size:12px;font-weight:800;color:#5b5344;margin-bottom:8px;background:#fff;border-radius:20px;padding:4px 14px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+  .phone{width:330px;background:var(--bg);border:8px solid #1c1c1c;border-radius:32px;overflow:hidden;box-shadow:0 10px 28px rgba(0,0,0,.2);}
+  .sbar{background:#1c1c1c;color:#fff;text-align:center;font-size:10px;padding:4px;font-family:'Inter';}
+  .scr{padding:14px 12px 20px;}
+  .hdr{display:flex;align-items:center;justify-content:space-between;padding:2px 2px 10px;}
+  .hdr .back{font-size:13px;color:var(--ink2);font-weight:700;} .hdr .t{font-size:13px;font-weight:800;color:var(--grnd);}
+  /* ピルタブ (全案共通) */
+  .pill{display:flex;gap:6px;background:#f0ece2;padding:5px;border-radius:14px;margin-bottom:12px;}
+  .pill span{flex:1;text-align:center;font-size:12px;font-weight:800;padding:9px;border-radius:10px;color:var(--ink2);}
+  .pill span.on{background:var(--grn);color:#fff;box-shadow:0 2px 6px rgba(74,135,91,.35);}
+  /* 予測ブロック(単枠) */
+  .pred{border:1px solid #d7e6db;border-radius:14px;padding:14px;background:linear-gradient(135deg,#eef5f0,#fffbe6);margin-bottom:11px;}
+  .predlbl{font-size:11px;color:var(--ink2);font-weight:700;}
+  .cal{width:42px;height:46px;border-radius:8px;background:#fff;border:1px solid #cfe0d4;overflow:hidden;text-align:center;flex:0 0 auto;}
+  .cal .m{background:var(--grn);color:#fff;font-size:9px;font-weight:800;padding:2px;} .cal .d{font-size:19px;font-weight:800;color:var(--grnd);font-family:'Inter';line-height:1.35;}
+  .predmain{display:flex;align-items:baseline;gap:8px;margin:4px 0 12px;}
+  .predmain .k{font-size:29px;font-weight:800;color:#004d40;font-family:'Inter';} .predmain .w{font-size:15px;font-weight:800;color:#2b2620;}
+  .caldate{display:flex;align-items:center;gap:10px;}
+  .caldate .h{font-size:14px;font-weight:800;color:#2b2620;} .caldate .s{font-size:11px;color:#6a6256;margin-top:2px;}
+  .graph{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:10px 8px;}
+  .graph.plain{border:none;background:transparent;padding:6px 0;}
+  .u{font-size:12px;color:var(--ink2);font-weight:700;} .g{color:var(--grnd);}
+  .banote{font-size:10px;color:var(--ink3);text-align:center;margin-top:10px;}
+  .sec{font-size:12px;font-weight:800;color:#5b5344;margin:12px 2px 8px;}
+  .foot{max-width:900px;margin:18px auto 0;font-size:11px;color:#7a6f5c;line-height:1.7;text-align:center;}
+  svg.line{width:100%;display:block;}
+</style>
+</head>
+<body>
+<div class="head">
+  <h1>体組成 詳細 ・ スタイル5案（体重表示）</h1>
+  <p>全案：ピルタブ・二重枠なし。内容は同じで「全体の見た目/分け方」を変えて比較</p>
+</div>
+<div class="tabbar">
+  <button class="tb on" data-s="1" onclick="setS('1')">1. クリーン整理</button>
+  <button class="tb" data-s="2" onclick="setS('2')">2. フラット＆余白</button>
+  <button class="tb" data-s="3" onclick="setS('3')">3. ヒーロー型</button>
+  <button class="tb" data-s="4" onclick="setS('4')">4. ダッシュボード</button>
+  <button class="tb" data-s="5" onclick="setS('5')">5. ダークヒーロー</button>
+</div>
+<div class="stage on" id="s-1"><div class="cols" id="c-1"></div></div>
+<div class="stage" id="s-2"><div class="cols" id="c-2"></div></div>
+<div class="stage" id="s-3"><div class="cols" id="c-3"></div></div>
+<div class="stage" id="s-4"><div class="cols" id="c-4"></div></div>
+<div class="stage" id="s-5"><div class="cols" id="c-5"></div></div>
+<div class="foot" id="foot"></div>
+
+<script>
+const PILL = `<div class="pill"><span class="on">体重</span><span>ウエスト＋写真</span></div>`;
+const HDR = `<div class="hdr"><span class="back">‹ 体組成</span><span class="t">体型変化の記録</span><span style="width:18px"></span></div>`;
+const phone = (cls,inner) => `<div class="phone"><div class="sbar">9:41</div><div class="scr ${cls}">${HDR}${PILL}${inner}</div></div>`;
+const ringSvg = (col="#4a875b",track="#eee4d4",sz=88,sw=9)=>`<svg width="${sz}" height="${sz}"><circle cx="${sz/2}" cy="${sz/2}" r="${sz/2-sw-2}" fill="none" stroke="${track}" stroke-width="${sw}"/><circle cx="${sz/2}" cy="${sz/2}" r="${sz/2-sw-2}" fill="none" stroke="${col}" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${2*Math.PI*(sz/2-sw-2)}" stroke-dashoffset="${Math.PI*(sz/2-sw-2)}" transform="rotate(-90 ${sz/2} ${sz/2})"/></svg>`;
+const lineSvg = `<svg class="line" viewBox="0 0 300 96"><line x1="10" y1="22" x2="290" y2="22" stroke="#ddd6c6" stroke-width="1" stroke-dasharray="4 4"/><text x="12" y="18" font-size="9" fill="#4a875b">目標 65.0</text><polyline points="15,36 60,42 105,39 150,52 195,58 240,68 285,74" fill="none" stroke="#2b2620" stroke-width="2.5"/><circle cx="285" cy="74" r="4" fill="#34603f"/></svg>`;
+const PRED = `<div class="pred"><div class="predlbl">次の目標</div><div class="predmain"><span class="k">67.0<span style="font-size:14px">kg</span></span><span class="w">まで あと 2.5週間</span></div><div class="caldate"><div class="cal"><div class="m">9月</div><div class="d">5</div></div><div><div class="h">9月上旬ごろ 達成見込み</div><div class="s">今のペースであと約60日です</div></div></div></div>`;
+const BANOTE = `<div class="banote">↓ この下に「ビフォーアフター写真」は全案共通で入ります</div>`;
+
+// 1. クリーン整理
+document.getElementById('c-1').innerHTML = `<div class="col"><div class="cap">1. クリーン整理</div>${phone('',`
+  <div style="border:1px solid var(--line);background:var(--card);border-radius:16px;padding:14px;margin-bottom:11px">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="position:relative;width:88px;height:88px;flex:0 0 auto">${ringSvg()}<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:17px;font-weight:800;font-family:'Inter'">68.4<span style="font-size:10px">kg</span></div><div style="font-size:9px;color:var(--ink2);font-weight:700">達成50%</div></div></div>
+      <div style="flex:1"><div style="display:flex;justify-content:space-around;font-size:11px"><span style="color:#6a6256">入会時<br><b style="font-size:17px;font-family:'Inter'">71.8</b></span><span style="color:#6a6256">現在<br><b class="g" style="font-size:17px;font-family:'Inter'">68.4</b></span><span style="color:#6a6256">目標<br><b class="g" style="font-size:17px;font-family:'Inter'">65.0</b></span></div>
+      <div style="text-align:center;margin-top:8px"><span style="display:inline-block;text-align:right"><div style="font-size:11px;color:#6a6256;font-weight:700">残り <b style="font-size:17px;color:#004d40;font-family:'Inter'">3.4</b><span class="u">kg</span></div><div style="font-size:11px;color:#6a6256;font-weight:700">今のペース 週 <b style="font-size:17px;color:#004d40;font-family:'Inter'">-0.4</b><span class="u">kg</span></div></span></div></div>
+    </div></div>
+  ${PRED}<div class="sec">数値の推移</div><div class="graph">${lineSvg}</div>${BANOTE}`)}</div>`;
+
+// 2. フラット＆余白 (枠なし・見出し区切り)
+document.getElementById('c-2').innerHTML = `<div class="col"><div class="cap">2. フラット＆余白</div>${phone('',`
+  <div style="text-align:center;padding:6px 0 14px">
+    <div style="position:relative;width:120px;height:120px;margin:0 auto">${ringSvg('#4a875b','#eadfce',120,10)}<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:30px;font-weight:800;font-family:'Inter'">68.4</div><div style="font-size:11px;color:var(--ink2)">kg ・ 達成50%</div></div></div>
+  </div>
+  <div style="display:flex;justify-content:space-around;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:11px">
+    <span style="color:#6a6256">入会時<br><b style="font-size:16px;font-family:'Inter'">71.8</b></span><span style="color:#6a6256">目標まで<br><b class="g" style="font-size:16px;font-family:'Inter'">3.4</b></span><span style="color:#6a6256">ペース/週<br><b class="g" style="font-size:16px;font-family:'Inter'">-0.4</b></span>
+  </div>
+  <div style="padding:14px 0;border-bottom:1px solid var(--line)"><div class="predlbl" style="margin-bottom:4px">次の目標</div><div class="predmain" style="margin:2px 0 8px"><span class="k">67.0<span style="font-size:14px">kg</span></span><span class="w">まで あと 2.5週間</span></div><div style="font-size:12px;color:#2b2620;font-weight:800">📅 9月上旬ごろ 達成見込み <span style="font-size:11px;color:#6a6256;font-weight:400">（今のペースであと約60日）</span></div></div>
+  <div class="sec">数値の推移</div><div class="graph plain">${lineSvg}</div>${BANOTE}`)}</div>`;
+
+// 3. ヒーロー型
+document.getElementById('c-3').innerHTML = `<div class="col"><div class="cap">3. ヒーロー型</div>${phone('',`
+  <div style="background:linear-gradient(135deg,#e6efe8,#fffbe6);border-radius:18px;padding:18px 14px;text-align:center;margin-bottom:11px">
+    <div style="position:relative;width:132px;height:132px;margin:0 auto 8px">${ringSvg('#4a875b','#ffffff',132,11)}<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:36px;font-weight:800;font-family:'Inter';line-height:1">68.4</div><div style="font-size:11px;color:var(--ink2);font-weight:700">kg ・ 達成 50%</div></div></div>
+    <div style="display:flex;justify-content:center;gap:10px"><span style="background:#fff;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:800;color:#004d40">目標まで あと 3.4kg</span><span style="background:#fff;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:800;color:#004d40">週 -0.4kg</span></div>
+  </div>
+  ${PRED}<div class="sec">数値の推移</div><div class="graph">${lineSvg}</div>${BANOTE}`)}</div>`;
+
+// 4. ダッシュボード型 (小タイル)
+const tile=(l,v,u,c='#2b2620')=>`<div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center"><div style="font-size:10px;color:#6a6256;font-weight:700">${l}</div><div style="font-size:19px;font-weight:800;font-family:'Inter';color:${c};line-height:1.2">${v}<span style="font-size:10px;color:#6a6256">${u}</span></div></div>`;
+document.getElementById('c-4').innerHTML = `<div class="col"><div class="cap">4. ダッシュボード</div>${phone('',`
+  <div style="display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px">
+    <div style="position:relative;width:70px;height:70px;flex:0 0 auto">${ringSvg('#4a875b','#eee4d4',70,8)}<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#004d40">50%</div></div>
+    <div><div style="font-size:11px;color:#6a6256">現在</div><div style="font-size:28px;font-weight:800;font-family:'Inter';line-height:1">68.4<span style="font-size:12px">kg</span></div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:11px">${tile('入会時','71.8','')}${tile('目標','65.0','')}${tile('残り','3.4','kg','#004d40')}${tile('変化','-3.4','kg','#004d40')}${tile('ペース/週','-0.4','kg','#004d40')}${tile('経過','32','日')}</div>
+  ${PRED}<div class="sec">数値の推移</div><div class="graph">${lineSvg}</div>${BANOTE}`)}</div>`;
+
+// 5. ダークヒーロー型
+document.getElementById('c-5').innerHTML = `<div class="col"><div class="cap">5. ダークヒーロー</div>${phone('',`
+  <div style="background:linear-gradient(160deg,#34603f,#1f3f2a);border-radius:18px;padding:18px 16px;color:#fff;margin-bottom:11px">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="position:relative;width:84px;height:84px;flex:0 0 auto">${ringSvg('#8fd6a3','rgba(255,255,255,.18)',84,9)}<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:15px;font-weight:800;font-family:'Inter'">50%</div></div></div>
+      <div><div style="font-size:11px;opacity:.8">現在の体重</div><div style="font-size:34px;font-weight:800;font-family:'Inter';line-height:1">68.4<span style="font-size:13px">kg</span></div></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px"><div style="flex:1;background:rgba(255,255,255,.12);border-radius:10px;padding:8px;text-align:center"><div style="font-size:10px;opacity:.8">目標まで</div><div style="font-size:16px;font-weight:800;font-family:'Inter'">3.4<span style="font-size:10px">kg</span></div></div><div style="flex:1;background:rgba(255,255,255,.12);border-radius:10px;padding:8px;text-align:center"><div style="font-size:10px;opacity:.8">ペース/週</div><div style="font-size:16px;font-weight:800;font-family:'Inter'">-0.4<span style="font-size:10px">kg</span></div></div><div style="flex:1;background:rgba(255,255,255,.12);border-radius:10px;padding:8px;text-align:center"><div style="font-size:10px;opacity:.8">入会時</div><div style="font-size:16px;font-weight:800;font-family:'Inter'">71.8</div></div></div>
+  </div>
+  ${PRED}<div class="sec">数値の推移</div><div class="graph">${lineSvg}</div>${BANOTE}`)}</div>`;
+
+const F={'1':'クリーン整理：今の構成のまま枠を単純化・数値そろえ。無難で読みやすい。','2':'フラット＆余白：カード枠を減らし、見出し＋区切り線＋余白で上品に。すっきり大人っぽい。','3':'ヒーロー型：上部に大きなリング＋現在値を主役に。映える・モチベ高い。','4':'ダッシュボード：現在/入会/目標/残り/変化/ペースを小タイルで一望。情報量重視・Apple Health風。','5':'ダークヒーロー：上部だけ濃緑帯に白抜き数字でコントラスト。おしゃれ・締まる。'};
+document.getElementById('foot').innerHTML=F['1'];
+function setS(s){document.querySelectorAll('.stage').forEach(el=>el.classList.toggle('on',el.id==='s-'+s));document.querySelectorAll('.tb').forEach(b=>b.classList.toggle('on',b.dataset.s===s));document.getElementById('foot').innerHTML=F[s];}
+</script>
+</body>
+</html>
