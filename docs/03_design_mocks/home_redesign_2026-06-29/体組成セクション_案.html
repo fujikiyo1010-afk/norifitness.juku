@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>体組成セクション ・ デザイン案</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800&family=Inter:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f9f5ed;--card:#fffdf8;--line:#e7dcc9;--ink:#2b2620;--ink2:#6a6256;--ink3:#a59b8c;--grn:#4a875b;--grnd:#004d40;--warm1:#e6efe8;--warm2:#fffbe6;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Noto Sans JP',sans-serif;background:#ece0cf;color:var(--ink);padding:20px 12px 60px;}
+  .head{max-width:900px;margin:0 auto 16px;text-align:center;}
+  .head h1{font-size:20px;font-weight:800;margin-bottom:4px;}
+  .head p{font-size:12px;color:#7a6f5c;}
+  .tabbar{max-width:760px;margin:0 auto 22px;display:flex;gap:8px;background:#fff;border-radius:12px;padding:8px;box-shadow:0 2px 10px rgba(0,0,0,.08);}
+  .tb{flex:1;border:none;background:transparent;border-radius:8px;padding:11px 6px;font-size:13px;font-weight:800;color:var(--ink2);cursor:pointer;line-height:1.3;}
+  .tb.on{background:var(--grn);color:#fff;}
+  .stage{display:none;}
+  .stage.on{display:block;}
+  .cols{display:flex;gap:26px;justify-content:center;flex-wrap:wrap;max-width:900px;margin:0 auto;}
+  .col{display:flex;flex-direction:column;align-items:center;}
+  .cap{font-size:12px;font-weight:800;color:#5b5344;margin-bottom:8px;background:#fff;border-radius:20px;padding:4px 14px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+  .phone{width:340px;background:var(--bg);border:8px solid #1c1c1c;border-radius:34px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.2);}
+  .sbar{background:#1c1c1c;color:#fff;text-align:center;font-size:10px;padding:4px;font-family:'Inter';}
+  .scr{padding:14px 12px 20px;min-height:120px;}
+  .apphdr{display:flex;align-items:center;justify-content:space-between;padding:2px 4px 12px;}
+  .apphdr .t{font-size:15px;font-weight:800;color:var(--grnd);letter-spacing:.04em;}
+  .apphdr .g{width:22px;height:22px;color:var(--ink2);}
+  .back{font-size:13px;color:var(--ink2);font-weight:700;}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;}
+  .lbl{font-size:11px;color:var(--ink2);font-weight:700;}
+  .big{font-size:34px;font-weight:800;color:var(--ink);font-family:'Inter';letter-spacing:-.5px;line-height:1;}
+  .u{font-size:12px;color:var(--ink2);font-weight:700;}
+  .g{color:var(--grnd);} .rose{color:#c0553b;}
+  .pill{display:inline-block;background:#eef5f0;color:var(--grnd);font-size:11px;font-weight:800;border-radius:20px;padding:3px 10px;}
+  .cta{background:var(--grn);color:#fff;border-radius:12px;text-align:center;font-size:13px;font-weight:800;padding:12px;}
+  .ctaline{background:linear-gradient(to bottom,#5fa872,#4a875b);color:#fff;border-radius:12px;text-align:center;font-size:13px;font-weight:800;padding:12px;box-shadow:0 3px 8px rgba(52,96,63,.3);}
+  .sec{font-size:12px;font-weight:800;color:#5b5344;margin:14px 2px 8px;}
+  .photos{display:flex;gap:8px;}
+  .ph{flex:1;aspect-ratio:3/4;border-radius:10px;background:#e6e2d8;display:flex;align-items:flex-end;justify-content:center;position:relative;overflow:hidden;}
+  .ph.dash{background:#f3efe6;border:1.5px dashed #cfc7b5;}
+  .ph .tag{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.5);color:#fff;font-size:9px;font-weight:700;border-radius:6px;padding:2px 7px;}
+  .ph .kg{background:rgba(255,255,255,.9);width:100%;text-align:center;font-size:11px;font-weight:800;color:var(--ink);padding:3px;}
+  .ph .plus{font-size:26px;color:var(--ink2);font-weight:800;align-self:center;}
+  .tabs2{display:flex;gap:5px;margin-bottom:8px;}
+  .tabs2 span{flex:1;text-align:center;font-size:11px;font-weight:800;padding:5px;border-radius:16px;background:#efe9dc;color:var(--ink2);}
+  .tabs2 span.on{background:var(--grnd);color:#fff;}
+  .metricsel{display:flex;gap:5px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);}
+  .metricsel span{flex:1;text-align:center;font-size:11px;font-weight:800;padding:5px;border-radius:16px;background:#f0f0ee;color:var(--ink2);}
+  .metricsel span.on{background:var(--grnd);color:#fff;}
+  .note{font-size:11px;color:var(--ink2);line-height:1.6;}
+  /* リング */
+  .ring{position:relative;width:150px;height:150px;margin:2px auto 6px;}
+  .ring svg{transform:rotate(-90deg);}
+  .ring .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .ring .ctr .n{font-size:28px;font-weight:800;font-family:'Inter';color:var(--ink);line-height:1;}
+  .ring .ctr .s{font-size:10px;color:var(--ink2);font-weight:700;margin-top:2px;}
+  .predict{background:#eef5f0;border-radius:10px;padding:10px 12px;font-size:11.5px;color:var(--grnd);font-weight:700;line-height:1.6;text-align:center;}
+  /* 比較スライダー */
+  .cmp{position:relative;width:100%;aspect-ratio:4/3;border-radius:12px;overflow:hidden;background:#ded9cd;}
+  .cmp .after{position:absolute;inset:0;background:#cfd8cf;}
+  .cmp .before{position:absolute;inset:0;width:52%;background:#e6ddcf;border-right:3px solid #fff;}
+  .cmp .lab{position:absolute;top:8px;font-size:10px;font-weight:800;color:#fff;background:rgba(0,0,0,.45);border-radius:6px;padding:2px 8px;}
+  .cmp .lab.b{left:8px;} .cmp .lab.a{right:8px;}
+  .cmp .knob{position:absolute;top:50%;left:52%;transform:translate(-50%,-50%);width:30px;height:30px;border-radius:50%;background:#fff;box-shadow:0 1px 5px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--grn);font-weight:800;}
+  .tl{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;}
+  .tl .it{flex:0 0 auto;text-align:center;}
+  .tl .it .box{width:52px;height:66px;border-radius:8px;background:#e6e2d8;margin-bottom:3px;}
+  .tl .it .d{font-size:9px;color:var(--ink2);font-weight:700;}
+  .foot{max-width:760px;margin:20px auto 0;font-size:11px;color:#7a6f5c;line-height:1.7;text-align:center;}
+</style>
+</head>
+<body>
+<div class="head">
+  <h1>体組成セクション ・ デザイン案</h1>
+  <p>本命（提案どおり）＋ 追加2案。左＝ホームに出るカード / 右＝タップした中身（詳細画面）</p>
+</div>
+<div class="tabbar">
+  <button class="tb on" data-s="base" onclick="setS('base')">本命<br>（提案どおり）</button>
+  <button class="tb" data-s="ring" onclick="setS('ring')">追加案1<br>達成リング＋予測</button>
+  <button class="tb" data-s="cmp" onclick="setS('cmp')">追加案2<br>ビフォーアフター主役</button>
+</div>
+
+<!-- ============ 本命 ============ -->
+<div class="stage on" id="s-base">
+  <div class="cols">
+    <div class="col">
+      <div class="cap">ホームに出るカード</div>
+      <div class="phone"><div class="sbar">9:41　筋肉塾</div><div class="scr">
+        <div class="apphdr"><div class="t">筋肉塾</div><div class="g">⚙</div></div>
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span class="lbl">今のからだ</span><span style="font-size:11px;color:var(--grn);font-weight:800">詳細・グラフ →</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:12px;margin:6px 0 8px">
+            <div><span class="big">68.4</span><span class="u">kg</span></div>
+            <div style="font-size:15px;font-weight:800;color:var(--ink)">体脂肪 18.2<span class="u">%</span></div>
+          </div>
+          <div style="font-size:12px;color:var(--ink2);font-weight:700">目標まで <span class="g" style="font-weight:800">あと 3.4kg</span></div>
+          <div class="ctaline" style="margin-top:10px">タップして記録・グラフを見る</div>
+        </div>
+        <div style="text-align:center;font-size:10px;color:var(--ink3)">↑ ホーム上ではこのカード1枚</div>
+      </div></div>
+    </div>
+    <div class="col">
+      <div class="cap">タップした中身（詳細画面）</div>
+      <div class="phone"><div class="sbar">9:41</div><div class="scr">
+        <div class="apphdr"><span class="back">‹ 体組成</span><div class="t" style="font-size:13px">体型変化の記録</div><span style="width:22px"></span></div>
+        <div class="card" style="text-align:center">
+          <div class="lbl" style="margin-bottom:4px">7月2日（水）</div>
+          <div><span class="big" style="font-size:40px">68.4</span><span class="u">kg</span></div>
+          <div style="display:flex;justify-content:center;gap:12px;margin-top:8px;font-size:12px">
+            <span style="color:var(--ink2)">入会時 <b style="color:var(--ink)">71.8</b></span>
+            <span style="color:var(--ink3)">|</span>
+            <span style="color:var(--ink2)">変化 <b class="g">-3.4</b></span>
+          </div>
+          <div style="margin-top:8px"><span class="pill">目標まで あと 3.4kg</span></div>
+          <div class="metricsel"><span class="on">体重</span><span>体脂肪率</span><span>ウエスト</span></div>
+        </div>
+        <div class="tabs2"><span>1週間</span><span class="on">1ヶ月</span><span>3ヶ月</span><span>1年</span></div>
+        <div class="card" style="padding:10px 8px">
+          <svg viewBox="0 0 300 130" style="width:100%">
+            <line x1="10" y1="30" x2="290" y2="30" stroke="#ddd6c6" stroke-width="1" stroke-dasharray="4 4"/>
+            <text x="12" y="26" font-size="9" fill="#4a875b">目標 65.0</text>
+            <polyline points="15,45 60,52 105,48 150,66 195,72 240,86 285,92" fill="none" stroke="#2b2620" stroke-width="2.5"/>
+            <circle cx="285" cy="92" r="4" fill="#34603f"/>
+          </svg>
+        </div>
+        <div class="sec">ビフォー / アフター</div>
+        <div class="photos">
+          <div class="ph"><span class="tag">入会時 6/1</span><span class="kg">71.8kg</span></div>
+          <div class="ph"><span class="tag">現在 7/2</span><span class="kg">68.4kg</span></div>
+        </div>
+        <div class="ctaline" style="margin-top:12px">＋ 今日の写真を追加 ・ 記録する</div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 追加案1 リング＋予測 ============ -->
+<div class="stage" id="s-ring">
+  <div class="cols">
+    <div class="col">
+      <div class="cap">ホームに出るカード</div>
+      <div class="phone"><div class="sbar">9:41　筋肉塾</div><div class="scr">
+        <div class="apphdr"><div class="t">筋肉塾</div><div class="g">⚙</div></div>
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between"><span class="lbl">目標への進み具合</span><span style="font-size:11px;color:var(--grn);font-weight:800">詳細 →</span></div>
+          <div style="display:flex;align-items:center;gap:14px;margin-top:6px">
+            <div class="ring" style="width:96px;height:96px;margin:0">
+              <svg width="96" height="96"><circle cx="48" cy="48" r="40" fill="none" stroke="#eee4d4" stroke-width="9"/><circle cx="48" cy="48" r="40" fill="none" stroke="#4a875b" stroke-width="9" stroke-linecap="round" stroke-dasharray="251" stroke-dashoffset="125"/></svg>
+              <div class="ctr"><div class="n" style="font-size:20px">50<span style="font-size:11px">%</span></div><div class="s">達成</div></div>
+            </div>
+            <div>
+              <div><span class="big" style="font-size:26px">68.4</span><span class="u">kg</span> <span style="font-size:12px;color:var(--ink2)">体脂肪18.2%</span></div>
+              <div style="font-size:12px;color:var(--ink2);font-weight:700;margin-top:4px">目標まで <span class="g" style="font-weight:800">あと3.4kg</span></div>
+              <div style="font-size:11px;color:var(--grnd);font-weight:700;margin-top:2px">この調子で 約2ヶ月後</div>
+            </div>
+          </div>
+          <div class="ctaline" style="margin-top:10px">記録する・グラフを見る</div>
+        </div>
+      </div></div>
+    </div>
+    <div class="col">
+      <div class="cap">タップした中身（詳細画面）</div>
+      <div class="phone"><div class="sbar">9:41</div><div class="scr">
+        <div class="apphdr"><span class="back">‹ 体組成</span><div class="t" style="font-size:13px">体型変化の記録</div><span style="width:22px"></span></div>
+        <div class="card" style="text-align:center">
+          <div class="ring">
+            <svg width="150" height="150"><circle cx="75" cy="75" r="62" fill="none" stroke="#eee4d4" stroke-width="12"/><circle cx="75" cy="75" r="62" fill="none" stroke="#4a875b" stroke-width="12" stroke-linecap="round" stroke-dasharray="389" stroke-dashoffset="195"/></svg>
+            <div class="ctr"><div class="n">68.4<span style="font-size:12px">kg</span></div><div class="s">達成率 50%</div></div>
+          </div>
+          <div style="display:flex;justify-content:space-around;font-size:11px;margin:2px 0 10px">
+            <span style="color:var(--ink2)">入会時<br><b style="color:var(--ink);font-size:14px">71.8</b></span>
+            <span style="color:var(--ink2)">現在<br><b class="g" style="font-size:14px">68.4</b></span>
+            <span style="color:var(--ink2)">目標<br><b style="color:var(--grnd);font-size:14px">65.0</b></span>
+          </div>
+          <div class="predict">📈 このペース（週 -0.4kg）なら<br><b>約2ヶ月後・9月上旬</b>に目標達成の見込み</div>
+        </div>
+        <div class="card" style="padding:10px 8px">
+          <svg viewBox="0 0 300 110" style="width:100%">
+            <line x1="10" y1="24" x2="290" y2="24" stroke="#ddd6c6" stroke-width="1" stroke-dasharray="4 4"/><text x="12" y="20" font-size="9" fill="#4a875b">目標 65.0</text>
+            <polyline points="15,40 60,46 105,43 150,58 195,64 240,76 285,82" fill="none" stroke="#2b2620" stroke-width="2.5"/>
+            <polyline points="285,82 300,88" fill="none" stroke="#4a875b" stroke-width="2" stroke-dasharray="3 3"/>
+            <circle cx="285" cy="82" r="4" fill="#34603f"/>
+          </svg>
+          <div class="note" style="text-align:center;margin-top:4px">実線＝実績 / 破線＝予測</div>
+        </div>
+        <div class="sec">ビフォー / アフター</div>
+        <div class="photos"><div class="ph"><span class="tag">入会時</span><span class="kg">71.8kg</span></div><div class="ph"><span class="tag">現在</span><span class="kg">68.4kg</span></div></div>
+        <div class="ctaline" style="margin-top:12px">＋ 記録する</div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 追加案2 ビフォーアフター主役 ============ -->
+<div class="stage" id="s-cmp">
+  <div class="cols">
+    <div class="col">
+      <div class="cap">ホームに出るカード</div>
+      <div class="phone"><div class="sbar">9:41　筋肉塾</div><div class="scr">
+        <div class="apphdr"><div class="t">筋肉塾</div><div class="g">⚙</div></div>
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><span class="lbl">からだの変化</span><span style="font-size:11px;color:var(--grn);font-weight:800">詳細 →</span></div>
+          <div class="photos">
+            <div class="ph" style="aspect-ratio:1/1"><span class="tag">入会時</span><span class="kg">71.8kg</span></div>
+            <div class="ph" style="aspect-ratio:1/1"><span class="tag">現在</span><span class="kg">68.4kg</span></div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px">
+            <span class="pill">体重 -3.4kg</span><span class="pill">体脂肪 -3.2%</span>
+          </div>
+          <div class="ctaline" style="margin-top:10px">記録する・グラフを見る</div>
+        </div>
+      </div></div>
+    </div>
+    <div class="col">
+      <div class="cap">タップした中身（詳細画面）</div>
+      <div class="phone"><div class="sbar">9:41</div><div class="scr">
+        <div class="apphdr"><span class="back">‹ 体組成</span><div class="t" style="font-size:13px">からだの変化</div><span style="width:22px"></span></div>
+        <div class="sec" style="margin-top:2px">ビフォー / アフター 比較</div>
+        <div class="cmp">
+          <div class="after"></div><div class="before"></div>
+          <span class="lab b">入会時 71.8kg</span><span class="lab a">現在 68.4kg</span>
+          <div class="knob">‹›</div>
+        </div>
+        <div style="display:flex;justify-content:center;gap:8px;margin:10px 0">
+          <span class="pill">-3.4kg</span><span class="pill">-3.2%</span><span class="pill">32日</span>
+        </div>
+        <div class="sec">記録の写真（タイムライン）</div>
+        <div class="tl">
+          <div class="it"><div class="box"></div><div class="d">6/1</div></div>
+          <div class="it"><div class="box"></div><div class="d">6/10</div></div>
+          <div class="it"><div class="box"></div><div class="d">6/20</div></div>
+          <div class="it"><div class="box"></div><div class="d">7/2</div></div>
+          <div class="it"><div class="box" style="background:#f3efe6;border:1.5px dashed #cfc7b5;display:flex;align-items:center;justify-content:center"><span class="plus">＋</span></div><div class="d">追加</div></div>
+        </div>
+        <div class="sec">数値の推移</div>
+        <div class="card" style="padding:10px 8px">
+          <svg viewBox="0 0 300 90" style="width:100%">
+            <line x1="10" y1="20" x2="290" y2="20" stroke="#ddd6c6" stroke-width="1" stroke-dasharray="4 4"/><text x="12" y="16" font-size="9" fill="#4a875b">目標 65.0</text>
+            <polyline points="15,34 60,40 105,37 150,50 195,56 240,66 285,72" fill="none" stroke="#2b2620" stroke-width="2.5"/><circle cx="285" cy="72" r="4" fill="#34603f"/>
+          </svg>
+        </div>
+        <div class="ctaline" style="margin-top:12px">＋ 今日の写真を追加・記録する</div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  ※ 写真枠はダミー（本番は受講生がアップした before/after が入る）。数値はサンプル。<br>
+  本命＝提案どおり（カード→グラフ＋ビフォーアフター）／案1＝達成率リングと達成予測でモチベ強化／案2＝写真の変化を主役に（比較スライダー＋タイムライン）。
+</div>
+
+<script>
+function setS(s){
+  document.querySelectorAll('.stage').forEach(el=>el.classList.toggle('on',el.id==='s-'+s));
+  document.querySelectorAll('.tb').forEach(b=>b.classList.toggle('on',b.dataset.s===s));
+}
+</script>
+</body>
+</html>
