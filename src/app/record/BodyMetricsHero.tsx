@@ -1,7 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import type { BodyMetricRow } from "@/lib/body-metrics/queries";
+import { weightGoalProgress } from "@/lib/body-metrics/goal-progress";
 import { BodyMetricsChart } from "./BodyMetricsChart";
 
 /**
@@ -123,6 +125,9 @@ export function BodyMetricsHero({
           </div>
         ) : null}
 
+        {/* 目標まで あと◯kg (体重選択時のみ ・ 手順B 2026-07-02) */}
+        {metric === "weight_kg" ? <GoalRemaining current={currentValue} target={targetWeightKg} /> : null}
+
         {/* 主軸 3-way 切替 */}
         <div className="border-t border-[#e7dcc9] mt-4 pt-3">
           <MetricSelector value={metric} onChange={setMetric} />
@@ -166,6 +171,46 @@ export function BodyMetricsHero({
           />
         )}
       </div>
+    </div>
+  );
+}
+
+function GoalRemaining({
+  current,
+  target,
+}: {
+  current: number | null;
+  target: number | null;
+}) {
+  const prog = weightGoalProgress(current, target);
+
+  if (prog.state === "no_target") {
+    return (
+      <div className="mt-3 text-center">
+        <Link
+          href="/goal-sheet"
+          className="text-[12px] font-bold text-[#4a875b] underline underline-offset-2"
+        >
+          目標体重 未設定 — 設定する
+        </Link>
+      </div>
+    );
+  }
+  if (prog.state === "no_current") return null;
+  if (prog.state === "reached") {
+    return (
+      <div className="mt-3 text-center text-[13px] font-bold text-[#34603f]">
+        🎉 目標達成
+      </div>
+    );
+  }
+  return (
+    <div className="mt-3 text-center">
+      <span className="text-[12px] text-[#6a6256]">目標まで あと </span>
+      <span className="text-[18px] font-bold text-[#34603f] font-mono">
+        {prog.kg.toFixed(1)}
+      </span>
+      <span className="text-[11px] text-[#6a6256] ml-0.5">kg</span>
     </div>
   );
 }
