@@ -86,7 +86,7 @@
 // ===== 再利用ブロック =====
 const RING = (rem="3.4kg") => `<div class="card"><div class="metricsel" style="margin-bottom:12px"><span class="on">体重</span><span>体脂肪率</span><span>ウエスト</span></div><div class="ringrow">
   <div class="ring"><svg width="88" height="88"><circle cx="44" cy="44" r="36" fill="none" stroke="#eee4d4" stroke-width="9"/><circle cx="44" cy="44" r="36" fill="none" stroke="#4a875b" stroke-width="9" stroke-linecap="round" stroke-dasharray="226" stroke-dashoffset="113" transform="rotate(-90 44 44)"/></svg><div class="ctr"><div class="n">68.4<span style="font-size:10px">kg</span></div><div class="s">達成50%</div></div></div>
-  <div style="flex:1"><div class="sub3"><span style="color:#6a6256">入会時<br><b style="color:#2b2620">71.8</b></span><span style="color:#6a6256">現在<br><b class="g">68.4</b></span><span style="color:#6a6256">目標<br><b class="g">65.0</b></span></div><div style="text-align:center;margin-top:8px;line-height:1.5"><div style="font-size:11px;color:#6a6256;font-weight:700">残り <span style="font-size:17px;color:#004d40;font-weight:800;font-family:'Inter'">3.4</span><span class="u">kg</span></div><div style="font-size:11px;color:#6a6256;font-weight:700">今のペース 週 <span style="font-size:17px;color:#004d40;font-weight:800;font-family:'Inter'">-0.4</span><span class="u">kg</span></div></div></div>
+  <div style="flex:1"><div class="sub3"><span style="color:#6a6256">入会時<br><b style="color:#2b2620">71.8</b></span><span style="color:#6a6256">現在<br><b class="g">68.4</b></span><span style="color:#6a6256">目標<br><b class="g">65.0</b></span></div><div style="text-align:center;margin-top:8px"><div style="display:inline-block;text-align:right;line-height:1.6"><div style="font-size:11px;color:#6a6256;font-weight:700">残り <span style="font-size:17px;color:#004d40;font-weight:800;font-family:'Inter'">3.4</span><span class="u">kg</span></div><div style="font-size:11px;color:#6a6256;font-weight:700">今のペース 週 <span style="font-size:17px;color:#004d40;font-weight:800;font-family:'Inter'">-0.4</span><span class="u">kg</span></div></div></div></div>
 </div></div>`;
 
 // 予測ブロック 4案
@@ -110,7 +110,7 @@ const HDR = t => `<div class="apphdr"><span class="back">‹ 体組成</span><sp
 const phone = inner => `<div class="phone"><div class="sbar">9:41</div><div class="scr">${inner}</div></div>`;
 
 // ===== タブ1: 詳細 最新形 =====
-document.getElementById('c-full').innerHTML = `<div class="col"><div class="cap">体組成の詳細（完成イメージ・体重表示）</div>${phone(HDR('体型変化の記録')+RING()+PRED.C4+BA+GRAPH(true)+`<div class="ctaline">＋ 今日の写真を追加 ・ 記録する</div>`)}</div>`;
+document.getElementById('c-full').innerHTML = `<div class="col"><div class="cap">体組成の詳細（完成イメージ・体重表示）</div>${phone(HDR('体型変化の記録')+RING()+PRED.C4+`<div class="sec">数値の推移</div>`+GRAPH(true)+BA+`<div class="ctaline">＋ 今日の写真を追加 ・ 記録する</div>`)}</div>`;
 
 // ===== タブ2: 予測 4案 =====
 document.getElementById('c-pred').innerHTML =
