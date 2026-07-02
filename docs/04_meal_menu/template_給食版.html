@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>1週間 献立表（給食スタイル）</title>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&family=Inter:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f9f5ed;--card:#fffdf8;--line:#d8ccb4;--ink:#2b2620;--ink2:#6a6256;--grn:#4a875b;--grnd:#004d40;--band:#eef5f0;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'M PLUS Rounded 1c',sans-serif;background:#cfc3ae;color:var(--ink);padding:24px 0;}
+  /* A4 横 */
+  .page{width:1123px;min-height:794px;background:var(--bg);margin:0 auto 26px;padding:30px 34px;box-shadow:0 6px 22px rgba(0,0,0,.22);}
+  .hd{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:16px;}
+  .hd .ttl{font-size:30px;font-weight:800;color:var(--grnd);}
+  .hd .ttl small{display:block;font-size:14px;color:var(--ink2);font-weight:500;margin-top:5px;}
+  .hd .goal{text-align:right;font-size:15px;color:var(--ink);font-weight:700;line-height:1.7;}
+  .hd .goal b{color:var(--grnd);font-family:'Inter';font-size:19px;}
+  table{width:100%;border-collapse:separate;border-spacing:5px;table-layout:fixed;}
+  th,td{border-radius:10px;vertical-align:middle;}
+  th.corner{width:70px;background:transparent;}
+  th.day{background:var(--grnd);color:#fff;padding:9px 2px;font-size:20px;font-weight:800;}
+  th.day .lv{display:block;font-size:13px;font-weight:700;opacity:.92;margin-top:3px;}
+  td.rowlbl{background:var(--grn);color:#fff;font-size:18px;font-weight:800;text-align:center;width:70px;}
+  td.cell{background:var(--card);border:1px solid var(--line);padding:10px 9px;height:86px;}
+  td.cell .dish{font-size:16px;font-weight:700;color:var(--ink);line-height:1.4;}
+  td.cell .kc{font-size:13px;color:var(--grn);font-weight:700;font-family:'Inter';margin-top:5px;}
+  tr.nutri td{background:var(--band);border:1px solid #d8e6dc;padding:8px 6px;text-align:center;}
+  tr.nutri .kcal{font-size:21px;font-weight:800;color:var(--grnd);font-family:'Inter';}
+  tr.nutri .pfc{font-size:13px;color:var(--ink2);font-weight:700;font-family:'Inter';margin-top:3px;}
+  .foot{margin-top:14px;font-size:11px;color:#8a7f6c;line-height:1.7;text-align:center;}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  @page{size:A4 landscape;margin:0;}
+  @media print{body{background:#fff;padding:0;}.page{margin:0;box-shadow:none;}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="hd">
+    <div class="ttl">横下さんの1週間 献立表<small>のり × のりfitness AI ／ 動画455本・論文308本から、あなた仕様に</small></div>
+    <div class="goal">1日の目標　たんぱく質 <b>156g</b>・脂質 <b>56g</b>（毎日キープ）<br>糖質は曜日で増減（カーボサイクル）／食物繊維 <b>20〜25g</b></div>
+  </div>
+
+  <table>
+    <tr>
+      <th class="corner"></th>
+      <th class="day">月<span class="lv">中</span></th>
+      <th class="day">火<span class="lv">高</span></th>
+      <th class="day">水<span class="lv">低</span></th>
+      <th class="day">木<span class="lv">中</span></th>
+      <th class="day">金<span class="lv">高</span></th>
+      <th class="day">土<span class="lv">低</span></th>
+      <th class="day">日<span class="lv">中</span></th>
+    </tr>
+    <tr>
+      <td class="rowlbl">朝</td>
+      <td class="cell"><div class="dish">オーバーナイトオーツ</div><div class="kc">437 kcal</div></td>
+      <td class="cell"><div class="dish">納豆もち麦ごはん＋卵</div><div class="kc">567 kcal</div></td>
+      <td class="cell"><div class="dish">ベリーヨーグルトボウル</div><div class="kc">284 kcal</div></td>
+      <td class="cell"><div class="dish">プロテインパンケーキ</div><div class="kc">464 kcal</div></td>
+      <td class="cell"><div class="dish">オーツのプロテインがゆ</div><div class="kc">419 kcal</div></td>
+      <td class="cell"><div class="dish">納豆玄米ごはん＋卵</div><div class="kc">369 kcal</div></td>
+      <td class="cell"><div class="dish">バナナヨーグルトオーツ</div><div class="kc">303 kcal</div></td>
+    </tr>
+    <tr>
+      <td class="rowlbl">昼</td>
+      <td class="cell"><div class="dish">鶏むねブロッコリー丼</div><div class="kc">597 kcal</div></td>
+      <td class="cell"><div class="dish">鶏むねカレー 大盛り</div><div class="kc">753 kcal</div></td>
+      <td class="cell"><div class="dish">鮭の塩焼き定食</div><div class="kc">410 kcal</div></td>
+      <td class="cell"><div class="dish">鶏むねもち麦ボウル</div><div class="kc">570 kcal</div></td>
+      <td class="cell"><div class="dish">夏野菜カレー 大盛り</div><div class="kc">857 kcal</div></td>
+      <td class="cell"><div class="dish">サバ缶と豆腐のサラダ</div><div class="kc">422 kcal</div></td>
+      <td class="cell"><div class="dish">鶏むねと卵の玄米ボウル</div><div class="kc">654 kcal</div></td>
+    </tr>
+    <tr>
+      <td class="rowlbl">夜</td>
+      <td class="cell"><div class="dish">豚ヒレステーキ</div><div class="kc">677 kcal</div></td>
+      <td class="cell"><div class="dish">豚ヒレの生姜焼き丼</div><div class="kc">775 kcal</div></td>
+      <td class="cell"><div class="dish">鶏むねと豆腐のチゲ風</div><div class="kc">454 kcal</div></td>
+      <td class="cell"><div class="dish">鶏むねと豆腐の丼</div><div class="kc">606 kcal</div></td>
+      <td class="cell"><div class="dish">ささみと枝豆のごはん</div><div class="kc">729 kcal</div></td>
+      <td class="cell"><div class="dish">鶏むねのソテー</div><div class="kc">408 kcal</div></td>
+      <td class="cell"><div class="dish">豚ヒレのポン酢炒め</div><div class="kc">545 kcal</div></td>
+    </tr>
+    <tr>
+      <td class="rowlbl">間食</td>
+      <td class="cell"><div class="dish">アーモンド＋プロテイン</div><div class="kc">195 kcal</div></td>
+      <td class="cell"><div class="dish">さつまいも＋バナナ</div><div class="kc">399 kcal</div></td>
+      <td class="cell"><div class="dish">ゆで卵＋アーモンド</div><div class="kc">212 kcal</div></td>
+      <td class="cell"><div class="dish">ヨーグルト＋アーモンド</div><div class="kc">159 kcal</div></td>
+      <td class="cell"><div class="dish">さつまいも＆バナナ＋お酒</div><div class="kc">592 kcal</div></td>
+      <td class="cell"><div class="dish">高たんぱくヨーグルト</div><div class="kc">276 kcal</div></td>
+      <td class="cell"><div class="dish">アーモンド＋プロテイン</div><div class="kc">223 kcal</div></td>
+    </tr>
+    <tr class="nutri">
+      <td class="rowlbl" style="background:var(--grnd)">栄養</td>
+      <td><div class="kcal">1,906</div><div class="pfc">P161 F58 C207 ／ 繊26</div></td>
+      <td><div class="kcal">2,494</div><div class="pfc">P151 F49 C386 ／ 繊36</div></td>
+      <td><div class="kcal">1,360</div><div class="pfc">P153 F54 C81 ／ 繊21</div></td>
+      <td><div class="kcal">1,799</div><div class="pfc">P155 F55 C185 ／ 繊22</div></td>
+      <td><div class="kcal">2,596</div><div class="pfc">P172 F51 C348 ／ 繊36</div></td>
+      <td><div class="kcal">1,475</div><div class="pfc">P171 F54 C95 ／ 繊18</div></td>
+      <td><div class="kcal">1,724</div><div class="pfc">P146 F53 C190 ／ 繊22</div></td>
+    </tr>
+  </table>
+
+  <div class="foot">
+    たんぱく質は毎日キープ、糖質は動く日（高）に増やし休む日（低）に絞ります。発酵食品・海藻・青魚・食物繊維20g以上を毎日。作り方は別紙「レシピ集」へ。<br>
+    ※本メニューは参考です。持病・服薬がある方は医師の判断を優先してください。数値は日本食品標準成分表（八訂）準拠で計算。
+  </div>
+</div>
+</body>
+</html>
