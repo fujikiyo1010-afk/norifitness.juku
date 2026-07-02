@@ -36,9 +36,10 @@
   .cols3 b{display:block;font-size:17px;font-family:'Inter';margin-top:3px;color:#2b2620;}
   .cols3 b.g{color:#004d40;}
   /* ピル2つ */
-  .pills2{display:flex;justify-content:center;gap:8px;margin:14px 0 4px;}
-  .pills2 span{background:#eef5f0;border:1px solid #dce9e0;border-radius:20px;padding:6px 14px;font-size:12px;font-weight:800;color:#004d40;}
-  .pills2 span b{font-family:'Inter';}
+  .pills2{display:flex;justify-content:center;gap:10px;margin:14px 0 4px;}
+  .pills2 .p{background:#eef5f0;border:1px solid #dce9e0;border-radius:16px;padding:9px 22px;text-align:center;line-height:1.2;}
+  .pills2 .p .l{display:block;font-size:11px;font-weight:700;color:#6a6256;}
+  .pills2 .p .v{display:block;font-size:17px;font-weight:800;color:#004d40;font-family:'Inter';margin-top:3px;}
   .sec{font-size:12px;font-weight:800;color:#5b5344;margin:16px 2px 8px;}
   .graph{padding:6px 0;} svg.line{width:100%;display:block;}
   /* 予測カード */
@@ -85,7 +86,7 @@ const PILL = `<div class="pill"><span class="on">体重</span><span>ウエスト
 const ringSvg = (sz=124,sw=10)=>{const r=sz/2-sw-2;const c=2*Math.PI*r;return `<svg width="${sz}" height="${sz}"><circle cx="${sz/2}" cy="${sz/2}" r="${r}" fill="none" stroke="#eadfce" stroke-width="${sw}"/><circle cx="${sz/2}" cy="${sz/2}" r="${r}" fill="none" stroke="#4a875b" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c/2}" transform="rotate(-90 ${sz/2} ${sz/2})"/></svg>`;};
 const RING = `<div class="ringwrap"><div class="ringbox">${ringSvg()}<div class="n"><b>68.4</b><s>kg ・ 達成50%</s></div></div></div>`;
 const COLS3 = `<div class="cols3"><span>入会時<b>71.8</b></span><span>現在<b class="g">68.4</b></span><span>目標<b class="g">65.0</b></span></div>`;
-const PILLS2 = `<div class="pills2"><span>目標まで あと <b>3.4kg</b></span><span>現状ペース <b>-0.4kg/週</b></span></div>`;
+const PILLS2 = `<div class="pills2"><div class="p"><span class="l">目標まで</span><span class="v">あと 3.4kg</span></div><div class="p"><span class="l">現状ペース</span><span class="v">-0.4kg/週</span></div></div>`;
 const GRAPH = `<div class="sec">数値の推移</div><div class="graph"><svg class="line" viewBox="0 0 300 96"><line x1="10" y1="20" x2="290" y2="20" stroke="#ddd6c6" stroke-width="1" stroke-dasharray="4 4"/><text x="12" y="16" font-size="9" fill="#4a875b">目標 65.0</text><polyline points="15,36 60,42 105,39 150,52 195,58 240,68 285,74" fill="none" stroke="#2b2620" stroke-width="2.5"/><circle cx="285" cy="74" r="4" fill="#34603f"/></svg></div>`;
 const CALCBTN = `<button class="calcbtn">＋ 体重を指定して計算する</button>`;
 const BANOTE = `<div class="banote">↓ ビフォーアフター写真は「ウエスト＋写真」タブに共通で入ります</div>`;
