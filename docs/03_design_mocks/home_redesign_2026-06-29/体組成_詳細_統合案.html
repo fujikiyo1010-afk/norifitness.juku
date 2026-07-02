@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>体組成 詳細 ・ 統合案</title>
+<title>体組成 詳細 ・ 最終形</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800&family=Inter:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{--bg:#f9f5ed;--card:#fffdf8;--line:#e7dcc9;--ink:#2b2620;--ink2:#6a6256;--ink3:#a59b8c;--grn:#4a875b;--grnd:#004d40;}
@@ -12,7 +12,7 @@
   .head{max-width:960px;margin:0 auto 14px;text-align:center;}
   .head h1{font-size:20px;font-weight:800;margin-bottom:4px;}
   .head p{font-size:12px;color:#7a6f5c;}
-  .tabbar{max-width:720px;margin:0 auto 22px;display:flex;gap:8px;background:#fff;border-radius:12px;padding:8px;box-shadow:0 2px 10px rgba(0,0,0,.08);}
+  .tabbar{max-width:640px;margin:0 auto 22px;display:flex;gap:8px;background:#fff;border-radius:12px;padding:8px;box-shadow:0 2px 10px rgba(0,0,0,.08);}
   .tb{flex:1;border:none;background:transparent;border-radius:8px;padding:11px 6px;font-size:13px;font-weight:800;color:var(--ink2);cursor:pointer;line-height:1.35;}
   .tb.on{background:var(--grn);color:#fff;}
   .stage{display:none;} .stage.on{display:block;}
@@ -21,29 +21,26 @@
   .cap{font-size:12px;font-weight:800;color:#5b5344;margin-bottom:8px;background:#fff;border-radius:20px;padding:4px 14px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
   .phone{width:330px;background:var(--bg);border:8px solid #1c1c1c;border-radius:32px;overflow:hidden;box-shadow:0 10px 28px rgba(0,0,0,.2);}
   .sbar{background:#1c1c1c;color:#fff;text-align:center;font-size:10px;padding:4px;font-family:'Inter';}
-  .scr{padding:14px 16px 20px;}
-  .apphdr{display:flex;align-items:center;justify-content:space-between;padding:2px 2px 10px;}
+  .scr{padding:14px 8px 20px;}
+  .apphdr{display:flex;align-items:center;justify-content:space-between;padding:2px 4px 10px;}
   .apphdr .back{font-size:13px;color:var(--ink2);font-weight:700;}
   .apphdr .t{font-size:13px;font-weight:800;color:var(--grnd);}
+  .apphdr .g{width:20px;height:20px;color:var(--ink2);}
   .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:11px;}
   .u{font-size:12px;color:var(--ink2);font-weight:700;} .g{color:var(--grnd);}
   .sec{font-size:12px;font-weight:800;color:#5b5344;margin:12px 2px 8px;}
   .metricsel{display:flex;gap:5px;}
-  .metricsel span{flex:1;text-align:center;font-size:11px;font-weight:800;padding:6px;border-radius:16px;background:#f0f0ee;color:var(--ink2);}
+  .metricsel span{flex:1;text-align:center;font-size:12px;font-weight:800;padding:7px;border-radius:16px;background:#f0f0ee;color:var(--ink2);}
   .metricsel span.on{background:var(--grnd);color:#fff;}
-  /* ring */
   .ringrow{display:flex;align-items:center;gap:14px;}
   .ring{position:relative;width:88px;height:88px;flex:0 0 auto;}
   .ring .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
   .ring .ctr .n{font-size:17px;font-weight:800;font-family:'Inter';color:var(--ink);line-height:1;}
   .ring .ctr .s{font-size:9px;color:var(--ink2);font-weight:700;margin-top:2px;}
   .sub3{display:flex;justify-content:space-around;font-size:11px;} .sub3 b{font-size:17px;font-family:'Inter';}
-  .desc{font-size:11px;color:#7a6f5c;text-align:center;line-height:1.6;margin-top:6px;}
-  /* simple summary (非体重) */
   .simple{text-align:center;}
-  .simple .big{font-size:36px;font-weight:800;font-family:'Inter';color:var(--ink);line-height:1;}
+  .simple .big{font-size:38px;font-weight:800;font-family:'Inter';color:var(--ink);line-height:1;}
   .badge{font-size:10px;font-weight:800;color:var(--grnd);background:#eef5f0;border-radius:20px;padding:3px 10px;display:inline-block;}
-  /* before/after (追加案2) */
   .cmp{position:relative;width:100%;aspect-ratio:5/3;border-radius:12px;overflow:hidden;background:#ded9cd;}
   .cmp .after{position:absolute;inset:0;background:#cfd8cf;}
   .cmp .before{position:absolute;inset:0;width:52%;background:#e6ddcf;border-right:3px solid #fff;}
@@ -56,84 +53,60 @@
   .tl .it .box.add{background:#f3efe6;border:1.5px dashed #cfc7b5;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--ink2);font-weight:800;}
   .tl .it .d{font-size:9px;color:var(--ink2);font-weight:700;}
   .ctaline{background:linear-gradient(to bottom,#5fa872,#4a875b);color:#fff;border-radius:12px;text-align:center;font-size:13px;font-weight:800;padding:12px;box-shadow:0 3px 8px rgba(52,96,63,.3);margin-top:12px;}
-  /* 予測ブロック */
   .predbox{border:1px solid #d7e6db;border-radius:14px;padding:14px;background:linear-gradient(135deg,#eef5f0,#fffbe6);}
   .cal{width:44px;height:48px;border-radius:8px;background:#fff;border:1px solid #cfe0d4;overflow:hidden;text-align:center;flex:0 0 auto;}
   .cal .m{background:var(--grn);color:#fff;font-size:9px;font-weight:800;padding:2px;} .cal .d{font-size:20px;font-weight:800;color:var(--grnd);font-family:'Inter';line-height:1.4;}
-  .mile{display:flex;align-items:center;gap:8px;margin-top:10px;padding:9px 11px;border:1px dashed #cfc7b5;border-radius:10px;font-size:12px;color:var(--ink);background:#fff;} .mile b{color:var(--grnd);}
   .predlbl{font-size:11px;color:var(--ink2);font-weight:700;}
-  .foot{max-width:720px;margin:18px auto 0;font-size:11px;color:#7a6f5c;line-height:1.7;text-align:center;}
+  .homecard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;}
+  .foot{max-width:640px;margin:18px auto 0;font-size:11px;color:#7a6f5c;line-height:1.7;text-align:center;}
 </style>
 </head>
 <body>
 <div class="head">
-  <h1>体組成 詳細 ・ 統合案</h1>
-  <p>詳細の最新形（追加案1＋追加案2合体）／ 予測4案 ／ 指標切替パターン</p>
+  <h1>体組成 詳細 ・ 最終形</h1>
+  <p>体重 / ウエスト＋写真 の2タブ・体脂肪率は表示から除外(記録は残す)・ホームカードは体重＋目標まで</p>
 </div>
 <div class="tabbar">
-  <button class="tb on" data-s="full" onclick="setS('full')">詳細<br>最新形</button>
-  <button class="tb" data-s="pred" onclick="setS('pred')">予測<br>4案</button>
-  <button class="tb" data-s="metric" onclick="setS('metric')">指標切替<br>パターン</button>
+  <button class="tb on" data-s="w" onclick="setS('w')">詳細<br>体重</button>
+  <button class="tb" data-s="u" onclick="setS('u')">詳細<br>ウエスト＋写真</button>
+  <button class="tb" data-s="home" onclick="setS('home')">ホーム<br>カード</button>
 </div>
-
-<div class="stage on" id="s-full"><div class="cols" id="c-full"></div></div>
-<div class="stage" id="s-pred"><div class="cols" id="c-pred"></div></div>
-<div class="stage" id="s-metric"><div class="cols" id="c-metric"></div></div>
-
+<div class="stage on" id="s-w"><div class="cols" id="c-w"></div></div>
+<div class="stage" id="s-u"><div class="cols" id="c-u"></div></div>
+<div class="stage" id="s-home"><div class="cols" id="c-home"></div></div>
 <div class="foot" id="foot"></div>
 
 <script>
-// ===== 再利用ブロック =====
-const RING = (rem="3.4kg") => `<div class="card"><div class="metricsel" style="margin-bottom:12px"><span class="on">体重</span><span>体脂肪率</span><span>ウエスト</span></div><div class="ringrow">
+const sel = on => `<div class="metricsel" style="margin-bottom:12px">${['体重','ウエスト＋写真'].map(m=>`<span class="${m===on?'on':''}">${m}</span>`).join('')}</div>`;
+const HDR = `<div class="apphdr"><span class="back">‹ 体組成</span><span class="t">体型変化の記録</span><span style="width:20px"></span></div>`;
+const phone = inner => `<div class="phone"><div class="sbar">9:41</div><div class="scr">${inner}</div></div>`;
+const GRAPH = (target) => `<div class="card" style="padding:10px 8px"><svg viewBox="0 0 300 96" style="width:100%">${target?`<line x1="10" y1="22" x2="290" y2="22" stroke="#ddd6c6" stroke-width="1" stroke-dasharray="4 4"/><text x="12" y="18" font-size="9" fill="#4a875b">目標 65.0</text>`:''}<polyline points="15,36 60,42 105,39 150,52 195,58 240,68 285,74" fill="none" stroke="#2b2620" stroke-width="2.5"/><circle cx="285" cy="74" r="4" fill="#34603f"/></svg></div>`;
+
+// 体重: リング + 予測(C-4) + グラフ
+const RING = `<div class="card">${sel('体重')}<div class="ringrow">
   <div class="ring"><svg width="88" height="88"><circle cx="44" cy="44" r="36" fill="none" stroke="#eee4d4" stroke-width="9"/><circle cx="44" cy="44" r="36" fill="none" stroke="#4a875b" stroke-width="9" stroke-linecap="round" stroke-dasharray="226" stroke-dashoffset="113" transform="rotate(-90 44 44)"/></svg><div class="ctr"><div class="n">68.4<span style="font-size:10px">kg</span></div><div class="s">達成50%</div></div></div>
-  <div style="flex:1"><div class="sub3"><span style="color:#6a6256">入会時<br><b style="color:#2b2620">71.8</b></span><span style="color:#6a6256">現在<br><b class="g">68.4</b></span><span style="color:#6a6256">目標<br><b class="g">65.0</b></span></div><div style="text-align:center;margin-top:8px"><div style="display:inline-block;text-align:right;line-height:1.6"><div style="font-size:11px;color:#6a6256;font-weight:700">残り <span style="font-size:17px;color:#004d40;font-weight:800;font-family:'Inter'">3.4</span><span class="u">kg</span></div><div style="font-size:11px;color:#6a6256;font-weight:700">今のペース 週 <span style="font-size:17px;color:#004d40;font-weight:800;font-family:'Inter'">-0.4</span><span class="u">kg</span></div></div></div></div>
+  <div style="flex:1"><div class="sub3"><span style="color:#6a6256">入会時<br><b style="color:#2b2620">71.8</b></span><span style="color:#6a6256">現在<br><b class="g">68.4</b></span><span style="color:#6a6256">目標<br><b class="g">65.0</b></span></div>
+  <div style="text-align:center;margin-top:8px"><div style="display:inline-block;text-align:right;line-height:1.6"><div style="font-size:11px;color:#6a6256;font-weight:700">残り <span style="font-size:17px;color:#004d40;font-weight:800;font-family:'Inter'">3.4</span><span class="u">kg</span></div><div style="font-size:11px;color:#6a6256;font-weight:700">今のペース 週 <span style="font-size:17px;color:#004d40;font-weight:800;font-family:'Inter'">-0.4</span><span class="u">kg</span></div></div></div></div>
 </div></div>`;
+const PRED = `<div class="card"><div class="predbox"><div class="predlbl">次の目標</div><div style="display:flex;align-items:baseline;gap:8px;margin:4px 0 12px"><div style="font-size:30px;font-weight:800;color:#004d40;font-family:'Inter'">67.0<span style="font-size:14px">kg</span></div><div style="font-size:16px;font-weight:800;color:#2b2620">まで あと 2.5週間</div></div><div style="display:flex;align-items:center;gap:12px"><div class="cal"><div class="m">9月</div><div class="d">5</div></div><div><div style="font-size:14px;font-weight:800;color:#2b2620">9月上旬ごろ 達成見込み</div><div style="font-size:11px;color:#6a6256;margin-top:2px">今のペースであと約60日です</div></div></div></div></div>`;
 
-// 予測ブロック 4案
-const PRED = {
- C1:`<div class="card"><div class="predbox"><div style="display:flex;align-items:center;gap:12px"><div class="cal"><div class="m">9月</div><div class="d">5</div></div><div><div style="font-size:15px;font-weight:800">9月上旬ごろ 達成見込み</div><div style="font-size:11px;color:#6a6256;margin-top:2px">今のペース（週 -0.4kg）で計算 ・ あと約60日</div></div></div></div><div class="mile">👣 直近の節目：<b>67.0kg</b> まで あと <b>約2.5週間</b></div></div>`,
- C2:`<div class="card"><div class="predbox" style="text-align:center"><div class="predlbl">🎯 目標達成まで</div><div style="font-size:46px;font-weight:800;color:#004d40;font-family:'Inter';line-height:1;margin:4px 0">60<span style="font-size:17px">日</span></div><div style="font-size:13px;font-weight:800">9月上旬（9/5ごろ）見込み</div><div style="font-size:11px;color:#6a6256;margin-top:4px">週 -0.4kg ・ 残り3.4kg</div></div><div class="mile">👣 次の節目：<b>67.0kg</b> まで <b>約2.5週間</b></div></div>`,
- C3:`<div class="card"><div class="predbox" style="text-align:center"><div class="predlbl">達成見込み</div><div style="font-size:44px;font-weight:800;color:#004d40;font-family:'Inter';line-height:1;margin:4px 0">9<span style="font-size:20px">/</span>5<span style="font-size:15px"> ごろ</span></div><div style="font-size:12px;color:#6a6256">あと約60日 ・ 週 -0.4kg ・ 残り3.4kg</div></div><div class="mile">👣 次の節目：<b>67.0kg</b> まで <b>約2.5週間</b></div></div>`,
- C4:`<div class="card"><div class="predbox"><div class="predlbl">次の目標</div><div style="display:flex;align-items:baseline;gap:8px;margin:4px 0 12px"><div style="font-size:30px;font-weight:800;color:#004d40;font-family:'Inter'">67.0<span style="font-size:14px">kg</span></div><div style="font-size:16px;font-weight:800;color:#2b2620">まで あと 2.5週間</div></div><div style="display:flex;align-items:center;gap:12px"><div class="cal"><div class="m">9月</div><div class="d">5</div></div><div><div style="font-size:14px;font-weight:800;color:#2b2620">9月上旬ごろ 達成見込み</div><div style="font-size:11px;color:#6a6256;margin-top:2px">今のペースであと約60日です</div></div></div></div></div>`,
-};
-
-// 追加案2 ビフォーアフター＋タイムライン (共通・指標非依存)
+// ウエスト＋写真: シンプル + グラフ + ビフォーアフター
+const USIMPLE = `<div class="card simple">${sel('ウエスト＋写真')}<div class="predlbl" style="margin-bottom:2px">ウエスト</div><div><span class="big">78.0</span><span class="u">cm</span></div><div style="display:flex;justify-content:center;gap:12px;margin-top:8px;font-size:12px"><span style="color:#6a6256">入会時 <b style="color:#2b2620">84.0</b></span><span style="color:#ccc">|</span><span style="color:#6a6256">変化 <b class="g">-6.0</b></span></div></div>`;
 const BA = `<div class="sec">ビフォー / アフター 比較</div>
-<div class="cmp"><div class="after"></div><div class="before"></div><span class="lab b">入会時 71.8kg</span><span class="lab a">現在 68.4kg</span><div class="knob">‹›</div></div>
-<div style="display:flex;justify-content:center;gap:8px;margin:10px 0"><span class="badge">-3.4kg</span><span class="badge">-3.2%</span><span class="badge">32日</span></div>
+<div class="cmp"><div class="after"></div><div class="before"></div><span class="lab b">入会時</span><span class="lab a">現在</span><div class="knob">‹›</div></div>
+<div style="display:flex;justify-content:center;gap:8px;margin:10px 0"><span class="badge">体重 -3.4kg</span><span class="badge">ウエスト -6.0cm</span><span class="badge">32日</span></div>
 <div class="sec">記録の写真（タイムライン）</div>
 <div class="tl"><div class="it"><div class="box"></div><div class="d">6/1</div></div><div class="it"><div class="box"></div><div class="d">6/10</div></div><div class="it"><div class="box"></div><div class="d">6/20</div></div><div class="it"><div class="box"></div><div class="d">7/2</div></div><div class="it"><div class="box add">＋</div><div class="d">追加</div></div></div>`;
 
-const GRAPH = (target=true) => `<div class="card" style="padding:10px 8px"><svg viewBox="0 0 300 96" style="width:100%">${target?`<line x1="10" y1="22" x2="290" y2="22" stroke="#ddd6c6" stroke-width="1" stroke-dasharray="4 4"/><text x="12" y="18" font-size="9" fill="#4a875b">目標 65.0</text>`:''}<polyline points="15,36 60,42 105,39 150,52 195,58 240,68 285,74" fill="none" stroke="#2b2620" stroke-width="2.5"/><circle cx="285" cy="74" r="4" fill="#34603f"/></svg></div>`;
+const gear = `<svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`;
 
-const HDR = t => `<div class="apphdr"><span class="back">‹ 体組成</span><span class="t">${t}</span><span style="width:20px"></span></div>`;
-const phone = inner => `<div class="phone"><div class="sbar">9:41</div><div class="scr">${inner}</div></div>`;
+document.getElementById('c-w').innerHTML = `<div class="col"><div class="cap">詳細 ・ 体重（リング＋予測）</div>${phone(HDR+RING+PRED+`<div class="sec">数値の推移</div>`+GRAPH(true)+`<div class="ctaline">＋ 記録する</div>`)}</div>`;
+document.getElementById('c-u').innerHTML = `<div class="col"><div class="cap">詳細 ・ ウエスト＋写真</div>${phone(HDR+USIMPLE+`<div class="sec">数値の推移</div>`+GRAPH(false)+BA+`<div class="ctaline">＋ 今日の写真を追加 ・ 記録する</div>`)}</div>`;
+document.getElementById('c-home').innerHTML = `<div class="col"><div class="cap">ホームに出るカード（体重＋目標まで）</div>${phone(`<div class="apphdr"><span class="t" style="font-size:15px">筋肉塾</span>${gear}</div><div class="homecard"><div style="display:flex;align-items:center;justify-content:space-between"><span class="predlbl">今のからだ</span><span style="font-size:11px;color:#4a875b;font-weight:800">詳細・グラフ →</span></div><div style="margin:6px 0 8px"><span style="font-size:34px;font-weight:800;color:#2b2620;font-family:'Inter'">68.4</span><span class="u">kg</span></div><div style="font-size:12px;color:#6a6256;font-weight:700">目標まで <span class="g" style="font-weight:800;font-size:15px">あと 3.4kg</span></div><div class="ctaline" style="margin-top:10px">タップして記録・グラフを見る</div></div><div style="text-align:center;font-size:10px;color:#a59b8c;margin-top:8px">↑ ホーム上ではこの1枚（体脂肪率は載せない）</div>`)}</div>`;
 
-// ===== タブ1: 詳細 最新形 =====
-document.getElementById('c-full').innerHTML = `<div class="col"><div class="cap">体組成の詳細（完成イメージ・体重表示）</div>${phone(HDR('体型変化の記録')+RING()+PRED.C4+`<div class="sec">数値の推移</div>`+GRAPH(true)+BA+`<div class="ctaline">＋ 今日の写真を追加 ・ 記録する</div>`)}</div>`;
-
-// ===== タブ2: 予測 4案 =====
-document.getElementById('c-pred').innerHTML =
- `<div class="col"><div class="cap">C-1 バランス</div>${phone(HDR('体型変化の記録')+RING()+PRED.C1)}</div>`+
- `<div class="col"><div class="cap">C-2 日数を強調</div>${phone(HDR('体型変化の記録')+RING()+PRED.C2)}</div>`+
- `<div class="col"><div class="cap">C-3 達成日を強調</div>${phone(HDR('体型変化の記録')+RING()+PRED.C3)}</div>`+
- `<div class="col"><div class="cap">C-4 近い節目を主役</div>${phone(HDR('体型変化の記録')+RING()+PRED.C4)}</div>`;
-
-// ===== タブ3: 指標切替 パターンA (体重/体脂肪/ウエスト) =====
-const selHTML = on => `<div class="metricsel" style="margin-bottom:12px">${['体重','体脂肪率','ウエスト'].map(m=>`<span class="${m===on?'on':''}">${m}</span>`).join('')}</div>`;
-const SIMPLE = (label,cur,unit,start,delta) => `<div class="card simple">${selHTML(label)}<div class="predlbl" style="margin-bottom:2px">${label}</div><div><span class="big">${cur}</span><span class="u">${unit}</span></div><div style="display:flex;justify-content:center;gap:12px;margin-top:8px;font-size:12px"><span style="color:#6a6256">入会時 <b style="color:#2b2620">${start}</b></span><span style="color:#ccc">|</span><span style="color:#6a6256">変化 <b class="g">${delta}</b></span></div></div>`;
-
-document.getElementById('c-metric').innerHTML =
- `<div class="col"><div class="cap">体重（目標あり＝フル）</div>${phone(HDR('体型変化の記録')+RING()+PRED.C1+GRAPH(true))}</div>`+
- `<div class="col"><div class="cap">体脂肪率（目標なし＝シンプル）</div>${phone(HDR('体型変化の記録')+SIMPLE('体脂肪率','18.2','%','21.4','-3.2')+GRAPH(false))}</div>`+
- `<div class="col"><div class="cap">ウエスト（目標なし＝シンプル）</div>${phone(HDR('体型変化の記録')+SIMPLE('ウエスト','78.0','cm','84.0','-6.0')+GRAPH(false))}</div>`;
-
-document.getElementById('foot').innerHTML = {
- full:'完成イメージ：体重＝リング＋予測（案C-1）→ ビフォーアフター比較＋タイムライン（追加案2）→ 推移グラフ。写真枠はダミー・数値サンプル。',
- pred:'予測ブロックの見せ方4案。上のリング要約は共通。C-1バランス / C-2日数強調 / C-3達成日強調 / C-4近い節目主役。',
- metric:'指標切替＝パターンA（切替で姿が変わる）。体重だけリング＋予測、体脂肪率・ウエストは「現在値＋変化＋グラフ」に自動で切替。ビフォーアフターは指標に関係なく常に下段共通（この画面では省略）。',
-}.full;
-function setS(s){document.querySelectorAll('.stage').forEach(el=>el.classList.toggle('on',el.id==='s-'+s));document.querySelectorAll('.tb').forEach(b=>b.classList.toggle('on',b.dataset.s===s));document.getElementById('foot').innerHTML={full:'完成イメージ：体重＝リング＋予測（案C-1）→ ビフォーアフター比較＋タイムライン（追加案2）→ 推移グラフ。写真枠はダミー・数値サンプル。',pred:'予測ブロックの見せ方4案。上のリング要約は共通。C-1バランス / C-2日数強調 / C-3達成日強調 / C-4近い節目主役。',metric:'指標切替＝パターンA（切替で姿が変わる）。体重だけリング＋予測、体脂肪率・ウエストは「現在値＋変化＋グラフ」に自動で切替。ビフォーアフターは指標に関係なく常に下段共通（この画面では省略）。'}[s];}
+const F={w:'体重タブ：リング＋予測(C-4)＋推移グラフ。目標がある体重だけこのフル表示。',u:'ウエスト＋写真タブ：ウエスト現在値＋変化＋グラフ＋ビフォーアフター/タイムライン。目標なしなのでリング・予測は出さない。',home:'ホームカード：体重＋目標まで あと◯ の1枚。体脂肪率は載せない（記録は残す）。タップで詳細へ。'};
+document.getElementById('foot').innerHTML=F.w;
+function setS(s){document.querySelectorAll('.stage').forEach(el=>el.classList.toggle('on',el.id==='s-'+s));document.querySelectorAll('.tb').forEach(b=>b.classList.toggle('on',b.dataset.s===s));document.getElementById('foot').innerHTML=F[s];}
 </script>
 </body>
 </html>

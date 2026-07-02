@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>デザイン案 ・ フォント / ボタン / タブ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800;900&family=Zen+Kaku+Gothic+New:wght@500;700;900&family=Zen+Maru+Gothic:wght@500;700;900&family=M+PLUS+Rounded+1c:wght@500;700;800&family=BIZ+UDPGothic:wght@400;700&family=Inter:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f9f5ed;--card:#fffdf8;--line:#e7dcc9;--ink:#2b2620;--ink2:#6a6256;--grn:#4a875b;--grnd:#004d40;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Noto Sans JP',sans-serif;background:#ece0cf;color:var(--ink);padding:20px 12px 60px;}
+  .head{max-width:1000px;margin:0 auto 14px;text-align:center;}
+  .head h1{font-size:20px;font-weight:800;margin-bottom:4px;}
+  .head p{font-size:12px;color:#7a6f5c;}
+  .tabbar{max-width:560px;margin:0 auto 24px;display:flex;gap:8px;background:#fff;border-radius:12px;padding:8px;box-shadow:0 2px 10px rgba(0,0,0,.08);}
+  .tb{flex:1;border:none;background:transparent;border-radius:8px;padding:11px;font-size:13px;font-weight:800;color:var(--ink2);cursor:pointer;}
+  .tb.on{background:var(--grn);color:#fff;}
+  .stage{display:none;} .stage.on{display:block;}
+  .grid{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;max-width:1000px;margin:0 auto;}
+  .item{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:16px;width:300px;}
+  .item .name{font-size:12px;font-weight:800;color:var(--grn);margin-bottom:10px;background:#eef5f0;border-radius:20px;padding:3px 12px;display:inline-block;}
+  /* サンプルカード(体組成) */
+  .samp{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;}
+  .samp .lbl{font-size:11px;color:var(--ink2);font-weight:700;}
+  .samp .kg{font-size:30px;font-weight:800;color:var(--ink);line-height:1;}
+  .samp .kgu{font-size:12px;color:var(--ink2);font-weight:700;}
+  .samp .goal{font-size:12px;color:var(--ink2);font-weight:700;margin-top:4px;}
+  .samp .goal b{color:var(--grnd);font-size:15px;}
+  /* ボタン各種 */
+  .btnrow{display:flex;flex-direction:column;gap:12px;}
+  .b{border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;text-align:center;cursor:pointer;font-family:inherit;}
+  .b-flat{background:var(--grn);color:#fff;}
+  .b-3d{background:linear-gradient(to bottom,#5fa872,#4a875b 55%,#34603f);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 0 rgba(0,0,0,.18),0 4px 10px rgba(52,96,63,.35);}
+  .b-soft{background:var(--grn);color:#fff;box-shadow:0 6px 16px rgba(74,135,91,.35);}
+  .b-outline{background:#fff;color:var(--grnd);border:2px solid var(--grn);}
+  .b-pill{background:var(--grn);color:#fff;border-radius:40px;}
+  .b-ghost{background:#eef5f0;color:var(--grnd);}
+  .b-dark{background:linear-gradient(to bottom,#3a6b48,#284d34);color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.2);}
+  .lab{font-size:10px;color:var(--ink2);margin-top:4px;text-align:center;}
+  /* タブ各種 */
+  .tset{margin-bottom:18px;}
+  .tname{font-size:12px;font-weight:800;color:var(--grn);margin-bottom:8px;}
+  .t-pill{display:flex;gap:6px;background:#f0ece2;padding:5px;border-radius:12px;}
+  .t-pill span{flex:1;text-align:center;font-size:12px;font-weight:800;padding:8px;border-radius:9px;color:var(--ink2);}
+  .t-pill span.on{background:var(--grnd);color:#fff;}
+  .t-under{display:flex;gap:18px;border-bottom:1px solid var(--line);}
+  .t-under span{font-size:13px;font-weight:800;padding:8px 2px;color:var(--ink2);border-bottom:3px solid transparent;margin-bottom:-1px;}
+  .t-under span.on{color:var(--grnd);border-bottom-color:var(--grn);}
+  .t-seg{display:flex;border:1.5px solid var(--grn);border-radius:10px;overflow:hidden;}
+  .t-seg span{flex:1;text-align:center;font-size:12px;font-weight:800;padding:8px;color:var(--grnd);background:#fff;}
+  .t-seg span.on{background:var(--grn);color:#fff;}
+  .t-3d{display:flex;gap:8px;}
+  .t-3d span{flex:1;text-align:center;font-size:12px;font-weight:800;padding:9px;border-radius:10px;color:var(--ink2);background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.08);}
+  .t-3d span.on{background:linear-gradient(to bottom,#5fa872,#4a875b);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 3px 8px rgba(52,96,63,.3);}
+  .t-chip{display:flex;gap:6px;}
+  .t-chip span{font-size:12px;font-weight:800;padding:6px 14px;border-radius:20px;color:var(--ink2);background:#efe9dc;}
+  .t-chip span.on{background:var(--grnd);color:#fff;}
+  .foot{max-width:800px;margin:18px auto 0;font-size:11px;color:#7a6f5c;line-height:1.7;text-align:center;}
+</style>
+</head>
+<body>
+<div class="head">
+  <h1>デザイン案 ・ フォント / ボタン / タブ</h1>
+  <p>体組成の完成デザインに載せる「見た目のトーン」候補。フォント・ボタン・タブを別々に比較</p>
+</div>
+<div class="tabbar">
+  <button class="tb on" data-s="font" onclick="setS('font')">フォント</button>
+  <button class="tb" data-s="btn" onclick="setS('btn')">ボタン</button>
+  <button class="tb" data-s="tab" onclick="setS('tab')">タブ</button>
+</div>
+
+<!-- フォント -->
+<div class="stage on" id="s-font"><div class="grid" id="g-font"></div>
+  <div class="foot">同じ体組成カードを違うフォントで。数値は Inter 固定（欧文数字がきれい）、日本語部分のフォントだけ変えています。太さ・丸み・堅さの違いを見てください。</div>
+</div>
+<!-- ボタン -->
+<div class="stage" id="s-btn"><div class="grid" id="g-btn"></div>
+  <div class="foot">「記録する」ボタンの見た目候補。フラット / 立体3D / ソフト影 / アウトライン / ピル / ゴースト / ダーク。今の受講生UIは立体3D寄り。</div>
+</div>
+<!-- タブ -->
+<div class="stage" id="s-tab"><div class="grid" id="g-tab" style="max-width:640px"></div>
+  <div class="foot">指標切替（体重 / ウエスト＋写真）のタブ見た目候補。ピル / 下線 / セグメント / 立体3D / チップ。</div>
+</div>
+
+<script>
+const SAMP = f => `<div class="samp" style="font-family:${f}">
+  <div style="display:flex;justify-content:space-between;align-items:center"><span class="lbl">今のからだ</span><span style="font-size:11px;color:#4a875b;font-weight:800">詳細 →</span></div>
+  <div style="margin:6px 0 4px"><span class="kg" style="font-family:'Inter'">68.4</span><span class="kgu">kg</span></div>
+  <div class="goal">目標まで <b style="font-family:'Inter'">あと 3.4kg</b></div>
+</div>`;
+const FONTS = [
+  ["Noto Sans JP（現行）","'Noto Sans JP',sans-serif"],
+  ["Zen Kaku Gothic New（すっきり）","'Zen Kaku Gothic New',sans-serif"],
+  ["Zen Maru Gothic（丸ゴシック・やわらか）","'Zen Maru Gothic',sans-serif"],
+  ["M PLUS Rounded 1c（丸め・親しみ）","'M PLUS Rounded 1c',sans-serif"],
+  ["BIZ UDPGothic（読みやすさ重視）","'BIZ UDPGothic',sans-serif"],
+];
+document.getElementById('g-font').innerHTML = FONTS.map(([n,f])=>`<div class="item"><span class="name">${n}</span>${SAMP(f)}</div>`).join('');
+
+const BTNS = [
+  ["フラット","b-flat"],["立体3D（現行寄り・おすすめ）","b-3d"],["ソフト影","b-soft"],
+  ["アウトライン","b-outline"],["ピル（角丸大）","b-pill"],["ゴースト（淡色）","b-ghost"],["ダークグリーン","b-dark"],
+];
+document.getElementById('g-btn').innerHTML = `<div class="item" style="width:340px"><span class="name">ボタン 7種（記録する）</span><div class="btnrow">${BTNS.map(([n,c])=>`<div><button class="b ${c}">＋ 記録する</button><div class="lab">${n}</div></div>`).join('')}</div></div>`;
+
+const TABS = [
+  ["ピル（背景に溝）","t-pill"],["下線（アンダーライン）","t-under"],["セグメント（枠線）","t-seg"],["立体3D","t-3d"],["チップ","t-chip"],
+];
+const TABSAMPLE = c => `<div class="${c}"><span class="on">体重</span><span>ウエスト＋写真</span></div>`;
+document.getElementById('g-tab').innerHTML = TABS.map(([n,c])=>`<div class="item" style="width:300px"><div class="tset"><div class="tname">${n}</div>${TABSAMPLE(c)}</div></div>`).join('');
+
+function setS(s){document.querySelectorAll('.stage').forEach(el=>el.classList.toggle('on',el.id==='s-'+s));document.querySelectorAll('.tb').forEach(b=>b.classList.toggle('on',b.dataset.s===s));}
+</script>
+</body>
+</html>
