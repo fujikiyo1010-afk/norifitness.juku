@@ -29,9 +29,9 @@
   .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:11px;}
   .u{font-size:12px;color:var(--ink2);font-weight:700;} .g{color:var(--grnd);}
   .sec{font-size:12px;font-weight:800;color:#5b5344;margin:12px 2px 8px;}
-  .metricsel{display:flex;gap:5px;}
-  .metricsel span{flex:1;text-align:center;font-size:12px;font-weight:800;padding:7px;border-radius:16px;background:#f0f0ee;color:var(--ink2);}
-  .metricsel span.on{background:var(--grnd);color:#fff;}
+  .metricsel{display:flex;gap:8px;}
+  .metricsel span{flex:1;text-align:center;font-size:12px;font-weight:800;padding:9px;border-radius:10px;background:#fff;color:var(--ink2);box-shadow:0 2px 5px rgba(0,0,0,.08);}
+  .metricsel span.on{background:linear-gradient(to bottom,#5fa872,#4a875b);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 3px 8px rgba(52,96,63,.3);}
   .ringrow{display:flex;align-items:center;gap:14px;}
   .ring{position:relative;width:88px;height:88px;flex:0 0 auto;}
   .ring .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
@@ -102,7 +102,7 @@ const gear = `<svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColo
 
 document.getElementById('c-w').innerHTML = `<div class="col"><div class="cap">詳細 ・ 体重（リング＋予測）</div>${phone(HDR+RING+PRED+`<div class="sec">数値の推移</div>`+GRAPH(true)+`<div class="ctaline">＋ 記録する</div>`)}</div>`;
 document.getElementById('c-u').innerHTML = `<div class="col"><div class="cap">詳細 ・ ウエスト＋写真</div>${phone(HDR+USIMPLE+`<div class="sec">数値の推移</div>`+GRAPH(false)+BA+`<div class="ctaline">＋ 今日の写真を追加 ・ 記録する</div>`)}</div>`;
-document.getElementById('c-home').innerHTML = `<div class="col"><div class="cap">ホームに出るカード（体重＋目標まで）</div>${phone(`<div class="apphdr"><span class="t" style="font-size:15px">筋肉塾</span>${gear}</div><div class="homecard"><div style="display:flex;align-items:center;justify-content:space-between"><span class="predlbl">今のからだ</span><span style="font-size:11px;color:#4a875b;font-weight:800">詳細・グラフ →</span></div><div style="margin:6px 0 8px"><span style="font-size:34px;font-weight:800;color:#2b2620;font-family:'Inter'">68.4</span><span class="u">kg</span></div><div style="font-size:12px;color:#6a6256;font-weight:700">目標まで <span class="g" style="font-weight:800;font-size:15px">あと 3.4kg</span></div><div class="ctaline" style="margin-top:10px">タップして記録・グラフを見る</div></div><div style="text-align:center;font-size:10px;color:#a59b8c;margin-top:8px">↑ ホーム上ではこの1枚（体脂肪率は載せない）</div>`)}</div>`;
+document.getElementById('c-home').innerHTML = `<div class="col"><div class="cap">ホームに出るカード（体重＋目標まで）</div>${phone(`<div class="apphdr"><span class="t" style="font-size:15px">筋肉塾</span>${gear}</div><div class="homecard"><div style="display:flex;align-items:center;justify-content:space-between"><span class="predlbl">今のからだ</span><span style="font-size:11px;color:#4a875b;font-weight:800">詳細・グラフ →</span></div><div style="margin:6px 0 8px"><span style="font-size:34px;font-weight:800;color:#2b2620;font-family:'Inter'">68.4</span><span class="u">kg</span></div><div style="font-size:12px;color:#6a6256;font-weight:700">目標まで <span class="g" style="font-weight:800;font-size:15px">あと 3.4kg</span></div><div class="ctaline" style="margin-top:10px">＋ 記録・グラフ</div></div><div style="text-align:center;font-size:10px;color:#a59b8c;margin-top:8px">↑ ホーム上ではこの1枚（体脂肪率は載せない）</div>`)}</div>`;
 
 const F={w:'体重タブ：リング＋予測(C-4)＋推移グラフ。目標がある体重だけこのフル表示。',u:'ウエスト＋写真タブ：ウエスト現在値＋変化＋グラフ＋ビフォーアフター/タイムライン。目標なしなのでリング・予測は出さない。',home:'ホームカード：体重＋目標まで あと◯ の1枚。体脂肪率は載せない（記録は残す）。タップで詳細へ。'};
 document.getElementById('foot').innerHTML=F.w;
