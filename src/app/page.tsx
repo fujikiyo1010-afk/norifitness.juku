@@ -346,14 +346,14 @@ const ALERT_CONFIG: Record<MemberAlertKey, AlertConfig> = {
   body_metrics_missing: {
     strong: "体組成 まだ記録なし",
     tail: "。基準値を記録しましょう",
-    href: "/body-metrics",
+    href: "/record",
     icon: <BarIcon />,
   },
   body_metrics_stalled: {
     strong: (alert) =>
       `体組成の記録が止まっています (最後 ${alert.daysSinceLatest ?? "?"} 日前)`,
     tail: "。記録しましょう",
-    href: "/body-metrics",
+    href: "/record",
     icon: <BarIcon />,
   },
   notification_off: {

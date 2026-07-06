@@ -51,7 +51,6 @@ export function RecordSheetBody({
   const [bodyFat, setBodyFat] = useState<string>(
     initialBodyFat != null ? String(initialBodyFat) : ""
   );
-  const [note, setNote] = useState("");
   const [showDetails, setShowDetails] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -66,7 +65,7 @@ export function RecordSheetBody({
         weight_kg: parseNum(weight),
         body_fat_percent: parseNum(bodyFat),
         waist_cm: parseNum(waist),
-        note: note.trim() || null,
+        note: null, // 体重入力のメモは廃止 (食事添削で文脈を補う方針・2026-07-06)
       });
       if (!result.ok) {
         setError(result.message);
@@ -103,7 +102,7 @@ export function RecordSheetBody({
         onClick={() => setShowDetails((v) => !v)}
         className="mt-3 flex w-full items-center justify-center gap-1 text-[12px] font-bold text-[#4a875b]"
       >
-        {showDetails ? "詳しい入力を閉じる" : "＋ 詳しく入力（体脂肪率・日付・メモ）"}
+        {showDetails ? "詳しい入力を閉じる" : "＋ 詳しく入力（体脂肪率・日付）"}
       </button>
 
       {showDetails ? (
@@ -129,14 +128,6 @@ export function RecordSheetBody({
               />
             </div>
           </div>
-          <SmallInput
-            label="メモ (任意)"
-            value={note}
-            onChange={setNote}
-            placeholder="昨日たくさん食べた、等"
-            type="text"
-            maxLength={200}
-          />
         </div>
       ) : null}
 
