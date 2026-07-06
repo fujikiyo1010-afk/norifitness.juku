@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { MemberHeader } from "@/components/MemberHeader";
 import { createClient } from "@/lib/supabase/server";
 import { listMyBodyMetrics } from "@/lib/body-metrics/queries";
-import { listMyBodyPhotos } from "@/lib/body-photos/queries";
+import { getMyBodyPhotoSummary } from "@/lib/body-photos/queries";
 import { getMyGoalSheet } from "@/lib/goal-sheet/queries";
 import { BodyMetricsDetail } from "./BodyMetricsDetail";
 
@@ -26,10 +26,10 @@ export default async function RecordHubPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/record");
 
-  const [rows, goalSheet, photos] = await Promise.all([
+  const [rows, goalSheet, photoSummary] = await Promise.all([
     listMyBodyMetrics(365),
     getMyGoalSheet(),
-    listMyBodyPhotos(),
+    getMyBodyPhotoSummary(),
   ]);
 
   // 古い順に並べ替え (グラフ描画は時系列 ascending が自然)
@@ -49,8 +49,7 @@ export default async function RecordHubPage() {
           <BodyMetricsDetail
             rows={sorted}
             targetWeightKg={targetWeightKg}
-            photos={photos}
-            userId={user.id}
+            photoSummary={photoSummary}
           />
         </div>
       </main>

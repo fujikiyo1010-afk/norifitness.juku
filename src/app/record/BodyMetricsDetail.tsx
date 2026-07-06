@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import type { BodyMetricRow } from "@/lib/body-metrics/queries";
-import type { BodyPhoto } from "@/lib/body-photos/queries";
+import type { BodyPhotoSummary } from "@/lib/body-photos/queries";
 import {
   weightGoalProgress,
   weightPaceKgPerWeek,
@@ -13,7 +14,6 @@ import {
 import { BodyMetricsChart } from "./BodyMetricsChart";
 import { BottomSheet } from "./BottomSheet";
 import { RecordSheetBody } from "./RecordSheetBody";
-import { PhotoSection } from "./PhotoSection";
 
 /**
  * 体組成 詳細画面 (2026-07-06 体組成セクション改修 ・ 確定モック body-metrics-final.html)
@@ -37,13 +37,11 @@ function monthLabel(iso: string): string {
 export function BodyMetricsDetail({
   rows,
   targetWeightKg,
-  photos,
-  userId,
+  photoSummary,
 }: {
   rows: BodyMetricRow[]; // recorded_at 昇順
   targetWeightKg: number | null;
-  photos: BodyPhoto[];
-  userId: string;
+  photoSummary: BodyPhotoSummary;
 }) {
   const [tab, setTab] = useState<Tab>("weight");
   const [calcOpen, setCalcOpen] = useState(false);
@@ -113,7 +111,7 @@ export function BodyMetricsDetail({
           onOpenCalc={() => setCalcOpen(true)}
         />
       ) : (
-        <WaistView waistRows={waistRows} photos={photos} userId={userId} />
+        <WaistView waistRows={waistRows} photoSummary={photoSummary} />
       )}
 
       {/* 記録する (プライマリ) → 下からせり上がる入力シート */}
@@ -415,12 +413,10 @@ function CalcSheetBody({
 
 function WaistView({
   waistRows,
-  photos,
-  userId,
+  photoSummary,
 }: {
   waistRows: BodyMetricRow[];
-  photos: BodyPhoto[];
-  userId: string;
+  photoSummary: BodyPhotoSummary;
 }) {
   const start = waistRows[0]?.waist_cm ?? null;
   const current = waistRows[waistRows.length - 1]?.waist_cm ?? null;
@@ -476,8 +472,96 @@ function WaistView({
         </div>
       </div>
 
-      {/* ビフォーアフター写真 */}
-      <PhotoSection photos={photos} userId={userId} />
+      {/* ビフォーアフター写真 (要点2枚 + 一覧へ) */}
+      <PhotoSummaryCard summary={photoSummary} />
     </>
+  );
+}
+
+function PhotoSummaryCard({ summary }: { summary: BodyPhotoSummary }) {
+  // 0枚: 記録を促す
+  if (summary.count === 0) {
+    return (
+      <Link
+        href="/record/photos"
+        className="mt-1 flex flex-col items-center gap-1 rounded-2xl border border-dashed border-[#d8cdba] bg-[#fffdf8] p-6 text-center transition-colors hover:border-[#4a875b]"
+      >
+        <span className="text-[13px] font-bold text-[#5b5344]">
+          体型写真で変化を記録
+        </span>
+        <span className="text-[11px] text-[#a59b8c]">
+          写真を追加して、見た目の変化を並べて見られます →
+        </span>
+      </Link>
+    );
+  }
+
+  const { first, last } = summary;
+  return (
+    <div className="mt-1 space-y-2">
+      <div className="flex items-center justify-between px-0.5">
+        <span className="text-[12px] font-bold text-[#5b5344]">
+          ビフォーアフター
+        </span>
+        <Link
+          href="/record/photos"
+          className="text-[11px] font-bold text-[#4a875b]"
+        >
+          写真をすべて見る（{summary.count}枚）→
+        </Link>
+      </div>
+
+      <Link href="/record/photos" className="grid grid-cols-2 gap-2.5">
+        <PhotoThumb
+          url={first?.url ?? null}
+          tag={last ? "入会時ごろ" : "記録"}
+          date={first?.recorded_at ?? null}
+        />
+        {last ? (
+          <PhotoThumb url={last.url} tag="現在" date={last.recorded_at} />
+        ) : (
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#d8cdba] bg-[#fffdf8] p-4 text-center text-[11px] text-[#a59b8c]">
+            もう1枚追加すると
+            <br />
+            並べて比較できます
+          </div>
+        )}
+      </Link>
+    </div>
+  );
+}
+
+function PhotoThumb({
+  url,
+  tag,
+  date,
+}: {
+  url: string | null;
+  tag: string;
+  date: string | null;
+}) {
+  return (
+    <div>
+      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl border border-[#e7dcc9] bg-[#f0ece2]">
+        {url ? (
+          <Image
+            src={url}
+            alt={tag}
+            fill
+            sizes="(max-width:460px) 45vw, 200px"
+            className="object-cover"
+            unoptimized
+          />
+        ) : null}
+        <span className="absolute left-2 top-2 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-bold text-white">
+          {tag}
+        </span>
+      </div>
+      {date ? (
+        <div className="mt-1 text-center text-[10px] font-bold text-[#6a6256]">
+          {Number(date.slice(5, 7))}/{Number(date.slice(8, 10))}
+        </div>
+      ) : null}
+    </div>
   );
 }

@@ -18,7 +18,8 @@ type ActionResult = { ok: true } | { ok: false; message: string };
  */
 export async function addBodyPhoto(input: {
   recorded_at: string;
-  storage_path: string;
+  storage_path: string; // フル画像
+  thumb_path: string | null; // サムネ (無ければ null)
   note: string | null;
 }): Promise<ActionResult> {
   const supabase = await createClient();
@@ -28,7 +29,10 @@ export async function addBodyPhoto(input: {
   if (!user) return { ok: false, message: "ログインが必要です" };
 
   if (!input.recorded_at) return { ok: false, message: "記録日が必要です" };
-  if (!input.storage_path.startsWith(`${user.id}/`)) {
+  if (
+    !input.storage_path.startsWith(`${user.id}/`) ||
+    (input.thumb_path != null && !input.thumb_path.startsWith(`${user.id}/`))
+  ) {
     return { ok: false, message: "不正な保存先です" };
   }
 
@@ -36,11 +40,13 @@ export async function addBodyPhoto(input: {
     user_id: user.id,
     recorded_at: input.recorded_at,
     storage_path: input.storage_path,
+    thumb_path: input.thumb_path,
     note: input.note,
   });
   if (error) return { ok: false, message: `保存エラー: ${error.message}` };
 
   revalidatePath("/record");
+  revalidatePath("/record/photos");
   return { ok: true };
 }
 
@@ -54,16 +60,19 @@ export async function deleteBodyPhoto(id: string): Promise<ActionResult> {
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, message: "ログインが必要です" };
 
-  // storage_path を取得 (RLS で本人のみ)
+  // storage_path / thumb_path を取得 (RLS で本人のみ)
   const { data: row } = await supabase
     .from("body_photos")
-    .select("storage_path")
+    .select("storage_path, thumb_path")
     .eq("id", id)
     .eq("user_id", user.id)
     .single();
 
-  if (row?.storage_path) {
-    await supabase.storage.from("body-photos").remove([row.storage_path]);
+  const paths = [row?.storage_path, row?.thumb_path].filter(
+    (p): p is string => typeof p === "string" && p.length > 0
+  );
+  if (paths.length > 0) {
+    await supabase.storage.from("body-photos").remove(paths);
   }
 
   const { error } = await supabase
@@ -74,5 +83,6 @@ export async function deleteBodyPhoto(id: string): Promise<ActionResult> {
   if (error) return { ok: false, message: `削除エラー: ${error.message}` };
 
   revalidatePath("/record");
+  revalidatePath("/record/photos");
   return { ok: true };
 }
