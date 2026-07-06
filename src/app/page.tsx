@@ -8,6 +8,7 @@ import { getMyHomeStats } from "@/lib/member/home-stats";
 import { getMyLastWatchedLesson } from "@/lib/member/last-watched";
 import { getMyGoalSheetStatus } from "@/lib/member/goal-sheet-status";
 import { getMyMonthlyAuditHomeStatus } from "@/lib/member/monthly-audit-status";
+import { getMyBodyCard, type BodyCard } from "@/lib/member/body-card";
 import { getMyUnreadCount } from "@/lib/chat/queries";
 
 export const dynamic = "force-dynamic";
@@ -82,16 +83,25 @@ export default async function Home() {
     }
   }
 
-  const [alerts, stats, lastWatched, goalSheet, monthlyAudit, admin, chatUnread] =
-    await Promise.all([
-      getMyAlerts(),
-      getMyHomeStats(),
-      getMyLastWatchedLesson(),
-      getMyGoalSheetStatus(),
-      getMyMonthlyAuditHomeStatus(),
-      getAdminInfo(),
-      getMyUnreadCount(),
-    ]);
+  const [
+    alerts,
+    stats,
+    lastWatched,
+    goalSheet,
+    monthlyAudit,
+    bodyCard,
+    admin,
+    chatUnread,
+  ] = await Promise.all([
+    getMyAlerts(),
+    getMyHomeStats(),
+    getMyLastWatchedLesson(),
+    getMyGoalSheetStatus(),
+    getMyMonthlyAuditHomeStatus(),
+    getMyBodyCard(),
+    getAdminInfo(),
+    getMyUnreadCount(),
+  ]);
 
   const displayName = stats?.displayName ?? "受講生";
   const joinedAtLabel = stats
@@ -250,6 +260,11 @@ export default async function Home() {
         </Link>
       </div>
 
+      {/* 横長 体組成 (2026-07-06 P7) */}
+      <div className="px-4 pt-2">
+        <BodyCardBlock card={bodyCard} />
+      </div>
+
       {/* 全体進捗バー */}
       <div className="px-4 pt-[18px]">
         <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-xl px-4 py-3.5">
@@ -367,6 +382,126 @@ function NoticeBanner({ alert }: { alert: MemberAlert }) {
       </span>
       <span className="text-[#b8860b] font-mono font-bold">→</span>
     </Link>
+  );
+}
+
+// =====================================================================
+// 横長 体組成カード (P7) ・ /record への導線
+// =====================================================================
+
+function BodyCardBlock({ card }: { card: BodyCard }) {
+  // 記録なし → 記録を促すだけ (嘘の数字を出さない)
+  if (!card.hasData) {
+    return (
+      <Link
+        href="/record"
+        className="flex items-center gap-3 rounded-[14px] border border-[#e7dcc9] bg-[#fffdf8] px-[18px] py-4 transition-colors hover:border-[#4a875b]"
+      >
+        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#4a875b1a]">
+          <ScaleIcon />
+        </div>
+        <div className="flex-1">
+          <div className="mb-0.5 text-[13px] font-bold text-[#2b2620]">
+            体組成
+          </div>
+          <div className="text-[10px] text-[#6a6256]">
+            まだ記録がありません ・ 体重を記録して変化を見える化
+          </div>
+        </div>
+        <span className="font-mono text-xs text-[#a59b8c]">→</span>
+      </Link>
+    );
+  }
+
+  const pct = card.ringPct ?? 0;
+  const R = 15;
+  const C = 2 * Math.PI * R;
+  const sub = card.reached
+    ? "目標達成 ・ おめでとうございます"
+    : card.remainingKg != null
+      ? `目標まで あと ${card.remainingKg.toFixed(1)}kg`
+      : "目標体重が未設定です";
+
+  return (
+    <Link
+      href="/record"
+      className="flex items-center gap-3 rounded-[14px] border border-[#e7dcc9] bg-[#fffdf8] px-[18px] py-4 transition-colors hover:border-[#4a875b]"
+    >
+      {/* ミニリング (達成%) */}
+      <div className="relative h-10 w-10 flex-shrink-0">
+        {card.ringPct != null ? (
+          <>
+            <svg width="40" height="40" viewBox="0 0 40 40">
+              <circle
+                cx="20"
+                cy="20"
+                r={R}
+                fill="none"
+                stroke="#eadfce"
+                strokeWidth="5"
+              />
+              <circle
+                cx="20"
+                cy="20"
+                r={R}
+                fill="none"
+                stroke="#4a875b"
+                strokeWidth="5"
+                strokeLinecap="round"
+                strokeDasharray={C}
+                strokeDashoffset={C * (1 - pct / 100)}
+                transform="rotate(-90 20 20)"
+              />
+            </svg>
+            <span className="absolute inset-0 flex items-center justify-center text-[9px] font-extrabold text-[#004d40]">
+              {pct}%
+            </span>
+          </>
+        ) : (
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#4a875b1a]">
+            <ScaleIcon />
+          </div>
+        )}
+      </div>
+
+      <div className="flex-1">
+        <div className="mb-0.5 flex items-center gap-1.5 text-[13px] font-bold text-[#2b2620]">
+          体組成
+          {card.daysSinceLatest != null && card.daysSinceLatest >= 7 ? (
+            <span className="inline-flex items-center rounded-full bg-[#b8860b] px-1.5 py-[1px] text-[9px] text-white">
+              {card.daysSinceLatest}日 記録なし
+            </span>
+          ) : null}
+        </div>
+        <div className="text-[10px] text-[#6a6256]">
+          現在{" "}
+          <b className="font-mono text-[#004d40]">
+            {card.currentWeight?.toFixed(1) ?? "—"}
+          </b>{" "}
+          kg ・ {sub}
+        </div>
+      </div>
+      <span className="font-mono text-xs text-[#a59b8c]">→</span>
+    </Link>
+  );
+}
+
+function ScaleIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#4a875b"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      width="20"
+      height="20"
+      aria-hidden="true"
+    >
+      <path d="M12 3a9 9 0 0 1 9 9H3a9 9 0 0 1 9-9Z" />
+      <path d="M12 12 15 8" />
+    </svg>
   );
 }
 
