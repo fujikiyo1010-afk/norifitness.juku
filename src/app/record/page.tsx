@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { MemberHeader } from "@/components/MemberHeader";
 import { createClient } from "@/lib/supabase/server";
 import { listMyBodyMetrics } from "@/lib/body-metrics/queries";
@@ -46,13 +45,6 @@ export default async function RecordHubPage() {
       <main className="min-h-[100dvh] bg-[#f9f5ed]">
         <div className="mx-auto max-w-[460px] px-4 py-4 space-y-4">
           <BodyMetricsDetail rows={sorted} targetWeightKg={targetWeightKg} />
-
-          <Link
-            href="/body-metrics"
-            className="block bg-[#4a875b] text-white rounded-2xl px-4 py-3.5 text-center text-[14px] font-bold hover:bg-[#34603f] transition-colors"
-          >
-            記録する
-          </Link>
         </div>
       </main>
     </>

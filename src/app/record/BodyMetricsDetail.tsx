@@ -11,6 +11,7 @@ import {
 } from "@/lib/body-metrics/goal-progress";
 import { BodyMetricsChart } from "./BodyMetricsChart";
 import { BottomSheet } from "./BottomSheet";
+import { RecordSheetBody } from "./RecordSheetBody";
 
 /**
  * 体組成 詳細画面 (2026-07-06 体組成セクション改修 ・ 確定モック body-metrics-final.html)
@@ -40,6 +41,7 @@ export function BodyMetricsDetail({
 }) {
   const [tab, setTab] = useState<Tab>("weight");
   const [calcOpen, setCalcOpen] = useState(false);
+  const [recordOpen, setRecordOpen] = useState(false);
 
   const weightRows = useMemo(
     () => rows.filter((r) => r.weight_kg != null),
@@ -52,6 +54,7 @@ export function BodyMetricsDetail({
 
   const startWeight = weightRows[0]?.weight_kg ?? null;
   const currentWeight = weightRows[weightRows.length - 1]?.weight_kg ?? null;
+  const latest = rows[rows.length - 1] ?? null; // 直近の記録 (入力初期値)
   const pace = useMemo(() => weightPaceKgPerWeek(rows), [rows]);
   const prog = weightGoalProgress(currentWeight, targetWeightKg);
   const eta = weightEta(currentWeight, targetWeightKg, pace);
@@ -106,6 +109,29 @@ export function BodyMetricsDetail({
       ) : (
         <WaistView waistRows={waistRows} />
       )}
+
+      {/* 記録する (プライマリ) → 下からせり上がる入力シート */}
+      <button
+        type="button"
+        onClick={() => setRecordOpen(true)}
+        className="block w-full rounded-2xl bg-[#4a875b] px-4 py-3.5 text-center text-[14px] font-bold text-white transition-colors hover:bg-[#34603f]"
+      >
+        ＋ 記録する
+      </button>
+
+      {/* 記録入力シート */}
+      <BottomSheet
+        open={recordOpen}
+        onClose={() => setRecordOpen(false)}
+        title="今日の記録"
+      >
+        <RecordSheetBody
+          initialWeight={latest?.weight_kg ?? null}
+          initialBodyFat={latest?.body_fat_percent ?? null}
+          initialWaist={latest?.waist_cm ?? null}
+          onSaved={() => setRecordOpen(false)}
+        />
+      </BottomSheet>
 
       {/* 計算シート (体重を指定して逆算) */}
       <BottomSheet
