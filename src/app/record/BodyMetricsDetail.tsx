@@ -14,6 +14,7 @@ import {
 import { BodyMetricsChart } from "./BodyMetricsChart";
 import { BottomSheet } from "./BottomSheet";
 import { RecordSheetBody } from "./RecordSheetBody";
+import { RecordFab } from "./RecordFab";
 
 /**
  * 体組成 詳細画面 (2026-07-06 体組成セクション改修 ・ 確定モック body-metrics-final.html)
@@ -114,18 +115,8 @@ export function BodyMetricsDetail({
         <WaistView waistRows={waistRows} photoSummary={photoSummary} />
       )}
 
-      {/* 記録する (右下フローティング・常駐) → 下からせり上がる入力シート。
-          下部ナビ(約60px+safe-area)の上に浮かせる。 体重・ウエスト両タブで表示。 */}
-      <button
-        type="button"
-        onClick={() => setRecordOpen(true)}
-        aria-label="体組成を記録する"
-        className="fixed right-4 z-30 flex items-center gap-1.5 rounded-full bg-[#4a875b] px-5 py-3.5 text-[14px] font-bold text-white shadow-[0_6px_18px_rgba(74,135,91,0.45)] transition-colors hover:bg-[#34603f] active:scale-95"
-        style={{ bottom: "calc(74px + env(safe-area-inset-bottom))" }}
-      >
-        <span className="text-[18px] leading-none">＋</span>
-        記録
-      </button>
+      {/* 記録する (右下フローティング・常駐) → 下からせり上がる入力シート。両タブで表示。 */}
+      <RecordFab onClick={() => setRecordOpen(true)} />
 
       {/* 記録入力シート */}
       <BottomSheet
