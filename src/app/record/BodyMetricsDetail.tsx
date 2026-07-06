@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { BodyMetricRow } from "@/lib/body-metrics/queries";
+import type { BodyPhoto } from "@/lib/body-photos/queries";
 import {
   weightGoalProgress,
   weightPaceKgPerWeek,
@@ -12,6 +13,7 @@ import {
 import { BodyMetricsChart } from "./BodyMetricsChart";
 import { BottomSheet } from "./BottomSheet";
 import { RecordSheetBody } from "./RecordSheetBody";
+import { PhotoSection } from "./PhotoSection";
 
 /**
  * 体組成 詳細画面 (2026-07-06 体組成セクション改修 ・ 確定モック body-metrics-final.html)
@@ -35,9 +37,13 @@ function monthLabel(iso: string): string {
 export function BodyMetricsDetail({
   rows,
   targetWeightKg,
+  photos,
+  userId,
 }: {
   rows: BodyMetricRow[]; // recorded_at 昇順
   targetWeightKg: number | null;
+  photos: BodyPhoto[];
+  userId: string;
 }) {
   const [tab, setTab] = useState<Tab>("weight");
   const [calcOpen, setCalcOpen] = useState(false);
@@ -107,7 +113,7 @@ export function BodyMetricsDetail({
           onOpenCalc={() => setCalcOpen(true)}
         />
       ) : (
-        <WaistView waistRows={waistRows} />
+        <WaistView waistRows={waistRows} photos={photos} userId={userId} />
       )}
 
       {/* 記録する (プライマリ) → 下からせり上がる入力シート */}
@@ -407,7 +413,15 @@ function CalcSheetBody({
   );
 }
 
-function WaistView({ waistRows }: { waistRows: BodyMetricRow[] }) {
+function WaistView({
+  waistRows,
+  photos,
+  userId,
+}: {
+  waistRows: BodyMetricRow[];
+  photos: BodyPhoto[];
+  userId: string;
+}) {
   const start = waistRows[0]?.waist_cm ?? null;
   const current = waistRows[waistRows.length - 1]?.waist_cm ?? null;
   const delta =
@@ -462,15 +476,8 @@ function WaistView({ waistRows }: { waistRows: BodyMetricRow[] }) {
         </div>
       </div>
 
-      {/* ビフォーアフター写真 (フェーズ6で実装) */}
-      <div className="rounded-2xl border border-dashed border-[#d8cdba] bg-[#fffdf8] p-5 text-center">
-        <div className="text-[13px] font-bold text-[#5b5344]">
-          ビフォーアフター写真
-        </div>
-        <div className="mt-1 text-[11px] text-[#a59b8c]">
-          （近日追加：撮った写真で見た目の変化を並べられます）
-        </div>
-      </div>
+      {/* ビフォーアフター写真 */}
+      <PhotoSection photos={photos} userId={userId} />
     </>
   );
 }
