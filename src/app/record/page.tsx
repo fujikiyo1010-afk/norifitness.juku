@@ -4,7 +4,7 @@ import { MemberHeader } from "@/components/MemberHeader";
 import { createClient } from "@/lib/supabase/server";
 import { listMyBodyMetrics } from "@/lib/body-metrics/queries";
 import { getMyGoalSheet } from "@/lib/goal-sheet/queries";
-import { BodyMetricsHero } from "./BodyMetricsHero";
+import { BodyMetricsDetail } from "./BodyMetricsDetail";
 
 export const dynamic = "force-dynamic";
 
@@ -45,7 +45,7 @@ export default async function RecordHubPage() {
       <MemberHeader title="記録" fallbackHref="/" />
       <main className="min-h-[100dvh] bg-[#f9f5ed]">
         <div className="mx-auto max-w-[460px] px-4 py-4 space-y-4">
-          <BodyMetricsHero rows={sorted} targetWeightKg={targetWeightKg} />
+          <BodyMetricsDetail rows={sorted} targetWeightKg={targetWeightKg} />
 
           <Link
             href="/body-metrics"
