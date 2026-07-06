@@ -386,7 +386,7 @@ function PhotoAddForm({
           value={recordedAt}
           max={todayString()}
           onChange={(e) => setRecordedAt(e.target.value)}
-          className="w-full rounded-lg border border-[#e7dcc9] px-3 py-2 text-[13px] focus:border-[#4a875b] focus:outline-none"
+          className="w-full appearance-none rounded-lg border border-[#e7dcc9] bg-white px-3 py-2 text-left text-[13px] text-[#2b2620] [color-scheme:light] focus:border-[#4a875b] focus:outline-none"
         />
       </div>
 
