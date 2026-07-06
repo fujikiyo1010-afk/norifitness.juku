@@ -3,19 +3,21 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { upsertBodyMetric } from "@/lib/body-metrics/actions";
-import { NumberWheel, intRange } from "./Wheel";
+import { NumberWheel } from "./Wheel";
 
 /**
- * 記録入力シート本体 (2026-07-06 確定: 縦・両ホイール常時 / 案1)
+ * 記録入力シート本体 (2026-07-06 確定: 縦・両ホイール常時 + 丸い±0.1 / 案1・B)
  *
- *   - 体重・ウエストを ドラムロール(ホイール)で入力。キーボード不要。
- *   - 前回の記録値からスタート (そこから少し回すだけ)。
+ *   - 体重・ウエストを ドラムロール(ホイール)+左右の丸±(0.1刻み) で入力。キーボード不要。
+ *   - 前回の記録値からスタート (そこから少し回す/±で詰めるだけ)。
  *   - 体脂肪率・日付は「詳しく入力」に折りたたみ。
  *   - 保存成功 → onSaved() でシートを閉じ router.refresh()。
  */
 
-const WEIGHT_INT = intRange(30, 150); // kg 整数部
-const WAIST_INT = intRange(40, 150); // cm 整数部
+const WEIGHT_MIN = 30;
+const WEIGHT_MAX = 150;
+const WAIST_MIN = 40;
+const WAIST_MAX = 150;
 
 function todayString(): string {
   const now = new Date();
@@ -30,18 +32,9 @@ function parseNum(s: string): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-/** 数値を 整数配列内の index と 小数index(0-9) に分解 */
-function toIndices(
-  value: number | null | undefined,
-  intValues: number[],
-  fallback: number
-): { intIdx: number; decIdx: number } {
-  const v = value != null && Number.isFinite(value) ? value : fallback;
-  const min = intValues[0];
-  const max = intValues[intValues.length - 1];
-  const intPart = Math.max(min, Math.min(max, Math.floor(v)));
-  const decPart = Math.max(0, Math.min(9, Math.round((v - Math.floor(v)) * 10)));
-  return { intIdx: intPart - min, decIdx: decPart };
+function clampInit(v: number | null | undefined, min: number, max: number, fb: number): number {
+  const n = v != null && Number.isFinite(v) ? v : fb;
+  return Math.max(min, Math.min(max, n));
 }
 
 export function RecordSheetBody({
@@ -57,13 +50,12 @@ export function RecordSheetBody({
 }) {
   const router = useRouter();
 
-  const w0 = toIndices(initialWeight, WEIGHT_INT, 60);
-  const wa0 = toIndices(initialWaist, WAIST_INT, 70);
-  const [wInt, setWInt] = useState(w0.intIdx);
-  const [wDec, setWDec] = useState(w0.decIdx);
-  const [waInt, setWaInt] = useState(wa0.intIdx);
-  const [waDec, setWaDec] = useState(wa0.decIdx);
-
+  const [weight, setWeight] = useState(
+    clampInit(initialWeight, WEIGHT_MIN, WEIGHT_MAX, 60)
+  );
+  const [waist, setWaist] = useState(
+    clampInit(initialWaist, WAIST_MIN, WAIST_MAX, 70)
+  );
   const [bodyFat, setBodyFat] = useState<string>(
     initialBodyFat != null ? String(initialBodyFat) : ""
   );
@@ -72,9 +64,6 @@ export function RecordSheetBody({
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const weight = WEIGHT_INT[wInt] + wDec / 10;
-  const waist = WAIST_INT[waInt] + waDec / 10;
-
   const hasPrev = initialWeight != null || initialWaist != null;
 
   function handleSubmit() {
@@ -82,9 +71,9 @@ export function RecordSheetBody({
     startTransition(async () => {
       const result = await upsertBodyMetric({
         recorded_at: recordedAt,
-        weight_kg: weight,
+        weight_kg: Math.round(weight * 10) / 10,
         body_fat_percent: parseNum(bodyFat),
-        waist_cm: waist,
+        waist_cm: Math.round(waist * 10) / 10,
         note: null,
       });
       if (!result.ok) {
@@ -100,7 +89,7 @@ export function RecordSheetBody({
     <div>
       {hasPrev ? (
         <p className="mb-3 text-center text-[10px] text-[#a59b8c]">
-          前回の値からスタート。少し回して合わせてください
+          前回の値からスタート。回す or ± で合わせてください
         </p>
       ) : null}
 
@@ -114,12 +103,11 @@ export function RecordSheetBody({
           </span>
         </div>
         <NumberWheel
-          intValues={WEIGHT_INT}
-          intIndex={wInt}
-          setIntIndex={setWInt}
-          decIndex={wDec}
-          setDecIndex={setWDec}
+          initial={initialWeight ?? 60}
+          min={WEIGHT_MIN}
+          max={WEIGHT_MAX}
           unit="kg"
+          onChange={setWeight}
         />
       </div>
 
@@ -133,12 +121,11 @@ export function RecordSheetBody({
           </span>
         </div>
         <NumberWheel
-          intValues={WAIST_INT}
-          intIndex={waInt}
-          setIntIndex={setWaInt}
-          decIndex={waDec}
-          setDecIndex={setWaDec}
+          initial={initialWaist ?? 70}
+          min={WAIST_MIN}
+          max={WAIST_MAX}
           unit="cm"
+          onChange={setWaist}
         />
       </div>
 
