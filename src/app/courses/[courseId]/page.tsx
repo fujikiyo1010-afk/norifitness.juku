@@ -23,6 +23,28 @@ type RouteParams = Promise<{ courseId: string }>;
 
 const nowIso = () => new Date().toISOString();
 
+/**
+ * コース別ヒーローテーマ (= 画像 + 背景色)
+ * 色は一覧サムネ (CoursesView.pickCourseTheme) と同系統。
+ * 白文字が読めるよう濃いめのグラデにしている。
+ * 画像は public/courses/c1〜c5.jpg (社員入稿 → 軽量JPG化済み)。
+ */
+type HeroTheme = { from: string; to: string; image: string | null };
+
+function pickHeroTheme(title: string): HeroTheme {
+  if (title.includes("ボディメイク") || title.includes("ロードマップ"))
+    return { from: "#4a875b", to: "#34603f", image: "/courses/c1.jpg" }; // 緑
+  if (title.includes("live") || title.includes("LIVE") || title.includes("講義"))
+    return { from: "#7c3aed", to: "#5b21b6", image: "/courses/c2.jpg" }; // 紫
+  if (title.includes("マインドセット") || title.includes("コンテンツ"))
+    return { from: "#b45309", to: "#92400e", image: "/courses/c3.jpg" }; // 黄(アンバー)
+  if (title.includes("フォーム") || title.includes("筋トレ"))
+    return { from: "#ea580c", to: "#c2410c", image: "/courses/c4.jpg" }; // オレンジ
+  if (title.includes("レシピ") || title.includes("ダイエット"))
+    return { from: "#db2777", to: "#be185d", image: "/courses/c5.jpg" }; // ピンク
+  return { from: "#4a875b", to: "#34603f", image: null }; // フォールバック = 緑・画像なし
+}
+
 export default async function StudentCoursePage({
   params,
 }: {
@@ -128,30 +150,47 @@ export default async function StudentCoursePage({
   const coursePercent =
     totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
+  // コース別ヒーローテーマ (画像 + 背景色)
+  const hero = pickHeroTheme(course.title);
+
   return (
     <>
       <MemberHeader title="コース詳細" fallbackHref="/courses" />
       <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#f9f5ed]">
         <div className="mx-auto w-full max-w-[460px] space-y-4">
-        {/* ヒーロー (モック準拠 ・ 緑グラデ + 大サムネ + 進捗 + 続きから CTA) */}
-        <section className="rounded-2xl overflow-hidden bg-gradient-to-br from-[#4a875b] to-[#34603f] text-white p-5">
-          {/* 大サムネ枠 */}
-          <div className="w-full aspect-[16/9] rounded-xl bg-[#fffdf8]/15 flex items-center justify-center mb-3">
-            <svg
-              width="56"
-              height="56"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-white/95"
-            >
-              <circle cx="13" cy="4" r="2" />
-              <path d="M4 22 8.5 11l3 3 4-6 6 9" />
-              <path d="m11.5 10.5 2-7" />
-            </svg>
+        {/* ヒーロー (コース別カラー + 大サムネ画像 + 進捗 + 続きから CTA) */}
+        <section
+          className="rounded-2xl overflow-hidden text-white p-5"
+          style={{
+            backgroundImage: `linear-gradient(135deg, ${hero.from}, ${hero.to})`,
+          }}
+        >
+          {/* 大サムネ枠 (画像あり=入稿画像 / なし=線画プレースホルダ) */}
+          <div className="w-full aspect-[16/9] rounded-xl bg-[#fffdf8]/15 overflow-hidden flex items-center justify-center mb-3">
+            {hero.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={hero.image}
+                alt={course.title}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <svg
+                width="56"
+                height="56"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-white/95"
+              >
+                <circle cx="13" cy="4" r="2" />
+                <path d="M4 22 8.5 11l3 3 4-6 6 9" />
+                <path d="m11.5 10.5 2-7" />
+              </svg>
+            )}
           </div>
           <h1 className="text-lg font-bold leading-tight mb-1">
             {course.title}
@@ -171,7 +210,8 @@ export default async function StudentCoursePage({
           {firstUnfinished ? (
             <Link
               href={`/courses/${courseId}/chapters/${firstUnfinished.chapterId}/lessons/${firstUnfinished.lessonId}`}
-              className="block rounded-xl bg-[#fffdf8] text-[#34603f] py-3 px-4 text-sm font-bold text-center shadow-[0_4px_0_rgba(0,77,64,0.5)] hover:bg-[#f0e6d3] transition-colors"
+              className="block rounded-xl bg-[#fffdf8] py-3 px-4 text-sm font-bold text-center hover:bg-[#f0e6d3] transition-colors"
+              style={{ color: hero.to, boxShadow: `0 4px 0 ${hero.to}80` }}
             >
               ▶ 続きから ・ L{firstUnfinished.lessonSortOrder}「
               {firstUnfinished.title}」
