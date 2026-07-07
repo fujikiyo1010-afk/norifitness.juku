@@ -127,7 +127,7 @@ export default async function AdminLearningOverviewPage() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <Link
-                        href={`/admin/users/${r.userId}/learning`}
+                        href={`/admin/users/${r.userId}/learning?from=learning`}
                         className="text-xs font-bold text-[#00897b] hover:underline"
                       >
                         詳細 →

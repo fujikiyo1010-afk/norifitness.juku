@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import { requireAdmin } from "@/lib/auth/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { UserHubTabs } from "./_components/UserHubTabs";
@@ -37,7 +37,10 @@ export default async function UserHubLayout({
 
   return (
     <>
-      <UserHubTabs userId={userId} />
+      {/* useSearchParams(?from=learning) を使うため Suspense で包む */}
+      <Suspense fallback={<div className="h-[49px] border-b border-[#e8ebe9] bg-white" />}>
+        <UserHubTabs userId={userId} />
+      </Suspense>
       {children}
     </>
   );
