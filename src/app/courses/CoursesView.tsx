@@ -287,25 +287,48 @@ function pickCourseTheme(title: string): CourseTheme {
   };
 }
 
+// コース別アイコン画像 (社員入稿の透過PNG ・ public/courses/cN-icon.png)
+// 無いコースは従来の線画SVGにフォールバック。
+function pickCourseIcon(title: string): string | null {
+  if (title.includes("ボディメイク") || title.includes("ロードマップ")) return "/courses/c1-icon.png";
+  if (title.includes("live") || title.includes("LIVE") || title.includes("講義")) return "/courses/c2-icon.png";
+  if (title.includes("マインドセット") || title.includes("コンテンツ")) return "/courses/c3-icon.png";
+  if (title.includes("フォーム") || title.includes("筋トレ")) return "/courses/c4-icon.png";
+  if (title.includes("レシピ") || title.includes("ダイエット")) return "/courses/c5-icon.png";
+  return null;
+}
+
 function CourseThumb({ title }: { title: string }) {
   const theme = pickCourseTheme(title);
+  const icon = pickCourseIcon(title);
   return (
     <div
-      className="w-20 h-20 rounded-[10px] flex items-center justify-center flex-shrink-0"
-      style={{ backgroundColor: theme.bg }}
+      className="w-20 h-20 rounded-[10px] flex items-center justify-center flex-shrink-0 overflow-hidden"
+      style={{ backgroundColor: icon ? "transparent" : theme.bg }}
     >
-      <svg
-        width="36"
-        height="36"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke={theme.stroke}
-        strokeWidth={1.75}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-        dangerouslySetInnerHTML={{ __html: `<path d="${theme.path}" />` }}
-      />
+      {icon ? (
+        // 入稿アイコンは自前の色背景+枠を持つ完成タイル → 余白なしで敷き詰める
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={icon}
+          alt=""
+          aria-hidden="true"
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <svg
+          width="36"
+          height="36"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={theme.stroke}
+          strokeWidth={1.75}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+          dangerouslySetInnerHTML={{ __html: `<path d="${theme.path}" />` }}
+        />
+      )}
     </div>
   );
 }
