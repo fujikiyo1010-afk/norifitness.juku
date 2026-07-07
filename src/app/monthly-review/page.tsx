@@ -202,7 +202,7 @@ function StateCardA() {
         今月分
       </span>
       <div className="text-sm font-medium text-[#2b2620] mt-2 mb-1.5">
-        月次添削が届いています
+        今月の月次添削を始めましょう
       </div>
       <div className="text-[11px] text-zinc-600 leading-relaxed mb-3">
         17 項目を振り返り、のりfitness に提出すると動画で返信が届きます。
