@@ -160,7 +160,7 @@ export default async function StudentCoursePage({
         <div className="mx-auto w-full max-w-[460px] space-y-4">
         {/* ヒーロー (コース別カラー + 大サムネ画像 + 進捗 + 続きから CTA) */}
         <section
-          className="rounded-2xl overflow-hidden text-white p-5"
+          className="rounded-2xl overflow-hidden text-white p-3"
           style={{
             backgroundImage: `linear-gradient(135deg, ${hero.from}, ${hero.to})`,
           }}
@@ -192,12 +192,8 @@ export default async function StudentCoursePage({
               </svg>
             )}
           </div>
-          <h1 className="text-lg font-bold leading-tight mb-1">
-            {course.title}
-          </h1>
           <div className="text-[11px] opacity-90 mb-2.5">
-            {chapters.length} 章 ・ {totalLessons} レッスン ・ 全体{" "}
-            {coursePercent}% ({completedLessons}/{totalLessons})
+            全体 {coursePercent}% ({completedLessons}/{totalLessons})
           </div>
           {/* 進捗バー */}
           <div className="h-1.5 rounded-full bg-[#fffdf8]/25 overflow-hidden mb-3">
