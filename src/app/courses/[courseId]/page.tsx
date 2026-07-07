@@ -158,9 +158,11 @@ export default async function StudentCoursePage({
       <MemberHeader title="コース詳細" fallbackHref="/courses" />
       <main className="flex flex-1 flex-col p-4 sm:p-6 bg-[#f9f5ed]">
         <div className="mx-auto w-full max-w-[460px] space-y-4">
-        {/* ヒーロー (コース別カラー + 大サムネ画像 + 進捗 + 続きから CTA) */}
+        {/* ヒーロー (コース別カラー + 大サムネ画像 + 進捗 + 続きから CTA)
+            フルブリード: ページ左右パディング(-mx)と上パディング(-mt)を打ち消し
+            画面いっぱいの四角バナーに (角丸なし・ヘッダー直下に接地) */}
         <section
-          className="rounded-2xl overflow-hidden text-white p-3"
+          className="-mt-4 -mx-4 sm:-mt-6 sm:-mx-6 overflow-hidden text-white p-3"
           style={{
             backgroundImage: `linear-gradient(135deg, ${hero.from}, ${hero.to})`,
           }}
