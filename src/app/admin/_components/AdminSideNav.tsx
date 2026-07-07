@@ -100,6 +100,12 @@ export function AdminSideNav({
       icon: <BookIcon />,
     },
     {
+      label: "学習進捗",
+      href: "/admin/learning",
+      matchPrefix: "/admin/learning",
+      icon: <ChartIcon />,
+    },
+    {
       label: "動画ライブラリ",
       href: "/admin/videos",
       matchPrefix: "/admin/videos",
@@ -288,6 +294,17 @@ function BookIcon() {
     <svg {...iconProps}>
       <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
       <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+    </svg>
+  );
+}
+
+function ChartIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M3 3v18h18" />
+      <rect x="7" y="12" width="3" height="6" />
+      <rect x="12" y="8" width="3" height="10" />
+      <rect x="17" y="5" width="3" height="13" />
     </svg>
   );
 }
