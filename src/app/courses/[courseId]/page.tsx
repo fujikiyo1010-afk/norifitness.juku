@@ -167,8 +167,10 @@ export default async function StudentCoursePage({
             backgroundImage: `linear-gradient(135deg, ${hero.from}, ${hero.to})`,
           }}
         >
-          {/* 大サムネ枠 (画像あり=入稿画像 / なし=線画プレースホルダ) */}
-          <div className="w-full aspect-[16/9] rounded-xl bg-[#fffdf8]/15 overflow-hidden flex items-center justify-center mb-3">
+          {/* 大サムネ枠 (画像あり=入稿画像 / なし=線画プレースホルダ)
+              画像は上・左右の色帯(p-3)を打ち消して全幅・角なし化 (-mt-3 -mx-3)。
+              下側だけ色帯を残す (mb-3) → その上に%/進捗/CTAが乗る */}
+          <div className="-mt-3 -mx-3 aspect-[16/9] bg-[#fffdf8]/15 overflow-hidden flex items-center justify-center mb-3">
             {hero.image ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
