@@ -24,25 +24,38 @@ type RouteParams = Promise<{ courseId: string }>;
 const nowIso = () => new Date().toISOString();
 
 /**
- * コース別ヒーローテーマ (= 画像 + 背景色)
- * 色は一覧サムネ (CoursesView.pickCourseTheme) と同系統。
- * 白文字が読めるよう濃いめのグラデにしている。
+ * コース別ヒーローテーマ (= 画像 + 色帯 + 帯上の文字色)
+ * 色は比較ツール(/mock/hero-colors.html)で社員が画像から選定 (2026-07-07)。
+ *   from/to  : 画像下の色帯 (単色は from==to / c1のみ縦グラデ)
+ *   onBand   : 帯の上に乗る文字・進捗バーの色 (帯が明るいc2/c5はタイトル文字色を採用)
+ *   ctaText  : 「続きから」ボタン(白地)の文字色
  * 画像は public/courses/c1〜c5.jpg (社員入稿 → 軽量JPG化済み)。
  */
-type HeroTheme = { from: string; to: string; image: string | null };
+type HeroTheme = {
+  image: string | null;
+  from: string;
+  to: string;
+  onBand: string;
+  ctaText: string;
+};
 
 function pickHeroTheme(title: string): HeroTheme {
   if (title.includes("ボディメイク") || title.includes("ロードマップ"))
-    return { from: "#4a875b", to: "#34603f", image: "/courses/c1.jpg" }; // 緑
+    // 緑・グラデ (#0b3618 → やや暗く)
+    return { image: "/courses/c1.jpg", from: "#0b3618", to: "#082711", onBand: "#ffffff", ctaText: "#0b3618" };
   if (title.includes("live") || title.includes("LIVE") || title.includes("講義"))
-    return { from: "#7c3aed", to: "#5b21b6", image: "/courses/c2.jpg" }; // 紫
+    // 明るい青の帯・文字はタイトル「生徒…」のネイビー
+    return { image: "/courses/c2.jpg", from: "#c9dce7", to: "#c9dce7", onBand: "#145ad2", ctaText: "#145ad2" };
   if (title.includes("マインドセット") || title.includes("コンテンツ"))
-    return { from: "#b45309", to: "#92400e", image: "/courses/c3.jpg" }; // 黄(アンバー)
+    // 紺・単色
+    return { image: "/courses/c3.jpg", from: "#2c388f", to: "#2c388f", onBand: "#ffffff", ctaText: "#2c388f" };
   if (title.includes("フォーム") || title.includes("筋トレ"))
-    return { from: "#ea580c", to: "#c2410c", image: "/courses/c4.jpg" }; // オレンジ
+    // 暗赤・単色
+    return { image: "/courses/c4.jpg", from: "#5b0c0e", to: "#5b0c0e", onBand: "#ffffff", ctaText: "#5b0c0e" };
   if (title.includes("レシピ") || title.includes("ダイエット"))
-    return { from: "#db2777", to: "#be185d", image: "/courses/c5.jpg" }; // ピンク
-  return { from: "#4a875b", to: "#34603f", image: null }; // フォールバック = 緑・画像なし
+    // クリームの帯・文字はタイトル「ダイエット」のブラウン
+    return { image: "/courses/c5.jpg", from: "#fbf2d0", to: "#fbf2d0", onBand: "#50320a", ctaText: "#50320a" };
+  return { image: null, from: "#4a875b", to: "#34603f", onBand: "#ffffff", ctaText: "#34603f" }; // フォールバック
 }
 
 export default async function StudentCoursePage({
@@ -164,7 +177,7 @@ export default async function StudentCoursePage({
         <section
           className="-mt-4 -mx-4 sm:-mt-6 sm:-mx-6 overflow-hidden text-white p-3"
           style={{
-            backgroundImage: `linear-gradient(135deg, ${hero.from}, ${hero.to})`,
+            backgroundImage: `linear-gradient(180deg, ${hero.from}, ${hero.to})`,
           }}
         >
           {/* 大サムネ枠 (画像あり=入稿画像 / なし=線画プレースホルダ)
@@ -196,14 +209,17 @@ export default async function StudentCoursePage({
               </svg>
             )}
           </div>
-          <div className="text-[11px] opacity-90 mb-2.5">
+          <div className="text-[11px] mb-2.5" style={{ color: hero.onBand }}>
             全体 {coursePercent}% ({completedLessons}/{totalLessons})
           </div>
-          {/* 進捗バー */}
-          <div className="h-1.5 rounded-full bg-[#fffdf8]/25 overflow-hidden mb-3">
+          {/* 進捗バー (帯上の文字色 onBand で塗る = 明るい帯でも視認できる) */}
+          <div
+            className="h-1.5 rounded-full overflow-hidden mb-3"
+            style={{ backgroundColor: `${hero.onBand}33` }}
+          >
             <div
-              className="h-full bg-[#fffdf8] rounded-full transition-all duration-500"
-              style={{ width: `${coursePercent}%` }}
+              className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${coursePercent}%`, backgroundColor: hero.onBand }}
             />
           </div>
           {/* 続きから CTA */}
@@ -211,7 +227,7 @@ export default async function StudentCoursePage({
             <Link
               href={`/courses/${courseId}/chapters/${firstUnfinished.chapterId}/lessons/${firstUnfinished.lessonId}`}
               className="block rounded-xl bg-[#fffdf8] py-3 px-4 text-sm font-bold text-center hover:bg-[#f0e6d3] transition-colors"
-              style={{ color: hero.to, boxShadow: `0 4px 0 ${hero.to}80` }}
+              style={{ color: hero.ctaText, boxShadow: `0 4px 0 ${hero.ctaText}80` }}
             >
               ▶ 続きから ・ L{firstUnfinished.lessonSortOrder}「
               {firstUnfinished.title}」
