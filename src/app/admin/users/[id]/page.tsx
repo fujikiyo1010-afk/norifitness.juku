@@ -196,8 +196,8 @@ export default async function AdminUserHubPage({
 
   return (
     <div className="min-h-screen bg-zinc-50">
-      {/* ヘッダー */}
-      <header className="sticky top-0 z-10 border-b border-[#e8ebe9] bg-white">
+      {/* ヘッダー (タブバー top-0 の下に重ならないよう top-[44px]) */}
+      <header className="sticky top-[44px] z-10 border-b border-[#e8ebe9] bg-white">
         <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
           <Link
             href={back.href}

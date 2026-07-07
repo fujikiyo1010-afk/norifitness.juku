@@ -18,8 +18,8 @@ export function UserHubTabs({ userId }: { userId: string }) {
   ];
 
   return (
-    <div className="bg-white border-b border-[#e8ebe9] sticky top-[60px] z-[5]">
-      <div className="mx-auto max-w-3xl px-4 flex gap-1 overflow-x-auto">
+    <div className="bg-white border-b border-[#e8ebe9] sticky top-0 z-[5]">
+      <div className="mx-auto max-w-3xl px-4 flex gap-1 overflow-x-auto overflow-y-hidden">
         {tabs.map((tab) => {
           const isActive = tab.exact
             ? pathname === tab.href
