@@ -31,6 +31,7 @@ import {
   calcWeightProgress,
 } from "@/lib/monthly-audit/series";
 import { getLatestBodyMetricSummary } from "@/lib/body-metrics/queries";
+import { weightGoalProgress } from "@/lib/body-metrics/goal-progress";
 import {
   getGoalSheetForUser,
   listGoalSheetRevisionsForUser,
@@ -693,8 +694,11 @@ function WeightProgressBlock({
 
   // パターン 5: 全部揃っている (本命)
   const pct = (progress?.ratio ?? 0) * 100;
-  const remainingAbs = Math.abs(progress?.remaining ?? 0);
-  const direction = progress?.direction ?? "down";
+  // 「あと◯kg / 達成」は受講生側(/record)と同じ距離ベースの安全計算に統一する。
+  // 向きを判定せず絶対距離・符号なし = 増量/減量どちらでも誤表示ゼロ。
+  // (§3.6-1 マイナス符号廃止 / §3.6-4 増量目標で「あと-10kg・100%」になるバグの解消)
+  // ％バー(pct=progress.ratio)は span ベースで既に両方向対応のため維持。
+  const goalDist = weightGoalProgress(currentWeight, targetWeight);
 
   return (
     <div>
@@ -713,17 +717,16 @@ function WeightProgressBlock({
           <span className="text-[10px] text-[#00695c]">kg</span>
         </div>
         <div className="flex items-baseline gap-2 text-xs">
-          {progress && progress.remaining === 0 ? (
+          {goalDist.state === "reached" ? (
             <span className="text-zinc-700 font-bold text-sm">達成</span>
-          ) : (
+          ) : goalDist.state === "remaining" ? (
             <span className="text-zinc-700">
               あと{" "}
               <span className="text-sm font-bold font-mono">
-                {direction === "down" ? "-" : "+"}
-                {remainingAbs.toFixed(1)} kg
+                {goalDist.kg.toFixed(1)} kg
               </span>
             </span>
-          )}
+          ) : null}
           {targetDate && (
             <>
               <span className="text-zinc-300">|</span>
