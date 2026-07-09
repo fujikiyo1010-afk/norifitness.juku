@@ -1,9 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import type { BodyMetricRow } from "@/lib/body-metrics/queries";
+import { deleteBodyMetric } from "@/lib/body-metrics/actions";
 import type { BodyPhotoSummary } from "@/lib/body-photos/queries";
 import {
   weightGoalProgress,
@@ -47,6 +49,26 @@ export function BodyMetricsDetail({
   const [tab, setTab] = useState<Tab>("weight");
   const [calcOpen, setCalcOpen] = useState(false);
   const [recordOpen, setRecordOpen] = useState(false);
+  // ② 保存/削除トースト  ① 誤日付記録の削除(2段階確認)
+  const [toast, setToast] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [isDeleting, startDelete] = useTransition();
+  const router = useRouter();
+  const showToast = (m: string) => {
+    setToast(m);
+    setTimeout(() => setToast(null), 2200);
+  };
+  const confirmDelete = (id: string) =>
+    startDelete(async () => {
+      const r = await deleteBodyMetric(id);
+      setPendingDelete(null);
+      if (r.ok) {
+        showToast("記録を削除しました");
+        router.refresh();
+      } else {
+        showToast(r.message);
+      }
+    });
 
   const weightRows = useMemo(
     () => rows.filter((r) => r.weight_kg != null),
@@ -76,6 +98,12 @@ export function BodyMetricsDetail({
 
   return (
     <div className="space-y-3">
+      {/* ② トースト (保存/削除の反応) */}
+      {toast && (
+        <div className="pointer-events-none fixed left-1/2 top-4 z-50 -translate-x-1/2 rounded-full bg-[#34603f] px-4 py-2 text-[12px] font-bold text-white shadow-[0_4px_16px_rgba(0,0,0,0.25)]">
+          {toast}
+        </div>
+      )}
       {/* ピルタブ */}
       <div className="flex gap-1.5 rounded-2xl bg-[#f0ece2] p-1.5">
         {(
@@ -115,6 +143,18 @@ export function BodyMetricsDetail({
         <WaistView waistRows={waistRows} photoSummary={photoSummary} />
       )}
 
+      {/* ① 最近の記録 (誤った日付の記録を削除・2段階確認) */}
+      <RecentRecords
+        rows={rows}
+        pendingDelete={pendingDelete}
+        deleting={isDeleting}
+        onAsk={setPendingDelete}
+        onCancel={() => setPendingDelete(null)}
+        onConfirm={confirmDelete}
+      />
+      {/* 最下行の削除ボタンが右下FABと重ならないための余白 */}
+      <div className="h-20" aria-hidden="true" />
+
       {/* 記録する (右下フローティング・常駐) → 下からせり上がる入力シート。両タブで表示。 */}
       <RecordFab onClick={() => setRecordOpen(true)} />
 
@@ -128,7 +168,10 @@ export function BodyMetricsDetail({
           initialWeight={latest?.weight_kg ?? null}
           initialBodyFat={latest?.body_fat_percent ?? null}
           initialWaist={latest?.waist_cm ?? null}
-          onSaved={() => setRecordOpen(false)}
+          onSaved={() => {
+            setRecordOpen(false);
+            showToast("記録しました");
+          }}
         />
       </BottomSheet>
 
@@ -557,6 +600,80 @@ function PhotoThumb({
           {Number(date.slice(5, 7))}/{Number(date.slice(8, 10))}
         </div>
       ) : null}
+    </div>
+  );
+}
+
+// ① 最近の記録リスト (誤った日付の記録を削除・2段階確認)
+function RecentRecords({
+  rows,
+  pendingDelete,
+  deleting,
+  onAsk,
+  onCancel,
+  onConfirm,
+}: {
+  rows: BodyMetricRow[];
+  pendingDelete: string | null;
+  deleting: boolean;
+  onAsk: (id: string) => void;
+  onCancel: () => void;
+  onConfirm: (id: string) => void;
+}) {
+  if (rows.length === 0) return null;
+  const recent = [...rows].reverse().slice(0, 12); // 新しい順・直近12件
+  return (
+    <div className="rounded-2xl border border-[#e7dcc9] bg-[#fffdf8] px-3 py-3">
+      <div className="mb-0.5 px-0.5 text-[12px] font-bold text-[#5b5344]">最近の記録</div>
+      <div className="mb-2 px-0.5 text-[10px] text-[#a59b8c]">
+        間違えた日付の記録はここから削除できます
+      </div>
+      <ul className="divide-y divide-[#efe6d4]">
+        {recent.map((r) => (
+          <li key={r.id} className="flex items-center gap-2 py-2 text-[12px]">
+            <span className="w-12 flex-none font-mono text-[#6a6256]">
+              {Number(r.recorded_at.slice(5, 7))}/{Number(r.recorded_at.slice(8, 10))}
+            </span>
+            <span className="flex-1 truncate text-[#2b2620]">
+              {r.weight_kg != null && <b className="font-mono">{r.weight_kg}kg</b>}
+              {r.waist_cm != null && (
+                <span className="ml-2 text-[#6a6256]">W{r.waist_cm}cm</span>
+              )}
+              {r.body_fat_percent != null && (
+                <span className="ml-2 text-[#6a6256]">{r.body_fat_percent}%</span>
+              )}
+            </span>
+            {pendingDelete === r.id ? (
+              <span className="flex flex-none items-center gap-1.5">
+                <span className="text-[11px] font-bold text-[#b91c1c]">削除？</span>
+                <button
+                  type="button"
+                  disabled={deleting}
+                  onClick={() => onConfirm(r.id)}
+                  className="rounded-md bg-[#c0392b] px-2 py-0.5 text-[11px] font-bold text-white disabled:opacity-50"
+                >
+                  削除
+                </button>
+                <button
+                  type="button"
+                  onClick={onCancel}
+                  className="rounded-md border border-[#e7dcc9] px-2 py-0.5 text-[11px] text-[#6a6256]"
+                >
+                  やめる
+                </button>
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onAsk(r.id)}
+                className="flex-none text-[11px] text-[#a59b8c] transition-colors hover:text-[#b91c1c]"
+              >
+                削除
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

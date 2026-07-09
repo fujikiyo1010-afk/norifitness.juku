@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { daysSinceDateJST } from "@/lib/date/jst";
 
 /**
  * 管理画面 アラートタグ集計
@@ -146,21 +147,24 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
   // body_metrics: ユーザーごとに「最新記録日」「最新体重」「最低体重(ベスト)」
   const bodyMetricsByUser = new Map<
     string,
-    { latestDate: Date; latestWeight: number | null; minWeight: number | null }
+    { latestDate: Date; latestDateStr: string; latestWeight: number | null; minWeight: number | null }
   >();
   for (const m of bodyMetrics.data ?? []) {
-    const date = new Date(m.recorded_at as string);
+    const recordedAt = m.recorded_at as string;
+    const date = new Date(recordedAt);
     const w = m.weight_kg as number | null;
     const existing = bodyMetricsByUser.get(m.user_id);
     if (!existing) {
       bodyMetricsByUser.set(m.user_id, {
         latestDate: date,
+        latestDateStr: recordedAt,
         latestWeight: w,
         minWeight: w,
       });
     } else {
       if (date > existing.latestDate) {
         existing.latestDate = date;
+        existing.latestDateStr = recordedAt;
         existing.latestWeight = w;
       }
       if (w != null && (existing.minWeight == null || w < existing.minWeight)) {
@@ -224,7 +228,8 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
         });
       }
     } else {
-      const gap = daysBetween(bm.latestDate, now);
+      // ⑦ JST基準の暦日差（recorded_at は date 型 = UTC解釈で「N日記録なし」が深夜にズレるため）
+      const gap = daysSinceDateJST(bm.latestDateStr);
       if (gap >= ALERT_THRESHOLDS.BODY_METRICS_OVERDUE_DAYS) {
         tags.push({
           key: "body_metrics_stalled",

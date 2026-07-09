@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { daysSinceDateJST } from "@/lib/date/jst";
 
 export type BodyMetricRow = {
   id: string;
@@ -86,9 +87,8 @@ export async function getLatestBodyMetricSummary(
 
   const latest = rows[0];
   const latestDate = new Date(latest.recorded_at);
-  const daysSinceLatest = Math.floor(
-    (Date.now() - latestDate.getTime()) / (1000 * 60 * 60 * 24)
-  );
+  // ③ JST基準の暦日差（UTC解釈で「◯日ぶり」が深夜にズレるのを防ぐ）
+  const daysSinceLatest = daysSinceDateJST(latest.recorded_at);
 
   // 7 日前以上前の最も近い記録を探す
   const sevenDaysBefore = new Date(latestDate);
