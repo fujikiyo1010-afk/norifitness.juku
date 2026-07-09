@@ -61,8 +61,8 @@ export async function upsertBodyMetric(input: BodyMetricInput): Promise<ActionRe
 
   if (error) return { ok: false, message: `保存エラー: ${error.message}` };
 
-  revalidatePath("/body-metrics");
-  revalidatePath("/body-metrics/chart");
+  revalidatePath("/record");
+  revalidatePath("/"); // ホーム体組成カード
   // 管理画面側も更新 (受講生ハブ /metrics タブ + ホーム KPI + アラート集計)
   revalidatePath("/admin/users", "layout");
   revalidatePath("/admin");

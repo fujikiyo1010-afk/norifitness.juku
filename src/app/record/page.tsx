@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { MemberHeader } from "@/components/MemberHeader";
 import { createClient } from "@/lib/supabase/server";
 import { listMyBodyMetrics } from "@/lib/body-metrics/queries";
+import { getMyBodyPhotoSummary } from "@/lib/body-photos/queries";
 import { getMyGoalSheet } from "@/lib/goal-sheet/queries";
-import { BodyMetricsHero } from "./BodyMetricsHero";
+import { BodyMetricsDetail } from "./BodyMetricsDetail";
 
 export const dynamic = "force-dynamic";
 
@@ -26,9 +26,10 @@ export default async function RecordHubPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/record");
 
-  const [rows, goalSheet] = await Promise.all([
+  const [rows, goalSheet, photoSummary] = await Promise.all([
     listMyBodyMetrics(365),
     getMyGoalSheet(),
+    getMyBodyPhotoSummary(),
   ]);
 
   // 古い順に並べ替え (グラフ描画は時系列 ascending が自然)
@@ -45,14 +46,11 @@ export default async function RecordHubPage() {
       <MemberHeader title="記録" fallbackHref="/" />
       <main className="min-h-[100dvh] bg-[#f9f5ed]">
         <div className="mx-auto max-w-[460px] px-4 py-4 space-y-4">
-          <BodyMetricsHero rows={sorted} targetWeightKg={targetWeightKg} />
-
-          <Link
-            href="/body-metrics"
-            className="block bg-[#4a875b] text-white rounded-2xl px-4 py-3.5 text-center text-[14px] font-bold hover:bg-[#34603f] transition-colors"
-          >
-            記録する
-          </Link>
+          <BodyMetricsDetail
+            rows={sorted}
+            targetWeightKg={targetWeightKg}
+            photoSummary={photoSummary}
+          />
         </div>
       </main>
     </>

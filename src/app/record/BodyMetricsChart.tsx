@@ -2,7 +2,8 @@
 
 import { useMemo } from "react";
 import type { BodyMetricRow } from "@/lib/body-metrics/queries";
-import type { MetricKey } from "./BodyMetricsHero";
+
+export type MetricKey = "weight_kg" | "body_fat_percent" | "waist_cm";
 
 /**
  * 体組成 折れ線グラフ ・ SVG 自前実装 (2026-06-17 v2 ・ 3-way 単一指標)
