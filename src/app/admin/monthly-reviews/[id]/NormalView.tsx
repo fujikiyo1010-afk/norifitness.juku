@@ -33,7 +33,7 @@ export function NormalView({
   onSelectFile: (video: RecordedVideo) => void;
   onDiscardRecorded: () => void;
 }) {
-  const { audit, user, pastReplied, replyCount, remainingCount, nextAuditId, adminName, adminInitial, back } =
+  const { userId, audit, user, pastReplied, replyCount, remainingCount, nextAuditId, adminName, adminInitial, back } =
     data;
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -140,6 +140,13 @@ export function NormalView({
               <ProfileMeta label={`${audit.daysSinceSubmit} 日経過`} />
             </div>
           </div>
+          {/* 管S2/R18: 添削中にこの受講生の体組成・履歴を見たい → 受講生ハブへ (常設) */}
+          <Link
+            href={`/admin/users/${userId}`}
+            className="flex-shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#cfe3df] bg-[#f0f7f5] px-3 py-2 text-xs font-bold text-[#00695c] hover:bg-[#e0efec] transition-colors"
+          >
+            受講生ハブで詳細を見る →
+          </Link>
         </section>
 
         {/* 動画返信エリア (画面開いてすぐ録画開始できるよう最上部に、2026-05-27 きよむさん要望) */}

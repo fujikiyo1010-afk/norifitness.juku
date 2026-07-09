@@ -76,6 +76,7 @@ export default async function AdminMonthlyReviewDetailPage({
       };
 
   const data: DetailViewData = {
+    userId: audit.user_id,
     audit: {
       id: audit.id,
       items: audit.items,

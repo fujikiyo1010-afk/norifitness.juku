@@ -13,6 +13,13 @@ type NavItem = {
   icon: ReactNode;
   badge?: number;
   badgeTone?: BadgeTone;
+  /** 本体が未実装のため準備中(クリック不可・準備中チップ)。P2で有効化する。 */
+  comingSoon?: boolean;
+};
+
+type NavGroup = {
+  label: string;
+  items: NavItem[];
 };
 
 export type AdminSideNavProps = {
@@ -34,94 +41,124 @@ export function AdminSideNav({
 }: AdminSideNavProps) {
   const pathname = usePathname() ?? "/admin";
 
-  const items: NavItem[] = [
+  // 4グループ構成 (M1モック「提案_管理_ホーム_今日の流れ.html」のナビ部分に準拠)。
+  // 「毎日の仕事」内の並び=デイリー→月次→リクエスト→チャット (監査 管S1: 4受信箱の境界を並び順で明示)。
+  const groups: NavGroup[] = [
     {
-      label: "ホーム",
-      href: "/admin",
-      matchPrefix: "/admin",
-      icon: <HomeIcon />,
+      label: "毎日の仕事",
+      items: [
+        {
+          label: "ホーム",
+          href: "/admin",
+          matchPrefix: "/admin",
+          icon: <HomeIcon />,
+        },
+        {
+          // 本体はP2で実装。ここでは器としてナビにだけ置く(クリック不可・準備中)。
+          label: "デイリー添削",
+          href: "/admin/daily",
+          matchPrefix: "/admin/daily",
+          icon: <PenIcon />,
+          comingSoon: true,
+        },
+        {
+          label: "月次添削",
+          href: "/admin/monthly-reviews",
+          matchPrefix: "/admin/monthly-reviews",
+          icon: <VideoIcon />,
+          badge: pendingAudits,
+          badgeTone: "danger",
+        },
+        {
+          label: "リクエスト",
+          href: "/admin/requests",
+          matchPrefix: "/admin/requests",
+          icon: <ClipboardIcon />,
+          badge: pendingRequests,
+          badgeTone: "danger",
+        },
+        {
+          label: "チャット",
+          href: "/admin/messages",
+          matchPrefix: "/admin/messages",
+          icon: <ChatIcon />,
+          badge: chatUnread,
+          badgeTone: "danger",
+        },
+        {
+          label: "発送管理",
+          href: "/admin/shipments",
+          matchPrefix: "/admin/shipments",
+          icon: <TruckIcon />,
+          badge: pendingShipments,
+          badgeTone: "danger",
+        },
+      ],
     },
     {
       label: "受講生",
-      href: "/admin/users",
-      matchPrefix: "/admin/users",
-      icon: <UsersIcon />,
-      badge: totalUsers,
-      badgeTone: "neutral",
+      items: [
+        {
+          label: "受講生",
+          href: "/admin/users",
+          matchPrefix: "/admin/users",
+          icon: <UsersIcon />,
+          badge: totalUsers,
+          badgeTone: "neutral",
+        },
+        {
+          label: "学習進捗",
+          href: "/admin/learning",
+          matchPrefix: "/admin/learning",
+          icon: <ChartIcon />,
+        },
+      ],
     },
     {
-      label: "月次添削",
-      href: "/admin/monthly-reviews",
-      matchPrefix: "/admin/monthly-reviews",
-      icon: <VideoIcon />,
-      badge: pendingAudits,
-      badgeTone: "danger",
+      label: "コンテンツ",
+      items: [
+        {
+          label: "コース管理",
+          href: "/admin/courses",
+          matchPrefix: "/admin/courses",
+          icon: <BookIcon />,
+        },
+        {
+          label: "動画ライブラリ",
+          href: "/admin/videos",
+          matchPrefix: "/admin/videos",
+          icon: <FilmIcon />,
+        },
+        {
+          label: "アナウンス",
+          href: "/admin/announcements",
+          matchPrefix: "/admin/announcements",
+          icon: <MegaphoneIcon />,
+        },
+      ],
     },
     {
-      label: "リクエスト",
-      href: "/admin/requests",
-      matchPrefix: "/admin/requests",
-      icon: <ClipboardIcon />,
-      badge: pendingRequests,
-      badgeTone: "danger",
-    },
-    {
-      label: "チャット",
-      href: "/admin/messages",
-      matchPrefix: "/admin/messages",
-      icon: <ChatIcon />,
-      badge: chatUnread,
-      badgeTone: "danger",
-    },
-    {
-      label: "発送管理",
-      href: "/admin/shipments",
-      matchPrefix: "/admin/shipments",
-      icon: <TruckIcon />,
-      badge: pendingShipments,
-      badgeTone: "danger",
-    },
-    {
-      label: "招待",
-      href: "/admin/invitations",
-      matchPrefix: "/admin/invitations",
-      icon: <MailIcon />,
-    },
-    {
-      label: "アナウンス",
-      href: "/admin/announcements",
-      matchPrefix: "/admin/announcements",
-      icon: <MegaphoneIcon />,
-    },
-    {
-      label: "コース管理",
-      href: "/admin/courses",
-      matchPrefix: "/admin/courses",
-      icon: <BookIcon />,
-    },
-    {
-      label: "学習進捗",
-      href: "/admin/learning",
-      matchPrefix: "/admin/learning",
-      icon: <ChartIcon />,
-    },
-    {
-      label: "動画ライブラリ",
-      href: "/admin/videos",
-      matchPrefix: "/admin/videos",
-      icon: <FilmIcon />,
-    },
-    {
-      label: "管理者",
-      href: "/admin/admins",
-      matchPrefix: "/admin/admins",
-      icon: <ShieldIcon />,
-    },
-    {
-      label: "設定",
-      href: "/admin/settings",
-      matchPrefix: "/admin/settings",
-      icon: <SettingsIcon />,
+      label: "運営",
+      items: [
+        {
+          label: "招待",
+          href: "/admin/invitations",
+          matchPrefix: "/admin/invitations",
+          icon: <MailIcon />,
+        },
+        {
+          label: "管理者",
+          href: "/admin/admins",
+          matchPrefix: "/admin/admins",
+          icon: <ShieldIcon />,
+        },
+        {
+          label: "設定",
+          href: "/admin/settings",
+          matchPrefix: "/admin/settings",
+          icon: <SettingsIcon />,
+        },
+      ],
     },
   ];
 
@@ -144,37 +181,63 @@ export function AdminSideNav({
       </div>
 
       {/* メニュー */}
-      <div className="flex-1 py-3 px-2">
-        {items.map((item) => {
-          const active = isActive(item);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-2.5 px-3 py-[9px] rounded-md text-[13px] font-medium mb-0.5 transition-colors ${
-                active
-                  ? "bg-[#00897b]/20 text-white font-bold"
-                  : "text-zinc-300 hover:bg-white/5 hover:text-white"
-              }`}
-            >
-              <span className="w-[18px] h-[18px] flex-shrink-0">
-                {item.icon}
-              </span>
-              <span>{item.label}</span>
-              {item.badge !== undefined && item.badge > 0 && (
-                <span
-                  className={`ml-auto text-[10px] font-bold px-[7px] py-px rounded-full font-mono ${
-                    item.badgeTone === "danger"
-                      ? "bg-red-500 text-white"
-                      : "bg-zinc-600 text-zinc-100"
+      <div className="flex-1 py-3 px-2 overflow-y-auto">
+        {groups.map((group) => (
+          <div key={group.label} className="mb-1">
+            <div className="px-3 pt-3 pb-1.5 text-[10px] font-bold tracking-[0.14em] text-zinc-500">
+              {group.label}
+            </div>
+            {group.items.map((item) => {
+              // 準備中(本体未実装)は遷移させない。灰色＋「準備中」チップで存在だけ示す。
+              if (item.comingSoon) {
+                return (
+                  <div
+                    key={item.href}
+                    aria-disabled="true"
+                    title="準備中（近日公開）"
+                    className="flex items-center gap-2.5 px-3 py-[9px] rounded-md text-[13px] font-medium mb-0.5 text-zinc-500 cursor-default select-none"
+                  >
+                    <span className="w-[18px] h-[18px] flex-shrink-0">
+                      {item.icon}
+                    </span>
+                    <span>{item.label}</span>
+                    <span className="ml-auto text-[9px] font-bold px-[6px] py-px rounded border border-zinc-600 text-zinc-400">
+                      準備中
+                    </span>
+                  </div>
+                );
+              }
+              const active = isActive(item);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-2.5 px-3 py-[9px] rounded-md text-[13px] font-medium mb-0.5 transition-colors ${
+                    active
+                      ? "bg-[#00897b]/20 text-white font-bold"
+                      : "text-zinc-300 hover:bg-white/5 hover:text-white"
                   }`}
                 >
-                  {item.badge}
-                </span>
-              )}
-            </Link>
-          );
-        })}
+                  <span className="w-[18px] h-[18px] flex-shrink-0">
+                    {item.icon}
+                  </span>
+                  <span>{item.label}</span>
+                  {item.badge !== undefined && item.badge > 0 && (
+                    <span
+                      className={`ml-auto text-[10px] font-bold px-[7px] py-px rounded-full font-mono ${
+                        item.badgeTone === "danger"
+                          ? "bg-red-500 text-white"
+                          : "bg-zinc-600 text-zinc-100"
+                      }`}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </div>
 
       {/* フッター (管理者) */}
@@ -238,6 +301,16 @@ function ChatIcon() {
   return (
     <svg {...iconProps}>
       <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+    </svg>
+  );
+}
+
+function PenIcon() {
+  // デイリー添削 = 日々の手書き添削のイメージ (ペン)
+  return (
+    <svg {...iconProps}>
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z" />
     </svg>
   );
 }

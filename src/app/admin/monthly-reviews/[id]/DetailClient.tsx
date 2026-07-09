@@ -25,6 +25,8 @@ import { RecordingView } from "./RecordingView";
 export type DetailMode = "normal" | "recording_ready" | "recording" | "preview";
 
 export type DetailViewData = {
+  /** 受講生ハブへの統一リンク用 (管S2/R18) */
+  userId: string;
   audit: {
     id: string;
     items: MonthlyAuditItems;

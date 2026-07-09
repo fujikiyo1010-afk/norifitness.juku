@@ -492,6 +492,13 @@ export default async function AdminUserHubPage({
                 >
                   マッチング検索から新規配布 →
                 </Link>
+                {/* 管E11: マッチングを介さず、ゼロから手作りで配布する直接入口 */}
+                <Link
+                  href={`/admin/users/${userId}/menu/new?from_scratch=1`}
+                  className="inline-block rounded-[4px] border border-zinc-300 bg-white px-4 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+                >
+                  ゼロから新規配布（テンプレなし）→
+                </Link>
               </div>
             </>
           ) : isCarteReady ? (
@@ -499,12 +506,21 @@ export default async function AdminUserHubPage({
               <p className="text-sm text-zinc-700 mb-3">
                 まだメニューが配布されていません。
               </p>
-              <Link
-                href={`/admin/users/${userId}/match`}
-                className="inline-block rounded-[4px] bg-[#00897b] px-4 py-2 text-xs font-bold text-white hover:bg-[#00695c]"
-              >
-                マッチング検索 → 配布 →
-              </Link>
+              <div className="flex flex-wrap gap-2">
+                <Link
+                  href={`/admin/users/${userId}/match`}
+                  className="inline-block rounded-[4px] bg-[#00897b] px-4 py-2 text-xs font-bold text-white hover:bg-[#00695c]"
+                >
+                  マッチング検索 → 配布 →
+                </Link>
+                {/* 管E11: ゼロから手作りで配布する直接入口 */}
+                <Link
+                  href={`/admin/users/${userId}/menu/new?from_scratch=1`}
+                  className="inline-block rounded-[4px] border border-zinc-300 bg-white px-4 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+                >
+                  ゼロから新規配布（テンプレなし）→
+                </Link>
+              </div>
             </>
           ) : (
             <p className="text-sm text-amber-800">

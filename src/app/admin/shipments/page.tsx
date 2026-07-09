@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { markAsShipped, undoShipped } from "@/lib/admin/shipment-actions";
@@ -238,7 +239,16 @@ function ShipmentRowComponent({ row }: { row: ShipmentRow }) {
           >
             {userName.charAt(0)}
           </div>
-          <span className="text-sm font-bold text-zinc-900">{userName}</span>
+          <div className="min-w-0">
+            <span className="block text-sm font-bold text-zinc-900">{userName}</span>
+            {/* 管E12: 発送前に本人情報・住所を確かめたい → 受講生ハブへ */}
+            <Link
+              href={`/admin/users/${row.user_id}`}
+              className="text-[11px] font-bold text-[#00897b] hover:underline"
+            >
+              詳細 → ハブ
+            </Link>
+          </div>
         </div>
       </td>
 
