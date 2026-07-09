@@ -10,6 +10,7 @@ import { getMyGoalSheetStatus } from "@/lib/member/goal-sheet-status";
 import { getMyMonthlyAuditHomeStatus } from "@/lib/member/monthly-audit-status";
 import { getMyBodyCard, type BodyCard } from "@/lib/member/body-card";
 import { getMyUnreadCount } from "@/lib/chat/queries";
+import { getMyBoardItems, type BoardItem } from "@/lib/member/board";
 
 export const dynamic = "force-dynamic";
 
@@ -92,6 +93,7 @@ export default async function Home() {
     bodyCard,
     admin,
     chatUnread,
+    boardItems,
   ] = await Promise.all([
     getMyAlerts(),
     getMyHomeStats(),
@@ -101,6 +103,7 @@ export default async function Home() {
     getMyBodyCard(),
     getAdminInfo(),
     getMyUnreadCount(),
+    getMyBoardItems(2),
   ]);
 
   const displayName = stats?.displayName ?? "受講生";
@@ -162,6 +165,13 @@ export default async function Home() {
           <NoticeBanner key={alert.key} alert={alert} />
         ))}
       </div>
+
+      {/* 掲示板「のりfitnessから」(P2b-1) */}
+      {boardItems.length > 0 && (
+        <div className="px-4 pt-3.5">
+          <BoardSection items={boardItems} />
+        </div>
+      )}
 
       {/* 続きから学ぶ CTA */}
       <div className="px-4 pt-3.5">
@@ -502,6 +512,76 @@ function ScaleIcon() {
       <path d="M12 3a9 9 0 0 1 9 9H3a9 9 0 0 1 9-9Z" />
       <path d="M12 12 15 8" />
     </svg>
+  );
+}
+
+// =====================================================================
+// 掲示板「のりfitnessから」(P2b-1)
+// =====================================================================
+
+function BoardSection({ items }: { items: BoardItem[] }) {
+  return (
+    <div className="rounded-[14px] border border-[#e7dcc9] bg-[#fffdf8] px-4 py-3.5">
+      <div className="mb-2 flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#4a875b] text-[11px] font-bold text-white">
+            の
+          </span>
+          <span className="text-[13px] font-bold text-[#2b2620]">
+            のりfitnessから
+          </span>
+        </div>
+        <Link
+          href="/notices"
+          className="text-[11px] font-bold text-[#4a875b] hover:underline"
+        >
+          すべて見る →
+        </Link>
+      </div>
+      <ul className="divide-y divide-[#efe6d4]">
+        {items.map((it) => (
+          <li key={it.key} className="py-2 first:pt-0 last:pb-0">
+            <BoardRow item={it} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function BoardRow({ item }: { item: BoardItem }) {
+  const inner = (
+    <div className="flex items-start gap-2">
+      <span className="mt-1 w-8 flex-shrink-0 font-mono text-[10px] text-[#a59b8c]">
+        {item.dateLabel}
+      </span>
+      <div className="min-w-0 flex-1">
+        {item.kind === "announcement" ? (
+          <div className="flex items-center gap-1.5">
+            <span className="flex-shrink-0 rounded bg-[#fbf2dd] px-1.5 py-px text-[9px] font-bold text-[#a5631f]">
+              お知らせ
+            </span>
+            <span className="truncate text-[12.5px] font-bold text-[#2b2620]">
+              {item.title}
+            </span>
+          </div>
+        ) : (
+          <div className="line-clamp-2 text-[12.5px] leading-relaxed text-[#2b2620]">
+            {item.body}
+          </div>
+        )}
+      </div>
+      {item.href ? (
+        <span className="mt-0.5 flex-shrink-0 text-[#a59b8c]">›</span>
+      ) : null}
+    </div>
+  );
+  return item.href ? (
+    <Link href={item.href} className="block hover:opacity-90">
+      {inner}
+    </Link>
+  ) : (
+    inner
   );
 }
 
