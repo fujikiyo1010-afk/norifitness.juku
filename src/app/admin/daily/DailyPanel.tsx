@@ -1,0 +1,630 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import type { DailyDetail } from "@/lib/admin/daily";
+import {
+  sendDailyFeedback,
+  skipDailyFeedback,
+} from "@/lib/daily-feedbacks/actions";
+
+/**
+ * デイリー添削 パネル（P2a v1）。モックM2準拠。
+ * 実データ: 今のからだ / 今日の学習 / 計画・カルテ / 学び / これまでの言葉 / 目標シート / 日次FB。
+ * プレースホルダ: 今日のトレ(P5) / 今日の食事(P4) / 生活(P6)。
+ */
+
+const TEAL = "#00897b";
+const TEAL_DARK = "#00695c";
+
+function fmtNum(n: number | null | undefined, d = 1): string {
+  return n == null ? "—" : n.toFixed(d);
+}
+function mdLabel(iso: string | null): string {
+  if (!iso) return "—";
+  return `${Number(iso.slice(5, 7))}/${Number(iso.slice(8, 10))}`;
+}
+
+type Tab = "today" | "plan" | "learn" | "words";
+
+export function DailyPanel({
+  detail,
+  date,
+  remaining,
+  nextUserId,
+}: {
+  detail: DailyDetail;
+  date: string;
+  remaining: number;
+  nextUserId: string | null;
+}) {
+  const [tab, setTab] = useState<Tab>("today");
+
+  return (
+    <div className="flex-1 min-w-0 flex flex-col">
+      <div className="flex-1 min-w-0 px-6 py-5 pb-4">
+        <PanelHead detail={detail} />
+        <FourCards detail={detail} />
+
+        {/* タブ */}
+        <div className="flex items-center border-b-2 border-[#e8ebe9] mb-4">
+          <div className="flex gap-0.5 flex-1">
+            {(
+              [
+                { key: "today", label: "今日" },
+                { key: "plan", label: "計画・カルテ" },
+                { key: "learn", label: "学び" },
+                { key: "words", label: "これまでの言葉" },
+              ] as const
+            ).map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                onClick={() => setTab(t.key)}
+                className={`relative text-[12.5px] font-bold px-4 py-2.5 -mb-0.5 border-b-2 transition-colors ${
+                  tab === t.key
+                    ? "text-[#00695c] border-[#00897b]"
+                    : "text-zinc-500 border-transparent hover:text-zinc-800"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {tab === "today" && <TodayTab detail={detail} />}
+        {tab === "plan" && <PlanTab detail={detail} />}
+        {tab === "learn" && <LearnTab detail={detail} />}
+        {tab === "words" && <WordsTab detail={detail} />}
+      </div>
+
+      <FbBar
+        detail={detail}
+        date={date}
+        remaining={remaining}
+        nextUserId={nextUserId}
+      />
+    </div>
+  );
+}
+
+// =====================================================================
+// ヘッダ
+// =====================================================================
+
+function PanelHead({ detail }: { detail: DailyDetail }) {
+  const { body, goal } = detail;
+  const joined = detail.joinedAt ? mdLabel(detail.joinedAt) : "—";
+  return (
+    <div className="bg-white border border-[#e8ebe9] rounded-xl px-[18px] py-3.5 mb-3">
+      <div className="flex items-center gap-3">
+        <div
+          className="w-[42px] h-[42px] rounded-full text-white flex items-center justify-center font-bold text-[15px] flex-shrink-0"
+          style={{ background: TEAL }}
+        >
+          {detail.initial}
+        </div>
+        <div className="min-w-0">
+          <div className="text-base font-bold text-zinc-900">{detail.name}</div>
+          <div className="text-[10.5px] text-zinc-500 mt-px">
+            入会 {joined}
+            {body.targetWeightKg != null && (
+              <>
+                {" ・ "}目標 {fmtNum(body.targetWeightKg)}kg
+                {body.weightKg != null && (
+                  <>
+                    （今 {fmtNum(body.weightKg)}kg
+                    {body.remainingKg != null && ` ・ あと${fmtNum(body.remainingKg)}kg`}）
+                  </>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+        <div className="ml-auto flex gap-1.5 items-center">
+          <Link
+            href={`/admin/users/${detail.userId}`}
+            className="text-[11px] font-semibold text-[#00695c] border border-[#e8ebe9] rounded-md px-2.5 py-1 bg-white hover:bg-zinc-50"
+          >
+            受講生ハブ
+          </Link>
+          <Link
+            href={`/admin/messages`}
+            className="text-[11px] font-semibold text-[#00695c] border border-[#e8ebe9] rounded-md px-2.5 py-1 bg-white hover:bg-zinc-50"
+          >
+            チャット
+          </Link>
+        </div>
+      </div>
+
+      {(goal.shortTerm || goal.longTerm) && (
+        <div className="flex items-center gap-2 mt-2.5 px-3 py-2 bg-[#f7faf9] border border-[#e3edea] rounded-[9px] text-[12px] text-[#2d4a45]">
+          <span className="text-[9.5px] font-bold text-[#00695c] flex-shrink-0 tracking-wide">
+            この人の目標
+          </span>
+          <span className="min-w-0">
+            「{goal.longTerm || goal.shortTerm}」
+            {goal.targetWeightKg != null && (
+              <span className="text-zinc-500">（目標シートより）</span>
+            )}
+          </span>
+        </div>
+      )}
+
+      {detail.tags.length > 0 && (
+        <div className="flex gap-1.5 mt-2.5 flex-wrap">
+          {detail.tags.map((t, i) => (
+            <span
+              key={i}
+              className={`text-[10.5px] font-bold rounded-full px-2.5 py-[3px] border ${
+                t.severity === "urgent"
+                  ? "bg-[#fef2f2] text-[#b91c1c] border-[#fecaca]"
+                  : "bg-[#fff4e6] text-[#c2600f] border-[#fcd9ad]"
+              }`}
+            >
+              {t.label}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// =====================================================================
+// 4カード
+// =====================================================================
+
+function FourCards({ detail }: { detail: DailyDetail }) {
+  const { body, learning } = detail;
+  return (
+    <div className="grid grid-cols-4 gap-2.5 mb-3">
+      {/* 今のからだ（実データ） */}
+      <Card>
+        <CardHead icon="⚖" title="今のからだ" />
+        <div className="text-[20px] font-bold leading-none font-mono">
+          {fmtNum(body.weightKg)}
+          <small className="text-[10.5px] text-zinc-500 font-sans font-medium"> kg</small>
+        </div>
+        <div className="text-[10.5px] text-zinc-700 mt-1.5 leading-snug">
+          {body.remainingKg != null ? (
+            <>
+              あと <b>{fmtNum(body.remainingKg)}kg</b>
+            </>
+          ) : (
+            "目標未設定"
+          )}
+          {body.waistCm != null && ` ・ ウエスト ${fmtNum(body.waistCm)}cm`}
+        </div>
+        <div className="text-[10px] text-zinc-400 mt-0.5">
+          {body.recordedAt
+            ? `記録 ${mdLabel(body.recordedAt)}`
+            : "記録なし"}
+          {body.weightDelta7d != null &&
+            ` ・ 7日 ${body.weightDelta7d > 0 ? "+" : ""}${fmtNum(body.weightDelta7d)}kg`}
+        </div>
+      </Card>
+
+      {/* 今日のトレ（P5 プレースホルダ） */}
+      <PlaceholderCard icon="💪" title="今日のトレ" phase="P5で実装" />
+
+      {/* 今日の食事（P4 プレースホルダ） */}
+      <PlaceholderCard icon="🍚" title="今日の食事" phase="P4で実装" />
+
+      {/* 今日の学習（実データ） */}
+      <Card dim={!learning.latestTitle}>
+        <CardHead icon="📖" title="今日の学習" />
+        <div className="text-[14px] font-bold pt-0.5 leading-tight">
+          {learning.percent != null ? `全体 ${learning.percent}%` : "—"}
+          <span className="text-[10.5px] text-zinc-500 font-medium">
+            {" "}
+            （{learning.completedCount}/{learning.totalCount}）
+          </span>
+        </div>
+        <div className="text-[10.5px] text-zinc-700 mt-1.5 leading-snug">
+          {learning.latestTitle
+            ? `直近: ${learning.latestTitle}`
+            : "まだ学習記録がありません"}
+        </div>
+        <div className="text-[10px] text-zinc-400 mt-0.5">
+          {learning.latestAt ? `${mdLabel(learning.latestAt)} 完了` : ""}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function Card({
+  children,
+  dim,
+}: {
+  children: React.ReactNode;
+  dim?: boolean;
+}) {
+  return (
+    <div
+      className={`border border-[#e8ebe9] rounded-xl px-3 py-3 ${dim ? "bg-[#fbfcfb]" : "bg-white"}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+function CardHead({ icon, title }: { icon: string; title: string }) {
+  return (
+    <div className="flex items-center gap-1.5 mb-2">
+      <span className="text-[13px]">{icon}</span>
+      <span className="text-[10.5px] font-bold text-zinc-500 tracking-wide">
+        {title}
+      </span>
+    </div>
+  );
+}
+
+function PlaceholderCard({
+  icon,
+  title,
+  phase,
+}: {
+  icon: string;
+  title: string;
+  phase: string;
+}) {
+  return (
+    <div className="border border-dashed border-[#e0e4e2] rounded-xl px-3 py-3 bg-[#fbfcfb]">
+      <CardHead icon={icon} title={title} />
+      <div className="text-[12px] font-bold text-zinc-400 pt-1">準備中</div>
+      <div className="text-[10px] text-zinc-400 mt-1">{phase}</div>
+    </div>
+  );
+}
+
+// =====================================================================
+// タブ0: 今日（食事/トレ/生活はプレースホルダ）
+// =====================================================================
+
+function TodayTab({ detail }: { detail: DailyDetail }) {
+  void detail;
+  return (
+    <div className="space-y-3">
+      <SectionCard title="🍚 今日の食事" srcLabel="meal_logs（P4）" srcNew>
+        <PlaceholderBody text="食事投稿・PFC集計はP4で実装します。ここに今日の食事カードと合計ゲージ（目標PFC比）が入ります。" />
+      </SectionCard>
+      <SectionCard title="💪 今日のトレーニング" srcLabel="user_workout_logs（P5）" srcNew>
+        <PlaceholderBody text="実施記録はP5で実装します。ここに原本×実績の突合と「原本以外にやったこと」が入ります。" />
+      </SectionCard>
+      <SectionCard title="🌙 今日の生活" srcLabel="daily_conditions（P6）" srcNew>
+        <PlaceholderBody text="睡眠・体調・お通じ・飲酒はP6で実装します。ここに1行の生活帯が入ります。" />
+      </SectionCard>
+    </div>
+  );
+}
+
+function PlaceholderBody({ text }: { text: string }) {
+  return (
+    <div className="text-[11.5px] text-zinc-400 leading-relaxed">{text}</div>
+  );
+}
+
+// =====================================================================
+// タブ1: 計画・カルテ（実データ）
+// =====================================================================
+
+function PlanTab({ detail }: { detail: DailyDetail }) {
+  const c = detail.carte;
+  return (
+    <div className="space-y-3">
+      <SectionCard
+        title="📇 カルテ"
+        srcLabel="user_workout_carte（既存）"
+      >
+        {c ? (
+          <div className="grid grid-cols-2 gap-x-[18px] gap-y-2">
+            <CarteRow label="環境" value={c.environments} />
+            <CarteRow label="重点部位" value={c.focusBodyParts} />
+            <CarteRow label="頻度希望" value={c.frequencyWish} />
+            <CarteRow label="目的" value={c.purposes} />
+            <CarteRow label="経験" value={c.experience} />
+            <CarteRow label="なりたい体" value={c.idealBody} />
+            <CarteRow label="気をつける点" value={c.medicalLimits} attn />
+          </div>
+        ) : (
+          <PlaceholderBody text="カルテ未提出です。" />
+        )}
+      </SectionCard>
+      <SectionCard title="💪 筋トレ原本 / 1週間メニュー" srcLabel="P5で本体表示">
+        <div className="text-[11.5px] text-zinc-500 leading-relaxed">
+          原本メニュー・1週間メニューの詳細表示はP5で統合します。今は
+          <Link
+            href={`/admin/users/${detail.userId}/menu/new?from_current=1`}
+            className="font-bold text-[#00695c] underline mx-1"
+          >
+            配布画面
+          </Link>
+          から確認・変更できます。
+        </div>
+      </SectionCard>
+    </div>
+  );
+}
+
+function CarteRow({
+  label,
+  value,
+  attn,
+}: {
+  label: string;
+  value: string | null;
+  attn?: boolean;
+}) {
+  return (
+    <div className="flex gap-2 text-[11.5px] py-1 border-b border-dashed border-[#f4f6f5]">
+      <span className="w-[86px] flex-shrink-0 text-[10px] text-zinc-500 font-bold pt-0.5">
+        {label}
+      </span>
+      <span
+        className={`leading-snug ${attn ? "text-[#b45309] font-semibold" : "text-zinc-700"}`}
+      >
+        {value ?? "—"}
+      </span>
+    </div>
+  );
+}
+
+// =====================================================================
+// タブ2: 学び（実データ）
+// =====================================================================
+
+function LearnTab({ detail }: { detail: DailyDetail }) {
+  const l = detail.learning;
+  return (
+    <div className="space-y-3">
+      <SectionCard title="📖 直近の学習" srcLabel="lesson_progress（既存）">
+        {l.latestTitle ? (
+          <>
+            <div className="text-[12px] font-bold">
+              直近完了: {l.latestTitle}
+              {l.latestAt && (
+                <span className="text-zinc-400 font-normal">
+                  {" "}
+                  （{mdLabel(l.latestAt)}）
+                </span>
+              )}
+            </div>
+            <div className="text-[10.5px] text-zinc-500 mt-2">
+              全体進捗 {l.percent}%（{l.completedCount}/{l.totalCount}）
+            </div>
+          </>
+        ) : (
+          <PlaceholderBody text="まだ学習記録がありません。" />
+        )}
+      </SectionCard>
+      <SectionCard title="🚀 実践宣言と行動のつながり" srcLabel="P4で本体">
+        <PlaceholderBody text="実践宣言 × 食事/トレの突合はP4以降で活性化します。" />
+      </SectionCard>
+    </div>
+  );
+}
+
+// =====================================================================
+// タブ3: これまでの言葉（実データ）
+// =====================================================================
+
+function WordsTab({ detail }: { detail: DailyDetail }) {
+  const { recentWords, goal } = detail;
+  return (
+    <div className="space-y-3">
+      <SectionCard
+        title="💬 のりが伝えてきたこと（直近）"
+        srcLabel="daily_feedbacks（新設）"
+        srcNew
+      >
+        {recentWords.length > 0 ? (
+          <div>
+            {recentWords.map((w, i) => (
+              <div
+                key={i}
+                className="flex gap-2.5 py-2.5 border-b border-dashed border-[#f1f3f2] last:border-none"
+              >
+                <span className="w-16 flex-shrink-0 text-[10px] text-zinc-500 font-mono pt-0.5">
+                  {mdLabel(w.date)}
+                </span>
+                <span className="text-[12px] text-zinc-700 leading-relaxed flex-1">
+                  <span
+                    className="text-[9px] font-bold rounded px-1.5 py-px mr-1.5"
+                    style={{ background: "#e0f2f1", color: TEAL_DARK }}
+                  >
+                    日次
+                  </span>
+                  {w.body}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <PlaceholderBody text="まだ日次フィードバックの履歴がありません。最初のFBを下のバーから送りましょう。" />
+        )}
+      </SectionCard>
+
+      <SectionCard title="🎯 目標シートの言葉" srcLabel="goal_sheets（既存）">
+        {goal.shortTerm || goal.longTerm || goal.selfImage || goal.adminNotes ? (
+          <div className="space-y-2.5">
+            {goal.longTerm && <WordLine tag="長期目標" text={goal.longTerm} />}
+            {goal.shortTerm && <WordLine tag="短期目標" text={goal.shortTerm} />}
+            {goal.process && <WordLine tag="プロセス" text={goal.process} />}
+            {goal.selfImage && (
+              <WordLine tag="なりたい姿" text={goal.selfImage} />
+            )}
+            {goal.adminNotes && (
+              <WordLine tag="のりメモ" text={goal.adminNotes} accent />
+            )}
+            <Link
+              href={`/admin/users/${detail.userId}/goal-sheet`}
+              className="inline-block text-[10px] font-bold text-[#00695c] underline mt-1"
+            >
+              目標シート原文を開く →
+            </Link>
+          </div>
+        ) : (
+          <PlaceholderBody text="目標シートはまだ作成されていません。" />
+        )}
+      </SectionCard>
+    </div>
+  );
+}
+
+function WordLine({
+  tag,
+  text,
+  accent,
+}: {
+  tag: string;
+  text: string;
+  accent?: boolean;
+}) {
+  return (
+    <div className="flex gap-2.5">
+      <span
+        className={`text-[9px] font-bold rounded px-1.5 py-px h-fit mt-0.5 flex-shrink-0 ${
+          accent
+            ? "bg-[#fffbeb] text-[#92700c] border border-[#f5e6a8]"
+            : "bg-[#eef2ff] text-[#4338ca]"
+        }`}
+      >
+        {tag}
+      </span>
+      <span className="text-[12px] text-zinc-700 leading-relaxed">{text}</span>
+    </div>
+  );
+}
+
+// =====================================================================
+// 共通: セクションカード
+// =====================================================================
+
+function SectionCard({
+  title,
+  srcLabel,
+  srcNew,
+  children,
+}: {
+  title: string;
+  srcLabel?: string;
+  srcNew?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="bg-white border border-[#e8ebe9] rounded-[11px] overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[#f1f3f2] text-[12.5px] font-bold bg-[#fafbfa]">
+        {title}
+        {srcLabel && (
+          <span
+            className={`ml-auto text-[9px] font-semibold rounded px-1.5 py-px ${
+              srcNew
+                ? "text-[#9a3412] bg-[#ffedd5]"
+                : "text-[#00695c] bg-[#e0f2f1]"
+            }`}
+          >
+            {srcLabel}
+          </span>
+        )}
+      </div>
+      <div className="px-4 py-3.5">{children}</div>
+    </div>
+  );
+}
+
+// =====================================================================
+// FBバー（下部固定・sticky）
+// =====================================================================
+
+function FbBar({
+  detail,
+  date,
+  remaining,
+  nextUserId,
+}: {
+  detail: DailyDetail;
+  date: string;
+  remaining: number;
+  nextUserId: string | null;
+}) {
+  const router = useRouter();
+  const [body, setBody] = useState(detail.todayFeedback?.body ?? "");
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const alreadySent = detail.todayFeedback?.status === "sent";
+
+  const advance = () => {
+    if (nextUserId) {
+      router.push(`/admin/daily?user=${nextUserId}&date=${date}`);
+    } else {
+      router.refresh();
+    }
+  };
+
+  const send = () =>
+    startTransition(async () => {
+      setError(null);
+      const r = await sendDailyFeedback({ userId: detail.userId, date, body });
+      if (!r.ok) return setError(r.message);
+      advance();
+    });
+
+  const skip = () =>
+    startTransition(async () => {
+      setError(null);
+      const r = await skipDailyFeedback({ userId: detail.userId, date });
+      if (!r.ok) return setError(r.message);
+      advance();
+    });
+
+  return (
+    <div className="sticky bottom-0 bg-white border-t border-[#e8ebe9] shadow-[0_-8px_24px_rgba(0,0,0,0.06)] px-6 py-3 flex gap-3.5 items-stretch z-40">
+      <div className="w-[240px] flex-shrink-0 bg-[#f8faf9] border border-[#e8ebe9] rounded-[9px] px-3 py-2 text-[11px] text-zinc-600 leading-relaxed overflow-y-auto max-h-[92px]">
+        <b className="text-[9.5px] text-zinc-500 block mb-0.5">
+          前回のフィードバック
+          {detail.prevFeedback && `（${mdLabel(detail.prevFeedback.date)}）`}
+        </b>
+        {detail.prevFeedback ? detail.prevFeedback.body : "まだありません"}
+      </div>
+
+      <div className="flex-1 flex flex-col gap-1">
+        <textarea
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          placeholder="今日のフィードバック…"
+          className="w-full min-h-[56px] max-h-[92px] border border-[#e8ebe9] rounded-[9px] px-3 py-2 text-[12.5px] leading-relaxed resize-none focus:outline focus:outline-2 focus:outline-[#00897b]/35 focus:border-[#00897b]"
+        />
+        {error && <div className="text-[11px] text-red-600">⚠ {error}</div>}
+      </div>
+
+      <div className="flex flex-col justify-between items-end gap-2 flex-shrink-0">
+        <span className="text-[10.5px] text-zinc-500 font-semibold whitespace-nowrap">
+          {alreadySent ? "送信済み（上書き可）" : `残り ${remaining} 人`}
+        </span>
+        <div className="flex gap-1.5">
+          <button
+            type="button"
+            onClick={skip}
+            disabled={pending}
+            className="text-[12px] font-semibold text-zinc-500 bg-white border border-[#e8ebe9] rounded-lg px-3.5 py-2 disabled:opacity-50"
+          >
+            スキップ
+          </button>
+          <button
+            type="button"
+            onClick={send}
+            disabled={pending || !body.trim()}
+            className="text-[12px] font-bold text-white rounded-lg px-3.5 py-2 disabled:opacity-50"
+            style={{ background: TEAL }}
+          >
+            {pending ? "送信中…" : "➤ 送信して次へ"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

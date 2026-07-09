@@ -54,12 +54,10 @@ export function AdminSideNav({
           icon: <HomeIcon />,
         },
         {
-          // 本体はP2で実装。ここでは器としてナビにだけ置く(クリック不可・準備中)。
           label: "デイリー添削",
           href: "/admin/daily",
           matchPrefix: "/admin/daily",
           icon: <PenIcon />,
-          comingSoon: true,
         },
         {
           label: "月次添削",
