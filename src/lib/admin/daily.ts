@@ -233,7 +233,7 @@ export async function getDailyDetail(
         focusBodyParts: fmtField(c.focus_body_parts),
         purposes: fmtField(c.purposes),
         experience: (c.experience as string | null) ?? null,
-        medicalLimits: (c.medical_limits as string | null) ?? null,
+        medicalLimits: fmtField(c.medical_limits),
         idealBody: (c.ideal_body as string | null) ?? null,
         updatedAt: (c.updated_at as string | null) ?? null,
       }

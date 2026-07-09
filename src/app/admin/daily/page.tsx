@@ -60,6 +60,24 @@ export default async function AdminDailyPage({
 
   const remaining = workList.length;
 
+  // 進捗リング（案3）: 弧=完了/全体。サブ行は残数連動。
+  const doneCount = queue.doneCount;
+  const totalCount = queue.total;
+  const RING_C = 132; // 2πr (r=21)
+  const ringOffset = totalCount > 0 ? RING_C * (1 - doneCount / totalCount) : RING_C;
+  const remainCount = totalCount - doneCount;
+  const allDone = totalCount > 0 && remainCount === 0;
+  const progressSub =
+    totalCount === 0
+      ? "対象なし"
+      : remainCount === 0
+        ? "✓ 全員完了"
+        : remainCount === 1
+          ? "ラスト1人"
+          : doneCount * 2 > totalCount
+            ? `あと${remainCount}人・順調です`
+            : `あと${remainCount}人`;
+
   return (
     <div className="flex min-h-screen">
       {/* キュー */}
@@ -85,21 +103,68 @@ export default async function AdminDailyPage({
           </div>
         </div>
 
-        {/* 進捗バー */}
-        <div className="px-3.5 py-2.5 border-b border-[#e8ebe9]">
-          <div className="flex justify-between text-[11px] font-bold mb-1.5">
-            <span>進捗</span>
-            <span className="font-mono">
-              {queue.doneCount} / {queue.total}
-            </span>
-          </div>
-          <div className="h-[5px] bg-[#eef1f0] rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-[#00897b] to-[#00695c]"
-              style={{
-                width: `${queue.total ? (queue.doneCount / queue.total) * 100 : 0}%`,
-              }}
-            />
+        {/* 進捗リング（案3・受講生ホームの達成リングと同族） */}
+        <div className="px-3.5 py-3 border-b border-[#e8ebe9]">
+          <div className="flex items-center gap-3">
+            <div className="relative w-[52px] h-[52px] flex-shrink-0">
+              <svg
+                width="52"
+                height="52"
+                viewBox="0 0 52 52"
+                className="-rotate-90"
+              >
+                <circle
+                  cx="26"
+                  cy="26"
+                  r="21"
+                  fill="none"
+                  stroke="#eef1f0"
+                  strokeWidth="6"
+                />
+                <circle
+                  cx="26"
+                  cy="26"
+                  r="21"
+                  fill="none"
+                  stroke="#00897b"
+                  strokeWidth="6"
+                  strokeLinecap="round"
+                  strokeDasharray={RING_C}
+                  strokeDashoffset={ringOffset}
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                {allDone ? (
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#00897b"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                ) : (
+                  <>
+                    <b className="font-mono text-[13px] leading-none">
+                      {doneCount}/{totalCount}
+                    </b>
+                    <small className="text-[8px] text-zinc-500 leading-none mt-0.5">
+                      人
+                    </small>
+                  </>
+                )}
+              </div>
+            </div>
+            <div>
+              <div className="text-[12px] font-extrabold">今日の添削</div>
+              <div className="text-[10px] text-zinc-500 mt-0.5">
+                {progressSub}
+              </div>
+            </div>
           </div>
         </div>
 
