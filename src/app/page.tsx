@@ -564,38 +564,35 @@ function BoardSection({
 }
 
 function BoardRow({ item }: { item: BoardItem }) {
-  const inner = (
-    <div className="flex items-start gap-2">
-      <span className="mt-1 w-8 flex-shrink-0 font-mono text-[10px] text-[#a59b8c]">
-        {item.dateLabel}
-      </span>
-      <div className="min-w-0 flex-1">
-        {item.kind === "announcement" ? (
-          <div className="flex items-center gap-1.5">
-            <span className="flex-shrink-0 rounded bg-[#fbf2dd] px-1.5 py-px text-[9px] font-bold text-[#a5631f]">
-              お知らせ
+  // 案A: ホームは「短い合図」だけ。日次FBの全文はお知らせ一覧(/notices)で読む。
+  //   日次FB   → 「のりから返信が届きました」＋/notices へ
+  //   お知らせ → 件名＋詳細(/notices/[id]) へ
+  const href = item.kind === "announcement" ? item.href ?? "/notices" : "/notices";
+  return (
+    <Link href={href} className="block hover:opacity-90">
+      <div className="flex items-center gap-2">
+        <span className="w-8 flex-shrink-0 font-mono text-[10px] text-[#a59b8c]">
+          {item.dateLabel}
+        </span>
+        <div className="flex min-w-0 flex-1 items-center gap-1.5">
+          {item.kind === "announcement" ? (
+            <>
+              <span className="flex-shrink-0 rounded bg-[#fbf2dd] px-1.5 py-px text-[9px] font-bold text-[#a5631f]">
+                お知らせ
+              </span>
+              <span className="truncate text-[12.5px] font-bold text-[#2b2620]">
+                {item.title}
+              </span>
+            </>
+          ) : (
+            <span className="truncate text-[12.5px] text-[#2b2620]">
+              のりから返信が届きました
             </span>
-            <span className="truncate text-[12.5px] font-bold text-[#2b2620]">
-              {item.title}
-            </span>
-          </div>
-        ) : (
-          <div className="line-clamp-2 text-[12.5px] leading-relaxed text-[#2b2620]">
-            {item.body}
-          </div>
-        )}
+          )}
+        </div>
+        <span className="flex-shrink-0 text-[#a59b8c]">›</span>
       </div>
-      {item.href ? (
-        <span className="mt-0.5 flex-shrink-0 text-[#a59b8c]">›</span>
-      ) : null}
-    </div>
-  );
-  return item.href ? (
-    <Link href={item.href} className="block hover:opacity-90">
-      {inner}
     </Link>
-  ) : (
-    inner
   );
 }
 
