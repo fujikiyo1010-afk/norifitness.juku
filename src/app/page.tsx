@@ -11,6 +11,7 @@ import { getMyMonthlyAuditHomeStatus } from "@/lib/member/monthly-audit-status";
 import { getMyBodyCard, type BodyCard } from "@/lib/member/body-card";
 import { getMyUnreadCount } from "@/lib/chat/queries";
 import { getMyBoardItems, type BoardItem } from "@/lib/member/board";
+import { hasUnreadReply } from "@/lib/member/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -94,6 +95,7 @@ export default async function Home() {
     admin,
     chatUnread,
     boardItems,
+    unreadReply,
   ] = await Promise.all([
     getMyAlerts(),
     getMyHomeStats(),
@@ -104,6 +106,7 @@ export default async function Home() {
     getAdminInfo(),
     getMyUnreadCount(),
     getMyBoardItems(2),
+    hasUnreadReply(),
   ]);
 
   const displayName = stats?.displayName ?? "受講生";
@@ -166,10 +169,10 @@ export default async function Home() {
         ))}
       </div>
 
-      {/* 掲示板「のりfitnessから」(P2b-1) */}
+      {/* 掲示板「のりfitnessから」(P2b-1) ＋ 返信あり緑バッジ(P2b-2) */}
       {boardItems.length > 0 && (
         <div className="px-4 pt-3.5">
-          <BoardSection items={boardItems} />
+          <BoardSection items={boardItems} hasUnreadReply={unreadReply} />
         </div>
       )}
 
@@ -519,7 +522,13 @@ function ScaleIcon() {
 // 掲示板「のりfitnessから」(P2b-1)
 // =====================================================================
 
-function BoardSection({ items }: { items: BoardItem[] }) {
+function BoardSection({
+  items,
+  hasUnreadReply,
+}: {
+  items: BoardItem[];
+  hasUnreadReply: boolean;
+}) {
   return (
     <div className="rounded-[14px] border border-[#e7dcc9] bg-[#fffdf8] px-4 py-3.5">
       <div className="mb-2 flex items-center justify-between">
@@ -530,6 +539,11 @@ function BoardSection({ items }: { items: BoardItem[] }) {
           <span className="text-[13px] font-bold text-[#2b2620]">
             のりfitnessから
           </span>
+          {hasUnreadReply && (
+            <span className="rounded-full bg-[#4a875b] px-2 py-0.5 text-[10px] font-bold text-white">
+              返信あり
+            </span>
+          )}
         </div>
         <Link
           href="/notices"
