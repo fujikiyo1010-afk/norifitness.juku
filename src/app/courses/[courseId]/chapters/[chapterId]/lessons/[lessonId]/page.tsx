@@ -19,6 +19,7 @@ import { ReviewAccordion } from "./ReviewAccordion";
 import { PracticeInput } from "./PracticeInput";
 import { listMyActionsForLesson } from "@/lib/practice/queries";
 import { isBetaUser } from "@/lib/auth/beta";
+import { getTodayActivity } from "@/lib/member/today-activity";
 
 export const dynamic = "force-dynamic";
 
@@ -45,13 +46,14 @@ export default async function StudentLessonPage({
     notFound();
   }
 
-  const [progressMap, review, adjacent, practiceActions, isBeta] =
+  const [progressMap, review, adjacent, practiceActions, isBeta, todayActivity] =
     await Promise.all([
       getMyLessonProgress([lesson.id]),
       getMyLessonReview(lesson.id),
       getAdjacentLessons(courseId, lesson.id),
       listMyActionsForLesson(lesson.id),
       isBetaUser(),
+      getTodayActivity(),
     ]);
 
   // B10: 動画未設定・試験準備中でも受講生を止めない(ベータ限定)。次レッスンへの逃げ道URL。
@@ -181,6 +183,8 @@ export default async function StudentLessonPage({
             <CompleteButton
               lessonId={lesson.id}
               initialCompleted={isCompleted}
+              isBeta={isBeta}
+              recordedBodyToday={todayActivity.recordedBody}
             />
           </section>
         )}
