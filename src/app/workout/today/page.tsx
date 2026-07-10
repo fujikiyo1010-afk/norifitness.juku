@@ -3,6 +3,7 @@ import Link from "next/link";
 import { isBetaUser } from "@/lib/auth/beta";
 import { MemberHeader } from "@/components/MemberHeader";
 import { getTodayWorkout } from "@/lib/workout/logs";
+import { getTodayActivity } from "@/lib/member/today-activity";
 import { resolveDayMenu } from "@/lib/workout/logs-types";
 import { cleanExerciseName } from "@/lib/workout/menu-display";
 import { WorkoutTodayClient } from "./WorkoutTodayClient";
@@ -24,6 +25,11 @@ export default async function WorkoutTodayPage({
 
   const sp = await searchParams;
   const w = await getTodayWorkout();
+  // 細16: 完了演出の「今日の達成 n/3」バー(トレ+食事+学び)
+  const act = sp.done === "1" ? await getTodayActivity() : null;
+  const doneCount = act
+    ? (act.learned ? 1 : 0) + (act.recordedMeal ? 1 : 0) + (act.recordedWorkout ? 1 : 0)
+    : 0;
 
   return (
     <>
@@ -35,7 +41,18 @@ export default async function WorkoutTodayPage({
               <div className="text-[30px] font-extrabold leading-none">✓</div>
               <div className="mt-1.5 text-[16px] font-bold">記録しました！</div>
               <div className="mt-0.5 text-[12px] opacity-90">
-                今日の達成に反映されます。おつかれさまでした。
+                おつかれさまでした。
+              </div>
+              {/* 細16: 今日の達成 n/3 バー */}
+              <div className="mx-auto mt-3 flex max-w-[280px] items-center gap-2">
+                <span className="font-mono text-[13px] font-extrabold">{doneCount}/3</span>
+                <div className="h-[7px] flex-1 overflow-hidden rounded-full bg-white/25">
+                  <div
+                    className="h-full rounded-full bg-white"
+                    style={{ width: `${(doneCount / 3) * 100}%` }}
+                  />
+                </div>
+                <span className="text-[10px] font-bold opacity-90">今日の達成</span>
               </div>
               {w.started && w.dayMenu && (
                 <div className="mt-3 rounded-xl bg-white/15 px-3 py-2 text-[12px] font-bold">
