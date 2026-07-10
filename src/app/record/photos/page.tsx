@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { MemberHeader } from "@/components/MemberHeader";
 import { createClient } from "@/lib/supabase/server";
 import { listMyBodyPhotosForGallery } from "@/lib/body-photos/queries";
+import { isBetaUser } from "@/lib/auth/beta";
 import { PhotoGallery } from "./PhotoGallery";
 
 export const dynamic = "force-dynamic";
@@ -21,14 +22,17 @@ export default async function BodyPhotosPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/record/photos");
 
-  const photos = await listMyBodyPhotosForGallery();
+  const [photos, isBeta] = await Promise.all([
+    listMyBodyPhotosForGallery(),
+    isBetaUser(),
+  ]);
 
   return (
     <>
       <MemberHeader title="体型写真の記録" fallbackHref="/record" />
       <main className="min-h-[100dvh] bg-[#f9f5ed]">
         <div className="mx-auto max-w-[460px]">
-          <PhotoGallery photos={photos} userId={user.id} />
+          <PhotoGallery photos={photos} userId={user.id} isBeta={isBeta} />
         </div>
       </main>
     </>

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getMyCarte } from "@/lib/workout/queries";
+import { isBetaUser } from "@/lib/auth/beta";
 import { CarteIntakeForm } from "./CarteIntakeForm";
 import { MemberHeader } from "@/components/MemberHeader";
 
@@ -23,12 +24,13 @@ export default async function WorkoutCarteNewPage() {
   if (existing) {
     redirect("/workout/carte");
   }
+  const isBeta = await isBetaUser();
 
   return (
     <>
       <MemberHeader title="カルテ 入力" fallbackHref="/workout" />
       <div className="min-h-screen bg-[#f9f5ed]">
-        <CarteIntakeForm />
+        <CarteIntakeForm isBeta={isBeta} />
       </div>
     </>
   );

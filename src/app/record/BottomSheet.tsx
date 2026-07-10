@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * 下からふわっとせり上がる ボトムシート (2026-07-06 体組成改修)
@@ -13,24 +13,53 @@ export function BottomSheet({
   onClose,
   title,
   children,
+  backClose = false,
 }: {
   open: boolean;
   onClose: () => void;
   title?: string;
   children: React.ReactNode;
+  /** 体1(ベータ): スマホの「戻る」で閉じる。全体公開時に既定true化→propごと削除。 */
+  backClose?: boolean;
 }) {
   const [shown, setShown] = useState(false);
+  // onClose を ref 経由にして、effect を open の変化だけで動かす(毎レンダーで再push しない)
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+  const pushedRef = useRef(false);
 
   useEffect(() => {
     if (!open) return;
     document.body.style.overflow = "hidden";
+    let cleanupHistory = () => {};
+    // 体1(ベータのみ): スマホの「戻る」でシート/写真ライトボックスを閉じる
+    if (backClose) {
+      window.history.pushState({ bottomSheet: true }, "");
+      pushedRef.current = true;
+      const onPop = () => {
+        pushedRef.current = false; // 戻るで積んだ履歴は消費済み
+        onCloseRef.current();
+      };
+      window.addEventListener("popstate", onPop);
+      cleanupHistory = () => {
+        window.removeEventListener("popstate", onPop);
+        // UI/保存で閉じた時は、積んだ履歴を1つ戻して後始末(戻るで閉じた時は消費済)
+        if (pushedRef.current) {
+          pushedRef.current = false;
+          window.history.back();
+        }
+      };
+    }
     const id = requestAnimationFrame(() => setShown(true));
     return () => {
+      cleanupHistory();
       cancelAnimationFrame(id);
       document.body.style.overflow = "";
       setShown(false);
     };
-  }, [open]);
+  }, [open, backClose]);
 
   if (!open) return null;
 

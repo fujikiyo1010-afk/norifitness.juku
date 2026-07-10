@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { BodyMetricRow } from "@/lib/body-metrics/queries";
 import { deleteBodyMetric } from "@/lib/body-metrics/actions";
+import { useRefreshOnReturn } from "@/lib/hooks/useRefreshOnReturn";
 import type { BodyPhotoSummary } from "@/lib/body-photos/queries";
 import {
   weightGoalProgress,
@@ -41,10 +42,13 @@ export function BodyMetricsDetail({
   rows,
   targetWeightKg,
   photoSummary,
+  isBeta = false,
 }: {
   rows: BodyMetricRow[]; // recorded_at 昇順
   targetWeightKg: number | null;
   photoSummary: BodyPhotoSummary;
+  /** 体1(戻るで閉じる)・体13(ホイール—)のベータ出し分け。裏側(画像再取得)は全体。 */
+  isBeta?: boolean;
 }) {
   const [tab, setTab] = useState<Tab>("weight");
   const [calcOpen, setCalcOpen] = useState(false);
@@ -54,6 +58,8 @@ export function BodyMetricsDetail({
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
   const [isDeleting, startDelete] = useTransition();
   const router = useRouter();
+  // 体4: 長時間離れて復帰したら署名URLを取り直す(写真の1時間切れ対策)
+  useRefreshOnReturn();
   const showToast = (m: string) => {
     setToast(m);
     setTimeout(() => setToast(null), 2200);
@@ -163,11 +169,13 @@ export function BodyMetricsDetail({
         open={recordOpen}
         onClose={() => setRecordOpen(false)}
         title="今日の記録"
+        backClose={isBeta}
       >
         <RecordSheetBody
           initialWeight={latest?.weight_kg ?? null}
           initialBodyFat={latest?.body_fat_percent ?? null}
           initialWaist={latest?.waist_cm ?? null}
+          isBeta={isBeta}
           onSaved={() => {
             setRecordOpen(false);
             showToast("記録しました");
@@ -180,6 +188,7 @@ export function BodyMetricsDetail({
         open={calcOpen}
         onClose={() => setCalcOpen(false)}
         title="体重を指定して計算"
+        backClose={isBeta}
       >
         <CalcSheetBody currentWeight={currentWeight} pace={pace} />
       </BottomSheet>

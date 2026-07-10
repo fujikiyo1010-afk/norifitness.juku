@@ -7,6 +7,7 @@ import type { GalleryPhoto } from "@/lib/body-photos/queries";
 import { addBodyPhoto, deleteBodyPhoto } from "@/lib/body-photos/actions";
 import { compressImage } from "@/lib/images/compress";
 import { createClient } from "@/lib/supabase/client";
+import { useRefreshOnReturn } from "@/lib/hooks/useRefreshOnReturn";
 import { BottomSheet } from "../BottomSheet";
 
 /**
@@ -40,13 +41,19 @@ type MonthSection = { key: string; label: string; items: GalleryPhoto[] };
 export function PhotoGallery({
   photos,
   userId,
+  isBeta = false,
 }: {
   photos: GalleryPhoto[]; // recorded_at 降順
   userId: string;
+  /** 体1(戻るで閉じる)・体2再試行文言のベータ出し分け。裏側(後始末/画像再取得)は全体。 */
+  isBeta?: boolean;
 }) {
   const router = useRouter();
   const [addOpen, setAddOpen] = useState(false);
   const [lightbox, setLightbox] = useState<GalleryPhoto | null>(null);
+
+  // 体4: 長時間離れて復帰したら署名URLを取り直す(1時間切れで画像が全滅するのを防ぐ)
+  useRefreshOnReturn();
 
   const sections = useMemo<MonthSection[]>(() => {
     const map = new Map<string, GalleryPhoto[]>();
@@ -218,9 +225,11 @@ export function PhotoGallery({
         open={addOpen}
         onClose={() => setAddOpen(false)}
         title="写真を追加"
+        backClose={isBeta}
       >
         <PhotoAddForm
           userId={userId}
+          isBeta={isBeta}
           onSaved={() => {
             setAddOpen(false);
             router.refresh();
@@ -233,6 +242,7 @@ export function PhotoGallery({
         open={lightbox != null}
         onClose={() => setLightbox(null)}
         title={lightbox ? `${mdLabel(lightbox.recorded_at)} の記録` : ""}
+        backClose={isBeta}
       >
         {lightbox ? (
           <LightboxBody
@@ -282,9 +292,11 @@ function Chip({
 function PhotoAddForm({
   userId,
   onSaved,
+  isBeta = false,
 }: {
   userId: string;
   onSaved: () => void;
+  isBeta?: boolean;
 }) {
   const [recordedAt, setRecordedAt] = useState(todayString());
   const [note, setNote] = useState("");
@@ -312,6 +324,8 @@ function PhotoAddForm({
     const base = `${userId}/${recordedAt}-${Date.now()}`;
     const fullPath = `${base}.jpg`;
     const thumbPath = `${base}_t.jpg`;
+    // 体2: 上げたファイルを追跡し、失敗時にまとめて後始末(孤立ファイル防止)
+    const uploaded: string[] = [];
     try {
       const [full, thumb] = await Promise.all([
         compressImage(file, 1080, 0.82),
@@ -321,11 +335,13 @@ function PhotoAddForm({
         .from("body-photos")
         .upload(fullPath, full, { contentType: "image/jpeg", upsert: false });
       if (up1.error) throw new Error(up1.error.message);
+      uploaded.push(fullPath);
       const up2 = await supabase.storage
         .from("body-photos")
         .upload(thumbPath, thumb, { contentType: "image/jpeg", upsert: false });
       // サムネ失敗は致命的でない(フルで代替できる)ので握りつぶさず記録だけ
       const thumbOk = !up2.error;
+      if (thumbOk) uploaded.push(thumbPath);
 
       const result = await addBodyPhoto({
         recorded_at: recordedAt,
@@ -333,16 +349,21 @@ function PhotoAddForm({
         thumb_path: thumbOk ? thumbPath : null,
         note: note.trim() || null,
       });
-      if (!result.ok) {
-        await supabase.storage
-          .from("body-photos")
-          .remove(thumbOk ? [fullPath, thumbPath] : [fullPath]);
-        throw new Error(result.message);
-      }
+      if (!result.ok) throw new Error(result.message);
       if (previewUrl) URL.revokeObjectURL(previewUrl);
       onSaved();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "アップロードに失敗しました");
+      // 体2: 失敗時は上げたファイルを必ず削除(後始末)。フォームは保持=そのまま再試行可
+      if (uploaded.length) {
+        try {
+          await supabase.storage.from("body-photos").remove(uploaded);
+        } catch {}
+      }
+      setError(
+        e instanceof Error
+          ? `${e.message}（もう一度お試しください）`
+          : "アップロードに失敗しました。もう一度お試しください。"
+      );
     } finally {
       setBusy(false);
     }
@@ -420,7 +441,11 @@ function PhotoAddForm({
         disabled={busy || !file}
         className="w-full rounded-2xl bg-[#4a875b] py-3 text-[14px] font-bold text-white transition-colors hover:bg-[#34603f] disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {busy ? "アップロード中..." : "保存する"}
+        {busy
+          ? "アップロード中..."
+          : error && isBeta
+            ? "再試行する"
+            : "保存する"}
       </button>
     </div>
   );

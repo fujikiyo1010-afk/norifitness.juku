@@ -42,11 +42,14 @@ export function RecordSheetBody({
   initialBodyFat,
   initialWaist,
   onSaved,
+  isBeta = false,
 }: {
   initialWeight?: number | null;
   initialBodyFat?: number | null;
   initialWaist?: number | null;
   onSaved: () => void;
+  /** 体13(ベータ): 記録ゼロの初回は「—」開始。全体公開時に既定挙動化。 */
+  isBeta?: boolean;
 }) {
   const router = useRouter();
 
@@ -64,16 +67,32 @@ export function RecordSheetBody({
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  // 体13(ベータのみ): 記録ゼロの初回は「—」開始、回して初めて値が立つ(固定60/70の誤保存を防ぐ)。
+  //   各フィールドごとに前回値があれば最初から touched。非ベータは従来どおり常に touched(値表示)。
+  const [weightTouched, setWeightTouched] = useState(
+    isBeta ? initialWeight != null : true
+  );
+  const [waistTouched, setWaistTouched] = useState(
+    isBeta ? initialWaist != null : true
+  );
+
   const hasPrev = initialWeight != null || initialWaist != null;
 
   function handleSubmit() {
     setError(null);
+    const weightVal = weightTouched ? Math.round(weight * 10) / 10 : null;
+    const waistVal = waistTouched ? Math.round(waist * 10) / 10 : null;
+    const bodyFatVal = parseNum(bodyFat);
+    if (weightVal == null && waistVal == null && bodyFatVal == null) {
+      setError("体重・ウエスト・体脂肪率のいずれかを入力してください");
+      return;
+    }
     startTransition(async () => {
       const result = await upsertBodyMetric({
         recorded_at: recordedAt,
-        weight_kg: Math.round(weight * 10) / 10,
-        body_fat_percent: parseNum(bodyFat),
-        waist_cm: Math.round(waist * 10) / 10,
+        weight_kg: weightVal,
+        body_fat_percent: bodyFatVal,
+        waist_cm: waistVal,
         note: null,
       });
       if (!result.ok) {
@@ -87,18 +106,20 @@ export function RecordSheetBody({
 
   return (
     <div>
-      {hasPrev ? (
-        <p className="mb-3 text-center text-[10px] text-[#a59b8c]">
-          前回の値からスタート。回す or ± で合わせてください
-        </p>
-      ) : null}
+      <p className="mb-3 text-center text-[10px] text-[#a59b8c]">
+        {hasPrev
+          ? "前回の値からスタート。回す or ± で合わせてください"
+          : isBeta
+            ? "回す or ± で値を合わせてください（回すまで「—」）"
+            : "回す or ± で値を合わせてください"}
+      </p>
 
       {/* 体重 */}
       <div className="mb-3">
         <div className="mb-1.5 flex items-baseline justify-between px-0.5">
           <span className="text-[11px] font-bold text-[#6a6256]">体重</span>
           <span className="font-mono text-[16px] font-extrabold text-[#004d40]">
-            {weight.toFixed(1)}
+            {weightTouched ? weight.toFixed(1) : "—"}
             <span className="ml-0.5 text-[11px] text-[#6a6256]">kg</span>
           </span>
         </div>
@@ -107,7 +128,10 @@ export function RecordSheetBody({
           min={WEIGHT_MIN}
           max={WEIGHT_MAX}
           unit="kg"
-          onChange={setWeight}
+          onChange={(v) => {
+            setWeight(v);
+            setWeightTouched(true);
+          }}
         />
       </div>
 
@@ -116,7 +140,7 @@ export function RecordSheetBody({
         <div className="mb-1.5 flex items-baseline justify-between px-0.5">
           <span className="text-[11px] font-bold text-[#6a6256]">ウエスト</span>
           <span className="font-mono text-[16px] font-extrabold text-[#004d40]">
-            {waist.toFixed(1)}
+            {waistTouched ? waist.toFixed(1) : "—"}
             <span className="ml-0.5 text-[11px] text-[#6a6256]">cm</span>
           </span>
         </div>
@@ -125,7 +149,10 @@ export function RecordSheetBody({
           min={WAIST_MIN}
           max={WAIST_MAX}
           unit="cm"
-          onChange={setWaist}
+          onChange={(v) => {
+            setWaist(v);
+            setWaistTouched(true);
+          }}
         />
       </div>
 

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { listMyBodyMetrics } from "@/lib/body-metrics/queries";
 import { getMyBodyPhotoSummary } from "@/lib/body-photos/queries";
 import { getMyGoalSheet } from "@/lib/goal-sheet/queries";
+import { isBetaUser } from "@/lib/auth/beta";
 import { BodyMetricsDetail } from "./BodyMetricsDetail";
 
 export const dynamic = "force-dynamic";
@@ -26,10 +27,11 @@ export default async function RecordHubPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/record");
 
-  const [rows, goalSheet, photoSummary] = await Promise.all([
+  const [rows, goalSheet, photoSummary, isBeta] = await Promise.all([
     listMyBodyMetrics(365),
     getMyGoalSheet(),
     getMyBodyPhotoSummary(),
+    isBetaUser(),
   ]);
 
   // 古い順に並べ替え (グラフ描画は時系列 ascending が自然)
@@ -50,6 +52,7 @@ export default async function RecordHubPage() {
             rows={sorted}
             targetWeightKg={targetWeightKg}
             photoSummary={photoSummary}
+            isBeta={isBeta}
           />
         </div>
       </main>

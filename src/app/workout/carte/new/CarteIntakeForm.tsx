@@ -123,7 +123,7 @@ const CARTE_QUESTIONS: readonly CarteQuestion[] = [
 
 type DraftState = {
   birthday: string | null; // YYYY-MM-DD (Q1, 必須)
-  gender: Gender;
+  gender: Gender | null; // 体15: 初期値なし=要選択
   environments: Environment[];
   frequency_wish: Frequency | null;
   focus_body_parts: BodyPartGroup[];
@@ -135,7 +135,7 @@ type DraftState = {
 
 const INITIAL_DRAFT: DraftState = {
   birthday: null,
-  gender: "男",
+  gender: null,
   environments: [],
   frequency_wish: null,
   focus_body_parts: [],
@@ -160,7 +160,7 @@ function getBirthdayOptions() {
 // コンポーネント
 // =====================================================================
 
-export function CarteIntakeForm() {
+export function CarteIntakeForm({ isBeta = false }: { isBeta?: boolean }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [mode, setMode] = useState<"form" | "preview">("form");
@@ -170,8 +170,10 @@ export function CarteIntakeForm() {
   const autoSaveSkipRef = useRef(true);
   const [missingKeys, setMissingKeys] = useState<Set<string>>(new Set());
 
-  // フォーム state
-  const [draft, setDraft] = useState<DraftState>(INITIAL_DRAFT);
+  // フォーム state (体15: 非ベータは従来どおり性別デフォルト「男」、ベータは要選択=null)
+  const [draft, setDraft] = useState<DraftState>(
+    isBeta ? INITIAL_DRAFT : { ...INITIAL_DRAFT, gender: "男" }
+  );
 
   // 初回マウント時に localStorage から下書き復元
   useEffect(() => {
@@ -181,7 +183,7 @@ export function CarteIntakeForm() {
         const parsed = JSON.parse(saved) as DraftState & { _savedAt?: string };
         setDraft({
           birthday: parsed.birthday ?? null,
-          gender: parsed.gender ?? "男",
+          gender: parsed.gender ?? (isBeta ? null : "男"),
           environments: parsed.environments ?? [],
           frequency_wish: parsed.frequency_wish ?? null,
           focus_body_parts: parsed.focus_body_parts ?? [],
@@ -241,6 +243,7 @@ export function CarteIntakeForm() {
     setError(null);
     const missing = new Set<string>();
     if (!draft.birthday) missing.add("birthday");
+    if (isBeta && !draft.gender) missing.add("gender"); // 体15(ベータ): 性別も必須
     if (draft.environments.length === 0) missing.add("environments");
     if (!draft.frequency_wish) missing.add("frequency_wish");
     if (draft.focus_body_parts.length === 0) missing.add("focus_body_parts");
@@ -257,7 +260,13 @@ export function CarteIntakeForm() {
   // 提出
   function handleSubmit() {
     setError(null);
-    const input: MyCarteInput = { ...draft };
+    if (!draft.gender) {
+      // プレビュー前に検証済みだが、型安全と防御のため(体15)
+      setError("性別を選択してください");
+      setMode("form");
+      return;
+    }
+    const input: MyCarteInput = { ...draft, gender: draft.gender };
     startTransition(async () => {
       const result = await createMyCarte(input);
       if (result.ok) {
@@ -272,10 +281,10 @@ export function CarteIntakeForm() {
     });
   }
 
-  // 進捗 (性別は常にデフォルト値あり = 記入済扱い)
+  // 進捗 (体15: 性別も要選択に変更。選択済みのみカウント)
   const filledCount =
     (draft.birthday ? 1 : 0) +
-    1 + // gender
+    (draft.gender ? 1 : 0) +
     (draft.environments.length > 0 ? 1 : 0) +
     (draft.frequency_wish ? 1 : 0) +
     (draft.focus_body_parts.length > 0 ? 1 : 0) +
