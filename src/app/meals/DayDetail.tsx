@@ -35,10 +35,13 @@ export function DayDetail({
   date,
   meals,
   today,
+  feedback = null,
 }: {
   date: string;
   meals: MealWithUrls[];
   today: string;
+  /** その日のデイリーFB(のりからのコメント・M6 着地) */
+  feedback?: string | null;
 }) {
   const router = useRouter();
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
@@ -88,6 +91,21 @@ export function DayDetail({
           <span className="w-16" />
         )}
       </div>
+
+      {/* のりからのコメント(M6 着地・その日のデイリーFB) */}
+      {feedback && (
+        <div className="rounded-2xl border border-[#d7e6db] bg-[#eef5f0] px-4 py-3">
+          <div className="mb-1 flex items-center gap-2">
+            <span className="rounded-full bg-[#4a875b] px-2 py-0.5 text-[9px] font-bold text-white">
+              のりから
+            </span>
+            <span className="text-[10px] text-[#6a6256]">この日の記録へのコメント</span>
+          </div>
+          <p className="whitespace-pre-wrap text-[12.5px] leading-relaxed text-[#2b2620]">
+            {feedback}
+          </p>
+        </div>
+      )}
 
       {/* 合計(数値があれば) */}
       <div className="rounded-2xl border border-[#e7dcc9] bg-[#fffdf8] px-4 py-3">
