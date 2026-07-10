@@ -32,6 +32,8 @@ export function HomeBeta({
   boardItems,
   unreadReply,
   today,
+  workoutDayNumber = null,
+  workoutPartLabel = null,
 }: {
   displayName: string;
   daysSinceJoined: number;
@@ -44,6 +46,8 @@ export function HomeBeta({
   boardItems: BoardItem[];
   unreadReply: boolean;
   today: TodayActivity;
+  workoutDayNumber?: number | null; // トレカード「◯日目」
+  workoutPartLabel?: string | null; // トレカード タイトル=メニュー名(部位ラベル)
 }) {
   const learnPct =
     totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
@@ -127,24 +131,26 @@ export function HomeBeta({
               </span>
             </div>
             <div className="flex flex-col gap-2">
-              {/* トレーニング(点19の並び=先頭・点1の色) */}
+              {/* トレーニング(点19先頭・点1色・ラベル文言=モック) */}
               <TodayCard
-                cap="今日のトレ"
+                cap={
+                  workoutDayNumber
+                    ? `今日のトレーニング ・ ${workoutDayNumber}日目`
+                    : "今日のトレーニング"
+                }
                 capColor={CARD_COLOR.workout}
                 title={
-                  today.recordedWorkout
-                    ? "今日のトレ完了"
-                    : today.hasWorkoutMenu
-                      ? "今日のトレを記録しよう"
-                      : "メニューを開始しよう"
+                  today.hasWorkoutMenu
+                    ? (workoutPartLabel ?? "今日のトレーニング")
+                    : "メニューを開始しよう"
                 }
                 cta={today.recordedWorkout ? "タップして見る →" : "▶ 実施を記録 →"}
                 href="/workout/today"
                 done={today.recordedWorkout}
               />
-              {/* 食事(M7 案1・1食で✓) */}
+              {/* 食事(M7 案1・1食で✓・ラベル文言=モック) */}
               <TodayCard
-                cap="今日の食事"
+                cap="食事添削 ・ 今日"
                 capColor={CARD_COLOR.meal}
                 title={mealTitle}
                 cta={today.recordedMeal ? "タップして見る →" : "＋写真で記録 →"}
@@ -175,26 +181,58 @@ export function HomeBeta({
             daysSinceJoined={daysSinceJoined}
           />
 
-          {/* 大タイル(先頭=デイリー添削・M17) */}
+          {/* 大タイル(先頭=デイリー添削・M17)・細18=確定7/7の色/アイコン/説明を転写 */}
           <div className="grid grid-cols-2 gap-2">
             <BigTile
               href="/history/feedbacks"
               name="デイリー添削"
               desc="のりからの言葉"
-              icon={<CommentIcon />}
+              icon={<TileIcon paths={[TILE_ICON.comment]} />}
+              iconColor="#4a875b"
+              iconBg="#eaf3ec"
               badge={unreadReply ? "NEW" : undefined}
             />
-            <BigTile href="/courses" name="コース一覧" desc="動画レッスン" icon={<BookIcon />} />
-            <BigTile href="/my-log" name="学びの記録" desc="振り返り・進捗" icon={<PencilIcon />} />
-            <BigTile href="/tools" name="ツール" desc="カロリー/PFC計算" icon={<ToolIcon />} />
+            <BigTile
+              href="/courses"
+              name="コース一覧"
+              desc="動画レッスン"
+              icon={<TileIcon paths={TILE_ICON.course.split(" M").map((s, i) => (i === 0 ? s : "M" + s))} />}
+              iconColor="#3a6ea5"
+              iconBg="#e8f0fa"
+            />
+            <BigTile
+              href="/my-log"
+              name="学びの記録"
+              desc="振り返り・実践"
+              icon={<TileIcon paths={TILE_ICON.learn.split(" M").map((s, i) => (i === 0 ? s : "M" + s))} />}
+              iconColor="#4a875b"
+              iconBg="#eaf3ec"
+            />
+            <BigTile
+              href="/tools"
+              name="ツール"
+              desc="カロリー/PFC計算"
+              icon={<ToolsTileIcon />}
+              iconColor="#7a5af0"
+              iconBg="#efeafd"
+            />
             <BigTile
               href="/monthly-review"
               name="月次添削"
               desc="動画返信・履歴"
-              icon={<VideoIcon />}
+              icon={<MonthlyTileIcon />}
+              iconColor="#d6536a"
+              iconBg="#fbe9ee"
               badge={monthlyBadge ? "NEW" : undefined}
             />
-            <BigTile href="/goal-sheet" name="目標シート" desc="今月の目標" icon={<TargetIcon />} />
+            <BigTile
+              href="/goal-sheet"
+              name="目標シート"
+              desc="今月の目標"
+              icon={<GoalTileIcon />}
+              iconColor="#2f7d6b"
+              iconBg="#e3f1ee"
+            />
           </div>
 
           <div className="h-4" />
@@ -454,12 +492,16 @@ function BigTile({
   name,
   desc,
   icon,
+  iconColor,
+  iconBg,
   badge,
 }: {
   href: string;
   name: string;
   desc: string;
   icon: React.ReactNode;
+  iconColor: string;
+  iconBg: string;
   badge?: string;
 }) {
   return (
@@ -472,7 +514,11 @@ function BigTile({
           {badge}
         </span>
       )}
-      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#4a875b1a] text-[#4a875b]">
+      {/* 細18: 確定7/7転写=色付きアイコン円 */}
+      <span
+        className="flex h-9 w-9 items-center justify-center rounded-xl"
+        style={{ background: iconBg, color: iconColor }}
+      >
         {icon}
       </span>
       <div>
@@ -480,6 +526,49 @@ function BigTile({
         <div className="text-[9.5px] text-[#6a6256]">{desc}</div>
       </div>
     </Link>
+  );
+}
+
+// 細18/細19: タイルアイコン(確定7/7 ICONS のSVGパスを転写)
+const TILE_ICON = {
+  course: "M4 19.5A2.5 2.5 0 0 1 6.5 17H20 M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z",
+  learn: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M9 13h6 M9 17h4",
+  comment: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z",
+} as const;
+
+function TileIcon({ paths }: { paths: string[] }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      {paths.map((d, i) => (
+        <path key={i} d={d} />
+      ))}
+    </svg>
+  );
+}
+function ToolsTileIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="5" y="3" width="14" height="18" rx="2" />
+      <rect x="8" y="6" width="8" height="3" rx="0.5" />
+      <path d="M9 13h.01M12 13h.01M15 13h.01M9 16h.01M12 16h.01M15 16h.01" />
+    </svg>
+  );
+}
+function MonthlyTileIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="2" />
+      <polygon points="10 9 15 12 10 15" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+function GoalTileIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="12" cy="12" r="5" />
+      <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
+    </svg>
   );
 }
 
@@ -506,21 +595,6 @@ function GearIcon() {
     </svg>
   );
 }
-function BookIcon() {
-  return (
-    <svg {...iconProps}>
-      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-    </svg>
-  );
-}
-function CommentIcon() {
-  return (
-    <svg {...iconProps}>
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-    </svg>
-  );
-}
 function FlameIcon() {
   return (
     <svg
@@ -534,38 +608,6 @@ function FlameIcon() {
       strokeLinejoin="round"
     >
       <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
-    </svg>
-  );
-}
-function PencilIcon() {
-  return (
-    <svg {...iconProps}>
-      <path d="M12 20h9" />
-      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z" />
-    </svg>
-  );
-}
-function ToolIcon() {
-  return (
-    <svg {...iconProps}>
-      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
-    </svg>
-  );
-}
-function VideoIcon() {
-  return (
-    <svg {...iconProps}>
-      <polygon points="23 7 16 12 23 17 23 7" />
-      <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-    </svg>
-  );
-}
-function TargetIcon() {
-  return (
-    <svg {...iconProps}>
-      <circle cx="12" cy="12" r="9" />
-      <circle cx="12" cy="12" r="4.5" />
-      <circle cx="12" cy="12" r="1" />
     </svg>
   );
 }
