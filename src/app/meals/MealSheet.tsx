@@ -34,6 +34,14 @@ type DraftItem = {
 
 type ExistingPhoto = { path: string; url: string };
 
+// 細1: ストレージキー用の英語コード(日本語はキーに使えない)
+const MEAL_TYPE_CODE: Record<MealType, string> = {
+  朝: "breakfast",
+  昼: "lunch",
+  夕: "dinner",
+  間: "snack",
+};
+
 export function MealSheet({
   userId,
   date,
@@ -133,7 +141,8 @@ export function MealSheet({
     const uploaded: string[] = [];
     try {
       for (const nf of newFiles) {
-        const path = `${userId}/${date}-${mealType}-${Date.now()}-${uploaded.length}.jpg`;
+        // 細1: ストレージキーに日本語(mealType)を入れるとSupabaseが Invalid key で拒否する。英語コードで生成。
+        const path = `${userId}/${date}-${MEAL_TYPE_CODE[mealType]}-${Date.now()}-${uploaded.length}.jpg`;
         const blob = await compressImage(nf.file, 1080, 0.82);
         const up = await supabase.storage
           .from("meal-photos")

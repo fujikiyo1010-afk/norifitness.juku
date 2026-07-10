@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getMyCurrentMenu } from "@/lib/workout/queries";
+import { jstTodayStr } from "@/lib/date/jst";
 import type { DayMenu, Exercise, WorkoutCycles } from "@/lib/workout/types";
 import { resolveDayMenu, type Intensity, type LoggedItem } from "@/lib/workout/logs-types";
 
@@ -60,6 +61,7 @@ export type TodayWorkout = {
     items: LoggedItem[];
   } | null;
   pending: boolean; // 再配布予告
+  completedToday: boolean; // 細2: 今日(JST)に既に記録済み(=次の日の開始は翌日から)
 };
 
 /** 今日の実施記録に必要な一式を解決 */
@@ -80,23 +82,45 @@ export async function getTodayWorkout(): Promise<TodayWorkout> {
     dayMenu: menu ? resolveDayMenu(menu.cycles, "medium", 1) : null,
     todayLog: null,
     pending: false,
+    completedToday: false,
   };
   if (!user || !menu) return empty;
 
   const progress = await getMyProgress();
   if (!progress) return empty; // 未開始
 
-  const dayNumber = progress.currentDay;
-  const cycleNumber = progress.cycleNumber;
+  const today = jstTodayStr();
 
-  // 今日(=現在の周・日)の既存ログ
-  const { data: logRow } = await supabase
+  // 細2: まず「今日(JST)のログ」を探す。あればその日を表示し翌日開始をブロック(current_dayは進んでいてよい)。
+  const { data: todayRow } = await supabase
     .from("user_workout_logs")
-    .select("id, intensity, status, memo, completed_at")
+    .select("id, day_number, cycle_number, intensity, status, memo, completed_at")
     .eq("user_id", user.id)
-    .eq("cycle_number", cycleNumber)
-    .eq("day_number", dayNumber)
+    .eq("date", today)
     .maybeSingle();
+
+  const completedToday = !!todayRow;
+  let dayNumber: number;
+  let cycleNumber: number;
+  let logRow:
+    | { id: string; intensity: string; status: string; memo: string | null; completed_at: string | null }
+    | null;
+  if (todayRow) {
+    dayNumber = todayRow.day_number as number;
+    cycleNumber = todayRow.cycle_number as number;
+    logRow = todayRow as typeof logRow;
+  } else {
+    dayNumber = progress.currentDay;
+    cycleNumber = progress.cycleNumber;
+    const { data } = await supabase
+      .from("user_workout_logs")
+      .select("id, intensity, status, memo, completed_at")
+      .eq("user_id", user.id)
+      .eq("cycle_number", cycleNumber)
+      .eq("day_number", dayNumber)
+      .maybeSingle();
+    logRow = data as typeof logRow;
+  }
 
   let todayLog: TodayWorkout["todayLog"] = null;
   if (logRow) {
@@ -132,6 +156,7 @@ export async function getTodayWorkout(): Promise<TodayWorkout> {
     dayMenu: resolveDayMenu(menu.cycles, intensity, dayNumber),
     todayLog,
     pending: !!progress.pendingMenuId,
+    completedToday,
   };
 }
 
