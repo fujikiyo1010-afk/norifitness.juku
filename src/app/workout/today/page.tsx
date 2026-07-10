@@ -64,6 +64,7 @@ export default async function WorkoutTodayPage({
               initialIntensity={w.todayLog?.intensity ?? "medium"}
               alreadyDone={w.todayLog?.status === "done" || w.todayLog?.status === "rest_done"}
               initialMemo={w.todayLog?.memo ?? null}
+              initialItems={w.todayLog?.items ?? []}
               completedAtLabel={
                 w.todayLog?.completedAt
                   ? new Date(
