@@ -76,7 +76,7 @@ export default async function AdminUserHubPage({
   const admin = createAdminClient();
   const { data: userRow } = await admin
     .from("users")
-    .select("id, name, nickname, email, joined_at")
+    .select("id, name, nickname, email, joined_at, form_review_first_done")
     .eq("id", userId)
     .maybeSingle();
 
@@ -192,6 +192,23 @@ export default async function AdminUserHubPage({
       .from("user_workout_carte")
       .update({ menu_review_needed: false })
       .eq("user_id", userId);
+    revalidatePath(`/admin/users/${userId}`, "page");
+  }
+
+  /**
+   * Server Action: フォーム添削「初回完了」札のトグル。
+   * true = 初回済み → 受講生は2回目以降(有料)URLへ。押し間違いを戻せるよう双方向。
+   */
+  const formReviewFirstDone = (userRow.form_review_first_done as boolean | null) === true;
+  async function toggleFormReviewFirstDoneAction() {
+    "use server";
+    const me = await getAdminInfo();
+    if (!me) return;
+    const admin2 = createAdminClient();
+    await admin2
+      .from("users")
+      .update({ form_review_first_done: !formReviewFirstDone })
+      .eq("id", userId);
     revalidatePath(`/admin/users/${userId}`, "page");
   }
 
@@ -422,6 +439,40 @@ export default async function AdminUserHubPage({
             </section>
           );
         })()}
+
+        {/* フォーム添削(5大機能②): 初回完了トグル。押すと受講生は2回目以降(有料)URLへ */}
+        <section className="rounded-[14px] border border-[#e8ebe9] bg-white p-5">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="h-5 w-1 rounded-full bg-[#00897b]" />
+            <h2 className="text-sm font-semibold text-zinc-900">フォーム添削</h2>
+            <span
+              className={`ml-auto rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                formReviewFirstDone
+                  ? "bg-emerald-50 text-emerald-800"
+                  : "bg-amber-100 text-amber-800"
+              }`}
+            >
+              {formReviewFirstDone ? "初回完了(2回目以降=有料)" : "初回まだ(無料)"}
+            </span>
+          </div>
+          <p className="mb-3 text-[12px] leading-relaxed text-zinc-600">
+            受講生アプリのボタンは、初回は<b>無料URL</b>、この札を立てると<b>2回目以降(1回4,000円)URL</b>に切り替わります。初回セッションを終えたら「初回完了にする」を押してください。UTAGEの予約状況はここには出ないので、この一押しが切り替えの合図です。
+          </p>
+          <form action={toggleFormReviewFirstDoneAction}>
+            <button
+              type="submit"
+              className={`rounded-[4px] px-4 py-2 text-xs font-bold ${
+                formReviewFirstDone
+                  ? "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100"
+                  : "bg-[#00897b] text-white hover:bg-[#00695c]"
+              }`}
+            >
+              {formReviewFirstDone
+                ? "初回まだ(無料)に戻す"
+                : "初回完了にする(以後2回目URLへ)"}
+            </button>
+          </form>
+        </section>
 
         {/* 4 セクション 2x2 グリッド (月次/メニュー/目標/カルテ) */}
         <div className="grid grid-cols-2 gap-5">
