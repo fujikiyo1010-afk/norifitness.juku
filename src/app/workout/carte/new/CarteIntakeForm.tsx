@@ -200,7 +200,7 @@ export function CarteIntakeForm({ isBeta = false }: { isBeta?: boolean }) {
     setHydrated(true);
   }, []);
 
-  // 入力が変わるたびに自動保存 (debounce 600ms)。手動「下書き保存」ボタンは廃止。
+  // 入力が変わるたびに自動保存 (debounce 1000ms・体17 で他画面と統一)。手動「下書き保存」ボタンは廃止。
   useEffect(() => {
     if (!hydrated) return;
     // 復元直後の初回は保存しない (= 無意味な上書き回避)
@@ -219,7 +219,7 @@ export function CarteIntakeForm({ isBeta = false }: { isBeta?: boolean }) {
       } catch {
         // 保存失敗は黙殺 (= 入力体験を止めない)
       }
-    }, 600);
+    }, 1000);
     return () => clearTimeout(t);
   }, [draft, hydrated]);
 

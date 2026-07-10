@@ -420,7 +420,8 @@ export function GoalSheetEditor({
       try {
         sessionStorage.setItem("goal-sheet-just-saved", "1");
       } catch {}
-      router.push("/goal-sheet");
+      // B13: 保存後の「戻る」で編集画面へ逆戻りしないよう replace（履歴を残さない）
+      router.replace("/goal-sheet");
       router.refresh();
     });
   };
