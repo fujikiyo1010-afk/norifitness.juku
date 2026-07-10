@@ -15,6 +15,7 @@ import {
   etaForTarget,
 } from "@/lib/body-metrics/goal-progress";
 import { BodyMetricsChart } from "./BodyMetricsChart";
+import { ForecastCard } from "./ForecastCard";
 import { BottomSheet } from "./BottomSheet";
 import { RecordSheetBody } from "./RecordSheetBody";
 import { RecordFab } from "./RecordFab";
@@ -41,11 +42,14 @@ function monthLabel(iso: string): string {
 export function BodyMetricsDetail({
   rows,
   targetWeightKg,
+  targetDate = null,
   photoSummary,
   isBeta = false,
 }: {
   rows: BodyMetricRow[]; // recorded_at 昇順
   targetWeightKg: number | null;
+  /** 目標日 ISO (goal_selection.target_date)。M20 見通しカード用。 */
+  targetDate?: string | null;
   photoSummary: BodyPhotoSummary;
   /** 体1(戻るで閉じる)・体13(ホイール—)のベータ出し分け。裏側(画像再取得)は全体。 */
   isBeta?: boolean;
@@ -139,10 +143,12 @@ export function BodyMetricsDetail({
           startWeight={startWeight}
           currentWeight={currentWeight}
           targetWeightKg={targetWeightKg}
+          targetDate={targetDate}
           ringPct={ringPct}
           pace={pace}
           prog={prog}
           eta={eta}
+          isBeta={isBeta}
           onOpenCalc={() => setCalcOpen(true)}
         />
       ) : (
@@ -201,20 +207,24 @@ function WeightView({
   startWeight,
   currentWeight,
   targetWeightKg,
+  targetDate,
   ringPct,
   pace,
   prog,
   eta,
+  isBeta,
   onOpenCalc,
 }: {
   weightRows: BodyMetricRow[];
   startWeight: number | null;
   currentWeight: number | null;
   targetWeightKg: number | null;
+  targetDate: string | null;
   ringPct: number | null;
   pace: number | null;
   prog: ReturnType<typeof weightGoalProgress>;
   eta: ReturnType<typeof weightEta>;
+  isBeta: boolean;
   onOpenCalc: () => void;
 }) {
   const R = 52;
@@ -334,17 +344,29 @@ function WeightView({
         </div>
       </div>
 
-      {/* 予測カード (A-2) */}
-      <PredictCard eta={eta} />
+      {/* M20: ベータは新「見通しカード」(1階3行+2階道のり/試算)。旧=予測カードA-2+計算シート。 */}
+      {isBeta ? (
+        <ForecastCard
+          current={currentWeight}
+          target={targetWeightKg}
+          targetDate={targetDate}
+          pace={pace}
+        />
+      ) : (
+        <>
+          {/* 予測カード (A-2) */}
+          <PredictCard eta={eta} />
 
-      {/* 体重を指定して計算 (アウトライン) */}
-      <button
-        type="button"
-        onClick={onOpenCalc}
-        className="block w-full rounded-xl border-2 border-[#4a875b] bg-white py-2.5 text-center text-[13px] font-bold text-[#004d40] transition-colors hover:bg-[#4a875b]/5"
-      >
-        ＋ 体重を指定して計算する
-      </button>
+          {/* 体重を指定して計算 (アウトライン) */}
+          <button
+            type="button"
+            onClick={onOpenCalc}
+            className="block w-full rounded-xl border-2 border-[#4a875b] bg-white py-2.5 text-center text-[13px] font-bold text-[#004d40] transition-colors hover:bg-[#4a875b]/5"
+          >
+            ＋ 体重を指定して計算する
+          </button>
+        </>
+      )}
     </>
   );
 }

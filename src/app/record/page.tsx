@@ -39,9 +39,11 @@ export default async function RecordHubPage() {
     a.recorded_at.localeCompare(b.recorded_at)
   );
 
-  const targetWeightKg =
-    (goalSheet?.content?.goal_selection as { target_weight_kg?: number } | undefined)
-      ?.target_weight_kg ?? null;
+  const goalSelection = goalSheet?.content?.goal_selection as
+    | { target_weight_kg?: number; target_date?: string }
+    | undefined;
+  const targetWeightKg = goalSelection?.target_weight_kg ?? null;
+  const targetDate = goalSelection?.target_date ?? null;
 
   return (
     <>
@@ -51,6 +53,7 @@ export default async function RecordHubPage() {
           <BodyMetricsDetail
             rows={sorted}
             targetWeightKg={targetWeightKg}
+            targetDate={targetDate}
             photoSummary={photoSummary}
             isBeta={isBeta}
           />
