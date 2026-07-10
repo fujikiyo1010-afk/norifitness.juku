@@ -235,6 +235,15 @@ export function HomeBeta({
               iconColor="#2f7d6b"
               iconBg="#e3f1ee"
             />
+            {/* フォーム添削(5大機能②)。タップ→誘導ページ→UTAGE予約。初回無料/2回目以降は札で出し分け */}
+            <BigTile
+              href="/form-review"
+              name="フォーム添削"
+              desc="オンラインで直接"
+              icon={<FormReviewTileIcon />}
+              iconColor="#c2693f"
+              iconBg="#f7ece2"
+            />
           </div>
 
           <div className="h-4" />
@@ -623,6 +632,16 @@ function GoalTileIcon() {
       <circle cx="12" cy="12" r="9" />
       <circle cx="12" cy="12" r="5" />
       <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+// フォーム添削: オンラインで直接見る=画面(モニタ)+再生の線画
+function FormReviewTileIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2.5" y="4" width="19" height="13" rx="2" />
+      <path d="M8 21h8 M12 17v4" />
+      <polygon points="10.5 8.5 15 11 10.5 13.5" fill="currentColor" stroke="none" />
     </svg>
   );
 }
