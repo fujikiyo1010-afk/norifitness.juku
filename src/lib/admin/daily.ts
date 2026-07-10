@@ -135,9 +135,10 @@ export type DailyDetail = {
   name: string;
   initial: string;
   joinedAt: string | null;
-  isBeta: boolean; // 食事/トレブロックはベータ受講生時のみ表示(P4-a/P5)
+  isBeta: boolean; // 食事/トレ/生活ブロックはベータ受講生時のみ表示(P4-a/P5/P6)
   meals: DailyMealForAdmin[]; // その日の食事(v1-a=写真+品目)
   workout: DailyWorkoutForAdmin | null; // その日のトレ実績(原本×実績の差分)
+  condition: import("@/lib/conditions/types").DailyConditionData | null; // その日の生活4問
   tags: AlertTag[];
   body: DailyBody;
   learning: DailyLearning;
@@ -368,6 +369,22 @@ export async function getDailyDetail(
       }
     : null;
 
+  // --- 生活記録(P6) ---
+  const { data: condRow } = await admin
+    .from("daily_conditions")
+    .select("sleep_hours, condition, bowel, alcohol")
+    .eq("user_id", userId)
+    .eq("date", dateStr)
+    .maybeSingle();
+  const condition = condRow
+    ? {
+        sleepHours: (condRow.sleep_hours as number | null) ?? null,
+        condition: (condRow.condition as "good" | "normal" | "bad" | null) ?? null,
+        bowel: (condRow.bowel as "yes" | "constipated" | "no" | null) ?? null,
+        alcohol: (condRow.alcohol as "none" | "little" | "much" | null) ?? null,
+      }
+    : null;
+
   // --- アラートタグ ---
   const tags = alerts.find((u) => u.userId === userId)?.tags ?? [];
 
@@ -404,6 +421,7 @@ export async function getDailyDetail(
     isBeta: (userRow.is_beta as boolean | null) === true,
     meals,
     workout,
+    condition,
     tags,
     body,
     learning,

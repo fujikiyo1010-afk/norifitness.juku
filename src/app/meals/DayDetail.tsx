@@ -7,6 +7,14 @@ import { BottomSheet } from "@/app/record/BottomSheet";
 import { deleteMealLog } from "@/lib/meals/actions";
 import { sumMeals, MEAL_TYPES, MEAL_LABEL, type MealLog, type MealType } from "@/lib/meals/types";
 import { MealSheet } from "./MealSheet";
+import { LifeConditionForm } from "./LifeConditionForm";
+import {
+  hasAnyCondition,
+  CONDITION_LABEL,
+  BOWEL_LABEL,
+  ALCOHOL_LABEL,
+  type DailyConditionData,
+} from "@/lib/conditions/types";
 
 type MealWithUrls = MealLog & { photoUrls: string[] };
 export type TargetPFC = { kcal: number | null; p: number | null; f: number | null; c: number | null };
@@ -37,6 +45,8 @@ export function DayDetail({
   feedback = null,
   target = null,
   userId,
+  condition = null,
+  askYesterday = null,
 }: {
   date: string;
   meals: MealWithUrls[];
@@ -44,11 +54,15 @@ export function DayDetail({
   feedback?: string | null;
   target?: TargetPFC | null;
   userId: string;
+  condition?: DailyConditionData | null; // その日の生活記録(記録済みなら値)
+  askYesterday?: string | null; // 翌日補完: 昨日の日付(聞くべきなら) or null
 }) {
   const router = useRouter();
   const [sheet, setSheet] = useState<{ mealType: MealType; editLog: MealWithUrls | null } | null>(null);
+  const [lifeSheet, setLifeSheet] = useState<{ date: string; initial: DailyConditionData | null } | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [, startDelete] = useTransition();
+  const conditionRecorded = hasAnyCondition(condition);
 
   const isToday = date === today;
   // FBが届いた日は編集ロック(当日は M6 に従い編集可)
@@ -70,7 +84,17 @@ export function DayDetail({
     setTimeout(() => setToast(null), 2200);
   }
   function onSaved(msg: string) {
+    const savedType = sheet?.mealType;
     setSheet(null);
+    showToast(msg);
+    router.refresh();
+    // 夕食フォールバック(M13): 夕食保存後にその日の生活が未記録なら4問へ接ぎ木
+    if (savedType === "夕" && isToday && !conditionRecorded) {
+      setTimeout(() => setLifeSheet({ date, initial: null }), 350);
+    }
+  }
+  function onLifeDone(msg: string) {
+    setLifeSheet(null);
     showToast(msg);
     router.refresh();
   }
@@ -182,6 +206,74 @@ export function DayDetail({
         })}
       </div>
 
+      {/* 翌日補完(M13): 昨日の生活が未入力なら1度だけ聞く */}
+      {editable && askYesterday && (
+        <button
+          type="button"
+          onClick={() => setLifeSheet({ date: askYesterday, initial: null })}
+          className="flex w-full items-center justify-between rounded-2xl border border-[#f0e2b8] bg-[#fffbeb] px-4 py-3 text-left"
+        >
+          <span className="text-[12px] font-bold text-[#8a6d1a]">
+            昨日の調子だけ教えてください
+          </span>
+          <span className="text-[12px] font-bold text-[#8a6d1a]">記録する →</span>
+        </button>
+      )}
+
+      {/* 今日の生活(独立入力口・M13) */}
+      <div className="rounded-2xl border border-[#e7dcc9] bg-[#fffdf8] px-4 py-3">
+        <div className="mb-1.5 text-[12px] font-bold text-[#5b5344]">
+          {isToday ? "今日の生活" : "この日の生活"}
+        </div>
+        {conditionRecorded && condition ? (
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-[#2b2620]">
+            {condition.sleepHours != null && (
+              <span>
+                <b className="font-mono">{condition.sleepHours}h</b>
+                <span className="ml-1 text-[10px] text-[#a59b8c]">睡眠</span>
+              </span>
+            )}
+            {condition.condition && (
+              <span>
+                {CONDITION_LABEL[condition.condition]}
+                <span className="ml-1 text-[10px] text-[#a59b8c]">体調</span>
+              </span>
+            )}
+            {condition.bowel && (
+              <span>
+                {BOWEL_LABEL[condition.bowel]}
+                <span className="ml-1 text-[10px] text-[#a59b8c]">お通じ</span>
+              </span>
+            )}
+            {condition.alcohol && (
+              <span>
+                {ALCOHOL_LABEL[condition.alcohol]}
+                <span className="ml-1 text-[10px] text-[#a59b8c]">お酒</span>
+              </span>
+            )}
+            {editable && (
+              <button
+                type="button"
+                onClick={() => setLifeSheet({ date, initial: condition })}
+                className="text-[11px] font-bold text-[#4a875b]"
+              >
+                編集する →
+              </button>
+            )}
+          </div>
+        ) : editable ? (
+          <button
+            type="button"
+            onClick={() => setLifeSheet({ date, initial: null })}
+            className="text-[12px] font-bold text-[#4a875b]"
+          >
+            ＋ 今日の調子を記録（4問・約10秒）
+          </button>
+        ) : (
+          <div className="text-[11px] text-[#a59b8c]">記録なし</div>
+        )}
+      </div>
+
       {!editable && (
         <p className="text-center text-[11px] text-[#a59b8c]">
           {locked
@@ -209,6 +301,21 @@ export function DayDetail({
             editLog={sheet.editLog}
             onClose={() => setSheet(null)}
             onSaved={onSaved}
+          />
+        )}
+      </BottomSheet>
+
+      {/* 生活記録シート(4問) */}
+      <BottomSheet open={!!lifeSheet} onClose={() => setLifeSheet(null)} title="今日の調子">
+        {lifeSheet && (
+          <LifeConditionForm
+            date={lifeSheet.date}
+            initial={lifeSheet.initial}
+            title={
+              lifeSheet.date === today ? "今日の調子は？" : "昨日の調子は？"
+            }
+            onDone={onLifeDone}
+            onSkip={() => setLifeSheet(null)}
           />
         )}
       </BottomSheet>

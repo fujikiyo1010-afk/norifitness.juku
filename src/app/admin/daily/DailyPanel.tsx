@@ -5,6 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { DailyDetail } from "@/lib/admin/daily";
 import {
+  CONDITION_LABEL,
+  BOWEL_LABEL,
+  ALCOHOL_LABEL,
+} from "@/lib/conditions/types";
+import {
   sendDailyFeedback,
   skipDailyFeedback,
 } from "@/lib/daily-feedbacks/actions";
@@ -410,7 +415,38 @@ function TodayTab({ detail }: { detail: DailyDetail }) {
         )}
       </SectionCard>
       <SectionCard title="🌙 今日の生活" srcLabel="daily_conditions（P6）" srcNew>
-        <PlaceholderBody text="睡眠・体調・お通じ・飲酒はP6で実装します。ここに1行の生活帯が入ります。" />
+        {!detail.isBeta ? (
+          <PlaceholderBody text="この受講生はまだ生活記録の対象外です（ベータ公開後に表示されます）。" />
+        ) : !detail.condition ||
+          (detail.condition.sleepHours == null &&
+            !detail.condition.condition &&
+            !detail.condition.bowel &&
+            !detail.condition.alcohol) ? (
+          <PlaceholderBody text="今日の生活記録はまだありません（未入力またはスキップ）。" />
+        ) : (
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-zinc-800">
+            {detail.condition.sleepHours != null && (
+              <span>
+                睡眠 <b>{detail.condition.sleepHours}h</b>
+              </span>
+            )}
+            {detail.condition.condition && (
+              <span>
+                体調 <b>{CONDITION_LABEL[detail.condition.condition]}</b>
+              </span>
+            )}
+            {detail.condition.bowel && (
+              <span>
+                お通じ <b>{BOWEL_LABEL[detail.condition.bowel]}</b>
+              </span>
+            )}
+            {detail.condition.alcohol && (
+              <span>
+                お酒 <b>{ALCOHOL_LABEL[detail.condition.alcohol]}</b>
+              </span>
+            )}
+          </div>
+        )}
       </SectionCard>
     </div>
   );
@@ -710,8 +746,8 @@ function FbBar({
             食事はP4-a公開済みのため、ベータ受講生には食事も解禁。 */}
         <div className="rounded-md border border-[#f0e2b8] bg-[#fffbeb] px-2.5 py-1 text-[10.5px] leading-snug text-[#8a6d1a]">
           いま書けるのは
-          <b>{detail.isBeta ? "体重・学習・食事・トレ" : "体重・学習"}</b>
-          の話題までです（{detail.isBeta ? "生活は P6 公開後" : "食事・生活は P4/P6 公開後"}）
+          <b>{detail.isBeta ? "体重・学習・食事・トレ・生活" : "体重・学習"}</b>
+          の話題まで{detail.isBeta ? "です" : "です（食事・生活は P4/P6 公開後）"}
         </div>
         <textarea
           value={body}
