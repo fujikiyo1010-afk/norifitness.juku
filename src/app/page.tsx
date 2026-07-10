@@ -10,6 +10,8 @@ import { getMyGoalSheetStatus } from "@/lib/member/goal-sheet-status";
 import { getMyMonthlyAuditHomeStatus } from "@/lib/member/monthly-audit-status";
 import { getMyBodyCard, type BodyCard } from "@/lib/member/body-card";
 import { getRecordStreak } from "@/lib/member/record-streak";
+import { getTodayWorkout } from "@/lib/workout/logs";
+import { getExerciseTarget } from "@/lib/workout/menu-display";
 import { getMyUnreadCount } from "@/lib/chat/queries";
 import { getMyBoardItems, type BoardItem } from "@/lib/member/board";
 import { hasUnreadReply } from "@/lib/member/notifications";
@@ -132,12 +134,28 @@ export default async function Home() {
 
   // P3(ベータ限定): 確定7/7ホーム。非ベータは従来ホーム(下の return)。
   if (isBeta) {
-    const streakDays = await getRecordStreak();
+    const [streakDays, w] = await Promise.all([getRecordStreak(), getTodayWorkout()]);
+    // トレカードのラベル(◯日目 + メニュー名/部位ラベル)
+    const workoutDayNumber = w.started ? w.dayNumber : null;
+    let workoutPartLabel: string | null = null;
+    if (w.started && w.dayMenu) {
+      const label = w.dayMenu.日;
+      if (label && label !== `${w.dayNumber}日目`) {
+        workoutPartLabel = label;
+      } else {
+        const t = getExerciseTarget(
+          (w.dayMenu.種目 ?? []).flatMap((e) => e.主部位 ?? [])
+        );
+        workoutPartLabel = t && t !== "全身" ? `${t}の日` : `${w.dayNumber}日目`;
+      }
+    }
     return (
       <HomeBeta
         displayName={displayName}
         daysSinceJoined={stats?.daysSinceJoined ?? 0}
         streakDays={streakDays}
+        workoutDayNumber={workoutDayNumber}
+        workoutPartLabel={workoutPartLabel}
         bodyCard={bodyCard}
         completedLessons={stats?.completedLessons ?? 0}
         totalLessons={stats?.totalLessons ?? 0}
