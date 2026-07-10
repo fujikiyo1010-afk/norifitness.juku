@@ -35,6 +35,8 @@ const HIDDEN_PREFIXES = [
   "/reset-password",
   "/debug",
   "/messages", // チャット画面では入力欄を画面下端ピッタリにするためナビ非表示 (2026-06-18 #2)
+  "/meals/new", // 食事投稿(P4-a): 下部固定「これで記録する」がナビと重ならないよう非表示
+  "/workout/today", // 実施記録(P5): 下部固定「今日のトレ完了」がナビと重ならないよう非表示
 ];
 
 export function MemberBottomNav() {
