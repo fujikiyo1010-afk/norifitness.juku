@@ -109,11 +109,21 @@ export type DailyWord = {
   status: "sent" | "checked" | "skipped";
 };
 
+export type DailyMealForAdmin = {
+  mealType: string; // 朝/昼/夕/間
+  postedAt: string;
+  memo: string | null;
+  items: string[];
+  photoUrls: string[];
+};
+
 export type DailyDetail = {
   userId: string;
   name: string;
   initial: string;
   joinedAt: string | null;
+  isBeta: boolean; // 食事ブロックはベータ受講生時のみ表示(P4-a)
+  meals: DailyMealForAdmin[]; // その日の食事(v1-a=写真+品目)
   tags: AlertTag[];
   body: DailyBody;
   learning: DailyLearning;
@@ -139,10 +149,71 @@ export async function getDailyDetail(
 
   const { data: userRow } = await admin
     .from("users")
-    .select("id, name, joined_at")
+    .select("id, name, joined_at, is_beta")
     .eq("id", userId)
     .maybeSingle();
   if (!userRow) return null;
+
+  // --- その日の食事(P4-a・写真+品目)。合計/署名URLは admin(service role)で取得 ---
+  const meals: DailyMealForAdmin[] = [];
+  {
+    const { data: mealRows } = await admin
+      .from("meal_logs")
+      .select("id, meal_type, posted_at, memo, photos")
+      .eq("user_id", userId)
+      .eq("date", dateStr)
+      .order("posted_at", { ascending: true });
+    const rows = (mealRows ?? []) as {
+      id: string;
+      meal_type: string;
+      posted_at: string;
+      memo: string | null;
+      photos: string[] | null;
+    }[];
+    if (rows.length > 0) {
+      const { data: itemRows } = await admin
+        .from("meal_log_items")
+        .select("meal_log_id, name, sort_order")
+        .in(
+          "meal_log_id",
+          rows.map((r) => r.id)
+        )
+        .order("sort_order", { ascending: true });
+      const itemsByLog = new Map<string, string[]>();
+      for (const it of (itemRows ?? []) as { meal_log_id: string; name: string }[]) {
+        const arr = itemsByLog.get(it.meal_log_id) ?? [];
+        arr.push(it.name);
+        itemsByLog.set(it.meal_log_id, arr);
+      }
+      const allPaths = rows.flatMap((r) => r.photos ?? []);
+      const urlByPath = new Map<string, string>();
+      if (allPaths.length > 0) {
+        const { data: signed } = await admin.storage
+          .from("meal-photos")
+          .createSignedUrls(allPaths, 3600);
+        for (const s of signed ?? []) {
+          if (s.signedUrl && s.path) urlByPath.set(s.path, s.signedUrl);
+        }
+      }
+      const order: Record<string, number> = { 朝: 0, 昼: 1, 夕: 2, 間: 3 };
+      for (const r of rows) {
+        meals.push({
+          mealType: r.meal_type,
+          postedAt: r.posted_at,
+          memo: r.memo,
+          items: itemsByLog.get(r.id) ?? [],
+          photoUrls: (r.photos ?? [])
+            .map((p) => urlByPath.get(p) ?? "")
+            .filter(Boolean),
+        });
+      }
+      meals.sort(
+        (a, b) =>
+          (order[a.mealType] ?? 9) - (order[b.mealType] ?? 9) ||
+          a.postedAt.localeCompare(b.postedAt)
+      );
+    }
+  }
 
   const [bodySummary, goalSheet, carteRes, alerts, fbRes, lessonsRes] =
     await Promise.all([
@@ -272,6 +343,8 @@ export async function getDailyDetail(
     name: (userRow.name as string) ?? "受講生",
     initial: ((userRow.name as string) ?? "?").charAt(0),
     joinedAt: (userRow.joined_at as string) ?? null,
+    isBeta: (userRow.is_beta as boolean | null) === true,
+    meals,
     tags,
     body,
     learning,

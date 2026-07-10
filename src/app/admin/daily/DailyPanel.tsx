@@ -285,12 +285,73 @@ function PlaceholderCard({
 // タブ0: 今日（食事/トレ/生活はプレースホルダ）
 // =====================================================================
 
+const MEAL_LABEL_ADMIN: Record<string, string> = {
+  朝: "朝食",
+  昼: "昼食",
+  夕: "夕食",
+  間: "間食",
+};
+
+function mealTime(iso: string): string {
+  const d = new Date(iso);
+  const jst = new Date(d.getTime() + 9 * 3600 * 1000);
+  return `${String(jst.getUTCHours()).padStart(2, "0")}:${String(jst.getUTCMinutes()).padStart(2, "0")}`;
+}
+
 function TodayTab({ detail }: { detail: DailyDetail }) {
-  void detail;
   return (
     <div className="space-y-3">
-      <SectionCard title="🍚 今日の食事" srcLabel="meal_logs（P4）" srcNew>
-        <PlaceholderBody text="食事投稿・PFC集計はP4で実装します。ここに今日の食事カードと合計ゲージ（目標PFC比）が入ります。" />
+      <SectionCard title="🍚 今日の食事" srcLabel="meal_logs（P4-a）" srcNew>
+        {!detail.isBeta ? (
+          <PlaceholderBody text="この受講生はまだ食事機能の対象外です（ベータ公開後に表示されます）。" />
+        ) : detail.meals.length === 0 ? (
+          <PlaceholderBody text="今日の食事の記録はまだありません。写真から判断してコメントする場合は、この下のFB欄へ。" />
+        ) : (
+          <div className="space-y-2">
+            {detail.meals.map((m, i) => (
+              <div
+                key={i}
+                className="flex items-start gap-3 rounded-lg border border-zinc-200 bg-white p-2.5"
+              >
+                {m.photoUrls[0] ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={m.photoUrls[0]}
+                    alt=""
+                    className="h-14 w-14 flex-shrink-0 rounded object-cover"
+                  />
+                ) : (
+                  <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded bg-zinc-100 text-[10px] text-zinc-400">
+                    写真なし
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-[13px] font-bold text-zinc-900">
+                      {MEAL_LABEL_ADMIN[m.mealType] ?? m.mealType}
+                    </span>
+                    <span className="text-[10px] text-zinc-400">
+                      {mealTime(m.postedAt)}
+                    </span>
+                  </div>
+                  {m.items.length > 0 && (
+                    <div className="mt-0.5 text-[11px] text-zinc-600">
+                      {m.items.join("、")}
+                    </div>
+                  )}
+                  {m.memo && (
+                    <div className="mt-0.5 text-[11px] italic text-zinc-400">
+                      {m.memo}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+            <p className="text-[10px] text-zinc-400">
+              数値なしの写真ベース記録です（PFC自動計算・目標PFCゲージはfood_table投入後＝v1-b）。
+            </p>
+          </div>
+        )}
       </SectionCard>
       <SectionCard title="💪 今日のトレーニング" srcLabel="user_workout_logs（P5）" srcNew>
         <PlaceholderBody text="実施記録はP5で実装します。ここに原本×実績の突合と「原本以外にやったこと」が入ります。" />
@@ -592,14 +653,21 @@ function FbBar({
       </div>
 
       <div className="flex-1 flex flex-col gap-1">
-        {/* 題材ガード: 食事・生活の受講生画面が無い間は話題を体重・学習に限定（半ループ対策・マスターRule18補足） */}
+        {/* 題材ガード: 生活の受講生画面が無い間は話題を限定（半ループ対策・マスターRule18補足）。
+            食事はP4-a公開済みのため、ベータ受講生には食事も解禁。 */}
         <div className="rounded-md border border-[#f0e2b8] bg-[#fffbeb] px-2.5 py-1 text-[10.5px] leading-snug text-[#8a6d1a]">
-          いま書けるのは<b>体重・学習</b>の話題までです（食事・生活は P4/P6 公開後）
+          いま書けるのは
+          <b>{detail.isBeta ? "体重・学習・食事" : "体重・学習"}</b>
+          の話題までです（{detail.isBeta ? "生活は P6 公開後" : "食事・生活は P4/P6 公開後"}）
         </div>
         <textarea
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          placeholder="体重の変化・学習の進みについてひとこと…（例: 今週の体重の落ち方いいですね／L4まで進んだのは順調です）"
+          placeholder={
+            detail.isBeta
+              ? "体重・学習・食事についてひとこと…（例: 朝の納豆いいですね／今週の体重の落ち方いいですね）"
+              : "体重の変化・学習の進みについてひとこと…（例: 今週の体重の落ち方いいですね／L4まで進んだのは順調です）"
+          }
           className="w-full min-h-[52px] max-h-[88px] border border-[#e8ebe9] rounded-[9px] px-3 py-2 text-[12.5px] leading-relaxed resize-none focus:outline focus:outline-2 focus:outline-[#00897b]/35 focus:border-[#00897b]"
         />
         {error && <div className="text-[11px] text-red-600">⚠ {error}</div>}

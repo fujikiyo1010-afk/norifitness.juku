@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import { isBetaUser } from "@/lib/auth/beta";
 import { MemberHeader } from "@/components/MemberHeader";
 import { jstTodayStr } from "@/lib/date/jst";
@@ -32,12 +33,28 @@ export default async function MealsDayPage({
     photoUrls: m.photos.map((p) => urlMap.get(p) ?? "").filter(Boolean),
   }));
 
+  // 着地切替(M6): その日のデイリーFB(送信済)を「のりからのコメント」として食事詳細に表示。
+  // RLS = 自分の sent のみ読める。
+  const supabase = await createClient();
+  const { data: fbRow } = await supabase
+    .from("daily_feedbacks")
+    .select("body, date")
+    .eq("date", date)
+    .eq("status", "sent")
+    .maybeSingle();
+  const feedback = fbRow?.body ? (fbRow.body as string) : null;
+
   return (
     <>
       <MemberHeader title="食事" fallbackHref="/" />
       <main className="min-h-[100dvh] bg-[#f9f5ed]">
         <div className="mx-auto max-w-[460px] px-4 py-4">
-          <DayDetail date={date} meals={withUrls} today={jstTodayStr()} />
+          <DayDetail
+            date={date}
+            meals={withUrls}
+            today={jstTodayStr()}
+            feedback={feedback}
+          />
         </div>
       </main>
     </>
