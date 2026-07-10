@@ -4,6 +4,7 @@ import { isBetaUser } from "@/lib/auth/beta";
 import { MemberHeader } from "@/components/MemberHeader";
 import { jstTodayStr } from "@/lib/date/jst";
 import { getMealsForDate, signMealPhotos } from "@/lib/meals/queries";
+import { getDailyCondition, shouldAskYesterday } from "@/lib/conditions/queries";
 import { DayDetail } from "./DayDetail";
 
 export const dynamic = "force-dynamic";
@@ -65,6 +66,15 @@ export default async function MealsDayPage({
       }
     : null;
 
+  // 生活記録(P6): その日の記録 + 翌日補完(今日を見ている時のみ昨日分を聞く)
+  const today = jstTodayStr();
+  const condRes = await getDailyCondition(date);
+  const yesterday = new Date(Date.parse(`${date}T00:00:00Z`) - 86_400_000)
+    .toISOString()
+    .slice(0, 10);
+  const askYesterday =
+    date === today && (await shouldAskYesterday(yesterday)) ? yesterday : null;
+
   return (
     <>
       <MemberHeader title="食事" fallbackHref="/" />
@@ -77,6 +87,8 @@ export default async function MealsDayPage({
             feedback={feedback}
             target={target}
             userId={user.id}
+            condition={condRes?.data ?? null}
+            askYesterday={askYesterday}
           />
         </div>
       </main>
