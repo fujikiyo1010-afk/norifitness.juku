@@ -113,6 +113,7 @@ export function DayDetail({
   askYesterday = null,
   foods = [],
   recordedDates = [],
+  autoOpenLife = false,
 }: {
   date: string;
   meals: MealWithUrls[];
@@ -124,10 +125,14 @@ export function DayDetail({
   askYesterday?: string | null; // 翌日補完: 昨日の日付(聞くべきなら) or null
   foods?: FoodItem[]; // food_table(P4-b・自動計算)
   recordedDates?: string[]; // 細8: 週ストリップ用・記録がある日(YYYY-MM-DD)
+  autoOpenLife?: boolean; // 細21: ホームの生活入口から来たら4問を自動で開く
 }) {
   const router = useRouter();
   const [sheet, setSheet] = useState<{ mealType: MealType; editLog: MealWithUrls | null } | null>(null);
-  const [lifeSheet, setLifeSheet] = useState<{ date: string; initial: DailyConditionData | null } | null>(null);
+  // 細21: ホームの生活入口(?life=1)から来たら、その日の4問シートを初期表示する
+  const [lifeSheet, setLifeSheet] = useState<{ date: string; initial: DailyConditionData | null } | null>(
+    autoOpenLife ? { date, initial: condition ?? null } : null
+  );
   const [toast, setToast] = useState<string | null>(null);
   const [, startDelete] = useTransition();
   const conditionRecorded = hasAnyCondition(condition);
