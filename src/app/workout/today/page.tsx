@@ -32,17 +32,35 @@ export default async function WorkoutTodayPage({
         <div className="mx-auto max-w-[460px] px-4 py-4">
           {sp.done === "1" && (
             <div className="mb-3 rounded-2xl bg-gradient-to-br from-[#4a875b] to-[#34603f] px-4 py-5 text-center text-white">
-              <div className="text-[28px] font-extrabold">✓</div>
-              <div className="mt-1 text-[15px] font-bold">記録しました！</div>
+              <div className="text-[30px] font-extrabold leading-none">✓</div>
+              <div className="mt-1.5 text-[16px] font-bold">記録しました！</div>
               <div className="mt-0.5 text-[12px] opacity-90">
                 今日の達成に反映されます。おつかれさまでした。
               </div>
-              <Link
-                href="/"
-                className="mt-3 inline-block rounded-full bg-white/20 px-4 py-1.5 text-[12px] font-bold"
-              >
-                ホームに戻る →
-              </Link>
+              {w.started && w.dayMenu && (
+                <div className="mt-3 rounded-xl bg-white/15 px-3 py-2 text-[12px] font-bold">
+                  次は {w.cycleNumber}周{w.dayNumber}日目
+                  {w.dayMenu.種別 === "休息"
+                    ? "・休養日"
+                    : w.dayMenu.日
+                      ? `・${w.dayMenu.日}`
+                      : ""}
+                </div>
+              )}
+              <div className="mt-3 flex justify-center gap-2">
+                <Link
+                  href="/"
+                  className="rounded-full bg-white/20 px-4 py-1.5 text-[12px] font-bold"
+                >
+                  ホームに戻る →
+                </Link>
+                <Link
+                  href="/workout/history"
+                  className="rounded-full bg-white/20 px-4 py-1.5 text-[12px] font-bold"
+                >
+                  履歴を見る
+                </Link>
+              </div>
             </div>
           )}
 
