@@ -5,6 +5,9 @@ import {
   type MyReviewWithContext,
 } from "@/lib/courses/queries";
 import { MemberHeader } from "@/components/MemberHeader";
+import { isBetaUser } from "@/lib/auth/beta";
+import { getMyLogDashboard } from "@/lib/member/my-log-dashboard";
+import { MyLogBeta } from "./MyLogBeta";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +19,13 @@ function daysAgo(iso: string): number {
 
 export default async function MyLogPage() {
   const supabase = await createClient();
+
+  // ベータ4人 = 新「学びの記録」(M18・案3ダッシュボード)。それ以外は現行(フラッシュバック+ハブ)。
+  const isBeta = await isBetaUser();
+  if (isBeta) {
+    const data = await getMyLogDashboard();
+    return <MyLogBeta data={data} />;
+  }
 
   // 各セクションのカウント取得 (= 振り返り + 完了履歴 + 実践リスト 全体件数)
   const [
