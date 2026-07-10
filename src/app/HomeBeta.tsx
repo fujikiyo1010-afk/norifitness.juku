@@ -16,11 +16,14 @@ import type { TodayActivity } from "@/lib/member/today-activity";
  */
 
 const TEAL = "#4a875b";
-const TEAL_DARK = "#34603f";
+
+// 今日やること3枚の色(点1・確定7/7): トレ/食事/学び
+const CARD_COLOR = { workout: "#5b7a9d", meal: "#c88a4a", learn: "#6a9a6a" };
 
 export function HomeBeta({
   displayName,
   daysSinceJoined,
+  streakDays,
   bodyCard,
   completedLessons,
   totalLessons,
@@ -32,6 +35,7 @@ export function HomeBeta({
 }: {
   displayName: string;
   daysSinceJoined: number;
+  streakDays: number; // 継続日数(点20)
   bodyCard: BodyCard;
   completedLessons: number;
   totalLessons: number;
@@ -43,8 +47,8 @@ export function HomeBeta({
 }) {
   const learnPct =
     totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+  // 今日やること=3枚(トレ・食事・学び)・分母3(点19)。体組成は上の大きい数字カードが担当。
   const doneCount =
-    (today.recordedBody ? 1 : 0) +
     (today.learned ? 1 : 0) +
     (today.recordedMeal ? 1 : 0) +
     (today.recordedWorkout ? 1 : 0);
@@ -81,11 +85,19 @@ export function HomeBeta({
 
         {/* 挨拶ヒーロー */}
         <section className="bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] px-5 py-[20px]">
-          <h1 className="text-[18px] font-bold text-[#2b2620]">
-            こんにちは、{displayName} さん
-          </h1>
-          <div className="mt-1 text-[11px] text-[#6a6256] font-mono">
-            入会 {daysSinceJoined + 1} 日目
+          <div className="flex items-start justify-between gap-2">
+            <h1 className="text-[18px] font-bold text-[#2b2620]">
+              こんにちは、{displayName} さん
+            </h1>
+            {/* 点20: 炎+継続◯日目(0日は出さない) */}
+            {streakDays > 0 && (
+              <div className="mt-0.5 flex flex-shrink-0 items-center gap-1 rounded-full bg-[#fff3e0] px-2.5 py-1">
+                <FlameIcon />
+                <span className="text-[11px] font-extrabold text-[#c2693f]">
+                  継続 {streakDays} 日目
+                </span>
+              </div>
+            )}
           </div>
         </section>
 
@@ -95,19 +107,19 @@ export function HomeBeta({
             <BoardCard items={boardItems} unreadReply={unreadReply} />
           )}
 
-          {/* 今のからだ(リング) */}
-          <BodyRingCard bodyCard={bodyCard} />
+          {/* 今のからだ(点18・見せ方3=大きい数字型。リングは/record体重タブのみ) */}
+          <BodyBigCard bodyCard={bodyCard} />
 
           {/* 今日やること */}
           <section>
             <div className="mb-2 flex items-center gap-2.5 rounded-[14px] border border-[#e7dcc9] bg-[#fffdf8] px-3.5 py-2.5">
               <span className="font-mono text-[15px] font-extrabold text-[#4a875b]">
-                {doneCount}/4
+                {doneCount}/3
               </span>
               <div className="h-[7px] flex-1 overflow-hidden rounded-full bg-[#e7dcc9]">
                 <div
                   className="h-full rounded-full"
-                  style={{ width: `${(doneCount / 4) * 100}%`, background: TEAL }}
+                  style={{ width: `${(doneCount / 3) * 100}%`, background: TEAL }}
                 />
               </div>
               <span className="text-[10px] font-bold text-[#6a6256]">
@@ -115,45 +127,10 @@ export function HomeBeta({
               </span>
             </div>
             <div className="flex flex-col gap-2">
-              {/* 体組成 */}
-              <TodayCard
-                cap="今のからだ"
-                capColor={TEAL_DARK}
-                title={
-                  today.recordedBody
-                    ? "今日の記録OK"
-                    : "今日の体組成を記録しよう"
-                }
-                cta="タップして記録 →"
-                href="/record"
-                done={today.recordedBody}
-              />
-              {/* 学習 */}
-              <TodayCard
-                cap="続きから学ぶ"
-                capColor={TEAL_DARK}
-                title={
-                  lastWatched
-                    ? lastWatched.lessonTitle
-                    : "最初のレッスンを見てみよう"
-                }
-                cta={lastWatched ? "▶ 続きを見る →" : "▶ レッスンへ →"}
-                href={lastWatched?.href ?? "/courses"}
-                done={today.learned}
-              />
-              {/* 食事(M7 案1・1食で✓) */}
-              <TodayCard
-                cap="今日の食事"
-                capColor={TEAL_DARK}
-                title={mealTitle}
-                cta={today.recordedMeal ? "タップして見る →" : "＋写真で記録 →"}
-                href="/meals"
-                done={today.recordedMeal}
-              />
-              {/* トレーニング(P5・1日1タップ) */}
+              {/* トレーニング(点19の並び=先頭・点1の色) */}
               <TodayCard
                 cap="今日のトレ"
-                capColor={TEAL_DARK}
+                capColor={CARD_COLOR.workout}
                 title={
                   today.recordedWorkout
                     ? "今日のトレ完了"
@@ -164,6 +141,28 @@ export function HomeBeta({
                 cta={today.recordedWorkout ? "タップして見る →" : "▶ 実施を記録 →"}
                 href="/workout/today"
                 done={today.recordedWorkout}
+              />
+              {/* 食事(M7 案1・1食で✓) */}
+              <TodayCard
+                cap="今日の食事"
+                capColor={CARD_COLOR.meal}
+                title={mealTitle}
+                cta={today.recordedMeal ? "タップして見る →" : "＋写真で記録 →"}
+                href="/meals"
+                done={today.recordedMeal}
+              />
+              {/* 学び */}
+              <TodayCard
+                cap="続きから学ぶ"
+                capColor={CARD_COLOR.learn}
+                title={
+                  lastWatched
+                    ? lastWatched.lessonTitle
+                    : "最初のレッスンを見てみよう"
+                }
+                cta={lastWatched ? "▶ 続きを見る →" : "▶ レッスンへ →"}
+                href={lastWatched?.href ?? "/courses"}
+                done={today.learned}
               />
             </div>
           </section>
@@ -284,84 +283,55 @@ function BoardCard({
 // 今のからだ(リング)
 // =====================================================================
 
-function BodyRingCard({ bodyCard }: { bodyCard: BodyCard }) {
-  const R = 34;
-  const C = 2 * Math.PI * R;
-  const pct = bodyCard.ringPct ?? 0;
-
+// 点18・確定7/7 bm()見せ方3=大きい数字型(リングは使わない)
+function BodyBigCard({ bodyCard }: { bodyCard: BodyCard }) {
   return (
     <Link
       href="/record"
-      className="block rounded-[14px] border border-[#e7dcc9] bg-[#fffdf8] px-4 py-3.5 hover:border-[#4a875b] transition-colors"
+      className="block rounded-[14px] border border-[#e7dcc9] bg-[#fffdf8] px-[13px] py-3 hover:border-[#4a875b] transition-colors"
     >
-      <div className="mb-1 flex items-center justify-between">
+      <div className="mb-1.5 flex items-center justify-between">
         <span className="text-[11px] font-bold text-[#6a6256]">今のからだ</span>
-        <span className="text-[10px] font-bold text-[#4a875b]">
-          詳細・グラフ →
-        </span>
+        <span className="text-[10px] font-bold text-[#4a875b]">詳細・グラフ →</span>
       </div>
       {bodyCard.hasData ? (
-        <div className="flex items-center gap-4">
-          <div className="relative h-[84px] w-[84px] flex-shrink-0">
-            <svg width="84" height="84" viewBox="0 0 84 84">
-              <circle cx="42" cy="42" r={R} fill="none" stroke="#eadfce" strokeWidth="8" />
-              <circle
-                cx="42"
-                cy="42"
-                r={R}
-                fill="none"
-                stroke={TEAL}
-                strokeWidth="8"
-                strokeLinecap="round"
-                strokeDasharray={C}
-                strokeDashoffset={C * (1 - pct / 100)}
-                transform="rotate(-90 42 42)"
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="font-mono text-[20px] font-extrabold leading-none text-[#2b2620]">
+        <>
+          <div className="flex items-end gap-3">
+            <div className="leading-none">
+              <span className="text-[42px] font-extrabold leading-none text-[#34603f]">
                 {bodyCard.currentWeight?.toFixed(1) ?? "—"}
               </span>
-              <span className="text-[9px] font-bold text-[#6a6256]">kg</span>
+              <span className="ml-0.5 text-[12px] font-bold text-[#6a6256]">kg</span>
             </div>
-          </div>
-          <div className="min-w-0 flex-1">
-            {bodyCard.targetWeightKg != null ? (
-              bodyCard.reached ? (
-                <div className="text-[13px] font-bold text-[#004d40]">
-                  目標達成
-                </div>
-              ) : (
-                <div className="text-[12px] text-[#6a6256]">
-                  目標まで{" "}
-                  <b className="font-mono text-[15px] text-[#c2693f]">
-                    あと {bodyCard.remainingKg?.toFixed(1)}kg
-                  </b>
-                </div>
-              )
-            ) : (
-              <div className="text-[12px] text-[#6a6256]">目標体重が未設定です</div>
-            )}
-            {bodyCard.paceKgPerWeek != null && (
-              <div className="mt-1 text-[10.5px] text-[#a59b8c]">
-                現状ペース{" "}
-                {bodyCard.paceKgPerWeek > 0 ? "+" : ""}
-                {bodyCard.paceKgPerWeek.toFixed(1)}kg/週
+            {bodyCard.currentBodyFat != null && (
+              <div className="pb-[3px] text-[12px] text-[#6a6256]">
+                体脂肪 <b className="text-[#34603f]">{bodyCard.currentBodyFat.toFixed(1)}%</b>
               </div>
             )}
-            <span className="mt-2 inline-block text-[10px] font-bold text-[#4a875b]">
-              タップして記録 →
-            </span>
           </div>
-        </div>
+          {bodyCard.targetWeightKg != null && (
+            <div className="mt-[7px] text-[11.5px] text-[#6a6256]">
+              {bodyCard.reached ? (
+                <b className="text-[#004d40]">目標体重に到達しました</b>
+              ) : (
+                <>
+                  目標まで <b className="text-[#c2693f]">体重-{bodyCard.remainingKg?.toFixed(1)}kg</b>
+                </>
+              )}
+            </div>
+          )}
+          <span className="mt-2.5 block rounded-lg bg-[#4a875b] py-2 text-center text-[12px] font-bold text-white">
+            タップして記録 ・ グラフを見る
+          </span>
+        </>
       ) : (
         <div className="py-2 text-center">
           <div className="text-[13px] font-bold text-[#5b5344]">
             体組成をはじめて記録しよう
           </div>
-          <div className="mt-1 text-[11px] text-[#a59b8c]">
-            体重を記録すると、変化がグラフで見えます →
-          </div>
+          <span className="mt-2.5 block rounded-lg bg-[#4a875b] py-2 text-center text-[12px] font-bold text-white">
+            タップして記録 ・ グラフを見る
+          </span>
         </div>
       )}
     </Link>
@@ -548,6 +518,22 @@ function CommentIcon() {
   return (
     <svg {...iconProps}>
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
+function FlameIcon() {
+  return (
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#c2693f"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
     </svg>
   );
 }
