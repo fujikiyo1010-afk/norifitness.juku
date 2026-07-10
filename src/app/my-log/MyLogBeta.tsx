@@ -81,7 +81,20 @@ export function MyLogBeta({ data }: { data: MyLogDashboard }) {
             }
           />
 
-          {/* 保存した添削カードは /history/feedbacks(P7)公開まで非表示 */}
+          {/* 保存した添削(P7・入口のみ→デイリー添削ページの保存済みへ直着地) */}
+          <BigCard
+            href="/history/feedbacks?tab=saved"
+            iconBg="#f6ecc8"
+            iconColor="#8a6d10"
+            icon={<BookmarkIcon />}
+            title="保存した添削"
+            count={`${data.savedFeedbackCount}件`}
+            desc={
+              data.savedFeedbackCount > 0
+                ? "しおりでとっておいた、のりの言葉。くじけた日に開く場所です"
+                : "心に残ったのりの言葉を、しおりでとっておけます"
+            }
+          />
         </div>
       </main>
     </>
@@ -194,6 +207,14 @@ function CheckIcon() {
   return (
     <svg {...ICO}>
       <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+
+function BookmarkIcon() {
+  return (
+    <svg {...ICO}>
+      <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
     </svg>
   );
 }

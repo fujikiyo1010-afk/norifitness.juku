@@ -25,6 +25,7 @@ export type MyLogDashboard = {
   untriedCount: number;
   latestUntriedText: string | null;
   latestCompleted: { title: string; dateLabel: string } | null;
+  savedFeedbackCount: number; // しおりした添削の数(P7)
 };
 
 /** ISO → JST の M/D 表記 */
@@ -53,10 +54,11 @@ export async function getMyLogDashboard(): Promise<MyLogDashboard> {
     untriedCount: 0,
     latestUntriedText: null,
     latestCompleted: null,
+    savedFeedbackCount: 0,
   };
   if (!user) return empty;
 
-  const [homeStats, reviewStats, actionStats, latestReviewRow, latestUntriedRow, latestCompletedRow] =
+  const [homeStats, reviewStats, actionStats, latestReviewRow, latestUntriedRow, latestCompletedRow, bookmarkRes] =
     await Promise.all([
       getMyHomeStats(),
       getReviewsStats(),
@@ -87,6 +89,11 @@ export async function getMyLogDashboard(): Promise<MyLogDashboard> {
         .order("completed_at", { ascending: false })
         .limit(1)
         .maybeSingle(),
+      // しおりした添削の数(P7)
+      supabase
+        .from("feedback_bookmarks")
+        .select("fb_date", { count: "exact", head: true })
+        .eq("user_id", user.id),
     ]);
 
   // レッスンタイトルの解決(振り返り最新 + 完了最新)
@@ -145,5 +152,6 @@ export async function getMyLogDashboard(): Promise<MyLogDashboard> {
     untriedCount: Math.max(0, actionStats.totalCount - actionStats.triedTotal),
     latestUntriedText: untriedData?.planned_action ?? null,
     latestCompleted,
+    savedFeedbackCount: bookmarkRes.count ?? 0,
   };
 }

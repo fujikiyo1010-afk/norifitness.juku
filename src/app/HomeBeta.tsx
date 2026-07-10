@@ -176,8 +176,15 @@ export function HomeBeta({
             daysSinceJoined={daysSinceJoined}
           />
 
-          {/* 大タイル(実装済み5枚) */}
+          {/* 大タイル(先頭=デイリー添削・M17) */}
           <div className="grid grid-cols-2 gap-2">
+            <BigTile
+              href="/history/feedbacks"
+              name="デイリー添削"
+              desc="のりからの言葉"
+              icon={<CommentIcon />}
+              badge={unreadReply ? "NEW" : undefined}
+            />
             <BigTile href="/courses" name="コース一覧" desc="動画レッスン" icon={<BookIcon />} />
             <BigTile href="/my-log" name="学びの記録" desc="振り返り・進捗" icon={<PencilIcon />} />
             <BigTile href="/tools" name="ツール" desc="カロリー/PFC計算" icon={<ToolIcon />} />
@@ -534,6 +541,13 @@ function BookIcon() {
     <svg {...iconProps}>
       <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
       <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+    </svg>
+  );
+}
+function CommentIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
     </svg>
   );
 }
