@@ -2,6 +2,9 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { listUsersWithAlerts, type AlertTag } from "@/lib/admin/alerts";
 import { getLatestBodyMetricSummary } from "@/lib/body-metrics/queries";
 import { getGoalSheetForUser } from "@/lib/goal-sheet/queries";
+import { getCurrentMenuForAdmin } from "@/lib/workout/queries";
+import { resolveDayMenu, INTENSITY_LABEL, type Intensity } from "@/lib/workout/logs-types";
+import { cleanExerciseName } from "@/lib/workout/menu-display";
 import { jstTodayStr } from "@/lib/date/jst";
 
 /**
@@ -117,13 +120,24 @@ export type DailyMealForAdmin = {
   photoUrls: string[];
 };
 
+export type DailyWorkoutForAdmin = {
+  status: "done" | "rest_done" | "skipped";
+  dayLabel: string;
+  intensity: string; // 小/中/大
+  doneNames: string[]; // 原本どおりやった種目
+  notDoneNames: string[]; // 原本にあってやらなかった
+  addedNames: string[]; // 原本外の追加
+  memo: string | null;
+};
+
 export type DailyDetail = {
   userId: string;
   name: string;
   initial: string;
   joinedAt: string | null;
-  isBeta: boolean; // 食事ブロックはベータ受講生時のみ表示(P4-a)
+  isBeta: boolean; // 食事/トレブロックはベータ受講生時のみ表示(P4-a/P5)
   meals: DailyMealForAdmin[]; // その日の食事(v1-a=写真+品目)
+  workout: DailyWorkoutForAdmin | null; // その日のトレ実績(原本×実績の差分)
   tags: AlertTag[];
   body: DailyBody;
   learning: DailyLearning;
@@ -212,6 +226,50 @@ export async function getDailyDetail(
           (order[a.mealType] ?? 9) - (order[b.mealType] ?? 9) ||
           a.postedAt.localeCompare(b.postedAt)
       );
+    }
+  }
+
+  // --- その日のトレ実績(原本×実績の差分・P5) ---
+  let workout: DailyWorkoutForAdmin | null = null;
+  {
+    const { data: logRow } = await admin
+      .from("user_workout_logs")
+      .select("id, day_number, intensity, status, memo")
+      .eq("user_id", userId)
+      .eq("date", dateStr)
+      .maybeSingle();
+    if (logRow) {
+      const { data: itemRows } = await admin
+        .from("user_workout_log_items")
+        .select("exercise_name, source")
+        .eq("log_id", logRow.id as string);
+      const items = (itemRows ?? []) as { exercise_name: string; source: string }[];
+      const doneOriginal = items
+        .filter((i) => i.source === "original")
+        .map((i) => cleanExerciseName(i.exercise_name));
+      const addedNames = items
+        .filter((i) => i.source === "added")
+        .map((i) => cleanExerciseName(i.exercise_name));
+      // 原本の当日種目 → やらなかった差分
+      const menu = await getCurrentMenuForAdmin(userId);
+      const intensity = (logRow.intensity as Intensity) ?? "medium";
+      const dayMenu = menu
+        ? resolveDayMenu(menu.cycles, intensity, logRow.day_number as number)
+        : null;
+      const originalNames = (dayMenu?.種目 ?? [])
+        .filter((e) => e.種目名)
+        .map((e) => cleanExerciseName(e.種目名));
+      const doneSet = new Set(doneOriginal);
+      const notDoneNames = originalNames.filter((n) => !doneSet.has(n));
+      workout = {
+        status: logRow.status as "done" | "rest_done" | "skipped",
+        dayLabel: dayMenu?.日 ?? `${logRow.day_number}日目`,
+        intensity: INTENSITY_LABEL[intensity] ?? "中",
+        doneNames: doneOriginal,
+        notDoneNames,
+        addedNames,
+        memo: (logRow.memo as string | null) ?? null,
+      };
     }
   }
 
@@ -345,6 +403,7 @@ export async function getDailyDetail(
     joinedAt: (userRow.joined_at as string) ?? null,
     isBeta: (userRow.is_beta as boolean | null) === true,
     meals,
+    workout,
     tags,
     body,
     learning,
