@@ -171,6 +171,8 @@ export function HomeBeta({
                 done={today.learned}
               />
             </div>
+            {/* 細21: 生活の独立入口(4問・10秒)。/meals?life=1 で4問シートを自動で開く */}
+            <LifeRow done={today.recordedLife} />
           </section>
 
           {/* 学習の進捗(ドーナツ) */}
@@ -427,6 +429,59 @@ function TodayCard({
         </div>
       </div>
     </Link>
+  );
+}
+
+// =====================================================================
+// 生活の独立入口(細21・4問10秒)
+// =====================================================================
+
+function LifeRow({ done }: { done: boolean }) {
+  return (
+    <Link
+      href="/meals?life=1"
+      className="mt-2 flex min-h-[44px] items-center gap-2.5 rounded-xl border border-[#e7dcc9] bg-[#fffdf8] px-3.5 py-2.5 hover:border-[#4a875b] transition-colors"
+    >
+      <span
+        className={`flex h-6 w-6 flex-none items-center justify-center rounded-full ${
+          done ? "bg-[#2f9e5a] text-white" : "bg-[#eaf3ec] text-[#4a875b]"
+        }`}
+      >
+        {done ? (
+          <span className="text-[13px] font-extrabold">✓</span>
+        ) : (
+          <MoonIcon />
+        )}
+      </span>
+      <span className="flex-1 text-[12.5px] font-bold text-[#2b2620]">
+        {done ? "今日の生活を記録しました" : "今日の生活を記録"}
+        <span className="ml-1 text-[10.5px] font-normal text-[#6a6256]">
+          （4問・10秒）
+        </span>
+      </span>
+      {!done && (
+        <span className="flex-none text-[11px] font-bold text-[#4a875b]">
+          記録する →
+        </span>
+      )}
+    </Link>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
   );
 }
 

@@ -17,6 +17,7 @@ export type TodayActivity = {
   mealTypes: string[];
   recordedWorkout: boolean; // 今日トレを完了/休養完了したか
   hasWorkoutMenu: boolean; // 進行中メニューがあるか(開始済み)
+  recordedLife: boolean; // 細21: 今日の生活(4問)を1つでも記録したか
 };
 
 export async function getTodayActivity(): Promise<TodayActivity> {
@@ -32,12 +33,13 @@ export async function getTodayActivity(): Promise<TodayActivity> {
       mealTypes: [],
       recordedWorkout: false,
       hasWorkoutMenu: false,
+      recordedLife: false,
     };
 
   const admin = createAdminClient();
   const today = jstTodayStr(); // YYYY-MM-DD (JST暦日)
 
-  const [bmRes, lpRes, mealRes, workoutRes, progRes] = await Promise.all([
+  const [bmRes, lpRes, mealRes, workoutRes, progRes, lifeRes] = await Promise.all([
     admin
       .from("body_metrics")
       .select("id")
@@ -67,7 +69,23 @@ export async function getTodayActivity(): Promise<TodayActivity> {
       .select("user_id")
       .eq("user_id", user.id)
       .limit(1),
+    admin
+      .from("daily_conditions")
+      .select("sleep_hours, condition, bowel, alcohol")
+      .eq("user_id", user.id)
+      .eq("date", today)
+      .limit(1),
   ]);
+
+  const lifeRow = (lifeRes.data?.[0] ?? null) as
+    | { sleep_hours: number | null; condition: string | null; bowel: string | null; alcohol: string | null }
+    | null;
+  const recordedLife =
+    lifeRow != null &&
+    (lifeRow.sleep_hours != null ||
+      lifeRow.condition != null ||
+      lifeRow.bowel != null ||
+      lifeRow.alcohol != null);
 
   const mealTypes = Array.from(
     new Set(((mealRes.data ?? []) as { meal_type: string }[]).map((m) => m.meal_type))
@@ -80,5 +98,6 @@ export async function getTodayActivity(): Promise<TodayActivity> {
     mealTypes,
     recordedWorkout: (workoutRes.data?.length ?? 0) > 0,
     hasWorkoutMenu: (progRes.data?.length ?? 0) > 0,
+    recordedLife,
   };
 }

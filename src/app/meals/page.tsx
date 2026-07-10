@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic";
 export default async function MealsDayPage({
   searchParams,
 }: {
-  searchParams: Promise<{ date?: string }>;
+  searchParams: Promise<{ date?: string; life?: string }>;
 }) {
   const isBeta = await isBetaUser();
   if (!isBeta) redirect("/");
@@ -25,6 +25,8 @@ export default async function MealsDayPage({
   const sp = await searchParams;
   const date =
     sp.date && /^\d{4}-\d{2}-\d{2}$/.test(sp.date) ? sp.date : jstTodayStr();
+  // 細21: ホームの生活入口(/meals?life=1)から来たら4問シートを自動で開く
+  const autoOpenLife = sp.life === "1";
 
   const supabase = await createClient();
   const {
@@ -112,6 +114,7 @@ export default async function MealsDayPage({
             askYesterday={askYesterday}
             foods={foods}
             recordedDates={recordedDates}
+            autoOpenLife={autoOpenLife}
           />
         </div>
       </main>
