@@ -147,7 +147,7 @@ export function HomeBeta({
                 capColor={TEAL_DARK}
                 title={mealTitle}
                 cta={today.recordedMeal ? "タップして見る →" : "＋写真で記録 →"}
-                href={today.recordedMeal ? "/meals" : "/meals/new"}
+                href="/meals"
                 done={today.recordedMeal}
               />
               {/* トレーニング(P5・1日1タップ) */}

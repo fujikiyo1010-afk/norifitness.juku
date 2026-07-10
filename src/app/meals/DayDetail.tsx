@@ -3,32 +3,31 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { BottomSheet } from "@/app/record/BottomSheet";
 import { deleteMealLog } from "@/lib/meals/actions";
-import {
-  sumMeals,
-  MEAL_TYPES,
-  MEAL_LABEL,
-  type MealLog,
-  type MealType,
-} from "@/lib/meals/types";
+import { sumMeals, MEAL_TYPES, MEAL_LABEL, type MealLog, type MealType } from "@/lib/meals/types";
+import { MealSheet } from "./MealSheet";
 
 type MealWithUrls = MealLog & { photoUrls: string[] };
+export type TargetPFC = { kcal: number | null; p: number | null; f: number | null; c: number | null };
 
 const DAY = 86_400_000;
 
-function shiftDate(date: string, deltaDays: number): string {
-  const ms = Date.parse(`${date}T00:00:00Z`) + deltaDays * DAY;
-  return new Date(ms).toISOString().slice(0, 10);
+function shiftDate(date: string, d: number): string {
+  return new Date(Date.parse(`${date}T00:00:00Z`) + d * DAY).toISOString().slice(0, 10);
 }
 function labelDate(date: string): string {
-  const d = new Date(`${date}T00:00:00Z`);
-  const w = ["日", "月", "火", "水", "木", "金", "土"][d.getUTCDay()];
-  return `${d.getUTCMonth() + 1}/${d.getUTCDate()}（${w}）`;
+  const dt = new Date(`${date}T00:00:00Z`);
+  const w = ["日", "月", "火", "水", "木", "金", "土"][dt.getUTCDay()];
+  return `${dt.getUTCMonth() + 1}/${dt.getUTCDate()}（${w}）`;
 }
 function timeLabel(iso: string): string {
   const d = new Date(iso);
   const jst = new Date(d.getTime() + 9 * 3600 * 1000);
   return `${String(jst.getUTCHours()).padStart(2, "0")}:${String(jst.getUTCMinutes()).padStart(2, "0")}`;
+}
+function nowPastNoonJST(): boolean {
+  return new Date(Date.now() + 9 * 3600 * 1000).getUTCHours() >= 12;
 }
 
 export function DayDetail({
@@ -36,22 +35,29 @@ export function DayDetail({
   meals,
   today,
   feedback = null,
+  target = null,
+  userId,
 }: {
   date: string;
   meals: MealWithUrls[];
   today: string;
-  /** その日のデイリーFB(のりからのコメント・M6 着地) */
   feedback?: string | null;
+  target?: TargetPFC | null;
+  userId: string;
 }) {
   const router = useRouter();
-  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
-  const [isDeleting, startDelete] = useTransition();
-  const editable = date === today;
+  const [sheet, setSheet] = useState<{ mealType: MealType; editLog: MealWithUrls | null } | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const [, startDelete] = useTransition();
+
+  const isToday = date === today;
+  // FBが届いた日は編集ロック(当日は M6 に従い編集可)
+  const locked = !isToday && !!feedback;
+  const editable = isToday && !locked;
 
   const total = sumMeals(meals);
   const hasNumbers = total.numberedCount > 0;
 
-  // チップ: タイプごとの記録有無/件数
   const byType = new Map<MealType, MealWithUrls[]>();
   for (const m of meals) {
     const arr = byType.get(m.meal_type) ?? [];
@@ -59,32 +65,41 @@ export function DayDetail({
     byType.set(m.meal_type, arr);
   }
 
+  function showToast(m: string) {
+    setToast(m);
+    setTimeout(() => setToast(null), 2200);
+  }
+  function onSaved(msg: string) {
+    setSheet(null);
+    showToast(msg);
+    router.refresh();
+  }
   function onDelete(id: string) {
     startDelete(async () => {
       const r = await deleteMealLog(id);
-      setPendingDelete(null);
-      if (r.ok) router.refresh();
+      if (r.ok) {
+        showToast("削除しました");
+        router.refresh();
+      }
     });
   }
 
   return (
     <div className="space-y-3 pb-6">
+      {toast && (
+        <div className="pointer-events-none fixed left-1/2 top-4 z-[70] -translate-x-1/2 rounded-full bg-[#34603f] px-4 py-2 text-[12px] font-bold text-white shadow-[0_4px_16px_rgba(0,0,0,0.25)]">
+          {toast}
+        </div>
+      )}
+
       {/* 日付ナビ */}
       <div className="flex items-center justify-between">
-        <Link
-          href={`/meals?date=${shiftDate(date, -1)}`}
-          className="rounded-lg px-2 py-1 text-[13px] text-[#6a6256]"
-        >
+        <Link href={`/meals?date=${shiftDate(date, -1)}`} className="px-2 py-1 text-[13px] text-[#6a6256]">
           ◀ {labelDate(shiftDate(date, -1))}
         </Link>
-        <span className="text-[14px] font-bold text-[#2b2620]">
-          {date === today ? "今日" : labelDate(date)}
-        </span>
+        <span className="text-[14px] font-bold text-[#2b2620]">{isToday ? "今日" : labelDate(date)}</span>
         {date < today ? (
-          <Link
-            href={`/meals?date=${shiftDate(date, 1)}`}
-            className="rounded-lg px-2 py-1 text-[13px] text-[#6a6256]"
-          >
+          <Link href={`/meals?date=${shiftDate(date, 1)}`} className="px-2 py-1 text-[13px] text-[#6a6256]">
             {labelDate(shiftDate(date, 1))} ▶
           </Link>
         ) : (
@@ -92,181 +107,233 @@ export function DayDetail({
         )}
       </div>
 
-      {/* のりからのコメント(M6 着地・その日のデイリーFB) */}
+      {/* のりコメント */}
       {feedback && (
         <div className="rounded-2xl border border-[#d7e6db] bg-[#eef5f0] px-4 py-3">
           <div className="mb-1 flex items-center gap-2">
-            <span className="rounded-full bg-[#4a875b] px-2 py-0.5 text-[9px] font-bold text-white">
-              のりから
-            </span>
+            <span className="rounded-full bg-[#4a875b] px-2 py-0.5 text-[9px] font-bold text-white">のりから</span>
             <span className="text-[10px] text-[#6a6256]">この日の記録へのコメント</span>
           </div>
-          <p className="whitespace-pre-wrap text-[12.5px] leading-relaxed text-[#2b2620]">
-            {feedback}
-          </p>
+          <p className="whitespace-pre-wrap text-[12.5px] leading-relaxed text-[#2b2620]">{feedback}</p>
         </div>
       )}
 
-      {/* 合計(数値があれば) */}
+      {/* 合計ゲージ */}
       <div className="rounded-2xl border border-[#e7dcc9] bg-[#fffdf8] px-4 py-3">
         {hasNumbers ? (
-          <div className="flex items-baseline gap-3">
-            <div className="text-[20px] font-extrabold text-[#34603f]">
-              {total.kcal}
-              <span className="ml-0.5 text-[11px] text-[#a59b8c]">kcal</span>
+          <>
+            <div className="flex items-baseline gap-2">
+              <span className="text-[22px] font-extrabold text-[#34603f]">{total.kcal}</span>
+              <span className="text-[11px] text-[#a59b8c]">kcal</span>
+              {target?.kcal != null && (
+                <span className="text-[11px] text-[#6a6256]">／ 目標 {target.kcal.toLocaleString()}（のり監修）</span>
+              )}
             </div>
-            <div className="text-[12px] text-[#6a6256]">
-              P{total.p} ・ F{total.f} ・ C{total.c}
+            <div className="mt-2 space-y-1">
+              <Bar label="P" value={total.p} tgt={target?.p ?? null} />
+              <Bar label="F" value={total.f} tgt={target?.f ?? null} />
+              <Bar label="C" value={total.c} tgt={target?.c ?? null} />
             </div>
-          </div>
+            {total.noValueCount > 0 && (
+              <p className="mt-1 text-[10px] text-[#a59b8c]">
+                数値を入れた食事だけで計算（ほか {total.noValueCount} 品は写真・名前のみ）
+              </p>
+            )}
+          </>
         ) : (
           <div className="text-[12px] text-[#6a6256]">
             {meals.length > 0
               ? "写真とメモで記録中（数値を入れた食事だけ合計します）"
-              : "まだ記録がありません"}
+              : "まだ記録がありません。下の枠から記録できます"}
           </div>
         )}
       </div>
 
-      {/* チップナビ(朝昼夕間) */}
-      <div className="flex gap-1.5">
+      {/* 4スロット(縦) */}
+      <div className="space-y-2">
         {MEAL_TYPES.map((t) => {
           const logs = byType.get(t) ?? [];
-          const has = logs.length > 0;
-          const extra = t === "間" && logs.length > 1 ? `+${logs.length - 1}` : "";
-          return has ? (
-            <a
-              key={t}
-              href={`#meal-${t}`}
-              className="flex-1 rounded-xl bg-[#eef5f0] py-2 text-center"
-            >
-              <div className="text-[12px] font-bold text-[#34603f]">
-                {t}
-                {extra && <span className="ml-0.5 text-[10px]">{extra}</span>}
-              </div>
-              <div className="text-[10px] text-[#6a6256]">✓</div>
-            </a>
-          ) : editable ? (
-            <Link
-              key={t}
-              href={`/meals/new?type=${t}&date=${date}`}
-              className="flex-1 rounded-xl border border-dashed border-[#d8cdba] py-2 text-center"
-            >
-              <div className="text-[12px] font-bold text-[#a59b8c]">{t}</div>
-              <div className="text-[13px] leading-none text-[#c9bfa9]">＋</div>
-            </Link>
-          ) : (
-            <div
-              key={t}
-              className="flex-1 rounded-xl border border-[#efe7d6] py-2 text-center"
-            >
-              <div className="text-[12px] font-bold text-[#c9bfa9]">{t}</div>
-              <div className="text-[11px] leading-none text-[#d8cdba]">—</div>
+          const isSnack = t === "間";
+          return (
+            <div key={t}>
+              {/* 記録済み(複数=間食) */}
+              {logs.map((m) => (
+                <Slot
+                  key={m.id}
+                  meal={m}
+                  editable={editable}
+                  locked={locked}
+                  onEdit={() => setSheet({ mealType: t, editLog: m })}
+                  onDelete={() => onDelete(m.id)}
+                />
+              ))}
+              {/* 空き枠 or 間食の追加枠 */}
+              {(logs.length === 0 || isSnack) && (
+                <EmptySlot
+                  type={t}
+                  editable={editable}
+                  isSnack={isSnack}
+                  hasRecords={logs.length > 0}
+                  onAdd={() => setSheet({ mealType: t, editLog: null })}
+                />
+              )}
             </div>
           );
         })}
       </div>
 
-      {/* 記録済みカード(記録済みのみ) */}
-      {meals.map((m) => (
-        <div
-          key={m.id}
-          id={`meal-${m.meal_type}`}
-          className="rounded-2xl border border-[#e7dcc9] bg-[#fffdf8] p-3"
-        >
-          <div className="flex items-start gap-3">
-            {m.photoUrls[0] ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={m.photoUrls[0]}
-                alt=""
-                className="h-16 w-16 flex-shrink-0 rounded-lg object-cover"
-              />
-            ) : (
-              <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg bg-[#f0ece2] text-[10px] text-[#a59b8c]">
-                写真なし
-              </div>
-            )}
-            <div className="min-w-0 flex-1">
-              <div className="flex items-baseline gap-2">
-                <span className="text-[13px] font-bold text-[#2b2620]">
-                  {MEAL_LABEL[m.meal_type]}
-                </span>
-                <span className="text-[10px] text-[#a59b8c]">
-                  {timeLabel(m.posted_at)}
-                </span>
-              </div>
-              {m.items.length > 0 && (
-                <div className="mt-0.5 text-[11px] leading-relaxed text-[#6a6256]">
-                  {m.items.map((i) => i.name).join("、")}
-                </div>
-              )}
-              {m.memo && (
-                <div className="mt-0.5 text-[11px] italic text-[#a59b8c]">
-                  {m.memo}
-                </div>
-              )}
-              {editable && (
-                <div className="mt-1.5 flex gap-3">
-                  <Link
-                    href={`/meals/new?edit=${m.id}`}
-                    className="text-[11px] font-bold text-[#4a875b]"
-                  >
-                    編集
-                  </Link>
-                  {pendingDelete === m.id ? (
-                    <span className="flex gap-2 text-[11px]">
-                      <button
-                        type="button"
-                        onClick={() => onDelete(m.id)}
-                        disabled={isDeleting}
-                        className="font-bold text-red-700"
-                      >
-                        {isDeleting ? "削除中…" : "本当に削除"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPendingDelete(null)}
-                        className="text-[#a59b8c]"
-                      >
-                        やめる
-                      </button>
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setPendingDelete(m.id)}
-                      className="text-[11px] text-[#a59b8c]"
-                    >
-                      削除
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      ))}
-
-      {/* 追加導線 */}
-      {editable && (
-        <Link
-          href={`/meals/new?date=${date}`}
-          className="block rounded-xl border-2 border-[#4a875b] bg-white py-2.5 text-center text-[13px] font-bold text-[#004d40]"
-        >
-          ＋ この日の食事を追加する
-        </Link>
-      )}
       {!editable && (
         <p className="text-center text-[11px] text-[#a59b8c]">
-          のりのコメントが届いた日や過去の記録は編集できません。
+          {locked
+            ? "のりのコメントが届いた日の記録は編集できません。"
+            : "過去の記録は閲覧のみです。"}
         </p>
       )}
 
-      {/* 医療ただし書き(常設) */}
+      {/* 医療ただし書き */}
       <p className="mt-2 border-t border-[#efe7d6] pt-3 text-[10px] leading-relaxed text-[#a59b8c]">
         持病・服薬がある方の食事調整は必ず医師の判断に従ってください。本サービスは医療行為・診断を行うものではありません。
       </p>
+
+      {/* 投稿/編集シート */}
+      <BottomSheet
+        open={!!sheet}
+        onClose={() => setSheet(null)}
+        title={sheet ? `${MEAL_LABEL[sheet.mealType]}を記録` : undefined}
+      >
+        {sheet && (
+          <MealSheet
+            userId={userId}
+            date={date}
+            mealType={sheet.mealType}
+            editLog={sheet.editLog}
+            onClose={() => setSheet(null)}
+            onSaved={onSaved}
+          />
+        )}
+      </BottomSheet>
     </div>
+  );
+}
+
+function Bar({ label, value, tgt }: { label: string; value: number; tgt: number | null }) {
+  const pct = tgt && tgt > 0 ? Math.min(120, Math.round((value / tgt) * 100)) : 0;
+  const over = tgt != null && value > tgt;
+  return (
+    <div className="flex items-center gap-2">
+      <span className="w-3 text-[10px] font-bold text-[#6a6256]">{label}</span>
+      <div className="h-2 flex-1 overflow-hidden rounded-full bg-[#ece3d3]">
+        <div
+          className="h-full rounded-full"
+          style={{ width: `${Math.min(100, pct)}%`, background: over ? "#c2693f" : "#4a875b" }}
+        />
+      </div>
+      <span className="w-16 text-right text-[10px] text-[#6a6256]">
+        {value}
+        {tgt != null ? ` / ${tgt}g` : "g"}
+      </span>
+    </div>
+  );
+}
+
+function Slot({
+  meal,
+  editable,
+  locked,
+  onEdit,
+  onDelete,
+}: {
+  meal: MealWithUrls;
+  editable: boolean;
+  locked: boolean;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const s = sumMeals([meal]);
+  return (
+    <div className="mb-2 rounded-2xl border border-[#e7dcc9] bg-[#fffdf8] p-3">
+      <div className="flex items-start gap-3">
+        {meal.photoUrls[0] ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={meal.photoUrls[0]} alt="" className="h-16 w-16 flex-shrink-0 rounded-lg object-cover" />
+        ) : (
+          <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg bg-[#f0ece2] text-[10px] text-[#a59b8c]">
+            写真なし
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-baseline gap-2">
+            <span className="text-[13px] font-bold text-[#2b2620]">{MEAL_LABEL[meal.meal_type]}</span>
+            <span className="text-[10px] text-[#a59b8c]">{timeLabel(meal.posted_at)}</span>
+            {s.numberedCount > 0 && <span className="text-[11px] text-[#6a6256]">{s.kcal}kcal</span>}
+          </div>
+          {meal.items.length > 0 && (
+            <div className="mt-0.5 text-[11px] leading-relaxed text-[#6a6256]">
+              {meal.items.map((i) => i.name).join("、")}
+            </div>
+          )}
+          {s.numberedCount > 0 && (
+            <div className="text-[10px] text-[#a59b8c]">
+              P{s.p} ・ F{s.f} ・ C{s.c}
+            </div>
+          )}
+          {meal.memo && <div className="mt-0.5 text-[11px] italic text-[#a59b8c]">{meal.memo}</div>}
+          <div className="mt-1.5 flex gap-3">
+            {editable ? (
+              <>
+                <button type="button" onClick={onEdit} className="text-[11px] font-bold text-[#4a875b]">
+                  編集する →
+                </button>
+                <button type="button" onClick={onDelete} className="text-[11px] text-[#a59b8c]">
+                  削除
+                </button>
+              </>
+            ) : locked ? (
+              <span className="text-[10px] text-[#a59b8c]">🔒 編集ロック中</span>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EmptySlot({
+  type,
+  editable,
+  isSnack,
+  hasRecords,
+  onAdd,
+}: {
+  type: MealType;
+  editable: boolean;
+  isSnack: boolean;
+  hasRecords: boolean;
+  onAdd: () => void;
+}) {
+  const noonHint = type === "昼" && !hasRecords && nowPastNoonJST() && editable;
+  if (!editable) {
+    // 過去日/ロック日の空き枠は薄く「記録なし」
+    if (hasRecords) return null;
+    return (
+      <div className="mb-2 flex items-center justify-between rounded-2xl border border-[#efe7d6] px-4 py-3">
+        <span className="text-[12px] font-bold text-[#c9bfa9]">{MEAL_LABEL[type]}</span>
+        <span className="text-[11px] text-[#d8cdba]">記録なし</span>
+      </div>
+    );
+  }
+  return (
+    <button
+      type="button"
+      onClick={onAdd}
+      className="mb-2 flex w-full items-center justify-between rounded-2xl border border-dashed border-[#d8cdba] px-4 py-3 text-left hover:bg-[#fffdf8]"
+    >
+      <span className="flex items-center gap-2">
+        <span className="text-[12px] font-bold text-[#6a6256]">{MEAL_LABEL[type]}</span>
+        {noonHint && <span className="text-[10px] text-[#a59b8c]">12:00をすぎています</span>}
+        {isSnack && <span className="text-[10px] text-[#a59b8c]">複数OK</span>}
+      </span>
+      <span className="text-[12px] font-bold text-[#4a875b]">＋ 追加する</span>
+    </button>
   );
 }
