@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { EmptyState } from "@/components/EmptyState";
 
 type Review = {
   id: string;
@@ -81,7 +82,13 @@ function Highlight({ text, query }: { text: string; query: string }) {
   );
 }
 
-export function ReviewsListView({ reviews }: { reviews: Review[] }) {
+export function ReviewsListView({
+  reviews,
+  isBeta = false,
+}: {
+  reviews: Review[];
+  isBeta?: boolean;
+}) {
   const [mode, setMode] = useState<Mode>("latest");
   const [query, setQuery] = useState("");
 
@@ -142,10 +149,14 @@ export function ReviewsListView({ reviews }: { reviews: Review[] }) {
       )}
 
       {mode === "latest" && (
-        <LatestTimeline reviews={filteredReviews} query={query} />
+        <LatestTimeline reviews={filteredReviews} query={query} isBeta={isBeta} />
       )}
       {mode === "by_course" && (
-        <CourseGroupedList reviews={filteredReviews} query={query} />
+        <CourseGroupedList
+          reviews={filteredReviews}
+          query={query}
+          isBeta={isBeta}
+        />
       )}
     </div>
   );
@@ -192,16 +203,30 @@ function ModeTab({
 function LatestTimeline({
   reviews,
   query,
+  isBeta = false,
 }: {
   reviews: Review[];
   query: string;
+  isBeta?: boolean;
 }) {
   if (reviews.length === 0) {
-    return (
+    if (query.trim().length > 0) {
+      return (
+        <p className="text-sm text-[#6a6256] p-4 text-center">
+          該当する振り返りが見つかりませんでした。
+        </p>
+      );
+    }
+    return isBeta ? (
+      <EmptyState
+        title="まだ振り返りがありません"
+        description="レッスンを見たら、学んだことを1行だけ書いてみましょう。ここに積み上がっていきます。"
+        ctaLabel="コースを見る →"
+        ctaHref="/courses"
+      />
+    ) : (
       <p className="text-sm text-[#6a6256] p-4 text-center">
-        {query.trim().length > 0
-          ? "該当する振り返りが見つかりませんでした。"
-          : "まだ振り返りがありません。 レッスン視聴後に書いてみましょう。"}
+        まだ振り返りがありません。 レッスン視聴後に書いてみましょう。
       </p>
     );
   }
@@ -242,16 +267,30 @@ function LatestTimeline({
 function CourseGroupedList({
   reviews,
   query,
+  isBeta = false,
 }: {
   reviews: Review[];
   query: string;
+  isBeta?: boolean;
 }) {
   if (reviews.length === 0) {
-    return (
+    if (query.trim().length > 0) {
+      return (
+        <p className="text-sm text-[#6a6256] p-4 text-center">
+          該当する振り返りが見つかりませんでした。
+        </p>
+      );
+    }
+    return isBeta ? (
+      <EmptyState
+        title="まだ振り返りがありません"
+        description="レッスンを見たら、学んだことを1行だけ書いてみましょう。"
+        ctaLabel="コースを見る →"
+        ctaHref="/courses"
+      />
+    ) : (
       <p className="text-sm text-[#6a6256] p-4 text-center">
-        {query.trim().length > 0
-          ? "該当する振り返りが見つかりませんでした。"
-          : "まだ振り返りがありません。"}
+        まだ振り返りがありません。
       </p>
     );
   }

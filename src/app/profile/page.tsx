@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { MemberHeader } from "@/components/MemberHeader";
+import { isBetaUser } from "@/lib/auth/beta";
 
 export const dynamic = "force-dynamic";
 
@@ -59,6 +60,9 @@ export default async function ProfilePage() {
 
   const focus = ((carte?.focus_body_parts as string[] | null) ?? []).join(" ・ ");
   const envs = ((carte?.environments as string[] | null) ?? []).join(" ・ ");
+
+  // B11: プロフィール最下部に「アカウント設定」への導線(ベータ限定)
+  const isBeta = await isBetaUser();
 
   return (
     <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
@@ -203,6 +207,21 @@ export default async function ProfilePage() {
                 )}
               </div>
             </div>
+          )}
+
+          {/* B11: アカウント設定への導線(ベータ) */}
+          {isBeta && (
+            <Link
+              href="/account"
+              className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl px-4 py-3.5 flex items-center justify-between hover:bg-[#f0e6d3]/40 transition-colors"
+            >
+              <span className="text-[13px] font-bold text-[#2b2620]">
+                アカウント設定
+              </span>
+              <span className="text-[12px] text-[#a59b8c]">
+                通知・パスワード・ログアウト →
+              </span>
+            </Link>
           )}
         </div>
       </div>
