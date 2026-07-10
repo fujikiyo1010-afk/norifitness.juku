@@ -127,12 +127,17 @@ export async function completeWorkoutDay(input: {
   }
 
   // progress を1日進める(周回ループ + 再配布の次1日目切替)
+  // 細2: 「現在の進行日を完了/スキップした時」だけ前進。既に完了済みの日を編集した場合は前進させない(二重前進防止)。
   const { data: prog } = await supabase
     .from("user_workout_progress")
     .select("current_day, cycle_number, pending_menu_id")
     .eq("user_id", user.id)
     .maybeSingle();
-  if (prog) {
+  const isCurrentDay =
+    prog != null &&
+    (prog.current_day as number) === input.dayNumber &&
+    (prog.cycle_number as number) === input.cycleNumber;
+  if (prog && isCurrentDay) {
     const total = dayCount(menu.cycles, input.intensity) || 7;
     let nextDay = (prog.current_day as number) + 1;
     let nextCycle = prog.cycle_number as number;

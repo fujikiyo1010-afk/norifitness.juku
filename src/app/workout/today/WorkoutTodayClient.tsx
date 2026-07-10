@@ -31,6 +31,8 @@ export function WorkoutTodayClient({
   initialMemo,
   initialItems,
   completedAtLabel,
+  completedToday = false,
+  todayStatus = null,
 }: {
   cycles: WorkoutCycles;
   dayNumber: number;
@@ -40,6 +42,8 @@ export function WorkoutTodayClient({
   initialMemo: string | null;
   initialItems: LoggedItem[]; // 既存ログの実績(あれば)
   completedAtLabel: string | null;
+  completedToday?: boolean; // 細2: 今日(JST)に既に記録済み
+  todayStatus?: "done" | "rest_done" | "skipped" | null;
 }) {
   const router = useRouter();
   const [intensity, setIntensity] = useState<Intensity>(initialIntensity);
@@ -139,6 +143,31 @@ export function WorkoutTodayClient({
     } finally {
       setBusy(false);
     }
+  }
+
+  // 細2: 今日スキップ済み → 記録できないロック表示(次は明日から)
+  if (completedToday && todayStatus === "skipped") {
+    return (
+      <div className="space-y-4">
+        <div className="rounded-2xl bg-gradient-to-br from-[#4a875b] to-[#34603f] px-4 py-4 text-white">
+          <div className="text-[11px] font-bold opacity-90">
+            {cycleNumber}周目 ／ {dayNumber}日目
+          </div>
+          <div className="mt-0.5 text-[18px] font-extrabold">今日はお休み</div>
+        </div>
+        <div className="rounded-2xl border border-[#e7dcc9] bg-[#fffdf8] px-4 py-6 text-center">
+          <p className="text-[13px] leading-relaxed text-[#5b5344]">
+            今日はこの日をとばしました。次のトレーニングは明日からです。
+          </p>
+          <Link
+            href="/workout/history"
+            className="mt-3 inline-block text-[12px] font-bold text-[#4a875b]"
+          >
+            履歴を見る →
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (

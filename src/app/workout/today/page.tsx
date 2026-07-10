@@ -92,6 +92,8 @@ export default async function WorkoutTodayPage({
                       .slice(11, 16)
                   : null
               }
+              completedToday={w.completedToday}
+              todayStatus={w.todayLog?.status ?? null}
             />
           )}
         </div>
