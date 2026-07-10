@@ -15,7 +15,7 @@ import {
   etaForTarget,
 } from "@/lib/body-metrics/goal-progress";
 import { BodyMetricsChart } from "./BodyMetricsChart";
-import { ForecastCard } from "./ForecastCard";
+import { ProgressTrendCard } from "./ProgressTrendCard";
 import { BottomSheet } from "./BottomSheet";
 import { RecordSheetBody } from "./RecordSheetBody";
 import { RecordFab } from "./RecordFab";
@@ -237,6 +237,8 @@ function WeightView({
       <div className="pt-1 text-center">
         <div className="relative mx-auto h-[124px] w-[124px]">
           <svg width="124" height="124" viewBox="0 0 124 124">
+            {/* ★1: 円の中の内側を完全な白(#ffffff)に */}
+            <circle cx="62" cy="62" r={R} fill="#ffffff" />
             <circle
               cx="62"
               cy="62"
@@ -285,29 +287,43 @@ function WeightView({
         ))}
       </div>
 
-      {/* ピル2つ (目標まで / 現状ペース) */}
-      <div className="flex justify-center gap-2.5">
-        <div className="rounded-2xl border border-[#dce9e0] bg-[#eef5f0] px-5 py-2.5 text-center leading-tight">
-          <span className="block text-[11px] font-bold text-[#6a6256]">
-            目標まで
-          </span>
-          <span className="mt-0.5 block font-mono text-[17px] font-extrabold text-[#004d40]">
-            {prog.state === "remaining"
-              ? `あと ${fmt(prog.kg)}kg`
-              : prog.state === "reached"
-                ? "達成"
-                : prog.state === "no_target"
-                  ? "未設定"
-                  : "—"}
-          </span>
+      {/* ピル2つ (目標まで / 現状ペース)。★2: 数値を大きく・ラベルと単位を小さく(数字だけ主役) */}
+      <div className="mt-3 flex gap-2.5">
+        <div className="flex-1 rounded-[14px] border border-[#dce9e0] bg-[#eef5f0] px-1.5 py-[9px] text-center leading-[1.2]">
+          <div className="text-[9px] font-bold text-[#a59b8c]">目標まで</div>
+          <div className="mt-0.5 font-mono text-[23px] font-extrabold text-[#004d40]">
+            {prog.state === "remaining" ? (
+              <>
+                <span className="mr-0.5 text-[11px] font-bold text-[#6a6256]">
+                  あと
+                </span>
+                {fmt(prog.kg)}
+                <small className="text-[11px] font-bold text-[#6a6256]">kg</small>
+              </>
+            ) : prog.state === "reached" ? (
+              "達成"
+            ) : prog.state === "no_target" ? (
+              "未設定"
+            ) : (
+              "—"
+            )}
+          </div>
         </div>
-        <div className="rounded-2xl border border-[#dce9e0] bg-[#eef5f0] px-5 py-2.5 text-center leading-tight">
-          <span className="block text-[11px] font-bold text-[#6a6256]">
-            現状ペース
-          </span>
-          <span className="mt-0.5 block font-mono text-[17px] font-extrabold text-[#004d40]">
-            {pace != null ? `${pace > 0 ? "+" : ""}${fmt(pace)}kg/週` : "—"}
-          </span>
+        <div className="flex-1 rounded-[14px] border border-[#dce9e0] bg-[#eef5f0] px-1.5 py-[9px] text-center leading-[1.2]">
+          <div className="text-[9px] font-bold text-[#a59b8c]">現状ペース</div>
+          <div className="mt-0.5 font-mono text-[23px] font-extrabold text-[#004d40]">
+            {pace != null ? (
+              <>
+                {pace > 0 ? "+" : ""}
+                {fmt(pace)}
+                <small className="text-[11px] font-bold text-[#6a6256]">
+                  kg/週
+                </small>
+              </>
+            ) : (
+              "—"
+            )}
+          </div>
         </div>
       </div>
 
@@ -327,7 +343,7 @@ function WeightView({
         <div className="mb-2 px-0.5 text-[12px] font-bold text-[#5b5344]">
           数値の推移
         </div>
-        <div className="rounded-2xl border border-[#e7dcc9] bg-[#fffdf8] px-3 pt-4 pb-3">
+        <div className="rounded-2xl border border-[#e7dcc9] bg-white px-3 pt-4 pb-3">
           {weightRows.length === 0 ? (
             <div className="py-8 text-center text-[12px] text-[#6a6256]">
               まだ記録がありません
@@ -344,9 +360,9 @@ function WeightView({
         </div>
       </div>
 
-      {/* M20: ベータは新「見通しカード」(1階3行+2階道のり/試算)。旧=予測カードA-2+計算シート。 */}
+      {/* M20改: ベータは新「目標推移/現状推移」タブ切替リスト。旧=予測カードA-2+計算シート。 */}
       {isBeta ? (
-        <ForecastCard
+        <ProgressTrendCard
           current={currentWeight}
           target={targetWeightKg}
           targetDate={targetDate}
@@ -496,7 +512,7 @@ function WaistView({
 
   return (
     <>
-      <div className="flex justify-around rounded-2xl border border-[#e7dcc9] bg-[#fffdf8] py-4 text-[11px]">
+      <div className="flex justify-around rounded-2xl border border-[#e7dcc9] bg-white py-4 text-[11px]">
         {[
           { label: "入会時", val: start },
           { label: "現在", val: current },
@@ -524,7 +540,7 @@ function WaistView({
         <div className="mb-2 px-0.5 text-[12px] font-bold text-[#5b5344]">
           ウエストの推移
         </div>
-        <div className="rounded-2xl border border-[#e7dcc9] bg-[#fffdf8] px-3 pt-4 pb-3">
+        <div className="rounded-2xl border border-[#e7dcc9] bg-white px-3 pt-4 pb-3">
           {waistRows.length === 0 ? (
             <div className="py-8 text-center text-[12px] text-[#6a6256]">
               まだ記録がありません

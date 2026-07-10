@@ -1,9 +1,13 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { BodyMetricRow } from "@/lib/body-metrics/queries";
 
 export type MetricKey = "weight_kg" | "body_fat_percent" | "waist_cm";
+
+// ④ 初回描画アニメ: その画面を初めて開いた時だけ左から線が伸びる。
+// metric ごとに「もう描いた」を保持し、タブ切替や再描画では再生しない。
+const animatedMetrics = new Set<MetricKey>();
 
 /**
  * 体組成 折れ線グラフ ・ SVG 自前実装 (2026-06-17 v2 ・ 3-way 単一指標)
@@ -35,6 +39,19 @@ export function BodyMetricsChart({
   metricUnit: string;
   targetWeightKg: number | null;
 }) {
+  // 初回だけアニメする対象か(mount時に1度確定)。以後この metric は再生しない。
+  const [shouldAnimate] = useState(() => {
+    if (animatedMetrics.has(metric)) return false;
+    animatedMetrics.add(metric);
+    return true;
+  });
+  const [drawn, setDrawn] = useState(!shouldAnimate);
+  useEffect(() => {
+    if (!shouldAnimate) return;
+    const id = requestAnimationFrame(() => setDrawn(true));
+    return () => cancelAnimationFrame(id);
+  }, [shouldAnimate]);
+
   const data = useMemo(
     () =>
       rows.map((r) => ({
@@ -174,7 +191,7 @@ export function BodyMetricsChart({
         </>
       ) : null}
 
-      {/* 折れ線 */}
+      {/* 折れ線 (④初回のみ左から描画) */}
       {linePath ? (
         <path
           d={linePath}
@@ -183,10 +200,18 @@ export function BodyMetricsChart({
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
+          pathLength={1}
+          style={{
+            strokeDasharray: 1,
+            strokeDashoffset: drawn ? 0 : 1,
+            transition: shouldAnimate
+              ? "stroke-dashoffset 1000ms ease-out"
+              : undefined,
+          }}
         />
       ) : null}
 
-      {/* データドット */}
+      {/* データドット (④線が描き終わってからフェードイン) */}
       {points.map((p, i) => (
         <circle
           key={`d-${i}`}
@@ -196,6 +221,10 @@ export function BodyMetricsChart({
           fill="white"
           stroke="#4a875b"
           strokeWidth="2"
+          style={{
+            opacity: drawn ? 1 : 0,
+            transition: shouldAnimate ? "opacity 400ms ease-out 700ms" : undefined,
+          }}
         />
       ))}
 
