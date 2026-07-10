@@ -15,6 +15,8 @@ export type TodayActivity = {
   learned: boolean;
   recordedMeal: boolean;
   mealTypes: string[];
+  recordedWorkout: boolean; // 今日トレを完了/休養完了したか
+  hasWorkoutMenu: boolean; // 進行中メニューがあるか(開始済み)
 };
 
 export async function getTodayActivity(): Promise<TodayActivity> {
@@ -23,12 +25,19 @@ export async function getTodayActivity(): Promise<TodayActivity> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user)
-    return { recordedBody: false, learned: false, recordedMeal: false, mealTypes: [] };
+    return {
+      recordedBody: false,
+      learned: false,
+      recordedMeal: false,
+      mealTypes: [],
+      recordedWorkout: false,
+      hasWorkoutMenu: false,
+    };
 
   const admin = createAdminClient();
   const today = jstTodayStr(); // YYYY-MM-DD (JST暦日)
 
-  const [bmRes, lpRes, mealRes] = await Promise.all([
+  const [bmRes, lpRes, mealRes, workoutRes, progRes] = await Promise.all([
     admin
       .from("body_metrics")
       .select("id")
@@ -46,6 +55,18 @@ export async function getTodayActivity(): Promise<TodayActivity> {
       .select("meal_type")
       .eq("user_id", user.id)
       .eq("date", today),
+    admin
+      .from("user_workout_logs")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("date", today)
+      .in("status", ["done", "rest_done"])
+      .limit(1),
+    admin
+      .from("user_workout_progress")
+      .select("user_id")
+      .eq("user_id", user.id)
+      .limit(1),
   ]);
 
   const mealTypes = Array.from(
@@ -57,5 +78,7 @@ export async function getTodayActivity(): Promise<TodayActivity> {
     learned: (lpRes.data?.length ?? 0) > 0,
     recordedMeal: mealTypes.length > 0,
     mealTypes,
+    recordedWorkout: (workoutRes.data?.length ?? 0) > 0,
+    hasWorkoutMenu: (progRes.data?.length ?? 0) > 0,
   };
 }

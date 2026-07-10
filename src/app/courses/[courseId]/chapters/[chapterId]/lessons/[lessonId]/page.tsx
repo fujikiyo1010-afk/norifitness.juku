@@ -186,6 +186,7 @@ export default async function StudentLessonPage({
               isBeta={isBeta}
               recordedBodyToday={todayActivity.recordedBody}
               recordedMealToday={todayActivity.recordedMeal}
+              recordedWorkoutToday={todayActivity.recordedWorkout}
             />
           </section>
         )}

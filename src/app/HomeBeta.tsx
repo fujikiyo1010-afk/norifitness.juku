@@ -46,7 +46,8 @@ export function HomeBeta({
   const doneCount =
     (today.recordedBody ? 1 : 0) +
     (today.learned ? 1 : 0) +
-    (today.recordedMeal ? 1 : 0);
+    (today.recordedMeal ? 1 : 0) +
+    (today.recordedWorkout ? 1 : 0);
   // M7 案1: 残枠テキスト(「朝を記録／残り 昼・夕・間食」)
   const MEAL_ORDER = ["朝", "昼", "夕", "間"];
   const MEAL_REMAIN_LABEL: Record<string, string> = {
@@ -101,12 +102,12 @@ export function HomeBeta({
           <section>
             <div className="mb-2 flex items-center gap-2.5 rounded-[14px] border border-[#e7dcc9] bg-[#fffdf8] px-3.5 py-2.5">
               <span className="font-mono text-[15px] font-extrabold text-[#4a875b]">
-                {doneCount}/3
+                {doneCount}/4
               </span>
               <div className="h-[7px] flex-1 overflow-hidden rounded-full bg-[#e7dcc9]">
                 <div
                   className="h-full rounded-full"
-                  style={{ width: `${(doneCount / 3) * 100}%`, background: TEAL }}
+                  style={{ width: `${(doneCount / 4) * 100}%`, background: TEAL }}
                 />
               </div>
               <span className="text-[10px] font-bold text-[#6a6256]">
@@ -148,6 +149,21 @@ export function HomeBeta({
                 cta={today.recordedMeal ? "タップして見る →" : "＋写真で記録 →"}
                 href={today.recordedMeal ? "/meals" : "/meals/new"}
                 done={today.recordedMeal}
+              />
+              {/* トレーニング(P5・1日1タップ) */}
+              <TodayCard
+                cap="今日のトレ"
+                capColor={TEAL_DARK}
+                title={
+                  today.recordedWorkout
+                    ? "今日のトレ完了"
+                    : today.hasWorkoutMenu
+                      ? "今日のトレを記録しよう"
+                      : "メニューを開始しよう"
+                }
+                cta={today.recordedWorkout ? "タップして見る →" : "▶ 実施を記録 →"}
+                href="/workout/today"
+                done={today.recordedWorkout}
               />
             </div>
           </section>
