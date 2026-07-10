@@ -18,13 +18,19 @@ import { usePathname } from "next/navigation";
  *   - layout で {children} の後ろに配置すると、 末尾コンテンツがタブで被らない
  *   - 各ページに pb-24 を手で足さない方針 (漏れ + 再発リスク回避)
  */
-const TABS = [
-  { label: "ホーム", href: "/", icon: <HomeIcon />, exact: true },
-  { label: "コース", href: "/courses", icon: <BookIcon />, exact: false },
-  { label: "記録", href: "/record", icon: <NoteIcon />, exact: false },
-  { label: "筋トレ", href: "/workout", icon: <DumbbellIcon />, exact: false },
-  { label: "プロフィール", href: "/profile", icon: <PersonIcon />, exact: false },
-];
+// 3番目のタブ: ベータ=チャット / 非ベータ=記録(点21・確定7/7)
+const TAB_RECORD = { label: "記録", href: "/record", icon: <NoteIcon />, exact: false };
+const TAB_CHAT = { label: "チャット", href: "/messages", icon: <ChatIcon />, exact: false };
+
+function tabsFor(isBeta: boolean) {
+  return [
+    { label: "ホーム", href: "/", icon: <HomeIcon />, exact: true },
+    { label: "コース", href: "/courses", icon: <BookIcon />, exact: false },
+    isBeta ? TAB_CHAT : TAB_RECORD,
+    { label: "筋トレ", href: "/workout", icon: <DumbbellIcon />, exact: false },
+    { label: "プロフィール", href: "/profile", icon: <PersonIcon />, exact: false },
+  ];
+}
 
 const HIDDEN_PREFIXES = [
   "/admin",
@@ -39,9 +45,10 @@ const HIDDEN_PREFIXES = [
   "/workout/today", // 実施記録(P5): 下部固定「今日のトレ完了」がナビと重ならないよう非表示
 ];
 
-export function MemberBottomNav() {
+export function MemberBottomNav({ isBeta = false }: { isBeta?: boolean }) {
   const pathname = usePathname() ?? "/";
   if (HIDDEN_PREFIXES.some((p) => pathname.startsWith(p))) return null;
+  const TABS = tabsFor(isBeta);
 
   return (
     <>
@@ -121,6 +128,14 @@ function NoteIcon() {
     <svg {...iconProps} width="22" height="22">
       <path d="M12 20h9" />
       <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  );
+}
+
+function ChatIcon() {
+  return (
+    <svg {...iconProps} width="22" height="22">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
     </svg>
   );
 }

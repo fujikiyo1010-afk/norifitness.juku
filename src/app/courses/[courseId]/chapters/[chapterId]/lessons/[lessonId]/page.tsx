@@ -184,7 +184,6 @@ export default async function StudentLessonPage({
               lessonId={lesson.id}
               initialCompleted={isCompleted}
               isBeta={isBeta}
-              recordedBodyToday={todayActivity.recordedBody}
               recordedMealToday={todayActivity.recordedMeal}
               recordedWorkoutToday={todayActivity.recordedWorkout}
             />
