@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { WorkoutCycles } from "@/lib/workout/types";
+import type { Exercise, WorkoutCycles } from "@/lib/workout/types";
 import {
   resolveDayMenu,
   parseRepsSets,
@@ -11,7 +11,9 @@ import {
   type Intensity,
   type LoggedItem,
 } from "@/lib/workout/logs-types";
-import { cleanExerciseName, cleanReps } from "@/lib/workout/menu-display";
+import { cleanExerciseName, cleanReps, getExerciseTarget } from "@/lib/workout/menu-display";
+import { resolveExerciseVideo } from "@/lib/workout/video-master";
+import { VimeoEmbed } from "@/components/VimeoEmbed";
 import { completeWorkoutDay } from "@/lib/workout/logs-actions";
 
 /**
@@ -52,6 +54,8 @@ export function WorkoutTodayClient({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmSkip, setConfirmSkip] = useState(false);
+  // 細11: フォーム動画ライトボックス
+  const [lightbox, setLightbox] = useState<{ url: string; name: string } | null>(null);
 
   const dayMenu = useMemo(
     () => resolveDayMenu(cycles, intensity, dayNumber),
@@ -61,6 +65,18 @@ export function WorkoutTodayClient({
   const isPersonal = dayMenu?.種別 === "パーソナル";
   const original = (dayMenu?.種目 ?? []).filter((e) => e.種目名);
   const dayLabel = dayMenu?.日 ?? `${dayNumber}日目`;
+  // 細12: ヒーロー2行目=メニュー名。「◯日目」だけ(上段と重複)なら部位ラベルへ。
+  const partsLabel = (() => {
+    const t = getExerciseTarget(original.flatMap((e) => e.主部位 ?? []));
+    return t && t !== "全身" ? `${t}の日` : null;
+  })();
+  const heroTitle = isRest
+    ? "休養日"
+    : isPersonal
+      ? "パーソナル指導日"
+      : dayLabel !== `${dayNumber}日目`
+        ? dayLabel
+        : (partsLabel ?? "今日のトレーニング");
 
   // 編集用アイテム(既存ログ優先、なければ原本の初期値)
   const [items, setItems] = useState<EditItem[]>(() => buildInitial());
@@ -177,9 +193,7 @@ export function WorkoutTodayClient({
         <div className="text-[11px] font-bold opacity-90">
           {cycleNumber}周目 ／ {dayNumber}日目
         </div>
-        <div className="mt-0.5 text-[18px] font-extrabold">
-          {isRest ? "休養日" : isPersonal ? "パーソナル指導日" : dayLabel}
-        </div>
+        <div className="mt-0.5 text-[18px] font-extrabold">{heroTitle}</div>
       </div>
 
       {alreadyDone && mode === "view" && (
@@ -219,16 +233,39 @@ export function WorkoutTodayClient({
           </div>
 
           {mode === "view" ? (
-            <ViewList original={original} loggedItems={initialItems} />
+            <ViewList
+              original={original}
+              loggedItems={initialItems}
+              onPlay={(url, name) => setLightbox({ url, name })}
+            />
           ) : (
             <EditList
               items={items}
+              original={original}
               onPatch={patch}
               addName={addName}
               setAddName={setAddName}
               onAdd={addItem}
+              onPlay={(url, name) => setLightbox({ url, name })}
             />
           )}
+
+          {/* 細13: 今日はやらない/メニュー全体は本体(通常領域)へ */}
+          {mode === "view" && !alreadyDone && (
+            <button
+              type="button"
+              onClick={() => setConfirmSkip(true)}
+              className="mt-1 block w-full text-center text-[12px] text-[#a59b8c]"
+            >
+              今日はやらない →
+            </button>
+          )}
+          <Link
+            href="/workout"
+            className="block text-center text-[11px] text-[#6a6256]"
+          >
+            メニュー全体を見る →
+          </Link>
         </>
       )}
 
@@ -292,52 +329,63 @@ export function WorkoutTodayClient({
                 </button>
               </div>
             </div>
+          ) : isRest || isPersonal ? (
+            <button
+              type="button"
+              onClick={() => save(isRest ? "rest_done" : "done", false)}
+              disabled={busy}
+              className="w-full rounded-xl bg-[#4a875b] py-3 text-[14px] font-bold text-white disabled:opacity-50"
+            >
+              {busy ? "保存中…" : isRest ? "✓ 今日は休んだ（完了）" : "✓ 完了"}
+            </button>
           ) : (
-            <>
+            // 細13: 編集する(枠) + ✓完了(緑) の横並び2ボタン
+            <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => save(isRest ? "rest_done" : "done", false)}
-                disabled={busy}
-                className="w-full rounded-xl bg-[#4a875b] py-3 text-[14px] font-bold text-white disabled:opacity-50"
+                onClick={enterEdit}
+                className="rounded-xl border-2 border-[#4a875b] px-4 py-3 text-[13px] font-bold text-[#4a875b]"
               >
-                {busy
-                  ? "保存中…"
-                  : isRest
-                    ? "✓ 今日は休んだ（完了）"
-                    : alreadyDone
-                      ? "✓ 内容を上書き保存"
-                      : "✓ 今日のトレ完了"}
+                編集する
               </button>
-              {!isRest && !isPersonal && (
-                <div className="flex items-center justify-center gap-4">
-                  <button
-                    type="button"
-                    onClick={enterEdit}
-                    className="text-[11px] font-bold text-[#4a875b]"
-                  >
-                    ✎ 内容を編集
-                  </button>
-                  {!alreadyDone && (
-                    <button
-                      type="button"
-                      onClick={() => setConfirmSkip(true)}
-                      className="text-[11px] text-[#a59b8c]"
-                    >
-                      今日はやらない →
-                    </button>
-                  )}
-                </div>
-              )}
-              <Link
-                href="/workout"
-                className="block text-center text-[11px] text-[#6a6256]"
+              <button
+                type="button"
+                onClick={() => save("done", false)}
+                disabled={busy}
+                className="flex-1 rounded-xl bg-[#4a875b] py-3 text-[14px] font-bold text-white disabled:opacity-50"
               >
-                メニュー全体を見る →
-              </Link>
-            </>
+                {busy ? "保存中…" : alreadyDone ? "✓ 内容を上書き保存" : "✓ 今日のトレ完了"}
+              </button>
+            </div>
           )}
         </div>
       </div>
+
+      {/* 細11: フォーム動画ライトボックス */}
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4"
+          onClick={() => setLightbox(null)}
+        >
+          <div
+            className="w-full max-w-[440px] overflow-hidden rounded-xl bg-black"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <VimeoEmbed url={lightbox.url} />
+            <div className="flex items-center justify-between bg-[#111] px-3.5 py-2.5 text-white">
+              <span className="text-[13px] font-bold">{lightbox.name}</span>
+              <button
+                type="button"
+                onClick={() => setLightbox(null)}
+                className="text-lg text-zinc-400 hover:text-white"
+                aria-label="閉じる"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -346,9 +394,11 @@ export function WorkoutTodayClient({
 function ViewList({
   original,
   loggedItems,
+  onPlay,
 }: {
-  original: import("@/lib/workout/types").Exercise[];
+  original: Exercise[];
   loggedItems: LoggedItem[];
+  onPlay: (url: string, name: string) => void;
 }) {
   const logByName = new Map(loggedItems.map((it) => [it.exerciseName, it]));
   const added = loggedItems.filter((it) => it.source === "added");
@@ -374,6 +424,7 @@ function ViewList({
       {original.map((e, i) => {
         const log = logByName.get(e.種目名);
         const nt = numText(log);
+        const videoUrl = resolveExerciseVideo(e);
         return (
           <div
             key={i}
@@ -386,6 +437,7 @@ function ViewList({
               </div>
               <div className="text-[11px] text-[#6a6256]">{nt ?? cleanReps(e.回数)}</div>
             </div>
+            {videoUrl && <PlayBtn onClick={() => onPlay(videoUrl, cleanExerciseName(e.種目名))} />}
           </div>
         );
       })}
@@ -412,20 +464,31 @@ function ViewList({
 // 編集リスト(ステッパー)
 function EditList({
   items,
+  original,
   onPatch,
   addName,
   setAddName,
   onAdd,
+  onPlay,
 }: {
   items: EditItem[];
+  original: Exercise[];
   onPatch: (i: number, p: Partial<EditItem>) => void;
   addName: string;
   setAddName: (v: string) => void;
   onAdd: () => void;
+  onPlay: (url: string, name: string) => void;
 }) {
+  const videoByName = new Map<string, string>();
+  for (const e of original) {
+    const u = resolveExerciseVideo(e);
+    if (u) videoByName.set(e.種目名, u);
+  }
   return (
     <div className="space-y-2">
-      {items.map((it, i) => (
+      {items.map((it, i) => {
+        const videoUrl = videoByName.get(it.exerciseName);
+        return (
         <div
           key={i}
           className={`rounded-xl border px-3 py-2.5 ${
@@ -436,9 +499,9 @@ function EditList({
                 : "border-[#e7dcc9] bg-[#fffdf8]"
           }`}
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <span
-              className={`text-[13px] font-bold ${it.removed ? "text-[#a59b8c] line-through" : "text-[#2b2620]"}`}
+              className={`flex-1 text-[13px] font-bold ${it.removed ? "text-[#a59b8c] line-through" : "text-[#2b2620]"}`}
             >
               {cleanExerciseName(it.exerciseName)}
               {it.source === "added" && (
@@ -447,12 +510,15 @@ function EditList({
                 </span>
               )}
             </span>
+            {videoUrl && !it.removed && (
+              <PlayBtn onClick={() => onPlay(videoUrl, cleanExerciseName(it.exerciseName))} />
+            )}
             <button
               type="button"
               onClick={() => onPatch(i, { removed: !it.removed })}
-              className="text-[11px] text-[#a59b8c]"
+              className="flex h-9 items-center rounded-full border border-[#d8cdba] px-3 text-[11px] font-bold text-[#a59b8c]"
             >
-              {it.removed ? "戻す" : "✕"}
+              {it.removed ? "戻す" : "はずす"}
             </button>
           </div>
           {!it.removed && (
@@ -478,9 +544,10 @@ function EditList({
             </div>
           )}
         </div>
-      ))}
+        );
+      })}
 
-      {/* 種目追加 */}
+      {/* 種目追加(細15: 緑塗りボタン) */}
       <div className="flex gap-2 pt-1">
         <input
           value={addName}
@@ -492,17 +559,33 @@ function EditList({
             }
           }}
           placeholder="＋ 種目を追加（例: 腹筋ローラー）"
-          className="flex-1 rounded-lg border border-[#e7dcc9] bg-white px-3 py-2 text-[13px] focus:border-[#4a875b] focus:outline-none"
+          className="h-11 flex-1 rounded-lg border border-[#e7dcc9] bg-white px-3 text-[13px] focus:border-[#4a875b] focus:outline-none"
         />
         <button
           type="button"
           onClick={onAdd}
-          className="rounded-lg bg-[#f0ece2] px-4 text-[12px] font-bold text-[#5b5344]"
+          className="h-11 rounded-lg bg-[#4a875b] px-5 text-[13px] font-bold text-white"
         >
-          追加
+          ＋ 追加
         </button>
       </div>
     </div>
+  );
+}
+
+// 細11: フォーム動画 ▶ ボタン(44px緑丸)
+function PlayBtn({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="フォーム動画を見る"
+      className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-[#4a875b]"
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff">
+        <polygon points="6 4 20 12 6 20" />
+      </svg>
+    </button>
   );
 }
 
@@ -523,18 +606,26 @@ function Stepper({
     onChange(next === 0 && value == null ? null : next);
   };
   const inc = () => onChange(Math.round(((value ?? 0) + step) * 10) / 10);
+  // 細14: 44px + 数値タップで直接入力(未入力は—)
   return (
-    <div className="flex flex-1 items-center rounded-lg border border-[#e7dcc9] bg-white">
-      <button type="button" onClick={dec} className="px-2 py-1.5 text-[15px] text-[#6a6256]">
-        −
-      </button>
-      <div className="flex-1 text-center text-[12px] font-bold text-[#2b2620]">
-        {value ?? "—"}
-        <span className="ml-0.5 text-[9px] font-medium text-[#a59b8c]">{label}</span>
+    <div className="flex-1">
+      <div className="mb-0.5 text-center text-[9px] font-medium text-[#a59b8c]">{label}</div>
+      <div className="flex items-center rounded-lg border border-[#e7dcc9] bg-white">
+        <button type="button" aria-label="減らす" onClick={dec} className="flex h-11 w-9 items-center justify-center text-[18px] text-[#6a6256]">
+          −
+        </button>
+        <input
+          type="number"
+          inputMode="decimal"
+          value={value ?? ""}
+          placeholder="—"
+          onChange={(e) => onChange(e.target.value === "" ? null : Number(e.target.value))}
+          className="h-11 w-full min-w-0 border-0 bg-transparent text-center text-[15px] font-bold text-[#2b2620] focus:outline-none"
+        />
+        <button type="button" aria-label="増やす" onClick={inc} className="flex h-11 w-9 items-center justify-center text-[18px] text-[#6a6256]">
+          ＋
+        </button>
       </div>
-      <button type="button" onClick={inc} className="px-2 py-1.5 text-[15px] text-[#6a6256]">
-        ＋
-      </button>
     </div>
   );
 }
