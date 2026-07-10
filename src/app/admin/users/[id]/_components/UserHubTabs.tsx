@@ -11,6 +11,7 @@ export function UserHubTabs({ userId }: { userId: string }) {
     { label: "概要", href: base, exact: true },
     { label: "体組成推移", href: `${base}/metrics`, exact: false },
     { label: "食事記録", href: `${base}/meals`, exact: false },
+    { label: "トレ記録", href: `${base}/workout`, exact: false },
     { label: "月次添削履歴", href: `${base}/monthly`, exact: false },
     { label: "筋トレメニュー", href: `${base}/menu`, exact: false },
     { label: "カルテ", href: `${base}/carte`, exact: false },

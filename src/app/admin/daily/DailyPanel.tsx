@@ -354,7 +354,60 @@ function TodayTab({ detail }: { detail: DailyDetail }) {
         )}
       </SectionCard>
       <SectionCard title="💪 今日のトレーニング" srcLabel="user_workout_logs（P5）" srcNew>
-        <PlaceholderBody text="実施記録はP5で実装します。ここに原本×実績の突合と「原本以外にやったこと」が入ります。" />
+        {!detail.isBeta ? (
+          <PlaceholderBody text="この受講生はまだトレ実施記録の対象外です（ベータ公開後に表示されます）。" />
+        ) : !detail.workout ? (
+          <PlaceholderBody text="今日のトレーニング記録はまだありません。" />
+        ) : (
+          <div className="space-y-2 text-[12px]">
+            <div className="flex items-center gap-2">
+              <span
+                className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                  detail.workout.status === "skipped"
+                    ? "bg-[#fdece0] text-[#b0640f]"
+                    : detail.workout.status === "rest_done"
+                      ? "bg-[#e8f0fa] text-[#3a6ea5]"
+                      : "bg-[#eef5f0] text-[#34603f]"
+                }`}
+              >
+                {detail.workout.status === "skipped"
+                  ? "未実施"
+                  : detail.workout.status === "rest_done"
+                    ? "休養完了"
+                    : "完了"}
+              </span>
+              <span className="font-bold text-zinc-900">{detail.workout.dayLabel}</span>
+              <span className="text-[10px] text-zinc-400">
+                {detail.workout.intensity}強度
+              </span>
+            </div>
+            {detail.workout.doneNames.length > 0 && (
+              <div>
+                <span className="text-[10px] font-bold text-[#34603f]">やった：</span>
+                <span className="text-zinc-700">{detail.workout.doneNames.join("、")}</span>
+              </div>
+            )}
+            {detail.workout.notDoneNames.length > 0 && (
+              <div>
+                <span className="text-[10px] font-bold text-[#b0640f]">やらなかった：</span>
+                <span className="text-zinc-400 line-through">
+                  {detail.workout.notDoneNames.join("、")}
+                </span>
+              </div>
+            )}
+            {detail.workout.addedNames.length > 0 && (
+              <div>
+                <span className="text-[10px] font-bold text-[#4a875b]">＋追加：</span>
+                <span className="text-zinc-700">{detail.workout.addedNames.join("、")}</span>
+              </div>
+            )}
+            {detail.workout.memo && (
+              <div className="rounded bg-[#faf7f0] px-2 py-1 text-[11px] italic text-zinc-500">
+                {detail.workout.memo}
+              </div>
+            )}
+          </div>
+        )}
       </SectionCard>
       <SectionCard title="🌙 今日の生活" srcLabel="daily_conditions（P6）" srcNew>
         <PlaceholderBody text="睡眠・体調・お通じ・飲酒はP6で実装します。ここに1行の生活帯が入ります。" />
@@ -657,7 +710,7 @@ function FbBar({
             食事はP4-a公開済みのため、ベータ受講生には食事も解禁。 */}
         <div className="rounded-md border border-[#f0e2b8] bg-[#fffbeb] px-2.5 py-1 text-[10.5px] leading-snug text-[#8a6d1a]">
           いま書けるのは
-          <b>{detail.isBeta ? "体重・学習・食事" : "体重・学習"}</b>
+          <b>{detail.isBeta ? "体重・学習・食事・トレ" : "体重・学習"}</b>
           の話題までです（{detail.isBeta ? "生活は P6 公開後" : "食事・生活は P4/P6 公開後"}）
         </div>
         <textarea
