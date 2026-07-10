@@ -262,6 +262,9 @@ export type DistributeMenuInput = {
   cycles: WorkoutCycles;                 // 微調整後の最終メニュー
   notes: string | null;
   effective_from?: string;               // YYYY-MM-DD、デフォルトは今日
+  // 再配布(P5): 進行中の受講生への切替方式。
+  //   'next'(既定)=いまの7日間が終わってから(次の1日目)／'immediate'=すぐ反映(日数は引き継ぐ)
+  applyMode?: "next" | "immediate";
 };
 
 /**
@@ -322,6 +325,27 @@ export async function distributeMenu(
       ok: false,
       message: `新規メニュー作成失敗: ${insErr?.message ?? "unknown"}`,
     };
+  }
+
+  // 3. 再配布(P5): 進行中(progress あり)の受講生には切替方式を反映。
+  //    'immediate'=menu_id を即差し替え(日数引継ぎ) / 既定 'next'=pending に積み次の1日目で切替。
+  const { data: prog } = await supabase
+    .from("user_workout_progress")
+    .select("user_id")
+    .eq("user_id", input.user_id)
+    .maybeSingle();
+  if (prog) {
+    if (input.applyMode === "immediate") {
+      await supabase
+        .from("user_workout_progress")
+        .update({ menu_id: newMenu.id, pending_menu_id: null })
+        .eq("user_id", input.user_id);
+    } else {
+      await supabase
+        .from("user_workout_progress")
+        .update({ pending_menu_id: newMenu.id })
+        .eq("user_id", input.user_id);
+    }
   }
 
   revalidatePath(`/admin/users/${input.user_id}`, "page");
