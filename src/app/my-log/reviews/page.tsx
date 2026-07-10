@@ -5,6 +5,7 @@ import {
 } from "@/lib/courses/queries";
 import { ReviewsListView } from "./ReviewsListView";
 import { MemberHeader } from "@/components/MemberHeader";
+import { isBetaUser } from "@/lib/auth/beta";
 
 export const dynamic = "force-dynamic";
 
@@ -16,9 +17,10 @@ export const dynamic = "force-dynamic";
  * - 末尾: 「← 学習に戻る」 リンク
  */
 export default async function MyReviewsPage() {
-  const [reviews, stats] = await Promise.all([
+  const [reviews, stats, isBeta] = await Promise.all([
     listMyReviewsWithContext(),
     getReviewsStats(),
+    isBetaUser(),
   ]);
 
   return (
@@ -61,7 +63,7 @@ export default async function MyReviewsPage() {
             </div>
           </section>
 
-          <ReviewsListView reviews={reviews} />
+          <ReviewsListView reviews={reviews} isBeta={isBeta} />
 
           {/* 末尾 ・ 学習に戻る (Phase 3) */}
           <div className="mt-4 flex justify-center">
