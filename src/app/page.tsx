@@ -12,6 +12,9 @@ import { getMyBodyCard, type BodyCard } from "@/lib/member/body-card";
 import { getMyUnreadCount } from "@/lib/chat/queries";
 import { getMyBoardItems, type BoardItem } from "@/lib/member/board";
 import { hasUnreadReply } from "@/lib/member/notifications";
+import { getTodayActivity } from "@/lib/member/today-activity";
+import { isBetaUser } from "@/lib/auth/beta";
+import { HomeBeta } from "./HomeBeta";
 
 export const dynamic = "force-dynamic";
 
@@ -96,6 +99,8 @@ export default async function Home() {
     chatUnread,
     boardItems,
     unreadReply,
+    isBeta,
+    todayActivity,
   ] = await Promise.all([
     getMyAlerts(),
     getMyHomeStats(),
@@ -107,6 +112,8 @@ export default async function Home() {
     getMyUnreadCount(),
     getMyBoardItems(2),
     hasUnreadReply(),
+    isBetaUser(),
+    getTodayActivity(),
   ]);
 
   const displayName = stats?.displayName ?? "受講生";
@@ -121,6 +128,24 @@ export default async function Home() {
     stats && stats.totalLessons > 0
       ? Math.round((stats.completedLessons / stats.totalLessons) * 100)
       : 0;
+
+  // P3(ベータ限定): 確定7/7ホーム。非ベータは従来ホーム(下の return)。
+  if (isBeta) {
+    return (
+      <HomeBeta
+        displayName={displayName}
+        daysSinceJoined={stats?.daysSinceJoined ?? 0}
+        bodyCard={bodyCard}
+        completedLessons={stats?.completedLessons ?? 0}
+        totalLessons={stats?.totalLessons ?? 0}
+        lastWatched={lastWatched}
+        monthlyBadge={monthlyAudit?.hasReviewNotice ?? false}
+        boardItems={boardItems}
+        unreadReply={unreadReply}
+        today={todayActivity}
+      />
+    );
+  }
 
   return (
     <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
