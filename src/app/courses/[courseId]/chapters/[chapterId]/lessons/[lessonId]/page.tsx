@@ -18,6 +18,7 @@ import { CompleteButton } from "./CompleteButton";
 import { ReviewAccordion } from "./ReviewAccordion";
 import { PracticeInput } from "./PracticeInput";
 import { listMyActionsForLesson } from "@/lib/practice/queries";
+import { isBetaUser } from "@/lib/auth/beta";
 
 export const dynamic = "force-dynamic";
 
@@ -44,12 +45,19 @@ export default async function StudentLessonPage({
     notFound();
   }
 
-  const [progressMap, review, adjacent, practiceActions] = await Promise.all([
-    getMyLessonProgress([lesson.id]),
-    getMyLessonReview(lesson.id),
-    getAdjacentLessons(courseId, lesson.id),
-    listMyActionsForLesson(lesson.id),
-  ]);
+  const [progressMap, review, adjacent, practiceActions, isBeta] =
+    await Promise.all([
+      getMyLessonProgress([lesson.id]),
+      getMyLessonReview(lesson.id),
+      getAdjacentLessons(courseId, lesson.id),
+      listMyActionsForLesson(lesson.id),
+      isBetaUser(),
+    ]);
+
+  // B10: 動画未設定・試験準備中でも受講生を止めない(ベータ限定)。次レッスンへの逃げ道URL。
+  const nextLessonHref = adjacent.next
+    ? `/courses/${courseId}/chapters/${adjacent.next.chapter_id}/lessons/${adjacent.next.lesson_id}`
+    : null;
   const isCompleted = progressMap.get(lesson.id) === true;
 
   // 【テスト】 レッスン判定 ・ vimeo なし + meta_tags に「テスト」 含む
@@ -129,6 +137,14 @@ export default async function StudentLessonPage({
               <br />
               先に動画レッスンを視聴して内容を学んでください。
             </div>
+            {isBeta && nextLessonHref && (
+              <Link
+                href={nextLessonHref}
+                className="mt-3 inline-block rounded-full bg-[#4a875b] px-4 py-2 text-[12px] font-bold text-white hover:bg-[#34603f]"
+              >
+                次のレッスンへ →
+              </Link>
+            )}
           </section>
         ) : lesson.vimeo_url ? (
           <VimeoEmbed url={lesson.vimeo_url} />
@@ -138,12 +154,29 @@ export default async function StudentLessonPage({
           />
         ) : (
           <div className="rounded-xl bg-zinc-100 border border-zinc-200 p-6 text-center text-sm text-[#6a6256]">
-            動画 URL が設定されていません。
+            {isBeta ? (
+              <>
+                <div className="font-bold text-[#2b2620]">準備中です</div>
+                <div className="mt-1 text-[12px] leading-relaxed">
+                  このレッスンの動画はまだ準備中です。先に進んで大丈夫です。
+                </div>
+                {nextLessonHref && (
+                  <Link
+                    href={nextLessonHref}
+                    className="mt-3 inline-block rounded-full bg-[#4a875b] px-4 py-2 text-[12px] font-bold text-white hover:bg-[#34603f]"
+                  >
+                    次のレッスンへ →
+                  </Link>
+                )}
+              </>
+            ) : (
+              "動画 URL が設定されていません。"
+            )}
           </div>
         )}
 
-        {/* 完了ボタン (試験は対象外) */}
-        {!isExam && (
+        {/* 完了ボタン (試験は対象外。ただしベータは試験準備中でも完了可=進行を止めない B10) */}
+        {(!isExam || isBeta) && (
           <section>
             <CompleteButton
               lessonId={lesson.id}
