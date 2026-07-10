@@ -239,6 +239,8 @@ export function BodyFatToolClient({
             label="身長"
             value={height}
             unit="cm"
+            step="1"
+            mode="numeric"
             inputClass={inputClass("height")}
             onChange={(v) => {
               setHeight(v);
@@ -423,6 +425,8 @@ function InputRow({
   onChange,
   last = false,
   hasError = false,
+  step = "0.1",
+  mode = "decimal",
 }: {
   label: React.ReactNode;
   value: string;
@@ -431,6 +435,8 @@ function InputRow({
   onChange: (v: string) => void;
   last?: boolean;
   hasError?: boolean;
+  step?: string;
+  mode?: "decimal" | "numeric";
 }) {
   return (
     <div className={last ? "" : "mb-3.5"}>
@@ -446,8 +452,8 @@ function InputRow({
       >
         <input
           type="number"
-          inputMode="decimal"
-          step="0.1"
+          inputMode={mode}
+          step={step}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className={inputClass}

@@ -16,6 +16,7 @@ export function AddAdminForm() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (pending) return; // 体3: 二重送信ガード(超高速クリック/Enterの隙間を塞ぐ)
     setError(null);
     setSuccess(null);
 
