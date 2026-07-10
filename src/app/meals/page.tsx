@@ -24,6 +24,12 @@ export default async function MealsDayPage({
   const date =
     sp.date && /^\d{4}-\d{2}-\d{2}$/.test(sp.date) ? sp.date : jstTodayStr();
 
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login?next=/meals");
+
   const meals = await getMealsForDate(date);
   const allPaths = meals.flatMap((m) => m.photos);
   const urlMap = await signMealPhotos(allPaths);
@@ -34,8 +40,6 @@ export default async function MealsDayPage({
   }));
 
   // 着地切替(M6): その日のデイリーFB(送信済)を「のりからのコメント」として食事詳細に表示。
-  // RLS = 自分の sent のみ読める。
-  const supabase = await createClient();
   const { data: fbRow } = await supabase
     .from("daily_feedbacks")
     .select("body, date")
@@ -43,6 +47,23 @@ export default async function MealsDayPage({
     .eq("status", "sent")
     .maybeSingle();
   const feedback = fbRow?.body ? (fbRow.body as string) : null;
+
+  // 合計ゲージの「ものさし」= 目標PFC(既存 goal_sheets.content.nutrition)
+  const { data: goal } = await supabase
+    .from("goal_sheets")
+    .select("content")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const nutrition = (goal?.content as { nutrition?: { target_calorie?: number; pfc?: { p?: number; f?: number; c?: number } } } | null)
+    ?.nutrition;
+  const target = nutrition
+    ? {
+        kcal: nutrition.target_calorie ?? null,
+        p: nutrition.pfc?.p ?? null,
+        f: nutrition.pfc?.f ?? null,
+        c: nutrition.pfc?.c ?? null,
+      }
+    : null;
 
   return (
     <>
@@ -54,6 +75,8 @@ export default async function MealsDayPage({
             meals={withUrls}
             today={jstTodayStr()}
             feedback={feedback}
+            target={target}
+            userId={user.id}
           />
         </div>
       </main>
