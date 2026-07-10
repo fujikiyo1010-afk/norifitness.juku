@@ -45,3 +45,17 @@ export type LoggedItem = {
   reps: number | null;
   sets: number | null;
 };
+
+/** 原本の回数文字列から reps/sets の初期値を推定("10回±2、2セット"→{reps:10,sets:2}) */
+export function parseRepsSets(s: string | null | undefined): {
+  reps: number | null;
+  sets: number | null;
+} {
+  if (!s) return { reps: null, sets: null };
+  const repsM = s.match(/(\d+)\s*回/);
+  const setsM = s.match(/(\d+)\s*セット/);
+  return {
+    reps: repsM ? Number(repsM[1]) : null,
+    sets: setsM ? Number(setsM[1]) : null,
+  };
+}
