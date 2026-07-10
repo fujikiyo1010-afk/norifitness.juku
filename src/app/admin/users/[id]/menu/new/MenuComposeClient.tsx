@@ -79,6 +79,8 @@ export function MenuComposeClient({
   const [activeCycleIdx, setActiveCycleIdx] = useState(0);
   const [activeDayIdx, setActiveDayIdx] = useState(0);
   const [errors, setErrors] = useState<string[]>([]);
+  // 再配布(P5): 進行中の受講生への切替方式
+  const [applyMode, setApplyMode] = useState<"next" | "immediate">("next");
 
   const activeCycle = cycles[activeCycleIdx];
   const activeDay: DayMenu | undefined = activeCycle?.["週"]?.[activeDayIdx];
@@ -323,6 +325,7 @@ export function MenuComposeClient({
         template_snapshot: sourceTemplate,
         cycles,
         notes: notes.trim(),
+        applyMode,
       });
       if (result.ok) {
         // リクエスト経由なら 返信フォームへ自動で戻す (= /admin/requests 右ペイン展開)
@@ -713,7 +716,30 @@ export function MenuComposeClient({
 
       {/* フッタ固定 (配布ボタン) */}
       <div className="fixed bottom-0 left-0 right-0 border-t border-[#e8ebe9] bg-white px-4 py-3 shadow-[0_-2px_8px_rgba(0,0,0,0.04)]">
-        <div className="mx-auto flex max-w-3xl items-center gap-3">
+        <div className="mx-auto max-w-3xl">
+          {/* 再配布の切替方式(P5・進行中の受講生向け) */}
+          <div className="mb-2 flex flex-wrap items-center gap-3 text-[11px] text-zinc-600">
+            <span className="font-bold text-zinc-500">切替:</span>
+            <label className="flex items-center gap-1">
+              <input
+                type="radio"
+                name="applyMode"
+                checked={applyMode === "next"}
+                onChange={() => setApplyMode("next")}
+              />
+              次の1日目から反映（おすすめ・今の7日間は走り切る）
+            </label>
+            <label className="flex items-center gap-1">
+              <input
+                type="radio"
+                name="applyMode"
+                checked={applyMode === "immediate"}
+                onChange={() => setApplyMode("immediate")}
+              />
+              すぐ反映（けが・体調時／日数は引き継ぐ）
+            </label>
+          </div>
+          <div className="flex items-center gap-3">
           <div className="flex-1 text-xs text-zinc-600">
             {userName} に {totalExercises} 種目 / {cycles.length} 強度で配布
           </div>
@@ -733,6 +759,7 @@ export function MenuComposeClient({
               "配布する"
             )}
           </button>
+          </div>
         </div>
       </div>
     </div>
