@@ -9,13 +9,16 @@ export function CompleteButton({
   initialCompleted,
   isBeta = false,
   recordedBodyToday = false,
+  recordedMealToday = false,
 }: {
   lessonId: string;
   initialCompleted: boolean;
   /** C19 完了トースト(ベータ) の出し分け */
   isBeta?: boolean;
-  /** 今日すでに体組成を記録済みか(トーストの「今日の達成 x/2」計算用) */
+  /** 今日すでに体組成を記録済みか(トーストの「今日の達成 x/3」計算用) */
   recordedBodyToday?: boolean;
+  /** 今日すでに食事を記録済みか(同上) */
+  recordedMealToday?: boolean;
 }) {
   const [completed, setCompleted] = useState(initialCompleted);
   const [error, setError] = useState<string | null>(null);
@@ -37,10 +40,10 @@ export function CompleteButton({
         setError(result.message);
         return;
       }
-      // C19: 完了時に「今日の達成 x/2」トースト(ベータ)。v1= 学習+体組成の2つ。
+      // C19: 完了時に「今日の達成 x/3」トースト(ベータ)。学習+体組成+食事。
       if (next && isBeta) {
-        const done = 1 + (recordedBodyToday ? 1 : 0);
-        setToast(`レッスン完了！今日の達成 ${done}/2`);
+        const done = 1 + (recordedBodyToday ? 1 : 0) + (recordedMealToday ? 1 : 0);
+        setToast(`レッスン完了！今日の達成 ${done}/3`);
         window.setTimeout(() => setToast(null), 2600);
       }
       router.refresh();

@@ -43,7 +43,23 @@ export function HomeBeta({
 }) {
   const learnPct =
     totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
-  const doneCount = (today.recordedBody ? 1 : 0) + (today.learned ? 1 : 0);
+  const doneCount =
+    (today.recordedBody ? 1 : 0) +
+    (today.learned ? 1 : 0) +
+    (today.recordedMeal ? 1 : 0);
+  // M7 案1: 残枠テキスト(「朝を記録／残り 昼・夕・間食」)
+  const MEAL_ORDER = ["朝", "昼", "夕", "間"];
+  const MEAL_REMAIN_LABEL: Record<string, string> = {
+    朝: "朝",
+    昼: "昼",
+    夕: "夕",
+    間: "間食",
+  };
+  const doneMeals = MEAL_ORDER.filter((t) => today.mealTypes.includes(t));
+  const remainMeals = MEAL_ORDER.filter((t) => !today.mealTypes.includes(t));
+  const mealTitle = today.recordedMeal
+    ? `${doneMeals.join("・")}を記録${remainMeals.length > 0 ? `／残り ${remainMeals.map((t) => MEAL_REMAIN_LABEL[t]).join("・")}` : "（そろいました）"}`
+    : "今日の食事を記録しよう";
 
   return (
     <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
@@ -85,12 +101,12 @@ export function HomeBeta({
           <section>
             <div className="mb-2 flex items-center gap-2.5 rounded-[14px] border border-[#e7dcc9] bg-[#fffdf8] px-3.5 py-2.5">
               <span className="font-mono text-[15px] font-extrabold text-[#4a875b]">
-                {doneCount}/2
+                {doneCount}/3
               </span>
               <div className="h-[7px] flex-1 overflow-hidden rounded-full bg-[#e7dcc9]">
                 <div
                   className="h-full rounded-full"
-                  style={{ width: `${(doneCount / 2) * 100}%`, background: TEAL }}
+                  style={{ width: `${(doneCount / 3) * 100}%`, background: TEAL }}
                 />
               </div>
               <span className="text-[10px] font-bold text-[#6a6256]">
@@ -123,6 +139,15 @@ export function HomeBeta({
                 cta={lastWatched ? "▶ 続きを見る →" : "▶ レッスンへ →"}
                 href={lastWatched?.href ?? "/courses"}
                 done={today.learned}
+              />
+              {/* 食事(M7 案1・1食で✓) */}
+              <TodayCard
+                cap="今日の食事"
+                capColor={TEAL_DARK}
+                title={mealTitle}
+                cta={today.recordedMeal ? "タップして見る →" : "＋写真で記録 →"}
+                href={today.recordedMeal ? "/meals" : "/meals/new"}
+                done={today.recordedMeal}
               />
             </div>
           </section>
