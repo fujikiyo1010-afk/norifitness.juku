@@ -38,6 +38,70 @@ function nowPastNoonJST(): boolean {
   return new Date(Date.now() + 9 * 3600 * 1000).getUTCHours() >= 12;
 }
 
+const DOW_LABEL = ["日", "月", "火", "水", "木", "金", "土"];
+
+// 細8: 週ストリップ(日〜土・記録ありドット・未来日不可)
+function WeekStrip({
+  date,
+  today,
+  recordedDates,
+}: {
+  date: string;
+  today: string;
+  recordedDates: string[];
+}) {
+  const recSet = new Set(recordedDates);
+  const baseMs = Date.parse(`${date}T00:00:00Z`);
+  const dow = new Date(baseMs).getUTCDay();
+  const sunday = baseMs - dow * DAY;
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const ds = new Date(sunday + i * DAY).toISOString().slice(0, 10);
+    return { ds, dow: i, num: new Date(sunday + i * DAY).getUTCDate() };
+  });
+  return (
+    <div className="flex gap-1">
+      {days.map((d) => {
+        const selected = d.ds === date;
+        const future = d.ds > today;
+        const hasRec = recSet.has(d.ds);
+        const inner = (
+          <div
+            className={`flex flex-col items-center rounded-xl py-1.5 ${
+              selected ? "bg-[#4a875b] text-white" : future ? "text-[#d8cdba]" : "text-[#6a6256]"
+            }`}
+          >
+            <span className="text-[9px] font-bold">{DOW_LABEL[d.dow]}</span>
+            <span className="text-[13px] font-extrabold">{d.num}</span>
+            <span
+              className={`mt-0.5 h-1 w-1 rounded-full ${
+                hasRec ? (selected ? "bg-white" : "bg-[#4a875b]") : "bg-transparent"
+              }`}
+            />
+          </div>
+        );
+        return future ? (
+          <div key={d.ds} className="flex-1 opacity-60">
+            {inner}
+          </div>
+        ) : (
+          <Link key={d.ds} href={`/meals?date=${d.ds}`} className="flex-1">
+            {inner}
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+function LockIcon() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  );
+}
+
 export function DayDetail({
   date,
   meals,
@@ -48,6 +112,7 @@ export function DayDetail({
   condition = null,
   askYesterday = null,
   foods = [],
+  recordedDates = [],
 }: {
   date: string;
   meals: MealWithUrls[];
@@ -58,6 +123,7 @@ export function DayDetail({
   condition?: DailyConditionData | null; // その日の生活記録(記録済みなら値)
   askYesterday?: string | null; // 翌日補完: 昨日の日付(聞くべきなら) or null
   foods?: FoodItem[]; // food_table(P4-b・自動計算)
+  recordedDates?: string[]; // 細8: 週ストリップ用・記録がある日(YYYY-MM-DD)
 }) {
   const router = useRouter();
   const [sheet, setSheet] = useState<{ mealType: MealType; editLog: MealWithUrls | null } | null>(null);
@@ -132,6 +198,9 @@ export function DayDetail({
           <span className="w-16" />
         )}
       </div>
+
+      {/* 細8: 週ストリップ(日〜土・記録ありドット・未来日不可) */}
+      <WeekStrip date={date} today={today} recordedDates={recordedDates} />
 
       {/* のりコメント */}
       {feedback && (
@@ -399,7 +468,9 @@ function Slot({
                 </button>
               </>
             ) : locked ? (
-              <span className="text-[10px] text-[#a59b8c]">🔒 編集ロック中</span>
+              <span className="flex items-center gap-1 text-[10px] text-[#a59b8c]">
+                <LockIcon /> 編集ロック中
+              </span>
             ) : null}
           </div>
         </div>

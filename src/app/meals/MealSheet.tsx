@@ -195,7 +195,13 @@ export function MealSheet({
           await supabase.storage.from("meal-photos").remove(uploaded);
         } catch {}
       }
-      setError(e instanceof Error ? `${e.message}（もう一度お試しください）` : "保存に失敗しました");
+      // 細7: 生エラー(英語/内部ID)は見せない。人の言葉に変換(入力は保持)。
+      console.warn("[meal] save failed", e);
+      setError(
+        newFiles.length > 0
+          ? "写真の保存に失敗しました。もう一度お試しください。"
+          : "保存に失敗しました。もう一度お試しください。"
+      );
     } finally {
       setBusy(false);
     }
@@ -203,11 +209,9 @@ export function MealSheet({
 
   return (
     <div className="space-y-4 pb-4">
-      <div>
-        <div className="text-[15px] font-extrabold text-[#2b2620]">{MEAL_LABEL[mealType]}を記録</div>
-        <div className="text-[10px] text-[#a59b8c]">
-          タイプはこの枠に固定です（変えたい時は枠を選び直してください）
-        </div>
+      {/* 細3: シート見出しはBottomSheet側(◯食を記録)が担う。ここは固定の注記のみ */}
+      <div className="text-[10px] text-[#a59b8c]">
+        タイプはこの枠に固定です（変えたい時は枠を選び直してください）
       </div>
 
       {/* 写真 */}
@@ -267,13 +271,13 @@ export function MealSheet({
             </div>
           </div>
         ) : (
-          <div className="mt-2 space-y-1">
+          <div className="mt-2 space-y-1.5">
             {results.map((f) => (
               <button
                 key={f.id}
                 type="button"
                 onClick={() => addFood(f)}
-                className="flex w-full items-center justify-between rounded-lg border border-[#e7dcc9] bg-[#fffdf8] px-3 py-2 text-left"
+                className="flex min-h-[44px] w-full items-center justify-between rounded-lg border border-[#e7dcc9] bg-[#fffdf8] px-3 py-2 text-left"
               >
                 <span className="text-[13px] font-bold text-[#2b2620]">
                   <span className="mr-1.5 rounded bg-[#eaf3ec] px-1 py-0.5 text-[9px] font-bold text-[#34603f]">表</span>
@@ -285,13 +289,17 @@ export function MealSheet({
                 </span>
               </button>
             ))}
+            {/* 細6: 候補外は常時「＋追加する」緑ボタン(1文字目から表示) */}
             <button
               type="button"
               onClick={() => addManual(q)}
-              className="w-full rounded-lg border border-dashed border-[#d8cdba] px-3 py-2 text-left text-[12px] text-[#6a6256]"
+              className="flex min-h-[44px] w-full items-center justify-center rounded-lg bg-[#4a875b] px-3 py-2 text-[13px] font-bold text-white"
             >
-              表に見つからない →「{q.trim()}」をこのまま追加（数値は任意で手入力）
+              ＋「{q.trim()}」を追加する
             </button>
+            <p className="text-[10px] text-[#a59b8c]">
+              表にない食べ物もそのまま追加できます。数値は任意で手入力できます。
+            </p>
           </div>
         )}
       </div>
@@ -305,7 +313,25 @@ export function MealSheet({
         className="w-full rounded-lg border border-[#e7dcc9] bg-white px-3 py-2 text-[13px] focus:border-[#4a875b] focus:outline-none"
       />
 
-      {error && <p className="text-[12px] font-bold text-red-700">❌ {error}</p>}
+      {/* 細7: エラーは SVG + 人の言葉 + もう一度試す(入力保持) */}
+      {error && (
+        <div className="flex items-center gap-2 rounded-lg border border-[#f0c9c0] bg-[#fdeee9] px-3 py-2.5">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c2693f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <span className="flex-1 text-[12px] text-[#8a4b32]">{error}</span>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={busy}
+            className="flex-shrink-0 rounded-lg bg-[#4a875b] px-3 py-1.5 text-[11px] font-bold text-white disabled:opacity-50"
+          >
+            もう一度試す
+          </button>
+        </div>
+      )}
 
       {confirmClose ? (
         <div className="rounded-lg border border-[#f0e2b8] bg-[#fffbeb] p-3">
@@ -367,21 +393,21 @@ function ItemRow({
     const n = calcNutrition(item.food, item.quantity);
     const isWeight = item.food.unitType === "weight";
     return (
-      <li className="rounded-lg border border-[#cfe0d4] bg-[#eef5f0] px-3 py-2">
-        <div className="flex items-center justify-between">
+      <li className="rounded-lg border border-[#cfe0d4] bg-[#eef5f0] px-3 py-2.5">
+        <div className="flex items-center justify-between gap-2">
           <span className="flex items-center gap-1.5 text-[13px] font-bold text-[#2b2620]">
             <span className="rounded bg-[#eaf3ec] px-1 py-0.5 text-[9px] text-[#34603f]">表</span>
             {item.food.name}
           </span>
-          <button type="button" onClick={onRemove} className="text-[11px] text-[#a59b8c]">
-            削除
-          </button>
+          <DeleteBtn onClick={onRemove} />
         </div>
         <div className="mt-2 flex items-center gap-2">
+          {/* 細4: 44px ステッパー */}
           <button
             type="button"
+            aria-label="減らす"
             onClick={() => onPatch({ quantity: Math.max(0, Math.round((item.quantity - item.food!.stepQty) * 10) / 10) })}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#cfe0d4] bg-white text-[16px] text-[#34603f]"
+            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg border border-[#cfe0d4] bg-white text-[20px] text-[#34603f]"
           >
             −
           </button>
@@ -391,25 +417,24 @@ function ItemRow({
               inputMode="decimal"
               value={item.quantity}
               onChange={(e) => onPatch({ quantity: e.target.value === "" ? 0 : Number(e.target.value) })}
-              className="w-14 rounded-lg border border-[#cfe0d4] bg-white px-1 py-1 text-center text-[14px] font-bold focus:outline-none"
+              className="h-11 w-20 rounded-lg border border-[#cfe0d4] bg-white px-1 text-center text-[16px] font-bold focus:outline-none"
             />
-            <span className="text-[11px] text-[#6a6256]">{item.food.unitLabel}</span>
+            <span className="text-[12px] text-[#6a6256]">{item.food.unitLabel}</span>
           </div>
           <button
             type="button"
+            aria-label="増やす"
             onClick={() => onPatch({ quantity: Math.round((item.quantity + item.food!.stepQty) * 10) / 10 })}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#cfe0d4] bg-white text-[16px] text-[#34603f]"
+            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg border border-[#cfe0d4] bg-white text-[20px] text-[#34603f]"
           >
             ＋
           </button>
-          <span className="ml-auto text-[11px] font-bold text-[#34603f]">
-            {n.kcal}kcal
-          </span>
+          <span className="ml-auto text-[12px] font-bold text-[#34603f]">{n.kcal}kcal</span>
         </div>
-        <div className="mt-0.5 text-[10px] text-[#6a6256]">
+        <div className="mt-1 text-[10px] text-[#6a6256]">
           P{n.p} ・ F{n.f} ・ C{n.c}
           <span className="ml-1 text-[9px] text-[#a59b8c]">
-            （{isWeight ? `${item.food.stepQty}gずつ・数字入力OK` : "±1"}）
+            （{isWeight ? `${item.food.stepQty}gずつ・数字タップで直接入力` : "±1"}）
           </span>
         </div>
       </li>
@@ -422,20 +447,23 @@ function ItemRow({
     ? { t: "手入力", cls: "bg-[#f6ecc8] text-[#8a6d10]" }
     : { t: "数値なし", cls: "bg-[#eee] text-[#8a8577]" };
   return (
-    <li className="rounded-lg border border-[#e7dcc9] bg-[#fffdf8] px-3 py-2">
-      <div className="flex items-center justify-between">
+    <li className="rounded-lg border border-[#e7dcc9] bg-[#fffdf8] px-3 py-2.5">
+      <div className="flex items-center justify-between gap-2">
         <span className="flex items-center gap-1.5 text-[13px] text-[#2b2620]">
           <span className={`rounded px-1 py-0.5 text-[9px] font-bold ${label.cls}`}>{label.t}</span>
           {item.name}
           {item.kcal.trim() && <span className="text-[11px] text-[#6a6256]">{item.kcal}kcal〜</span>}
         </span>
-        <span className="flex gap-2 text-[11px]">
-          <button type="button" onClick={() => onPatch({ open: !item.open })} className="text-[#4a875b]">
-            {item.open ? "閉じる" : "数値"}
+        {/* 細5: 裸テキスト→ボタン形状。数値=緑枠pill / 削除=グレー枠pill(右) */}
+        <span className="flex flex-shrink-0 items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => onPatch({ open: !item.open })}
+            className="flex h-9 items-center rounded-full border border-[#4a875b] px-3 text-[11px] font-bold text-[#4a875b]"
+          >
+            {item.open ? "閉じる" : "数値を入れる"}
           </button>
-          <button type="button" onClick={onRemove} className="text-[#a59b8c]">
-            削除
-          </button>
+          <DeleteBtn onClick={onRemove} />
         </span>
       </div>
       {item.open && (
@@ -448,7 +476,7 @@ function ItemRow({
                 value={item[k]}
                 onChange={(e) => onPatch({ [k]: e.target.value } as Partial<DraftItem>)}
                 placeholder="—"
-                className="w-full rounded border border-[#e7dcc9] bg-white px-1 py-1 text-center text-[12px] focus:border-[#4a875b] focus:outline-none"
+                className="h-11 w-full rounded border border-[#e7dcc9] bg-white px-1 text-center text-[15px] focus:border-[#4a875b] focus:outline-none"
               />
               <span className="text-[8px] text-[#a59b8c]">{k === "kcal" ? "kcal" : `${k.toUpperCase()} g`}</span>
             </label>
@@ -456,5 +484,18 @@ function ItemRow({
         </div>
       )}
     </li>
+  );
+}
+
+// 細5: 削除ボタン(グレー枠pill・右端)
+function DeleteBtn({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex h-9 items-center rounded-full border border-[#d8cdba] px-3 text-[11px] font-bold text-[#a59b8c]"
+    >
+      削除
+    </button>
   );
 }

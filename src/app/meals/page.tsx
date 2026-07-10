@@ -78,6 +78,24 @@ export default async function MealsDayPage({
 
   const foods = await getActiveFoods();
 
+  // 細8: 週ストリップ用・当該週(日〜土)で記録がある日
+  const baseMs = Date.parse(`${date}T00:00:00Z`);
+  const sunday = new Date(baseMs - new Date(baseMs).getUTCDay() * 86_400_000)
+    .toISOString()
+    .slice(0, 10);
+  const saturday = new Date(Date.parse(`${sunday}T00:00:00Z`) + 6 * 86_400_000)
+    .toISOString()
+    .slice(0, 10);
+  const { data: weekMeals } = await supabase
+    .from("meal_logs")
+    .select("date")
+    .eq("user_id", user.id)
+    .gte("date", sunday)
+    .lte("date", saturday);
+  const recordedDates = Array.from(
+    new Set(((weekMeals ?? []) as { date: string }[]).map((m) => m.date))
+  );
+
   return (
     <>
       <MemberHeader title="食事" fallbackHref="/" />
@@ -93,6 +111,7 @@ export default async function MealsDayPage({
             condition={condRes?.data ?? null}
             askYesterday={askYesterday}
             foods={foods}
+            recordedDates={recordedDates}
           />
         </div>
       </main>

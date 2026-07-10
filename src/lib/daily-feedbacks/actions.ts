@@ -46,12 +46,12 @@ export async function sendDailyFeedback(input: {
   const r = await upsert(input.userId, input.date, body, "sent", adminInfo.id);
   // P2b-2: 受講生ホームの緑バッジ「返信あり」用に通知を1件立てる（既存 notifications・種類=comment）。
   // 未読が既にあれば増やさない（バッジは有無だけを見るため重複不要）。送信失敗時は立てない。
-  if (r.ok) await ensureReplyNotification(input.userId);
+  if (r.ok) await ensureReplyNotification(input.userId, input.date);
   return r;
 }
 
 /** 未読の「のりの返信(comment)」通知が無ければ1件作る（重複防止）。 */
-async function ensureReplyNotification(userId: string): Promise<void> {
+async function ensureReplyNotification(userId: string, date: string): Promise<void> {
   const admin = createAdminClient();
   const { data: existing } = await admin
     .from("notifications")
@@ -62,11 +62,18 @@ async function ensureReplyNotification(userId: string): Promise<void> {
     .limit(1)
     .maybeSingle();
   if (existing) return;
+  // 細9(M16改): ベータ受講生はその日の食事詳細へ着地(FBが表示される)。非ベータは汎用お知らせ。
+  const { data: u } = await admin
+    .from("users")
+    .select("is_beta")
+    .eq("id", userId)
+    .maybeSingle();
+  const linkUrl = u?.is_beta === true ? `/meals?date=${date}` : "/notices";
   await admin.from("notifications").insert({
     user_id: userId,
     type: "comment",
     title: "のりから返信が届きました",
-    link_url: "/notices",
+    link_url: linkUrl,
     is_read: false,
   });
 }
