@@ -4,6 +4,7 @@ import { isBetaUser } from "@/lib/auth/beta";
 import { MemberHeader } from "@/components/MemberHeader";
 import { jstTodayStr } from "@/lib/date/jst";
 import { getMealsForDate, signMealPhotos } from "@/lib/meals/queries";
+import { getActiveFoods } from "@/lib/meals/food";
 import { getDailyCondition, shouldAskYesterday } from "@/lib/conditions/queries";
 import { DayDetail } from "./DayDetail";
 
@@ -75,6 +76,8 @@ export default async function MealsDayPage({
   const askYesterday =
     date === today && (await shouldAskYesterday(yesterday)) ? yesterday : null;
 
+  const foods = await getActiveFoods();
+
   return (
     <>
       <MemberHeader title="食事" fallbackHref="/" />
@@ -89,6 +92,7 @@ export default async function MealsDayPage({
             userId={user.id}
             condition={condRes?.data ?? null}
             askYesterday={askYesterday}
+            foods={foods}
           />
         </div>
       </main>

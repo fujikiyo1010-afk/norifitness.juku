@@ -37,6 +37,46 @@ export type MealLog = {
   items: MealItem[];
 };
 
+// food_table(のり監修成分表・P4-b)のクライアント安全な型・計算
+export type FoodItem = {
+  id: string;
+  name: string;
+  aliases: string[];
+  unitType: "weight" | "count";
+  baseQty: number; // weight=100 / count=1
+  defaultQty: number;
+  stepQty: number; // weight=10 / count=1
+  unitLabel: string;
+  kcal: number | null; // base_qtyあたり
+  proteinG: number | null;
+  fatG: number | null;
+  carbG: number | null;
+};
+
+/** food_table値 × 数量 で栄養を算出(base_qtyあたり→実量) */
+export function calcNutrition(
+  food: FoodItem,
+  quantity: number
+): { kcal: number | null; p: number | null; f: number | null; c: number | null } {
+  const base = food.baseQty || 1;
+  const scale = quantity / base;
+  const r = (v: number | null) => (v == null ? null : Math.round(v * scale * 10) / 10);
+  return { kcal: r(food.kcal), p: r(food.proteinG), f: r(food.fatG), c: r(food.carbG) };
+}
+
+/** かな・別名を含めた検索 */
+export function searchFoods(foods: FoodItem[], q: string): FoodItem[] {
+  const s = q.trim().toLowerCase();
+  if (!s) return [];
+  return foods
+    .filter(
+      (f) =>
+        f.name.toLowerCase().includes(s) ||
+        f.aliases.some((a) => a.toLowerCase().includes(s))
+    )
+    .slice(0, 8);
+}
+
 /** 数値のある品目だけを合計(数値なし品目数も返す) */
 export function sumMeals(logs: MealLog[]): {
   kcal: number;

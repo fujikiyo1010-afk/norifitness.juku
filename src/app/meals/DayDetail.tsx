@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BottomSheet } from "@/app/record/BottomSheet";
 import { deleteMealLog } from "@/lib/meals/actions";
-import { sumMeals, MEAL_TYPES, MEAL_LABEL, type MealLog, type MealType } from "@/lib/meals/types";
+import { sumMeals, MEAL_TYPES, MEAL_LABEL, type MealLog, type MealType, type FoodItem } from "@/lib/meals/types";
 import { MealSheet } from "./MealSheet";
 import { LifeConditionForm } from "./LifeConditionForm";
 import {
@@ -47,6 +47,7 @@ export function DayDetail({
   userId,
   condition = null,
   askYesterday = null,
+  foods = [],
 }: {
   date: string;
   meals: MealWithUrls[];
@@ -56,6 +57,7 @@ export function DayDetail({
   userId: string;
   condition?: DailyConditionData | null; // その日の生活記録(記録済みなら値)
   askYesterday?: string | null; // 翌日補完: 昨日の日付(聞くべきなら) or null
+  foods?: FoodItem[]; // food_table(P4-b・自動計算)
 }) {
   const router = useRouter();
   const [sheet, setSheet] = useState<{ mealType: MealType; editLog: MealWithUrls | null } | null>(null);
@@ -299,6 +301,7 @@ export function DayDetail({
             date={date}
             mealType={sheet.mealType}
             editLog={sheet.editLog}
+            foods={foods}
             onClose={() => setSheet(null)}
             onSaved={onSaved}
           />
