@@ -242,3 +242,21 @@ input[type="number"] {
   -moz-appearance: textfield;
   appearance: textfield;
 }
+
+/* 立体ボタン(B案・2026-07-11): べた塗り単色の緑CTA(bg-[#4a875b])をこれに寄せる。
+   下エッジ+浮きで物理ボタン風。押すと沈む。グラデ完了ボタン/枠線/バッジ等は対象外。 */
+.btn3d {
+  background: linear-gradient(180deg, #528f62, #3c7550);
+  color: #fff;
+  box-shadow: 0 5px 0 #2f5b3d, 0 8px 16px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  transition: transform 0.06s ease, box-shadow 0.06s ease;
+}
+.btn3d:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #2f5b3d, 0 3px 8px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+.btn3d:disabled {
+  box-shadow: 0 5px 0 #2f5b3d, 0 8px 16px rgba(0, 0, 0, 0.12);
+}

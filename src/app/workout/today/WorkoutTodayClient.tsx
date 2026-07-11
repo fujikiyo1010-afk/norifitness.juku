@@ -320,8 +320,8 @@ export function WorkoutTodayClient({
                   }}
                   className={`flex-1 rounded-[9px] border-[1.5px] py-1.5 text-[11.5px] font-extrabold transition-colors ${
                     intensity === iv
-                      ? "border-[#34603f] bg-[#34603f] text-white"
-                      : "border-[#e7dcc9] bg-[#fffdf8] text-[#6a6256]"
+                      ? "border-[#2e5638] bg-gradient-to-b from-[#3f7350] to-[#34603f] text-white shadow-[0_3px_7px_rgba(52,96,63,0.32)]"
+                      : "border-[#e7dcc9] bg-[#fffdf8] text-[#6a6256] shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
                   } ${mode === "edit" ? "opacity-50" : ""}`}
                 >
                   {INTENSITY_LABEL[iv]}
@@ -466,7 +466,7 @@ export function WorkoutTodayClient({
               <button
                 type="button"
                 onClick={confirmEdit}
-                className="flex-1 rounded-xl bg-[#4a875b] py-3 text-[14px] font-bold text-white"
+                className="btn3d flex-1 rounded-xl py-3 text-[14px] font-bold"
               >
                 ✓ 編集完了
               </button>
@@ -506,7 +506,7 @@ export function WorkoutTodayClient({
               type="button"
               onClick={() => save(isRest ? "rest_done" : "done")}
               disabled={busy}
-              className="w-full rounded-xl bg-[#4a875b] py-3 text-[14px] font-bold text-white disabled:opacity-50"
+              className="btn3d w-full rounded-xl py-3 text-[14px] font-bold disabled:opacity-50"
             >
               {busy ? "保存中…" : isRest ? "✓ 今日は休んだ（完了）" : "✓ 完了"}
             </button>
@@ -524,7 +524,7 @@ export function WorkoutTodayClient({
                 type="button"
                 onClick={() => save("done")}
                 disabled={busy}
-                className="flex-1 rounded-xl bg-[#4a875b] py-3 text-[14px] font-bold text-white disabled:opacity-50"
+                className="btn3d flex-1 rounded-xl py-3 text-[14px] font-bold disabled:opacity-50"
               >
                 {busy ? "保存中…" : alreadyDone ? "✓ 内容を上書き保存" : "✓ 今日のトレ完了"}
               </button>
@@ -816,7 +816,7 @@ function EditList({
       <button
         type="button"
         onClick={onOpenAdd}
-        className="mt-1 flex w-full items-center justify-center rounded-xl bg-[#4a875b] py-3 text-[13px] font-bold text-white"
+        className="btn3d mt-1 flex w-full items-center justify-center rounded-xl py-3 text-[13px] font-bold"
       >
         ＋ 種目を追加
       </button>
