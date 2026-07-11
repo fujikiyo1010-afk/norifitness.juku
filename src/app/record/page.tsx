@@ -44,6 +44,10 @@ export default async function RecordHubPage() {
     | undefined;
   const targetWeightKg = goalSelection?.target_weight_kg ?? null;
   const targetDate = goalSelection?.target_date ?? null;
+  // hydration対策: 「今」はサーバ時刻を1つ確定して渡す(client側のDate.now()を廃し SSR/CSRを一致させる)。
+  // これはServer Component(force-dynamic・per-request)なのでDate.nowは正当。purityルールは誤検知。
+  // eslint-disable-next-line react-hooks/purity
+  const nowMs = Date.now();
 
   return (
     <>
@@ -56,6 +60,7 @@ export default async function RecordHubPage() {
             targetDate={targetDate}
             photoSummary={photoSummary}
             isBeta={isBeta}
+            nowMs={nowMs}
           />
         </div>
       </main>
