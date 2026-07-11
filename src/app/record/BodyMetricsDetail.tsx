@@ -45,6 +45,7 @@ export function BodyMetricsDetail({
   targetDate = null,
   photoSummary,
   isBeta = false,
+  nowMs,
 }: {
   rows: BodyMetricRow[]; // recorded_at 昇順
   targetWeightKg: number | null;
@@ -53,6 +54,8 @@ export function BodyMetricsDetail({
   photoSummary: BodyPhotoSummary;
   /** 体1(戻るで閉じる)・体13(ホイール—)のベータ出し分け。裏側(画像再取得)は全体。 */
   isBeta?: boolean;
+  /** hydration対策: サーバ確定の「今」(ms)。予測日はこれ基準で SSR/CSR 一致。 */
+  nowMs: number;
 }) {
   const [tab, setTab] = useState<Tab>("weight");
   const [calcOpen, setCalcOpen] = useState(false);
@@ -94,7 +97,7 @@ export function BodyMetricsDetail({
   const latest = rows[rows.length - 1] ?? null; // 直近の記録 (入力初期値)
   const pace = useMemo(() => weightPaceKgPerWeek(rows), [rows]);
   const prog = weightGoalProgress(currentWeight, targetWeightKg);
-  const eta = weightEta(currentWeight, targetWeightKg, pace);
+  const eta = weightEta(currentWeight, targetWeightKg, pace, nowMs);
 
   // リング 達成率 (入会→目標 のうち どこまで来たか)
   const ringPct = useMemo(() => {
@@ -149,6 +152,7 @@ export function BodyMetricsDetail({
           prog={prog}
           eta={eta}
           isBeta={isBeta}
+          nowMs={nowMs}
           onOpenCalc={() => setCalcOpen(true)}
         />
       ) : (
@@ -196,7 +200,7 @@ export function BodyMetricsDetail({
         title="体重を指定して計算"
         backClose={isBeta}
       >
-        <CalcSheetBody currentWeight={currentWeight} pace={pace} />
+        <CalcSheetBody currentWeight={currentWeight} pace={pace} nowMs={nowMs} />
       </BottomSheet>
     </div>
   );
@@ -213,6 +217,7 @@ function WeightView({
   prog,
   eta,
   isBeta,
+  nowMs,
   onOpenCalc,
 }: {
   weightRows: BodyMetricRow[];
@@ -225,6 +230,7 @@ function WeightView({
   prog: ReturnType<typeof weightGoalProgress>;
   eta: ReturnType<typeof weightEta>;
   isBeta: boolean;
+  nowMs: number;
   onOpenCalc: () => void;
 }) {
   const R = 52;
@@ -367,6 +373,7 @@ function WeightView({
           target={targetWeightKg}
           targetDate={targetDate}
           pace={pace}
+          nowMs={nowMs}
         />
       ) : (
         <>
@@ -430,9 +437,11 @@ function PredictCard({ eta }: { eta: ReturnType<typeof weightEta> }) {
 function CalcSheetBody({
   currentWeight,
   pace,
+  nowMs,
 }: {
   currentWeight: number | null;
   pace: number | null;
+  nowMs: number;
 }) {
   const [input, setInput] = useState<string>(
     currentWeight != null ? String(Math.round(currentWeight - 2)) : ""
@@ -440,7 +449,7 @@ function CalcSheetBody({
   const target = input.trim() ? Number(input) : null;
   const result =
     target != null && Number.isFinite(target)
-      ? etaForTarget(currentWeight, target, pace)
+      ? etaForTarget(currentWeight, target, pace, nowMs)
       : null;
 
   return (

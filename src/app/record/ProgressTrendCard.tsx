@@ -54,17 +54,20 @@ export function ProgressTrendCard({
   target,
   targetDate,
   pace,
+  nowMs,
 }: {
   current: number | null;
   target: number | null;
   targetDate: string | null;
   /** 実測ペース kg/週(符号つき)。上部「現状ペース」ピルと同一値。<2記録は null */
   pace: number | null;
+  /** hydration対策: サーバ確定の「今」(ms)。client側 Date.now() を廃し SSR/CSR一致。 */
+  nowMs: number;
 }) {
   const [tab, setTab] = useState<TrendTab>("goal");
   const [rangeKey, setRangeKey] = useState<RangeKey>("1w");
-  // レンダー中の Date.now() は不純のため初回だけ確定(この画面の寿命では十分)
-  const [now] = useState(() => Date.now());
+  // 「今」はサーバから受け取った固定値(client で Date.now() を呼ばない=hydration不一致を防ぐ)
+  const now = nowMs;
 
   const realPaceAbs = pace != null ? Math.abs(pace) : null;
   // 目標推移のペース手入力(初期値=今の実ペース・0.05刻み・最小0.05)
