@@ -242,13 +242,15 @@ async function DetailPane({
     );
   }
 
-  const { data: user } = await admin
-    .from("users")
-    .select("id, name, joined_at")
-    .eq("id", req.user_id)
-    .maybeSingle();
-
-  const carte = type === "carte" ? await getCarteForAdmin(req.user_id) : null;
+  // S2: user と carte は req.user_id 引きで互いに独立→並列(直列2→1)。
+  const [{ data: user }, carte] = await Promise.all([
+    admin
+      .from("users")
+      .select("id, name, joined_at")
+      .eq("id", req.user_id)
+      .maybeSingle(),
+    type === "carte" ? getCarteForAdmin(req.user_id) : Promise.resolve(null),
+  ]);
   const editHref =
     type === "carte"
       ? `/admin/users/${req.user_id}/carte?from=request&requestId=${requestId}`

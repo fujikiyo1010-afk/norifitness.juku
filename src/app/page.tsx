@@ -104,6 +104,8 @@ export default async function Home() {
     unreadReply,
     isBeta,
     todayActivity,
+    streakDays,
+    w,
   ] = await Promise.all([
     getMyAlerts(),
     getMyHomeStats(),
@@ -117,6 +119,10 @@ export default async function Home() {
     hasUnreadReply(),
     isBetaUser(),
     getTodayActivity(),
+    // F: beta ホームで使う2本を本体バッチに合流(後段の直列往復を1つ消す)。
+    // 非betaでは使わないが、並列なので待ち時間コストは無い。
+    getRecordStreak(),
+    getTodayWorkout(),
   ]);
 
   const displayName = stats?.displayName ?? "受講生";
@@ -134,7 +140,7 @@ export default async function Home() {
 
   // P3(ベータ限定): 確定7/7ホーム。非ベータは従来ホーム(下の return)。
   if (isBeta) {
-    const [streakDays, w] = await Promise.all([getRecordStreak(), getTodayWorkout()]);
+    // streakDays, w は上の本体バッチで取得済み(F: 後段の直列を合流)。
     // トレカードのラベル(◯日目 + メニュー名/部位ラベル)
     const workoutDayNumber = w.started ? w.dayNumber : null;
     let workoutPartLabel: string | null = null;
