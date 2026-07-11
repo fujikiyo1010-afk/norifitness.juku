@@ -117,8 +117,15 @@ export function WorkoutTodayClient({
     setAddName("");
   }
 
+  // 点16: 直近の保存操作(もう一度試す用)
+  const [lastAttempt, setLastAttempt] = useState<{
+    status: "done" | "rest_done" | "skipped";
+    useEdited: boolean;
+  } | null>(null);
+
   async function save(status: "done" | "rest_done" | "skipped", useEdited: boolean) {
     setError(null);
+    setLastAttempt({ status, useEdited });
     setBusy(true);
     try {
       let payloadItems: LoggedItem[] = [];
@@ -153,9 +160,9 @@ export function WorkoutTodayClient({
       router.replace(status === "skipped" ? "/workout/today" : "/workout/today?done=1");
       router.refresh();
     } catch (e) {
-      setError(
-        e instanceof Error ? `${e.message}（もう一度お試しください）` : "保存に失敗しました"
-      );
+      // 点16: 生エラー(英語/内部ID)は見せない。console に残し、人の言葉に変換。
+      console.warn("[workout] save failed", e);
+      setError("保存に失敗しました。もう一度お試しください。");
     } finally {
       setBusy(false);
     }
@@ -283,7 +290,27 @@ export function WorkoutTodayClient({
         />
       </div>
 
-      {error && <p className="text-[12px] font-bold text-red-700">❌ {error}</p>}
+      {/* 点16: 生エラーを撤去。食事(細7)と同じ SVG + 人の言葉 + もう一度試す。 */}
+      {error && (
+        <div className="flex items-center gap-2 rounded-lg border border-[#f0c9c0] bg-[#fdeee9] px-3 py-2.5">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c2693f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <span className="flex-1 text-[12px] text-[#8a4b32]">{error}</span>
+          {lastAttempt && (
+            <button
+              type="button"
+              onClick={() => save(lastAttempt.status, lastAttempt.useEdited)}
+              disabled={busy}
+              className="flex-shrink-0 rounded-lg bg-[#4a875b] px-3 py-1.5 text-[11px] font-bold text-white disabled:opacity-50"
+            >
+              もう一度試す
+            </button>
+          )}
+        </div>
+      )}
 
       {/* 下部固定バー */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#e7dcc9] bg-[#f9f5ed]/95 px-4 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-3 backdrop-blur">
