@@ -2,12 +2,35 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { isBetaUser } from "@/lib/auth/beta";
 import { MemberHeader } from "@/components/MemberHeader";
-import { getTodayWorkout } from "@/lib/workout/logs";
+import { getTodayWorkout, getMyProgress } from "@/lib/workout/logs";
 import { getTodayActivity } from "@/lib/member/today-activity";
 import { resolveDayMenu } from "@/lib/workout/logs-types";
-import { cleanExerciseName } from "@/lib/workout/menu-display";
+import { cleanExerciseName, getExerciseTarget } from "@/lib/workout/menu-display";
+import type { WorkoutCycles } from "@/lib/workout/types";
 import { WorkoutTodayClient } from "./WorkoutTodayClient";
 import { StartWorkoutButton } from "./StartWorkoutButton";
+import { StripDoneQuery } from "./StripDoneQuery";
+
+/**
+ * 新3b: 完了演出の「明日は 1周◯日目・◯◯の日」ラベル。
+ * 前進後の progress を使い、「◯日目」の二重表記(細12と同規則)を避ける。
+ */
+function nextDayLabel(
+  cycles: WorkoutCycles,
+  cycleNumber: number,
+  dayNumber: number
+): string {
+  const dm = resolveDayMenu(cycles, "medium", dayNumber);
+  let tail = "";
+  if (dm?.種別 === "休息") tail = "・休養日";
+  else if (dm?.種別 === "パーソナル") tail = "・パーソナル指導日";
+  else if (dm?.日 && dm.日 !== `${dayNumber}日目`) tail = `・${dm.日}`;
+  else {
+    const t = getExerciseTarget((dm?.種目 ?? []).flatMap((e) => e.主部位 ?? []));
+    if (t && t !== "全身") tail = `・${t}の日`;
+  }
+  return `明日は ${cycleNumber}周${dayNumber}日目${tail}`;
+}
 
 export const dynamic = "force-dynamic";
 
@@ -25,19 +48,31 @@ export default async function WorkoutTodayPage({
 
   const sp = await searchParams;
   const w = await getTodayWorkout();
+  // 新3a: バナーは「?done=1 かつ 今日を実際に完了(done/rest_done)」の時だけ。
+  const showCeleb =
+    sp.done === "1" &&
+    w.completedToday &&
+    (w.todayLog?.status === "done" || w.todayLog?.status === "rest_done");
   // 細16: 完了演出の「今日の達成 n/3」バー(トレ+食事+学び)
-  const act = sp.done === "1" ? await getTodayActivity() : null;
+  const act = showCeleb ? await getTodayActivity() : null;
   const doneCount = act
     ? (act.learned ? 1 : 0) + (act.recordedMeal ? 1 : 0) + (act.recordedWorkout ? 1 : 0)
     : 0;
+  // 新3b: 「明日は…」は前進後の progress を使う(完了当日が「次は」に出る誤りを解消)
+  const prog = showCeleb ? await getMyProgress() : null;
+  const nextLabel =
+    prog && w.cycles
+      ? nextDayLabel(w.cycles, prog.cycleNumber, prog.currentDay)
+      : null;
 
   return (
     <>
       <MemberHeader title="今日のトレーニング" fallbackHref="/" />
       <main className="min-h-[100dvh] bg-[#f9f5ed]">
         <div className="mx-auto max-w-[460px] px-4 py-4">
-          {sp.done === "1" && (
+          {showCeleb && (
             <div className="mb-3 rounded-2xl bg-gradient-to-br from-[#4a875b] to-[#34603f] px-4 py-5 text-center text-white">
+              <StripDoneQuery />
               <div className="text-[30px] font-extrabold leading-none">✓</div>
               <div className="mt-1.5 text-[16px] font-bold">記録しました！</div>
               <div className="mt-0.5 text-[12px] opacity-90">
@@ -54,14 +89,9 @@ export default async function WorkoutTodayPage({
                 </div>
                 <span className="text-[10px] font-bold opacity-90">今日の達成</span>
               </div>
-              {w.started && w.dayMenu && (
+              {nextLabel && (
                 <div className="mt-3 rounded-xl bg-white/15 px-3 py-2 text-[12px] font-bold">
-                  次は {w.cycleNumber}周{w.dayNumber}日目
-                  {w.dayMenu.種別 === "休息"
-                    ? "・休養日"
-                    : w.dayMenu.日
-                      ? `・${w.dayMenu.日}`
-                      : ""}
+                  {nextLabel}
                 </div>
               )}
               <div className="mt-3 flex justify-center gap-2">

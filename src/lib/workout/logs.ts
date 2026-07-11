@@ -92,12 +92,16 @@ export async function getTodayWorkout(): Promise<TodayWorkout> {
   const today = jstTodayStr();
 
   // 細2: まず「今日(JST)のログ」を探す。あればその日を表示し翌日開始をブロック(current_dayは進んでいてよい)。
-  const { data: todayRow } = await supabase
+  // 新2: date=today が万一2行あっても壊れないよう order+limit(1)。error は握りつぶさない。
+  const { data: todayRows, error: todayErr } = await supabase
     .from("user_workout_logs")
     .select("id, day_number, cycle_number, intensity, status, memo, completed_at")
     .eq("user_id", user.id)
     .eq("date", today)
-    .maybeSingle();
+    .order("completed_at", { ascending: false })
+    .limit(1);
+  if (todayErr) throw new Error(`今日のトレ記録の取得に失敗しました: ${todayErr.message}`);
+  const todayRow = todayRows?.[0] ?? null;
 
   const completedToday = !!todayRow;
   let dayNumber: number;

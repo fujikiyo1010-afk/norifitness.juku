@@ -83,6 +83,17 @@ export async function completeWorkoutDay(input: {
 
   const today = jstTodayStr();
 
+  // 新1: 既存行があれば date は維持する(過去日を後日編集しても履歴の日付を書き換えない)。
+  // 新規完了のときだけ today を刻む。completed_at は毎回更新してよい。
+  const { data: existing } = await supabase
+    .from("user_workout_logs")
+    .select("date")
+    .eq("user_id", user.id)
+    .eq("cycle_number", input.cycleNumber)
+    .eq("day_number", input.dayNumber)
+    .maybeSingle();
+  const logDate = (existing?.date as string | undefined) ?? today;
+
   // ログ upsert(unique user_id,cycle_number,day_number)
   const { data: log, error: upErr } = await supabase
     .from("user_workout_logs")
@@ -90,7 +101,7 @@ export async function completeWorkoutDay(input: {
       {
         user_id: user.id,
         menu_id: menu.id,
-        date: today,
+        date: logDate,
         day_number: input.dayNumber,
         cycle_number: input.cycleNumber,
         intensity: input.intensity,
