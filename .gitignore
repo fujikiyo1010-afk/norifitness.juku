@@ -61,3 +61,6 @@ next-env.d.ts
 /blob-report/
 /playwright/.cache/
 /e2e/.auth/
+
+# レビュー用突合スクショ(本番に載せない)
+_突合_*/
