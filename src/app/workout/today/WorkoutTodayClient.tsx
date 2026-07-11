@@ -70,13 +70,17 @@ export function WorkoutTodayClient({
     const t = getExerciseTarget(original.flatMap((e) => e.主部位 ?? []));
     return t && t !== "全身" ? `${t}の日` : null;
   })();
-  const heroTitle = isRest
+  // M8 デイヒーロー: cap「今日のトレーニング ・ ◯周目」/ title「◯日目 ・ ◯◯の日」
+  const titleSuffix = isRest
     ? "休養日"
     : isPersonal
       ? "パーソナル指導日"
       : dayLabel !== `${dayNumber}日目`
         ? dayLabel
-        : (partsLabel ?? "今日のトレーニング");
+        : partsLabel;
+  const heroTitleText = titleSuffix
+    ? `${dayNumber}日目 ・ ${titleSuffix}`
+    : `${dayNumber}日目`;
 
   // 編集用アイテム(既存ログ優先、なければ原本の初期値)
   const [items, setItems] = useState<EditItem[]>(() => buildInitial());
@@ -172,11 +176,11 @@ export function WorkoutTodayClient({
   if (completedToday && todayStatus === "skipped") {
     return (
       <div className="space-y-4">
-        <div className="rounded-2xl bg-gradient-to-br from-[#4a875b] to-[#34603f] px-4 py-4 text-white">
-          <div className="text-[11px] font-bold opacity-90">
-            {cycleNumber}周目 ／ {dayNumber}日目
+        <div className="rounded-[14px] border border-[#cfe3d6] bg-gradient-to-br from-[#e8f3ec] to-[#fffbe6] px-[13px] py-[11px]">
+          <div className="text-[9.5px] font-extrabold text-[#a5631f]">
+            今日のトレーニング ・ {cycleNumber}周目
           </div>
-          <div className="mt-0.5 text-[18px] font-extrabold">今日はお休み</div>
+          <div className="mt-0.5 text-[16px] font-extrabold text-[#2b2620]">今日はお休み</div>
         </div>
         <div className="rounded-2xl border border-[#e7dcc9] bg-[#fffdf8] px-4 py-6 text-center">
           <p className="text-[13px] leading-relaxed text-[#5b5344]">
@@ -195,12 +199,12 @@ export function WorkoutTodayClient({
 
   return (
     <div className="space-y-4 pb-32">
-      {/* デイヒーロー */}
-      <div className="rounded-2xl bg-gradient-to-br from-[#4a875b] to-[#34603f] px-4 py-4 text-white">
-        <div className="text-[11px] font-bold opacity-90">
-          {cycleNumber}周目 ／ {dayNumber}日目
+      {/* デイヒーロー(M8 .dayhero転写: 淡色グラデ+茶cap+濃い文字) */}
+      <div className="rounded-[14px] border border-[#cfe3d6] bg-gradient-to-br from-[#e8f3ec] to-[#fffbe6] px-[13px] py-[11px]">
+        <div className="text-[9.5px] font-extrabold text-[#a5631f]">
+          今日のトレーニング ・ {cycleNumber}周目
         </div>
-        <div className="mt-0.5 text-[18px] font-extrabold">{heroTitle}</div>
+        <div className="mt-0.5 text-[16px] font-extrabold text-[#2b2620]">{heroTitleText}</div>
       </div>
 
       {alreadyDone && mode === "view" && (
@@ -222,15 +226,18 @@ export function WorkoutTodayClient({
           {/* 強度 */}
           <div>
             <div className="mb-1.5 text-[11px] font-bold text-[#6a6256]">強度</div>
-            <div className="flex gap-1.5 rounded-xl bg-[#f0ece2] p-1">
+            {/* M8 .stg転写: トラック無し・枠付きピル・選択=#34603f塗り */}
+            <div className="flex gap-1.5">
               {(["small", "medium", "large"] as Intensity[]).map((iv) => (
                 <button
                   key={iv}
                   type="button"
                   disabled={mode === "edit"}
                   onClick={() => setIntensity(iv)}
-                  className={`flex-1 rounded-lg py-1.5 text-[12px] font-bold transition-colors ${
-                    intensity === iv ? "bg-[#4a875b] text-white" : "text-[#6a6256]"
+                  className={`flex-1 rounded-[9px] border-[1.5px] py-1.5 text-[11.5px] font-extrabold transition-colors ${
+                    intensity === iv
+                      ? "border-[#34603f] bg-[#34603f] text-white"
+                      : "border-[#e7dcc9] bg-[#fffdf8] text-[#6a6256]"
                   } ${mode === "edit" ? "opacity-50" : ""}`}
                 >
                   {INTENSITY_LABEL[iv]}
@@ -243,6 +250,7 @@ export function WorkoutTodayClient({
             <ViewList
               original={original}
               loggedItems={initialItems}
+              intensityLabel={INTENSITY_LABEL[intensity]}
               onPlay={(url, name) => setLightbox({ url, name })}
             />
           ) : (
@@ -417,14 +425,16 @@ export function WorkoutTodayClient({
   );
 }
 
-// 表示リスト(readonly)
+// 表示リスト(readonly)。M8 .list転写: 1枚カード内を .lh見出し + .ex行区切りで。
 function ViewList({
   original,
   loggedItems,
+  intensityLabel,
   onPlay,
 }: {
   original: Exercise[];
   loggedItems: LoggedItem[];
+  intensityLabel: string;
   onPlay: (url: string, name: string) => void;
 }) {
   const logByName = new Map(loggedItems.map((it) => [it.exerciseName, it]));
@@ -436,52 +446,69 @@ function ViewList({
       </p>
     );
   }
-  const numText = (it?: LoggedItem) =>
-    it && (it.weightKg != null || it.reps != null || it.sets != null)
-      ? [
-          it.weightKg != null ? `${it.weightKg}kg` : null,
-          it.reps != null ? `${it.reps}回` : null,
-          it.sets != null ? `×${it.sets}` : null,
-        ]
-          .filter(Boolean)
-          .join(" ")
-      : null;
+  // M8 .val 表記: 「14kg ・ 12回 × 3」
+  const numText = (it?: LoggedItem) => {
+    if (!it || (it.weightKg == null && it.reps == null && it.sets == null)) return null;
+    const head = [
+      it.weightKg != null ? `${it.weightKg}kg` : null,
+      it.reps != null ? `${it.reps}回` : null,
+    ]
+      .filter(Boolean)
+      .join(" ・ ");
+    const tail = it.sets != null ? `${head ? " " : ""}× ${it.sets}` : "";
+    return head + tail || null;
+  };
   return (
-    <div className="space-y-2">
+    <div className="overflow-hidden rounded-[13px] border border-[#e7dcc9] bg-[#fffdf8]">
+      {/* 点8: リスト見出し(.lh・選択強度に追随) */}
+      <div className="border-b border-[#f3eddf] px-3 py-2 text-[10px] font-extrabold text-[#6a6256]">
+        今日の内容（{intensityLabel}強度）
+      </div>
       {original.map((e, i) => {
         const log = logByName.get(e.種目名);
         const nt = numText(log);
+        // 揃え(③): 未ログの原本値もモック書式「◯回 × ◯」に統一
+        const rs = parseRepsSets(e.回数);
+        const origText =
+          rs.reps != null
+            ? `${rs.reps}回${rs.sets != null ? ` × ${rs.sets}` : ""}`
+            : cleanReps(e.回数);
         const videoUrl = resolveExerciseVideo(e);
         return (
           <div
             key={i}
-            className="flex items-center gap-3 rounded-xl border border-[#e7dcc9] bg-[#fffdf8] px-3.5 py-3"
+            className="flex items-center gap-2 border-b border-[#f3eddf] px-3 py-2.5 last:border-b-0"
           >
-            <span className="font-mono text-[11px] text-[#a59b8c]">{i + 1}</span>
-            <div className="min-w-0 flex-1">
-              <div className="text-[13px] font-bold text-[#2b2620]">
-                {cleanExerciseName(e.種目名)}
-              </div>
-              <div className="text-[11px] text-[#6a6256]">{nt ?? cleanReps(e.回数)}</div>
+            {videoUrl ? (
+              <PlayBtn onClick={() => onPlay(videoUrl, cleanExerciseName(e.種目名))} />
+            ) : (
+              <span className="h-11 w-11 flex-shrink-0" aria-hidden />
+            )}
+            <div className="min-w-0 flex-1 truncate text-[13px] font-bold text-[#2b2620]">
+              {cleanExerciseName(e.種目名)}
             </div>
-            {videoUrl && <PlayBtn onClick={() => onPlay(videoUrl, cleanExerciseName(e.種目名))} />}
+            <span className="whitespace-nowrap text-[11px] font-bold text-[#6a6256]">
+              {nt ?? origText}
+            </span>
           </div>
         );
       })}
       {added.map((it, i) => (
         <div
           key={`a${i}`}
-          className="flex items-center gap-3 rounded-xl border border-[#d7e6db] bg-[#eef5f0] px-3.5 py-3"
+          className="flex items-center gap-2 border-b border-[#f3eddf] px-3 py-2.5 last:border-b-0"
         >
-          <span className="rounded bg-[#4a875b] px-1.5 py-0.5 text-[9px] font-bold text-white">
-            追加
+          <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center">
+            <span className="rounded bg-[#4a875b] px-1.5 py-0.5 text-[9px] font-bold text-white">
+              追加
+            </span>
           </span>
-          <div className="min-w-0 flex-1">
-            <div className="text-[13px] font-bold text-[#2b2620]">
-              {cleanExerciseName(it.exerciseName)}
-            </div>
-            <div className="text-[11px] text-[#6a6256]">{numText(it) ?? "記録あり"}</div>
+          <div className="min-w-0 flex-1 truncate text-[13px] font-bold text-[#2b2620]">
+            {cleanExerciseName(it.exerciseName)}
           </div>
+          <span className="whitespace-nowrap text-[11px] font-bold text-[#6a6256]">
+            {numText(it) ?? "記録あり"}
+          </span>
         </div>
       ))}
     </div>
@@ -600,16 +627,16 @@ function EditList({
   );
 }
 
-// 細11: フォーム動画 ▶ ボタン(44px緑丸)
+// 細11+PR-T2: フォーム動画 ▶ ボタン。M8 .vplay転写(薄緑円+緑▶)・タップは44px維持(ルール20)
 function PlayBtn({ onClick }: { onClick: () => void }) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label="フォーム動画を見る"
-      className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-[#4a875b]"
+      className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-[#e8f3ec]"
     >
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="#34603f">
         <polygon points="6 4 20 12 6 20" />
       </svg>
     </button>
