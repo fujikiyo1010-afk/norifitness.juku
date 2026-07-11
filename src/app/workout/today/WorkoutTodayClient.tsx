@@ -7,13 +7,19 @@ import type { Exercise, WorkoutCycles } from "@/lib/workout/types";
 import {
   resolveDayMenu,
   parseRepsSets,
+  dayCount,
   INTENSITY_LABEL,
   type Intensity,
   type LoggedItem,
 } from "@/lib/workout/logs-types";
 import { cleanExerciseName, cleanReps, getExerciseTarget } from "@/lib/workout/menu-display";
-import { resolveExerciseVideo } from "@/lib/workout/video-master";
+import {
+  resolveExerciseVideo,
+  lookupVideoByName,
+  listExercisesWithVideo,
+} from "@/lib/workout/video-master";
 import { VimeoEmbed } from "@/components/VimeoEmbed";
+import { BottomSheet } from "@/app/record/BottomSheet";
 import { completeWorkoutDay } from "@/lib/workout/logs-actions";
 
 /**
@@ -38,6 +44,8 @@ export function WorkoutTodayClient({
   completedAtLabel,
   completedToday = false,
   todayStatus = null,
+  pending = false,
+  feedbackLocked = false,
 }: {
   cycles: WorkoutCycles;
   dayNumber: number;
@@ -49,6 +57,8 @@ export function WorkoutTodayClient({
   completedAtLabel: string | null;
   completedToday?: boolean; // 細2: 今日(JST)に既に記録済み
   todayStatus?: "done" | "rest_done" | "skipped" | null;
+  pending?: boolean; // 点6: 再配布予告(次の周から切替)
+  feedbackLocked?: boolean; // 点7: のりコメント後は編集ロック
 }) {
   const router = useRouter();
   const [intensity, setIntensity] = useState<Intensity>(initialIntensity);
@@ -95,6 +105,9 @@ export function WorkoutTodayClient({
   const heroTitleText = titleSuffix
     ? `${dayNumber}日目 ・ ${titleSuffix}`
     : `${dayNumber}日目`;
+  // 点6: 再配布予告「あと◯日」= いまの周の残り日数(総日数−現在日+1)
+  const totalDays = dayCount(cycles, intensity) || 7;
+  const daysLeft = Math.max(1, totalDays - dayNumber + 1);
 
   const [items, setItems] = useState<EditItem[]>([]);
 
@@ -182,15 +195,16 @@ export function WorkoutTodayClient({
     setInvalidIdx((prev) => prev.filter((x) => x !== i));
     setValidationMsg(null);
   }
-  const [addName, setAddName] = useState("");
-  function addItem() {
-    const v = addName.trim();
+  // 点4: 種目追加はボトムシート(検索→動画候補)
+  const [addSheetOpen, setAddSheetOpen] = useState(false);
+  function addItem(name: string) {
+    const v = name.trim();
     if (!v) return;
     setItems((prev) => [
       ...prev,
       { exerciseName: v, source: "added", weightKg: null, reps: null, sets: null, removed: false, original: false },
     ]);
-    setAddName("");
+    setAddSheetOpen(false);
   }
 
   async function save(status: "done" | "rest_done" | "skipped") {
@@ -265,9 +279,18 @@ export function WorkoutTodayClient({
         <div className="mt-0.5 text-[16px] font-extrabold text-[#2b2620]">{heroTitleText}</div>
       </div>
 
+      {/* 点6: 再配布予告バッジ(M14) */}
+      {pending && !feedbackLocked && (
+        <div className="truncate rounded-xl border border-[#f0e2b8] bg-[#fffbeb] px-3.5 py-2.5 text-[11.5px] font-bold text-[#8a6d1a]">
+          新しいメニューが届いています（あと{daysLeft}日で切替）
+        </div>
+      )}
+
       {alreadyDone && mode === "view" && (
         <div className="rounded-xl border border-[#d7e6db] bg-[#eef5f0] px-4 py-2.5 text-[12px] font-bold text-[#34603f]">
-          ✓ 今日のトレは完了済み{completedAtLabel ? `・${completedAtLabel}` : ""}（内容を直せます）
+          {feedbackLocked
+            ? `✓ 今日のトレは完了済み${completedAtLabel ? `・${completedAtLabel}` : ""}`
+            : `✓ 今日のトレは完了済み${completedAtLabel ? `・${completedAtLabel}` : ""}（内容を直せます）`}
         </div>
       )}
 
@@ -332,9 +355,7 @@ export function WorkoutTodayClient({
               expanded={expanded}
               onExpand={setExpanded}
               onPatch={patch}
-              addName={addName}
-              setAddName={setAddName}
-              onAdd={addItem}
+              onOpenAdd={() => setAddSheetOpen(true)}
               onPlay={(url, name) => setLightbox({ url, name })}
             />
           )}
@@ -352,7 +373,7 @@ export function WorkoutTodayClient({
           )}
 
           {/* 細13: 今日はやらない/メニュー全体は本体(通常領域)へ */}
-          {mode === "view" && !alreadyDone && (
+          {mode === "view" && !alreadyDone && !feedbackLocked && (
             <button
               type="button"
               onClick={() => setConfirmSkip(true)}
@@ -475,6 +496,11 @@ export function WorkoutTodayClient({
                 </button>
               </div>
             </div>
+          ) : feedbackLocked ? (
+            // 点7: のりコメント後は編集導線を出さない
+            <p className="rounded-xl border border-[#d7e6db] bg-[#eef5f0] px-4 py-3 text-center text-[12px] font-bold text-[#34603f]">
+              のりのコメントが届いたため、この日の記録は確定されています
+            </p>
           ) : isRest || isPersonal ? (
             <button
               type="button"
@@ -506,6 +532,14 @@ export function WorkoutTodayClient({
           )}
         </div>
       </div>
+
+      {/* 点4: 種目追加ボトムシート(検索→動画候補) */}
+      <BottomSheet open={addSheetOpen} onClose={() => setAddSheetOpen(false)} title="種目を追加">
+        <AddExerciseSheet
+          existing={items.map((it) => it.exerciseName)}
+          onAdd={addItem}
+        />
+      </BottomSheet>
 
       {/* 細11: フォーム動画ライトボックス */}
       {lightbox && (
@@ -581,7 +615,7 @@ function ViewList({
     rows = overrideItems.map((it) => ({
       name: it.exerciseName,
       source: it.source,
-      videoUrl: videoByName.get(it.exerciseName) ?? null,
+      videoUrl: videoByName.get(it.exerciseName) ?? lookupVideoByName(it.exerciseName),
       val: numText(it) ?? (origMap.has(it.exerciseName) ? origText(origMap.get(it.exerciseName)!) : "記録あり"),
     }));
   } else {
@@ -597,7 +631,7 @@ function ViewList({
       ...added.map((it) => ({
         name: it.exerciseName,
         source: "added" as const,
-        videoUrl: null,
+        videoUrl: lookupVideoByName(it.exerciseName),
         val: numText(it) ?? "記録あり",
       })),
     ];
@@ -652,9 +686,7 @@ function EditList({
   expanded,
   onExpand,
   onPatch,
-  addName,
-  setAddName,
-  onAdd,
+  onOpenAdd,
   onPlay,
 }: {
   items: EditItem[];
@@ -665,9 +697,7 @@ function EditList({
   expanded: { i: number; field: ExpandField } | null;
   onExpand: (v: { i: number; field: ExpandField } | null) => void;
   onPatch: (i: number, p: Partial<EditItem>) => void;
-  addName: string;
-  setAddName: (v: string) => void;
-  onAdd: () => void;
+  onOpenAdd: () => void;
   onPlay: (url: string, name: string) => void;
 }) {
   const videoByName = new Map<string, string>();
@@ -678,7 +708,8 @@ function EditList({
   return (
     <div className="space-y-2">
       {items.map((it, i) => {
-        const videoUrl = videoByName.get(it.exerciseName);
+        // 追加種目はライブラリ名から動画解決(点4で候補選択したもの)
+        const videoUrl = videoByName.get(it.exerciseName) ?? lookupVideoByName(it.exerciseName);
         const orig = origByName.get(it.exerciseName) ?? null;
         const invalid = invalidIdx.includes(i);
         return (
@@ -781,28 +812,84 @@ function EditList({
         );
       })}
 
-      {/* 種目追加(細15: 緑塗りボタン) */}
-      <div className="flex gap-2 pt-1">
-        <input
-          value={addName}
-          onChange={(e) => setAddName(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              onAdd();
-            }
-          }}
-          placeholder="＋ 種目を追加（例: 腹筋ローラー）"
-          className="h-11 flex-1 rounded-lg border border-[#e7dcc9] bg-white px-3 text-[13px] focus:border-[#4a875b] focus:outline-none"
-        />
-        <button
-          type="button"
-          onClick={onAdd}
-          className="h-11 rounded-lg bg-[#4a875b] px-5 text-[13px] font-bold text-white"
-        >
-          ＋ 追加
-        </button>
-      </div>
+      {/* 点4+細15: 種目追加はボトムシート(検索→動画候補)を開く緑ボタン */}
+      <button
+        type="button"
+        onClick={onOpenAdd}
+        className="mt-1 flex w-full items-center justify-center rounded-xl bg-[#4a875b] py-3 text-[13px] font-bold text-white"
+      >
+        ＋ 種目を追加
+      </button>
+    </div>
+  );
+}
+
+// 点4: 種目追加シート(M8-⑤/M9-④)。検索→動画ライブラリ候補(▶)→無ければ自由入力。
+function AddExerciseSheet({
+  existing,
+  onAdd,
+}: {
+  existing: string[];
+  onAdd: (name: string) => void;
+}) {
+  const [q, setQ] = useState("");
+  const query = q.trim();
+  const existingSet = new Set(existing);
+  // video-master から名前部分一致で候補(動画あり)。重複/既追加は除外。
+  const candidates =
+    query.length === 0
+      ? []
+      : listExercisesWithVideo()
+          .filter((e) => e.確定代表名.includes(query) && !existingSet.has(e.確定代表名))
+          .slice(0, 12);
+  const exactHit = candidates.some((c) => c.確定代表名 === query);
+
+  return (
+    <div className="space-y-3">
+      <input
+        autoFocus
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder="種目名で検索（例: サ → サイドレイズ）"
+        className="h-11 w-full rounded-lg border border-[#e7dcc9] bg-white px-3 text-[14px] focus:border-[#4a875b] focus:outline-none"
+      />
+
+      {query.length === 0 ? (
+        <p className="px-1 py-4 text-center text-[12px] text-[#a59b8c]">
+          種目名を入力すると、動画のある種目が候補に出ます。
+        </p>
+      ) : (
+        <div className="space-y-1.5">
+          {candidates.map((c) => (
+            <button
+              key={c.確定代表名}
+              type="button"
+              onClick={() => onAdd(c.確定代表名)}
+              className="flex w-full items-center gap-2.5 rounded-xl border border-[#e7dcc9] bg-white px-3 py-2.5 text-left"
+            >
+              <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#e8f3ec]">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="#34603f">
+                  <polygon points="6 4 20 12 6 20" />
+                </svg>
+              </span>
+              <span className="min-w-0 flex-1 truncate text-[13px] font-bold text-[#2b2620]">
+                {cleanExerciseName(c.確定代表名)}
+              </span>
+              <span className="flex-shrink-0 text-[10px] font-bold text-[#4a875b]">動画あり</span>
+            </button>
+          ))}
+          {/* 候補になくても自由入力で追加(動画なし) */}
+          {!exactHit && (
+            <button
+              type="button"
+              onClick={() => onAdd(query)}
+              className="flex w-full items-center justify-center rounded-xl border-[1.5px] border-dashed border-[#4a875b] bg-[#f0f7f2] py-2.5 text-[12.5px] font-bold text-[#34603f]"
+            >
+              ＋「{query}」を追加する
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

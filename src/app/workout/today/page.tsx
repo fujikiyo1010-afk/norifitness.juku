@@ -5,6 +5,8 @@ import { MemberHeader } from "@/components/MemberHeader";
 import { getTodayWorkout, getMyProgress } from "@/lib/workout/logs";
 import { getTodayActivity } from "@/lib/member/today-activity";
 import { getRecordStreak } from "@/lib/member/record-streak";
+import { createClient } from "@/lib/supabase/server";
+import { jstTodayStr } from "@/lib/date/jst";
 import { resolveDayMenu } from "@/lib/workout/logs-types";
 import { cleanExerciseName, getExerciseTarget } from "@/lib/workout/menu-display";
 import type { WorkoutCycles } from "@/lib/workout/types";
@@ -49,6 +51,18 @@ export default async function WorkoutTodayPage({
 
   const sp = await searchParams;
   const w = await getTodayWorkout();
+  // 点7: その日「のりのコメント(daily_feedbacks sent)」が届いていれば編集ロック(食事と同じ導出・RLSで本人のみ)
+  let feedbackLocked = false;
+  if (w.started) {
+    const supabase = await createClient();
+    const { data: fb } = await supabase
+      .from("daily_feedbacks")
+      .select("id")
+      .eq("date", jstTodayStr())
+      .eq("status", "sent")
+      .limit(1);
+    feedbackLocked = (fb?.length ?? 0) > 0;
+  }
   // 新3a: バナーは「?done=1 かつ 今日を実際に完了(done/rest_done)」の時だけ。
   const showCeleb =
     sp.done === "1" &&
@@ -169,6 +183,8 @@ export default async function WorkoutTodayPage({
               }
               completedToday={w.completedToday}
               todayStatus={w.todayLog?.status ?? null}
+              pending={w.pending}
+              feedbackLocked={feedbackLocked}
             />
           )}
         </div>
