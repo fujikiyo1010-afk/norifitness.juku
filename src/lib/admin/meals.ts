@@ -29,9 +29,10 @@ export async function getMealDaysForUser(
 ): Promise<AdminMealDay[]> {
   const admin = createAdminClient();
 
+  // S2: 品目は親(meal_logs)にネスト取得(親子2往復→1)。
   const { data: logRows } = await admin
     .from("meal_logs")
-    .select("id, date, meal_type, posted_at, memo, photos")
+    .select("id, date, meal_type, posted_at, memo, photos, meal_log_items(name, sort_order)")
     .eq("user_id", userId)
     .order("date", { ascending: false })
     .order("posted_at", { ascending: true })
@@ -43,44 +44,31 @@ export async function getMealDaysForUser(
     posted_at: string;
     memo: string | null;
     photos: string[] | null;
+    meal_log_items: { name: string; sort_order: number | null }[] | null;
   }[];
   if (logs.length === 0) return [];
 
-  // 品目
-  const { data: itemRows } = await admin
-    .from("meal_log_items")
-    .select("meal_log_id, name, sort_order")
-    .in(
-      "meal_log_id",
-      logs.map((l) => l.id)
-    )
-    .order("sort_order", { ascending: true });
-  const itemsByLog = new Map<string, string[]>();
-  for (const it of (itemRows ?? []) as { meal_log_id: string; name: string }[]) {
-    const arr = itemsByLog.get(it.meal_log_id) ?? [];
-    arr.push(it.name);
-    itemsByLog.set(it.meal_log_id, arr);
-  }
-
-  // 署名URL
+  // S2: 署名URLと期間FBは互いに独立→並列(直列2本→1波)。
   const allPaths = logs.flatMap((l) => l.photos ?? []);
-  const urlByPath = new Map<string, string>();
-  if (allPaths.length > 0) {
+  const dates = Array.from(new Set(logs.map((l) => l.date)));
+  const signedP = (async () => {
+    const m = new Map<string, string>();
+    if (allPaths.length === 0) return m;
     const { data: signed } = await admin.storage
       .from("meal-photos")
       .createSignedUrls(allPaths, 3600);
     for (const s of signed ?? []) {
-      if (s.signedUrl && s.path) urlByPath.set(s.path, s.signedUrl);
+      if (s.signedUrl && s.path) m.set(s.path, s.signedUrl);
     }
-  }
-
-  // その期間のFB
-  const dates = Array.from(new Set(logs.map((l) => l.date)));
-  const { data: fbRows } = await admin
+    return m;
+  })();
+  const fbP = admin
     .from("daily_feedbacks")
     .select("date, body, status")
     .eq("user_id", userId)
     .in("date", dates);
+  const [urlByPath, { data: fbRows }] = await Promise.all([signedP, fbP]);
+
   const fbByDate = new Map<string, string>();
   for (const f of (fbRows ?? []) as {
     date: string;
@@ -93,12 +81,16 @@ export async function getMealDaysForUser(
   // 日別にまとめ
   const byDate = new Map<string, AdminMealEntry[]>();
   for (const l of logs) {
+    const items = (l.meal_log_items ?? [])
+      .slice()
+      .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+      .map((i) => i.name);
     const arr = byDate.get(l.date) ?? [];
     arr.push({
       mealType: l.meal_type,
       postedAt: l.posted_at,
       memo: l.memo,
-      items: itemsByLog.get(l.id) ?? [],
+      items,
       photoUrls: (l.photos ?? []).map((p) => urlByPath.get(p) ?? "").filter(Boolean),
     });
     byDate.set(l.date, arr);

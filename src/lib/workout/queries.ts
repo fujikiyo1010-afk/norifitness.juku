@@ -191,17 +191,24 @@ export async function getCarteForAdmin(
 /**
  * 受講生 (本人) の現役メニュー (is_current = true) を 1 件取得。
  */
-export async function getMyCurrentMenu(): Promise<UserWorkoutMenuRow | null> {
+export async function getMyCurrentMenu(
+  userId?: string
+): Promise<UserWorkoutMenuRow | null> {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
+  // S2-C: 呼び出し元が user を持っていれば getUser(往復)を省く(未指定なら従来どおり)。
+  let uid = userId;
+  if (!uid) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return null;
+    uid = user.id;
+  }
 
   const { data } = await supabase
     .from("user_workout_menu")
     .select(MENU_COLS)
-    .eq("user_id", user.id)
+    .eq("user_id", uid)
     .eq("is_current", true)
     .maybeSingle();
 
