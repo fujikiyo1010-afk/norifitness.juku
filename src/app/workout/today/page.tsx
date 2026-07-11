@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { isBetaUser } from "@/lib/auth/beta";
 import { MemberHeader } from "@/components/MemberHeader";
-import { getTodayWorkout, getMyProgress } from "@/lib/workout/logs";
+import { getTodayWorkout } from "@/lib/workout/logs";
 import { getTodayActivity } from "@/lib/member/today-activity";
 import { getRecordStreak } from "@/lib/member/record-streak";
 import { createClient } from "@/lib/supabase/server";
@@ -51,36 +51,39 @@ export default async function WorkoutTodayPage({
 
   const sp = await searchParams;
   const w = await getTodayWorkout();
-  // 点7: その日「のりのコメント(daily_feedbacks sent)」が届いていれば編集ロック(食事と同じ導出・RLSで本人のみ)
-  let feedbackLocked = false;
-  if (w.started) {
-    const supabase = await createClient();
-    const { data: fb } = await supabase
-      .from("daily_feedbacks")
-      .select("id")
-      .eq("date", jstTodayStr())
-      .eq("status", "sent")
-      .limit(1);
-    feedbackLocked = (fb?.length ?? 0) > 0;
-  }
+
   // 新3a: バナーは「?done=1 かつ 今日を実際に完了(done/rest_done)」の時だけ。
   const showCeleb =
     sp.done === "1" &&
     w.completedToday &&
     (w.todayLog?.status === "done" || w.todayLog?.status === "rest_done");
-  // 細16: 完了演出の「今日の達成 n/3」バー(トレ+食事+学び)
-  const act = showCeleb ? await getTodayActivity() : null;
+
+  // S2-C: 後続の独立クエリを1回の並列に束ねる(直列を短縮・挙動不変)。
+  //   ・点7 feedbackLock: w.started の時だけ daily_feedbacks(sent)を見る(RLSで本人のみ)
+  //   ・細16 今日の達成 / ④ 継続日数: 完了演出時だけ
+  //   ・新3b「明日は…」の progress は getTodayWorkout 取得済みの w.progress を使い回す(再取得しない)
+  const supabase = w.started ? await createClient() : null;
+  const [fbRes, act, streakDays] = await Promise.all([
+    supabase
+      ? supabase
+          .from("daily_feedbacks")
+          .select("id")
+          .eq("date", jstTodayStr())
+          .eq("status", "sent")
+          .limit(1)
+      : Promise.resolve(null),
+    showCeleb ? getTodayActivity() : Promise.resolve(null),
+    showCeleb ? getRecordStreak() : Promise.resolve(0),
+  ]);
+  const feedbackLocked = (fbRes?.data?.length ?? 0) > 0;
   const doneCount = act
     ? (act.learned ? 1 : 0) + (act.recordedMeal ? 1 : 0) + (act.recordedWorkout ? 1 : 0)
     : 0;
-  // 新3b: 「明日は…」は前進後の progress を使う(完了当日が「次は」に出る誤りを解消)
-  const prog = showCeleb ? await getMyProgress() : null;
+  const prog = showCeleb ? w.progress : null;
   const nextLabel =
     prog && w.cycles
       ? nextDayLabel(w.cycles, prog.cycleNumber, prog.currentDay)
       : null;
-  // ④: 完了演出に「継続◯日」(記録が続いた連続日数・0は出さない)
-  const streakDays = showCeleb ? await getRecordStreak() : 0;
 
   return (
     <>

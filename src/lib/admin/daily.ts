@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { listUsersWithAlerts, type AlertTag } from "@/lib/admin/alerts";
+import { listUsersWithAlerts, type AlertTag, type UserWithAlerts } from "@/lib/admin/alerts";
 import { getLatestBodyMetricSummary } from "@/lib/body-metrics/queries";
 import { getGoalSheetForUser } from "@/lib/goal-sheet/queries";
 import { getCurrentMenuForAdmin } from "@/lib/workout/queries";
@@ -36,10 +36,15 @@ export type DailyQueue = {
   done: DailyQueueItem[]; // 処理済み
 };
 
-export async function getDailyQueue(dateStr: string): Promise<DailyQueue> {
+export async function getDailyQueue(
+  dateStr: string,
+  preUsers?: UserWithAlerts[]
+): Promise<DailyQueue> {
   const admin = createAdminClient();
+  // S2-A: usersWithAlerts は重い全件スキャン。呼び出し元が既に取得済みなら再実行しない
+  // (未指定なら従来どおり自前取得＝後方互換)。
   const [usersWithAlerts, fbRes] = await Promise.all([
-    listUsersWithAlerts(),
+    preUsers ?? listUsersWithAlerts(),
     admin.from("daily_feedbacks").select("user_id").eq("date", dateStr),
   ]);
   const doneSet = new Set((fbRes.data ?? []).map((r) => r.user_id as string));
@@ -158,7 +163,8 @@ export type DailyDetail = {
 
 export async function getDailyDetail(
   userId: string,
-  dateStr: string
+  dateStr: string,
+  preUsers?: UserWithAlerts[]
 ): Promise<DailyDetail | null> {
   const admin = createAdminClient();
 
@@ -172,9 +178,10 @@ export async function getDailyDetail(
   // --- その日の食事(P4-a・写真+品目)。合計/署名URLは admin(service role)で取得 ---
   const meals: DailyMealForAdmin[] = [];
   {
+    // S2-D: 親(meal_logs)→子(meal_log_items)の2往復をネストselectで1往復に(service role)。
     const { data: mealRows } = await admin
       .from("meal_logs")
-      .select("id, meal_type, posted_at, memo, photos")
+      .select("id, meal_type, posted_at, memo, photos, meal_log_items(name, sort_order)")
       .eq("user_id", userId)
       .eq("date", dateStr)
       .order("posted_at", { ascending: true });
@@ -184,22 +191,9 @@ export async function getDailyDetail(
       posted_at: string;
       memo: string | null;
       photos: string[] | null;
+      meal_log_items: { name: string; sort_order: number | null }[] | null;
     }[];
     if (rows.length > 0) {
-      const { data: itemRows } = await admin
-        .from("meal_log_items")
-        .select("meal_log_id, name, sort_order")
-        .in(
-          "meal_log_id",
-          rows.map((r) => r.id)
-        )
-        .order("sort_order", { ascending: true });
-      const itemsByLog = new Map<string, string[]>();
-      for (const it of (itemRows ?? []) as { meal_log_id: string; name: string }[]) {
-        const arr = itemsByLog.get(it.meal_log_id) ?? [];
-        arr.push(it.name);
-        itemsByLog.set(it.meal_log_id, arr);
-      }
       const allPaths = rows.flatMap((r) => r.photos ?? []);
       const urlByPath = new Map<string, string>();
       if (allPaths.length > 0) {
@@ -212,11 +206,15 @@ export async function getDailyDetail(
       }
       const order: Record<string, number> = { 朝: 0, 昼: 1, 夕: 2, 間: 3 };
       for (const r of rows) {
+        const items = (r.meal_log_items ?? [])
+          .slice()
+          .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+          .map((i) => i.name);
         meals.push({
           mealType: r.meal_type,
           postedAt: r.posted_at,
           memo: r.memo,
-          items: itemsByLog.get(r.id) ?? [],
+          items,
           photoUrls: (r.photos ?? [])
             .map((p) => urlByPath.get(p) ?? "")
             .filter(Boolean),
@@ -233,18 +231,18 @@ export async function getDailyDetail(
   // --- その日のトレ実績(原本×実績の差分・P5) ---
   let workout: DailyWorkoutForAdmin | null = null;
   {
+    // S2-D: 親(user_workout_logs)→子(items)の2往復をネストselectで1往復に(service role)。
     const { data: logRow } = await admin
       .from("user_workout_logs")
-      .select("id, day_number, intensity, status, memo")
+      .select("id, day_number, intensity, status, memo, user_workout_log_items(exercise_name, source)")
       .eq("user_id", userId)
       .eq("date", dateStr)
       .maybeSingle();
     if (logRow) {
-      const { data: itemRows } = await admin
-        .from("user_workout_log_items")
-        .select("exercise_name, source")
-        .eq("log_id", logRow.id as string);
-      const items = (itemRows ?? []) as { exercise_name: string; source: string }[];
+      const items = ((logRow.user_workout_log_items ?? []) as {
+        exercise_name: string;
+        source: string;
+      }[]);
       const doneOriginal = items
         .filter((i) => i.source === "original")
         .map((i) => cleanExerciseName(i.exercise_name));
@@ -285,7 +283,8 @@ export async function getDailyDetail(
         )
         .eq("user_id", userId)
         .maybeSingle(),
-      listUsersWithAlerts(),
+      // S2-A: タグ抽出用の全件リスト。呼び出し元が取得済みなら再実行しない(後方互換)。
+      preUsers ?? listUsersWithAlerts(),
       admin
         .from("daily_feedbacks")
         .select("date, body, status")

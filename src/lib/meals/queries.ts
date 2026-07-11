@@ -26,38 +26,31 @@ export async function getMealsForDate(date: string): Promise<MealLog[]> {
   } = await supabase.auth.getUser();
   if (!user) return [];
 
+  // S2-D: 親(meal_logs)→子(meal_log_items)の2往復を、ネストselectで1往復に。
+  //   子は RLS「meal_log_items: self all」で本人が読めるため空落ちしない(前後の実データで突合)。
+  //   子の並び(sort_order昇順)はJS側で行う(APIの参照テーブル指定に依存しないため)。
   const { data: logs } = await supabase
     .from("meal_logs")
-    .select("id, date, meal_type, posted_at, memo, photos")
+    .select(
+      "id, date, meal_type, posted_at, memo, photos, meal_log_items(id, name, source, food_table_id, quantity, unit, kcal, protein_g, fat_g, carb_g, sort_order)"
+    )
     .eq("user_id", user.id)
     .eq("date", date)
     .order("posted_at", { ascending: true });
 
-  const rows = (logs ?? []) as Omit<MealLog, "items">[];
+  const rows = (logs ?? []) as (Omit<MealLog, "items"> & {
+    meal_log_items: MealItem[] | null;
+  })[];
   if (rows.length === 0) return [];
 
-  const { data: items } = await supabase
-    .from("meal_log_items")
-    .select(
-      "id, meal_log_id, name, source, food_table_id, quantity, unit, kcal, protein_g, fat_g, carb_g, sort_order"
-    )
-    .in(
-      "meal_log_id",
-      rows.map((r) => r.id)
-    )
-    .order("sort_order", { ascending: true });
-
-  const byLog = new Map<string, MealItem[]>();
-  for (const it of (items ?? []) as (MealItem & { meal_log_id: string })[]) {
-    const arr = byLog.get(it.meal_log_id) ?? [];
-    const { meal_log_id: _omit, ...rest } = it;
-    void _omit;
-    arr.push(rest);
-    byLog.set(it.meal_log_id, arr);
-  }
-
   return rows
-    .map((r) => ({ ...r, photos: r.photos ?? [], items: byLog.get(r.id) ?? [] }))
+    .map((r) => {
+      const { meal_log_items, ...rest } = r;
+      const items = (meal_log_items ?? [])
+        .slice()
+        .sort((a, b) => a.sort_order - b.sort_order);
+      return { ...rest, photos: rest.photos ?? [], items };
+    })
     .sort(
       (a, b) =>
         MEAL_ORDER[a.meal_type] - MEAL_ORDER[b.meal_type] ||

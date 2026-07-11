@@ -6,6 +6,7 @@ import {
   jstToday,
   type DailyQueueItem,
 } from "@/lib/admin/daily";
+import { listUsersWithAlerts } from "@/lib/admin/alerts";
 import { DailyPanel } from "./DailyPanel";
 
 export const dynamic = "force-dynamic";
@@ -38,7 +39,10 @@ export default async function AdminDailyPage({
       ? sp.date
       : jstToday();
 
-  const queue = await getDailyQueue(date);
+  // S2-A: listUsersWithAlerts(重い全件スキャン)は queue と detail の両方で必要。
+  // 1回だけ取得して両方へ渡す(従来は各関数が個別に実行=1リクエストで2回走っていた)。
+  const usersWithAlerts = await listUsersWithAlerts();
+  const queue = await getDailyQueue(date, usersWithAlerts);
 
   // 選択中ユーザー: 指定がなければ 要対応→未処理→処理済み の先頭
   const ordered = [...queue.attention, ...queue.pending, ...queue.done];
@@ -55,7 +59,7 @@ export default async function AdminDailyPage({
       : workList[0]?.userId ?? null;
 
   const detail = selectedUserId
-    ? await getDailyDetail(selectedUserId, date)
+    ? await getDailyDetail(selectedUserId, date, usersWithAlerts)
     : null;
 
   const remaining = workList.length;

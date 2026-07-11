@@ -34,30 +34,63 @@ export default async function MealsDayPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/meals");
 
-  const meals = await getMealsForDate(date);
-  const allPaths = meals.flatMap((m) => m.photos);
-  const urlMap = await signMealPhotos(allPaths);
+  // S2-B: 互いに独立な読み取りを1つの Promise.all で並列化(9段の直列→約4段)。
+  //   依存のある「meals→署名URL」は1単位で内部順序を保持。shouldAskYesterday は
+  //   date===today のときだけ実クエリ(元の条件を保つ)。
+  //   ※lib関数がthrowする挙動は従来の逐次awaitと同じ(全体エラー)＝フォールバックは元のまま。
+  const today = jstTodayStr();
+  const yesterday = new Date(Date.parse(`${date}T00:00:00Z`) - 86_400_000)
+    .toISOString()
+    .slice(0, 10);
+  // 細8: 週ストリップ用・当該週(日〜土)
+  const baseMs = Date.parse(`${date}T00:00:00Z`);
+  const sunday = new Date(baseMs - new Date(baseMs).getUTCDay() * 86_400_000)
+    .toISOString()
+    .slice(0, 10);
+  const saturday = new Date(Date.parse(`${sunday}T00:00:00Z`) + 6 * 86_400_000)
+    .toISOString()
+    .slice(0, 10);
 
-  const withUrls = meals.map((m) => ({
+  const [mealsData, fbRes, goalRes, condRes, askFlag, foods, weekRes] =
+    await Promise.all([
+      (async () => {
+        const meals = await getMealsForDate(date);
+        const urlMap = await signMealPhotos(meals.flatMap((m) => m.photos));
+        return { meals, urlMap };
+      })(),
+      supabase
+        .from("daily_feedbacks")
+        .select("body, date")
+        .eq("date", date)
+        .eq("status", "sent")
+        .maybeSingle(),
+      supabase
+        .from("goal_sheets")
+        .select("content")
+        .eq("user_id", user.id)
+        .maybeSingle(),
+      getDailyCondition(date),
+      date === today ? shouldAskYesterday(yesterday) : Promise.resolve(false),
+      getActiveFoods(),
+      supabase
+        .from("meal_logs")
+        .select("date")
+        .eq("user_id", user.id)
+        .gte("date", sunday)
+        .lte("date", saturday),
+    ]);
+
+  const withUrls = mealsData.meals.map((m) => ({
     ...m,
-    photoUrls: m.photos.map((p) => urlMap.get(p) ?? "").filter(Boolean),
+    photoUrls: m.photos.map((p) => mealsData.urlMap.get(p) ?? "").filter(Boolean),
   }));
 
   // 着地切替(M6): その日のデイリーFB(送信済)を「のりからのコメント」として食事詳細に表示。
-  const { data: fbRow } = await supabase
-    .from("daily_feedbacks")
-    .select("body, date")
-    .eq("date", date)
-    .eq("status", "sent")
-    .maybeSingle();
+  const fbRow = fbRes.data;
   const feedback = fbRow?.body ? (fbRow.body as string) : null;
 
   // 合計ゲージの「ものさし」= 目標PFC(既存 goal_sheets.content.nutrition)
-  const { data: goal } = await supabase
-    .from("goal_sheets")
-    .select("content")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const goal = goalRes.data;
   const nutrition = (goal?.content as { nutrition?: { target_calorie?: number; pfc?: { p?: number; f?: number; c?: number } } } | null)
     ?.nutrition;
   const target = nutrition
@@ -69,33 +102,11 @@ export default async function MealsDayPage({
       }
     : null;
 
-  // 生活記録(P6): その日の記録 + 翌日補完(今日を見ている時のみ昨日分を聞く)
-  const today = jstTodayStr();
-  const condRes = await getDailyCondition(date);
-  const yesterday = new Date(Date.parse(`${date}T00:00:00Z`) - 86_400_000)
-    .toISOString()
-    .slice(0, 10);
-  const askYesterday =
-    date === today && (await shouldAskYesterday(yesterday)) ? yesterday : null;
+  // 生活記録(P6): 今日を見ている時のみ昨日分を聞く
+  const askYesterday = askFlag ? yesterday : null;
 
-  const foods = await getActiveFoods();
-
-  // 細8: 週ストリップ用・当該週(日〜土)で記録がある日
-  const baseMs = Date.parse(`${date}T00:00:00Z`);
-  const sunday = new Date(baseMs - new Date(baseMs).getUTCDay() * 86_400_000)
-    .toISOString()
-    .slice(0, 10);
-  const saturday = new Date(Date.parse(`${sunday}T00:00:00Z`) + 6 * 86_400_000)
-    .toISOString()
-    .slice(0, 10);
-  const { data: weekMeals } = await supabase
-    .from("meal_logs")
-    .select("date")
-    .eq("user_id", user.id)
-    .gte("date", sunday)
-    .lte("date", saturday);
   const recordedDates = Array.from(
-    new Set(((weekMeals ?? []) as { date: string }[]).map((m) => m.date))
+    new Set(((weekRes.data ?? []) as { date: string }[]).map((m) => m.date))
   );
 
   return (

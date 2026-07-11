@@ -99,38 +99,40 @@ export async function listConversationsForAdmin(): Promise<
     )
   );
 
-  // 各 conv の最新メッセージ + 未読数
-  const results: AdminConversationRow[] = [];
-  for (const conv of conversations) {
-    const u = userMap.get(conv.user_id);
-    const { data: lastMsg } = await admin
-      .from("messages")
-      .select("body, sender_kind")
-      .eq("conversation_id", conv.id)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    let unreadQ = admin
-      .from("messages")
-      .select("id", { count: "exact", head: true })
-      .eq("conversation_id", conv.id)
-      .eq("sender_kind", "user");
-    if (conv.last_read_at_admin) {
-      unreadQ = unreadQ.gt("created_at", conv.last_read_at_admin);
-    }
-    const { count: unread } = await unreadQ;
-
-    results.push({
-      conversation: conv,
-      user_name: u?.name ?? "(削除済受講生)",
-      user_email: u?.email ?? "",
-      last_message_body: (lastMsg?.body as string | null) ?? null,
-      last_message_sender:
-        (lastMsg?.sender_kind as "user" | "admin" | null) ?? null,
-      unread_count: unread ?? 0,
-    });
-  }
+  // 各 conv の最新メッセージ + 未読数。
+  // S2(N+1解消): 会話ごとに直列2クエリ×N本 → 会話間も会話内も並列化して1波に(順序・値は不変)。
+  const results: AdminConversationRow[] = await Promise.all(
+    conversations.map(async (conv) => {
+      const u = userMap.get(conv.user_id);
+      let unreadQ = admin
+        .from("messages")
+        .select("id", { count: "exact", head: true })
+        .eq("conversation_id", conv.id)
+        .eq("sender_kind", "user");
+      if (conv.last_read_at_admin) {
+        unreadQ = unreadQ.gt("created_at", conv.last_read_at_admin);
+      }
+      const [{ data: lastMsg }, { count: unread }] = await Promise.all([
+        admin
+          .from("messages")
+          .select("body, sender_kind")
+          .eq("conversation_id", conv.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        unreadQ,
+      ]);
+      return {
+        conversation: conv,
+        user_name: u?.name ?? "(削除済受講生)",
+        user_email: u?.email ?? "",
+        last_message_body: (lastMsg?.body as string | null) ?? null,
+        last_message_sender:
+          (lastMsg?.sender_kind as "user" | "admin" | null) ?? null,
+        unread_count: unread ?? 0,
+      };
+    })
+  );
   return results;
 }
 

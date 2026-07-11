@@ -23,16 +23,23 @@ export type WorkoutProgress = {
   pendingMenuId: string | null;
 };
 
-export async function getMyProgress(): Promise<WorkoutProgress | null> {
+export async function getMyProgress(
+  userId?: string
+): Promise<WorkoutProgress | null> {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
+  // S2-C: 呼び出し元が user を持っていれば getUser(往復)を省く(未指定なら従来どおり)。
+  let uid = userId;
+  if (!uid) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return null;
+    uid = user.id;
+  }
   const { data } = await supabase
     .from("user_workout_progress")
     .select("menu_id, current_day, cycle_number, started_at, pending_menu_id")
-    .eq("user_id", user.id)
+    .eq("user_id", uid)
     .maybeSingle();
   if (!data) return null;
   return {
@@ -62,6 +69,7 @@ export type TodayWorkout = {
   } | null;
   pending: boolean; // 再配布予告
   completedToday: boolean; // 細2: 今日(JST)に既に記録済み(=次の日の開始は翌日から)
+  progress: WorkoutProgress | null; // S2-C: 完了演出の「明日は」ラベル等で再取得せず使い回す
 };
 
 /** 今日の実施記録に必要な一式を解決 */
@@ -71,7 +79,7 @@ export async function getTodayWorkout(): Promise<TodayWorkout> {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const menu = await getMyCurrentMenu();
+  const menu = await getMyCurrentMenu(user?.id); // S2-C: user引き回し(null時は内部でgetUser=従来どおり)
   const empty: TodayWorkout = {
     hasMenu: !!menu,
     started: false,
@@ -83,10 +91,11 @@ export async function getTodayWorkout(): Promise<TodayWorkout> {
     todayLog: null,
     pending: false,
     completedToday: false,
+    progress: null,
   };
   if (!user || !menu) return empty;
 
-  const progress = await getMyProgress();
+  const progress = await getMyProgress(user.id); // S2-C: user引き回し
   if (!progress) return empty; // 未開始
 
   const today = jstTodayStr();
@@ -95,7 +104,9 @@ export async function getTodayWorkout(): Promise<TodayWorkout> {
   // 新2: date=today が万一2行あっても壊れないよう order+limit(1)。error は握りつぶさない。
   const { data: todayRows, error: todayErr } = await supabase
     .from("user_workout_logs")
-    .select("id, day_number, cycle_number, intensity, status, memo, completed_at")
+    .select(
+      "id, day_number, cycle_number, intensity, status, memo, completed_at, user_workout_log_items(exercise_name, source, weight_kg, reps, sets, sort_order)"
+    )
     .eq("user_id", user.id)
     .eq("date", today)
     .order("completed_at", { ascending: false })
@@ -106,45 +117,61 @@ export async function getTodayWorkout(): Promise<TodayWorkout> {
   const completedToday = !!todayRow;
   let dayNumber: number;
   let cycleNumber: number;
+  // S2-D: 品目は user_workout_logs にネストして取得済み(別便のitemsクエリを廃止)。
+  type NestedItem = {
+    exercise_name: string;
+    source: string;
+    weight_kg: number | null;
+    reps: number | null;
+    sets: number | null;
+    sort_order: number | null;
+  };
   let logRow:
-    | { id: string; intensity: string; status: string; memo: string | null; completed_at: string | null }
+    | {
+        id: string;
+        intensity: string;
+        status: string;
+        memo: string | null;
+        completed_at: string | null;
+        user_workout_log_items: NestedItem[] | null;
+      }
     | null;
   if (todayRow) {
     dayNumber = todayRow.day_number as number;
     cycleNumber = todayRow.cycle_number as number;
-    logRow = todayRow as typeof logRow;
+    logRow = todayRow as unknown as typeof logRow;
   } else {
     dayNumber = progress.currentDay;
     cycleNumber = progress.cycleNumber;
     const { data } = await supabase
       .from("user_workout_logs")
-      .select("id, intensity, status, memo, completed_at")
+      .select(
+        "id, intensity, status, memo, completed_at, user_workout_log_items(exercise_name, source, weight_kg, reps, sets, sort_order)"
+      )
       .eq("user_id", user.id)
       .eq("cycle_number", cycleNumber)
       .eq("day_number", dayNumber)
       .maybeSingle();
-    logRow = data as typeof logRow;
+    logRow = data as unknown as typeof logRow;
   }
 
   let todayLog: TodayWorkout["todayLog"] = null;
   if (logRow) {
-    const { data: itemRows } = await supabase
-      .from("user_workout_log_items")
-      .select("exercise_name, source, weight_kg, reps, sets")
-      .eq("log_id", logRow.id)
-      .order("sort_order", { ascending: true });
+    const itemRows = (logRow.user_workout_log_items ?? [])
+      .slice()
+      .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
     todayLog = {
       id: logRow.id as string,
       intensity: (logRow.intensity as Intensity) ?? "medium",
       status: logRow.status as "done" | "rest_done" | "skipped",
       memo: (logRow.memo as string | null) ?? null,
       completedAt: (logRow.completed_at as string | null) ?? null,
-      items: ((itemRows ?? []) as Record<string, unknown>[]).map((r) => ({
-        exerciseName: r.exercise_name as string,
+      items: itemRows.map((r) => ({
+        exerciseName: r.exercise_name,
         source: (r.source as "original" | "added") ?? "original",
-        weightKg: (r.weight_kg as number | null) ?? null,
-        reps: (r.reps as number | null) ?? null,
-        sets: (r.sets as number | null) ?? null,
+        weightKg: r.weight_kg ?? null,
+        reps: r.reps ?? null,
+        sets: r.sets ?? null,
       })),
     };
   }
@@ -161,6 +188,7 @@ export async function getTodayWorkout(): Promise<TodayWorkout> {
     todayLog,
     pending: !!progress.pendingMenuId,
     completedToday,
+    progress,
   };
 }
 
@@ -198,10 +226,14 @@ export async function getMyWorkoutHistory(limit = 60): Promise<WorkoutHistory> {
   };
   if (!user) return empty;
 
+  // S2-D: 親(user_workout_logs)→子(items)の2往復を、ネストselectで1往復に。
+  //   子は RLS「uw_log_items: self all」で本人が読めるため空落ちしない。件数だけ使う。
   const [{ data: logs }, { data: prog }] = await Promise.all([
     supabase
       .from("user_workout_logs")
-      .select("id, date, day_number, cycle_number, intensity, status, memo")
+      .select(
+        "id, date, day_number, cycle_number, intensity, status, memo, user_workout_log_items(source)"
+      )
       .eq("user_id", user.id)
       .order("date", { ascending: false })
       .limit(limit),
@@ -220,36 +252,22 @@ export async function getMyWorkoutHistory(limit = 60): Promise<WorkoutHistory> {
     intensity: Intensity;
     status: "done" | "rest_done" | "skipped";
     memo: string | null;
+    user_workout_log_items: { source: string }[] | null;
   }[];
 
-  // 追加種目数(source='added')を一括取得
-  const addedByLog = new Map<string, number>();
-  const itemsByLog = new Map<string, number>();
-  if (rows0.length > 0) {
-    const { data: items } = await supabase
-      .from("user_workout_log_items")
-      .select("log_id, source")
-      .in(
-        "log_id",
-        rows0.map((r) => r.id)
-      );
-    for (const it of (items ?? []) as { log_id: string; source: string }[]) {
-      itemsByLog.set(it.log_id, (itemsByLog.get(it.log_id) ?? 0) + 1);
-      if (it.source === "added")
-        addedByLog.set(it.log_id, (addedByLog.get(it.log_id) ?? 0) + 1);
-    }
-  }
-
-  const rows: WorkoutHistoryRow[] = rows0.map((r) => ({
-    date: r.date,
-    dayNumber: r.day_number,
-    cycleNumber: r.cycle_number,
-    intensity: r.intensity,
-    status: r.status,
-    addedCount: addedByLog.get(r.id) ?? 0,
-    itemCount: itemsByLog.get(r.id) ?? 0,
-    hasMemo: !!r.memo,
-  }));
+  const rows: WorkoutHistoryRow[] = rows0.map((r) => {
+    const items = r.user_workout_log_items ?? [];
+    return {
+      date: r.date,
+      dayNumber: r.day_number,
+      cycleNumber: r.cycle_number,
+      intensity: r.intensity,
+      status: r.status,
+      addedCount: items.filter((i) => i.source === "added").length,
+      itemCount: items.length,
+      hasMemo: !!r.memo,
+    };
+  });
 
   // 今週(JST月曜)/今月
   const jstOffset = 9 * 3600 * 1000;

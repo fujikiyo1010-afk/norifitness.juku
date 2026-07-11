@@ -29,19 +29,17 @@ export default async function ChapterDetailPage({
     notFound();
   }
 
-  const { data: course } = await supabase
-    .from("courses")
-    .select("id, title")
-    .eq("id", courseId)
-    .maybeSingle();
-
-  const { data: lessons } = await supabase
-    .from("lessons")
-    .select(
-      "id, chapter_id, title, description, vimeo_url, summary_video_url, sub_image_url, meta_tags, sort_order, released_at"
-    )
-    .eq("chapter_id", chapterId)
-    .order("sort_order", { ascending: true });
+  // S2: course と lessons は互いに独立→並列(chapterのガード後に実行=挙動不変)。
+  const [{ data: course }, { data: lessons }] = await Promise.all([
+    supabase.from("courses").select("id, title").eq("id", courseId).maybeSingle(),
+    supabase
+      .from("lessons")
+      .select(
+        "id, chapter_id, title, description, vimeo_url, summary_video_url, sub_image_url, meta_tags, sort_order, released_at"
+      )
+      .eq("chapter_id", chapterId)
+      .order("sort_order", { ascending: true }),
+  ]);
 
   const rows: LessonRowData[] = (lessons ?? []).map((l) => ({
     id: l.id,
