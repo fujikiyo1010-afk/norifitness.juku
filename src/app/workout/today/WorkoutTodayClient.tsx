@@ -774,7 +774,7 @@ function EditList({
                             ? "border-[#34603f] bg-[#f0f7f2]"
                             : changed
                               ? "border-[#4a875b] bg-[#f0f7f2]"
-                              : "border-[#e7dcc9] bg-[#f9f5ed]"
+                              : "border-[#d9dce0] bg-[#edeef0]"
                         }`}
                       >
                         <div className="text-[8px] font-bold text-[#a59b8c]">{c.label}</div>
@@ -945,7 +945,7 @@ function BigStepper({
   const inc = () => onChange(Math.round(((value ?? 0) + step) * 10) / 10);
   const unit = field === "kg" ? "kg" : field === "reps" ? "回" : "セット";
   return (
-    <div className="mt-2 rounded-[11px] border-[1.5px] border-[#4a875b] bg-[#f9f5ed] p-2.5">
+    <div className="mt-2 rounded-[11px] border-[1.5px] border-[#4a875b] bg-[#edeef0] p-2.5">
       <div className="flex items-center justify-center gap-3">
         <button
           type="button"
