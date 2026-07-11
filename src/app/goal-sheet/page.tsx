@@ -58,7 +58,7 @@ export default async function GoalSheetPage() {
             </div>
             <Link
               href="/goal-sheet/edit"
-              className="inline-block rounded-md bg-[#4a875b] hover:bg-[#34603f] text-white px-6 py-3 text-sm font-bold tracking-wide transition-colors"
+              className="inline-block rounded-md btn3d text-white px-6 py-3 text-sm font-bold tracking-wide transition-colors"
             >
               記入を始める
             </Link>
@@ -248,7 +248,7 @@ export default async function GoalSheetPage() {
               </Link>
               <Link
                 href="/"
-                className="inline-block text-center rounded-md bg-[#4a875b] hover:bg-[#34603f] text-white px-4 py-2 text-xs font-bold tracking-wide transition-colors"
+                className="inline-block text-center rounded-md btn3d text-white px-4 py-2 text-xs font-bold tracking-wide transition-colors"
               >
                 ホームに戻る
               </Link>

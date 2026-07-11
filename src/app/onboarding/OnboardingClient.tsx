@@ -226,7 +226,7 @@ export function OnboardingClient({
             <div className="z-10 pt-3 border-t border-dashed border-[#4a875b]/15">
               <button
                 onClick={finish}
-                className="w-full bg-[#4a875b] hover:bg-[#34603f] text-white rounded-xl py-3.5 text-sm font-bold shadow-md shadow-[#4a875b]/25 transition-colors"
+                className="w-full btn3d text-white rounded-xl py-3.5 text-sm font-bold shadow-md shadow-[#4a875b]/25 transition-colors"
               >
                 カルテを入力する →
               </button>
@@ -298,7 +298,7 @@ function Footer({
         type="button"
         onClick={onNext}
         disabled={nextDisabled}
-        className={`bg-[#4a875b] hover:bg-[#34603f] text-white rounded-xl px-5 py-2.5 text-[12.5px] font-bold shadow-md shadow-[#4a875b]/25 transition-colors ${
+        className={`btn3d text-white rounded-xl px-5 py-2.5 text-[12.5px] font-bold shadow-md shadow-[#4a875b]/25 transition-colors ${
           nextDisabled ? "opacity-45 cursor-not-allowed" : ""
         } ${nextFaded ? "opacity-50" : ""}`}
       >
@@ -441,7 +441,7 @@ function BrowserSwitchGuide({
               <button
                 type="button"
                 onClick={handleCopy}
-                className="mt-4 w-full bg-[#4a875b] hover:bg-[#34603f] text-white rounded-xl py-3 text-[12.5px] font-bold shadow-md shadow-[#4a875b]/25 transition-colors"
+                className="mt-4 w-full btn3d text-white rounded-xl py-3 text-[12.5px] font-bold shadow-md shadow-[#4a875b]/25 transition-colors"
               >
                 {copied ? "✓ URL をコピーしました" : "URL をコピー"}
               </button>
@@ -911,7 +911,7 @@ function Step7Permission({
           type="button"
           onClick={handlePermit}
           disabled={pending}
-          className="w-full bg-[#4a875b] hover:bg-[#34603f] text-white rounded-xl py-3 text-[13px] font-bold shadow-md shadow-[#4a875b]/25 transition-colors mb-2 disabled:opacity-60"
+          className="w-full btn3d text-white rounded-xl py-3 text-[13px] font-bold shadow-md shadow-[#4a875b]/25 transition-colors mb-2 disabled:opacity-60"
         >
           {pending ? "設定中…" : "通知をオンにする ・ 推奨"}
         </button>

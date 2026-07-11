@@ -72,7 +72,7 @@ export default async function FormReviewPage() {
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-5 flex min-h-[52px] items-center justify-center rounded-xl bg-[#4a875b] px-5 text-[15px] font-bold text-white transition-colors hover:bg-[#3a6d49]"
+              className="mt-5 flex min-h-[52px] items-center justify-center rounded-xl btn3d px-5 text-[15px] font-bold text-white transition-colors"
             >
               フォーム添削を依頼する →
             </a>

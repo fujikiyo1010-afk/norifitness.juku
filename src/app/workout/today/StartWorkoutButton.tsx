@@ -25,7 +25,7 @@ export function StartWorkoutButton() {
             router.refresh();
           })
         }
-        className="w-full rounded-xl bg-[#4a875b] py-3 text-[14px] font-bold text-white disabled:opacity-50"
+        className="w-full rounded-xl btn3d py-3 text-[14px] font-bold text-white disabled:opacity-50"
       >
         {pending ? "開始中…" : "この内容で開始する"}
       </button>

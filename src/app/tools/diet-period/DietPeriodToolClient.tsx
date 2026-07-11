@@ -427,7 +427,7 @@ export function DietPeriodToolClient({
                     );
                     router.push("/goal-sheet/edit#tool-diet-period");
                   }}
-                  className="w-full py-3.5 bg-[#4a875b] text-white rounded text-sm font-bold hover:bg-[#34603f] transition-colors"
+                  className="w-full py-3.5 btn3d text-white rounded text-sm font-bold transition-colors"
                 >
                   目標シートに適用 →
                 </button>

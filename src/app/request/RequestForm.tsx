@@ -91,7 +91,7 @@ export function RequestForm() {
       <button
         type="submit"
         disabled={!isValid || isPending}
-        className="mt-1.5 w-full bg-[#4a875b] hover:bg-[#34603f] disabled:bg-zinc-300 disabled:cursor-not-allowed text-white rounded-xl py-3 text-[13px] font-bold shadow-md shadow-[#4a875b]/25 transition-colors"
+        className="mt-1.5 w-full btn3d disabled:cursor-not-allowed text-white rounded-xl py-3 text-[13px] font-bold shadow-md shadow-[#4a875b]/25 transition-colors"
       >
         {isPending ? "送信中..." : "申請する"}
       </button>

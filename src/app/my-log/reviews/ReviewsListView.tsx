@@ -426,7 +426,7 @@ function ReviewCard({ review, query }: { review: Review; query: string }) {
       <div className="mt-3 pt-3 border-t border-[#e7dcc9] flex gap-2">
         <Link
           href={`/courses/${review.course_id}/chapters/${review.chapter_id}/lessons/${review.lesson_id}?from=reviews`}
-          className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 bg-[#4a875b] hover:bg-[#34603f] text-white rounded-[10px] text-[12.5px] font-bold transition-colors"
+          className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 btn3d text-white rounded-[10px] text-[12.5px] font-bold transition-colors"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
             <polygon points="6 3 20 12 6 21 6 3" />

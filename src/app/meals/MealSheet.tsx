@@ -293,7 +293,7 @@ export function MealSheet({
             <button
               type="button"
               onClick={() => addManual(q)}
-              className="flex min-h-[44px] w-full items-center justify-center rounded-lg bg-[#4a875b] px-3 py-2 text-[13px] font-bold text-white"
+              className="flex min-h-[44px] w-full items-center justify-center rounded-lg btn3d px-3 py-2 text-[13px] font-bold text-white"
             >
               ＋「{q.trim()}」を追加する
             </button>
@@ -326,7 +326,7 @@ export function MealSheet({
             type="button"
             onClick={handleSubmit}
             disabled={busy}
-            className="flex-shrink-0 rounded-lg bg-[#4a875b] px-3 py-1.5 text-[11px] font-bold text-white disabled:opacity-50"
+            className="flex-shrink-0 rounded-lg btn3d px-3 py-1.5 text-[11px] font-bold text-white disabled:opacity-50"
           >
             もう一度試す
           </button>
@@ -354,7 +354,7 @@ export function MealSheet({
             type="button"
             onClick={handleSubmit}
             disabled={busy}
-            className="flex-1 rounded-xl bg-[#4a875b] py-3 text-[14px] font-bold text-white disabled:opacity-50"
+            className="flex-1 rounded-xl btn3d py-3 text-[14px] font-bold text-white disabled:opacity-50"
           >
             {busy ? "保存中…" : isEdit ? "変更を保存する" : "これで記録する"}
           </button>

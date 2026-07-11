@@ -68,7 +68,7 @@ export function ServiceWorkerRegister() {
         <button
           type="button"
           onClick={() => window.location.reload()}
-          className="flex-shrink-0 rounded-full bg-[#4a875b] px-4 py-1.5 text-[12px] font-bold hover:bg-[#34603f]"
+          className="flex-shrink-0 rounded-full btn3d px-4 py-1.5 text-[12px] font-bold"
         >
           更新する
         </button>

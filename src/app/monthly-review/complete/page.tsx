@@ -139,7 +139,7 @@ export default async function MonthlyReviewCompletePage() {
             {/* CTA ボタン: 履歴を見る */}
             <Link
               href="/monthly-review"
-              className="bg-[#4a875b] hover:bg-[#34603f] text-white rounded-2xl px-6 py-3.5 text-[13px] font-bold w-full max-w-[340px] flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(0,137,123,0.25)] transition-colors"
+              className="btn3d text-white rounded-2xl px-6 py-3.5 text-[13px] font-bold w-full max-w-[340px] flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(0,137,123,0.25)] transition-colors"
             >
               月次添削履歴を見る
               <span className="text-base">→</span>

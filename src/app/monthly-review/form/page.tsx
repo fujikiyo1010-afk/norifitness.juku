@@ -56,7 +56,7 @@ export default async function MonthlyReviewFormPage() {
             </div>
             <Link
               href="/monthly-review"
-              className="inline-block rounded-md bg-[#4a875b] hover:bg-[#34603f] text-white px-5 py-2.5 text-sm font-bold tracking-wide transition-colors"
+              className="inline-block rounded-md btn3d text-white px-5 py-2.5 text-sm font-bold tracking-wide transition-colors"
             >
               履歴を見る
             </Link>

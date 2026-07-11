@@ -28,7 +28,7 @@ export function EmptyState({
         <div className="mt-4 flex justify-center">
           <Link
             href={ctaHref}
-            className="rounded-full bg-[#4a875b] px-5 py-2 text-[12px] font-bold text-white hover:bg-[#34603f]"
+            className="rounded-full btn3d px-5 py-2 text-[12px] font-bold text-white"
           >
             {ctaLabel}
           </Link>

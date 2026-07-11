@@ -131,7 +131,7 @@ export default async function ProfilePage() {
                     </Link>
                     <Link
                       href="/workout/carte/request"
-                      className="flex-1 text-center py-2.5 rounded-xl text-[11.5px] font-bold bg-[#4a875b] text-white"
+                      className="flex-1 text-center py-2.5 rounded-xl text-[11.5px] font-bold btn3d text-white"
                     >
                       変更をリクエスト
                     </Link>
@@ -144,7 +144,7 @@ export default async function ProfilePage() {
                   </div>
                   <Link
                     href="/workout/carte/new"
-                    className="inline-block px-5 py-2.5 rounded-xl text-[12px] font-bold bg-[#4a875b] text-white"
+                    className="inline-block px-5 py-2.5 rounded-xl text-[12px] font-bold btn3d text-white"
                   >
                     カルテを入力する
                   </Link>

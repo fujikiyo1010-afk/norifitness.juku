@@ -252,7 +252,7 @@ function InviteBrowserSwitchGuide({
         <button
           type="button"
           onClick={handleCopy}
-          className="mt-4 w-full bg-[#4a875b] hover:bg-[#34603f] text-white rounded-xl py-3 text-[12.5px] font-bold shadow-md shadow-[#4a875b]/25 transition-colors"
+          className="mt-4 w-full btn3d text-white rounded-xl py-3 text-[12.5px] font-bold shadow-md shadow-[#4a875b]/25 transition-colors"
         >
           {copied ? "✓ URL をコピーしました" : "URL をコピー"}
         </button>
