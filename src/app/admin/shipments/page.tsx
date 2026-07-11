@@ -50,8 +50,10 @@ export default async function AdminShipmentsPage({
   if (filter === "pending") query = query.eq("status", "pending");
   if (filter === "shipped") query = query.eq("status", "shipped");
 
-  // S2: 一覧本体 + 件数3本は互いに独立→並列(4直列→1波)。挙動・受け取り方は不変。
-  const [{ data: rawData }, { data: pendingCount }, { data: shippedCount }, { data: totalCount }] =
+  // S2: 一覧本体 + 件数3本は互いに独立→並列(4直列→1波)。
+  // バグ修正: head:true の集計は data(=null) でなく count フィールドに入る。
+  //   従来 { data: xxxCount }→.count で常に0だったのを { count: xxxCount } に是正。
+  const [{ data: rawData }, { count: pendingCount }, { count: shippedCount }, { count: totalCount }] =
     await Promise.all([
       query,
       admin
@@ -66,9 +68,9 @@ export default async function AdminShipmentsPage({
     ]);
   const rows = ((rawData ?? []) as unknown) as ShipmentRow[];
 
-  const pending = (pendingCount as unknown as { count: number })?.count ?? 0;
-  const shipped = (shippedCount as unknown as { count: number })?.count ?? 0;
-  const total = (totalCount as unknown as { count: number })?.count ?? 0;
+  const pending = pendingCount ?? 0;
+  const shipped = shippedCount ?? 0;
+  const total = totalCount ?? 0;
   const percent = total > 0 ? Math.round((shipped / total) * 100) : 0;
 
   return (
