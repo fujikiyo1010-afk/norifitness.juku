@@ -231,3 +231,14 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .loading-gate { animation-duration: 0.01s; }
 }
+
+/* 数値入力の標準スピナー(▲▼)を非表示。各所に独自の−/＋・直接入力があり不要(2026-07-11)。 */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
