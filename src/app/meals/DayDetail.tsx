@@ -189,18 +189,26 @@ export function DayDetail({
         </div>
       )}
 
-      {/* 日付ナビ */}
-      <div className="flex items-center justify-between">
-        <Link href={`/meals?date=${shiftDate(date, -1)}`} className="px-2 py-1 text-[13px] text-[#6a6256]">
+      {/* 日付ナビ(3等分グリッド=中央は左右の幅に依らず常に画面中央) */}
+      <div className="grid grid-cols-3 items-center">
+        <Link
+          href={`/meals?date=${shiftDate(date, -1)}`}
+          className="justify-self-start px-2 py-1 text-[13px] text-[#6a6256]"
+        >
           ◀ {labelDate(shiftDate(date, -1))}
         </Link>
-        <span className="text-[14px] font-bold text-[#2b2620]">{isToday ? "今日" : labelDate(date)}</span>
+        <span className="justify-self-center text-[14px] font-bold text-[#2b2620]">
+          {isToday ? "今日" : labelDate(date)}
+        </span>
         {date < today ? (
-          <Link href={`/meals?date=${shiftDate(date, 1)}`} className="px-2 py-1 text-[13px] text-[#6a6256]">
+          <Link
+            href={`/meals?date=${shiftDate(date, 1)}`}
+            className="justify-self-end px-2 py-1 text-[13px] text-[#6a6256]"
+          >
             {labelDate(shiftDate(date, 1))} ▶
           </Link>
         ) : (
-          <span className="w-16" />
+          <span />
         )}
       </div>
 
