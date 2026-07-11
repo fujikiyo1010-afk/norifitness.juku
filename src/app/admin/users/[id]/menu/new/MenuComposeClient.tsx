@@ -19,6 +19,7 @@ import {
   partByExerciseName,
 } from "@/lib/workout/video-master";
 import { VimeoEmbed } from "@/components/VimeoEmbed";
+import { normalizeVimeoUrl, extractVimeoId } from "@/lib/video-library/vimeo";
 import type {
   WorkoutCycles,
   WorkoutTemplateRow,
@@ -799,6 +800,21 @@ function ExerciseEditor({
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerQ, setPickerQ] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
+  // 割り込み小PR: Vimeo URL 直貼り(このメニュー限定の上書き)。マスタ/DBは触らない。
+  const [directUrl, setDirectUrl] = useState("");
+  const [directErr, setDirectErr] = useState<string | null>(null);
+  const applyDirectUrl = () => {
+    const raw = directUrl.trim();
+    if (!raw) return;
+    if (!extractVimeoId(raw)) {
+      setDirectErr("VimeoのURLではないようです。動画ページのURLを貼ってください");
+      return;
+    }
+    onUpdate("video_url", normalizeVimeoUrl(raw));
+    setDirectErr(null);
+    setDirectUrl("");
+    setPickerOpen(false);
+  };
   const videoChoices = listExercisesWithVideo();
   const filteredChoices = pickerQ.trim()
     ? videoChoices.filter(
@@ -1029,6 +1045,46 @@ function ExerciseEditor({
                   >
                     動画なしにする
                   </button>
+                </div>
+
+                {/* VimeoのURLを直接貼る (このメニュー限定の上書き・マスタには追加しない) */}
+                <div className="mt-2 border-t border-[#eef0ef] pt-2">
+                  <div className="mb-1 text-[10px] font-bold text-zinc-500">
+                    または、VimeoのURLを直接貼る
+                    <span className="ml-1 font-normal text-zinc-400">
+                      (このメニュー限定・新しい動画OK)
+                    </span>
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={directUrl}
+                      onChange={(e) => {
+                        setDirectUrl(e.target.value);
+                        if (directErr) setDirectErr(null);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          applyDirectUrl();
+                        }
+                      }}
+                      placeholder="https://vimeo.com/…"
+                      className="min-w-0 flex-1 rounded-md border border-[#e8ebe9] bg-white px-2 py-1.5 text-xs text-zinc-900 focus:outline-none focus:border-[#00897b]"
+                    />
+                    <button
+                      type="button"
+                      onClick={applyDirectUrl}
+                      className="rounded-md border border-[#00897b] bg-[#00897b] px-3 py-1.5 text-[10px] font-bold text-white hover:bg-[#00695c]"
+                    >
+                      この動画にする
+                    </button>
+                  </div>
+                  {directErr && (
+                    <div className="mt-1 text-[10px] font-bold text-rose-500">
+                      {directErr}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
