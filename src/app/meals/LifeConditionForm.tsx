@@ -107,7 +107,7 @@ export function LifeConditionForm({
         type="button"
         onClick={() => save(false)}
         disabled={busy}
-        className="w-full rounded-xl bg-[#4a875b] py-3 text-[14px] font-bold text-white disabled:opacity-50"
+        className="w-full rounded-xl btn3d py-3 text-[14px] font-bold text-white disabled:opacity-50"
       >
         {busy ? "保存中…" : "これで今日はおしまい"}
       </button>

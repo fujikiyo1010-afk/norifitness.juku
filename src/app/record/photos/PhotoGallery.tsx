@@ -100,7 +100,7 @@ export function PhotoGallery({
         <button
           type="button"
           onClick={() => setAddOpen(true)}
-          className="rounded-full bg-[#4a875b] px-4 py-1.5 text-[12px] font-bold text-white transition-colors hover:bg-[#34603f]"
+          className="rounded-full btn3d px-4 py-1.5 text-[12px] font-bold text-white transition-colors"
         >
           ＋ 写真を追加
         </button>
@@ -439,7 +439,7 @@ function PhotoAddForm({
         type="button"
         onClick={handleSave}
         disabled={busy || !file}
-        className="w-full rounded-2xl bg-[#4a875b] py-3 text-[14px] font-bold text-white transition-colors hover:bg-[#34603f] disabled:cursor-not-allowed disabled:opacity-50"
+        className="w-full rounded-2xl btn3d py-3 text-[14px] font-bold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
       >
         {busy
           ? "アップロード中..."

@@ -61,7 +61,7 @@ export function ActionsClient({
         <button
           type="button"
           onClick={() => setShowNew(true)}
-          className="inline-flex items-center gap-1.5 text-[13px] font-bold text-white bg-[#4a875b] hover:bg-[#34603f] rounded-[11px] px-3.5 py-2 transition-colors"
+          className="inline-flex items-center gap-1.5 text-[13px] font-bold text-white btn3d rounded-[11px] px-3.5 py-2 transition-colors"
         >
           <span className="inline-block w-3.5 h-3.5">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
@@ -151,7 +151,7 @@ export function ActionsClient({
                   }
                 });
               }}
-              className="rounded-full bg-[#4a875b] px-5 py-2 text-[12px] font-bold text-white hover:bg-[#34603f] disabled:bg-[#a59b8c]"
+              className="rounded-full btn3d px-5 py-2 text-[12px] font-bold text-white"
             >
               {savingNew ? "保存中..." : "宣言する"}
             </button>
@@ -226,7 +226,7 @@ function EmptyHero({ onAddClick }: { onAddClick: () => void }) {
         <button
           type="button"
           onClick={onAddClick}
-          className="rounded-full bg-[#4a875b] text-white px-4 py-2 text-[12px] font-bold hover:bg-[#34603f]"
+          className="rounded-full btn3d text-white px-4 py-2 text-[12px] font-bold"
         >
           自発的に追加 →
         </button>
@@ -442,7 +442,7 @@ function ReflectionModal({
               else alert(r.message);
             });
           }}
-          className="rounded-full bg-[#4a875b] px-5 py-2 text-[12px] font-bold text-white hover:bg-[#34603f] disabled:bg-[#a59b8c]"
+          className="rounded-full btn3d px-5 py-2 text-[12px] font-bold text-white"
         >
           {saving ? "保存中..." : "保存"}
         </button>

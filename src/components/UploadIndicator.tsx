@@ -98,7 +98,7 @@ export function UploadIndicator() {
             </button>
             <button
               onClick={retry}
-              className="text-[11px] px-3 py-1.5 bg-[#4a875b] text-white rounded-md hover:bg-[#34603f]"
+              className="text-[11px] px-3 py-1.5 btn3d text-white rounded-md"
             >
               リトライ
             </button>

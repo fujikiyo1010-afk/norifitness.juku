@@ -210,7 +210,7 @@ export function RecordSheetBody({
         type="button"
         onClick={handleSubmit}
         disabled={isPending}
-        className="mt-3.5 w-full rounded-2xl bg-[#4a875b] py-3 text-[14px] font-bold text-white transition-colors hover:bg-[#34603f] disabled:cursor-not-allowed disabled:opacity-50"
+        className="mt-3.5 w-full rounded-2xl btn3d py-3 text-[14px] font-bold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isPending ? "保存中..." : "記録する"}
       </button>

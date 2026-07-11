@@ -159,7 +159,7 @@ export function PasswordForm({ email }: { email: string }) {
         <button
           type="submit"
           disabled={!ready}
-          className="flex-1 bg-[#4a875b] text-white rounded-2xl px-4 py-3 text-[13px] font-bold hover:bg-[#34603f] transition-colors disabled:opacity-50"
+          className="flex-1 btn3d text-white rounded-2xl px-4 py-3 text-[13px] font-bold transition-colors disabled:opacity-50"
         >
           {pending ? "変更中..." : "変更する"}
         </button>

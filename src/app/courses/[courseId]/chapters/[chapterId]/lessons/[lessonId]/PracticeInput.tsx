@@ -105,7 +105,7 @@ export function PracticeInput({
                     }
                   });
                 }}
-                className="rounded-full bg-[#4a875b] px-4 py-1.5 text-[12px] font-bold text-white hover:bg-[#34603f] disabled:bg-zinc-300"
+                className="rounded-full btn3d px-4 py-1.5 text-[12px] font-bold text-white"
               >
                 {saving ? "保存中..." : "宣言する"}
               </button>

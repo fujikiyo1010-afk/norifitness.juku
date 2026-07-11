@@ -126,7 +126,7 @@ export function ExamView({
         <button
           type="button"
           onClick={start}
-          className="w-full bg-[#4a875b] text-white rounded-2xl px-4 py-3.5 text-[14px] font-bold hover:bg-[#34603f] transition-colors"
+          className="w-full btn3d text-white rounded-2xl px-4 py-3.5 text-[14px] font-bold transition-colors"
         >
           {latestAttempt ? "もう一度 受ける" : "開始する"}
         </button>
@@ -228,7 +228,7 @@ export function ExamView({
               type="button"
               onClick={submitAll}
               disabled={!canSubmit || pending}
-              className="flex-1 bg-[#4a875b] text-white rounded-2xl px-4 py-3 text-[13px] font-bold hover:bg-[#34603f] transition-colors disabled:opacity-50"
+              className="flex-1 btn3d text-white rounded-2xl px-4 py-3 text-[13px] font-bold transition-colors disabled:opacity-50"
             >
               {pending ? "採点中..." : "採点する"}
             </button>
@@ -237,7 +237,7 @@ export function ExamView({
               type="button"
               onClick={goNext}
               disabled={!currentAnswer || pending}
-              className="flex-1 bg-[#4a875b] text-white rounded-2xl px-4 py-3 text-[13px] font-bold hover:bg-[#34603f] transition-colors disabled:opacity-50"
+              className="flex-1 btn3d text-white rounded-2xl px-4 py-3 text-[13px] font-bold transition-colors disabled:opacity-50"
             >
               次へ →
             </button>
@@ -398,7 +398,7 @@ function ResultsView({
         <button
           type="button"
           onClick={() => router.push(`/courses/${courseId}`)}
-          className="flex-1 bg-[#4a875b] text-white rounded-2xl px-4 py-3 text-[13px] font-bold hover:bg-[#34603f] transition-colors"
+          className="flex-1 btn3d text-white rounded-2xl px-4 py-3 text-[13px] font-bold transition-colors"
         >
           章に戻る
         </button>

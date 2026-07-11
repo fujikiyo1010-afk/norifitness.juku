@@ -84,7 +84,7 @@ export default async function RequestCompletePage({
         <div className="flex w-full max-w-sm flex-col gap-3">
           <Link
             href={backHref}
-            className="rounded-[4px] bg-[#4a875b] px-6 py-3 text-center text-sm font-medium text-white hover:bg-[#34603f]"
+            className="rounded-[4px] btn3d px-6 py-3 text-center text-sm font-medium text-white"
           >
             {backLabel}
           </Link>

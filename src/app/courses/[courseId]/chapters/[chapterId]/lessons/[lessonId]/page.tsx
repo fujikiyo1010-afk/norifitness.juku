@@ -142,7 +142,7 @@ export default async function StudentLessonPage({
             {isBeta && nextLessonHref && (
               <Link
                 href={nextLessonHref}
-                className="mt-3 inline-block rounded-full bg-[#4a875b] px-4 py-2 text-[12px] font-bold text-white hover:bg-[#34603f]"
+                className="mt-3 inline-block rounded-full btn3d px-4 py-2 text-[12px] font-bold text-white"
               >
                 次のレッスンへ →
               </Link>
@@ -165,7 +165,7 @@ export default async function StudentLessonPage({
                 {nextLessonHref && (
                   <Link
                     href={nextLessonHref}
-                    className="mt-3 inline-block rounded-full bg-[#4a875b] px-4 py-2 text-[12px] font-bold text-white hover:bg-[#34603f]"
+                    className="mt-3 inline-block rounded-full btn3d px-4 py-2 text-[12px] font-bold text-white"
                   >
                     次のレッスンへ →
                   </Link>
@@ -313,7 +313,7 @@ export default async function StudentLessonPage({
               </div>
               <Link
                 href="/courses"
-                className="inline-block rounded-md bg-[#4a875b] hover:bg-[#34603f] text-white px-4 py-2 text-xs font-bold transition-colors"
+                className="inline-block rounded-md btn3d text-white px-4 py-2 text-xs font-bold transition-colors"
               >
                 コース一覧へ
               </Link>

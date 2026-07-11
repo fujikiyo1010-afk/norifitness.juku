@@ -128,7 +128,7 @@ export default async function CompletedLessonsPage() {
               </p>
               <Link
                 href="/courses"
-                className="inline-block mt-4 bg-[#4a875b] text-white rounded-xl px-5 py-2.5 text-[12px] font-bold hover:bg-[#34603f] transition-colors"
+                className="inline-block mt-4 btn3d text-white rounded-xl px-5 py-2.5 text-[12px] font-bold transition-colors"
               >
                 コース一覧へ →
               </Link>

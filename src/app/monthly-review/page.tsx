@@ -210,7 +210,7 @@ function StateCardA() {
       </div>
       <Link
         href="/monthly-review/form"
-        className="block w-full text-center py-2.5 rounded-lg bg-[#4a875b] hover:bg-[#34603f] text-white text-xs font-medium transition-colors"
+        className="block w-full text-center py-2.5 rounded-lg btn3d text-white text-xs font-medium transition-colors"
       >
         記入を始める
       </Link>
@@ -253,7 +253,7 @@ function StateCardB({ audit }: { audit: MonthlyAuditRow }) {
       </div>
       <Link
         href="/monthly-review/form"
-        className="block w-full text-center py-2.5 rounded-lg bg-[#4a875b] hover:bg-[#34603f] text-white text-xs font-medium transition-colors"
+        className="block w-full text-center py-2.5 rounded-lg btn3d text-white text-xs font-medium transition-colors"
       >
         続きから記入する
       </Link>

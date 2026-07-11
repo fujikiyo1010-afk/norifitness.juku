@@ -111,7 +111,7 @@ export default async function WorkoutCartePage() {
               </div>
               <Link
                 href="/workout"
-                className="rounded-md bg-[#4a875b] hover:bg-[#34603f] text-white px-4 py-2 text-xs font-bold tracking-wide transition-colors flex-shrink-0"
+                className="rounded-md btn3d text-white px-4 py-2 text-xs font-bold tracking-wide transition-colors flex-shrink-0"
               >
                 メニューを見る
               </Link>

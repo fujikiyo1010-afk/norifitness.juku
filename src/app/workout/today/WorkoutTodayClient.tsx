@@ -420,7 +420,7 @@ export function WorkoutTodayClient({
             type="button"
             onClick={() => save("done")}
             disabled={busy}
-            className="flex-shrink-0 rounded-lg bg-[#4a875b] px-3 py-1.5 text-[11px] font-bold text-white disabled:opacity-50"
+            className="flex-shrink-0 rounded-lg btn3d px-3 py-1.5 text-[11px] font-bold text-white disabled:opacity-50"
           >
             もう一度試す
           </button>

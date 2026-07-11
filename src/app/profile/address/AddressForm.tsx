@@ -108,7 +108,7 @@ export function AddressForm({
       <button
         type="submit"
         disabled={!valid || pending}
-        className="mt-1 w-full bg-[#4a875b] hover:bg-[#34603f] text-white rounded-xl py-3 text-[13px] font-bold disabled:opacity-50 transition-colors"
+        className="mt-1 w-full btn3d text-white rounded-xl py-3 text-[13px] font-bold disabled:opacity-50 transition-colors"
       >
         {pending ? "保存中…" : "住所を更新する"}
       </button>
