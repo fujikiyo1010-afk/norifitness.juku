@@ -26,8 +26,11 @@ export const dynamic = "force-dynamic";
 export default async function AdminMonthlyReviewInboxPage() {
   const admin = await requireAdmin();
 
-  const pending = await listPendingAudits();
-  const allAudits = await listAllAudits(50);
+  // S2: pending と allAudits は互いに独立→並列(直列2→1)。
+  const [pending, allAudits] = await Promise.all([
+    listPendingAudits(),
+    listAllAudits(50),
+  ]);
   const replied = allAudits
     .filter((a) => a.nori_video_published_at !== null)
     .slice(0, 10);
