@@ -50,21 +50,21 @@ export default async function AdminShipmentsPage({
   if (filter === "pending") query = query.eq("status", "pending");
   if (filter === "shipped") query = query.eq("status", "shipped");
 
-  const { data: rawData } = await query;
+  // S2: 一覧本体 + 件数3本は互いに独立→並列(4直列→1波)。挙動・受け取り方は不変。
+  const [{ data: rawData }, { data: pendingCount }, { data: shippedCount }, { data: totalCount }] =
+    await Promise.all([
+      query,
+      admin
+        .from("shipments")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "pending"),
+      admin
+        .from("shipments")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "shipped"),
+      admin.from("shipments").select("id", { count: "exact", head: true }),
+    ]);
   const rows = ((rawData ?? []) as unknown) as ShipmentRow[];
-
-  // 件数集計
-  const { data: pendingCount } = await admin
-    .from("shipments")
-    .select("id", { count: "exact", head: true })
-    .eq("status", "pending");
-  const { data: shippedCount } = await admin
-    .from("shipments")
-    .select("id", { count: "exact", head: true })
-    .eq("status", "shipped");
-  const { data: totalCount } = await admin
-    .from("shipments")
-    .select("id", { count: "exact", head: true });
 
   const pending = (pendingCount as unknown as { count: number })?.count ?? 0;
   const shipped = (shippedCount as unknown as { count: number })?.count ?? 0;

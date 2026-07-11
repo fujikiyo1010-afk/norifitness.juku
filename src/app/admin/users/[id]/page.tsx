@@ -72,31 +72,14 @@ export default async function AdminUserHubPage({
     ? { href: "/admin/requests", label: "受信箱に戻る" }
     : { href: "/admin/users", label: "受講生一覧に戻る" };
 
-  // 受講生情報取得
+  // 受講生情報 + プロフィール + 8リソースを一括並列取得。
+  // S2: 以前は users → user_profiles を直列awaitしてから8本Promise.allだった(=先頭2往復が直列)。
+  //   これら全て userId(param)引きで互いに独立なので、10本まとめて並列化(notFoundガードは後ろへ)。
+  //   ※userRowが無ければ notFound。他9本の結果は捨てられるだけで無害(happy pathで最速)。
   const admin = createAdminClient();
-  const { data: userRow } = await admin
-    .from("users")
-    .select("id, name, nickname, email, joined_at, form_review_first_done")
-    .eq("id", userId)
-    .maybeSingle();
-
-  if (!userRow) {
-    notFound();
-  }
-
-  // プロフィール (生年月日) 取得
-  const { data: profileRow } = await admin
-    .from("user_profiles")
-    .select("birthday")
-    .eq("user_id", userId)
-    .maybeSingle();
-
-  const birthday = (profileRow?.birthday as string | null) ?? null;
-  const age = birthday ? calcAge(birthday) : null;
-  const ageBand = birthday ? calcAgeBand(birthday) : null;
-
-  // 8 リソースを並列取得 (body_metrics 追加 = 「現在の最新値」 を日々記録から補完)
   const [
+    { data: userRow },
+    { data: profileRow },
     carte,
     currentMenu,
     latestAudit,
@@ -106,6 +89,16 @@ export default async function AdminUserHubPage({
     pendingCounts,
     latestBodyMetric,
   ] = await Promise.all([
+    admin
+      .from("users")
+      .select("id, name, nickname, email, joined_at, form_review_first_done")
+      .eq("id", userId)
+      .maybeSingle(),
+    admin
+      .from("user_profiles")
+      .select("birthday")
+      .eq("user_id", userId)
+      .maybeSingle(),
     getCarteForAdmin(userId),
     getCurrentMenuForAdmin(userId),
     getLatestAuditForUser(userId),
@@ -115,6 +108,14 @@ export default async function AdminUserHubPage({
     countPendingRequestsForUser(userId),
     getLatestBodyMetricSummary(userId), // body_metrics (日々記録) の最新値
   ]);
+
+  if (!userRow) {
+    notFound();
+  }
+
+  const birthday = (profileRow?.birthday as string | null) ?? null;
+  const age = birthday ? calcAge(birthday) : null;
+  const ageBand = birthday ? calcAgeBand(birthday) : null;
 
   // 体組成推移データ (sparkline + 前月比較は monthly_audits 由来のまま)
   const weightSeries = extractWeightSeries(recentAudits);
