@@ -3,7 +3,7 @@ import { Noto_Sans_JP, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
 import "./globals.css";
 import { MemberBottomNav } from "@/components/MemberBottomNav";
-import { isBetaUser } from "@/lib/auth/beta";
+import { getLayoutBootState } from "@/lib/auth/beta";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { BootSplash } from "@/components/BootSplash";
 
@@ -127,7 +127,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   // 点21: 下ナビ3番目をベータはチャット/非ベータは記録に出し分け(確定7/7)
-  const isBeta = await isBetaUser();
+  // C: 同じ呼び出しで last_seen_at(=最終利用) を JST日変わり時に1回だけ更新(往復を増やさない)
+  const { isBeta } = await getLayoutBootState();
   return (
     <html
       lang="ja"
