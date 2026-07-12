@@ -200,10 +200,19 @@ export function WorkoutTodayClient({
   function addItem(name: string) {
     const v = name.trim();
     if (!v) return;
-    setItems((prev) => [
-      ...prev,
-      { exerciseName: v, source: "added", weightKg: null, reps: null, sets: null, removed: false, original: false },
-    ]);
+    if (mode === "edit") {
+      setItems((prev) => [
+        ...prev,
+        { exerciseName: v, source: "added", weightKg: null, reps: null, sets: null, removed: false, original: false },
+      ]);
+    } else {
+      // タスク3(M8起点1・結果5): view時も追加できる。編集モードに入らず原本を汚さず
+      // editedItems へ追加(数値は null=後から編集)。決B の締めは「今日のトレ完了」時。
+      setEditedItems((prev) => [
+        ...(prev ?? toLogged(buildInitial())),
+        { exerciseName: v, source: "added", weightKg: null, reps: null, sets: null },
+      ]);
+    }
     setAddSheetOpen(false);
   }
 
@@ -223,6 +232,32 @@ export function WorkoutTodayClient({
             reps: null,
             sets: null,
           }));
+        // 決B: 追加種目(source=added)は回数≥1・セット≥1が必須(締めるのは完了の瞬間)。
+        // view で追加して数値未入力のまま完了しようとした場合は編集モードへ誘導して入力させる。
+        const badAdded = payloadItems.some(
+          (it) => it.source === "added" && !(it.reps != null && it.reps >= 1 && it.sets != null && it.sets >= 1),
+        );
+        if (badAdded) {
+          setBusy(false);
+          const base = fromLogged(editedItems ?? toLogged(buildInitial()));
+          setItems(base);
+          setEditBaseline(base);
+          setMode("edit");
+          setExpanded(null);
+          const bad = validateAdded(base);
+          setInvalidIdx(bad);
+          setValidationMsg("追加した種目は、回数とセット数を入れてください");
+          if (typeof document !== "undefined" && bad.length > 0) {
+            setTimeout(
+              () =>
+                document
+                  .getElementById(`edit-item-${bad[0]}`)
+                  ?.scrollIntoView({ behavior: "smooth", block: "center" }),
+              60,
+            );
+          }
+          return;
+        }
       }
       const r = await completeWorkoutDay({
         dayNumber,
@@ -358,6 +393,18 @@ export function WorkoutTodayClient({
               onOpenAdd={() => setAddSheetOpen(true)}
               onPlay={(url, name) => setLightbox({ url, name })}
             />
+          )}
+
+          {/* タスク3(M8起点1・結果5): view でも「＋種目を追加」を常設。編集モードに入らず
+              追加でき(原本を汚さない)、数値は後から編集。決B の締めは「今日のトレ完了」時。 */}
+          {mode === "view" && !feedbackLocked && (
+            <button
+              type="button"
+              onClick={() => setAddSheetOpen(true)}
+              className="btn3d flex w-full items-center justify-center rounded-xl py-3 text-[13px] font-bold"
+            >
+              ＋ 種目を追加
+            </button>
           )}
 
           {/* 決B: バリデーション注意(編集中) */}
@@ -536,7 +583,10 @@ export function WorkoutTodayClient({
       {/* 点4: 種目追加ボトムシート(検索→動画候補) */}
       <BottomSheet open={addSheetOpen} onClose={() => setAddSheetOpen(false)} title="種目を追加">
         <AddExerciseSheet
-          existing={items.map((it) => it.exerciseName)}
+          existing={(mode === "edit"
+            ? items
+            : (editedItems ?? toLogged(buildInitial()))
+          ).map((it) => it.exerciseName)}
           onAdd={addItem}
         />
       </BottomSheet>
