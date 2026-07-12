@@ -44,13 +44,13 @@ export default async function AdminDailyPage({
   const usersWithAlerts = await listUsersWithAlerts();
   const queue = await getDailyQueue(date, usersWithAlerts);
 
-  // 選択中ユーザー: 指定がなければ 要対応→未処理→処理済み の先頭
-  const ordered = [...queue.attention, ...queue.pending, ...queue.done];
+  // 選択中ユーザー: 指定がなければ 記録あり→要対応→未処理→処理済み の先頭
+  const ordered = [...queue.recorded, ...queue.attention, ...queue.pending, ...queue.done];
   const selectedUserId =
     (typeof sp.user === "string" && sp.user) || ordered[0]?.userId || null;
 
-  // 「送信して次へ」用の次の未処理者（自分より後の 要対応→未処理）
-  const workList = [...queue.attention, ...queue.pending];
+  // 「送信して次へ」用の次の未処理者（自分より後の 記録あり→要対応→未処理）
+  const workList = [...queue.recorded, ...queue.attention, ...queue.pending];
   const idx = workList.findIndex((u) => u.userId === selectedUserId);
   const nextUserId =
     idx >= 0
@@ -173,6 +173,14 @@ export default async function AdminDailyPage({
         </div>
 
         <QueueGroup
+          label="記録あり"
+          count={queue.recorded.length}
+          positive
+          items={queue.recorded}
+          selectedId={selectedUserId}
+          date={date}
+        />
+        <QueueGroup
           label="要対応"
           count={queue.attention.length}
           danger
@@ -223,6 +231,7 @@ function QueueGroup({
   selectedId,
   date,
   danger,
+  positive,
   dim,
 }: {
   label: string;
@@ -231,6 +240,7 @@ function QueueGroup({
   selectedId: string | null;
   date: string;
   danger?: boolean;
+  positive?: boolean; // A: 記録あり=緑系(警報の橙/赤と混同しない)
   dim?: boolean;
 }) {
   if (count === 0) return null;
@@ -238,7 +248,9 @@ function QueueGroup({
     <div>
       <div className="px-3.5 pt-2.5 pb-1 text-[10.5px] font-bold text-zinc-500">
         {label}{" "}
-        <span className={danger ? "text-red-500" : ""}>{count}</span>
+        <span className={danger ? "text-red-500" : positive ? "text-[#00897b]" : ""}>
+          {count}
+        </span>
       </div>
       {items.map((u) => {
         const sel = u.userId === selectedId;
@@ -258,6 +270,12 @@ function QueueGroup({
             <span className="text-[12px] font-semibold flex-1 min-w-0 truncate">
               {u.name}
             </span>
+            {/* A: 記録あり(返信待ち)の緑枠タグ。警報の橙/赤ドットと併存表示。 */}
+            {!u.done && u.hasRecord && (
+              <span className="flex-shrink-0 rounded border border-[#8fcfc7] bg-[#e6f4f2] px-1.5 py-[1px] text-[8.5px] font-bold text-[#00695c]">
+                記録あり
+              </span>
+            )}
             {!u.done && u.topSeverity && (
               <span
                 className={`w-[7px] h-[7px] rounded-full flex-shrink-0 ${
