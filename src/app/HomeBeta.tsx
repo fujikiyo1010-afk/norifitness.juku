@@ -295,7 +295,8 @@ function BoardCard({
       </div>
       <ul className="divide-y divide-[#efe6d4]">
         {items.map((it) => {
-          const href = it.kind === "announcement" ? it.href ?? "/notices" : "/notices";
+          // 総2: ベータの日次FBは it.href(=その日の食事詳細)へ着地統一。無ければお知らせ一覧。
+          const href = it.href ?? "/notices";
           return (
             <li key={it.key} className="py-2 first:pt-0 last:pb-0">
               <Link href={href} className="flex items-center gap-2 hover:opacity-90">

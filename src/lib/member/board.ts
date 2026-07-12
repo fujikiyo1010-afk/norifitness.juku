@@ -38,7 +38,7 @@ export async function getMyBoardItems(limit?: number): Promise<BoardItem[]> {
   if (!user) return [];
 
   const admin = createAdminClient();
-  const [fbRes, annRes] = await Promise.all([
+  const [fbRes, annRes, betaRes] = await Promise.all([
     admin
       .from("daily_feedbacks")
       .select("date, body, status")
@@ -52,7 +52,10 @@ export async function getMyBoardItems(limit?: number): Promise<BoardItem[]> {
       .eq("status", "sent")
       .order("sent_at", { ascending: false })
       .limit(30),
+    // 総2: ベータは日次FB行の着地を「その日の食事詳細」に揃える(バナー通知=細9と同じ)
+    admin.from("users").select("is_beta").eq("id", user.id).maybeSingle(),
   ]);
+  const isBeta = betaRes.data?.is_beta === true;
 
   const items: BoardItem[] = [];
 
@@ -67,7 +70,8 @@ export async function getMyBoardItems(limit?: number): Promise<BoardItem[]> {
       dateLabel: mdLabel(date),
       title: body,
       body,
-      href: null,
+      // 総2: ベータは食事詳細へ着地(通知と同じ)。非ベータは従来どおり本文がそのまま中身。
+      href: isBeta ? `/meals?date=${date}` : null,
       isNew: false,
     });
   }
