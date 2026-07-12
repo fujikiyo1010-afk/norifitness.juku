@@ -605,7 +605,7 @@ function PastVideoRow({
       )}
       <span
         className="ml-auto w-5 h-5 rounded-full bg-zinc-300 text-white flex items-center justify-center text-[8px]"
-        title="Step 9 で再生機能を実装予定"
+        title="録画の再生は近日ご用意します"
       >
         ▶
       </span>
@@ -634,7 +634,7 @@ function ActionButton({
     <button
       disabled
       className={`${classes} px-4 py-2.5 rounded-lg text-[13px] font-medium border cursor-not-allowed opacity-60`}
-      title={disabledExtra ?? "Step 9c-d で機能実装予定"}
+      title={disabledExtra ?? "この操作は近日ご用意します"}
     >
       {label}
       {arrow && <span className="text-[#00897b]">→</span>}

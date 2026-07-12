@@ -681,11 +681,6 @@ export default async function AdminUserHubPage({
         </div>
         {/* /4 セクション グリッド終了 */}
 
-        {/* 注記 (基本情報はヘッダに統合済み) */}
-        <div className="rounded-[14px] border border-dashed border-zinc-300 bg-white p-4 text-xs text-zinc-500">
-          ※ Step 4-B-1 (体組成推移) + 案 C (対応事項集約 + 順序見直し) 完了。
-          Step 4-B-2 で達成度セクション、Step 4-B-3 で上部 1 行サマリヘッダを追加予定。
-        </div>
       </main>
     </div>
   );

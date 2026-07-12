@@ -131,7 +131,7 @@ export default async function AdminShipmentsPage({
           完了後「発送済」チェックで漏れを防ぐ (取消可能)。
           <br />
           <span className="text-zinc-500">
-            ※ 受講生側の住所入力 UI (オンボ Step 6) は別タスクで実装予定。 現状は発送データは集まりません。
+            ※ 受講生の住所入力は近日ご用意します。 現状は発送先のデータがまだ集まりません。
           </span>
         </div>
       </div>
@@ -153,7 +153,7 @@ export default async function AdminShipmentsPage({
           </div>
           <div className="text-xs text-zinc-500">
             {total === 0
-              ? "受講生がオンボ Step 6 で住所を入力すると、 ここに発送リストが追加されます"
+              ? "受講生が住所を入力すると、 ここに発送リストが追加されます"
               : "フィルタを変えてみてください"}
           </div>
         </div>
