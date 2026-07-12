@@ -122,6 +122,21 @@ export async function sendAnnouncement(
     console.error("[announcement] sent but status update failed", updateError);
   }
 
+  // 総3: 受講生ホームの「お知らせNEW」用に、配信先ごとに通知を1件立てる(FB送信と同じ枠組み)。
+  // 失敗しても送信は成功しているので警告のみ(表示を巻き込まない)。
+  const notiRows = (users ?? []).map((u) => ({
+    user_id: (u as { id: string }).id,
+    type: "announcement",
+    title: row.subject as string,
+    link_url: `/notices/${id}`,
+    broadcast_notification_id: id,
+    is_read: false,
+  }));
+  if (notiRows.length > 0) {
+    const { error: notiErr } = await supabase.from("notifications").insert(notiRows);
+    if (notiErr) console.error("[announcement] notification insert failed", notiErr);
+  }
+
   revalidatePath("/admin/announcements");
   revalidatePath(`/admin/announcements/${id}`);
   return { ok: true, recipient_count: recipients.length };

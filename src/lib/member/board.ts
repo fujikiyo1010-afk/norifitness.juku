@@ -38,7 +38,7 @@ export async function getMyBoardItems(limit?: number): Promise<BoardItem[]> {
   if (!user) return [];
 
   const admin = createAdminClient();
-  const [fbRes, annRes, betaRes] = await Promise.all([
+  const [fbRes, annRes, betaRes, unreadAnnRes] = await Promise.all([
     admin
       .from("daily_feedbacks")
       .select("date, body, status")
@@ -54,8 +54,20 @@ export async function getMyBoardItems(limit?: number): Promise<BoardItem[]> {
       .limit(30),
     // 総2: ベータは日次FB行の着地を「その日の食事詳細」に揃える(バナー通知=細9と同じ)
     admin.from("users").select("is_beta").eq("id", user.id).maybeSingle(),
+    // 総3: お知らせNEW=未読のアナウンス通知(type='announcement')の broadcast_id 集合
+    admin
+      .from("notifications")
+      .select("broadcast_notification_id")
+      .eq("user_id", user.id)
+      .eq("type", "announcement")
+      .eq("is_read", false),
   ]);
   const isBeta = betaRes.data?.is_beta === true;
+  const unreadAnnIds = new Set(
+    (unreadAnnRes.data ?? [])
+      .map((n) => n.broadcast_notification_id as string | null)
+      .filter((v): v is string => !!v)
+  );
 
   const items: BoardItem[] = [];
 
@@ -86,7 +98,7 @@ export async function getMyBoardItems(limit?: number): Promise<BoardItem[]> {
       title: a.subject as string,
       body: a.body_text as string,
       href: `/notices/${a.id as string}`,
-      isNew: false,
+      isNew: unreadAnnIds.has(a.id as string), // 総3: 未読アナウンスはNEW
     });
   }
 

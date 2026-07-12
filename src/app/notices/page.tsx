@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { MemberHeader } from "@/components/MemberHeader";
 import { createClient } from "@/lib/supabase/server";
 import { getMyBoardItems, type BoardItem } from "@/lib/member/board";
-import { markRepliesRead } from "@/lib/member/notifications";
+import { markRepliesRead, markAnnouncementsRead } from "@/lib/member/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -20,8 +20,8 @@ export default async function NoticesPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/notices");
 
-  // お知らせ一覧を開いた＝のりの返信を見た → 未読を既読にして緑バッジを消す(P2b-2)
-  await markRepliesRead();
+  // お知らせ一覧を開いた＝のりの返信/お知らせを見た → 未読を既読にしてNEWを消す
+  await Promise.all([markRepliesRead(), markAnnouncementsRead()]);
 
   const items = await getMyBoardItems();
 
