@@ -81,11 +81,21 @@ export async function getDailyQueue(
 
   for (const u of usersWithAlerts) {
     const recordMs = recordMsByUser.get(u.userId) ?? null;
+    // 要Go-1: 「のり宿題」(新1〜3)はキューの要対応に出さない=受講生系タグだけで重要度を判定。
+    // のり宿題は管理ホームの「今すぐ対応/今日中」でだけ拾う(受講生の放置警報と混ぜない)。
+    const studentTags = u.tags.filter((t) => t.category !== "nori_todo");
+    const studentSeverity: "urgent" | "warn" | null = studentTags.some(
+      (t) => t.severity === "urgent"
+    )
+      ? "urgent"
+      : studentTags.some((t) => t.severity === "warn")
+        ? "warn"
+        : null;
     const item: DailyQueueItem = {
       userId: u.userId,
       name: u.userName,
       initial: (u.userName ?? "?").charAt(0),
-      topSeverity: u.topSeverity,
+      topSeverity: studentSeverity,
       done: doneSet.has(u.userId),
       hasRecord: recordMs != null,
       recordMs,
@@ -93,7 +103,7 @@ export async function getDailyQueue(
     // 区分優先度: 処理済み → 記録あり(返信待ち) → 要対応 → 未処理
     if (item.done) done.push(item);
     else if (item.hasRecord) recorded.push(item);
-    else if (u.topSeverity) attention.push(item);
+    else if (studentSeverity) attention.push(item);
     else pending.push(item);
   }
   // 記録ありは記録時刻の新しい順

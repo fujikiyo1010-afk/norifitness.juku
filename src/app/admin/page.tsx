@@ -395,8 +395,30 @@ function mapTagToAction(
         href: `/admin/users/${userId}/metrics`,
         icon: <TargetIcon className="w-3.5 h-3.5 text-[#00695c]" />,
       };
+    // 新1〜3(のり宿題): 管理ホームでそのまま次の一手に飛べるように
+    case "nori_no_menu":
+      return {
+        label: "メニュー配布",
+        href: `/admin/users/${userId}/menu/new?from_current=1`,
+        icon: <DocIcon className="w-3.5 h-3.5 text-[#00695c]" />,
+      };
+    case "nori_no_video":
+      return {
+        label: "月次添削",
+        href: "/admin/monthly-reviews",
+        icon: <VideoIcon className="w-3.5 h-3.5 text-[#00695c]" />,
+      };
+    case "nori_chat_unreplied":
+      return {
+        label: "チャット",
+        href: "/admin/messages",
+        icon: <DocIcon className="w-3.5 h-3.5 text-[#00695c]" />,
+      };
     case "no_learning":
     case "long_no_login":
+    case "workout_stalled":
+    case "meal_stalled":
+    case "skip_streak":
       return null;
   }
 }
