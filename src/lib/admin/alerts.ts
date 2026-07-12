@@ -33,12 +33,22 @@ export type AlertTagKey =
   | "carte_blank"
   | "goal_sheet_blank"
   | "long_no_login"
-  | "no_learning";
+  | "no_learning"
+  // PR-K3 新設(★1採用)
+  | "nori_no_menu" // 新1: カルテ提出済・メニュー未配布(のり宿題)
+  | "nori_no_video" // 新2: 月次提出済・動画返信なし(のり宿題)
+  | "nori_chat_unreplied" // 新3: チャット未返信(のり宿題)
+  | "workout_stalled" // 新4: トレ途絶
+  | "meal_stalled" // 新5: 食事途絶
+  | "skip_streak"; // 新6: スキップ連続
 
 export type AlertTag = {
   key: AlertTagKey;
   label: string;
   severity: AlertSeverity;
+  /** "nori_todo"=のり側の宿題(新1〜3)。デイリー添削キューの「要対応」には出さず、
+   *  管理ホームの「今すぐ対応/今日中」でだけ拾う(受講生の放置警報と混ぜない)。 */
+  category?: "nori_todo";
 };
 
 export type UserWithAlerts = {
@@ -69,6 +79,19 @@ export const ALERT_THRESHOLDS = {
   NO_LOGIN_DAYS: 7,
   /** 学習未着手: 入塾後 N 日経過で警告 */
   NO_LEARNING_DAYS: 14,
+  // PR-K3 新設閾値(★2の推し値で確定)
+  /** 新1: カルテ提出から N 日でメニュー未配布 */
+  NO_MENU_AFTER_CARTE_DAYS: 2,
+  /** 新2: 月次提出から N 日で動画返信なし */
+  NO_VIDEO_AFTER_MONTHLY_DAYS: 5,
+  /** 新3: 受講生の最終メッセージから N 日 未返信 */
+  CHAT_UNREPLIED_DAYS: 2,
+  /** 新4: メニュー開始済みで N 日 トレ実施なし(ベータ) */
+  WORKOUT_STALLED_DAYS: 5,
+  /** 新5: 食事記録が N 日 途絶(ベータ) */
+  MEAL_STALLED_DAYS: 5,
+  /** 新6: スキップが N 回連続 */
+  SKIP_STREAK_COUNT: 3,
 } as const;
 
 // =====================================================================
@@ -107,28 +130,51 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
   // 受講生一覧(ア1: 退塾者を除外＝在籍中 status='active' のみ)
   const { data: allUsers } = await admin
     .from("users")
-    .select("id, name, joined_at, last_seen_at")
+    .select("id, name, joined_at, last_seen_at, is_beta")
     .eq("status", "active")
     .order("joined_at", { ascending: false });
 
   if (!allUsers || allUsers.length === 0) return [];
 
   // 関連データを並列取得
-  const [audits, cartes, sheets, lessons, authList, bodyMetrics, adminRows] =
-    await Promise.all([
-      admin.from("monthly_audits").select("user_id, target_month, submitted_at"),
-      admin.from("user_workout_carte").select("user_id"),
-      admin.from("goal_sheets").select("user_id"),
-      // ア3: 「未着手」は完了0件でなく着手(lesson_progressの行)0件で判定する
-      admin.from("lesson_progress").select("user_id"),
-      admin.auth.admin.listUsers({ perPage: 1000 }),
-      admin
-        .from("body_metrics")
-        .select("user_id, recorded_at, weight_kg")
-        .order("recorded_at", { ascending: false }),
-      // ア1: 管理者ロールは受講生集計から除外(テスト垢がprodに現れても除外)
-      admin.from("admin_users").select("id"),
-    ]);
+  const [
+    audits,
+    cartes,
+    sheets,
+    lessons,
+    authList,
+    bodyMetrics,
+    adminRows,
+    menus,
+    workoutLogs,
+    mealRows,
+    progresses,
+    convos,
+    msgs,
+  ] = await Promise.all([
+    admin
+      .from("monthly_audits")
+      .select("user_id, target_month, submitted_at, nori_video_published_at"),
+    admin.from("user_workout_carte").select("user_id, created_at"),
+    admin.from("goal_sheets").select("user_id"),
+    // ア3: 「未着手」は完了0件でなく着手(lesson_progressの行)0件で判定する
+    admin.from("lesson_progress").select("user_id"),
+    admin.auth.admin.listUsers({ perPage: 1000 }),
+    admin
+      .from("body_metrics")
+      .select("user_id, recorded_at, weight_kg")
+      .order("recorded_at", { ascending: false }),
+    // ア1: 管理者ロールは受講生集計から除外(テスト垢がprodに現れても除外)
+    admin.from("admin_users").select("id"),
+    // 新1: 配布済みメニュー / 新4: 開始 / 新4,6: 実施ログ / 新5: 食事 / 新3: チャット
+    admin.from("user_workout_menu").select("user_id"),
+    admin.from("user_workout_logs").select("user_id, date, status").order("date", { ascending: false }),
+    admin.from("meal_logs").select("user_id, date").order("date", { ascending: false }),
+    admin.from("user_workout_progress").select("user_id, started_at"),
+    // 新3: チャットは dev にテーブルが無い場合がある→エラー時は data=null で握る(prodのみ発火)
+    admin.from("conversations").select("id, user_id"),
+    admin.from("messages").select("conversation_id, sender_kind, created_at"),
+  ]);
 
   // ア1: 管理者を受講生一覧から除外
   const adminIds = new Set((adminRows.data ?? []).map((a) => a.id as string));
@@ -139,6 +185,54 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
   const carteUserIds = new Set(cartes.data?.map((c) => c.user_id) ?? []);
   const sheetUserIds = new Set(sheets.data?.map((s) => s.user_id) ?? []);
   const learningUserIds = new Set(lessons.data?.map((l) => l.user_id) ?? []);
+
+  // --- PR-K3 新1〜6 用のルックアップ ---
+  // 新1: カルテ提出時刻(created_at) / 配布済みメニューを持つユーザー
+  const carteCreatedByUser = new Map<string, string>();
+  for (const c of cartes.data ?? []) {
+    if (c.created_at) carteCreatedByUser.set(c.user_id as string, c.created_at as string);
+  }
+  const menuUserIds = new Set((menus.data ?? []).map((m) => m.user_id as string));
+  // 新4: メニュー開始時刻(開始済みユーザー)
+  const startedAtByUser = new Map<string, string>();
+  for (const p of progresses.data ?? []) {
+    if (p.started_at) startedAtByUser.set(p.user_id as string, p.started_at as string);
+  }
+  // 新4,6: 実施ログ(date降順)→ ユーザーごとに最新実施日 と 直近ステータス列
+  const lastWorkoutDateByUser = new Map<string, string>();
+  const recentStatusesByUser = new Map<string, string[]>();
+  for (const l of workoutLogs.data ?? []) {
+    const uid = l.user_id as string;
+    if (!lastWorkoutDateByUser.has(uid)) lastWorkoutDateByUser.set(uid, l.date as string);
+    const arr = recentStatusesByUser.get(uid) ?? [];
+    if (arr.length < 3) arr.push(l.status as string);
+    recentStatusesByUser.set(uid, arr);
+  }
+  // 新5: 食事(date降順)→ ユーザーごとに最新記録日
+  const lastMealDateByUser = new Map<string, string>();
+  for (const m of mealRows.data ?? []) {
+    const uid = m.user_id as string;
+    if (!lastMealDateByUser.has(uid)) lastMealDateByUser.set(uid, m.date as string);
+  }
+  // 新3: チャット未返信(dev はテーブル無し→ convos.data=null なら空集合)。
+  // 会話ごとに最後のメッセージを見て、受講生発でN日経過なら未返信。
+  const chatUnrepliedByUser = new Map<string, string>(); // user_id → 受講生の最終発言時刻
+  {
+    const convUser = new Map<string, string>();
+    for (const c of convos.data ?? []) convUser.set(c.id as string, c.user_id as string);
+    // 会話ごとに最新メッセージ(created_at最大)を求める
+    const lastMsgByConv = new Map<string, { at: string; kind: string }>();
+    for (const m of msgs.data ?? []) {
+      const cid = m.conversation_id as string;
+      const at = m.created_at as string;
+      const cur = lastMsgByConv.get(cid);
+      if (!cur || at > cur.at) lastMsgByConv.set(cid, { at, kind: m.sender_kind as string });
+    }
+    for (const [cid, last] of lastMsgByConv) {
+      const uid = convUser.get(cid);
+      if (uid && last.kind !== "admin") chatUnrepliedByUser.set(uid, last.at);
+    }
+  }
   // C: 最終利用 = max(last_sign_in_at[認証], last_seen_at[アプリを開いた点])。
   // アプリを開いただけでは last_sign_in_at は更新されないため、両者の新しい方を採る。
   const lastActivityByUser = new Map<string, Date>();
@@ -152,10 +246,17 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
   for (const u of authList.data?.users ?? []) bumpActivity(u.id, u.last_sign_in_at);
   for (const u of users) bumpActivity(u.id, (u as { last_seen_at?: string | null }).last_seen_at);
   // ユーザーごとの月次提出状況 (target_month 降順、 未提出を優先)
-  const auditsByUser = new Map<string, { target_month: string; submitted_at: string | null }[]>();
+  const auditsByUser = new Map<
+    string,
+    { target_month: string; submitted_at: string | null; videoAt: string | null }[]
+  >();
   for (const a of audits.data ?? []) {
     const arr = auditsByUser.get(a.user_id) ?? [];
-    arr.push({ target_month: a.target_month as string, submitted_at: a.submitted_at as string | null });
+    arr.push({
+      target_month: a.target_month as string,
+      submitted_at: a.submitted_at as string | null,
+      videoAt: (a as { nori_video_published_at?: string | null }).nori_video_published_at ?? null,
+    });
     auditsByUser.set(a.user_id, arr);
   }
 
@@ -292,6 +393,80 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
         label: "学習 記録なし",
         severity: "warn",
       });
+    }
+
+    // ===== PR-K3 新1〜6 =====
+    const isBeta = (user as { is_beta?: boolean }).is_beta === true;
+
+    // 新1(のり宿題): カルテ提出済み・N日でメニュー未配布
+    const carteCreated = carteCreatedByUser.get(user.id);
+    if (
+      carteCreated &&
+      !menuUserIds.has(user.id) &&
+      daysSinceTsJST(carteCreated) >= ALERT_THRESHOLDS.NO_MENU_AFTER_CARTE_DAYS
+    ) {
+      tags.push({
+        key: "nori_no_menu",
+        label: "メニュー未配布",
+        severity: "urgent",
+        category: "nori_todo",
+      });
+    }
+
+    // 新2(のり宿題): 月次提出済み・N日で動画返信なし
+    const audits2 = auditsByUser.get(user.id) ?? [];
+    const waitingVideo = audits2.some(
+      (a) =>
+        a.submitted_at != null &&
+        a.videoAt == null &&
+        daysSinceTsJST(a.submitted_at) >= ALERT_THRESHOLDS.NO_VIDEO_AFTER_MONTHLY_DAYS
+    );
+    if (waitingVideo) {
+      tags.push({
+        key: "nori_no_video",
+        label: "月次の返信待ち",
+        severity: "warn",
+        category: "nori_todo",
+      });
+    }
+
+    // 新3(のり宿題): 受講生の最終メッセージからN日 未返信
+    const lastStudentMsg = chatUnrepliedByUser.get(user.id);
+    if (lastStudentMsg && daysSinceTsJST(lastStudentMsg) >= ALERT_THRESHOLDS.CHAT_UNREPLIED_DAYS) {
+      tags.push({
+        key: "nori_chat_unreplied",
+        label: "チャット未返信",
+        severity: "warn",
+        category: "nori_todo",
+      });
+    }
+
+    // 新4(ベータ): メニュー開始済み・N日 トレ実施なし
+    const startedAt = startedAtByUser.get(user.id);
+    if (isBeta && startedAt) {
+      const lastWorkout = lastWorkoutDateByUser.get(user.id);
+      const gap = lastWorkout ? daysSinceDateJST(lastWorkout) : daysSinceTsJST(startedAt);
+      if (gap >= ALERT_THRESHOLDS.WORKOUT_STALLED_DAYS) {
+        tags.push({ key: "workout_stalled", label: `トレ ${gap} 日途絶`, severity: "warn" });
+      }
+    }
+
+    // 新5(ベータ): 食事記録がN日 途絶
+    const lastMeal = lastMealDateByUser.get(user.id);
+    if (isBeta && lastMeal) {
+      const gap = daysSinceDateJST(lastMeal);
+      if (gap >= ALERT_THRESHOLDS.MEAL_STALLED_DAYS) {
+        tags.push({ key: "meal_stalled", label: `食事 ${gap} 日途絶`, severity: "warn" });
+      }
+    }
+
+    // 新6: スキップがN回連続
+    const recent = recentStatusesByUser.get(user.id) ?? [];
+    if (
+      recent.length >= ALERT_THRESHOLDS.SKIP_STREAK_COUNT &&
+      recent.slice(0, ALERT_THRESHOLDS.SKIP_STREAK_COUNT).every((s) => s === "skipped")
+    ) {
+      tags.push({ key: "skip_streak", label: "スキップ連続", severity: "warn" });
     }
 
     const hasUrgent = tags.some((t) => t.severity === "urgent");
