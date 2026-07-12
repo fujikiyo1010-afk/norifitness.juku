@@ -6,6 +6,7 @@ import {
 } from "@/lib/monthly-audit/queries";
 import { type MonthlyAuditRow } from "@/lib/monthly-audit/types";
 import { InboxClient, type InboxAudit } from "./InboxClient";
+import { jstTodayStr, daysSinceTsJST } from "@/lib/date/jst";
 
 export const dynamic = "force-dynamic";
 
@@ -48,9 +49,8 @@ export default async function AdminMonthlyReviewInboxPage() {
     const publishedAt = audit.nori_video_published_at
       ? new Date(audit.nori_video_published_at)
       : null;
-    const daysSinceSubmit = submittedAt
-      ? Math.floor((Date.now() - submittedAt.getTime()) / 86_400_000)
-      : 0;
+    // 総5: 提出からの経過はJST暦日で(UTC直+Date.nowだと深夜にズレる)
+    const daysSinceSubmit = audit.submitted_at ? daysSinceTsJST(audit.submitted_at) : 0;
     const user = usersMap.get(audit.user_id);
     return {
       id: audit.id,
@@ -71,7 +71,8 @@ export default async function AdminMonthlyReviewInboxPage() {
 
   // 今月の進捗バー用集計
   const supabase = createAdminClient();
-  const targetMonth = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}-01`;
+  // 総5: 月度はJSTで(UTCサーバのgetMonthだと月末深夜に前月へズレる)
+  const targetMonth = `${jstTodayStr().slice(0, 7)}-01`;
   const [usersCount, completedCount] = await Promise.all([
     supabase.from("users").select("id", { count: "exact", head: true }),
     supabase

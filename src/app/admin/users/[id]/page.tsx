@@ -11,6 +11,7 @@ import {
 } from "@/lib/workout/queries";
 import { calcAge, calcAgeBand } from "@/lib/workout/types";
 import { getUserAlerts } from "@/lib/admin/alerts";
+import { daysSinceDateJST } from "@/lib/date/jst";
 import {
   formatDistributionDate,
   formatDistributionDateTime,
@@ -819,10 +820,8 @@ function WeightProgressBlock({
                   {formatDistributionDate(targetDate)}
                 </span>
                 {(() => {
-                  const days = Math.floor(
-                    (new Date(targetDate).getTime() - Date.now()) /
-                      86_400_000
-                  );
+                  // 総5: 目標日までの残り日数をJST暦日で(UTC直+Date.nowだと深夜にズレる)
+                  const days = -daysSinceDateJST(targetDate.slice(0, 10));
                   if (days < 0) {
                     return (
                       <span className="ml-1 text-rose-600 font-bold">
