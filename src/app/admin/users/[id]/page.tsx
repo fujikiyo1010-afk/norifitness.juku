@@ -552,25 +552,29 @@ export default async function AdminUserHubPage({
                 </dd>
               </dl>
 
+              {/* 総8: ラベル短縮＋作り方の説明1行(構造・遷移先は不変) */}
+              <p className="mb-1.5 text-[11px] text-zinc-500">
+                作り直す3つの方法（いまの内容を直す／過去事例から作る／白紙から作る）
+              </p>
               <div className="flex flex-wrap gap-2">
                 <Link
                   href={`/admin/users/${userId}/menu/new?from_current=1`}
                   className="inline-block rounded-[4px] border border-[#00897b] bg-[rgba(0,137,123,0.08)] px-4 py-2 text-xs font-bold text-[#00695c] hover:bg-[rgba(0,137,123,0.16)]"
                 >
-                  現メニューを編集して再配布 →
+                  現メニューを編集
                 </Link>
                 <Link
                   href={`/admin/users/${userId}/match`}
                   className="inline-block rounded-[4px] border border-zinc-300 bg-white px-4 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
                 >
-                  マッチング検索から新規配布 →
+                  過去事例から作る
                 </Link>
                 {/* 管E11: マッチングを介さず、ゼロから手作りで配布する直接入口 */}
                 <Link
                   href={`/admin/users/${userId}/menu/new?from_scratch=1`}
                   className="inline-block rounded-[4px] border border-zinc-300 bg-white px-4 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
                 >
-                  ゼロから新規配布（テンプレなし）→
+                  ゼロから作る
                 </Link>
               </div>
             </>
@@ -584,14 +588,14 @@ export default async function AdminUserHubPage({
                   href={`/admin/users/${userId}/match`}
                   className="inline-block rounded-[4px] bg-[#00897b] px-4 py-2 text-xs font-bold text-white hover:bg-[#00695c]"
                 >
-                  マッチング検索 → 配布 →
+                  過去事例から作る
                 </Link>
                 {/* 管E11: ゼロから手作りで配布する直接入口 */}
                 <Link
                   href={`/admin/users/${userId}/menu/new?from_scratch=1`}
                   className="inline-block rounded-[4px] border border-zinc-300 bg-white px-4 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
                 >
-                  ゼロから新規配布（テンプレなし）→
+                  ゼロから作る
                 </Link>
               </div>
             </>
