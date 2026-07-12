@@ -307,3 +307,35 @@ export function FlexIcon(p: IconProps) {
     </Svg>
   );
 }
+
+/** 食事（お茶碗） */
+export function MealIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M3.5 11.5h17a8.5 8.5 0 0 1-17 0Z" />
+      <path d="M2.5 11.5h19" />
+      <path d="M12 4.2c1.4 1 1.4 2.4 0 3.4" />
+      <path d="M9 5c.9.7.9 1.6 0 2.3" />
+    </Svg>
+  );
+}
+
+/** 生活（三日月＝睡眠・体調） */
+export function MoonIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M20 13.5A8 8 0 1 1 10.5 4a6.5 6.5 0 0 0 9.5 9.5Z" />
+    </Svg>
+  );
+}
+
+/** 体組成（体重計） */
+export function ScaleIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <rect x="3.5" y="3.5" width="17" height="17" rx="3" />
+      <path d="M12 7.2a3 3 0 0 0-3 3h6a3 3 0 0 0-3-3Z" />
+      <path d="M12 10.2 13.4 8" />
+    </Svg>
+  );
+}
