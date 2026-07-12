@@ -25,14 +25,17 @@ export type DailyQueueItem = {
   initial: string;
   topSeverity: "urgent" | "warn" | null;
   done: boolean; // 今日のFBを送信/確認/スキップ済み
+  hasRecord: boolean; // A: 表示日にその受講生の記録(食事/トレ/生活/体組成)が1件以上ある
+  recordMs: number | null; // A: 記録の最新時刻(記録ありの並べ替え用・記録なしはnull)
 };
 
 export type DailyQueue = {
   date: string;
   total: number;
   doneCount: number;
-  attention: DailyQueueItem[]; // 要対応（アラートあり・未処理）
-  pending: DailyQueueItem[]; // 未処理（アラートなし）
+  recorded: DailyQueueItem[]; // A: 記録あり（返信待ち）＝記録あり・未処理（記録時刻の新しい順）
+  attention: DailyQueueItem[]; // 要対応（アラートあり・記録なし・未処理）
+  pending: DailyQueueItem[]; // 未処理（アラートなし・記録なし）
   done: DailyQueueItem[]; // 処理済み
 };
 
@@ -43,33 +46,64 @@ export async function getDailyQueue(
   const admin = createAdminClient();
   // S2-A: usersWithAlerts は重い全件スキャン。呼び出し元が既に取得済みなら再実行しない
   // (未指定なら従来どおり自前取得＝後方互換)。
-  const [usersWithAlerts, fbRes] = await Promise.all([
+  // A: 「記録あり」判定のため、表示日の記録4種(食事/トレ/生活/体組成)も同じ並列バッチで取得。
+  //   S2の思想を守り N+1 を作らず、各テーブル1クエリ(その日の user_id + 記録時刻)だけ足す。
+  const [usersWithAlerts, fbRes, mealRes, workoutRes, condRes, bodyRes] = await Promise.all([
     preUsers ?? listUsersWithAlerts(),
     admin.from("daily_feedbacks").select("user_id").eq("date", dateStr),
+    admin.from("meal_logs").select("user_id, posted_at").eq("date", dateStr),
+    admin.from("user_workout_logs").select("user_id, completed_at, created_at").eq("date", dateStr),
+    admin.from("daily_conditions").select("user_id, created_at").eq("date", dateStr),
+    admin.from("body_metrics").select("user_id, created_at").eq("recorded_at", dateStr),
   ]);
   const doneSet = new Set((fbRes.data ?? []).map((r) => r.user_id as string));
 
+  // 記録時刻マップ: 受講生ごとに、その日の記録の「最新時刻」を保持(記録ありの並べ替え用)。
+  // トレのスキップは completed_at が無いので created_at を代替に使う(スキップも声かけ材料=記録あり)。
+  const recordMsByUser = new Map<string, number>();
+  const bump = (userId: string | null, ts: string | null | undefined) => {
+    if (!userId || !ts) return;
+    const t = new Date(ts).getTime();
+    if (Number.isNaN(t)) return;
+    const cur = recordMsByUser.get(userId);
+    if (cur == null || t > cur) recordMsByUser.set(userId, t);
+  };
+  for (const r of mealRes.data ?? []) bump(r.user_id as string, r.posted_at as string);
+  for (const r of workoutRes.data ?? [])
+    bump(r.user_id as string, (r.completed_at as string) ?? (r.created_at as string));
+  for (const r of condRes.data ?? []) bump(r.user_id as string, r.created_at as string);
+  for (const r of bodyRes.data ?? []) bump(r.user_id as string, r.created_at as string);
+
+  const recorded: DailyQueueItem[] = [];
   const attention: DailyQueueItem[] = [];
   const pending: DailyQueueItem[] = [];
   const done: DailyQueueItem[] = [];
 
   for (const u of usersWithAlerts) {
+    const recordMs = recordMsByUser.get(u.userId) ?? null;
     const item: DailyQueueItem = {
       userId: u.userId,
       name: u.userName,
       initial: (u.userName ?? "?").charAt(0),
       topSeverity: u.topSeverity,
       done: doneSet.has(u.userId),
+      hasRecord: recordMs != null,
+      recordMs,
     };
+    // 区分優先度: 処理済み → 記録あり(返信待ち) → 要対応 → 未処理
     if (item.done) done.push(item);
+    else if (item.hasRecord) recorded.push(item);
     else if (u.topSeverity) attention.push(item);
     else pending.push(item);
   }
+  // 記録ありは記録時刻の新しい順
+  recorded.sort((a, b) => (b.recordMs ?? 0) - (a.recordMs ?? 0));
 
   return {
     date: dateStr,
     total: usersWithAlerts.length,
     doneCount: done.length,
+    recorded,
     attention,
     pending,
     done,
