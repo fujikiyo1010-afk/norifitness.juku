@@ -10,6 +10,7 @@ import {
   countPendingRequestsForUser,
 } from "@/lib/workout/queries";
 import { calcAge, calcAgeBand } from "@/lib/workout/types";
+import { getUserAlerts } from "@/lib/admin/alerts";
 import {
   formatDistributionDate,
   formatDistributionDateTime,
@@ -88,6 +89,7 @@ export default async function AdminUserHubPage({
     revisions,
     pendingCounts,
     latestBodyMetric,
+    userAlerts,
   ] = await Promise.all([
     admin
       .from("users")
@@ -107,6 +109,7 @@ export default async function AdminUserHubPage({
     listGoalSheetRevisionsForUser(userId, 2), // 前回値比較用 (最新1件 = 1 つ前の編集)
     countPendingRequestsForUser(userId),
     getLatestBodyMetricSummary(userId), // body_metrics (日々記録) の最新値
+    getUserAlerts(userId), // ア6: この受講生のアラートタグ(ハブ概要ヘッダに表示)
   ]);
 
   if (!userRow) {
@@ -263,6 +266,23 @@ export default async function AdminUserHubPage({
                 </>
               )}
             </p>
+            {/* ア6: この受講生のアラートタグ(概要ヘッダ) */}
+            {userAlerts.length > 0 && (
+              <div className="flex gap-1.5 mt-2 flex-wrap">
+                {userAlerts.map((t, i) => (
+                  <span
+                    key={i}
+                    className={`text-[10.5px] font-bold rounded-full px-2.5 py-[3px] border ${
+                      t.severity === "urgent"
+                        ? "bg-[#fef2f2] text-[#b91c1c] border-[#fecaca]"
+                        : "bg-[#fff4e6] text-[#c2600f] border-[#fcd9ad]"
+                    }`}
+                  >
+                    {t.label}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
           {/* 右上: 管理者ホームへ直接戻る (左上 ← は親階層 = 受講生一覧) */}
           <Link
