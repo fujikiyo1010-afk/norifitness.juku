@@ -169,6 +169,10 @@ export function ChapterForm({ mode }: { mode: Mode }) {
             キャンセル
           </button>
         )}
+        {/* 総9: 押せない理由を出す(無言disabledをやめる) */}
+        {!pending && title.trim().length === 0 && (
+          <span className="text-[11px] text-zinc-400">章タイトルを入力すると保存できます</span>
+        )}
       </div>
     </form>
   );

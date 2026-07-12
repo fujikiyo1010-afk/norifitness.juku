@@ -40,6 +40,9 @@ export default async function UserWorkoutPage({
       {h.days.length === 0 ? (
         <div className="rounded-2xl border border-[#e8ebe9] bg-white p-8 text-center text-[13px] text-zinc-500">
           まだトレーニングの記録はありません。
+          <div className="mt-1.5 text-[11px] text-zinc-400">
+            受講生がトレを記録すると、ここに日別で表示されます。
+          </div>
         </div>
       ) : (
         <div className="space-y-2">
