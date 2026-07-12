@@ -73,6 +73,7 @@ export function WorkoutTodayClient({
   const [editedItems, setEditedItems] = useState<LoggedItem[] | null>(null);
   const [editBaseline, setEditBaseline] = useState<EditItem[] | null>(null);
   const [confirmDiscard, setConfirmDiscard] = useState(false); // 点3
+  const [pendingIntensity, setPendingIntensity] = useState<Intensity | null>(null); // T2: 未保存編集あり時の強度切替 破棄確認
   const [expanded, setExpanded] = useState<{ i: number; field: ExpandField } | null>(null); // 点5
   const [invalidIdx, setInvalidIdx] = useState<number[]>([]); // 決B
   const [validationMsg, setValidationMsg] = useState<string | null>(null);
@@ -152,6 +153,7 @@ export function WorkoutTodayClient({
     setExpanded(null);
     setInvalidIdx([]);
     setValidationMsg(null);
+    setPendingIntensity(null); // T2: 編集に入ったら強度切替確認は畳む
   }
   function exitEditToView() {
     setMode("view");
@@ -349,8 +351,14 @@ export function WorkoutTodayClient({
                   type="button"
                   disabled={mode === "edit"}
                   onClick={() => {
+                    if (iv === intensity) return;
+                    // T2: 未保存の編集(editedItems)がある時は破棄確認を挟む。
+                    if (editedItems) {
+                      setPendingIntensity(iv);
+                      return;
+                    }
+                    // 編集が無ければ従来どおり即切替(M8)。
                     setIntensity(iv);
-                    // 強度を変えると編集内容(旧強度基準)は破棄して原本へ戻す
                     setEditedItems(null);
                   }}
                   className={`flex-1 rounded-[9px] border-[1.5px] py-1.5 text-[11.5px] font-extrabold transition-colors ${
@@ -364,6 +372,35 @@ export function WorkoutTodayClient({
               ))}
             </div>
           </div>
+
+          {/* T2: 未保存編集がある状態で強度を切り替える時の破棄確認(「編集をやめる」と同型) */}
+          {pendingIntensity && (
+            <div className="rounded-lg border border-[#f0e2b8] bg-[#fffbeb] p-3">
+              <p className="text-[12px] leading-snug text-[#8a6d1a]">
+                編集した内容を破棄して、強度を切り替えますか？
+              </p>
+              <div className="mt-2 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIntensity(pendingIntensity);
+                    setEditedItems(null);
+                    setPendingIntensity(null);
+                  }}
+                  className="flex-1 rounded-lg border border-[#e7dcc9] bg-white py-2 text-[12px] font-bold text-[#6a6256]"
+                >
+                  破棄して切り替える
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPendingIntensity(null)}
+                  className="flex-1 rounded-lg bg-[#8a6d1a] py-2 text-[12px] font-bold text-white"
+                >
+                  編集に戻る
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* 決A: 編集済み(未保存)の注記 */}
           {mode === "view" && editedItems && (
