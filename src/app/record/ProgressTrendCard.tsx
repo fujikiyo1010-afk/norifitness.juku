@@ -6,6 +6,7 @@ import {
   computeForecast,
   projectWeight,
   etaForPace,
+  SAFE_MAX,
   type ForecastPeriod,
 } from "@/lib/body-metrics/forecast";
 
@@ -37,6 +38,12 @@ function round1(n: number): number {
 }
 function roundStep(n: number, step = 0.05): number {
   return Math.round(n / step) * step;
+}
+// 修1: ペースは0.05刻みに丸め、0.05〜5.0にクランプ(5.0超は切り詰め)。
+const PACE_MIN = 0.05;
+const PACE_MAX = 5.0;
+function clampPace(n: number): number {
+  return Math.min(PACE_MAX, Math.max(PACE_MIN, roundStep(n)));
 }
 /** 予測日ラベル(今年=M/D・来年=来年M/D・それ以降=YYYY/M/D) */
 function etaDateLabel(ms: number, nowMs: number): string {
@@ -70,10 +77,31 @@ export function ProgressTrendCard({
   const now = nowMs;
 
   const realPaceAbs = pace != null ? Math.abs(pace) : null;
-  // 目標推移のペース手入力(初期値=今の実ペース・0.05刻み・最小0.05)
+  // 目標推移のペース手入力(初期値=今の実ペース・0.05刻み・0.05〜5.0)。
+  // inputPace=確定値(計算に使う)/ inputPaceStr=入力中の文字列(打っている間は変換しない)。
   const [inputPace, setInputPace] = useState<number>(() =>
-    realPaceAbs != null ? Math.max(0.05, roundStep(realPaceAbs)) : 0.3
+    realPaceAbs != null ? clampPace(realPaceAbs) : 0.3
   );
+  const [inputPaceStr, setInputPaceStr] = useState<string>(() =>
+    (realPaceAbs != null ? clampPace(realPaceAbs) : 0.3).toFixed(2)
+  );
+  // 修1: 確定はblur/Enter時のみ。数値でない/0以下は元の値へ戻す→丸め→クランプ。
+  function commitPace(raw: string) {
+    const v = Number(raw);
+    if (!Number.isFinite(v) || v <= 0) {
+      setInputPaceStr(inputPace.toFixed(2));
+      return;
+    }
+    const c = clampPace(v);
+    setInputPace(c);
+    setInputPaceStr(c.toFixed(2));
+  }
+  // ±ボタン: 0.05刻み(同じクランプを通す)。
+  function stepPace(delta: number) {
+    const c = clampPace(inputPace + delta);
+    setInputPace(c);
+    setInputPaceStr(c.toFixed(2));
+  }
 
   // エッジ: 記録不足 / 目標(体重・日)未設定 は道のりを引けない
   const goalMs = targetDate ? Date.parse(targetDate) : null;
@@ -114,9 +142,9 @@ export function ProgressTrendCard({
   const etaMs = etaForPace(current, target, paceAbs, now);
   const etaDays = etaMs != null ? Math.round((etaMs - now) / DAY) : null;
 
-  // チェックポイント(今日→レンジ刻み4点→到達日)。予測点は点線の丸。
-  const interim = [1, 2, 3, 4]
-    .map((k) => k * step)
+  // 修2: チェックポイント(今日→レンジ刻み最大14点→到達日)。予測点は点線の丸。
+  // 到達日以降の行は出さない(既存の < etaDays フィルタ維持)。
+  const interim = Array.from({ length: 14 }, (_, i) => (i + 1) * step)
     .filter((d) => etaDays == null || d < etaDays)
     .map((d) => ({
       label: etaDateLabel(now + d * DAY, now),
@@ -126,6 +154,15 @@ export function ProgressTrendCard({
   // 下カード3点セット(このペースだと/届きたい通過点/ひとこと)=computeForecast一発。
   const period: ForecastPeriod = { key: "1w", label: range.label, days: step };
   const fc = computeForecast(current, target, signedPace, now, goalMs, period);
+
+  // 修3: 「このペースだと」は目標体重でクランプ(行き過ぎ禁止)。
+  // 選択期間内に到達する場合はひとことを到達見込みに差し替え、state1〜4判定はスキップ。
+  const reachedInPeriod = dir > 0 ? fc.predicted >= target : fc.predicted <= target;
+  const predictedShown = reachedInPeriod ? round1(target) : fc.predicted;
+  const messageShown =
+    reachedInPeriod && etaMs != null
+      ? `このペースなら ${etaDateLabel(etaMs, now)} に目標到達の見込みです`
+      : fc.message;
 
   return (
     <Shell>
@@ -171,47 +208,57 @@ export function ProgressTrendCard({
       </div>
 
       {tab === "goal" ? (
-        // 目標推移: ペース手入力ボックス
-        <div className="mt-[9px] flex items-center gap-2 rounded-xl border border-[#e8ede4] bg-[#f6f8f4] px-[11px] py-[9px]">
-          <span className="text-[9.5px] font-extrabold leading-[1.35] text-[#6a6256]">
-            ペース
-            <br />
-            <small className="text-[8px] font-semibold text-[#a59b8c]">
-              初期値=今の実ペース
-            </small>
-          </span>
-          <span className="ml-auto flex items-center gap-1.5">
-            <button
-              type="button"
-              aria-label="ペースを下げる"
-              onClick={() => setInputPace((v) => Math.max(0.05, roundStep(v - 0.05)))}
-              className="flex h-11 w-11 items-center justify-center rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white text-[17px] font-bold text-[#34603f]"
-            >
-              −
-            </button>
-            <input
-              type="number"
-              inputMode="decimal"
-              step={0.05}
-              min={0.05}
-              value={inputPace.toFixed(2)}
-              onChange={(e) => {
-                const v = Number(e.target.value);
-                if (Number.isFinite(v) && v > 0) setInputPace(v);
-              }}
-              className="h-11 w-16 rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white text-center font-mono text-[17px] font-extrabold text-[#2b2620] focus:outline-none"
-            />
-            <button
-              type="button"
-              aria-label="ペースを上げる"
-              onClick={() => setInputPace((v) => roundStep(v + 0.05))}
-              className="flex h-11 w-11 items-center justify-center rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white text-[17px] font-bold text-[#34603f]"
-            >
-              ＋
-            </button>
-            <span className="text-[9px] font-bold text-[#a59b8c]">kg/週</span>
-          </span>
-        </div>
+        // 目標推移: ペース手入力ボックス + 安全域警告(修4)
+        <>
+          <div className="mt-[9px] flex items-center gap-2 rounded-xl border border-[#e8ede4] bg-[#f6f8f4] px-[11px] py-[9px]">
+            <span className="text-[9.5px] font-extrabold leading-[1.35] text-[#6a6256]">
+              ペース
+              <br />
+              <small className="text-[8px] font-semibold text-[#a59b8c]">
+                初期値=今の実ペース
+              </small>
+            </span>
+            <span className="ml-auto flex items-center gap-1.5">
+              <button
+                type="button"
+                aria-label="ペースを下げる"
+                onClick={() => stepPace(-0.05)}
+                className="flex h-11 w-11 items-center justify-center rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white text-[17px] font-bold text-[#34603f]"
+              >
+                −
+              </button>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={inputPaceStr}
+                onChange={(e) => setInputPaceStr(e.target.value)}
+                onBlur={(e) => commitPace(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    commitPace((e.target as HTMLInputElement).value);
+                    (e.target as HTMLInputElement).blur();
+                  }
+                }}
+                className="h-11 w-16 rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white text-center font-mono text-[17px] font-extrabold text-[#2b2620] focus:outline-none"
+              />
+              <button
+                type="button"
+                aria-label="ペースを上げる"
+                onClick={() => stepPace(0.05)}
+                className="flex h-11 w-11 items-center justify-center rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white text-[17px] font-bold text-[#34603f]"
+              >
+                ＋
+              </button>
+              <span className="text-[9px] font-bold text-[#a59b8c]">kg/週</span>
+            </span>
+          </div>
+          {inputPace > SAFE_MAX && (
+            <div className="mt-1.5 rounded-lg border border-[#f0e2b8] bg-[#fff8e1] px-3 py-2 text-[10.5px] font-bold leading-[1.5] text-[#8a6d10]">
+              週0.8kgを超えるペースは体に負担が大きいことがあります。無理のない計画にしましょう
+            </div>
+          )}
+        </>
       ) : (
         // 現状推移: 今の実ペース固定の見出し(入力なし)
         <div className="mt-[9px] text-center text-[9.5px] font-bold text-[#a59b8c]">
@@ -247,7 +294,7 @@ export function ProgressTrendCard({
             このペースだと
           </span>
           <span className="font-mono text-[18px] font-extrabold text-[#2b2620]">
-            {fc.predicted}
+            {predictedShown}
             <small className="text-[10px] font-bold text-[#a59b8c]"> kg</small>
           </span>
         </div>
@@ -261,7 +308,7 @@ export function ProgressTrendCard({
           </span>
         </div>
         <p className="mt-[9px] rounded-[11px] border border-[#cfe3d6] bg-[#e8f3ec] px-3 py-[9px] text-[11.5px] font-bold leading-[1.6] text-[#34603f]">
-          {fc.message}
+          {messageShown}
         </p>
       </div>
     </Shell>
