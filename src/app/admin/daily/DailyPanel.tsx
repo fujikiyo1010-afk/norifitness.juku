@@ -13,6 +13,18 @@ import {
   sendDailyFeedback,
   skipDailyFeedback,
 } from "@/lib/daily-feedbacks/actions";
+import {
+  ScaleIcon,
+  DumbbellIcon,
+  MealIcon,
+  BookOpenIcon,
+  MoonIcon,
+  TrendingUpIcon,
+  TargetIcon,
+  DocIcon,
+  ChatIcon,
+} from "@/components/icons";
+import type { ReactNode } from "react";
 
 /**
  * デイリー添削 パネル（P2a v1）。モックM2準拠。
@@ -183,12 +195,25 @@ function PanelHead({ detail }: { detail: DailyDetail }) {
 // =====================================================================
 
 function FourCards({ detail }: { detail: DailyDetail }) {
-  const { body, learning } = detail;
+  const { body, learning, workout, meals, isBeta } = detail;
+  // 管1: 非ベータはトレクラ管理の人語・ベータは実状態(既存detailデータ・新規取得なし)
+  const workoutValue = !isBeta
+    ? "トレクラで記録中"
+    : workout
+      ? workout.status === "skipped"
+        ? "お休み"
+        : "完了"
+      : "記録なし";
+  const mealValue = !isBeta
+    ? "トレクラで記録中"
+    : meals.length > 0
+      ? `${meals.length}件 記録`
+      : "記録なし";
   return (
     <div className="grid grid-cols-4 gap-2.5 mb-3">
       {/* 今のからだ（実データ） */}
       <Card>
-        <CardHead icon="⚖" title="今のからだ" />
+        <CardHead icon={<ScaleIcon size={14} />} title="今のからだ" />
         <div className="text-[20px] font-bold leading-none font-mono">
           {fmtNum(body.weightKg)}
           <small className="text-[10.5px] text-zinc-500 font-sans font-medium"> kg</small>
@@ -212,15 +237,15 @@ function FourCards({ detail }: { detail: DailyDetail }) {
         </div>
       </Card>
 
-      {/* 今日のトレ（P5 プレースホルダ） */}
-      <PlaceholderCard icon="💪" title="今日のトレ" phase="P5で実装" />
+      {/* 今日のトレ（実状態 or トレクラ管理） */}
+      <MiniCard icon={<DumbbellIcon size={14} />} title="今日のトレ" value={workoutValue} />
 
-      {/* 今日の食事（P4 プレースホルダ） */}
-      <PlaceholderCard icon="🍚" title="今日の食事" phase="P4で実装" />
+      {/* 今日の食事（実状態 or トレクラ管理） */}
+      <MiniCard icon={<MealIcon size={14} />} title="今日の食事" value={mealValue} />
 
       {/* 今日の学習（実データ） */}
       <Card dim={!learning.latestTitle}>
-        <CardHead icon="📖" title="今日の学習" />
+        <CardHead icon={<BookOpenIcon size={14} />} title="今日の学習" />
         <div className="text-[14px] font-bold pt-0.5 leading-tight">
           {learning.percent != null ? `全体 ${learning.percent}%` : "—"}
           <span className="text-[10.5px] text-zinc-500 font-medium">
@@ -257,10 +282,10 @@ function Card({
   );
 }
 
-function CardHead({ icon, title }: { icon: string; title: string }) {
+function CardHead({ icon, title }: { icon: ReactNode; title: string }) {
   return (
     <div className="flex items-center gap-1.5 mb-2">
-      <span className="text-[13px]">{icon}</span>
+      <span className="text-[#00897b] flex-shrink-0">{icon}</span>
       <span className="text-[10.5px] font-bold text-zinc-500 tracking-wide">
         {title}
       </span>
@@ -268,20 +293,25 @@ function CardHead({ icon, title }: { icon: string; title: string }) {
   );
 }
 
-function PlaceholderCard({
+/** 管1: 4カードのミニ表示（非ベータは人語1行・ベータは実状態） */
+function MiniCard({
   icon,
   title,
-  phase,
+  value,
+  sub,
 }: {
-  icon: string;
+  icon: ReactNode;
   title: string;
-  phase: string;
+  value: string;
+  sub?: string;
 }) {
   return (
     <div className="border border-dashed border-[#e0e4e2] rounded-xl px-3 py-3 bg-[#fbfcfb]">
       <CardHead icon={icon} title={title} />
-      <div className="text-[12px] font-bold text-zinc-400 pt-1">準備中</div>
-      <div className="text-[10px] text-zinc-400 mt-1">{phase}</div>
+      <div className="text-[12px] font-bold text-zinc-500 pt-0.5 leading-snug">
+        {value}
+      </div>
+      {sub && <div className="text-[10px] text-zinc-400 mt-1 leading-snug">{sub}</div>}
     </div>
   );
 }
@@ -306,7 +336,7 @@ function mealTime(iso: string): string {
 function TodayTab({ detail }: { detail: DailyDetail }) {
   return (
     <div className="space-y-3">
-      <SectionCard title="🍚 今日の食事" srcLabel="meal_logs（P4-a）" srcNew>
+      <SectionCard title="今日の食事" icon={<MealIcon size={15} />}>
         {!detail.isBeta ? (
           <PlaceholderBody text="この受講生はまだ食事機能の対象外です（ベータ公開後に表示されます）。" />
         ) : detail.meals.length === 0 ? (
@@ -358,7 +388,7 @@ function TodayTab({ detail }: { detail: DailyDetail }) {
           </div>
         )}
       </SectionCard>
-      <SectionCard title="💪 今日のトレーニング" srcLabel="user_workout_logs（P5）" srcNew>
+      <SectionCard title="今日のトレーニング" icon={<DumbbellIcon size={15} />}>
         {!detail.isBeta ? (
           <PlaceholderBody text="この受講生はまだトレ実施記録の対象外です（ベータ公開後に表示されます）。" />
         ) : !detail.workout ? (
@@ -414,7 +444,7 @@ function TodayTab({ detail }: { detail: DailyDetail }) {
           </div>
         )}
       </SectionCard>
-      <SectionCard title="🌙 今日の生活" srcLabel="daily_conditions（P6）" srcNew>
+      <SectionCard title="今日の生活" icon={<MoonIcon size={15} />}>
         {!detail.isBeta ? (
           <PlaceholderBody text="この受講生はまだ生活記録の対象外です（ベータ公開後に表示されます）。" />
         ) : !detail.condition ||
@@ -466,10 +496,7 @@ function PlanTab({ detail }: { detail: DailyDetail }) {
   const c = detail.carte;
   return (
     <div className="space-y-3">
-      <SectionCard
-        title="📇 カルテ"
-        srcLabel="user_workout_carte（既存）"
-      >
+      <SectionCard title="カルテ" icon={<DocIcon size={15} />}>
         {c ? (
           <div className="grid grid-cols-2 gap-x-[18px] gap-y-2">
             <CarteRow label="環境" value={c.environments} />
@@ -484,9 +511,9 @@ function PlanTab({ detail }: { detail: DailyDetail }) {
           <PlaceholderBody text="カルテ未提出です。" />
         )}
       </SectionCard>
-      <SectionCard title="💪 筋トレ原本 / 1週間メニュー" srcLabel="P5で本体表示">
+      <SectionCard title="筋トレ原本 / 1週間メニュー" icon={<DumbbellIcon size={15} />}>
         <div className="text-[11.5px] text-zinc-500 leading-relaxed">
-          原本メニュー・1週間メニューの詳細表示はP5で統合します。今は
+          原本メニュー・1週間メニューは
           <Link
             href={`/admin/users/${detail.userId}/menu/new?from_current=1`}
             className="font-bold text-[#00695c] underline mx-1"
@@ -531,7 +558,7 @@ function LearnTab({ detail }: { detail: DailyDetail }) {
   const l = detail.learning;
   return (
     <div className="space-y-3">
-      <SectionCard title="📖 直近の学習" srcLabel="lesson_progress（既存）">
+      <SectionCard title="直近の学習" icon={<BookOpenIcon size={15} />}>
         {l.latestTitle ? (
           <>
             <div className="text-[12px] font-bold">
@@ -551,8 +578,8 @@ function LearnTab({ detail }: { detail: DailyDetail }) {
           <PlaceholderBody text="まだ学習記録がありません。" />
         )}
       </SectionCard>
-      <SectionCard title="🚀 実践宣言と行動のつながり" srcLabel="P4で本体">
-        <PlaceholderBody text="実践宣言 × 食事/トレの突合はP4以降で活性化します。" />
+      <SectionCard title="実践宣言と行動のつながり" icon={<TrendingUpIcon size={15} />}>
+        <PlaceholderBody text="実践宣言と食事・トレのつながりは、今後ここに表示されます。" />
       </SectionCard>
     </div>
   );
@@ -566,11 +593,7 @@ function WordsTab({ detail }: { detail: DailyDetail }) {
   const { recentWords, goal } = detail;
   return (
     <div className="space-y-3">
-      <SectionCard
-        title="💬 のりが伝えてきたこと（直近）"
-        srcLabel="daily_feedbacks（新設）"
-        srcNew
-      >
+      <SectionCard title="のりが伝えてきたこと（直近）" icon={<ChatIcon size={15} />}>
         {recentWords.length > 0 ? (
           <div>
             {recentWords.map((w, i) => (
@@ -598,7 +621,7 @@ function WordsTab({ detail }: { detail: DailyDetail }) {
         )}
       </SectionCard>
 
-      <SectionCard title="🎯 目標シートの言葉" srcLabel="goal_sheets（既存）">
+      <SectionCard title="目標シートの言葉" icon={<TargetIcon size={15} />}>
         {goal.shortTerm || goal.longTerm || goal.selfImage || goal.adminNotes ? (
           <div className="space-y-2.5">
             {goal.longTerm && <WordLine tag="長期目標" text={goal.longTerm} />}
@@ -656,30 +679,18 @@ function WordLine({
 
 function SectionCard({
   title,
-  srcLabel,
-  srcNew,
+  icon,
   children,
 }: {
   title: string;
-  srcLabel?: string;
-  srcNew?: boolean;
+  icon?: ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <div className="bg-white border border-[#e8ebe9] rounded-[11px] overflow-hidden">
       <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[#f1f3f2] text-[12.5px] font-bold bg-[#fafbfa]">
+        {icon && <span className="text-[#00897b] flex-shrink-0">{icon}</span>}
         {title}
-        {srcLabel && (
-          <span
-            className={`ml-auto text-[9px] font-semibold rounded px-1.5 py-px ${
-              srcNew
-                ? "text-[#9a3412] bg-[#ffedd5]"
-                : "text-[#00695c] bg-[#e0f2f1]"
-            }`}
-          >
-            {srcLabel}
-          </span>
-        )}
       </div>
       <div className="px-4 py-3.5">{children}</div>
     </div>
@@ -747,7 +758,7 @@ function FbBar({
         <div className="rounded-md border border-[#f0e2b8] bg-[#fffbeb] px-2.5 py-1 text-[10.5px] leading-snug text-[#8a6d1a]">
           いま書けるのは
           <b>{detail.isBeta ? "体重・学習・食事・トレ・生活" : "体重・学習"}</b>
-          の話題まで{detail.isBeta ? "です" : "です（食事・生活は P4/P6 公開後）"}
+          の話題まで{detail.isBeta ? "です" : "です（この受講生の食事・生活はまだ筋肉塾に来ていません）"}
         </div>
         <textarea
           value={body}
