@@ -20,3 +20,11 @@ export function daysSinceDateJST(dateStr: string, nowMs: number = Date.now()): n
   if (Number.isNaN(a) || Number.isNaN(b)) return 0;
   return Math.round((b - a) / 86_400_000);
 }
+
+/** timestamptz(ISO文字列 or Date) の指す「JST暦日」から JSTの今日 までの経過日数。
+ *  ア2: joined_at / last_seen_at 等の timestamptz を JST基準の暦日差で数える(深夜のズレ防止)。 */
+export function daysSinceTsJST(ts: string | Date, nowMs: number = Date.now()): number {
+  const ms = typeof ts === "string" ? Date.parse(ts) : ts.getTime();
+  if (Number.isNaN(ms)) return 0;
+  return daysSinceDateJST(jstTodayStr(ms), nowMs);
+}

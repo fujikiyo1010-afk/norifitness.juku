@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { daysSinceDateJST } from "@/lib/date/jst";
+import { daysSinceDateJST, daysSinceTsJST } from "@/lib/date/jst";
 
 /**
  * 管理画面 アラートタグ集計
@@ -104,27 +104,36 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
   const admin = createAdminClient();
   const now = new Date();
 
-  // 受講生一覧
-  const { data: users } = await admin
+  // 受講生一覧(ア1: 退塾者を除外＝在籍中 status='active' のみ)
+  const { data: allUsers } = await admin
     .from("users")
     .select("id, name, joined_at, last_seen_at")
+    .eq("status", "active")
     .order("joined_at", { ascending: false });
 
-  if (!users || users.length === 0) return [];
+  if (!allUsers || allUsers.length === 0) return [];
 
   // 関連データを並列取得
-  const [audits, cartes, sheets, lessons, authList, bodyMetrics] =
+  const [audits, cartes, sheets, lessons, authList, bodyMetrics, adminRows] =
     await Promise.all([
       admin.from("monthly_audits").select("user_id, target_month, submitted_at"),
       admin.from("user_workout_carte").select("user_id"),
       admin.from("goal_sheets").select("user_id"),
-      admin.from("lesson_progress").select("user_id").eq("is_completed", true),
+      // ア3: 「未着手」は完了0件でなく着手(lesson_progressの行)0件で判定する
+      admin.from("lesson_progress").select("user_id"),
       admin.auth.admin.listUsers({ perPage: 1000 }),
       admin
         .from("body_metrics")
         .select("user_id, recorded_at, weight_kg")
         .order("recorded_at", { ascending: false }),
+      // ア1: 管理者ロールは受講生集計から除外(テスト垢がprodに現れても除外)
+      admin.from("admin_users").select("id"),
     ]);
+
+  // ア1: 管理者を受講生一覧から除外
+  const adminIds = new Set((adminRows.data ?? []).map((a) => a.id as string));
+  const users = allUsers.filter((u) => !adminIds.has(u.id));
+  if (users.length === 0) return [];
 
   // 高速ルックアップ用の Set / Map
   const carteUserIds = new Set(cartes.data?.map((c) => c.user_id) ?? []);
@@ -181,8 +190,8 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
 
   return users.map((user) => {
     const tags: AlertTag[] = [];
-    const joinedAt = new Date(user.joined_at);
-    const daysSinceJoined = daysBetween(joinedAt, now);
+    // ア2: 入会からの経過は JST暦日で数える(UTC直だと深夜に1日ズレる)
+    const daysSinceJoined = daysSinceTsJST(user.joined_at as string);
 
     // 1-2. 月次未提出 (期限間近 / 期限後)
     const userAudits = auditsByUser.get(user.id) ?? [];
@@ -266,7 +275,7 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
     // 7. 最終利用(C: last_sign_in_at と last_seen_at の新しい方・閾値7日は据え置き)
     const lastActivity = lastActivityByUser.get(user.id);
     if (lastActivity) {
-      const daysSinceActivity = daysBetween(lastActivity, now);
+      const daysSinceActivity = daysSinceTsJST(lastActivity); // ア2: JST暦日
       if (daysSinceActivity >= ALERT_THRESHOLDS.NO_LOGIN_DAYS) {
         tags.push({
           key: "long_no_login",
@@ -276,11 +285,11 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
       }
     }
 
-    // 8. 学習未着手
+    // 8. 学習 記録なし(ア3: 完了0件でなく着手0件で判定)
     if (!learningUserIds.has(user.id) && daysSinceJoined >= ALERT_THRESHOLDS.NO_LEARNING_DAYS) {
       tags.push({
         key: "no_learning",
-        label: "学習未着手",
+        label: "学習 記録なし",
         severity: "warn",
       });
     }
