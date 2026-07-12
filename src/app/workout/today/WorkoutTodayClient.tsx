@@ -895,13 +895,14 @@ function AddExerciseSheet({
   const exactHit = candidates.some((c) => c.確定代表名 === query);
 
   return (
-    <div className="space-y-3">
+    <div className="flex max-h-[58vh] flex-col">
+      {/* T1: 検索入力欄はシート上部に固定(shrink-0)・スクロールするのは候補リストだけ */}
       <input
         autoFocus
         value={q}
         onChange={(e) => setQ(e.target.value)}
         placeholder="種目名で検索（例: サ → サイドレイズ）"
-        className="h-11 w-full rounded-lg border border-[#e7dcc9] bg-white px-3 text-[14px] focus:border-[#4a875b] focus:outline-none"
+        className="h-11 w-full shrink-0 rounded-lg border border-[#e7dcc9] bg-white px-3 text-[14px] focus:border-[#4a875b] focus:outline-none"
       />
 
       {query.length === 0 ? (
@@ -909,7 +910,7 @@ function AddExerciseSheet({
           種目名を入力すると、動画のある種目が候補に出ます。
         </p>
       ) : (
-        <div className="space-y-1.5">
+        <div className="mt-3 flex-1 space-y-1.5 overflow-y-auto pr-0.5">
           {candidates.map((c) => (
             <button
               key={c.確定代表名}
