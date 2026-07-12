@@ -281,8 +281,8 @@ export function WorkoutTodayClient({
 
       {/* 点6: 再配布予告バッジ(M14) */}
       {pending && !feedbackLocked && (
-        <div className="truncate rounded-xl border border-[#f0e2b8] bg-[#fffbeb] px-3.5 py-2.5 text-[11.5px] font-bold text-[#8a6d1a]">
-          新しいメニューが届いています（あと{daysLeft}日で切替）
+        <div className="rounded-xl border border-[#f0e2b8] bg-[#fffbeb] px-3.5 py-2.5 text-[11.5px] font-bold leading-relaxed text-[#8a6d1a]">
+          新しいメニューが届いています ・ いまの7日間が終わったら切り替わります（あと{daysLeft}日）
         </div>
       )}
 
