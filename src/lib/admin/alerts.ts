@@ -13,7 +13,7 @@ import { daysSinceDateJST } from "@/lib/date/jst";
  *   ✅ goal_sheet_blank (目標シート空 ・ 入塾3日で warn)
  *   ✅ weight_gain (体重増加 ・ ベスト〔最低〕記録から +3kg で warn)
  *   ✅ body_metrics_stalled (体組成 5日記録なし / 未記入は入会5日 ・ warn)
- *   ✅ long_no_login (最終ログイン 7日放置 ・ warn)
+ *   ✅ long_no_login (最終利用 7日放置 ・ warn)
  *   ✅ no_learning (学習 14日未着手 ・ warn)
  *
  * 閾値はコード直書き (Phase 4 で /admin/settings/alerts から変更可能化予定)
@@ -65,7 +65,7 @@ export const ALERT_THRESHOLDS = {
   CARTE_BLANK_DAYS: 1,
   /** 目標シート空: 入塾後 N 日経過で警告 */
   GOAL_SHEET_BLANK_DAYS: 3,
-  /** 最終ログイン: N 日前で警告 */
+  /** 最終利用: N 日前で警告(last_sign_in_at と last_seen_at の新しい方) */
   NO_LOGIN_DAYS: 7,
   /** 学習未着手: 入塾後 N 日経過で警告 */
   NO_LEARNING_DAYS: 14,
@@ -107,7 +107,7 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
   // 受講生一覧
   const { data: users } = await admin
     .from("users")
-    .select("id, name, joined_at")
+    .select("id, name, joined_at, last_seen_at")
     .order("joined_at", { ascending: false });
 
   if (!users || users.length === 0) return [];
@@ -130,12 +130,18 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
   const carteUserIds = new Set(cartes.data?.map((c) => c.user_id) ?? []);
   const sheetUserIds = new Set(sheets.data?.map((s) => s.user_id) ?? []);
   const learningUserIds = new Set(lessons.data?.map((l) => l.user_id) ?? []);
-  const lastLoginByUser = new Map<string, Date>();
-  for (const u of authList.data?.users ?? []) {
-    if (u.last_sign_in_at) {
-      lastLoginByUser.set(u.id, new Date(u.last_sign_in_at));
-    }
-  }
+  // C: 最終利用 = max(last_sign_in_at[認証], last_seen_at[アプリを開いた点])。
+  // アプリを開いただけでは last_sign_in_at は更新されないため、両者の新しい方を採る。
+  const lastActivityByUser = new Map<string, Date>();
+  const bumpActivity = (id: string, ts: string | null | undefined) => {
+    if (!ts) return;
+    const d = new Date(ts);
+    if (Number.isNaN(d.getTime())) return;
+    const cur = lastActivityByUser.get(id);
+    if (!cur || d > cur) lastActivityByUser.set(id, d);
+  };
+  for (const u of authList.data?.users ?? []) bumpActivity(u.id, u.last_sign_in_at);
+  for (const u of users) bumpActivity(u.id, (u as { last_seen_at?: string | null }).last_seen_at);
   // ユーザーごとの月次提出状況 (target_month 降順、 未提出を優先)
   const auditsByUser = new Map<string, { target_month: string; submitted_at: string | null }[]>();
   for (const a of audits.data ?? []) {
@@ -257,14 +263,14 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
       });
     }
 
-    // 7. 最終ログイン
-    const lastLogin = lastLoginByUser.get(user.id);
-    if (lastLogin) {
-      const daysSinceLogin = daysBetween(lastLogin, now);
-      if (daysSinceLogin >= ALERT_THRESHOLDS.NO_LOGIN_DAYS) {
+    // 7. 最終利用(C: last_sign_in_at と last_seen_at の新しい方・閾値7日は据え置き)
+    const lastActivity = lastActivityByUser.get(user.id);
+    if (lastActivity) {
+      const daysSinceActivity = daysBetween(lastActivity, now);
+      if (daysSinceActivity >= ALERT_THRESHOLDS.NO_LOGIN_DAYS) {
         tags.push({
           key: "long_no_login",
-          label: `最終ログイン ${daysSinceLogin} 日前`,
+          label: `最終利用 ${daysSinceActivity} 日前`,
           severity: "warn",
         });
       }
