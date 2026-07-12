@@ -43,3 +43,20 @@ export async function markRepliesRead(): Promise<void> {
     .eq("type", "comment")
     .eq("is_read", false);
 }
+
+/** 総3: 未読「お知らせ(announcement)」を既読にする。お知らせ一覧を開いた時に呼ぶ。 */
+export async function markAnnouncementsRead(): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const admin = createAdminClient();
+  await admin
+    .from("notifications")
+    .update({ is_read: true })
+    .eq("user_id", user.id)
+    .eq("type", "announcement")
+    .eq("is_read", false);
+}
