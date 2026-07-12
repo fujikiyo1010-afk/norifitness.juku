@@ -25,16 +25,14 @@ export default function NotificationsPage() {
       <div className="rounded-[10px] border border-[#e8ebe9] bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] p-4 mb-4 text-xs text-[#004d40] leading-relaxed">
         <b className="block mb-1">画面内バッジは既に有効</b>
         サイドナビ・ホーム KPI に件数バッジが表示されています。 メール通知の
-        ON/OFF 設定は次のフェーズで実装します。
+        ON/OFF 設定は近日ご用意します。
       </div>
 
       <div className="rounded-[10px] border border-dashed border-[#e8ebe9] bg-white px-6 py-12 text-center">
-        <div className="text-sm font-bold text-zinc-900 mb-2">準備中</div>
-        <div className="text-xs text-zinc-500 leading-relaxed mb-4">
-          メール通知トグル + daily まとめ送信機能は Phase 3 内 別タスクで実装予定。
-        </div>
-        <div className="inline-block text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-1.5">
-          実装予定: 新規入会通知 (即時) + 重要アラート daily まとめ (毎朝)
+        <div className="text-sm font-bold text-zinc-900 mb-2">この機能はまだご用意していません</div>
+        <div className="text-xs text-zinc-500 leading-relaxed">
+          メール通知の切り替えと、毎朝のまとめ送信は近日ご用意します。<br />
+          いまはサイドナビとホームの件数バッジで、対応が必要な件数を確認できます。
         </div>
       </div>
     </div>

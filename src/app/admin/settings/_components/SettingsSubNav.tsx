@@ -11,6 +11,7 @@ type Item = {
   badge?: string;
 };
 
+// 管3/★3: 未実装の「テンプレート」「通知設定」はナビから隠す(ページのコードは残置)。
 const items: Item[] = [
   {
     label: "プロフィール",
@@ -18,22 +19,9 @@ const items: Item[] = [
     icon: <UserIcon />,
   },
   {
-    label: "テンプレート",
-    href: "/admin/settings/templates",
-    icon: <TemplateIcon />,
-    badge: "準備中",
-  },
-  {
-    label: "通知設定",
-    href: "/admin/settings/notifications",
-    icon: <BellIcon />,
-    badge: "準備中",
-  },
-  {
     label: "アカウント",
     href: "/admin/settings/account",
     icon: <LockIcon />,
-    badge: "近日",
   },
 ];
 
@@ -81,23 +69,6 @@ function UserIcon() {
     <svg {...iconProps}>
       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
       <circle cx="12" cy="7" r="4" />
-    </svg>
-  );
-}
-
-function TemplateIcon() {
-  return (
-    <svg {...iconProps}>
-      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-    </svg>
-  );
-}
-
-function BellIcon() {
-  return (
-    <svg {...iconProps}>
-      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
     </svg>
   );
 }

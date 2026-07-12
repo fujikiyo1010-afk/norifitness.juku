@@ -24,13 +24,10 @@ export default function TemplatesPage() {
       </p>
 
       <div className="rounded-[10px] border border-dashed border-[#e8ebe9] bg-white px-6 py-12 text-center">
-        <div className="text-sm font-bold text-zinc-900 mb-2">準備中</div>
-        <div className="text-xs text-zinc-500 leading-relaxed mb-4">
-          テンプレート CRUD 機能は Phase 3 内 別タスクで実装予定。<br />
-          現状はリクエスト返信フォームにハードコードされており、 動作はします。
-        </div>
-        <div className="inline-block text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-1.5">
-          実装予定: 3 カテゴリ (月次添削 / リクエスト返答 / ウェルカム)
+        <div className="text-sm font-bold text-zinc-900 mb-2">この機能はまだご用意していません</div>
+        <div className="text-xs text-zinc-500 leading-relaxed">
+          定型文の管理画面は近日ご用意します。<br />
+          いまはリクエストの返信フォームに定型文が入っているので、返信自体は問題なくできます。
         </div>
       </div>
     </div>

@@ -13,9 +13,10 @@ export default function AccountPage() {
       </p>
 
       <div className="rounded-[10px] border border-dashed border-[#e8ebe9] bg-white px-6 py-12 text-center">
-        <div className="text-sm font-bold text-zinc-900 mb-2">近日リリース</div>
+        <div className="text-sm font-bold text-zinc-900 mb-2">近日ご用意します</div>
         <div className="text-xs text-zinc-500 leading-relaxed">
-          現状は Supabase Dashboard でアカウント管理を行います。
+          パスワードの変更などをこの画面から行えるようにする予定です。<br />
+          それまでに変更が必要なときは、きよむさんにご相談ください。
         </div>
       </div>
     </div>
