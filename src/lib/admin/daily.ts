@@ -46,15 +46,14 @@ export async function getDailyQueue(
   const admin = createAdminClient();
   // S2-A: usersWithAlerts は重い全件スキャン。呼び出し元が既に取得済みなら再実行しない
   // (未指定なら従来どおり自前取得＝後方互換)。
-  // A: 「記録あり」判定のため、表示日の記録4種(食事/トレ/生活/体組成)も同じ並列バッチで取得。
-  //   S2の思想を守り N+1 を作らず、各テーブル1クエリ(その日の user_id + 記録時刻)だけ足す。
-  const [usersWithAlerts, fbRes, mealRes, workoutRes, condRes, bodyRes] = await Promise.all([
+  // 件0(2026-07-13 きよむ確定): 「記録あり」に浮上させるのは添削の主戦場=食事とトレの2つだけ。
+  //   生活(daily_conditions)・体組成(body_metrics)は浮上条件から外す(取得もしない=軽くなる)。
+  //   ※体組成・生活はパネルの状態ストリップ・上部カードで引き続き見える(浮上の合図にしないだけ)。
+  const [usersWithAlerts, fbRes, mealRes, workoutRes] = await Promise.all([
     preUsers ?? listUsersWithAlerts(),
     admin.from("daily_feedbacks").select("user_id").eq("date", dateStr),
     admin.from("meal_logs").select("user_id, posted_at").eq("date", dateStr),
     admin.from("user_workout_logs").select("user_id, completed_at, created_at").eq("date", dateStr),
-    admin.from("daily_conditions").select("user_id, created_at").eq("date", dateStr),
-    admin.from("body_metrics").select("user_id, created_at").eq("recorded_at", dateStr),
   ]);
   const doneSet = new Set((fbRes.data ?? []).map((r) => r.user_id as string));
 
@@ -71,8 +70,6 @@ export async function getDailyQueue(
   for (const r of mealRes.data ?? []) bump(r.user_id as string, r.posted_at as string);
   for (const r of workoutRes.data ?? [])
     bump(r.user_id as string, (r.completed_at as string) ?? (r.created_at as string));
-  for (const r of condRes.data ?? []) bump(r.user_id as string, r.created_at as string);
-  for (const r of bodyRes.data ?? []) bump(r.user_id as string, r.created_at as string);
 
   const recorded: DailyQueueItem[] = [];
   const attention: DailyQueueItem[] = [];
