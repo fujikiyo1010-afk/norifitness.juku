@@ -67,7 +67,9 @@ export function HomeBeta({
   const doneMeals = MEAL_ORDER.filter((t) => today.mealTypes.includes(t));
   const remainMeals = MEAL_ORDER.filter((t) => !today.mealTypes.includes(t));
   const mealTitle = today.recordedMeal
-    ? `${doneMeals.join("・")}を記録${remainMeals.length > 0 ? `／残り ${remainMeals.map((t) => MEAL_REMAIN_LABEL[t]).join("・")}` : "（そろいました）"}`
+    ? remainMeals.length > 0
+      ? `${doneMeals.join("・")}を記録／残り ${remainMeals.map((t) => MEAL_REMAIN_LABEL[t]).join("・")}`
+      : `${doneMeals.join("・")} 記録済` // 全4項目そろい時は短く「朝・昼・夕・間 記録済」(見切れ対策)
     : "今日の食事を記録しよう";
 
   return (
