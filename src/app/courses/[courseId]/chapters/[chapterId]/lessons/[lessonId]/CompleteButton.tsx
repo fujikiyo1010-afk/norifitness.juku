@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { setLessonProgress } from "@/lib/courses/progress-actions";
+import { CheckCircleIcon, XCircleIcon } from "@/components/icons";
 
 export function CompleteButton({
   lessonId,
@@ -66,7 +67,7 @@ export function CompleteButton({
       <div className="rounded-lg border border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950 p-4 space-y-3">
         {toastEl}
         <div className="flex items-center gap-2 text-emerald-900 dark:text-emerald-100">
-          <span className="text-2xl">✅</span>
+          <CheckCircleIcon size={26} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
           <div>
             <p className="font-semibold">学習完了</p>
             <p className="text-xs text-emerald-700 dark:text-emerald-300">
@@ -83,7 +84,10 @@ export function CompleteButton({
           {pending ? "更新中…" : "未完了に戻す"}
         </button>
         {error && (
-          <p className="text-xs text-red-700 dark:text-red-300">❌ {error}</p>
+          <p className="flex items-center gap-1.5 text-xs text-red-700 dark:text-red-300">
+            <XCircleIcon size={13} className="shrink-0" />
+            <span>{error}</span>
+          </p>
         )}
       </div>
     );
@@ -101,7 +105,10 @@ export function CompleteButton({
         {pending ? "保存中…" : "✓ 学習完了にする"}
       </button>
       {error && (
-        <p className="text-xs text-red-700 dark:text-red-300">❌ {error}</p>
+        <p className="flex items-center gap-1.5 text-xs text-red-700 dark:text-red-300">
+          <XCircleIcon size={13} className="shrink-0" />
+          <span>{error}</span>
+        </p>
       )}
     </div>
   );

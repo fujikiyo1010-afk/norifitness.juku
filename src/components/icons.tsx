@@ -339,3 +339,58 @@ export function ScaleIcon(p: IconProps) {
     </Svg>
   );
 }
+
+/* ===== 件C(2026-07-13): レッスン画面の絵文字を線画SVGへ置換するための追加分 ===== */
+
+// 💾 保存(フロッピー)
+export function SaveIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M5 3.5h11L20.5 8v10.5a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1Z" />
+      <path d="M7.5 3.5v5h7v-5" />
+      <rect x="7.5" y="12" width="9" height="7.5" rx="0.5" />
+    </Svg>
+  );
+}
+
+// 💡 ヒント(電球)
+export function LightbulbIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M9 18h6" />
+      <path d="M10 21h4" />
+      <path d="M12 3a6 6 0 0 0-3.8 10.6c.5.4.8 1 .8 1.7V16h6v-.7c0-.7.3-1.3.8-1.7A6 6 0 0 0 12 3Z" />
+    </Svg>
+  );
+}
+
+// 🚀 ロケット(挑戦/試す)
+export function RocketIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M12 3c3 1 5.5 4 5.5 8 0 2-.6 3.7-1.5 5h-8c-.9-1.3-1.5-3-1.5-5 0-4 2.5-7 5.5-8Z" />
+      <circle cx="12" cy="9.5" r="1.6" />
+      <path d="M8 16c-1.6.6-2.5 2-2.7 4 2-.2 3.4-1.1 4-2.7M16 16c1.6.6 2.5 2 2.7 4-2-.2-3.4-1.1-4-2.7" />
+    </Svg>
+  );
+}
+
+// ❌ エラー(×丸)
+export function XCircleIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="m9 9 6 6M15 9l-6 6" />
+    </Svg>
+  );
+}
+
+// ⚠️ 警告(三角)
+export function AlertTriangleIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M10.3 3.9 2.4 17.5a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+      <path d="M12 9v4.5M12 17h.01" />
+    </Svg>
+  );
+}

@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createAction } from "@/lib/practice/actions";
+import { RocketIcon } from "@/components/icons";
 
 /**
  * レッスン詳細ページの「今週これを試す」 入力欄 (2026-06-18 線① #5)
@@ -41,8 +42,8 @@ export function PracticeInput({
         <span className="text-[#6a6256] text-sm shrink-0">
           {isOpen ? "▼" : "▶"}
         </span>
-        <span className="text-base font-semibold text-[#2b2620]">
-          🚀 今週これを試す
+        <span className="inline-flex items-center gap-1.5 text-base font-semibold text-[#2b2620]">
+          <RocketIcon size={16} className="shrink-0" />今週これを試す
         </span>
         <span className="text-xs text-[#6a6256]">(任意)</span>
         {existingCount > 0 && !isOpen && (
