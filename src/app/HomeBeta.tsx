@@ -1,8 +1,11 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import type { BodyCard } from "@/lib/member/body-card";
 import type { BoardItem } from "@/lib/member/board";
 import type { LastWatchedLesson } from "@/lib/member/last-watched";
 import type { TodayActivity } from "@/lib/member/today-activity";
+import type { MemberAlert, MemberAlertKey } from "@/lib/member/alerts";
+import { DocIcon, TargetIcon, BarIcon, BellIcon } from "@/components/icons";
 
 /**
  * 受講生ホーム 確定7/7版(P3・v1・ベータ限定)。
@@ -32,6 +35,7 @@ export function HomeBeta({
   boardItems,
   unreadReply,
   today,
+  alerts,
   workoutDayNumber = null,
   workoutPartLabel = null,
 }: {
@@ -46,6 +50,7 @@ export function HomeBeta({
   boardItems: BoardItem[];
   unreadReply: boolean;
   today: TodayActivity;
+  alerts: MemberAlert[]; // 件1: 未記入誘導の黄バナー(旧ホームから移植・該当解消で消える)
   workoutDayNumber?: number | null; // トレカード「◯日目」
   workoutPartLabel?: string | null; // トレカード タイトル=メニュー名(部位ラベル)
 }) {
@@ -111,6 +116,11 @@ export function HomeBeta({
 
         {/* 件J: ホームのセクション間余白を約2/3(gap-3→gap-2)。ゾーン内部・カード内部は不変 */}
         <div className="px-4 pt-0.5 pb-4 flex flex-col gap-2">
+          {/* 件1: 未記入誘導の黄バナー(旧ホームから移植)。挨拶の下・掲示板の上。該当解消で消える。 */}
+          {alerts.map((alert) => (
+            <NoticeBanner key={alert.key} alert={alert} />
+          ))}
+
           {/* 掲示板「のりfitnessから」 */}
           {boardItems.length > 0 && (
             <BoardCard items={boardItems} unreadReply={unreadReply} />
@@ -694,5 +704,70 @@ function FlameIcon({ size = 13 }: { size?: number }) {
     >
       <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
     </svg>
+  );
+}
+
+// =====================================================================
+// 件1: 未記入誘導の黄バナー(旧ホーム page.tsx から転写・文言/条件/hrefそのまま)
+// =====================================================================
+type AlertConfig = {
+  strong: string | ((alert: MemberAlert) => string);
+  tail: string;
+  href: string;
+  icon: ReactNode;
+};
+
+const ALERT_CONFIG: Record<MemberAlertKey, AlertConfig> = {
+  carte_blank: {
+    strong: "カルテが未記入",
+    tail: "です。専用メニュー作成のために記入を",
+    href: "/workout/carte/new",
+    icon: <DocIcon />,
+  },
+  goal_sheet_blank: {
+    strong: "目標管理シートが未記入",
+    tail: "です。タップして設定しましょう",
+    href: "/goal-sheet",
+    icon: <TargetIcon />,
+  },
+  body_metrics_missing: {
+    strong: "体組成 まだ記録なし",
+    tail: "。基準値を記録しましょう",
+    href: "/record",
+    icon: <BarIcon />,
+  },
+  body_metrics_stalled: {
+    strong: (alert) =>
+      `体組成の記録が止まっています (最後 ${alert.daysSinceLatest ?? "?"} 日前)`,
+    tail: "。記録しましょう",
+    href: "/record",
+    icon: <BarIcon />,
+  },
+  notification_off: {
+    strong: "通知が OFF です",
+    tail: "。タップして 設定 → 通知 で ON にしましょう",
+    href: "/account",
+    icon: <BellIcon />,
+  },
+};
+
+function NoticeBanner({ alert }: { alert: MemberAlert }) {
+  const cfg = ALERT_CONFIG[alert.key];
+  const strong =
+    typeof cfg.strong === "function" ? cfg.strong(alert) : cfg.strong;
+  return (
+    <Link
+      href={cfg.href}
+      className="px-3.5 py-3 bg-gradient-to-br from-[rgba(255,235,59,0.18)] to-[rgba(255,235,59,0.10)] border border-[rgba(255,235,59,0.55)] rounded-[10px] flex items-center gap-2.5 text-[12px] text-[#2b2620]"
+    >
+      <span className="flex-shrink-0 w-[18px] h-[18px] text-zinc-700">
+        {cfg.icon}
+      </span>
+      <span className="flex-1">
+        <b className="text-[#b8860b] font-bold">{strong}</b>
+        {cfg.tail}
+      </span>
+      <span className="text-[#b8860b] font-mono font-bold">→</span>
+    </Link>
   );
 }

@@ -170,6 +170,7 @@ export default async function Home() {
         boardItems={boardItems}
         unreadReply={unreadReply}
         today={todayActivity}
+        alerts={alerts}
       />
     );
   }
