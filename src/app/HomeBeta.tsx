@@ -106,7 +106,8 @@ export function HomeBeta({
           </div>
         </section>
 
-        <div className="px-4 pt-0.5 pb-4 flex flex-col gap-3">
+        {/* 件J: ホームのセクション間余白を約2/3(gap-3→gap-2)。ゾーン内部・カード内部は不変 */}
+        <div className="px-4 pt-0.5 pb-4 flex flex-col gap-2">
           {/* 掲示板「のりfitnessから」 */}
           {boardItems.length > 0 && (
             <BoardCard items={boardItems} unreadReply={unreadReply} />
