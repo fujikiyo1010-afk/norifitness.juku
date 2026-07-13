@@ -980,17 +980,7 @@ function SummaryPanel({
         {s.learn.total > 0 ? `${s.learn.completed}/${s.learn.total}` : "—"}
         {s.learn.latestLabel && ` ・ 直近 ${s.learn.latestLabel}`}
       </SumRow>
-
-      {/* 前回FB */}
-      <SumRow label="前回FB">
-        {s.prevFeedback ? (
-          <span className="text-zinc-500">
-            「{s.prevFeedback.quote}」({mdLabel(s.prevFeedback.date)})
-          </span>
-        ) : (
-          "—"
-        )}
-      </SumRow>
+      {/* 前回FB行は撤去(2026-07-13): 入力欄の横=FBバー左「前回のフィードバック」枠に既にあるため */}
     </div>
   );
 }
