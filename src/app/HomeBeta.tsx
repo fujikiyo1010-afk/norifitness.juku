@@ -89,15 +89,16 @@ export function HomeBeta({
 
         {/* 挨拶ヒーロー */}
         <section className="bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] px-5 py-[20px]">
-          <div className="flex items-start justify-between gap-2">
-            <h1 className="text-[18px] font-bold text-[#2b2620]">
+          {/* 件E(2026-07-13): 挨拶+継続ピルは必ず横1行(改行禁止)。長い名前は挨拶側をtruncate。 */}
+          <div className="flex items-center justify-between gap-2">
+            <h1 className="min-w-0 truncate text-[18px] font-bold text-[#2b2620]">
               こんにちは、{displayName} さん
             </h1>
-            {/* 点20: 炎+継続◯日目(0日は出さない)。件E(2026-07-13): 挨拶と同格に拡大(文字16px・炎18) */}
+            {/* 点20: 炎+継続◯日目(0日は出さない)。挨拶と同格に拡大(文字16px・炎18) */}
             {streakDays > 0 && (
-              <div className="mt-0.5 flex flex-shrink-0 items-center gap-1.5 rounded-full bg-[#fff3e0] px-3 py-1.5">
+              <div className="flex flex-shrink-0 items-center gap-1.5 rounded-full bg-[#fff3e0] px-3 py-1.5">
                 <FlameIcon size={18} />
-                <span className="text-[16px] font-extrabold text-[#c2693f]">
+                <span className="whitespace-nowrap text-[16px] font-extrabold text-[#c2693f]">
                   継続 {streakDays} 日目
                 </span>
               </div>
