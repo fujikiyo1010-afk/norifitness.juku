@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendAnnouncementBatch } from "@/lib/email/announcement";
+import { sendPushToUser } from "@/lib/push/send";
 
 /**
  * 一斉アナウンス Server Actions (2026-06-18 C-1 ・ 線①)
@@ -135,6 +136,17 @@ export async function sendAnnouncement(
   if (notiRows.length > 0) {
     const { error: notiErr } = await supabase.from("notifications").insert(notiRows);
     if (notiErr) console.error("[announcement] notification insert failed", notiErr);
+  }
+
+  // OSプッシュ（お知らせバナー）。配信先ごとに1件。着地=お知らせ詳細。
+  // prod専用（devは push_subscriptions 無しで実質no-op）。失敗が送信本体を巻き込まないよう catch。
+  const annBody = (row.body_text as string) ?? "";
+  for (const u of users ?? []) {
+    void sendPushToUser((u as { id: string }).id, {
+      title: row.subject as string,
+      body: annBody.length > 60 ? `${annBody.slice(0, 60)}…` : annBody,
+      url: `/notices/${id}`,
+    }).catch(() => {});
   }
 
   revalidatePath("/admin/announcements");
