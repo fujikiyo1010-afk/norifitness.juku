@@ -342,10 +342,8 @@ function BodyBigCard({ bodyCard }: { bodyCard: BodyCard }) {
       href="/record"
       className="group block rounded-[14px] border border-[#e7dcc9] bg-[#fffdf8] px-[13px] py-3 hover:border-[#4a875b] transition-colors"
     >
-      <div className="mb-1.5 flex items-center justify-between">
-        <span className="text-[11px] font-bold text-[#6a6256]">今のからだ</span>
-        <span className="text-[10px] font-bold text-[#4a875b]">詳細・グラフ →</span>
-      </div>
+      {/* 2026-07-13: 「今のからだ」ラベルと「詳細・グラフ →」の行を削除し、その分カードを縮小
+          (カード全体が /record リンク＋下部ボタンで導線は担保) */}
       {bodyCard.hasData ? (
         <>
           <div className="flex items-end gap-3">
