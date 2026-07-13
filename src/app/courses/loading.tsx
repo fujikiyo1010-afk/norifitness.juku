@@ -1,13 +1,10 @@
-import { SkeletonHeader, SkeletonCards } from "@/components/Skeleton";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
-// コース一覧 / コース詳細 / レッスンの待ち画面 (= 進捗バー付きカード)
+// コース一覧 / コース詳細 / レッスンの待ち画面 = くるくるのみ・文字なし。発動条件は不変。
 export default function CoursesLoading() {
   return (
-    <main className="loading-gate flex flex-1 flex-col bg-[#f9f5ed]">
-      <SkeletonHeader />
-      <div className="mx-auto w-full max-w-[460px] flex-1 p-4 sm:p-6">
-        <SkeletonCards count={4} />
-      </div>
+    <main className="loading-gate flex flex-1 items-center justify-center bg-[#f9f5ed] text-[#4a875b] min-h-[60vh]">
+      <LoadingSpinner size={40} />
     </main>
   );
 }
