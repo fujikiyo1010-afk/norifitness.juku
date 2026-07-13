@@ -101,11 +101,9 @@ export function MessagesClient({
         <div ref={bottomRef} />
       </div>
 
-      {/* 送信フォーム (flex-shrink-0 ・ 画面下端ピッタリ ・ iPhone safe-area 対応) */}
-      <div
-        className="border-t border-[#d3dac8] bg-[#fffdf8] px-3 py-2.5 flex-shrink-0"
-        style={{ paddingBottom: "max(env(safe-area-inset-bottom), 10px)" }}
-      >
+      {/* 送信フォーム (flex-shrink-0)。 2026-07-13: 下部ナビの真上に配置。
+          safe-area は下のナビが担うため、ここは通常の余白のみ。 */}
+      <div className="border-t border-[#d3dac8] bg-[#fffdf8] px-3 py-2.5 flex-shrink-0">
         <div className="flex items-end gap-2">
           <textarea
             value={text}

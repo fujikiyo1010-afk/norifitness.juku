@@ -63,7 +63,11 @@ export default async function MessagesPage() {
   return (
     <>
       <RefreshOnFocus />
-      <div className="flex flex-col h-[100dvh] bg-[#e8efe1]">
+      {/* 2026-07-13: 下部ナビ表示に伴い、高さを「画面 - ナビ高さ」に。入力欄がナビの真上に収まる。 */}
+      <div
+        className="flex flex-col bg-[#e8efe1]"
+        style={{ height: "calc(100dvh - 60px - env(safe-area-inset-bottom))" }}
+      >
       <MemberHeader title="チャット" fallbackHref="/" />
       <div className="mx-auto w-full max-w-[460px] flex-1 flex flex-col min-h-0">
         {/* 説明 (= flex-shrink-0) */}
