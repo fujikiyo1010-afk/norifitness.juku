@@ -87,8 +87,9 @@ export function HomeBeta({
           </Link>
         </header>
 
-        {/* 挨拶ヒーロー (件I: 下余白を詰めて掲示板とほぼ密着) */}
-        <section className="bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] px-5 pt-[20px] pb-0.5">
+        {/* 挨拶ヒーロー (件I改・2026-07-13: グラデ帯の上下余白を14px均等にし文字を縦中央へ。
+            掲示板との隙間はそこそこ近いまま=案A) */}
+        <section className="bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] px-5 py-3.5">
           {/* 件E(2026-07-13): 挨拶+継続ピルは必ず横1行(改行禁止)。長い名前は挨拶側をtruncate。 */}
           <div className="flex items-center justify-between gap-2">
             <h1 className="min-w-0 truncate text-[18px] font-bold text-[#2b2620]">
@@ -349,7 +350,7 @@ function BodyBigCard({ bodyCard }: { bodyCard: BodyCard }) {
         <>
           <div className="flex items-end gap-3">
             <div className="leading-none">
-              <span className="text-[42px] font-extrabold leading-none text-[#34603f]">
+              <span className="text-[42px] font-extrabold leading-none text-black">
                 {bodyCard.currentWeight?.toFixed(1) ?? "—"}
               </span>
               <span className="ml-0.5 text-[12px] font-bold text-[#6a6256]">kg</span>
