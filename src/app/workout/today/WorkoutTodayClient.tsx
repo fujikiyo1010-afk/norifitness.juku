@@ -511,8 +511,11 @@ export function WorkoutTodayClient({
         </div>
       )}
 
-      {/* 下部固定バー */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#e7dcc9] bg-[#f9f5ed]/95 px-4 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-3 backdrop-blur">
+      {/* 下部固定バー(2026-07-13: 下部ナビの真上に配置。safe-areaはナビ側が担う) */}
+      <div
+        className="fixed inset-x-0 z-40 border-t border-[#e7dcc9] bg-[#f9f5ed]/95 px-4 pb-3 pt-3 backdrop-blur"
+        style={{ bottom: "calc(60px + env(safe-area-inset-bottom))" }}
+      >
         <div className="mx-auto max-w-[460px] space-y-1.5">
           {confirmDiscard ? (
             // 点3: 編集破棄の確認

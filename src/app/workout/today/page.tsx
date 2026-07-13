@@ -172,7 +172,10 @@ function StartCard({ cycles }: { cycles: import("@/lib/workout/types").WorkoutCy
           </div>
         )}
       </div>
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#e7dcc9] bg-[#f9f5ed]/95 px-4 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-3 backdrop-blur">
+      <div
+        className="fixed inset-x-0 z-40 border-t border-[#e7dcc9] bg-[#f9f5ed]/95 px-4 pb-3 pt-3 backdrop-blur"
+        style={{ bottom: "calc(60px + env(safe-area-inset-bottom))" }}
+      >
         <div className="mx-auto max-w-[460px]">
           <StartWorkoutButton />
         </div>

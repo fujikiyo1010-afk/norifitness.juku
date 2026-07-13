@@ -42,8 +42,10 @@ const HIDDEN_PREFIXES = [
   "/debug",
   // /messages(チャット)は 2026-07-13 に下部ナビ表示へ変更(他画面と統一)。
   // ページ側を「100dvh - ナビ高さ」に縮め、入力欄がナビの真上に来るよう調整済み。
-  "/meals/new", // 食事投稿(P4-a): 下部固定「これで記録する」がナビと重ならないよう非表示
-  "/workout/today", // 実施記録(P5): 下部固定「今日のトレ完了」がナビと重ならないよう非表示
+  "/meals/new", // 旧・食事投稿(現在は/mealsへリダイレクトのみ。実投稿は/mealsのボトムシート)
+  // /workout/today(実施記録)は 2026-07-13 に下部ナビ表示へ変更(他画面と統一)。
+  // 固定の「今日のトレ完了/開始」バーはナビの上へ持ち上げ済み。
+  // 完了直後の祝福画面(?done=1)だけは、その画面自身が :root[data-hide-membernav] を立てて隠す。
 ];
 
 export function MemberBottomNav({ isBeta = false }: { isBeta?: boolean }) {
@@ -53,19 +55,25 @@ export function MemberBottomNav({ isBeta = false }: { isBeta?: boolean }) {
 
   return (
     <>
+      {/* 下部ナビの一時非表示(2026-07-13): フルスクリーンの行き止まり画面(トレ完了 祝福 等)が
+          マウント中だけ :root に data-hide-membernav="1" を立て、ナビ本体とスペーサーを消す。
+          画面が消えた瞬間にナビが戻る(コンポーネントのライフサイクルに追随=取りこぼしなし)。
+          globals.css でなくここに置くのは、CSS も component と同じHMR単位で確実に反映させるため。 */}
+      <style>{`:root[data-hide-membernav="1"] .member-nav{display:none!important}`}</style>
+
       {/* スペーサー: タブの物理高さに合わせて末尾に確保 (= 末尾コンテンツが nav に隠れない保証)。
           ブラウザ通常: 60px (= nav 自身 55-60px をカバー)
           PWA + iPhone: 60 + safe-area-inset-bottom (= 34px) = 94px (= nav + ホームインジケータをカバー)
           2026-06-18 改: 固定 h-16 (64px) では PWA で隠れる問題があり動的計算に。 */}
       <div
         aria-hidden
-        className="flex-shrink-0"
+        className="member-nav flex-shrink-0"
         style={{
           height: "calc(60px + env(safe-area-inset-bottom))",
         }}
       />
 
-      <nav className="fixed bottom-0 inset-x-0 z-40 bg-[#fffdf8] border-t border-[#e7dcc9] safe-bottom">
+      <nav className="member-nav fixed bottom-0 inset-x-0 z-40 bg-[#fffdf8] border-t border-[#e7dcc9] safe-bottom">
         <div className="mx-auto max-w-md flex">
           {TABS.map((tab) => {
             const isActive = tab.exact
