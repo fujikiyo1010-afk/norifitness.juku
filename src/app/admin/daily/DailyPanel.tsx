@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { DailyDetail } from "@/lib/admin/daily";
@@ -714,33 +714,38 @@ function SectionCard({
 //   数値は DailyDetail の既存fetchのみ。符号は付けず「増/減」の語(ルール3)。
 //   7日/30日=実測差・目標まで=距離。今日の記録ピル=食事/トレ/生活/体組成。
 // =====================================================================
-function StateStrip({ detail, date }: { detail: DailyDetail; date: string }) {
-  const b = detail.body;
-
-  // 差分1つ分（例: 「7日で 0.7kg増」）。null は「7日 —」。0は「変わらず」。
-  const Delta = ({ label, v }: { label: string; v: number | null }) => {
-    if (v == null)
-      return (
-        <span className="text-zinc-400">
-          {label} —
-        </span>
-      );
-    if (v === 0)
-      return (
-        <span>
-          {label}で <span className="font-bold text-zinc-500">変わらず</span>
-        </span>
-      );
-    const up = v > 0; // 増=コーラル / 減=緑
+// ストリップの差分1つ分（例:「7日で 0.7kg増」）。null は「7日 —」・0は「変わらず」。
+function StripDelta({ label, v }: { label: string; v: number | null }) {
+  if (v == null) return <span className="text-zinc-400">{label} —</span>;
+  if (v === 0)
     return (
       <span>
-        {label}で{" "}
-        <span className={`font-bold ${up ? "text-[#c2693f]" : "text-[#34603f]"}`}>
-          {Math.abs(v)}kg{up ? "増" : "減"}
-        </span>
+        {label}で <span className="font-bold text-zinc-500">変わらず</span>
       </span>
     );
-  };
+  const up = v > 0; // 増=コーラル / 減=緑
+  return (
+    <span>
+      {label}で{" "}
+      <span className={`font-bold ${up ? "text-[#c2693f]" : "text-[#34603f]"}`}>
+        {Math.abs(v)}kg{up ? "増" : "減"}
+      </span>
+    </span>
+  );
+}
+
+function StateStrip({
+  detail,
+  date,
+  summaryCollapsed,
+  onExpandSummary,
+}: {
+  detail: DailyDetail;
+  date: string;
+  summaryCollapsed: boolean;
+  onExpandSummary: () => void;
+}) {
+  const b = detail.body;
 
   // 今日の記録ピル（記録あり=緑・✓ / 記録なし=グレー）。体組成は当日の記録日付一致で判定。
   const pills: { label: string; on: boolean }[] = [
@@ -757,8 +762,8 @@ function StateStrip({ detail, date }: { detail: DailyDetail; date: string }) {
       ) : (
         <span className="text-[13px] font-semibold text-zinc-400">記録なし</span>
       )}
-      <Delta label="7日" v={b.weightDelta7d} />
-      <Delta label="30日" v={b.weightDelta30d} />
+      <StripDelta label="7日" v={b.weightDelta7d} />
+      <StripDelta label="30日" v={b.weightDelta30d} />
       {b.remainingKg != null && (
         <span className="font-bold text-[#8a6d10]">目標まで {b.remainingKg}kg</span>
       )}
@@ -776,8 +781,217 @@ function StateStrip({ detail, date }: { detail: DailyDetail; date: string }) {
             {p.label}
           </span>
         ))}
+        {/* まとめパネルをたたんだ時だけ、ストリップ右端に再表示ボタン */}
+        {summaryCollapsed && (
+          <button
+            type="button"
+            onClick={onExpandSummary}
+            className="flex items-center gap-0.5 rounded-full border border-[#cfe3d6] bg-[#f0f7f2] px-2 py-0.5 text-[10.5px] font-extrabold text-[#34603f] hover:bg-[#e6f1ea]"
+            aria-label="まとめパネルを表示"
+          >
+            <ChevronDownIcon size={11} />
+            まとめ
+          </button>
+        )}
       </span>
     </div>
+  );
+}
+
+// =====================================================================
+// まとめパネル（件・2026-07-13・案B）: 「この人の直近」6行の一皿。
+//   右下フロート(FBバーの真上・右寄せ)。数字の事実のみ・診断文言なし・絵文字なし。
+//   増=コーラル(#c2693f) / 減=緑(#34603f) / 超過=金茶(#8a6d10)・符号なしの語。
+// =====================================================================
+const WK_MARK: Record<string, string> = {
+  done: "完了",
+  rest_done: "完了(休)",
+  skipped: "とばした",
+  none: "未",
+};
+const COND_LABEL: Record<string, string> = {
+  good: "いい",
+  normal: "ふつう",
+  bad: "よくない",
+};
+
+// 各行: ラベル(50px)＋本文。データ欠けは本文「—」で行は残す。
+function SumRow({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="flex gap-1.5 border-b border-dashed border-[#eee] py-[3px] last:border-0">
+      <span className="w-[50px] flex-none font-extrabold text-[#6a6256]">{label}</span>
+      <span className="min-w-0 flex-1">{children}</span>
+    </div>
+  );
+}
+
+// 目標PFC差(g)の1つ分。null=数値/目標なし→「—」。負=不足(コーラル)/正=超過(金茶)/|差|<=5=目標内。
+function PfcDiff({ k, v }: { k: string; v: number | null }) {
+  if (v == null) return <span>{k} —</span>;
+  if (Math.abs(v) <= 5)
+    return (
+      <span>
+        {k} <span className="text-zinc-500">目標内</span>
+      </span>
+    );
+  const over = v > 0;
+  return (
+    <span>
+      {k}{" "}
+      <span className={`font-bold ${over ? "text-[#8a6d10]" : "text-[#c2693f]"}`}>
+        {over ? "+" : "-"}
+        {Math.abs(v)}g
+      </span>
+    </span>
+  );
+}
+
+function SummaryPanel({
+  detail,
+  onCollapse,
+}: {
+  detail: DailyDetail;
+  onCollapse: () => void;
+}) {
+  const s = detail.summary;
+  const isBeta = detail.isBeta;
+
+  return (
+    <div className="pointer-events-auto absolute bottom-full right-6 z-50 mb-2 w-[300px] rounded-xl border-[1.5px] border-[#cfe3d6] bg-[#fcfdfc] px-3 py-2.5 text-[11px] leading-[1.75] text-zinc-600 shadow-[0_6px_18px_rgba(0,0,0,0.12)]">
+      <div className="mb-1 flex items-center justify-between text-[11px] text-[#34603f]">
+        <span className="font-bold">この人の直近</span>
+        <button
+          type="button"
+          onClick={onCollapse}
+          className="flex items-center gap-0.5 font-extrabold text-[#34603f] hover:opacity-70"
+          aria-label="まとめパネルをたたむ"
+        >
+          <ChevronUpIcon size={12} />
+          たたむ
+        </button>
+      </div>
+
+      {/* 体重 */}
+      <SumRow label="体重">
+        {s.weight && s.weight.values.length > 0 ? (
+          <>
+            {s.weight.values.map((v, i) => (
+              <span key={i}>
+                {i > 0 && " → "}
+                {i === s.weight!.values.length - 1 ? (
+                  <b className="text-zinc-900">{v}</b>
+                ) : (
+                  v
+                )}
+              </span>
+            ))}
+            {s.weight.changeLabel && (
+              <span>
+                （
+                <span
+                  className={`font-bold ${
+                    s.weight.changeDir === "up"
+                      ? "text-[#c2693f]"
+                      : s.weight.changeDir === "down"
+                        ? "text-[#34603f]"
+                        : "text-zinc-500"
+                  }`}
+                >
+                  {s.weight.changeLabel}
+                </span>
+                ）
+              </span>
+            )}
+          </>
+        ) : (
+          "—"
+        )}
+      </SumRow>
+
+      {/* 食事(ベータのみ) */}
+      {isBeta && (
+        <SumRow label="食事">
+          {s.meal ? (
+            <>
+              <div>
+                {s.meal.yesterdayKcal != null
+                  ? `昨日 ${s.meal.yesterdayKcal.toLocaleString()}kcal`
+                  : s.meal.yesterdayPhotoOnly
+                    ? "昨日 写真のみ"
+                    : "昨日 —"}
+                （7日平均 {s.meal.avg7Kcal != null ? s.meal.avg7Kcal.toLocaleString() : "—"}）
+              </div>
+              {s.meal.hasGoalPfc ? (
+                <div>
+                  <PfcDiff k="P" v={s.meal.pfc.p} /> ・ <PfcDiff k="F" v={s.meal.pfc.f} /> ・{" "}
+                  <PfcDiff k="C" v={s.meal.pfc.c} />
+                </div>
+              ) : (
+                <div className="text-zinc-400">目標PFC未設定</div>
+              )}
+            </>
+          ) : (
+            "—"
+          )}
+        </SumRow>
+      )}
+
+      {/* トレ(ベータのみ) */}
+      {isBeta && (
+        <SumRow label="トレ">
+          昨日 {WK_MARK[s.workout.yesterday]} ・ 今日 {WK_MARK[s.workout.today]} ・ 今週 実施
+          {s.workout.weekDone}回
+        </SumRow>
+      )}
+
+      {/* 生活(ベータのみ) */}
+      {isBeta && (
+        <SumRow label="生活">
+          {s.life && (s.life.sleepHours != null || s.life.avgSleep != null) ? (
+            <>
+              昨夜 {s.life.sleepHours != null ? `${s.life.sleepHours}h` : "—"}
+              （平均{s.life.avgSleep != null ? `${s.life.avgSleep}h` : "—"}）
+              {s.life.condition && ` ・ 体調${COND_LABEL[s.life.condition]}`}
+            </>
+          ) : (
+            "—"
+          )}
+        </SumRow>
+      )}
+
+      {/* 学び */}
+      <SumRow label="学び">
+        {s.learn.total > 0 ? `${s.learn.completed}/${s.learn.total}` : "—"}
+        {s.learn.latestLabel && ` ・ 直近 ${s.learn.latestLabel}`}
+      </SumRow>
+
+      {/* 前回FB */}
+      <SumRow label="前回FB">
+        {s.prevFeedback ? (
+          <span className="text-zinc-500">
+            「{s.prevFeedback.quote}」({mdLabel(s.prevFeedback.date)})
+          </span>
+        ) : (
+          "—"
+        )}
+      </SumRow>
+    </div>
+  );
+}
+
+// ∧ ∨ の小さなSVG(絵文字禁止)
+function ChevronUpIcon({ size = 12 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m6 15 6-6 6 6" />
+    </svg>
+  );
+}
+function ChevronDownIcon({ size = 12 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m6 9 6 6 6-6" />
+    </svg>
   );
 }
 
@@ -801,6 +1015,24 @@ function FbBar({
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const alreadySent = detail.todayFeedback?.status === "sent";
+
+  // まとめパネルの開閉(localStorage・受講生切替をまたいで維持)。
+  //   初回描画は SSR/CSR とも展開で決定論的に出し、rAF で localStorage を反映(hydration安全・lint安全)。
+  const [summaryCollapsed, setSummaryCollapsed] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() =>
+      setSummaryCollapsed(localStorage.getItem("daily_summary_collapsed") === "1")
+    );
+    return () => cancelAnimationFrame(id);
+  }, []);
+  const setCollapsed = (v: boolean) => {
+    setSummaryCollapsed(v);
+    try {
+      localStorage.setItem("daily_summary_collapsed", v ? "1" : "0");
+    } catch {
+      /* localStorage不可でも致命ではない */
+    }
+  };
 
   const advance = () => {
     if (nextUserId) {
@@ -827,7 +1059,11 @@ function FbBar({
     });
 
   return (
-    <div className="sticky bottom-0 bg-white border-t border-[#e8ebe9] shadow-[0_-8px_24px_rgba(0,0,0,0.06)] px-6 py-3 flex gap-3.5 items-stretch z-40">
+    <div className="sticky bottom-0 z-40 flex items-stretch gap-3.5 border-t border-[#e8ebe9] bg-white px-6 py-3 shadow-[0_-8px_24px_rgba(0,0,0,0.06)] relative">
+      {/* まとめパネル(案B): FBバーの真上・右寄せに浮かせて固定。本文スクロールで動かない(barはsticky)。 */}
+      {!summaryCollapsed && (
+        <SummaryPanel detail={detail} onCollapse={() => setCollapsed(true)} />
+      )}
       <div className="w-[240px] flex-shrink-0 bg-[#f8faf9] border border-[#e8ebe9] rounded-[9px] px-3 py-2 text-[11px] text-zinc-600 leading-relaxed overflow-y-auto max-h-[92px]">
         <b className="text-[9.5px] text-zinc-500 block mb-0.5">
           前回のフィードバック
@@ -839,7 +1075,12 @@ function FbBar({
       <div className="flex-1 flex flex-col gap-1">
         {/* 件4(2026-07-13): 状態ストリップ(M22案1)。からだの状態を入力欄の真上に1行で。
             数値は既存fetchのみ・符号なし(増/減の語)・目標までは距離。 */}
-        <StateStrip detail={detail} date={date} />
+        <StateStrip
+          detail={detail}
+          date={date}
+          summaryCollapsed={summaryCollapsed}
+          onExpandSummary={() => setCollapsed(false)}
+        />
         {/* 件3(2026-07-13): 題材ガード枠は撤去（食事・トレ・生活すべて実データが揃い、
             話題を限定する必要がなくなったため。beta/非beta とも完全撤去）。 */}
         <textarea

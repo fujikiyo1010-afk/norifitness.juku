@@ -62,6 +62,8 @@ export type LatestWithDelta = {
   bodyFatDelta7d: number | null;
   waistDelta7d: number | null;
   daysSinceLatest: number | null;
+  // まとめパネル(2026-07-13): 体重の直近3回の流れ(古→新)。既存の60件取得から切り出すだけ(新規クエリ0)。
+  recentWeights: { date: string; value: number }[];
 };
 
 export async function getLatestBodyMetricSummary(
@@ -86,8 +88,16 @@ export async function getLatestBodyMetricSummary(
       bodyFatDelta7d: null,
       waistDelta7d: null,
       daysSinceLatest: null,
+      recentWeights: [],
     };
   }
+
+  // 直近3回の体重(古い順・重量ありのみ)。
+  const recentWeights = rows
+    .filter((r) => r.weight_kg != null)
+    .slice(0, 3)
+    .map((r) => ({ date: r.recorded_at, value: r.weight_kg as number }))
+    .reverse();
 
   const latest = rows[0];
   const latestDate = new Date(latest.recorded_at);
@@ -113,5 +123,6 @@ export async function getLatestBodyMetricSummary(
     bodyFatDelta7d: prev7 ? delta(latest.body_fat_percent, prev7.body_fat_percent) : null,
     waistDelta7d: prev7 ? delta(latest.waist_cm, prev7.waist_cm) : null,
     daysSinceLatest,
+    recentWeights,
   };
 }
