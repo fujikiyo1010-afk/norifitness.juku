@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import type { DailyDetail } from "@/lib/admin/daily";
 import {
@@ -44,7 +45,15 @@ function mdLabel(iso: string | null): string {
   return `${Number(iso.slice(5, 7))}/${Number(iso.slice(8, 10))}`;
 }
 
-type Tab = "today" | "plan" | "learn" | "words";
+// 件2(2026-07-13): 体組成タブは開いた時だけ読み込む(遅延・初回クリックでチャンク取得)。
+const BodyTab = dynamic(() => import("./BodyTab"), {
+  ssr: false,
+  loading: () => (
+    <div className="py-10 text-center text-[12px] text-zinc-400">読み込み中…</div>
+  ),
+});
+
+type Tab = "today" | "body" | "plan" | "learn" | "words";
 
 export function DailyPanel({
   detail,
@@ -71,6 +80,7 @@ export function DailyPanel({
             {(
               [
                 { key: "today", label: "今日" },
+                { key: "body", label: "体組成" },
                 { key: "plan", label: "計画・カルテ" },
                 { key: "learn", label: "学び" },
                 { key: "words", label: "これまでの言葉" },
@@ -93,6 +103,12 @@ export function DailyPanel({
         </div>
 
         {tab === "today" && <TodayTab detail={detail} />}
+        {tab === "body" && (
+          <BodyTab
+            userId={detail.userId}
+            targetWeightKg={detail.body.targetWeightKg}
+          />
+        )}
         {tab === "plan" && <PlanTab detail={detail} />}
         {tab === "learn" && <LearnTab detail={detail} />}
         {tab === "words" && <WordsTab detail={detail} />}
