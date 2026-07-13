@@ -25,6 +25,7 @@ import {
   ChatIcon,
 } from "@/components/icons";
 import type { ReactNode } from "react";
+import { PhotoLightbox } from "@/components/PhotoLightbox";
 
 /**
  * デイリー添削 パネル（P2a v1）。モックM2準拠。
@@ -334,8 +335,13 @@ function mealTime(iso: string): string {
 }
 
 function TodayTab({ detail }: { detail: DailyDetail }) {
+  // 件1: 食事写真ライトボックス(タップした食事の全写真を中央拡大・左右送り)
+  const [lightboxPhotos, setLightboxPhotos] = useState<string[] | null>(null);
   return (
     <div className="space-y-3">
+      {lightboxPhotos && (
+        <PhotoLightbox photos={lightboxPhotos} onClose={() => setLightboxPhotos(null)} />
+      )}
       <SectionCard title="今日の食事" icon={<MealIcon size={15} />}>
         {!detail.isBeta ? (
           <PlaceholderBody text="この受講生はまだ食事機能の対象外です（ベータ公開後に表示されます）。" />
@@ -349,12 +355,21 @@ function TodayTab({ detail }: { detail: DailyDetail }) {
                 className="flex items-start gap-3 rounded-lg border border-zinc-200 bg-white p-2.5"
               >
                 {m.photoUrls[0] ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={m.photoUrls[0]}
-                    alt=""
-                    className="h-14 w-14 flex-shrink-0 rounded object-cover"
-                  />
+                  // 件1: タップでライトボックス(この食事の全写真)。サムネイルの大きさ・配置は不変。
+                  <button
+                    type="button"
+                    onClick={() => setLightboxPhotos(m.photoUrls)}
+                    className="relative h-14 w-14 flex-shrink-0 cursor-zoom-in overflow-hidden rounded"
+                    aria-label="写真を拡大"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={m.photoUrls[0]} alt="" className="h-full w-full object-cover" />
+                    {m.photoUrls.length > 1 && (
+                      <span className="absolute bottom-0 right-0 rounded-tl bg-black/55 px-1 text-[9px] font-bold text-white">
+                        {m.photoUrls.length}
+                      </span>
+                    )}
+                  </button>
                 ) : (
                   <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded bg-zinc-100 text-[10px] text-zinc-400">
                     写真なし
