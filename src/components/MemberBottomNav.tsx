@@ -150,14 +150,14 @@ function SearchIcon() {
 }
 
 function DumbbellIcon() {
+  // 2026-07-13: コース内(筋トレフォーム)で使っている横型ダンベルSVGに統一。
   return (
     <svg {...iconProps} width="22" height="22">
-      <path d="M6.5 6.5h11" />
-      <path d="M6.5 17.5h11" />
-      <path d="M3 8v8" />
-      <path d="M21 8v8" />
-      <path d="M6.5 8v8" />
-      <path d="M17.5 8v8" />
+      <path d="M8.5 12h7" />
+      <path d="M6 8.6v6.8" />
+      <path d="M3.6 10.2v3.6" />
+      <path d="M18 8.6v6.8" />
+      <path d="M20.4 10.2v3.6" />
     </svg>
   );
 }

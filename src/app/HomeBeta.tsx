@@ -211,8 +211,10 @@ export function HomeBeta({
             daysSinceJoined={daysSinceJoined}
           />
 
-          {/* 大タイル(先頭=デイリー添削・M17)・細18=確定7/7の色/アイコン/説明を転写 */}
+          {/* 大タイル(2026-07-13 並び替え・行優先で 左列=デイリー/学び/コース/フォーム, 右列=月次/目標/ツール)。
+              アイコン色は7個すべて別色(学びの記録の緑重複を金へ変更)。 */}
           <div className="grid grid-cols-2 gap-2">
+            {/* 1行目: デイリー添削(左) / 月次添削(右) */}
             <BigTile
               href="/history/feedbacks"
               name="デイリー添削"
@@ -223,30 +225,6 @@ export function HomeBeta({
               badge={unreadReply ? "NEW" : undefined}
             />
             <BigTile
-              href="/courses"
-              name="コース一覧"
-              desc="動画レッスン"
-              icon={<TileIcon paths={TILE_ICON.course.split(" M").map((s, i) => (i === 0 ? s : "M" + s))} />}
-              iconColor="#3a6ea5"
-              iconBg="#e8f0fa"
-            />
-            <BigTile
-              href="/my-log"
-              name="学びの記録"
-              desc="振り返り・実践"
-              icon={<TileIcon paths={TILE_ICON.learn.split(" M").map((s, i) => (i === 0 ? s : "M" + s))} />}
-              iconColor="#4a875b"
-              iconBg="#eaf3ec"
-            />
-            <BigTile
-              href="/tools"
-              name="ツール"
-              desc="カロリー/PFC計算"
-              icon={<ToolsTileIcon />}
-              iconColor="#7a5af0"
-              iconBg="#efeafd"
-            />
-            <BigTile
               href="/monthly-review"
               name="月次添削"
               desc="動画返信・履歴"
@@ -254,6 +232,15 @@ export function HomeBeta({
               iconColor="#d6536a"
               iconBg="#fbe9ee"
               badge={monthlyBadge ? "NEW" : undefined}
+            />
+            {/* 2行目: 学びの記録(左・金) / 目標シート(右) */}
+            <BigTile
+              href="/my-log"
+              name="学びの記録"
+              desc="振り返り・実践"
+              icon={<TileIcon paths={TILE_ICON.learn.split(" M").map((s, i) => (i === 0 ? s : "M" + s))} />}
+              iconColor="#b8860b"
+              iconBg="#f7efd4"
             />
             <BigTile
               href="/goal-sheet"
@@ -263,7 +250,24 @@ export function HomeBeta({
               iconColor="#2f7d6b"
               iconBg="#e3f1ee"
             />
-            {/* フォーム添削(5大機能②)。タップ→誘導ページ→UTAGE予約。初回無料/2回目以降は札で出し分け */}
+            {/* 3行目: コース一覧(左) / ツール(右) */}
+            <BigTile
+              href="/courses"
+              name="コース一覧"
+              desc="動画レッスン"
+              icon={<TileIcon paths={TILE_ICON.course.split(" M").map((s, i) => (i === 0 ? s : "M" + s))} />}
+              iconColor="#3a6ea5"
+              iconBg="#e8f0fa"
+            />
+            <BigTile
+              href="/tools"
+              name="ツール"
+              desc="カロリー/PFC計算"
+              icon={<ToolsTileIcon />}
+              iconColor="#7a5af0"
+              iconBg="#efeafd"
+            />
+            {/* 4行目: フォーム添削(左・5大機能②) */}
             <BigTile
               href="/form-review"
               name="フォーム添削"
