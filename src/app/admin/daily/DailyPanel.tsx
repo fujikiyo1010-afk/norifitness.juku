@@ -710,6 +710,78 @@ function SectionCard({
 }
 
 // =====================================================================
+// 状態ストリップ（件4・M22案1）: FB記入時に「からだの状態」を1行で
+//   数値は DailyDetail の既存fetchのみ。符号は付けず「増/減」の語(ルール3)。
+//   7日/30日=実測差・目標まで=距離。今日の記録ピル=食事/トレ/生活/体組成。
+// =====================================================================
+function StateStrip({ detail, date }: { detail: DailyDetail; date: string }) {
+  const b = detail.body;
+
+  // 差分1つ分（例: 「7日で 0.7kg増」）。null は「7日 —」。0は「変わらず」。
+  const Delta = ({ label, v }: { label: string; v: number | null }) => {
+    if (v == null)
+      return (
+        <span className="text-zinc-400">
+          {label} —
+        </span>
+      );
+    if (v === 0)
+      return (
+        <span>
+          {label}で <span className="font-bold text-zinc-500">変わらず</span>
+        </span>
+      );
+    const up = v > 0; // 増=コーラル / 減=緑
+    return (
+      <span>
+        {label}で{" "}
+        <span className={`font-bold ${up ? "text-[#c2693f]" : "text-[#34603f]"}`}>
+          {Math.abs(v)}kg{up ? "増" : "減"}
+        </span>
+      </span>
+    );
+  };
+
+  // 今日の記録ピル（記録あり=緑・✓ / 記録なし=グレー）。体組成は当日の記録日付一致で判定。
+  const pills: { label: string; on: boolean }[] = [
+    { label: "食事", on: detail.meals.length > 0 },
+    { label: "トレ", on: detail.workout != null },
+    { label: "生活", on: detail.condition != null },
+    { label: "体組成", on: b.recordedAt === date },
+  ];
+
+  return (
+    <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1 rounded-lg border border-[#e8ede4] bg-[#f6f8f4] px-3 py-1.5 text-[12px] text-zinc-600">
+      {b.weightKg != null ? (
+        <b className="text-[14px] text-zinc-900">{b.weightKg}kg</b>
+      ) : (
+        <span className="text-[13px] font-semibold text-zinc-400">記録なし</span>
+      )}
+      <Delta label="7日" v={b.weightDelta7d} />
+      <Delta label="30日" v={b.weightDelta30d} />
+      {b.remainingKg != null && (
+        <span className="font-bold text-[#8a6d10]">目標まで {b.remainingKg}kg</span>
+      )}
+      <span className="ml-auto flex flex-wrap items-center gap-1">
+        {pills.map((p) => (
+          <span
+            key={p.label}
+            className={
+              p.on
+                ? "rounded-full bg-[#eaf3ec] px-2 py-0.5 text-[10.5px] font-extrabold text-[#34603f]"
+                : "rounded-full bg-[#f4f4f5] px-2 py-0.5 text-[10.5px] font-bold text-[#c9c9ce]"
+            }
+          >
+            {p.on ? "✓" : ""}
+            {p.label}
+          </span>
+        ))}
+      </span>
+    </div>
+  );
+}
+
+// =====================================================================
 // FBバー（下部固定・sticky）
 // =====================================================================
 
@@ -765,6 +837,9 @@ function FbBar({
       </div>
 
       <div className="flex-1 flex flex-col gap-1">
+        {/* 件4(2026-07-13): 状態ストリップ(M22案1)。からだの状態を入力欄の真上に1行で。
+            数値は既存fetchのみ・符号なし(増/減の語)・目標までは距離。 */}
+        <StateStrip detail={detail} date={date} />
         {/* 件3(2026-07-13): 題材ガード枠は撤去（食事・トレ・生活すべて実データが揃い、
             話題を限定する必要がなくなったため。beta/非beta とも完全撤去）。 */}
         <textarea
