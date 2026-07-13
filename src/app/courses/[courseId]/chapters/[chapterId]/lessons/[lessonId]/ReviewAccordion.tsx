@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { saveReview } from "@/lib/courses/review-actions";
+import { NoteIcon, SaveIcon, CheckCircleIcon, XCircleIcon } from "@/components/icons";
 
 type InitialReview = {
   learned: string | null;
@@ -99,8 +100,8 @@ export function ReviewAccordion({
         <span className="text-[#6a6256] text-sm shrink-0">
           {isOpen ? "▼" : "▶"}
         </span>
-        <span className="text-base font-semibold text-[#2b2620] dark:text-zinc-50">
-          📝 2 行で振り返り
+        <span className="inline-flex items-center gap-1.5 text-base font-semibold text-[#2b2620] dark:text-zinc-50">
+          <NoteIcon size={16} className="shrink-0" />2 行で振り返り
         </span>
         <span className="text-xs text-[#6a6256]">(任意)</span>
         {hasReview && !isOpen && (
@@ -147,13 +148,15 @@ export function ReviewAccordion({
             </p>
 
             {error && (
-              <div className="rounded-md border border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-950 p-2 text-xs text-red-800 dark:text-red-100">
-                ❌ {error}
+              <div className="flex items-center gap-1.5 rounded-md border border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-950 p-2 text-xs text-red-800 dark:text-red-100">
+                <XCircleIcon size={14} className="shrink-0" />
+                <span>{error}</span>
               </div>
             )}
             {success && (
-              <div className="rounded-md border border-emerald-300 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950 p-2 text-xs text-emerald-800 dark:text-emerald-100">
-                ✅ {success}
+              <div className="flex items-center gap-1.5 rounded-md border border-emerald-300 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950 p-2 text-xs text-emerald-800 dark:text-emerald-100">
+                <CheckCircleIcon size={14} className="shrink-0" />
+                <span>{success}</span>
               </div>
             )}
 
@@ -161,9 +164,10 @@ export function ReviewAccordion({
               <button
                 type="submit"
                 disabled={pending || !hasChanges || allEmpty}
-                className="rounded-md bg-zinc-900 dark:bg-[#f9f5ed] px-4 py-2 text-sm font-medium text-white dark:text-[#2b2620] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-1.5 rounded-full btn3d px-4 py-2 text-sm font-bold text-white disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {pending ? "保存中…" : hasReview ? "💾 更新する" : "💾 保存する"}
+                {!pending && <SaveIcon size={15} className="shrink-0" />}
+                {pending ? "保存中…" : hasReview ? "更新する" : "保存する"}
               </button>
               {lastSavedAt && (
                 <p className="text-xs text-[#6a6256]">

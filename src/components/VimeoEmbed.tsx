@@ -10,6 +10,8 @@
  *   https://player.vimeo.com/video/123456789  (直接埋め込み URL)
  */
 
+import { LightbulbIcon, AlertTriangleIcon } from "@/components/icons";
+
 type ParsedVimeo = { id: string; hash: string | null };
 
 export function parseVimeoUrl(url: string): ParsedVimeo | null {
@@ -42,8 +44,9 @@ export function VimeoEmbed({ url }: { url: string }) {
   if (!parsed) {
     return (
       <div className="rounded-md border border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950 p-4 text-sm space-y-2">
-        <p className="text-amber-900 dark:text-amber-100">
-          ⚠️ Vimeo URL を認識できませんでした。管理画面で正しい URL を設定してください。
+        <p className="flex items-center gap-1.5 text-amber-900 dark:text-amber-100">
+          <AlertTriangleIcon size={16} className="shrink-0" />
+          <span>Vimeo URL を認識できませんでした。管理画面で正しい URL を設定してください。</span>
         </p>
         <p className="text-xs text-amber-800 dark:text-amber-200">
           対応形式: <code className="px-1 bg-amber-100 dark:bg-amber-900 rounded">https://vimeo.com/動画ID</code>
@@ -73,8 +76,9 @@ export function VimeoEmbed({ url }: { url: string }) {
           title="動画プレイヤー"
         />
       </div>
-      <p className="text-xs text-[#6a6256]">
-        💡 再生速度の変更: 動画再生中、右下の⚙(歯車アイコン) → 再生速度 を選択
+      <p className="flex items-center gap-1.5 text-xs text-[#6a6256]">
+        <LightbulbIcon size={14} className="shrink-0" />
+        <span>再生速度の変更: 動画再生中、右下の歯車アイコン → 再生速度 を選択</span>
       </p>
     </div>
   );
