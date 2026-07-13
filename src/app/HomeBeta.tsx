@@ -183,8 +183,6 @@ export function HomeBeta({
                 done={today.learned}
               />
             </div>
-            {/* 細21: 生活の独立入口(4問・10秒)。/meals?life=1 で4問シートを自動で開く */}
-            <LifeRow done={today.recordedLife} />
             {/* 達成バー: 件H で 3カードの上→ゾーン最下段へ移動 */}
             <div className="mt-2 flex items-center gap-2.5 rounded-[14px] border border-[#e7dcc9] bg-[#fffdf8] px-3.5 py-2.5">
               <span className="font-mono text-[15px] font-extrabold text-[#4a875b]">
@@ -201,6 +199,9 @@ export function HomeBeta({
               </span>
             </div>
           </section>
+
+          {/* 細21: 生活の独立入口(4問・10秒)。2026-07-13: 今日やることゾーンの外・真下へ移動。 */}
+          <LifeRow done={today.recordedLife} />
 
           {/* 学習の進捗(ドーナツ) */}
           <LearnProgressCard
