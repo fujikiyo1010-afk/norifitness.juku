@@ -93,11 +93,11 @@ export function HomeBeta({
             <h1 className="text-[18px] font-bold text-[#2b2620]">
               こんにちは、{displayName} さん
             </h1>
-            {/* 点20: 炎+継続◯日目(0日は出さない) */}
+            {/* 点20: 炎+継続◯日目(0日は出さない)。件E(2026-07-13): 挨拶と同格に拡大(文字16px・炎18) */}
             {streakDays > 0 && (
-              <div className="mt-0.5 flex flex-shrink-0 items-center gap-1 rounded-full bg-[#fff3e0] px-2.5 py-1">
-                <FlameIcon />
-                <span className="text-[11px] font-extrabold text-[#c2693f]">
+              <div className="mt-0.5 flex flex-shrink-0 items-center gap-1.5 rounded-full bg-[#fff3e0] px-3 py-1.5">
+                <FlameIcon size={18} />
+                <span className="text-[16px] font-extrabold text-[#c2693f]">
                   継続 {streakDays} 日目
                 </span>
               </div>
@@ -665,11 +665,11 @@ function GearIcon() {
     </svg>
   );
 }
-function FlameIcon() {
+function FlameIcon({ size = 13 }: { size?: number }) {
   return (
     <svg
-      width="13"
-      height="13"
+      width={size}
+      height={size}
       viewBox="0 0 24 24"
       fill="none"
       stroke="#c2693f"
