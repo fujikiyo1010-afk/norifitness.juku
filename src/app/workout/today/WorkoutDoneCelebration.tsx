@@ -25,6 +25,12 @@ export function WorkoutDoneCelebration({
   nextLabel: string | null;
 }) {
   const router = useRouter();
+  // 2026-07-13: この行き止まり画面が出ている間だけ下部ナビを隠す(記録中/開始前は出す)。
+  //   URLの?done=1では区別しづらいので、画面のマウント/アンマウントに紐づける(戻れば即ナビ復帰)。
+  useEffect(() => {
+    document.documentElement.setAttribute("data-hide-membernav", "1");
+    return () => document.documentElement.removeAttribute("data-hide-membernav");
+  }, []);
   // 花吹雪(18枚・筋肉塾トーン3色+白)は client でのみ生成(SSR差異=hydration不一致を避ける)
   const [confetti, setConfetti] = useState<
     { left: string; bg: string; delay: string; w: string; h: string }[]
