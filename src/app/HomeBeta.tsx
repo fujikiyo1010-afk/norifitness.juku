@@ -129,6 +129,14 @@ export function HomeBeta({
           {/* 今のからだ(点18・見せ方3=大きい数字型。リングは/record体重タブのみ) */}
           <BodyBigCard bodyCard={bodyCard} />
 
+          {/* 件2(2026-07-13): 初日ガイド。新規の初日だけ・今日の達成3/3で消える・2日目以降は出さない。
+              純導出(daysSinceJoined===0 && doneCount<3)=表示済み管理の保存なし。責めないトーン・絵文字なし。 */}
+          {daysSinceJoined === 0 && doneCount < 3 && (
+            <div className="-mb-0.5 rounded-[12px] border border-[#cfe3d6] bg-[#eaf3ec] px-3.5 py-2 text-center text-[12.5px] font-bold text-[#34603f]">
+              「今日やること」から始めよう
+            </div>
+          )}
+
           {/* 今日やること ゾーン(件H・案1): 薄緑の大枠で トレ/食事/学び+生活行+達成バー を包む */}
           <section className="rounded-[16px] border-[1.5px] border-[#cfe3d6] bg-[#f0f7f2] p-2.5">
             <h2 className="mb-1.5 ml-0.5 text-[11.5px] font-extrabold text-[#34603f]">
