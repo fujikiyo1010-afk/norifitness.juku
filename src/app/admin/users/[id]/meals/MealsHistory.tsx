@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { AdminMealDay } from "@/lib/admin/meals";
+import { PhotoLightbox } from "@/components/PhotoLightbox";
 
 const MEAL_LABEL: Record<string, string> = {
   朝: "朝食",
@@ -23,9 +24,14 @@ function timeLabel(iso: string): string {
 
 export function MealsHistory({ days }: { days: AdminMealDay[] }) {
   const [open, setOpen] = useState<string | null>(days[0]?.date ?? null);
+  // 件1: 食事写真ライトボックス(共通部品)
+  const [lightboxPhotos, setLightboxPhotos] = useState<string[] | null>(null);
 
   return (
     <div className="space-y-2">
+      {lightboxPhotos && (
+        <PhotoLightbox photos={lightboxPhotos} onClose={() => setLightboxPhotos(null)} />
+      )}
       {days.map((day) => {
         const isOpen = open === day.date;
         const types = day.meals.map((m) => m.mealType);
@@ -60,12 +66,21 @@ export function MealsHistory({ days }: { days: AdminMealDay[] }) {
                 {day.meals.map((m, i) => (
                   <div key={i} className="flex items-start gap-3">
                     {m.photoUrls[0] ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={m.photoUrls[0]}
-                        alt=""
-                        className="h-14 w-14 flex-shrink-0 rounded object-cover"
-                      />
+                      // 件1: タップでライトボックス(この食事の全写真)。サムネイルは不変。
+                      <button
+                        type="button"
+                        onClick={() => setLightboxPhotos(m.photoUrls)}
+                        className="relative h-14 w-14 flex-shrink-0 cursor-zoom-in overflow-hidden rounded"
+                        aria-label="写真を拡大"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={m.photoUrls[0]} alt="" className="h-full w-full object-cover" />
+                        {m.photoUrls.length > 1 && (
+                          <span className="absolute bottom-0 right-0 rounded-tl bg-black/55 px-1 text-[9px] font-bold text-white">
+                            {m.photoUrls.length}
+                          </span>
+                        )}
+                      </button>
                     ) : (
                       <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded bg-zinc-100 text-[10px] text-zinc-400">
                         写真なし
