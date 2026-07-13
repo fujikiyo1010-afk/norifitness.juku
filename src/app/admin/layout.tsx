@@ -35,7 +35,11 @@ export default async function AdminLayout({ children }: { children: ReactNode })
 
   return (
     <UploadJobProvider>
-      <div className="flex min-h-screen bg-zinc-50">
+      {/* 件G(2026-07-13): アプリシェル型。外側を h-screen+overflow-hidden にし、本文(main)だけを
+          縦スクロールさせる。これでサイドナビは全ページで画面固定。従来は main の overflow-x-auto が
+          overflow-y も auto 化し main がスクロール文脈になって、デイリー添削の sticky(FBバー/キュー列)が
+          viewport でなく main 基準になり流れていた(2026-06-11 a88ea3b からの潜在バグ)。 */}
+      <div className="flex h-screen overflow-hidden bg-zinc-50">
         <AdminSideNav
           adminName={admin.name}
           totalUsers={metrics.totalUsers}
@@ -44,7 +48,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           pendingShipments={pendingShipmentsRes.count ?? 0}
           chatUnread={chatUnread}
         />
-        <main className="flex-1 min-w-0 overflow-x-auto">{children}</main>
+        <main className="flex-1 min-w-0 overflow-auto">{children}</main>
       </div>
       <UploadIndicator />
     </UploadJobProvider>
