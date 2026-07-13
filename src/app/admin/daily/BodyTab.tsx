@@ -44,7 +44,6 @@ export default function BodyTab({
   targetWeightKg: number | null;
 }) {
   const [rows, setRows] = useState<BodyMetricRow[] | null>(null);
-  const [metric, setMetric] = useState<MetricKey>("weight_kg");
   const [range, setRange] = useState<Range>("3m");
 
   useEffect(() => {
@@ -90,36 +89,30 @@ export default function BodyTab({
 
   const hasData = (m: MetricKey) => rows.some((r) => r[m] != null);
   const availMetrics = METRICS.filter((m) => hasData(m.key));
-  const curMeta = METRICS.find((m) => m.key === metric) ?? METRICS[0];
   const recent = rows.slice(0, 5); // 最近の記録(新しい順)
 
   return (
     <div className="space-y-3">
-      {/* 指標チップ(データのある指標のみ) */}
-      {availMetrics.length > 1 && (
-        <div className="flex gap-1.5">
-          {availMetrics.map((m) => (
-            <button
-              key={m.key}
-              type="button"
-              onClick={() => setMetric(m.key)}
-              className={chipClass(metric === m.key)}
-            >
+      {/* 体重・体脂肪・ウエストを横並びの小さいグラフで(データのある指標のみ)。体重は目標体重の緑破線つき。
+          描画アニメは各グラフのマウント時に維持。 */}
+      <div className="flex gap-2">
+        {availMetrics.map((m) => (
+          <div
+            key={m.key}
+            className="min-w-0 flex-1 rounded-xl border border-[#e8ebe9] bg-white p-2"
+          >
+            <div className="mb-0.5 text-center text-[11px] font-bold text-zinc-600">
               {m.label}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* グラフ(体重選択時のみ目標体重の緑破線) */}
-      <div className="rounded-xl border border-[#e8ebe9] bg-white p-3">
-        <BodyMetricsChart
-          rows={filtered}
-          metric={metric}
-          metricLabel={curMeta.label}
-          metricUnit={curMeta.unit}
-          targetWeightKg={metric === "weight_kg" ? targetWeightKg : null}
-        />
+            </div>
+            <BodyMetricsChart
+              rows={filtered}
+              metric={m.key}
+              metricLabel={m.label}
+              metricUnit={m.unit}
+              targetWeightKg={m.key === "weight_kg" ? targetWeightKg : null}
+            />
+          </div>
+        ))}
       </div>
 
       {/* 期間チップ */}
