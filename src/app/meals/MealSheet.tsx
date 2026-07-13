@@ -208,54 +208,54 @@ export function MealSheet({
   }
 
   return (
-    <div className="space-y-4 pb-4">
-      {/* 細3: シート見出しはBottomSheet側(◯食を記録)が担う。ここは固定の注記のみ */}
-      <div className="text-[10px] text-[#a59b8c]">
-        タイプはこの枠に固定です（変えたい時は枠を選び直してください）
-      </div>
+    // 件B(2026-07-13): 種目追加シート(T1)と同じ治し方。上=写真・検索欄を固定、
+    //   中央=候補+品目リスト+メモをスクロール領域、下=閉じる/記録バーを常時固定。
+    //   品目が増えても記録ボタンに必ず届く。max-h でシート全体の高さを制限。
+    <div className="flex max-h-[58vh] flex-col">
+      {/* 上: 固定(注記・写真・検索欄) */}
+      <div className="shrink-0 space-y-3">
+        {/* 細3: シート見出しはBottomSheet側(◯食を記録)が担う。ここは固定の注記のみ */}
+        <div className="text-[10px] text-[#a59b8c]">
+          タイプはこの枠に固定です（変えたい時は枠を選び直してください）
+        </div>
 
-      {/* 写真 */}
-      <div className="flex flex-wrap gap-2">
-        {keepPhotos.map((p, i) => (
-          <PhotoThumb key={p.path} url={p.url} onRemove={() => setKeepPhotos((prev) => prev.filter((_, idx) => idx !== i))} />
-        ))}
-        {newFiles.map((nf, i) => (
-          <PhotoThumb
-            key={i}
-            url={nf.preview}
-            onRemove={() => {
-              URL.revokeObjectURL(nf.preview);
-              setNewFiles((prev) => prev.filter((_, idx) => idx !== i));
-            }}
-          />
-        ))}
-        <label className="flex h-20 w-20 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#d8cdba] text-[#a59b8c]">
-          <span className="text-[20px] leading-none">＋</span>
-          <span className="text-[9px]">写真</span>
-          <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => onPickFiles(e.target.files)} />
-        </label>
-      </div>
-      <p className="text-[10px] text-[#a59b8c]">写真だけでも記録できます（品目・数値は任意）</p>
-
-      {/* 品目リスト */}
-      {items.length > 0 && (
-        <ul className="space-y-1.5">
-          {items.map((it, i) => (
-            <ItemRow key={i} item={it} onPatch={(p) => patch(i, p)} onRemove={() => remove(i)} />
+        {/* 写真 */}
+        <div className="flex flex-wrap gap-2">
+          {keepPhotos.map((p, i) => (
+            <PhotoThumb key={p.path} url={p.url} onRemove={() => setKeepPhotos((prev) => prev.filter((_, idx) => idx !== i))} />
           ))}
-        </ul>
-      )}
+          {newFiles.map((nf, i) => (
+            <PhotoThumb
+              key={i}
+              url={nf.preview}
+              onRemove={() => {
+                URL.revokeObjectURL(nf.preview);
+                setNewFiles((prev) => prev.filter((_, idx) => idx !== i));
+              }}
+            />
+          ))}
+          <label className="flex h-20 w-20 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#d8cdba] text-[#a59b8c]">
+            <span className="text-[20px] leading-none">＋</span>
+            <span className="text-[9px]">写真</span>
+            <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => onPickFiles(e.target.files)} />
+          </label>
+        </div>
+        <p className="text-[10px] text-[#a59b8c]">写真だけでも記録できます（品目・数値は任意）</p>
 
-      {/* 食材検索/追加 */}
-      <div>
+        {/* 食材検索欄(上固定)。候補は下のスクロール領域先頭に表示(=検索欄の直下で隣接) */}
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="＋ 品目を追加（かな・別名で検索 例: とりむね）"
           className="w-full rounded-lg border border-[#e7dcc9] bg-white px-3 py-2 text-[13px] focus:border-[#4a875b] focus:outline-none"
         />
+      </div>
+
+      {/* 中央: スクロール(検索候補 → 品目リスト → メモ) */}
+      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto py-3 pr-0.5">
+        {/* 検索候補 / よく使う食材 */}
         {q.trim() === "" ? (
-          <div className="mt-2">
+          <div>
             <div className="mb-1 text-[10px] font-bold text-[#a59b8c]">よく使う食材（のり監修）</div>
             <div className="flex flex-wrap gap-1.5">
               {popular.map((f) => (
@@ -271,7 +271,7 @@ export function MealSheet({
             </div>
           </div>
         ) : (
-          <div className="mt-2 space-y-1.5">
+          <div className="space-y-1.5">
             {results.map((f) => (
               <button
                 key={f.id}
@@ -302,64 +302,76 @@ export function MealSheet({
             </p>
           </div>
         )}
+
+        {/* 品目リスト(選択済み) */}
+        {items.length > 0 && (
+          <ul className="space-y-1.5">
+            {items.map((it, i) => (
+              <ItemRow key={i} item={it} onPatch={(p) => patch(i, p)} onRemove={() => remove(i)} />
+            ))}
+          </ul>
+        )}
+
+        {/* メモ */}
+        <textarea
+          value={memo}
+          onChange={(e) => setMemo(e.target.value)}
+          rows={2}
+          placeholder="メモ（任意）"
+          className="w-full rounded-lg border border-[#e7dcc9] bg-white px-3 py-2 text-[13px] focus:border-[#4a875b] focus:outline-none"
+        />
       </div>
 
-      {/* メモ */}
-      <textarea
-        value={memo}
-        onChange={(e) => setMemo(e.target.value)}
-        rows={2}
-        placeholder="メモ（任意）"
-        className="w-full rounded-lg border border-[#e7dcc9] bg-white px-3 py-2 text-[13px] focus:border-[#4a875b] focus:outline-none"
-      />
-
-      {/* 細7: エラーは SVG + 人の言葉 + もう一度試す(入力保持) */}
-      {error && (
-        <div className="flex items-center gap-2 rounded-lg border border-[#f0c9c0] bg-[#fdeee9] px-3 py-2.5">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c2693f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="8" x2="12" y2="12" />
-            <line x1="12" y1="16" x2="12.01" y2="16" />
-          </svg>
-          <span className="flex-1 text-[12px] text-[#8a4b32]">{error}</span>
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={busy}
-            className="flex-shrink-0 rounded-lg btn3d px-3 py-1.5 text-[11px] font-bold text-white disabled:opacity-50"
-          >
-            もう一度試す
-          </button>
-        </div>
-      )}
-
-      {confirmClose ? (
-        <div className="rounded-lg border border-[#f0e2b8] bg-[#fffbeb] p-3">
-          <p className="text-[12px] text-[#8a6d1a]">入力中の内容があります。破棄して閉じますか？</p>
-          <div className="mt-2 flex gap-2">
-            <button type="button" onClick={onClose} className="flex-1 rounded-lg bg-[#8a6d1a] py-2 text-[12px] font-bold text-white">
-              破棄して閉じる
-            </button>
-            <button type="button" onClick={() => setConfirmClose(false)} className="flex-1 rounded-lg border border-[#e7dcc9] py-2 text-[12px] font-bold text-[#6a6256]">
-              続ける
+      {/* 下: 固定(エラー + 閉じる/記録バー) */}
+      <div className="shrink-0 space-y-3 pt-3">
+        {/* 細7: エラーは SVG + 人の言葉 + もう一度試す(入力保持) */}
+        {error && (
+          <div className="flex items-center gap-2 rounded-lg border border-[#f0c9c0] bg-[#fdeee9] px-3 py-2.5">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c2693f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <span className="flex-1 text-[12px] text-[#8a4b32]">{error}</span>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={busy}
+              className="flex-shrink-0 rounded-lg btn3d px-3 py-1.5 text-[11px] font-bold text-white disabled:opacity-50"
+            >
+              もう一度試す
             </button>
           </div>
-        </div>
-      ) : (
-        <div className="flex gap-2">
-          <button type="button" onClick={tryClose} className="rounded-xl border border-[#e7dcc9] px-4 py-3 text-[13px] font-bold text-[#6a6256]">
-            閉じる
-          </button>
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={busy}
-            className="flex-1 rounded-xl btn3d py-3 text-[14px] font-bold text-white disabled:opacity-50"
-          >
-            {busy ? "保存中…" : isEdit ? "変更を保存する" : "これで記録する"}
-          </button>
-        </div>
-      )}
+        )}
+
+        {confirmClose ? (
+          <div className="rounded-lg border border-[#f0e2b8] bg-[#fffbeb] p-3">
+            <p className="text-[12px] text-[#8a6d1a]">入力中の内容があります。破棄して閉じますか？</p>
+            <div className="mt-2 flex gap-2">
+              <button type="button" onClick={onClose} className="flex-1 rounded-lg bg-[#8a6d1a] py-2 text-[12px] font-bold text-white">
+                破棄して閉じる
+              </button>
+              <button type="button" onClick={() => setConfirmClose(false)} className="flex-1 rounded-lg border border-[#e7dcc9] py-2 text-[12px] font-bold text-[#6a6256]">
+                続ける
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <button type="button" onClick={tryClose} className="rounded-xl border border-[#e7dcc9] px-4 py-3 text-[13px] font-bold text-[#6a6256]">
+              閉じる
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={busy}
+              className="flex-1 rounded-xl btn3d py-3 text-[14px] font-bold text-white disabled:opacity-50"
+            >
+              {busy ? "保存中…" : isEdit ? "変更を保存する" : "これで記録する"}
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
