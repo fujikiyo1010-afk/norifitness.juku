@@ -115,22 +115,11 @@ export function HomeBeta({
           {/* 今のからだ(点18・見せ方3=大きい数字型。リングは/record体重タブのみ) */}
           <BodyBigCard bodyCard={bodyCard} />
 
-          {/* 今日やること */}
-          <section>
-            <div className="mb-2 flex items-center gap-2.5 rounded-[14px] border border-[#e7dcc9] bg-[#fffdf8] px-3.5 py-2.5">
-              <span className="font-mono text-[15px] font-extrabold text-[#4a875b]">
-                {doneCount}/3
-              </span>
-              <div className="h-[7px] flex-1 overflow-hidden rounded-full bg-[#e7dcc9]">
-                <div
-                  className="h-full rounded-full"
-                  style={{ width: `${(doneCount / 3) * 100}%`, background: TEAL }}
-                />
-              </div>
-              <span className="text-[10px] font-bold text-[#6a6256]">
-                今日の達成
-              </span>
-            </div>
+          {/* 今日やること ゾーン(件H・案1): 薄緑の大枠で トレ/食事/学び+生活行+達成バー を包む */}
+          <section className="rounded-[16px] border-[1.5px] border-[#cfe3d6] bg-[#f0f7f2] p-2.5">
+            <h2 className="mb-1.5 ml-0.5 text-[11.5px] font-extrabold text-[#34603f]">
+              今日やること
+            </h2>
             <div className="flex flex-col gap-2">
               {/* トレーニング(点19先頭・点1色・ラベル文言=モック) */}
               <TodayCard
@@ -174,6 +163,21 @@ export function HomeBeta({
             </div>
             {/* 細21: 生活の独立入口(4問・10秒)。/meals?life=1 で4問シートを自動で開く */}
             <LifeRow done={today.recordedLife} />
+            {/* 達成バー: 件H で 3カードの上→ゾーン最下段へ移動 */}
+            <div className="mt-2 flex items-center gap-2.5 rounded-[14px] border border-[#e7dcc9] bg-[#fffdf8] px-3.5 py-2.5">
+              <span className="font-mono text-[15px] font-extrabold text-[#4a875b]">
+                {doneCount}/3
+              </span>
+              <div className="h-[7px] flex-1 overflow-hidden rounded-full bg-[#e7dcc9]">
+                <div
+                  className="h-full rounded-full"
+                  style={{ width: `${(doneCount / 3) * 100}%`, background: TEAL }}
+                />
+              </div>
+              <span className="text-[10px] font-bold text-[#6a6256]">
+                今日の達成
+              </span>
+            </div>
           </section>
 
           {/* 学習の進捗(ドーナツ) */}
