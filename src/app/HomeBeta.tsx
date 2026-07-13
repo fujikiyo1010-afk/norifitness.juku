@@ -87,8 +87,8 @@ export function HomeBeta({
           </Link>
         </header>
 
-        {/* 挨拶ヒーロー */}
-        <section className="bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] px-5 py-[20px]">
+        {/* 挨拶ヒーロー (件I: 下余白を詰めて掲示板とほぼ密着) */}
+        <section className="bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] px-5 pt-[20px] pb-0.5">
           {/* 件E(2026-07-13): 挨拶+継続ピルは必ず横1行(改行禁止)。長い名前は挨拶側をtruncate。 */}
           <div className="flex items-center justify-between gap-2">
             <h1 className="min-w-0 truncate text-[18px] font-bold text-[#2b2620]">
@@ -106,7 +106,7 @@ export function HomeBeta({
           </div>
         </section>
 
-        <div className="px-4 py-3.5 flex flex-col gap-3">
+        <div className="px-4 pt-0.5 pb-4 flex flex-col gap-3">
           {/* 掲示板「のりfitnessから」 */}
           {boardItems.length > 0 && (
             <BoardCard items={boardItems} unreadReply={unreadReply} />
