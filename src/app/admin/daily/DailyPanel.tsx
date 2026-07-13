@@ -765,22 +765,13 @@ function FbBar({
       </div>
 
       <div className="flex-1 flex flex-col gap-1">
-        {/* 題材ガード: 生活の受講生画面が無い間は話題を限定（半ループ対策・マスターRule18補足）。
-            食事はP4-a公開済みのため、ベータ受講生には食事も解禁。 */}
-        <div className="rounded-md border border-[#f0e2b8] bg-[#fffbeb] px-2.5 py-1 text-[10.5px] leading-snug text-[#8a6d1a]">
-          いま書けるのは
-          <b>{detail.isBeta ? "体重・学習・食事・トレ・生活" : "体重・学習"}</b>
-          の話題まで{detail.isBeta ? "です" : "です（この受講生の食事・生活はまだ筋肉塾に来ていません）"}
-        </div>
+        {/* 件3(2026-07-13): 題材ガード枠は撤去（食事・トレ・生活すべて実データが揃い、
+            話題を限定する必要がなくなったため。beta/非beta とも完全撤去）。 */}
         <textarea
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          placeholder={
-            detail.isBeta
-              ? "体重・学習・食事についてひとこと…（例: 朝の納豆いいですね／今週の体重の落ち方いいですね）"
-              : "体重の変化・学習の進みについてひとこと…（例: 今週の体重の落ち方いいですね／L4まで進んだのは順調です）"
-          }
-          className="w-full min-h-[52px] max-h-[88px] border border-[#e8ebe9] rounded-[9px] px-3 py-2 text-[12.5px] leading-relaxed resize-none focus:outline focus:outline-2 focus:outline-[#00897b]/35 focus:border-[#00897b]"
+          placeholder="今日のひとことを書く…"
+          className="w-full min-h-[84px] max-h-[140px] border border-[#e8ebe9] rounded-[9px] px-3 py-2 text-[12.5px] leading-relaxed resize-none focus:outline focus:outline-2 focus:outline-[#00897b]/35 focus:border-[#00897b]"
         />
         {error && <div className="text-[11px] text-red-600">⚠ {error}</div>}
       </div>
