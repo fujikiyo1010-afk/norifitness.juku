@@ -56,8 +56,10 @@ export function FeedbacksClient({
             key={t}
             type="button"
             onClick={() => setTab(t)}
-            className={`flex-1 rounded-xl py-2 text-[12px] font-bold transition-colors ${
-              tab === t ? "bg-[#4a875b] text-white" : "text-[#6a6256]"
+            className={`flex-1 rounded-xl py-2 text-[12px] font-bold transition-all ${
+              tab === t
+                ? "bg-gradient-to-b from-[#529367] to-[#3f7350] text-white shadow-[0_2px_5px_rgba(52,96,63,0.22)]"
+                : "text-[#6a6256]"
             }`}
           >
             {t === "all" ? "すべて" : `保存済み${savedCount > 0 ? ` ${savedCount}` : ""}`}
@@ -108,8 +110,10 @@ function Chip({ active, onClick, label }: { active: boolean; onClick: () => void
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-full px-3 py-1 text-[11px] font-bold ${
-        active ? "bg-[#4a875b] text-white" : "bg-[#fffdf8] border border-[#e7dcc9] text-[#6a6256]"
+      className={`rounded-full px-3 py-1 text-[11px] font-bold transition-all ${
+        active
+          ? "bg-gradient-to-b from-[#529367] to-[#3f7350] text-white shadow-[0_2px_5px_rgba(52,96,63,0.22)]"
+          : "bg-[#fffdf8] border border-[#e7dcc9] text-[#6a6256]"
       }`}
     >
       {label}
@@ -133,7 +137,7 @@ function DailyRow({
           href={`/meals?date=${item.date}`}
           className="flex items-center gap-2 text-[12px] font-bold text-[#34603f]"
         >
-          <span className="rounded-full bg-[#4a875b] px-2 py-0.5 text-[9px] text-white">のり</span>
+          {/* 件A(2026-07-13): 「のり」緑バッジは撤去（デイリー添削一覧をシンプルに） */}
           {dateLabel(item.date)}
           <span className="text-[#c9bfa9]">›</span>
         </Link>
