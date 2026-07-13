@@ -333,7 +333,7 @@ function BodyBigCard({ bodyCard }: { bodyCard: BodyCard }) {
   return (
     <Link
       href="/record"
-      className="block rounded-[14px] border border-[#e7dcc9] bg-[#fffdf8] px-[13px] py-3 hover:border-[#4a875b] transition-colors"
+      className="group block rounded-[14px] border border-[#e7dcc9] bg-[#fffdf8] px-[13px] py-3 hover:border-[#4a875b] transition-colors"
     >
       <div className="mb-1.5 flex items-center justify-between">
         <span className="text-[11px] font-bold text-[#6a6256]">今のからだ</span>
@@ -365,7 +365,11 @@ function BodyBigCard({ bodyCard }: { bodyCard: BodyCard }) {
               )}
             </div>
           )}
-          <span className="mt-2.5 block rounded-lg bg-[#4a875b] py-2 text-center text-[12px] font-bold text-white">
+          {/* 件D(2026-07-13): 立体3段モックの案2「中」を転写(薄グラデ+2px下エッジ・押下で2px沈む) */}
+          <span
+            className="mt-2.5 block rounded-lg py-2 text-center text-[12px] font-bold text-white transition-transform shadow-[0_2px_0_#2f5a3c,0_6px_12px_rgba(52,96,63,0.22)] group-active:translate-y-[2px] group-active:shadow-[0_0_0_#2f5a3c,0_3px_8px_rgba(52,96,63,0.2)]"
+            style={{ background: "linear-gradient(180deg,#529367,#4a875b 55%,#3f7350)" }}
+          >
             タップして記録 ・ グラフを見る
           </span>
         </>
@@ -374,7 +378,11 @@ function BodyBigCard({ bodyCard }: { bodyCard: BodyCard }) {
           <div className="text-[13px] font-bold text-[#5b5344]">
             体組成をはじめて記録しよう
           </div>
-          <span className="mt-2.5 block rounded-lg bg-[#4a875b] py-2 text-center text-[12px] font-bold text-white">
+          {/* 件D(2026-07-13): 立体3段モックの案2「中」を転写(薄グラデ+2px下エッジ・押下で2px沈む) */}
+          <span
+            className="mt-2.5 block rounded-lg py-2 text-center text-[12px] font-bold text-white transition-transform shadow-[0_2px_0_#2f5a3c,0_6px_12px_rgba(52,96,63,0.22)] group-active:translate-y-[2px] group-active:shadow-[0_0_0_#2f5a3c,0_3px_8px_rgba(52,96,63,0.2)]"
+            style={{ background: "linear-gradient(180deg,#529367,#4a875b 55%,#3f7350)" }}
+          >
             タップして記録 ・ グラフを見る
           </span>
         </div>
