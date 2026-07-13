@@ -268,14 +268,9 @@ function BoardCard({
     <div className="rounded-[14px] border border-[#e7dcc9] bg-[#fffdf8] px-4 py-3.5">
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-1.5">
-          <span
-            className="flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold text-white"
-            style={{ background: TEAL }}
-          >
-            の
-          </span>
+          {/* 件F(2026-07-13): 「の」丸アイコンと「のりfitnessから」を撤去し見出しは「掲示板」に */}
           <span className="text-[13px] font-bold text-[#2b2620]">
-            のりfitnessから
+            掲示板
           </span>
           {unreadReply && (
             <span
