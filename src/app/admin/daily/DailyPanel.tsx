@@ -397,9 +397,6 @@ function TodayTab({ detail }: { detail: DailyDetail }) {
                 </div>
               </div>
             ))}
-            <p className="text-[10px] text-zinc-400">
-              数値なしの写真ベース記録です（PFC自動計算・目標PFCゲージはfood_table投入後＝v1-b）。
-            </p>
           </div>
         )}
       </SectionCard>
