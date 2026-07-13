@@ -74,7 +74,9 @@ export default async function WorkoutTodayPage({
     showCeleb ? getTodayActivity() : Promise.resolve(null),
     showCeleb ? getRecordStreak() : Promise.resolve(0),
   ]);
-  const feedbackLocked = (fbRes?.data?.length ?? 0) > 0;
+  // 件0(2026-07-13): 編集ロックは「その日の実施記録が存在し(completedToday)、かつ当日FBがある」時だけ。
+  //   未記録の日はFBの有無に関係なく通常の記録フロー(強度・完了)を出す(点7の実装誤りを修正)。
+  const feedbackLocked = w.completedToday && (fbRes?.data?.length ?? 0) > 0;
   const doneCount = act
     ? (act.learned ? 1 : 0) + (act.recordedMeal ? 1 : 0) + (act.recordedWorkout ? 1 : 0)
     : 0;
