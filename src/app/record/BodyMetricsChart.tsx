@@ -5,10 +5,6 @@ import type { BodyMetricRow } from "@/lib/body-metrics/queries";
 
 export type MetricKey = "weight_kg" | "body_fat_percent" | "waist_cm";
 
-// ④ 初回描画アニメ: その画面を初めて開いた時だけ左から線が伸びる。
-// metric ごとに「もう描いた」を保持し、タブ切替や再描画では再生しない。
-const animatedMetrics = new Set<MetricKey>();
-
 /**
  * 体組成 折れ線グラフ ・ SVG 自前実装 (2026-06-17 v2 ・ 3-way 単一指標)
  *
@@ -39,18 +35,15 @@ export function BodyMetricsChart({
   metricUnit: string;
   targetWeightKg: number | null;
 }) {
-  // 初回だけアニメする対象か(mount時に1度確定)。以後この metric は再生しない。
-  const [shouldAnimate] = useState(() => {
-    if (animatedMetrics.has(metric)) return false;
-    animatedMetrics.add(metric);
-    return true;
-  });
-  const [drawn, setDrawn] = useState(!shouldAnimate);
+  // hydration対策(2026-07-13): 初回描画は SSR/CSR とも決定論的に「未描画(drawn=false)」で出し、
+  //   マウント時に一度だけ requestAnimationFrame で drawn=true にして左から線を伸ばす。
+  //   以前は useState 初期化子が描画中に module-level Set を読み書きしており、サーバのモジュール状態が
+  //   前リクエストで汚れると CSR と食い違い hydration mismatch を起こしていた(Set/初回限定判定は撤去)。
+  const [drawn, setDrawn] = useState(false);
   useEffect(() => {
-    if (!shouldAnimate) return;
     const id = requestAnimationFrame(() => setDrawn(true));
     return () => cancelAnimationFrame(id);
-  }, [shouldAnimate]);
+  }, []);
 
   const data = useMemo(
     () =>
@@ -204,9 +197,7 @@ export function BodyMetricsChart({
           style={{
             strokeDasharray: 1,
             strokeDashoffset: drawn ? 0 : 1,
-            transition: shouldAnimate
-              ? "stroke-dashoffset 1000ms ease-out"
-              : undefined,
+            transition: "stroke-dashoffset 1000ms ease-out",
           }}
         />
       ) : null}
@@ -223,7 +214,7 @@ export function BodyMetricsChart({
           strokeWidth="2"
           style={{
             opacity: drawn ? 1 : 0,
-            transition: shouldAnimate ? "opacity 400ms ease-out 700ms" : undefined,
+            transition: "opacity 400ms ease-out 700ms",
           }}
         />
       ))}
