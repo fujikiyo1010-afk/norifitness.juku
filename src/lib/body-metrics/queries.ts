@@ -58,6 +58,7 @@ export async function listBodyMetricsForAdmin(
 export type LatestWithDelta = {
   latest: BodyMetricRow | null;
   weightDelta7d: number | null;
+  weightDelta30d: number | null;
   bodyFatDelta7d: number | null;
   waistDelta7d: number | null;
   daysSinceLatest: number | null;
@@ -67,18 +68,21 @@ export async function getLatestBodyMetricSummary(
   userId: string
 ): Promise<LatestWithDelta> {
   const admin = createAdminClient();
+  // 件4(2026-07-13・要Go-1=B): 30日差も算出するため取得を 30→60 件へ。毎日記録でも
+  //   30日前の記録が窓に入るように。新規クエリは足さずこの1本の上限だけ増やす。
   const { data } = await admin
     .from("body_metrics")
     .select("*")
     .eq("user_id", userId)
     .order("recorded_at", { ascending: false })
-    .limit(30);
+    .limit(60);
 
   const rows = (data ?? []) as BodyMetricRow[];
   if (rows.length === 0) {
     return {
       latest: null,
       weightDelta7d: null,
+      weightDelta30d: null,
       bodyFatDelta7d: null,
       waistDelta7d: null,
       daysSinceLatest: null,
@@ -90,21 +94,24 @@ export async function getLatestBodyMetricSummary(
   // ③ JST基準の暦日差（UTC解釈で「◯日ぶり」が深夜にズレるのを防ぐ）
   const daysSinceLatest = daysSinceDateJST(latest.recorded_at);
 
-  // 7 日前以上前の最も近い記録を探す
-  const sevenDaysBefore = new Date(latestDate);
-  sevenDaysBefore.setDate(sevenDaysBefore.getDate() - 7);
-  const prev = rows.find(
-    (r) => new Date(r.recorded_at).getTime() <= sevenDaysBefore.getTime()
-  );
+  // N 日前以上前の最も近い記録を探す(なければ null)
+  const nearestBefore = (days: number): BodyMetricRow | undefined => {
+    const cutoff = new Date(latestDate);
+    cutoff.setDate(cutoff.getDate() - days);
+    return rows.find((r) => new Date(r.recorded_at).getTime() <= cutoff.getTime());
+  };
+  const prev7 = nearestBefore(7);
+  const prev30 = nearestBefore(30);
 
   const delta = (a: number | null, b: number | null): number | null =>
     a !== null && b !== null ? Math.round((a - b) * 10) / 10 : null;
 
   return {
     latest,
-    weightDelta7d: prev ? delta(latest.weight_kg, prev.weight_kg) : null,
-    bodyFatDelta7d: prev ? delta(latest.body_fat_percent, prev.body_fat_percent) : null,
-    waistDelta7d: prev ? delta(latest.waist_cm, prev.waist_cm) : null,
+    weightDelta7d: prev7 ? delta(latest.weight_kg, prev7.weight_kg) : null,
+    weightDelta30d: prev30 ? delta(latest.weight_kg, prev30.weight_kg) : null,
+    bodyFatDelta7d: prev7 ? delta(latest.body_fat_percent, prev7.body_fat_percent) : null,
+    waistDelta7d: prev7 ? delta(latest.waist_cm, prev7.waist_cm) : null,
     daysSinceLatest,
   };
 }

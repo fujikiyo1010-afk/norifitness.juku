@@ -128,6 +128,7 @@ export type DailyBody = {
   targetWeightKg: number | null;
   remainingKg: number | null; // 目標まで（距離のみ・符号なし）
   weightDelta7d: number | null;
+  weightDelta30d: number | null; // 件4: 30日差（状態ストリップ用）
   recordedAt: string | null;
   daysSinceLatest: number | null;
 };
@@ -356,6 +357,7 @@ export async function getDailyDetail(
     targetWeightKg,
     remainingKg,
     weightDelta7d: bodySummary.weightDelta7d,
+    weightDelta30d: bodySummary.weightDelta30d,
     recordedAt: latest?.recorded_at ?? null,
     daysSinceLatest: bodySummary.daysSinceLatest,
   };
