@@ -42,13 +42,12 @@ export default async function ProteinPage() {
                 </p>
               </div>
 
-              <div className="mt-4 rounded-xl bg-[#eaf3ec] px-4 py-3 text-[12.5px] font-bold leading-relaxed text-[#34603f]">
+              <div className="mt-4 rounded-xl bg-[#eaf3ec] px-3 py-2.5 text-[11px] font-bold leading-[1.7] tracking-[-0.015em] text-[#34603f]">
                 <p>
                   受講生は専用クーポンで、
                   <span className="text-[#c2693f]">
-                    何個買っても{PROTEIN_DISCOUNT_PERCENT}％オフ
+                    何個買っても{PROTEIN_DISCOUNT_PERCENT}％オフ。
                   </span>
-                  。
                 </p>
                 <p>まとめ買いにもそのまま使えます。</p>
               </div>
