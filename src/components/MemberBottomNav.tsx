@@ -18,17 +18,20 @@ import { usePathname } from "next/navigation";
  *   - layout で {children} の後ろに配置すると、 末尾コンテンツがタブで被らない
  *   - 各ページに pb-24 を手で足さない方針 (漏れ + 再発リスク回避)
  */
+// アイコン(2026-07-14): のり監修のGemini仕様書画像を機械トレース→中心線抽出で太さ統一
+//   →視覚重心センタリングした線画SVG。public/icons/nav/*.svg をCSSマスクで現行配色に着色。
+//   チャットのみ吹き出しSVGをインライン(細線1.4・確定A)。
 // 3番目のタブ: ベータ=チャット / 非ベータ=記録(点21・確定7/7)
-const TAB_RECORD = { label: "記録", href: "/record", icon: <NoteIcon />, exact: false };
-const TAB_CHAT = { label: "チャット", href: "/messages", icon: <ChatIcon />, exact: false };
+const TAB_RECORD = { label: "記録", href: "/record", mask: "record", exact: false };
+const TAB_CHAT = { label: "チャット", href: "/messages", chat: true, exact: false };
 
 function tabsFor(isBeta: boolean) {
   return [
-    { label: "ホーム", href: "/", icon: <HomeIcon />, exact: true },
-    { label: "コース", href: "/courses", icon: <BookIcon />, exact: false },
+    { label: "ホーム", href: "/", mask: "home", exact: true },
+    { label: "コース", href: "/courses", mask: "course", exact: false },
     isBeta ? TAB_CHAT : TAB_RECORD,
-    { label: "筋トレ", href: "/workout", icon: <DumbbellIcon />, exact: false },
-    { label: "プロフィール", href: "/profile", icon: <PersonIcon />, exact: false },
+    { label: "筋トレ", href: "/workout", mask: "workout", exact: false },
+    { label: "プロフィール", href: "/profile", mask: "profile", exact: false },
   ];
 }
 
@@ -83,20 +86,30 @@ export function MemberBottomNav({ isBeta = false }: { isBeta?: boolean }) {
               <Link
                 key={tab.href}
                 href={tab.href}
-                className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 px-1 text-[10px] font-bold transition-colors ${
-                  isActive
-                    ? "text-[#34603f]"
-                    : "text-[#6a6256] hover:text-[#2b2620]"
+                className={`flex flex-1 items-center justify-center py-1 transition-colors ${
+                  isActive ? "text-[#4a875b]" : "text-[#6a6256] hover:text-[#2b2620]"
                 }`}
               >
+                {/* 選択ピル: 全タブ同一幅(70px・案2/案3中間)。長い「プロフィール」でも同幅で崩れない。 */}
                 <span
-                  className={`w-6 h-6 flex items-center justify-center ${
-                    isActive ? "text-[#4a875b]" : ""
+                  style={{ width: 70, maxWidth: "100%" }}
+                  className={`flex flex-col items-center gap-0.5 rounded-[14px] px-0.5 py-1.5 transition-colors ${
+                    isActive ? "bg-[#eaf3ec]" : ""
                   }`}
                 >
-                  {tab.icon}
+                  {"chat" in tab && tab.chat ? (
+                    <ChatIcon />
+                  ) : (
+                    <MaskIcon name={(tab as { mask: string }).mask} />
+                  )}
+                  <span
+                    className={`text-[10px] leading-none whitespace-nowrap ${
+                      isActive ? "font-extrabold text-[#34603f]" : "font-bold"
+                    }`}
+                  >
+                    {tab.label}
+                  </span>
                 </span>
-                <span>{tab.label}</span>
               </Link>
             );
           })}
@@ -106,77 +119,47 @@ export function MemberBottomNav({ isBeta = false }: { isBeta?: boolean }) {
   );
 }
 
-const iconProps = {
-  viewBox: "0 0 24 24",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 2,
-  strokeLinecap: "round" as const,
-  strokeLinejoin: "round" as const,
-};
-
-function HomeIcon() {
+// 機械トレースの線画SVG(public/icons/nav/*.svg)をCSSマスクで着色(背景色=currentColor)。
+// SVGは中心線抽出で全アイコン太さ統一+視覚重心センタリング済み(viewBox 260角・26px表示)。
+function MaskIcon({ name }: { name: string }) {
+  const url = `url(/icons/nav/${name}.svg)`;
   return (
-    <svg {...iconProps} width="22" height="22">
-      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-    </svg>
+    <span
+      aria-hidden
+      style={{
+        display: "block",
+        width: 26,
+        height: 26,
+        backgroundColor: "currentColor",
+        WebkitMaskImage: url,
+        maskImage: url,
+        WebkitMaskRepeat: "no-repeat",
+        maskRepeat: "no-repeat",
+        WebkitMaskPosition: "center",
+        maskPosition: "center",
+        WebkitMaskSize: "contain",
+        maskSize: "contain",
+      }}
+    />
   );
 }
 
-function BookIcon() {
-  // 2026-07-13: コースアイコンを「開いた本」(候補B)に変更。
-  return (
-    <svg {...iconProps} width="22" height="22">
-      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-    </svg>
-  );
-}
-
-function NoteIcon() {
-  return (
-    <svg {...iconProps} width="22" height="22">
-      <path d="M12 20h9" />
-      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
-    </svg>
-  );
-}
-
+// チャット吹き出し(確定A・22px・細線1.4)。他アイコンと同じ26px枠に収めて縦位置を揃える。
 function ChatIcon() {
   return (
-    <svg {...iconProps} width="22" height="22">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-    </svg>
-  );
-}
-
-function SearchIcon() {
-  return (
-    <svg {...iconProps} width="22" height="22">
-      <circle cx="11" cy="11" r="8" />
-      <path d="m21 21-4.3-4.3" />
-    </svg>
-  );
-}
-
-function DumbbellIcon() {
-  // 2026-07-13: コース内(筋トレフォーム)で使っている横型ダンベルSVGに統一。他アイコンより少し大きく(24)。
-  return (
-    <svg {...iconProps} width="24" height="24">
-      <path d="M8.5 12h7" />
-      <path d="M6 8.6v6.8" />
-      <path d="M3.6 10.2v3.6" />
-      <path d="M18 8.6v6.8" />
-      <path d="M20.4 10.2v3.6" />
-    </svg>
-  );
-}
-
-function PersonIcon() {
-  return (
-    <svg {...iconProps} width="22" height="22">
-      <circle cx="12" cy="8" r="4" />
-      <path d="M4 21v-1a6 6 0 0 1 12 0v1" />
-    </svg>
+    <span className="flex items-center justify-center" style={{ width: 26, height: 26 }}>
+      <svg
+        width="22"
+        height="22"
+        viewBox="2.5 2.5 19 19"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.4}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      </svg>
+    </span>
   );
 }
