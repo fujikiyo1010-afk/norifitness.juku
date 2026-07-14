@@ -71,6 +71,10 @@ export async function completeWorkoutDay(input: {
   status: "done" | "rest_done" | "skipped";
   memo?: string | null;
   items?: LoggedItemInput[];
+  /** 実際に実施した日(横カードで選んだ日)。予定=dayNumber と違う日をやった時に差分が出る。省略=予定通り。 */
+  performedDayNumber?: number | null;
+  /** 本人が休養日に設定したか(のり予定の休養日=false)。デイリー添削でサボりと区別するため。 */
+  isSelfRest?: boolean;
 }): Promise<ActionResult> {
   const supabase = await createClient();
   const {
@@ -108,6 +112,13 @@ export async function completeWorkoutDay(input: {
         status: input.status,
         memo: input.memo?.trim() || null,
         completed_at: new Date().toISOString(),
+        // 区別記録(2026-07-14): 予定と違う日をやった/本人が休養にした を保存。
+        // performed_day_number は「予定通り(=dayNumber)」なら NULL に落とす(履歴で差分表示の判定が素直)。
+        performed_day_number:
+          input.performedDayNumber != null && input.performedDayNumber !== input.dayNumber
+            ? input.performedDayNumber
+            : null,
+        is_self_rest: input.isSelfRest ?? false,
       },
       { onConflict: "user_id,cycle_number,day_number" }
     )

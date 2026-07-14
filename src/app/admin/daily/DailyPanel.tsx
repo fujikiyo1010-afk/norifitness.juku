@@ -439,11 +439,23 @@ function TodayTab({ detail }: { detail: DailyDetail }) {
                     ? "休養完了"
                     : "完了"}
               </span>
-              <span className="font-bold text-zinc-900">{detail.workout.dayLabel}</span>
+              <span className="font-bold text-zinc-900">
+                予定：{detail.workout.dayLabel}
+              </span>
+              {detail.workout.performedDayLabel && (
+                <span className="rounded bg-[#fff4cf] px-1.5 py-0.5 text-[10.5px] font-bold text-[#8a6d1a]">
+                  実施：{detail.workout.performedDayLabel}
+                </span>
+              )}
               <span className="text-[10px] text-zinc-400">
                 {detail.workout.intensity}強度
               </span>
             </div>
+            {detail.workout.status === "rest_done" && detail.workout.isSelfRest && (
+              <div className="rounded bg-[#fff4cf] px-2 py-1 text-[11px] font-bold text-[#8a6d1a]">
+                本人が休養日に設定（のり予定の休養日ではありません）
+              </div>
+            )}
             {detail.workout.doneNames.length > 0 && (
               <div>
                 <span className="text-[10px] font-bold text-[#34603f]">やった：</span>

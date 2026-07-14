@@ -60,6 +60,11 @@ export default async function UserWorkoutPage({
                     {dateLabel(d.date)}
                   </span>
                   <span className="text-[13px] font-bold text-zinc-900">{d.dayLabel}</span>
+                  {d.performedDayLabel && (
+                    <span className="rounded bg-[#fff4cf] px-1.5 py-0.5 text-[10px] font-bold text-[#8a6d1a]">
+                      実施：{d.performedDayLabel}
+                    </span>
+                  )}
                   <span className="text-[10px] text-zinc-400">{d.intensityLabel}強度</span>
                   <span
                     className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold ${st.cls}`}
@@ -67,6 +72,11 @@ export default async function UserWorkoutPage({
                     {st.label}
                   </span>
                 </div>
+                {d.status === "rest_done" && d.isSelfRest && (
+                  <div className="mt-1 inline-block rounded bg-[#fff4cf] px-1.5 py-0.5 text-[10px] font-bold text-[#8a6d1a]">
+                    本人が休養日に設定
+                  </div>
+                )}
                 <div className="mt-1.5 space-y-0.5 text-[11.5px]">
                   {d.doneNames.length > 0 && (
                     <div>

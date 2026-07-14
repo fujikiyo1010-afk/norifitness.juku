@@ -243,7 +243,17 @@ export function WorkoutTodayClientV2({
           return;
         }
       }
-      const r = await completeWorkoutDay({ dayNumber, cycleNumber, intensity, status, memo, items: payloadItems });
+      const r = await completeWorkoutDay({
+        dayNumber,
+        cycleNumber,
+        intensity,
+        status,
+        memo,
+        items: payloadItems,
+        // 区別記録: done の時だけ「実施した日」を渡す(予定と違えば差分保存)。rest_done は本人休養フラグ。
+        performedDayNumber: status === "done" ? selectedDay : null,
+        isSelfRest: status === "rest_done" && selfRest,
+      });
       if (!r.ok) throw new Error(r.message);
       router.replace("/workout/today?done=1");
       router.refresh();
