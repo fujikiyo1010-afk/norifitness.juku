@@ -19,10 +19,13 @@ export function WorkoutDoneCelebration({
   streakDays,
   doneCount,
   nextLabel,
+  fullScreen = false,
 }: {
   streakDays: number;
   doneCount: number;
   nextLabel: string | null;
+  // 2026-07-14: ヘッダー無しのフルスクリーン表示(preview)。true の時は内容を縦中央に置いて上ズレを解消。
+  fullScreen?: boolean;
 }) {
   const router = useRouter();
   // 2026-07-13: この行き止まり画面が出ている間だけ下部ナビを隠す(記録中/開始前は出す)。
@@ -56,7 +59,12 @@ export function WorkoutDoneCelebration({
   const fillPct = `${Math.max(0, Math.min(1, doneCount / 3)) * 100}%`;
 
   return (
-    <main className="wkdone playing relative min-h-[100dvh] overflow-hidden bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6]">
+    <main
+      className={`wkdone playing relative min-h-[100dvh] overflow-hidden bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] ${
+        fullScreen ? "flex flex-col justify-center" : ""
+      }`}
+      style={fullScreen ? { paddingTop: "env(safe-area-inset-top)" } : undefined}
+    >
       {/* 花吹雪(装飾・操作を妨げない) */}
       <div className="confetti pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
         {confetti.map((c, i) => (
