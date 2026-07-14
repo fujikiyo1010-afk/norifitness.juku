@@ -8,10 +8,13 @@
  * 他の受講生は現行の実施記録のまま＝影響ゼロ。DB変更なし。
  * きよむさんの確認 → 承認 が出たら、この判定を撤去して全員へ公開する。
  */
-const WORKOUT_PREVIEW_USER_IDS = new Set<string>([
-  "eb5aab17-1379-43fa-9a79-d699b43591bb", // 藤田澄（きよむ）
-]);
-
+// 2026-07-14: きよむ確認OK → 全受講生へV2を公開。
+//   ロールバックしたい時は下の RETURN を消し、Set 判定(コメント側)に戻す。
+// const WORKOUT_PREVIEW_USER_IDS = new Set<string>([
+//   "eb5aab17-1379-43fa-9a79-d699b43591bb", // 藤田澄（きよむ）
+// ]);
 export function isWorkoutPreviewUser(userId: string | null | undefined): boolean {
-  return !!userId && WORKOUT_PREVIEW_USER_IDS.has(userId);
+  void userId;
+  return true; // 全員公開
+  // return !!userId && WORKOUT_PREVIEW_USER_IDS.has(userId);
 }
