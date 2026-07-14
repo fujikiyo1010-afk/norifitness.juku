@@ -105,6 +105,7 @@ export default async function WorkoutTodayPage({
           streakDays={streakDays}
           doneCount={doneCount}
           nextLabel={nextLabel}
+          fullScreen={preview}
         />
       </>
     );
