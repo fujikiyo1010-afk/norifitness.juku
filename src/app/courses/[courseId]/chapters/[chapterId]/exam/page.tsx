@@ -8,6 +8,7 @@ import {
   getMyLatestAttempt,
 } from "@/lib/exams/queries";
 import { ExamView } from "./ExamView";
+import { EXAMS_ENABLED } from "@/lib/exams/feature";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +37,36 @@ export default async function ExamPage({
   } = await supabase.auth.getUser();
   if (!user) {
     redirect(`/login?next=/courses/${courseId}/chapters/${chapterId}/exam`);
+  }
+
+  // 2026-07-14: 全体公開の準備で試験を一時封鎖。ここで早期returnし、
+  // 以降の getExamFull(correct_choice_id を含む)を一切読み込まない=直URLでも答えは漏れない。
+  if (!EXAMS_ENABLED) {
+    return (
+      <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
+        <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9]">
+          <MemberHeader title="テスト" fallbackHref={`/courses/${courseId}`} />
+          <div className="flex flex-1 items-center justify-center p-6">
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-center">
+              <div className="text-sm font-bold text-amber-800">
+                理解度テストは準備中です
+              </div>
+              <div className="mt-1.5 text-xs leading-relaxed text-amber-700">
+                現在このテストは一時的にお休みしています。
+                <br />
+                先に動画レッスンを進めて大丈夫です。
+              </div>
+              <Link
+                href={`/courses/${courseId}`}
+                className="mt-3 inline-block text-[12px] font-bold text-[#4a875b]"
+              >
+                コースに戻る →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
   }
 
   const examMeta = await getExamForChapter(chapterId);
