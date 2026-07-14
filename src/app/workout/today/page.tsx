@@ -10,6 +10,8 @@ import { resolveDayMenu } from "@/lib/workout/logs-types";
 import { cleanExerciseName, getExerciseTarget } from "@/lib/workout/menu-display";
 import type { WorkoutCycles } from "@/lib/workout/types";
 import { WorkoutTodayClient } from "./WorkoutTodayClient";
+import { WorkoutTodayClientV2 } from "./WorkoutTodayClientV2";
+import { isWorkoutPreviewUser } from "@/lib/workout/preview";
 import { StartWorkoutButton } from "./StartWorkoutButton";
 import { WorkoutDoneCelebration } from "./WorkoutDoneCelebration";
 
@@ -51,6 +53,12 @@ export default async function WorkoutTodayPage({
   const sp = await searchParams;
   const w = await getTodayWorkout();
 
+  // 仮反映(2026-07-14): きよむ(藤田)だけ新実施記録V2を表示。他は現行のまま。
+  const {
+    data: { user: previewUser },
+  } = await (await createClient()).auth.getUser();
+  const preview = isWorkoutPreviewUser(previewUser?.id);
+
   // 新3a: バナーは「?done=1 かつ 今日を実際に完了(done/rest_done)」の時だけ。
   const showCeleb =
     sp.done === "1" &&
@@ -89,13 +97,39 @@ export default async function WorkoutTodayPage({
   // T3: 完了直後(?done=1)だけ祝福専用画面。編集UI/種目リスト/下部ナビは出さない
   // (下ナビは /workout/today で既に非表示)。リロード/再訪では ?done=1 が消え通常の完了済みビューへ。
   if (showCeleb) {
+    // 仮反映(preview): 完了画面をフルスクリーン化(ヘッダー枠・戻る撤去)。非preview は現行どおり。
     return (
       <>
-        <MemberHeader title="今日のトレーニング" fallbackHref="/" />
+        {!preview && <MemberHeader title="今日のトレーニング" fallbackHref="/" />}
         <WorkoutDoneCelebration
           streakDays={streakDays}
           doneCount={doneCount}
           nextLabel={nextLabel}
+        />
+      </>
+    );
+  }
+
+  // 仮反映: きよむ + 開始済み + メニューあり の時だけ新実施記録V2(自前で main を持つ)。
+  if (preview && w.started && w.hasMenu && w.cycles) {
+    return (
+      <>
+        <MemberHeader title="今日のトレーニング" fallbackHref="/" />
+        <WorkoutTodayClientV2
+          cycles={w.cycles}
+          dayNumber={w.dayNumber}
+          cycleNumber={w.cycleNumber}
+          initialIntensity={w.todayLog?.intensity ?? "medium"}
+          alreadyDone={w.todayLog?.status === "done" || w.todayLog?.status === "rest_done"}
+          initialMemo={w.todayLog?.memo ?? null}
+          completedAtLabel={
+            w.todayLog?.completedAt
+              ? new Date(new Date(w.todayLog.completedAt).getTime() + 9 * 3600 * 1000)
+                  .toISOString()
+                  .slice(11, 16)
+              : null
+          }
+          feedbackLocked={feedbackLocked}
         />
       </>
     );
