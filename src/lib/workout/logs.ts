@@ -201,6 +201,10 @@ export type WorkoutHistoryRow = {
   addedCount: number;
   itemCount: number;
   hasMemo: boolean;
+  /** 予定と違う日をやった時、実際に実施した日(予定通りなら null)。 */
+  performedDayNumber: number | null;
+  /** 本人が休養日に設定したか(のり予定の休養日=false)。 */
+  isSelfRest: boolean;
 };
 
 export type WorkoutHistory = {
@@ -232,7 +236,7 @@ export async function getMyWorkoutHistory(limit = 60): Promise<WorkoutHistory> {
     supabase
       .from("user_workout_logs")
       .select(
-        "id, date, day_number, cycle_number, intensity, status, memo, user_workout_log_items(source)"
+        "id, date, day_number, cycle_number, intensity, status, memo, performed_day_number, is_self_rest, user_workout_log_items(source)"
       )
       .eq("user_id", user.id)
       .order("date", { ascending: false })
@@ -252,6 +256,8 @@ export async function getMyWorkoutHistory(limit = 60): Promise<WorkoutHistory> {
     intensity: Intensity;
     status: "done" | "rest_done" | "skipped";
     memo: string | null;
+    performed_day_number: number | null;
+    is_self_rest: boolean | null;
     user_workout_log_items: { source: string }[] | null;
   }[];
 
@@ -266,6 +272,8 @@ export async function getMyWorkoutHistory(limit = 60): Promise<WorkoutHistory> {
       addedCount: items.filter((i) => i.source === "added").length,
       itemCount: items.length,
       hasMemo: !!r.memo,
+      performedDayNumber: r.performed_day_number ?? null,
+      isSelfRest: !!r.is_self_rest,
     };
   });
 

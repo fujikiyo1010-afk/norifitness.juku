@@ -169,7 +169,9 @@ export type DailyMealForAdmin = {
 
 export type DailyWorkoutForAdmin = {
   status: "done" | "rest_done" | "skipped";
-  dayLabel: string;
+  dayLabel: string; // 予定の日(day_number)のラベル
+  performedDayLabel: string | null; // 予定と違う日をやった時、実施した日のラベル(予定通りなら null)
+  isSelfRest: boolean; // 本人が休養日に設定したか(のり予定の休養日=false)
   intensity: string; // 小/中/大
   doneNames: string[]; // 原本どおりやった種目
   notDoneNames: string[]; // 原本にあってやらなかった
@@ -307,7 +309,7 @@ export async function getDailyDetail(
     // S2-D: 親(user_workout_logs)→子(items)の2往復をネストselectで1往復に(service role)。
     const { data: logRow } = await admin
       .from("user_workout_logs")
-      .select("id, day_number, intensity, status, memo, user_workout_log_items(exercise_name, source)")
+      .select("id, day_number, performed_day_number, is_self_rest, intensity, status, memo, user_workout_log_items(exercise_name, source)")
       .eq("user_id", userId)
       .eq("date", dateStr)
       .maybeSingle();
@@ -322,20 +324,26 @@ export async function getDailyDetail(
       const addedNames = items
         .filter((i) => i.source === "added")
         .map((i) => cleanExerciseName(i.exercise_name));
-      // 原本の当日種目 → やらなかった差分
+      // 区別記録: 予定=day_number、実施=performed_day_number(あれば)。
+      // 差分(やらなかった種目)は「実際にやった日のメニュー」で比較する(予定と違う日をやった時に脚メニューと胸実績を突合しない)。
+      const scheduledDay = logRow.day_number as number;
+      const performedDay = (logRow.performed_day_number as number | null) ?? null;
+      const effectiveDay = performedDay ?? scheduledDay;
       const menu = await getCurrentMenuForAdmin(userId);
       const intensity = (logRow.intensity as Intensity) ?? "medium";
-      const dayMenu = menu
-        ? resolveDayMenu(menu.cycles, intensity, logRow.day_number as number)
-        : null;
-      const originalNames = (dayMenu?.種目 ?? [])
+      const scheduledMenu = menu ? resolveDayMenu(menu.cycles, intensity, scheduledDay) : null;
+      const effectiveMenu = menu ? resolveDayMenu(menu.cycles, intensity, effectiveDay) : null;
+      const originalNames = (effectiveMenu?.種目 ?? [])
         .filter((e) => e.種目名)
         .map((e) => cleanExerciseName(e.種目名));
       const doneSet = new Set(doneOriginal);
       const notDoneNames = originalNames.filter((n) => !doneSet.has(n));
       workout = {
         status: logRow.status as "done" | "rest_done" | "skipped",
-        dayLabel: dayMenu?.日 ?? `${logRow.day_number}日目`,
+        dayLabel: scheduledMenu?.日 ?? `${scheduledDay}日目`,
+        performedDayLabel:
+          performedDay != null ? (effectiveMenu?.日 ?? `${performedDay}日目`) : null,
+        isSelfRest: !!(logRow.is_self_rest as boolean | null),
         intensity: INTENSITY_LABEL[intensity] ?? "中",
         doneNames: doneOriginal,
         notDoneNames,

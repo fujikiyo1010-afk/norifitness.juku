@@ -11,6 +11,8 @@ import { cleanExerciseName } from "@/lib/workout/menu-display";
 export type AdminWorkoutDay = {
   date: string;
   dayLabel: string;
+  performedDayLabel: string | null; // 予定と違う日をやった時の実施日ラベル(予定通りなら null)
+  isSelfRest: boolean; // 本人が休養日に設定したか
   intensityLabel: string;
   status: "done" | "rest_done" | "skipped";
   doneNames: string[];
@@ -41,7 +43,7 @@ export async function getWorkoutHistoryForUser(
   const [{ data: logs }, { data: prog }, menu] = await Promise.all([
     admin
       .from("user_workout_logs")
-      .select("id, date, day_number, intensity, status, memo")
+      .select("id, date, day_number, performed_day_number, is_self_rest, intensity, status, memo")
       .eq("user_id", userId)
       .order("date", { ascending: false })
       .limit(limit),
@@ -57,6 +59,8 @@ export async function getWorkoutHistoryForUser(
     id: string;
     date: string;
     day_number: number;
+    performed_day_number: number | null;
+    is_self_rest: boolean | null;
     intensity: Intensity;
     status: "done" | "rest_done" | "skipped";
     memo: string | null;
@@ -92,16 +96,21 @@ export async function getWorkoutHistoryForUser(
 
   const days: AdminWorkoutDay[] = rows.map((r) => {
     const doneNames = doneByLog.get(r.id) ?? [];
-    const dayMenu = menu
-      ? resolveDayMenu(menu.cycles, r.intensity, r.day_number)
-      : null;
-    const originalNames = (dayMenu?.種目 ?? [])
+    // 区別記録: 差分は「実際にやった日」のメニューで比較。
+    const performedDay = r.performed_day_number ?? null;
+    const effectiveDay = performedDay ?? r.day_number;
+    const scheduledMenu = menu ? resolveDayMenu(menu.cycles, r.intensity, r.day_number) : null;
+    const effectiveMenu = menu ? resolveDayMenu(menu.cycles, r.intensity, effectiveDay) : null;
+    const originalNames = (effectiveMenu?.種目 ?? [])
       .filter((e) => e.種目名)
       .map((e) => cleanExerciseName(e.種目名));
     const doneSet = new Set(doneNames);
     return {
       date: r.date,
-      dayLabel: dayMenu?.日 ?? `${r.day_number}日目`,
+      dayLabel: scheduledMenu?.日 ?? `${r.day_number}日目`,
+      performedDayLabel:
+        performedDay != null ? (effectiveMenu?.日 ?? `${performedDay}日目`) : null,
+      isSelfRest: !!r.is_self_rest,
       intensityLabel: INTENSITY_LABEL[r.intensity] ?? "中",
       status: r.status,
       doneNames,

@@ -2,9 +2,24 @@ import { redirect } from "next/navigation";
 import { isBetaUser } from "@/lib/auth/beta";
 import { MemberHeader } from "@/components/MemberHeader";
 import { getMyWorkoutHistory } from "@/lib/workout/logs";
-import { INTENSITY_LABEL } from "@/lib/workout/logs-types";
+import { getMyCurrentMenu } from "@/lib/workout/queries";
+import { resolveDayMenu, INTENSITY_LABEL, type Intensity } from "@/lib/workout/logs-types";
+import { getExerciseTarget } from "@/lib/workout/menu-display";
+import type { WorkoutCycles } from "@/lib/workout/types";
 
 export const dynamic = "force-dynamic";
+
+/** その日のテーマ名(◯◯の日/休養日/パーソナル)。区別記録の「→◯日目を実施」表示用。 */
+function dayThemeLabel(cycles: WorkoutCycles | null, intensity: Intensity, day: number): string {
+  if (!cycles) return `${day}日目`;
+  const dm = resolveDayMenu(cycles, intensity, day);
+  if (!dm) return `${day}日目`;
+  if (dm.種別 === "休息") return "休養日";
+  if (dm.種別 === "パーソナル") return "パーソナル";
+  const ex = (dm.種目 ?? []).filter((e) => e.種目名);
+  const t = getExerciseTarget(ex.flatMap((e) => e.主部位 ?? []));
+  return dm.日 && dm.日 !== `${day}日目` ? dm.日 : t && t !== "全身" ? `${t}の日` : "トレーニング";
+}
 
 const STATUS: Record<string, { label: string; cls: string }> = {
   done: { label: "完了", cls: "text-[#34603f] bg-[#eef5f0]" },
@@ -23,7 +38,8 @@ export default async function WorkoutHistoryPage() {
   const isBeta = await isBetaUser();
   if (!isBeta) redirect("/workout");
 
-  const h = await getMyWorkoutHistory();
+  const [h, menu] = await Promise.all([getMyWorkoutHistory(), getMyCurrentMenu()]);
+  const cycles = menu?.cycles ?? null;
 
   return (
     <>
@@ -46,6 +62,10 @@ export default async function WorkoutHistoryPage() {
             <ul className="space-y-1.5">
               {h.rows.map((r, i) => {
                 const st = STATUS[r.status] ?? STATUS.done;
+                // 区別記録: done で予定と違う日をやった → 「→◯日目(◯◯の日)を実施」。
+                const didOtherDay =
+                  r.status === "done" && r.performedDayNumber != null && r.performedDayNumber !== r.dayNumber;
+                const selfRest = r.status === "rest_done" && r.isSelfRest;
                 return (
                   <li
                     key={i}
@@ -59,6 +79,11 @@ export default async function WorkoutHistoryPage() {
                     <div className="min-w-0 flex-1">
                       <div className="text-[12.5px] font-bold text-[#2b2620]">
                         {r.cycleNumber}周{r.dayNumber}日目
+                        {didOtherDay && (
+                          <span className="ml-1 text-[10.5px] font-bold text-[#8a6d1a]">
+                            → {r.performedDayNumber}日目（{dayThemeLabel(cycles, r.intensity, r.performedDayNumber!)}）を実施
+                          </span>
+                        )}
                         {r.addedCount > 0 && (
                           <span className="ml-1 text-[10px] font-bold text-[#4a875b]">
                             ＋{r.addedCount}追加
@@ -71,11 +96,18 @@ export default async function WorkoutHistoryPage() {
                         {r.hasMemo ? "・メモあり" : ""}
                       </div>
                     </div>
-                    <span
-                      className={`flex-shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${st.cls}`}
-                    >
-                      {st.label}
-                    </span>
+                    {selfRest ? (
+                      <div className="flex flex-shrink-0 flex-col items-end gap-1">
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${st.cls}`}>{st.label}</span>
+                        <span className="rounded-full border border-[#f0dd9a] bg-[#fff4cf] px-2 py-0.5 text-[9.5px] font-bold text-[#8a6d1a]">
+                          本人意思
+                        </span>
+                      </div>
+                    ) : (
+                      <span className={`flex-shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${st.cls}`}>
+                        {st.label}
+                      </span>
+                    )}
                   </li>
                 );
               })}
