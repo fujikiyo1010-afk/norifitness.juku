@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { EXAMS_ENABLED } from "@/lib/exams/feature";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { setLessonProgress } from "@/lib/courses/progress-actions";
@@ -255,8 +256,10 @@ export function CourseAccordion({
                         </li>
                       );
                     })}
-                    {/* 章末 ・ テスト行 (exam がある章のみ表示) */}
-                    {examsByChapterId[ch.id] ? (
+                    {/* 章末 ・ テスト行 (exam がある章のみ表示)。
+                        2026-07-14: 全体公開の準備で試験を一時非表示(EXAMS_ENABLED=false)。
+                        correct_choice_id 漏洩の既知債を全員に露出させないため。復活はフラグを戻すだけ。 */}
+                    {EXAMS_ENABLED && examsByChapterId[ch.id] ? (
                       <ExamRow
                         courseId={courseId}
                         chapterId={ch.id}
