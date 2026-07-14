@@ -360,7 +360,7 @@ export function WorkoutTodayClientV2({
         ) : isPersonalDay ? (
           <div className="mt-3 rounded-xl border border-[#e7dcc9] bg-white px-4 py-5 text-center text-[12.5px] leading-relaxed text-[#5b5344]">
             今日は<b className="text-[#34603f]">パーソナル指導の日</b>。
-            <span className="mt-1.5 block text-[11px] text-[#6a6256]">行けない時は、上で別の日を選べます。</span>
+            <span className="mt-1.5 block text-[11px] text-[#6a6256]">行けない時は、上で別の日を選択してメニューを設定できます。</span>
           </div>
         ) : (
           <div className="mt-3">
