@@ -267,7 +267,7 @@ export function HomeBeta({
               iconColor="#7a5af0"
               iconBg="#efeafd"
             />
-            {/* 4行目: フォーム添削(左・5大機能②) */}
+            {/* 4行目: フォーム添削(左・5大機能②) / プロテイン(右・5大機能④) */}
             <BigTile
               href="/form-review"
               name="フォーム添削"
@@ -275,6 +275,14 @@ export function HomeBeta({
               icon={<FormReviewTileIcon />}
               iconColor="#c2693f"
               iconBg="#f7ece2"
+            />
+            <BigTile
+              href="/protein"
+              name="プロテイン"
+              desc="専用クーポンで購入"
+              icon={<ProteinTileIcon />}
+              iconColor="#8a5a3c"
+              iconBg="#f3e7dd"
             />
           </div>
 
@@ -676,6 +684,16 @@ function FormReviewTileIcon() {
       <rect x="2.5" y="4" width="19" height="13" rx="2" />
       <path d="M8 21h8 M12 17v4" />
       <polygon points="10.5 8.5 15 11 10.5 13.5" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+// プロテイン: シェイカーの線画(フタ+ボトル+目盛り)
+function ProteinTileIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 3h8 M9 3v2.5a3 3 0 0 1-.5 1.7L7 9.5a4 4 0 0 0-.7 2.3V19a2 2 0 0 0 2 2h7.4a2 2 0 0 0 2-2v-7.2a4 4 0 0 0-.7-2.3l-1.5-2.3a3 3 0 0 1-.5-1.7V3" />
+      <path d="M6.4 12.5h11.2" />
+      <path d="M15 15.5h1.5 M15 18h1.5" />
     </svg>
   );
 }
