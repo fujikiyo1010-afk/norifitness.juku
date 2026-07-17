@@ -38,6 +38,7 @@ export function HomeBeta({
   alerts,
   workoutDayNumber = null,
   workoutPartLabel = null,
+  showTokuten = false,
 }: {
   displayName: string;
   daysSinceJoined: number;
@@ -53,6 +54,8 @@ export function HomeBeta({
   alerts: MemberAlert[]; // 件1: 未記入誘導の黄バナー(旧ホームから移植・該当解消で消える)
   workoutDayNumber?: number | null; // トレカード「◯日目」
   workoutPartLabel?: string | null; // トレカード タイトル=メニュー名(部位ラベル)
+  /** 藤田さん限定 仮反映: true=コース一覧を隠し特典ライブラリを表示 / false=従来(コース一覧あり) */
+  showTokuten?: boolean;
 }) {
   const learnPct =
     totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
@@ -250,15 +253,18 @@ export function HomeBeta({
               iconColor="#2f7d6b"
               iconBg="#e3f1ee"
             />
-            {/* 3行目: コース一覧(左) / ツール(右) */}
-            <BigTile
-              href="/courses"
-              name="コース一覧"
-              desc="動画レッスン"
-              icon={<TileIcon paths={TILE_ICON.course.split(" M").map((s, i) => (i === 0 ? s : "M" + s))} />}
-              iconColor="#3a6ea5"
-              iconBg="#e8f0fa"
-            />
+            {/* コース一覧: 通常は表示。藤田さん限定 仮反映(showTokuten)では非表示にし、
+                代わりに末尾へ「特典ライブラリ」を出す。どちらも8枚=4行×2列で揃う(2026-07-17)。 */}
+            {!showTokuten && (
+              <BigTile
+                href="/courses"
+                name="コース一覧"
+                desc="動画レッスン"
+                icon={<TileIcon paths={TILE_ICON.course.split(" M").map((s, i) => (i === 0 ? s : "M" + s))} />}
+                iconColor="#3a6ea5"
+                iconBg="#e8f0fa"
+              />
+            )}
             <BigTile
               href="/tools"
               name="ツール"
@@ -267,7 +273,6 @@ export function HomeBeta({
               iconColor="#7a5af0"
               iconBg="#efeafd"
             />
-            {/* 4行目: フォーム添削(左・5大機能②) / プロテイン(右・5大機能④) */}
             <BigTile
               href="/form-review"
               name="フォーム添削"
@@ -284,6 +289,26 @@ export function HomeBeta({
               iconColor="#8a5a3c"
               iconBg="#f3e7dd"
             />
+            {showTokuten && (
+              <BigTile
+                href="/tokuten"
+                name="特典ライブラリ"
+                icon={
+                  <TileIcon
+                    paths={[
+                      "M20 12v10H4V12",
+                      "M2 7h20v5H2z",
+                      "M12 22V7",
+                      "M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z",
+                      "M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z",
+                    ]}
+                  />
+                }
+                iconColor="#3a7d44"
+                iconBg="#eef6ee"
+                lineBadge
+              />
+            )}
           </div>
 
           <div className="h-4" />
@@ -601,24 +626,40 @@ function BigTile({
   iconColor,
   iconBg,
   badge,
+  lineBadge,
 }: {
   href: string;
   name: string;
-  desc: string;
+  desc?: string;
   icon: React.ReactNode;
   iconColor: string;
   iconBg: string;
   badge?: string;
+  /** 「LINE限定特典」の緑バッジ + シェブロンを表示(特典ライブラリ用・2026-07-14) */
+  lineBadge?: boolean;
 }) {
   return (
     <Link
       href={href}
-      className="relative flex min-h-[92px] flex-col justify-between gap-2 rounded-2xl border border-[#e7dcc9] bg-[#fffdf8] p-3 hover:border-[#4a875b] transition-colors"
+      className="relative flex h-[98px] flex-col justify-between gap-1 overflow-hidden rounded-2xl border border-[#e7dcc9] bg-[#fffdf8] p-3 hover:border-[#4a875b] transition-colors"
     >
       {badge && (
         <span className="absolute right-2 top-2 rounded-full bg-[#c2693f] px-1.5 py-px text-[8px] font-bold text-white">
           {badge}
         </span>
+      )}
+      {lineBadge && (
+        <svg
+          className="absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#c3b8a2"
+          strokeWidth={2.5}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <polyline points="9,18 15,12 9,6" />
+        </svg>
       )}
       {/* 細18: 確定7/7転写=色付きアイコン円 */}
       <span
@@ -629,7 +670,22 @@ function BigTile({
       </span>
       <div>
         <div className="text-[13px] font-bold text-[#2b2620]">{name}</div>
-        <div className="text-[9.5px] text-[#6a6256]">{desc}</div>
+        {desc && <div className="text-[9.5px] text-[#6a6256]">{desc}</div>}
+        {lineBadge && (
+          <span className="mt-1 inline-flex items-center gap-[3px]">
+            <span
+              className="flex h-[13px] w-[13px] flex-shrink-0 items-center justify-center rounded-[4px]"
+              style={{ background: "#06C755" }}
+            >
+              <svg viewBox="0 0 24 24" className="h-[9px] w-[9px]" fill="#fff">
+                <path d="M12 3.5c-4.7 0-8.5 3-8.5 6.8 0 3.4 3 6.2 7 6.7.28.06.66.18.75.42.08.22.05.55.03.77 0 0-.1.6-.12.73-.04.22-.17.86.75.47s4.96-2.92 6.77-5C20.6 12.9 20.5 11.5 20.5 10.3c0-3.8-3.8-6.8-8.5-6.8z" />
+              </svg>
+            </span>
+            <span className="text-[8.5px] font-bold" style={{ color: "#06C755" }}>
+              LINE限定特典
+            </span>
+          </span>
+        )}
       </div>
     </Link>
   );
