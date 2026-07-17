@@ -17,6 +17,7 @@ import { getMyBoardItems, type BoardItem } from "@/lib/member/board";
 import { hasUnreadReply } from "@/lib/member/notifications";
 import { getTodayActivity } from "@/lib/member/today-activity";
 import { isBetaUser } from "@/lib/auth/beta";
+import { isTokutenPreviewUser } from "@/lib/auth/tokuten-preview";
 import { HomeBeta } from "./HomeBeta";
 
 export const dynamic = "force-dynamic";
@@ -106,6 +107,7 @@ export default async function Home() {
     todayActivity,
     streakDays,
     w,
+    isTokutenPreview,
   ] = await Promise.all([
     getMyAlerts(),
     getMyHomeStats(),
@@ -123,6 +125,8 @@ export default async function Home() {
     // 非betaでは使わないが、並列なので待ち時間コストは無い。
     getRecordStreak(),
     getTodayWorkout(),
+    // 特典ライブラリの本番・藤田さん限定 仮反映(2026-07-17)
+    isTokutenPreviewUser(),
   ]);
 
   const displayName = stats?.displayName ?? "受講生";
@@ -139,7 +143,8 @@ export default async function Home() {
       : 0;
 
   // P3(ベータ限定): 確定7/7ホーム。非ベータは従来ホーム(下の return)。
-  if (isBeta) {
+  // 藤田さん限定の特典ライブラリ仮反映では、非ベータでも HomeBeta 経路に通す。
+  if (isBeta || isTokutenPreview) {
     // streakDays, w は上の本体バッチで取得済み(F: 後段の直列を合流)。
     // トレカードのラベル(◯日目 + メニュー名/部位ラベル)
     const workoutDayNumber = w.started ? w.dayNumber : null;
@@ -171,6 +176,7 @@ export default async function Home() {
         unreadReply={unreadReply}
         today={todayActivity}
         alerts={alerts}
+        showTokuten={isTokutenPreview}
       />
     );
   }
