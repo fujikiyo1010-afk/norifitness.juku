@@ -109,6 +109,7 @@ export function DayDetail({
   feedback = null,
   target = null,
   userId,
+  canEditPast = false,
   condition = null,
   askYesterday = null,
   foods = [],
@@ -121,6 +122,7 @@ export function DayDetail({
   feedback?: string | null;
   target?: TargetPFC | null;
   userId: string;
+  canEditPast?: boolean; // 仮反映(藤田さんのみ): 過去日の編集を許可
   condition?: DailyConditionData | null; // その日の生活記録(記録済みなら値)
   askYesterday?: string | null; // 翌日補完: 昨日の日付(聞くべきなら) or null
   foods?: FoodItem[]; // food_table(P4-b・自動計算)
@@ -140,7 +142,9 @@ export function DayDetail({
   const isToday = date === today;
   // FBが届いた日は編集ロック(当日は M6 に従い編集可)
   const locked = !isToday && !!feedback;
-  const editable = isToday && !locked;
+  // 仮反映(藤田さんのみ・2026-07-17): 過去日でも「のりコメント未到達」なら編集可(B案)。
+  //   コメント到達済み(locked)の日は従来通り守る。canEditPast=false の受講生は「今日のみ」。
+  const editable = (isToday || (canEditPast && !isToday)) && !locked;
 
   const total = sumMeals(meals);
   const hasNumbers = total.numberedCount > 0;

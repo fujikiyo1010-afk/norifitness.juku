@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isBetaUser } from "@/lib/auth/beta";
+import { PREVIEW_EMAILS } from "@/lib/auth/tokuten-preview";
 import { MemberHeader } from "@/components/MemberHeader";
 import { jstTodayStr } from "@/lib/date/jst";
 import { getMealsForDate, signMealPhotos } from "@/lib/meals/queries";
@@ -33,6 +34,10 @@ export default async function MealsDayPage({
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/meals");
+
+  // 仮反映(2026-07-17): 藤田さんのアカウントだけ、過去日の食事も編集できるようにする。
+  //   他の受講生は従来通り「今日のみ編集可」。承認後は PREVIEW_EMAILS 判定を外して全員へ。
+  const canEditPast = !!user.email && PREVIEW_EMAILS.includes(user.email.toLowerCase());
 
   // S2-B: 互いに独立な読み取りを1つの Promise.all で並列化(9段の直列→約4段)。
   //   依存のある「meals→署名URL」は1単位で内部順序を保持。shouldAskYesterday は
@@ -121,6 +126,7 @@ export default async function MealsDayPage({
             feedback={feedback}
             target={target}
             userId={user.id}
+            canEditPast={canEditPast}
             condition={condRes?.data ?? null}
             askYesterday={askYesterday}
             foods={foods}
