@@ -11,7 +11,10 @@ import { createClient } from "@/lib/supabase/server";
  * 全体公開に切り替える時は、この判定を使っている箇所を「常に true」にする
  * (= page.tsx / HomeBeta / tokuten ページの分岐を外す)。
  */
-const PREVIEW_EMAILS = ["fujikiyo1010@gmail.com"];
+const PREVIEW_EMAILS = [
+  "fujikiyo1010+kiyomu-test@gmail.com", // 藤田さん 本番アカウント
+  "fujikiyo1010@gmail.com", // dev テスト用(本番には存在しない)
+];
 
 export async function isTokutenPreviewUser(): Promise<boolean> {
   const supabase = await createClient();
