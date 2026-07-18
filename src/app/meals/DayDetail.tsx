@@ -93,15 +93,6 @@ function WeekStrip({
   );
 }
 
-function LockIcon() {
-  return (
-    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-    </svg>
-  );
-}
-
 export function DayDetail({
   date,
   meals,
@@ -122,7 +113,7 @@ export function DayDetail({
   feedback?: string | null;
   target?: TargetPFC | null;
   userId: string;
-  canEditPast?: boolean; // 仮反映(藤田さんのみ): 過去日の編集を許可
+  canEditPast?: boolean; // 仮反映(許可リストの4人): 過去日の編集を許可(添削済み含む)
   condition?: DailyConditionData | null; // その日の生活記録(記録済みなら値)
   askYesterday?: string | null; // 翌日補完: 昨日の日付(聞くべきなら) or null
   foods?: FoodItem[]; // food_table(P4-b・自動計算)
@@ -140,11 +131,9 @@ export function DayDetail({
   const conditionRecorded = hasAnyCondition(condition);
 
   const isToday = date === today;
-  // FBが届いた日は編集ロック(当日は M6 に従い編集可)
-  const locked = !isToday && !!feedback;
-  // 仮反映(藤田さんのみ・2026-07-17): 過去日でも「のりコメント未到達」なら編集可(B案)。
-  //   コメント到達済み(locked)の日は従来通り守る。canEditPast=false の受講生は「今日のみ」。
-  const editable = (isToday || (canEditPast && !isToday)) && !locked;
+  // 仮反映(2026-07-18): canEditPast の人は、のり添削済みの日も含め すべての過去日を編集できる
+  //   (ロック撤去)。canEditPast=false の受講生は従来通り「今日のみ」編集可。
+  const editable = isToday || (canEditPast && !isToday);
 
   const total = sumMeals(meals);
   const hasNumbers = total.numberedCount > 0;
@@ -274,7 +263,6 @@ export function DayDetail({
                   key={m.id}
                   meal={m}
                   editable={editable}
-                  locked={locked}
                   onEdit={() => setSheet({ mealType: t, editLog: m })}
                   onDelete={() => onDelete(m.id)}
                 />
@@ -363,11 +351,7 @@ export function DayDetail({
       </div>
 
       {!editable && (
-        <p className="text-center text-[11px] text-[#a59b8c]">
-          {locked
-            ? "のりのコメントが届いた日の記録は編集できません。"
-            : "過去の記録は閲覧のみです。"}
-        </p>
+        <p className="text-center text-[11px] text-[#a59b8c]">過去の記録は閲覧のみです。</p>
       )}
 
       {/* 医療ただし書き */}
@@ -435,13 +419,11 @@ function Bar({ label, value, tgt }: { label: string; value: number; tgt: number 
 function Slot({
   meal,
   editable,
-  locked,
   onEdit,
   onDelete,
 }: {
   meal: MealWithUrls;
   editable: boolean;
-  locked: boolean;
   onEdit: () => void;
   onDelete: () => void;
 }) {
@@ -474,22 +456,16 @@ function Slot({
             </div>
           )}
           {meal.memo && <div className="mt-0.5 text-[11px] italic text-[#a59b8c]">{meal.memo}</div>}
-          <div className="mt-1.5 flex gap-3">
-            {editable ? (
-              <>
-                <button type="button" onClick={onEdit} className="text-[11px] font-bold text-[#4a875b]">
-                  編集する →
-                </button>
-                <button type="button" onClick={onDelete} className="text-[11px] text-[#a59b8c]">
-                  削除
-                </button>
-              </>
-            ) : locked ? (
-              <span className="flex items-center gap-1 text-[10px] text-[#a59b8c]">
-                <LockIcon /> 編集ロック中
-              </span>
-            ) : null}
-          </div>
+          {editable && (
+            <div className="mt-1.5 flex gap-3">
+              <button type="button" onClick={onEdit} className="text-[11px] font-bold text-[#4a875b]">
+                編集する →
+              </button>
+              <button type="button" onClick={onDelete} className="text-[11px] text-[#a59b8c]">
+                削除
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
