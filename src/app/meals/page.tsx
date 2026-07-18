@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isBetaUser } from "@/lib/auth/beta";
-import { MEAL_EDIT_PREVIEW_EMAILS } from "@/lib/auth/meal-edit-preview";
 import { MemberHeader } from "@/components/MemberHeader";
 import { jstTodayStr } from "@/lib/date/jst";
 import { getMealsForDate, signMealPhotos } from "@/lib/meals/queries";
@@ -35,11 +34,9 @@ export default async function MealsDayPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/meals");
 
-  // 仮反映(2026-07-18): 許可リストの4人だけ、過去日の食事を編集できるようにする(ロックなし
-  //   =添削済みの日も含め全過去日を編集可)。他の受講生は従来通り「今日のみ編集可」。
-  //   承認後は MEAL_EDIT_PREVIEW_EMAILS 判定を外して全員へ。
-  const canEditPast =
-    !!user.email && MEAL_EDIT_PREVIEW_EMAILS.includes(user.email.toLowerCase());
+  // 2026-07-18 全受講生へ公開: 過去日の食事・生活を全員が編集できる(ロックなし・添削済み含む)。
+  //   記録し忘れの後追い入力に対応。将来また対象を絞るなら、ここを許可リスト判定に戻す。
+  const canEditPast = true;
 
   // S2-B: 互いに独立な読み取りを1つの Promise.all で並列化(9段の直列→約4段)。
   //   依存のある「meals→署名URL」は1単位で内部順序を保持。shouldAskYesterday は
