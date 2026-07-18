@@ -59,27 +59,9 @@ export default async function TokutenLibraryPage() {
       <MemberHeader title="特典ライブラリ" fallbackHref="/" />
       <main className="min-h-screen bg-[#f5efe3]">
         <div className="mx-auto w-full max-w-[460px] px-4 pb-16 pt-5">
-          <div className="mb-5 px-0.5">
-            <p className="text-[12.5px] font-medium leading-[1.75] text-[#3a332a]">
-              これまでの特典を、すべてここにまとめました。いつでも見返せます。
-            </p>
-            <p className="mt-2 flex items-start gap-1.5 text-[11.5px] font-bold leading-[1.6] text-[#4a875b]">
-              <svg
-                viewBox="0 0 24 24"
-                className="mt-[2px] h-3.5 w-3.5 flex-shrink-0"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16" />
-              </svg>
-              <span>
-                新しい特典や最新情報は、入り次第ここに追加します。ときどき覗いてみてください。
-              </span>
-            </p>
-          </div>
+          <p className="mb-5 px-0.5 text-[12.5px] font-medium leading-[1.75] text-[#3a332a]">
+            これまでの特典を、すべてここにまとめました。いつでも見返せます。
+          </p>
           <div className="flex flex-col gap-3">
             {gates.map((g) => (
               <Link
@@ -121,6 +103,20 @@ export default async function TokutenLibraryPage() {
               </Link>
             ))}
           </div>
+          <p className="mt-4 flex items-start gap-1.5 px-0.5 text-[11.5px] font-bold leading-[1.6] text-[#4a875b]">
+            <svg
+              viewBox="0 0 24 24"
+              className="mt-[2px] h-3.5 w-3.5 flex-shrink-0"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16" />
+            </svg>
+            <span>新しい特典や最新情報は、入り次第ここに追加します。</span>
+          </p>
         </div>
       </main>
     </>
