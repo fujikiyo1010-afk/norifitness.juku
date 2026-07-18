@@ -14,6 +14,7 @@ import { createClient } from "@/lib/supabase/server";
  */
 const PREVIEW_EMAILS = [
   "fujikiyo1010+kiyomu-test@gmail.com", // 藤田さん 本番アカウント
+  "hyuuga.morikawa@gmail.com", // 森川さん 本番アカウント
   "fujikiyo1010@gmail.com", // dev テスト用(本番には存在しない)
 ];
 
