@@ -193,6 +193,7 @@ export default async function StudentLessonPage({
           <section className="pt-1">
             <TextLessonRenderer
               content={lesson.content_json as TextLessonContent}
+              fullBleedImages
             />
           </section>
         )}
