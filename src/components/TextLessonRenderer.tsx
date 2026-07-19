@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { LessonImageZoom } from "@/components/LessonImageZoom";
 
 /**
  * テキストレッスン レンダラー (= 2026-06-23 きよむさん指示)
@@ -113,19 +114,23 @@ function StepAccordion({
                 fullBleedImages ? "-mx-4 -mt-3.5 -mb-3.5 space-y-0" : "space-y-2 pt-1"
               }
             >
-              {step.images.map((src, idx) => (
-                <img
-                  key={idx}
-                  src={src}
-                  alt=""
-                  className={
-                    fullBleedImages
-                      ? "w-full block"
-                      : "w-full rounded-md border border-[#e7dcc9]"
-                  }
-                  loading="lazy"
-                />
-              ))}
+              {step.images.map((src, idx) =>
+                fullBleedImages ? (
+                  <LessonImageZoom
+                    key={idx}
+                    src={src}
+                    thumbClassName="w-full block"
+                  />
+                ) : (
+                  <img
+                    key={idx}
+                    src={src}
+                    alt=""
+                    className="w-full rounded-md border border-[#e7dcc9]"
+                    loading="lazy"
+                  />
+                )
+              )}
             </div>
           )}
         </div>
