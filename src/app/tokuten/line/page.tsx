@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { MemberHeader } from "@/components/MemberHeader";
-import { isTokutenPreviewUser } from "@/lib/auth/tokuten-preview";
+import { canSeeTokuten } from "@/lib/auth/tokuten-preview";
 import { LINE_TOKUTEN, countItems } from "../data";
 import { TokutenList } from "../TokutenList";
 
@@ -13,7 +13,7 @@ export const metadata = {
  * 種類でグループ分けした特典カード。各カード → public/tokuten/<file>.html。
  */
 export default async function LineTokutenPage() {
-  if (!(await isTokutenPreviewUser())) redirect("/");
+  if (!(await canSeeTokuten())) redirect("/");
   return (
     <>
       <MemberHeader title="LINE無料特典" fallbackHref="/tokuten" />

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { isBetaUser } from "@/lib/auth/beta";
 
 /**
  * 特典ライブラリの「本番・藤田さん限定 仮反映」判定 (2026-07-17)。
@@ -25,4 +26,17 @@ export async function isTokutenPreviewUser(): Promise<boolean> {
   } = await supabase.auth.getUser();
   const email = user?.email?.toLowerCase();
   return !!email && PREVIEW_EMAILS.includes(email);
+}
+
+/**
+ * 特典ライブラリを表示してよいか（2026-07-19 拡大）。
+ * ベータ4人(is_beta=true) または メール許可リスト(藤田/森川) なら表示。
+ * 全体公開時は、これを使う箇所を「常に true」にする。
+ */
+export async function canSeeTokuten(): Promise<boolean> {
+  const [preview, beta] = await Promise.all([
+    isTokutenPreviewUser(),
+    isBetaUser(),
+  ]);
+  return preview || beta;
 }

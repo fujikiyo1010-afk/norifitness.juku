@@ -176,7 +176,7 @@ export default async function Home() {
         unreadReply={unreadReply}
         today={todayActivity}
         alerts={alerts}
-        showTokuten={isTokutenPreview}
+        showTokuten={isBeta || isTokutenPreview}
       />
     );
   }
