@@ -19,6 +19,7 @@ import { ReviewAccordion } from "./ReviewAccordion";
 import { PracticeInput } from "./PracticeInput";
 import { listMyActionsForLesson } from "@/lib/practice/queries";
 import { isBetaUser } from "@/lib/auth/beta";
+import { isStaffPreviewUser } from "@/lib/auth/staff-preview";
 import { getTodayActivity } from "@/lib/member/today-activity";
 
 export const dynamic = "force-dynamic";
@@ -46,15 +47,23 @@ export default async function StudentLessonPage({
     notFound();
   }
 
-  const [progressMap, review, adjacent, practiceActions, isBeta, todayActivity] =
-    await Promise.all([
-      getMyLessonProgress([lesson.id]),
-      getMyLessonReview(lesson.id),
-      getAdjacentLessons(courseId, lesson.id),
-      listMyActionsForLesson(lesson.id),
-      isBetaUser(),
-      getTodayActivity(),
-    ]);
+  const [
+    progressMap,
+    review,
+    adjacent,
+    practiceActions,
+    isBeta,
+    todayActivity,
+    staffPreview,
+  ] = await Promise.all([
+    getMyLessonProgress([lesson.id]),
+    getMyLessonReview(lesson.id),
+    getAdjacentLessons(courseId, lesson.id),
+    listMyActionsForLesson(lesson.id),
+    isBetaUser(),
+    getTodayActivity(),
+    isStaffPreviewUser(),
+  ]);
 
   // B10: 動画未設定・試験準備中でも受講生を止めない(ベータ限定)。次レッスンへの逃げ道URL。
   const nextLessonHref = adjacent.next
@@ -175,6 +184,17 @@ export default async function StudentLessonPage({
               "動画 URL が設定されていません。"
             )}
           </div>
+        )}
+
+        {/* レシピ画像アコーディオン (動画の下)。
+            社員4人 仮反映ゲート付き = staff-preview.ts。全体公開時は staffPreview 条件を外す。
+            動画レッスンに content_json がある時だけ (= 動画+テキスト併用) 表示。 */}
+        {staffPreview && !!lesson.vimeo_url && !!lesson.content_json && (
+          <section className="pt-1">
+            <TextLessonRenderer
+              content={lesson.content_json as TextLessonContent}
+            />
+          </section>
         )}
 
         {/* 完了ボタン (試験は対象外。ただしベータは試験準備中でも完了可=進行を止めない B10) */}

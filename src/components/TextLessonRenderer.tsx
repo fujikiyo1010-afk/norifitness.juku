@@ -50,9 +50,11 @@ export function TextLessonRenderer({ content }: { content: TextLessonContent }) 
 function Section({ section }: { section: TextLessonSection }) {
   return (
     <div>
-      <h3 className="text-[13px] font-bold text-[#34603f] border-l-4 border-[#4a875b] pl-2.5 mb-2.5">
-        {section.title}
-      </h3>
+      {section.title.trim() && (
+        <h3 className="text-[13px] font-bold text-[#34603f] border-l-4 border-[#4a875b] pl-2.5 mb-2.5">
+          {section.title}
+        </h3>
+      )}
       <div className="space-y-1.5">
         {section.steps.map((step, idx) => (
           <StepAccordion key={idx} step={step} />
