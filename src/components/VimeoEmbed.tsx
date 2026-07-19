@@ -78,7 +78,7 @@ export function VimeoEmbed({ url }: { url: string }) {
       </div>
       <p className="flex items-center gap-1.5 text-xs text-[#6a6256]">
         <LightbulbIcon size={14} className="shrink-0" />
-        <span>再生速度の変更: 動画再生中、右下の歯車アイコン → 再生速度 を選択</span>
+        <span>再生速度: 右下の歯車アイコン → 再生速度</span>
       </p>
     </div>
   );

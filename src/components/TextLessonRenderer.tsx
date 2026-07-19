@@ -37,17 +37,30 @@ export type TextLessonContent = {
   sections: TextLessonSection[];
 };
 
-export function TextLessonRenderer({ content }: { content: TextLessonContent }) {
+export function TextLessonRenderer({
+  content,
+  fullBleedImages = false,
+}: {
+  content: TextLessonContent;
+  /** 画像を枠内フルブリード(左右上下の余白ゼロ)で表示。レシピ写真用。 */
+  fullBleedImages?: boolean;
+}) {
   return (
     <div className="space-y-5">
       {content.sections.map((section, sIdx) => (
-        <Section key={sIdx} section={section} />
+        <Section key={sIdx} section={section} fullBleedImages={fullBleedImages} />
       ))}
     </div>
   );
 }
 
-function Section({ section }: { section: TextLessonSection }) {
+function Section({
+  section,
+  fullBleedImages,
+}: {
+  section: TextLessonSection;
+  fullBleedImages?: boolean;
+}) {
   return (
     <div>
       {section.title.trim() && (
@@ -57,14 +70,20 @@ function Section({ section }: { section: TextLessonSection }) {
       )}
       <div className="space-y-1.5">
         {section.steps.map((step, idx) => (
-          <StepAccordion key={idx} step={step} />
+          <StepAccordion key={idx} step={step} fullBleedImages={fullBleedImages} />
         ))}
       </div>
     </div>
   );
 }
 
-function StepAccordion({ step }: { step: TextLessonStep }) {
+function StepAccordion({
+  step,
+  fullBleedImages,
+}: {
+  step: TextLessonStep;
+  fullBleedImages?: boolean;
+}) {
   const [open, setOpen] = useState(false);
   return (
     <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-lg overflow-hidden">
@@ -89,13 +108,21 @@ function StepAccordion({ step }: { step: TextLessonStep }) {
         <div className="px-4 py-3.5 border-t border-[#e7dcc9] space-y-3 text-[13px] text-[#2b2620] leading-[1.8]">
           <StepBody body={step.body} />
           {step.images && step.images.length > 0 && (
-            <div className="space-y-2 pt-1">
+            <div
+              className={
+                fullBleedImages ? "-mx-4 -mt-3.5 -mb-3.5 space-y-0" : "space-y-2 pt-1"
+              }
+            >
               {step.images.map((src, idx) => (
                 <img
                   key={idx}
                   src={src}
                   alt=""
-                  className="w-full rounded-md border border-[#e7dcc9]"
+                  className={
+                    fullBleedImages
+                      ? "w-full block"
+                      : "w-full rounded-md border border-[#e7dcc9]"
+                  }
                   loading="lazy"
                 />
               ))}
