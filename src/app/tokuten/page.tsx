@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { MemberHeader } from "@/components/MemberHeader";
-import { isTokutenPreviewUser } from "@/lib/auth/tokuten-preview";
+import { canSeeTokuten } from "@/lib/auth/tokuten-preview";
 import {
   LINE_TOKUTEN,
   WEBINAR_TOKUTEN,
@@ -23,7 +23,7 @@ export const metadata = {
  */
 export default async function TokutenLibraryPage() {
   // 藤田さん限定 仮反映(2026-07-17): 対象外はホームへ
-  if (!(await isTokutenPreviewUser())) redirect("/");
+  if (!(await canSeeTokuten())) redirect("/");
 
   const gates: {
     href: string;
