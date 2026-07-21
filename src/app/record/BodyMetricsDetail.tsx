@@ -45,6 +45,7 @@ export function BodyMetricsDetail({
   targetDate = null,
   photoSummary,
   isBeta = false,
+  fujitaTwoWay = false,
   nowMs,
 }: {
   rows: BodyMetricRow[]; // recorded_at 昇順
@@ -54,6 +55,8 @@ export function BodyMetricsDetail({
   photoSummary: BodyPhotoSummary;
   /** 体1(戻るで閉じる)・体13(ホイール—)のベータ出し分け。裏側(画像再取得)は全体。 */
   isBeta?: boolean;
+  /** 藤田さんだけの仮反映(2026-07-21)。目標推移タブを両方向シミュレーターに差し替える。 */
+  fujitaTwoWay?: boolean;
   /** hydration対策: サーバ確定の「今」(ms)。予測日はこれ基準で SSR/CSR 一致。 */
   nowMs: number;
 }) {
@@ -152,6 +155,7 @@ export function BodyMetricsDetail({
           prog={prog}
           eta={eta}
           isBeta={isBeta}
+          fujitaTwoWay={fujitaTwoWay}
           nowMs={nowMs}
           onOpenCalc={() => setCalcOpen(true)}
         />
@@ -217,6 +221,7 @@ function WeightView({
   prog,
   eta,
   isBeta,
+  fujitaTwoWay,
   nowMs,
   onOpenCalc,
 }: {
@@ -230,6 +235,7 @@ function WeightView({
   prog: ReturnType<typeof weightGoalProgress>;
   eta: ReturnType<typeof weightEta>;
   isBeta: boolean;
+  fujitaTwoWay: boolean;
   nowMs: number;
   onOpenCalc: () => void;
 }) {
@@ -366,13 +372,16 @@ function WeightView({
         </div>
       </div>
 
-      {/* M20改: ベータは新「目標推移/現状推移」タブ切替リスト。旧=予測カードA-2+計算シート。 */}
-      {isBeta ? (
+      {/* M20改: ベータは新「目標推移/現状推移」タブ切替リスト。旧=予測カードA-2+計算シート。
+          2026-07-21: 藤田さんだけ 目標推移タブを両方向シミュレーターに(fujitaTwoWay)。
+          ベータでなくても藤田さんには出す(isBeta || fujitaTwoWay)。 */}
+      {isBeta || fujitaTwoWay ? (
         <ProgressTrendCard
           current={currentWeight}
           target={targetWeightKg}
           targetDate={targetDate}
           pace={pace}
+          fujitaTwoWay={fujitaTwoWay}
           nowMs={nowMs}
         />
       ) : (
