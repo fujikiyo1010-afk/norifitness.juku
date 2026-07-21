@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>目標推移タブ 両方向シミュレーター（モック）</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+    background: #e9e6de; color: #2b2620;
+    display:flex; justify-content:center; padding:20px 0; -webkit-font-smoothing:antialiased;
+  }
+  .phone {
+    width: 390px; min-height: 780px; background:#f9f5ed; border-radius:28px;
+    overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.25); display:flex; flex-direction:column;
+  }
+  .note { background:#34603f; color:#fff; font-size:11px; text-align:center; padding:6px 12px; line-height:1.5; }
+  .hd { padding:14px 16px 4px; }
+  .hd h1 { font-size:15px; font-weight:800; }
+  .hd p { font-size:11px; color:#6a6256; margin-top:2px; }
+  .wrap { padding:12px 16px 20px; }
+
+  /* 既存カード外殻 */
+  .card { border:1px solid #e7dcc9; background:#fffdf8; border-radius:16px; padding:13px; }
+
+  /* タブ */
+  .tabs { display:flex; background:#efe9dc; border-radius:11px; padding:3px; }
+  .tabs button {
+    flex:1; border:none; background:transparent; border-radius:9px; padding:7px 0;
+    font-size:11.5px; font-weight:800; color:#6a6256; cursor:pointer;
+  }
+  .tabs button.on { background:#fff; color:#34603f; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+
+  /* レンジ */
+  .ranges { display:flex; justify-content:flex-end; gap:5px; margin-top:8px; }
+  .ranges button {
+    border:1px solid #e0d6c2; background:#fffdf8; color:#6a6256; border-radius:99px;
+    padding:3px 11px; font-size:9.5px; font-weight:800; cursor:pointer;
+  }
+  .ranges button.on { border-color:#34603f; background:#34603f; color:#fff; }
+
+  /* 設定フィールド群 */
+  .fields { margin-top:10px; border:1px solid #e8ede4; background:#f6f8f4; border-radius:12px; overflow:hidden; }
+  .frow { display:flex; align-items:center; gap:8px; padding:9px 11px; }
+  .frow + .frow { border-top:1px solid #e8ede4; }
+  .frow .lab { font-size:10.5px; font-weight:800; color:#6a6256; width:66px; flex:none; line-height:1.3; }
+  .frow .lab small { display:block; font-size:8px; font-weight:700; color:#a59b8c; }
+  .auto { font-size:8px; font-weight:800; color:#34603f; background:#e2efe6; border:1px solid #bcdcc6; border-radius:99px; padding:1px 6px; margin-left:5px; }
+  .fixedval { font-family:ui-monospace,monospace; font-size:16px; font-weight:800; }
+  .fixedval small { font-size:9px; font-weight:700; color:#a59b8c; }
+
+  input.num {
+    width:70px; height:38px; border:1.5px solid #cfe0d4; border-radius:10px; background:#fff;
+    text-align:center; font-family:ui-monospace,monospace; font-size:15px; font-weight:800; color:#2b2620;
+  }
+  input.num:focus { outline:none; border-color:#34603f; }
+  input.date {
+    flex:1; height:38px; border:1.5px solid #cfe0d4; border-radius:10px; background:#fff;
+    padding:0 8px; font-size:13px; color:#2b2620;
+  }
+  input.date:focus { outline:none; border-color:#34603f; }
+  .pacectl { margin-left:auto; display:flex; align-items:center; gap:6px; }
+  .pacectl .rnd { width:38px; height:38px; border:1.5px solid #cfe0d4; border-radius:10px; background:#fff; color:#34603f; font-size:17px; font-weight:800; cursor:pointer; }
+  .u { font-size:9px; font-weight:800; color:#a59b8c; }
+  .right { margin-left:auto; }
+
+  .warn { margin-top:8px; border:1px solid #f0e2b8; background:#fff8e1; border-radius:10px; padding:8px 11px; font-size:10.5px; font-weight:800; line-height:1.5; color:#8a6d10; }
+  .err  { margin-top:8px; border:1px solid #f2c4c0; background:#fdf1ef; border-radius:10px; padding:8px 11px; font-size:11px; font-weight:800; color:#c0392b; }
+
+  /* チェックポイント縦ライン */
+  ol.cps { list-style:none; position:relative; margin-top:12px; padding-left:20px; }
+  ol.cps li { position:relative; padding:5px 0 5px 4px; }
+  ol.cps li .line { position:absolute; left:-13px; top:0; bottom:0; width:2px; background:#e8e0cd; }
+  ol.cps li:first-child .line { top:12px; }
+  ol.cps li:last-child .line { bottom:auto; height:12px; }
+  ol.cps li .dot { position:absolute; left:-18px; top:9px; width:12px; height:12px; border-radius:99px; border:2px solid #c9bfa9; background:#fff; }
+  ol.cps li.est .dot { border-style:dashed; }
+  ol.cps li.goal .dot { border-color:#c9a227; }
+  ol.cps li .rowline { display:flex; align-items:baseline; gap:7px; }
+  ol.cps li .lb { width:96px; font-size:10.5px; font-weight:800; color:#6a6256; }
+  ol.cps li .wt { font-family:ui-monospace,monospace; font-size:13.5px; font-weight:800; }
+  ol.cps li.goal .wt { color:#8a6d10; }
+  ol.cps li .tg { margin-left:auto; font-size:8.5px; color:#a59b8c; }
+
+  /* 下カード */
+  .foot { margin-top:10px; border:1px solid #e7dcc9; background:#fffdf8; border-radius:16px; padding:13px; }
+  .foot .r { display:flex; align-items:baseline; gap:8px; padding:6px 0; }
+  .foot .r .k { width:120px; flex:none; font-size:11px; font-weight:800; color:#6a6256; }
+  .foot .r .v { font-family:ui-monospace,monospace; font-size:18px; font-weight:800; }
+  .foot .msg { margin-top:8px; border:1px solid #cfe3d6; background:#e8f3ec; border-radius:11px; padding:9px 12px; font-size:11.5px; font-weight:800; line-height:1.6; color:#34603f; }
+  .foot .msg.warn2 { border-color:#f0e2b8; background:#fff8e1; color:#8a6d10; }
+
+  .nowtab { margin-top:10px; text-align:center; font-size:10px; font-weight:800; color:#a59b8c; padding:8px; }
+  .hidden { display:none; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="note">モック — 目標体重・目標日・ペースを動かせます（保存はしません＝電卓）</div>
+  <div class="hd">
+    <h1>推移シミュレーター</h1>
+    <p>目標日を決めれば必要ペースが／ペースを決めれば到達日が、自動で出ます</p>
+  </div>
+
+  <div class="wrap">
+    <div class="card">
+      <div class="tabs">
+        <button id="tab-goal" class="on" onclick="setTab('goal')">目標推移</button>
+        <button id="tab-now" onclick="setTab('now')">現状推移</button>
+      </div>
+      <div class="ranges">
+        <button data-r="1"  onclick="setRange(1)">1日</button>
+        <button data-r="7"  class="on" onclick="setRange(7)">1週間</button>
+        <button data-r="30" onclick="setRange(30)">1ヶ月</button>
+      </div>
+
+      <!-- 目標推移 -->
+      <div id="goalPane">
+        <div class="fields">
+          <div class="frow">
+            <span class="lab">現在体重<small>最新の記録</small></span>
+            <span class="right fixedval" id="curDisp">75.0<small> kg</small></span>
+          </div>
+          <div class="frow">
+            <span class="lab">目標体重<small>初期=目標シート</small></span>
+            <span class="right"><input class="num" id="tgt" type="text" inputmode="decimal" value="68.0"><span class="u"> kg</span></span>
+          </div>
+          <div class="frow">
+            <span class="lab">目標日<span id="dateAuto" class="auto">自動</span></span>
+            <input class="date" id="date" type="date">
+          </div>
+          <div class="frow">
+            <span class="lab">ペース<span id="paceAuto" class="auto">自動</span></span>
+            <span class="pacectl">
+              <button class="rnd" onclick="stepPace(-0.05)">−</button>
+              <input class="num" id="pace" type="text" inputmode="decimal" value="0.48" style="width:56px">
+              <button class="rnd" onclick="stepPace(0.05)">＋</button>
+              <span class="u">kg/週</span>
+            </span>
+          </div>
+        </div>
+        <div id="warn" class="warn hidden"></div>
+        <div id="err"  class="err hidden"></div>
+
+        <ol class="cps" id="cps"></ol>
+
+        <div class="foot">
+          <div class="r"><span class="k" id="footK">到達日</span><span class="v" id="footV">—</span></div>
+          <div class="msg" id="msg">—</div>
+        </div>
+      </div>
+
+      <!-- 現状推移 -->
+      <div id="nowPane" class="hidden">
+        <div class="nowtab">今の実ペース 週0.35kg（直近1ヶ月）で進んだ場合</div>
+        <ol class="cps" id="cpsNow"></ol>
+        <div class="foot">
+          <div class="r"><span class="k">今のペースの到達日</span><span class="v" id="nowEta">—</span></div>
+          <div class="msg">今のままのペースで進むと、この日にこの体重の見込みです</div>
+        </div>
+      </div>
+    </div>
+
+    <p style="font-size:10px;color:#8a8578;line-height:1.6;margin-top:12px">
+      <b>試してみて:</b> ①「目標日」を近い日にする → ペースが自動で上がる（速すぎると黄色警告）。
+      ②「ペース」を＋する → 目標日が自動で前倒し。③「目標体重」を変える → 直前に触っていた側を保って再計算。
+      どれもその場の試算だけで、目標シートには保存されません。
+    </p>
+  </div>
+</div>
+
+<script>
+const DAY=86400000, SAFE_MAX=0.8, PACE_MIN=0.05, PACE_MAX=5.0;
+const TODAY=new Date(2026,6,21); // 2026-07-21（モック固定・実装では実日付）
+const CUR=75.0;            // 現在体重（最新の記録・固定）
+const REAL_PACE=0.35;      // 現状推移用の実測ペース（モック固定）
+
+let tab='goal', range=7, driver='date'; // 初期=目標日ドライブ→ペースが自動（受講生の声）
+let T=68.0;                // 目標体重
+let D=new Date(TODAY.getTime()+104*DAY); // 目標日（初期=シート相当）
+let P=0.48;                // ペース kg/週
+
+function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function jp(d){return (d.getMonth()+1)+'月'+d.getDate()+'日';}
+function md(d){return (d.getMonth()+1)+'/'+d.getDate();}
+function round1(n){return Math.round(n*10)/10;}
+function clampPace(n){return Math.min(PACE_MAX,Math.max(PACE_MIN,Math.round(n/0.05)*0.05));}
+
+// 初期描画セット
+document.getElementById('date').value=iso(D);
+document.getElementById('tgt').value=T.toFixed(1);
+
+// ---- 依存の再計算（シーソー） ----
+function recompute(){
+  document.getElementById('err').classList.add('hidden');
+  if(!(T<CUR)){ showErr('目標体重は現在体重より軽い値にしてください'); return false; }
+  const needed=CUR-T;
+  if(driver==='date'){
+    const days=Math.round((D-TODAY)/DAY);
+    if(days<=0){ showErr('目標日は今日より後にしてください'); return false; }
+    P=clampPace(needed/(days/7));
+    document.getElementById('pace').value=P.toFixed(2);
+  } else { // driver==='pace'
+    if(!(P>0)){ showErr('ペースは正の値にしてください'); return false; }
+    const days=Math.ceil(needed/(P/7));
+    D=new Date(TODAY.getTime()+days*DAY);
+    document.getElementById('date').value=iso(D);
+  }
+  // 「自動」バッジは follower 側だけ
+  document.getElementById('paceAuto').style.display = driver==='date'?'inline-block':'none';
+  document.getElementById('dateAuto').style.display = driver==='pace'?'inline-block':'none';
+  return true;
+}
+function showErr(m){const e=document.getElementById('err');e.textContent=m;e.classList.remove('hidden');}
+
+// ---- 全体描画 ----
+function render(){
+  document.getElementById('curDisp').innerHTML=CUR.toFixed(1)+'<small> kg</small>';
+  if(tab==='now'){ renderNow(); return; }
+  if(!recompute()) return;
+
+  const needed=CUR-T, dir=-1; // 減量前提
+  const days=Math.round((D-TODAY)/DAY);
+
+  // 安全域警告（実コンポと同じ SAFE_MAX=0.8）
+  const warn=document.getElementById('warn');
+  if(P>SAFE_MAX){ warn.textContent='週0.8kgを超えるペースは体に負担が大きいことがあります。無理のない計画にしましょう'; warn.classList.remove('hidden'); }
+  else warn.classList.add('hidden');
+
+  // チェックポイント（今日→range刻み→到達日）
+  const ol=document.getElementById('cps'); ol.innerHTML='';
+  ol.appendChild(cp('今日', CUR.toFixed(1)+' kg', '起点','today'));
+  for(let i=1;i<=14;i++){
+    const dd=i*range; if(dd>=days) break;
+    const w=round1(CUR - P*(dd/7));
+    ol.appendChild(cp(md(new Date(TODAY.getTime()+dd*DAY)), w.toFixed(1)+' kg','','est'));
+  }
+  ol.appendChild(cp(md(D), T.toFixed(1)+' kg', driver==='date'?'目標日＝到達':'到達日','goal'));
+
+  // 下カード
+  document.getElementById('footK').textContent = driver==='date' ? '必要ペース' : '到達日';
+  document.getElementById('footV').innerHTML = driver==='date'
+    ? P.toFixed(2)+'<small style="font-size:10px;color:#a59b8c;font-weight:700"> kg/週</small>'
+    : jp(D)+'ごろ';
+  const msg=document.getElementById('msg');
+  if(P>SAFE_MAX){ msg.className='msg warn2'; msg.textContent='急がなくて大丈夫。目標日を少し後ろにすると、無理のないペースになります'; }
+  else if(P>0.5){ msg.className='msg'; msg.textContent='ややしっかりめのペースです。体調を見ながらいきましょう'; }
+  else { msg.className='msg'; msg.textContent='いいペースです。この調子でいきましょう'; }
+
+  document.getElementById('footK').insertAdjacentText; // noop
+  document.querySelector('#goalPane .foot .r .k').textContent = driver==='date' ? '目標日に間に合う必要ペース' : '到達日';
+}
+
+function renderNow(){
+  const ol=document.getElementById('cpsNow'); ol.innerHTML='';
+  const needed=CUR-T;
+  const days=Math.ceil(needed/(REAL_PACE/7));
+  ol.appendChild(cp('今日', CUR.toFixed(1)+' kg','起点','today'));
+  for(let i=1;i<=14;i++){
+    const dd=i*range; if(dd>=days) break;
+    const w=round1(CUR - REAL_PACE*(dd/7));
+    ol.appendChild(cp(md(new Date(TODAY.getTime()+dd*DAY)), w.toFixed(1)+' kg','','est'));
+  }
+  const eta=new Date(TODAY.getTime()+days*DAY);
+  ol.appendChild(cp(md(eta), T.toFixed(1)+' kg','今のペースの到達日','goal'));
+  document.getElementById('nowEta').textContent=jp(eta)+'ごろ';
+}
+
+function cp(label,weight,tag,kind){
+  const li=document.createElement('li'); li.className=kind;
+  li.innerHTML='<span class="line"></span><span class="dot"></span>'
+    +'<span class="rowline"><span class="lb">'+label+'</span><span class="wt">'+weight+'</span>'
+    +(tag?'<span class="tg">'+tag+'</span>':'')+'</span>';
+  return li;
+}
+
+// ---- 操作 ----
+function setTab(t){ tab=t;
+  document.getElementById('tab-goal').classList.toggle('on',t==='goal');
+  document.getElementById('tab-now').classList.toggle('on',t==='now');
+  document.getElementById('goalPane').classList.toggle('hidden',t!=='goal');
+  document.getElementById('nowPane').classList.toggle('hidden',t!=='now');
+  render();
+}
+function setRange(r){ range=r; document.querySelectorAll('.ranges button').forEach(b=>b.classList.toggle('on',+b.dataset.r===r)); render(); }
+function stepPace(delta){ driver='pace'; P=clampPace(P+delta); document.getElementById('pace').value=P.toFixed(2); render(); }
+
+document.getElementById('pace').addEventListener('input',e=>{ driver='pace'; const v=Number(e.target.value); if(Number.isFinite(v)&&v>0){P=clampPace(v);} render(); });
+document.getElementById('pace').addEventListener('blur',e=>{ e.target.value=P.toFixed(2); });
+document.getElementById('date').addEventListener('change',e=>{ driver='date'; const d=new Date(e.target.value+'T00:00:00'); if(!isNaN(d)) D=d; render(); });
+document.getElementById('tgt').addEventListener('input',e=>{ const v=Number(e.target.value); if(Number.isFinite(v)) T=v; render(); });
+document.getElementById('tgt').addEventListener('blur',e=>{ e.target.value=T.toFixed(1); });
+
+render();
+</script>
+</body>
+</html>

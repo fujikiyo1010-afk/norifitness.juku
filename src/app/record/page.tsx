@@ -5,6 +5,7 @@ import { listMyBodyMetrics } from "@/lib/body-metrics/queries";
 import { getMyBodyPhotoSummary } from "@/lib/body-photos/queries";
 import { getMyGoalSheet } from "@/lib/goal-sheet/queries";
 import { isBetaUser } from "@/lib/auth/beta";
+import { isFujitaPreviewUser } from "@/lib/auth/fujita-preview";
 import { BodyMetricsDetail } from "./BodyMetricsDetail";
 
 export const dynamic = "force-dynamic";
@@ -27,11 +28,12 @@ export default async function RecordHubPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/record");
 
-  const [rows, goalSheet, photoSummary, isBeta] = await Promise.all([
+  const [rows, goalSheet, photoSummary, isBeta, fujitaTwoWay] = await Promise.all([
     listMyBodyMetrics(365),
     getMyGoalSheet(),
     getMyBodyPhotoSummary(),
     isBetaUser(),
+    isFujitaPreviewUser(),
   ]);
 
   // 古い順に並べ替え (グラフ描画は時系列 ascending が自然)
@@ -60,6 +62,7 @@ export default async function RecordHubPage() {
             targetDate={targetDate}
             photoSummary={photoSummary}
             isBeta={isBeta}
+            fujitaTwoWay={fujitaTwoWay}
             nowMs={nowMs}
           />
         </div>

@@ -61,6 +61,7 @@ export function ProgressTrendCard({
   target,
   targetDate,
   pace,
+  fujitaTwoWay = false,
   nowMs,
 }: {
   current: number | null;
@@ -68,6 +69,8 @@ export function ProgressTrendCard({
   targetDate: string | null;
   /** 実測ペース kg/週(符号つき)。上部「現状ペース」ピルと同一値。<2記録は null */
   pace: number | null;
+  /** 藤田さんだけの仮反映(2026-07-21)。目標推移タブを両方向シミュレーターに差し替える。 */
+  fujitaTwoWay?: boolean;
   /** hydration対策: サーバ確定の「今」(ms)。client側 Date.now() を廃し SSR/CSR一致。 */
   nowMs: number;
 }) {
@@ -207,6 +210,17 @@ export function ProgressTrendCard({
         ))}
       </div>
 
+      {fujitaTwoWay && tab === "goal" ? (
+        // 藤田さんだけ: 両方向シミュレーター(目標日⇄ペースのシーソー・保存しない電卓)
+        <TwoWayGoalBody
+          current={current}
+          initialTarget={target}
+          initialGoalMs={goalMs}
+          step={step}
+          now={now}
+        />
+      ) : (
+        <>
       {tab === "goal" ? (
         // 目標推移: ペース手入力ボックス + 安全域警告(修4)
         <>
@@ -311,6 +325,8 @@ export function ProgressTrendCard({
           {messageShown}
         </p>
       </div>
+        </>
+      )}
     </Shell>
   );
 }
@@ -377,5 +393,287 @@ function CheckItem({
         ) : null}
       </span>
     </li>
+  );
+}
+
+// =====================================================================
+// 藤田さんだけの仮反映(2026-07-21): 目標推移タブ = 両方向シミュレーター
+// モック: public/mock/goal-trend-simulator.html
+//
+// 目標体重・目標日・ペースを画面上で自由に動かせる「電卓」(保存しない)。
+//   - 目標日を触る → 必要ペースが自動追従(driver="date")
+//   - ペースを触る → 到達日が自動追従(driver="pace")
+//   - 現在体重は最新の記録で固定・目標体重の初期値は目標シート。
+// 記録画面はあくまで参考・確認(B=X)なので、ここでの変更は目標シートに書き戻さない。
+// =====================================================================
+function isoDate(ms: number): string {
+  const d = new Date(ms);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate()
+  ).padStart(2, "0")}`;
+}
+
+function FieldRow({
+  label,
+  sub,
+  auto = false,
+  children,
+}: {
+  label: string;
+  sub?: string;
+  auto?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center gap-2 px-[11px] py-[9px]">
+      <span className="flex-none text-[10.5px] font-extrabold leading-[1.3] text-[#6a6256]">
+        {label}
+        {auto && (
+          <span className="ml-1 rounded-full border border-[#bcdcc6] bg-[#e2efe6] px-1.5 py-[1px] text-[8px] font-extrabold text-[#34603f]">
+            自動
+          </span>
+        )}
+        {sub && (
+          <small className="block text-[8px] font-bold text-[#a59b8c]">{sub}</small>
+        )}
+      </span>
+      {children}
+    </div>
+  );
+}
+
+function TwoWayGoalBody({
+  current,
+  initialTarget,
+  initialGoalMs,
+  step,
+  now,
+}: {
+  current: number;
+  initialTarget: number;
+  initialGoalMs: number;
+  /** レンジ(1/7/30日)=チェックポイント間隔 */
+  step: number;
+  now: number;
+}) {
+  // 目標体重(編集可)
+  const [tgt, setTgt] = useState<number>(round1(initialTarget));
+  const [tgtStr, setTgtStr] = useState<string>(round1(initialTarget).toFixed(1));
+  // シーソーの「今触っている側」。初期=目標日ドライブ→ペースが自動で出る(受講生の声)。
+  const [driver, setDriver] = useState<"date" | "pace">("date");
+  const [dateMs, setDateMs] = useState<number>(initialGoalMs);
+  const [pace, setPace] = useState<number>(0.3);
+  const [paceStr, setPaceStr] = useState<string>("0.30");
+
+  const needed = round1(current - tgt); // 減量前提(>0で有効)
+  const invalid = needed <= 0;
+
+  // 依存の再計算: driver に応じて片方を導出。
+  let effPace: number;
+  let effDateMs: number;
+  if (driver === "date") {
+    const days = Math.max(1, Math.round((dateMs - now) / DAY));
+    effPace = invalid ? 0 : clampPace(needed / (days / 7));
+    effDateMs = dateMs;
+  } else {
+    effPace = Math.max(PACE_MIN, pace);
+    const days = invalid ? 0 : Math.ceil(needed / (effPace / 7));
+    effDateMs = now + days * DAY;
+  }
+
+  // ペース入力の表示値: driver=date は導出値を直接表示(state不要)、
+  // driver=pace は手入力中の文字列(paceStr)を表示。→ setState-in-effect を避ける。
+  const paceInputValue = driver === "date" ? effPace.toFixed(2) : paceStr;
+
+  function commitPace(raw: string) {
+    const v = Number(raw);
+    if (!Number.isFinite(v) || v <= 0) {
+      setPaceStr((driver === "date" ? effPace : pace).toFixed(2));
+      return;
+    }
+    const c = clampPace(v);
+    setDriver("pace");
+    setPace(c);
+    setPaceStr(c.toFixed(2));
+  }
+  function stepPace(delta: number) {
+    const base = driver === "date" ? effPace : pace;
+    const c = clampPace(base + delta);
+    setDriver("pace");
+    setPace(c);
+    setPaceStr(c.toFixed(2));
+  }
+  function commitTgt(raw: string) {
+    const v = Number(raw);
+    if (!Number.isFinite(v)) {
+      setTgtStr(tgt.toFixed(1));
+      return;
+    }
+    setTgt(round1(v));
+    setTgtStr(round1(v).toFixed(1));
+  }
+
+  const days = Math.round((effDateMs - now) / DAY);
+  const overSafe = effPace > SAFE_MAX;
+
+  // チェックポイント(今日→レンジ刻み最大14点→到達日)。
+  const interim = invalid
+    ? []
+    : Array.from({ length: 14 }, (_, i) => (i + 1) * step)
+        .filter((d) => d < days)
+        .map((d) => ({
+          label: etaDateLabel(now + d * DAY, now),
+          weight: round1(current - effPace * (d / 7)),
+        }));
+
+  return (
+    <>
+      {/* 設定フィールド(現在体重=固定 / 目標体重・目標日・ペース=編集可) */}
+      <div className="mt-[9px] divide-y divide-[#e8ede4] rounded-xl border border-[#e8ede4] bg-[#f6f8f4]">
+        <FieldRow label="現在体重" sub="最新の記録">
+          <span className="ml-auto font-mono text-[16px] font-extrabold text-[#2b2620]">
+            {round1(current).toFixed(1)}
+            <small className="text-[9px] font-bold text-[#a59b8c]"> kg</small>
+          </span>
+        </FieldRow>
+        <FieldRow label="目標体重" sub="初期=目標シート">
+          <span className="ml-auto flex items-center gap-1">
+            <input
+              type="text"
+              inputMode="decimal"
+              value={tgtStr}
+              onChange={(e) => setTgtStr(e.target.value)}
+              onBlur={(e) => commitTgt(e.target.value)}
+              className="h-9 w-16 rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white text-center font-mono text-[15px] font-extrabold text-[#2b2620] focus:outline-none"
+            />
+            <span className="text-[9px] font-bold text-[#a59b8c]">kg</span>
+          </span>
+        </FieldRow>
+        <FieldRow label="目標日" auto={driver === "pace"}>
+          <input
+            type="date"
+            value={isoDate(effDateMs)}
+            onChange={(e) => {
+              const ms = Date.parse(`${e.target.value}T00:00:00`);
+              if (!Number.isNaN(ms)) {
+                setDriver("date");
+                setDateMs(ms);
+              }
+            }}
+            className="ml-auto h-9 rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white px-2 text-[13px] text-[#2b2620] focus:outline-none"
+          />
+        </FieldRow>
+        <FieldRow label="ペース" auto={driver === "date"}>
+          <span className="ml-auto flex items-center gap-1.5">
+            <button
+              type="button"
+              aria-label="ペースを下げる"
+              onClick={() => stepPace(-0.05)}
+              className="flex h-9 w-9 items-center justify-center rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white text-[16px] font-bold text-[#34603f]"
+            >
+              −
+            </button>
+            <input
+              type="text"
+              inputMode="decimal"
+              value={paceInputValue}
+              onChange={(e) => {
+                setDriver("pace");
+                setPaceStr(e.target.value);
+              }}
+              onBlur={(e) => commitPace(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  commitPace((e.target as HTMLInputElement).value);
+                  (e.target as HTMLInputElement).blur();
+                }
+              }}
+              className="h-9 w-14 rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white text-center font-mono text-[15px] font-extrabold text-[#2b2620] focus:outline-none"
+            />
+            <button
+              type="button"
+              aria-label="ペースを上げる"
+              onClick={() => stepPace(0.05)}
+              className="flex h-9 w-9 items-center justify-center rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white text-[16px] font-bold text-[#34603f]"
+            >
+              ＋
+            </button>
+            <span className="text-[9px] font-bold text-[#a59b8c]">kg/週</span>
+          </span>
+        </FieldRow>
+      </div>
+
+      {invalid && (
+        <div className="mt-1.5 rounded-lg border border-[#f2c4c0] bg-[#fdf1ef] px-3 py-2 text-[10.5px] font-bold leading-[1.5] text-[#c0392b]">
+          目標体重は現在体重より軽い値にしてください
+        </div>
+      )}
+      {!invalid && overSafe && (
+        <div className="mt-1.5 rounded-lg border border-[#f0e2b8] bg-[#fff8e1] px-3 py-2 text-[10.5px] font-bold leading-[1.5] text-[#8a6d10]">
+          週0.8kgを超えるペースは体に負担が大きいことがあります。無理のない計画にしましょう
+        </div>
+      )}
+
+      {!invalid && (
+        <>
+          {/* チェックポイント縦ライン */}
+          <ol className="relative mt-2.5 pl-5">
+            <CheckItem
+              label="今日"
+              weight={`${round1(current)} kg`}
+              tag="起点"
+              kind="today"
+              first
+            />
+            {interim.map((p, i) => (
+              <CheckItem key={i} label={p.label} weight={`${p.weight} kg`} kind="est" />
+            ))}
+            <CheckItem
+              label={etaDateLabel(effDateMs, now)}
+              weight={`${round1(tgt)} kg`}
+              tag={driver === "date" ? "目標日＝到達" : "このペースの到達日"}
+              kind="goal"
+              last
+            />
+          </ol>
+
+          {/* 下カード: ドライブ側に応じて主役を切替(必要ペース ⇄ 到達日) */}
+          <div className="mt-2.5 rounded-2xl border border-[#e7dcc9] bg-[#fffdf8] p-[13px]">
+            <div className="flex items-baseline gap-2 py-1.5">
+              <span className="w-[150px] flex-none text-[11px] font-bold text-[#6a6256]">
+                {driver === "date" ? "目標日に間に合う必要ペース" : "このペースの到達日"}
+              </span>
+              <span className="font-mono text-[18px] font-extrabold text-[#2b2620]">
+                {driver === "date" ? (
+                  <>
+                    {effPace.toFixed(2)}
+                    <small className="text-[10px] font-bold text-[#a59b8c]"> kg/週</small>
+                  </>
+                ) : (
+                  <>
+                    {etaDateLabel(effDateMs, now)}
+                    <small className="text-[10px] font-bold text-[#a59b8c]"> ごろ</small>
+                  </>
+                )}
+              </span>
+            </div>
+            <p
+              className={`mt-[9px] rounded-[11px] border px-3 py-[9px] text-[11.5px] font-bold leading-[1.6] ${
+                overSafe
+                  ? "border-[#f0e2b8] bg-[#fff8e1] text-[#8a6d10]"
+                  : "border-[#cfe3d6] bg-[#e8f3ec] text-[#34603f]"
+              }`}
+            >
+              {overSafe
+                ? "急がなくて大丈夫。目標日を少し後ろにすると、無理のないペースになります"
+                : effPace > 0.5
+                  ? "ややしっかりめのペースです。体調を見ながらいきましょう"
+                  : "いいペースです。この調子でいきましょう"}
+            </p>
+          </div>
+        </>
+      )}
+    </>
   );
 }
