@@ -6,6 +6,7 @@ import {
   listPendingAudits,
 } from "@/lib/monthly-audit/queries";
 import { getGoalSheetForUser } from "@/lib/goal-sheet/queries";
+import { listBodyPhotosForUser } from "@/lib/admin/body-photos";
 import {
   AUDIT_QUESTIONS,
   formatTargetMonthLabel,
@@ -41,11 +42,15 @@ export default async function AdminMonthlyReviewDetailPage({
   const audit = await getAuditForAdmin(id);
   if (!audit) notFound();
 
-  const [user, pastReplied, pending, goalSheet] = await Promise.all([
+  const [user, pastReplied, pending, goalSheet, bodyPhotos] = await Promise.all([
     fetchUser(audit.user_id),
     fetchPastRepliedAudits(audit.user_id, audit.id),
     listPendingAudits(),
     getGoalSheetForUser(audit.user_id),
+    // 対象月に撮影された体型写真(月初→月末のビフォーアフター用)
+    listBodyPhotosForUser(audit.user_id, {
+      month: audit.target_month.substring(0, 7),
+    }),
   ]);
 
   const pendingIndex = pending.findIndex((a) => a.id === audit.id);
@@ -111,6 +116,7 @@ export default async function AdminMonthlyReviewDetailPage({
     adminName: admin.name,
     adminInitial: admin.name.charAt(0),
     goalSheet,
+    bodyPhotos,
   };
 
   return <DetailClient data={data} />;

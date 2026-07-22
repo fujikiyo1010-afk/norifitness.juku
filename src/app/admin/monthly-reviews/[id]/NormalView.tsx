@@ -14,6 +14,7 @@ import {
 import { formatElapsed } from "@/lib/hooks/useVideoRecorder";
 import { useUploadJob } from "@/lib/upload/UploadJobContext";
 import type { DetailViewData, RecordedVideo } from "./DetailClient";
+import { MonthlyPhotoPanel } from "./MonthlyPhotoPanel";
 
 /**
  * 通常モード。録画済み Blob が DetailClient から渡れば、
@@ -33,7 +34,7 @@ export function NormalView({
   onSelectFile: (video: RecordedVideo) => void;
   onDiscardRecorded: () => void;
 }) {
-  const { userId, audit, user, pastReplied, replyCount, remainingCount, nextAuditId, adminName, adminInitial, back } =
+  const { userId, audit, user, pastReplied, replyCount, remainingCount, nextAuditId, adminName, adminInitial, back, bodyPhotos } =
     data;
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -180,40 +181,46 @@ export function NormalView({
               <p className="text-xs text-zinc-700 text-center mb-3 leading-relaxed">
                 下の 17 項目を読みながら、1 本の動画にまとめて返信してください。
               </p>
-              <div className="grid grid-cols-2 gap-2.5">
-                <button
-                  onClick={onStartRecording}
-                  className="bg-[#00897b] border-[#00897b] text-white border rounded-xl px-3.5 py-4 text-center cursor-pointer transition-all hover:bg-[#00695c] hover:border-[#00695c]"
-                >
-                  <span className="block mb-1.5 flex justify-center">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
-                      <polygon points="23 7 16 12 23 17 23 7" />
-                      <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-                    </svg>
-                  </span>
-                  <div className="text-[13px] font-bold mb-0.5">ブラウザで録画する</div>
-                  <div className="text-[10px] opacity-80">推奨 ・ 読みながらすぐ撮れる</div>
-                </button>
-                <button
-                  onClick={handleClickFileButton}
-                  className="bg-white border-[#e8ebe9] text-zinc-700 border rounded-xl px-3.5 py-4 text-center cursor-pointer transition-all hover:border-[#00897b] hover:bg-[rgba(0,137,123,0.04)]"
-                  title="動画ファイルを選んでアップロード"
-                >
-                  <span className="block mb-1.5 flex justify-center">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
-                      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-                    </svg>
-                  </span>
-                  <div className="text-[13px] font-bold mb-0.5">ファイルをアップロード</div>
-                  <div className="text-[10px] opacity-70">スマホ動画 / tldv / スタジオ撮影 等</div>
-                </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="video/*"
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
+              {/* 左=返信ボタン2つ縦積み(録画7:アップ3・弱い立体) / 右=対象月の体型写真 */}
+              <div className="grid gap-3.5 items-stretch" style={{ gridTemplateColumns: "1fr 1fr" }}>
+                <div className="flex flex-col gap-2.5">
+                  <button
+                    onClick={onStartRecording}
+                    style={{ flex: 7, boxShadow: "0 3px 0 #00695c, 0 5px 8px rgba(0,105,92,.18)" }}
+                    className="bg-[#00897b] border-[#00897b] text-white border rounded-xl px-3.5 py-3 text-center cursor-pointer transition-all hover:bg-[#00695c] hover:border-[#00695c] active:translate-y-[2px] flex flex-col items-center justify-center"
+                  >
+                    <span className="block mb-1.5 flex justify-center">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
+                        <polygon points="23 7 16 12 23 17 23 7" />
+                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                      </svg>
+                    </span>
+                    <div className="text-[13.5px] font-bold mb-0.5">ブラウザで録画する</div>
+                    <div className="text-[10px] opacity-80">推奨 ・ 読みながらすぐ撮れる</div>
+                  </button>
+                  <button
+                    onClick={handleClickFileButton}
+                    style={{ flex: 3, boxShadow: "0 3px 0 #dfe3e1, 0 5px 8px rgba(0,0,0,.06)" }}
+                    className="bg-white border-[#e8ebe9] text-zinc-700 border rounded-xl px-3.5 py-2.5 text-center cursor-pointer transition-all hover:border-[#00897b] hover:bg-[rgba(0,137,123,0.04)] active:translate-y-[2px] flex flex-col items-center justify-center"
+                    title="動画ファイルを選んでアップロード"
+                  >
+                    <span className="block mb-1 flex justify-center">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                      </svg>
+                    </span>
+                    <div className="text-[12.5px] font-bold mb-0.5">ファイルをアップロード</div>
+                    <div className="text-[10px] opacity-70">スマホ動画 / tldv / スタジオ撮影 等</div>
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="video/*"
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
+                </div>
+                <MonthlyPhotoPanel photos={bodyPhotos} monthLabel={audit.monthLabel} />
               </div>
               {fileError && (
                 <div className="mt-3 px-3 py-2 bg-[#fef5f5] border border-[#d32f2f]/30 text-[#d32f2f] text-xs rounded-md text-center">

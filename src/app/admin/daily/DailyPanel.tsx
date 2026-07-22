@@ -53,7 +53,15 @@ const BodyTab = dynamic(() => import("./BodyTab"), {
   ),
 });
 
-type Tab = "today" | "body" | "plan" | "learn" | "words";
+// 体型写真タブも同様に遅延読み込み(開いた時だけ署名URLを取りに行く)。
+const PhotoTab = dynamic(() => import("./PhotoTab"), {
+  ssr: false,
+  loading: () => (
+    <div className="py-10 text-center text-[12px] text-zinc-400">読み込み中…</div>
+  ),
+});
+
+type Tab = "today" | "body" | "photo" | "plan" | "learn" | "words";
 
 export function DailyPanel({
   detail,
@@ -81,6 +89,7 @@ export function DailyPanel({
               [
                 { key: "today", label: "今日" },
                 { key: "body", label: "体組成" },
+                { key: "photo", label: "写真" },
                 { key: "plan", label: "計画・カルテ" },
                 { key: "learn", label: "学び" },
                 { key: "words", label: "これまでの言葉" },
@@ -109,6 +118,7 @@ export function DailyPanel({
             targetWeightKg={detail.body.targetWeightKg}
           />
         )}
+        {tab === "photo" && <PhotoTab userId={detail.userId} />}
         {tab === "plan" && <PlanTab detail={detail} />}
         {tab === "learn" && <LearnTab detail={detail} />}
         {tab === "words" && <WordsTab detail={detail} />}
@@ -1029,7 +1039,13 @@ function FbBar({
   nextUserId: string | null;
 }) {
   const router = useRouter();
-  const [body, setBody] = useState(detail.todayFeedback?.body ?? "");
+  // ②-a: 「人＋日付」ごとの下書きを画面メモリに保持（送信していない打ちかけも、受講生を行き来して残す）。
+  //   FbBar は受講生切替（?user=）・日付切替をまたいでも再マウントされない＝この state は保たれる。
+  //   キーを人＋日付にするのは、日付を切り替えた時に別日の打ちかけが持ち越されない様にするため。
+  //   表示値は「その人その日の下書き優先 → なければ保存済みFB → 空」。送信成功でその下書きは消す。
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const draftKey = `${detail.userId}|${date}`;
+  const value = drafts[draftKey] ?? detail.todayFeedback?.body ?? "";
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const alreadySent = detail.todayFeedback?.status === "sent";
@@ -1063,8 +1079,14 @@ function FbBar({
   const send = () =>
     startTransition(async () => {
       setError(null);
-      const r = await sendDailyFeedback({ userId: detail.userId, date, body });
+      const r = await sendDailyFeedback({ userId: detail.userId, date, body: value });
       if (!r.ok) return setError(r.message);
+      // 送信成功: この人その日の下書きは役目終了 → 消す（「送ったら消す」）
+      setDrafts((d) => {
+        const next = { ...d };
+        delete next[draftKey];
+        return next;
+      });
       advance();
     });
 
@@ -1102,8 +1124,10 @@ function FbBar({
         {/* 件3(2026-07-13): 題材ガード枠は撤去（食事・トレ・生活すべて実データが揃い、
             話題を限定する必要がなくなったため。beta/非beta とも完全撤去）。 */}
         <textarea
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
+          value={value}
+          onChange={(e) =>
+            setDrafts((d) => ({ ...d, [draftKey]: e.target.value }))
+          }
           placeholder="今日のひとことを書く…"
           className="w-full min-h-[84px] max-h-[140px] border border-[#e8ebe9] rounded-[9px] px-3 py-2 text-[12.5px] leading-relaxed resize-none focus:outline focus:outline-2 focus:outline-[#00897b]/35 focus:border-[#00897b]"
         />
@@ -1126,7 +1150,7 @@ function FbBar({
           <button
             type="button"
             onClick={send}
-            disabled={pending || !body.trim()}
+            disabled={pending || !value.trim()}
             className="text-[12px] font-bold text-white rounded-lg px-3.5 py-2 disabled:opacity-50"
             style={{ background: TEAL }}
           >

@@ -3,6 +3,8 @@ import {
   listBodyMetricsForAdmin,
   getLatestBodyMetricSummary,
 } from "@/lib/body-metrics/queries";
+import { listBodyPhotosForUser } from "@/lib/admin/body-photos";
+import { MetricsPhotoSection } from "./MetricsPhotoSection";
 
 export const dynamic = "force-dynamic";
 
@@ -26,9 +28,10 @@ export default async function UserMetricsPage({
   const sp = await searchParams;
   const range = sp.range ?? "6m";
 
-  const [allRecords, summary] = await Promise.all([
+  const [allRecords, summary, bodyPhotos] = await Promise.all([
     listBodyMetricsForAdmin(userId, 365),
     getLatestBodyMetricSummary(userId),
+    listBodyPhotosForUser(userId),
   ]);
 
   const filtered = filterByRange(allRecords, range);
@@ -67,6 +70,9 @@ export default async function UserMetricsPage({
           </div>
         </div>
       )}
+
+      {/* 体型写真(ビフォーアフター + タイムライン)。写真があるときだけ表示 */}
+      <MetricsPhotoSection photos={bodyPhotos} />
 
       {/* 期間タブ */}
       <div className="flex gap-2 mb-4">

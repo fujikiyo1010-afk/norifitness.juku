@@ -136,17 +136,20 @@ export default function BodyTab({
           {recent.map((r) => (
             <div
               key={r.id}
-              className="flex items-center justify-between px-3 py-1.5 text-[12px]"
+              className="flex items-baseline gap-x-5 px-3 py-1.5 text-[12px]"
             >
-              <span className="font-mono text-zinc-500">{mdLabel(r.recorded_at)}</span>
-              <span className="flex gap-3">
-                {r.weight_kg != null && <span className="font-bold">{r.weight_kg}kg</span>}
-                {r.body_fat_percent != null && (
-                  <span className="text-zinc-500">体脂肪 {r.body_fat_percent}%</span>
-                )}
-                {r.waist_cm != null && (
-                  <span className="text-zinc-500">W {r.waist_cm}cm</span>
-                )}
+              {/* 日付のすぐ横に 体重→W→体脂肪 を左グループで並べ、各列を固定幅＋右寄せで縦にそろえる */}
+              <span className="w-10 flex-shrink-0 font-mono text-zinc-500">
+                {mdLabel(r.recorded_at)}
+              </span>
+              <span className="w-16 flex-shrink-0 text-right font-bold tabular-nums text-zinc-900">
+                {r.weight_kg != null ? `${r.weight_kg}kg` : ""}
+              </span>
+              <span className="w-24 flex-shrink-0 text-right tabular-nums text-zinc-500">
+                {r.waist_cm != null ? `W ${r.waist_cm}cm` : ""}
+              </span>
+              <span className="w-24 flex-shrink-0 text-right tabular-nums text-zinc-500">
+                {r.body_fat_percent != null ? `体脂肪 ${r.body_fat_percent}%` : ""}
               </span>
             </div>
           ))}
