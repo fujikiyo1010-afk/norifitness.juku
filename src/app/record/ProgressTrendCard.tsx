@@ -110,7 +110,7 @@ export function ProgressTrendCard({
   const goalMs = targetDate ? Date.parse(targetDate) : null;
   if (current == null || pace == null) {
     return (
-      <Shell>
+      <Shell white={fujitaTwoWay}>
         <p className="text-[12px] leading-relaxed text-[#6a6256]">
           記録が2回そろうと、ここに「このペースだと何kg」という道のりが出ます。
         </p>
@@ -119,7 +119,7 @@ export function ProgressTrendCard({
   }
   if (target == null || goalMs == null || Number.isNaN(goalMs)) {
     return (
-      <Shell>
+      <Shell white={fujitaTwoWay}>
         <p className="text-[12px] leading-relaxed text-[#6a6256]">
           目標体重と目標日を立てると、通過点と道のりが出せます。
         </p>
@@ -145,9 +145,12 @@ export function ProgressTrendCard({
   const etaMs = etaForPace(current, target, paceAbs, now);
   const etaDays = etaMs != null ? Math.round((etaMs - now) / DAY) : null;
 
-  // 修2: チェックポイント(今日→レンジ刻み最大14点→到達日)。予測点は点線の丸。
+  // 修2: チェックポイント(今日→レンジ刻み→到達日)。予測点は点線の丸。
   // 到達日以降の行は出さない(既存の < etaDays フィルタ維持)。
-  const interim = Array.from({ length: 14 }, (_, i) => (i + 1) * step)
+  // 藤田さん仮反映(2026-07-22): 上限14点をやめ、到達日までの全点を表示。
+  const cpCount =
+    fujitaTwoWay && etaDays != null ? Math.max(1, Math.ceil(etaDays / step)) : 14;
+  const interim = Array.from({ length: cpCount }, (_, i) => (i + 1) * step)
     .filter((d) => etaDays == null || d < etaDays)
     .map((d) => ({
       label: etaDateLabel(now + d * DAY, now),
@@ -168,7 +171,7 @@ export function ProgressTrendCard({
       : fc.message;
 
   return (
-    <Shell>
+    <Shell white={fujitaTwoWay}>
       {/* タブ */}
       <div className="flex rounded-[11px] bg-[#efe9dc] p-[3px]">
         {(
@@ -302,7 +305,11 @@ export function ProgressTrendCard({
       </ol>
 
       {/* 下カード3点セット */}
-      <div className="mt-2.5 rounded-2xl border border-[#e7dcc9] bg-[#fffdf8] p-[13px]">
+      <div
+        className={`mt-2.5 rounded-2xl border border-[#e7dcc9] p-[13px] ${
+          fujitaTwoWay ? "bg-white" : "bg-[#fffdf8]"
+        }`}
+      >
         <div className="flex items-baseline gap-2 border-b border-dashed border-[#f0ead9] py-1.5">
           <span className="w-[120px] flex-none text-[11px] font-bold text-[#6a6256]">
             このペースだと
@@ -331,9 +338,20 @@ export function ProgressTrendCard({
   );
 }
 
-function Shell({ children }: { children: React.ReactNode }) {
+function Shell({
+  children,
+  white = false,
+}: {
+  children: React.ReactNode;
+  /** 藤田さん仮反映(2026-07-22): カードの地を白に */
+  white?: boolean;
+}) {
   return (
-    <div className="rounded-2xl border border-[#e7dcc9] bg-[#fffdf8] p-[13px]">
+    <div
+      className={`rounded-2xl border border-[#e7dcc9] p-[13px] ${
+        white ? "bg-white" : "bg-[#fffdf8]"
+      }`}
+    >
       {children}
     </div>
   );
@@ -512,14 +530,22 @@ function TwoWayGoalBody({
     setTgt(round1(v));
     setTgtStr(round1(v).toFixed(1));
   }
+  function stepTgt(delta: number) {
+    const c = round1(tgt + delta);
+    setTgt(c);
+    setTgtStr(c.toFixed(1));
+  }
 
   const days = Math.round((effDateMs - now) / DAY);
   const overSafe = effPace > SAFE_MAX;
 
-  // チェックポイント(今日→レンジ刻み最大14点→到達日)。
+  // チェックポイント(今日→レンジ刻み→到達日)。藤田さん仮反映: 上限なしで全点表示。
   const interim = invalid
     ? []
-    : Array.from({ length: 14 }, (_, i) => (i + 1) * step)
+    : Array.from(
+        { length: Math.max(0, Math.ceil(days / step) - 1) },
+        (_, i) => (i + 1) * step
+      )
         .filter((d) => d < days)
         .map((d) => ({
           label: etaDateLabel(now + d * DAY, now),
@@ -530,14 +556,28 @@ function TwoWayGoalBody({
     <>
       {/* 設定フィールド(現在体重=固定 / 目標体重・目標日・ペース=編集可) */}
       <div className="mt-[9px] divide-y divide-[#e8ede4] rounded-xl border border-[#e8ede4] bg-[#f6f8f4]">
+        {/* 現在体重: 案あ = 目標体重の箱と同じ列に読み取り専用の箱を置き、±分の
+            スペースを空けて数値の列を完璧に揃える。 */}
         <FieldRow label="現在体重" sub="最新の記録">
-          <span className="ml-auto font-mono text-[16px] font-extrabold text-[#2b2620]">
-            {round1(current).toFixed(1)}
-            <small className="text-[9px] font-bold text-[#a59b8c]"> kg</small>
+          <span className="ml-auto flex items-center gap-1.5">
+            <span className="h-9 w-9" aria-hidden="true" />
+            <span className="flex h-9 w-16 items-center justify-center rounded-[10px] border-[1.5px] border-[#e3e7e0] bg-[#eef1ec] font-mono text-[15px] font-extrabold text-[#4a4436]">
+              {round1(current).toFixed(1)}
+            </span>
+            <span className="h-9 w-9" aria-hidden="true" />
+            <span className="text-[9px] font-bold text-[#a59b8c]">kg</span>
           </span>
         </FieldRow>
         <FieldRow label="目標体重" sub="初期=目標シート">
-          <span className="ml-auto flex items-center gap-1">
+          <span className="ml-auto flex items-center gap-1.5">
+            <button
+              type="button"
+              aria-label="目標体重を下げる"
+              onClick={() => stepTgt(-0.1)}
+              className="flex h-9 w-9 items-center justify-center rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white text-[16px] font-bold text-[#34603f]"
+            >
+              −
+            </button>
             <input
               type="text"
               inputMode="decimal"
@@ -546,6 +586,14 @@ function TwoWayGoalBody({
               onBlur={(e) => commitTgt(e.target.value)}
               className="h-9 w-16 rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white text-center font-mono text-[15px] font-extrabold text-[#2b2620] focus:outline-none"
             />
+            <button
+              type="button"
+              aria-label="目標体重を上げる"
+              onClick={() => stepTgt(0.1)}
+              className="flex h-9 w-9 items-center justify-center rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white text-[16px] font-bold text-[#34603f]"
+            >
+              ＋
+            </button>
             <span className="text-[9px] font-bold text-[#a59b8c]">kg</span>
           </span>
         </FieldRow>
@@ -560,7 +608,7 @@ function TwoWayGoalBody({
                 setDateMs(ms);
               }
             }}
-            className="ml-auto h-9 rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white px-2 text-[13px] text-[#2b2620] focus:outline-none"
+            className="ml-auto h-9 rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white px-2 text-[13px] font-bold text-[#2b2620] focus:outline-none"
           />
         </FieldRow>
         <FieldRow label="ペース" auto={driver === "date"}>
@@ -589,7 +637,7 @@ function TwoWayGoalBody({
                   (e.target as HTMLInputElement).blur();
                 }
               }}
-              className="h-9 w-14 rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white text-center font-mono text-[15px] font-extrabold text-[#2b2620] focus:outline-none"
+              className="h-9 w-16 rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white text-center font-mono text-[15px] font-extrabold text-[#2b2620] focus:outline-none"
             />
             <button
               type="button"
@@ -639,7 +687,7 @@ function TwoWayGoalBody({
           </ol>
 
           {/* 下カード: ドライブ側に応じて主役を切替(必要ペース ⇄ 到達日) */}
-          <div className="mt-2.5 rounded-2xl border border-[#e7dcc9] bg-[#fffdf8] p-[13px]">
+          <div className="mt-2.5 rounded-2xl border border-[#e7dcc9] bg-white p-[13px]">
             <div className="flex items-baseline gap-2 py-1.5">
               <span className="w-[150px] flex-none text-[11px] font-bold text-[#6a6256]">
                 {driver === "date" ? "目標日に間に合う必要ペース" : "このペースの到達日"}

@@ -168,6 +168,7 @@ export function BodyMetricsDetail({
         rows={rows}
         pendingDelete={pendingDelete}
         deleting={isDeleting}
+        fujitaTwoWay={fujitaTwoWay}
         onAsk={setPendingDelete}
         onCancel={() => setPendingDelete(null)}
         onConfirm={confirmDelete}
@@ -674,6 +675,7 @@ function RecentRecords({
   rows,
   pendingDelete,
   deleting,
+  fujitaTwoWay = false,
   onAsk,
   onCancel,
   onConfirm,
@@ -681,6 +683,8 @@ function RecentRecords({
   rows: BodyMetricRow[];
   pendingDelete: string | null;
   deleting: boolean;
+  /** 藤田さん仮反映(2026-07-22): カード地を白に */
+  fujitaTwoWay?: boolean;
   onAsk: (id: string) => void;
   onCancel: () => void;
   onConfirm: (id: string) => void;
@@ -688,7 +692,11 @@ function RecentRecords({
   if (rows.length === 0) return null;
   const recent = [...rows].reverse().slice(0, 12); // 新しい順・直近12件
   return (
-    <div className="rounded-2xl border border-[#e7dcc9] bg-[#fffdf8] px-3 py-3">
+    <div
+      className={`rounded-2xl border border-[#e7dcc9] px-3 py-3 ${
+        fujitaTwoWay ? "bg-white" : "bg-[#fffdf8]"
+      }`}
+    >
       <div className="mb-0.5 px-0.5 text-[12px] font-bold text-[#5b5344]">最近の記録</div>
       <div className="mb-2 px-0.5 text-[10px] text-[#a59b8c]">
         間違えた日付の記録はここから削除できます
