@@ -91,9 +91,10 @@ export function MonthlyPhotoPanel({
                 <img
                   src={p.thumbUrl ?? (p.fullUrl as string)}
                   alt=""
+                  loading="lazy"
                   className="h-full w-full object-cover"
                 />
-                <span className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/55 to-transparent px-0.5 pb-0.5 pt-2.5 text-center text-[9px] font-bold text-white">
+                <span className="absolute bottom-0.5 left-0.5 rounded bg-black/75 px-1 py-0.5 text-[9.5px] font-bold leading-none text-white">
                   {mdLabel(p.recordedAt)}
                 </span>
               </button>
@@ -116,7 +117,7 @@ function PhotoCell({
 }) {
   return (
     <div>
-      <div className="mb-1 text-center text-[9.5px] font-bold text-zinc-400">
+      <div className="mb-1 text-center text-[10.5px] font-bold text-zinc-700">
         {label}
       </div>
       <button
@@ -130,6 +131,7 @@ function PhotoCell({
           <img
             src={photo.thumbUrl ?? (photo.fullUrl as string)}
             alt=""
+            loading="lazy"
             className="h-full w-full object-cover"
           />
         ) : null}

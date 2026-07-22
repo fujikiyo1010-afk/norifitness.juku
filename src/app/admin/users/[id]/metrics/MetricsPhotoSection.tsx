@@ -83,9 +83,10 @@ export function MetricsPhotoSection({ photos }: { photos: AdminBodyPhoto[] }) {
             <img
               src={p.thumbUrl ?? (p.fullUrl as string)}
               alt=""
+              loading="lazy"
               className="h-full w-full object-cover"
             />
-            <span className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/55 to-transparent px-1 pb-0.5 pt-3 text-center text-[9.5px] font-bold text-white">
+            <span className="absolute bottom-1 left-1 rounded bg-black/75 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
               {mdLabel(p.recordedAt)}
             </span>
           </button>
@@ -106,7 +107,7 @@ function PhotoCell({
 }) {
   return (
     <div>
-      <div className="mb-1.5 text-center text-[10px] font-bold text-zinc-400">
+      <div className="mb-1.5 text-center text-[11px] font-bold text-zinc-700">
         {label}
       </div>
       <button
@@ -120,6 +121,7 @@ function PhotoCell({
           <img
             src={photo.thumbUrl ?? (photo.fullUrl as string)}
             alt=""
+            loading="lazy"
             className="h-full w-full object-cover"
           />
         ) : null}
