@@ -120,8 +120,8 @@ export default function PhotoTab({ userId }: { userId: string }) {
             ビフォーアフター
           </div>
           <div
-            className="grid items-center justify-center gap-4"
-            style={{ gridTemplateColumns: "120px auto 120px" }}
+            className="grid items-center gap-4"
+            style={{ gridTemplateColumns: "1fr auto 1fr" }}
           >
             <BeforeAfterCell label={`初回 ${mdLabel(first.recordedAt)}`} photo={first} onOpen={() => openAt(first)} />
             <div className="flex flex-col items-center gap-1 text-[11px] font-bold text-[#00897b]">
@@ -143,7 +143,7 @@ export default function PhotoTab({ userId }: { userId: string }) {
         </div>
         <div
           className="grid gap-2"
-          style={{ gridTemplateColumns: "repeat(auto-fill, minmax(74px, 1fr))" }}
+          style={{ gridTemplateColumns: "repeat(auto-fill, minmax(78px, 1fr))" }}
         >
           {viewable.map((p, i) => (
             <button
