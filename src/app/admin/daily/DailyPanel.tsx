@@ -1129,7 +1129,7 @@ function FbBar({
             setDrafts((d) => ({ ...d, [draftKey]: e.target.value }))
           }
           placeholder="今日のひとことを書く…"
-          className="w-full min-h-[84px] max-h-[140px] border border-[#e8ebe9] rounded-[9px] px-3 py-2 text-[12.5px] leading-relaxed resize-none focus:outline focus:outline-2 focus:outline-[#00897b]/35 focus:border-[#00897b]"
+          className="w-full min-h-[168px] max-h-[320px] border border-[#e8ebe9] rounded-[9px] px-3 py-2 text-[12.5px] leading-relaxed resize-y focus:outline focus:outline-2 focus:outline-[#00897b]/35 focus:border-[#00897b]"
         />
         {error && <div className="text-[11px] text-red-600">⚠ {error}</div>}
       </div>
