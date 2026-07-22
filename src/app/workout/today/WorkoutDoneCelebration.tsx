@@ -20,12 +20,15 @@ export function WorkoutDoneCelebration({
   doneCount,
   nextLabel,
   fullScreen = false,
+  homeHref = "/workout/today",
 }: {
   streakDays: number;
   doneCount: number;
   nextLabel: string | null;
   // 2026-07-14: ヘッダー無しのフルスクリーン表示(preview)。true の時は内容を縦中央に置いて上ズレを解消。
   fullScreen?: boolean;
+  // 2026-07-22 週間プール: 完了後 ?done=1 を消した後の着地先(戻る/リロード先)。pool は /workout/week。
+  homeHref?: string;
 }) {
   const router = useRouter();
   // 2026-07-13: この行き止まり画面が出ている間だけ下部ナビを隠す(記録中/開始前は出す)。
@@ -41,7 +44,7 @@ export function WorkoutDoneCelebration({
   useEffect(() => {
     // 完了直後に ?done=1 を URL から消す(リロード/深夜0時またぎで祝福が残らない)
     if (window.location.search.includes("done=1")) {
-      window.history.replaceState(null, "", "/workout/today");
+      window.history.replaceState(null, "", homeHref);
     }
     const colors = ["#4a875b", "#c9a227", "#c2693f", "#fffdf8"];
     const pieces = Array.from({ length: 18 }, (_, i) => ({
@@ -54,7 +57,7 @@ export function WorkoutDoneCelebration({
     // rAF 後に反映(effect 本体での同期 setState を避ける・mount時1回)
     const id = requestAnimationFrame(() => setConfetti(pieces));
     return () => cancelAnimationFrame(id);
-  }, []);
+  }, [homeHref]);
 
   const fillPct = `${Math.max(0, Math.min(1, doneCount / 3)) * 100}%`;
 

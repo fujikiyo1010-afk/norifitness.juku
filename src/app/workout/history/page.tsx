@@ -66,6 +66,14 @@ export default async function WorkoutHistoryPage() {
                 const didOtherDay =
                   r.status === "done" && r.performedDayNumber != null && r.performedDayNumber !== r.dayNumber;
                 const selfRest = r.status === "rest_done" && r.isSelfRest;
+                // 週間プール: じぶんメニュー/cycle=NULLの行を「null周null日目」にしない。
+                const title = r.isCustom
+                  ? `じぶんメニュー${r.primaryTarget ? `（${r.primaryTarget}）` : ""}`
+                  : r.cycleNumber != null && r.dayNumber != null
+                    ? `${r.cycleNumber}周${r.dayNumber}日目`
+                    : r.dayNumber != null
+                      ? dayThemeLabel(cycles, r.intensity, r.dayNumber)
+                      : "トレーニング";
                 return (
                   <li
                     key={i}
@@ -78,7 +86,7 @@ export default async function WorkoutHistoryPage() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="text-[12.5px] font-bold text-[#2b2620]">
-                        {r.cycleNumber}周{r.dayNumber}日目
+                        {title}
                         {didOtherDay && (
                           <span className="ml-1 text-[10.5px] font-bold text-[#8a6d1a]">
                             → {r.performedDayNumber}日目（{dayThemeLabel(cycles, r.intensity, r.performedDayNumber!)}）を実施
