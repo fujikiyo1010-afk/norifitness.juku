@@ -120,8 +120,8 @@ export default function PhotoTab({ userId }: { userId: string }) {
             ビフォーアフター
           </div>
           <div
-            className="grid items-center gap-4"
-            style={{ gridTemplateColumns: "1fr auto 1fr" }}
+            className="grid items-center justify-center gap-4"
+            style={{ gridTemplateColumns: "120px auto 120px" }}
           >
             <BeforeAfterCell label={`初回 ${mdLabel(first.recordedAt)}`} photo={first} onOpen={() => openAt(first)} />
             <div className="flex flex-col items-center gap-1 text-[11px] font-bold text-[#00897b]">
@@ -141,22 +141,26 @@ export default function PhotoTab({ userId }: { userId: string }) {
           </div>
           <div className="ml-auto text-[10.5px] text-zinc-400">タップで拡大</div>
         </div>
-        <div className="grid grid-cols-4 gap-2.5">
+        <div
+          className="grid gap-2"
+          style={{ gridTemplateColumns: "repeat(auto-fill, minmax(74px, 1fr))" }}
+        >
           {viewable.map((p, i) => (
             <button
               key={p.id}
               type="button"
               onClick={() => setLbIndex(i)}
-              className="relative aspect-[3/4] cursor-zoom-in overflow-hidden rounded-lg border border-[#e8ebe9] bg-[#eef1ef]"
+              className="relative aspect-[3/4] cursor-zoom-in overflow-hidden rounded-md border border-[#e8ebe9] bg-[#eef1ef]"
               aria-label={`${mdLabel(p.recordedAt)} の写真を拡大`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={p.thumbUrl ?? (p.fullUrl as string)}
                 alt=""
+                loading="lazy"
                 className="h-full w-full object-cover"
               />
-              <span className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/55 to-transparent px-1.5 pb-1 pt-3 text-[10.5px] font-bold text-white">
+              <span className="absolute bottom-1 left-1 rounded bg-black/75 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
                 {mdLabel(p.recordedAt)}
               </span>
             </button>
@@ -184,7 +188,7 @@ function BeforeAfterCell({
 }) {
   return (
     <div>
-      <div className="mb-1.5 text-center text-[10px] font-bold text-zinc-400">
+      <div className="mb-1.5 text-center text-[11px] font-bold text-zinc-700">
         {label}
       </div>
       <button
@@ -198,6 +202,7 @@ function BeforeAfterCell({
           <img
             src={photo.thumbUrl ?? (photo.fullUrl as string)}
             alt=""
+            loading="lazy"
             className="h-full w-full object-cover"
           />
         ) : null}
