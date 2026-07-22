@@ -309,7 +309,7 @@ export async function getDailyDetail(
     // S2-D: 親(user_workout_logs)→子(items)の2往復をネストselectで1往復に(service role)。
     const { data: logRow } = await admin
       .from("user_workout_logs")
-      .select("id, day_number, performed_day_number, is_self_rest, intensity, status, memo, user_workout_log_items(exercise_name, source)")
+      .select("id, day_number, performed_day_number, is_self_rest, is_custom, primary_target, intensity, status, memo, user_workout_log_items(exercise_name, source)")
       .eq("user_id", userId)
       .eq("date", dateStr)
       .maybeSingle();
@@ -326,13 +326,15 @@ export async function getDailyDetail(
         .map((i) => cleanExerciseName(i.exercise_name));
       // 区別記録: 予定=day_number、実施=performed_day_number(あれば)。
       // 差分(やらなかった種目)は「実際にやった日のメニュー」で比較する(予定と違う日をやった時に脚メニューと胸実績を突合しない)。
-      const scheduledDay = logRow.day_number as number;
+      const scheduledDay = (logRow.day_number as number | null) ?? null;
+      const isCustom = !!(logRow.is_custom as boolean | null);
+      const customTarget = (logRow.primary_target as string | null) ?? null;
       const performedDay = (logRow.performed_day_number as number | null) ?? null;
       const effectiveDay = performedDay ?? scheduledDay;
       const menu = await getCurrentMenuForAdmin(userId);
       const intensity = (logRow.intensity as Intensity) ?? "medium";
-      const scheduledMenu = menu ? resolveDayMenu(menu.cycles, intensity, scheduledDay) : null;
-      const effectiveMenu = menu ? resolveDayMenu(menu.cycles, intensity, effectiveDay) : null;
+      const scheduledMenu = menu && scheduledDay != null ? resolveDayMenu(menu.cycles, intensity, scheduledDay) : null;
+      const effectiveMenu = menu && effectiveDay != null ? resolveDayMenu(menu.cycles, intensity, effectiveDay) : null;
       const originalNames = (effectiveMenu?.種目 ?? [])
         .filter((e) => e.種目名)
         .map((e) => cleanExerciseName(e.種目名));
@@ -340,7 +342,9 @@ export async function getDailyDetail(
       const notDoneNames = originalNames.filter((n) => !doneSet.has(n));
       workout = {
         status: logRow.status as "done" | "rest_done" | "skipped",
-        dayLabel: scheduledMenu?.日 ?? `${scheduledDay}日目`,
+        dayLabel: isCustom
+          ? `じぶんメニュー${customTarget ? `（${customTarget}）` : ""}`
+          : (scheduledMenu?.日 ?? (scheduledDay != null ? `${scheduledDay}日目` : "トレーニング")),
         performedDayLabel:
           performedDay != null ? (effectiveMenu?.日 ?? `${performedDay}日目`) : null,
         isSelfRest: !!(logRow.is_self_rest as boolean | null),

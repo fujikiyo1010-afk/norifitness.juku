@@ -109,6 +109,8 @@ export async function getTodayWorkout(): Promise<TodayWorkout> {
     )
     .eq("user_id", user.id)
     .eq("date", today)
+    // 週間プールの行(cycle_number=NULL)は一本道の今日フローに混ぜない。
+    .not("cycle_number", "is", null)
     .order("completed_at", { ascending: false })
     .limit(1);
   if (todayErr) throw new Error(`今日のトレ記録の取得に失敗しました: ${todayErr.message}`);
@@ -194,8 +196,8 @@ export async function getTodayWorkout(): Promise<TodayWorkout> {
 
 export type WorkoutHistoryRow = {
   date: string;
-  dayNumber: number;
-  cycleNumber: number;
+  dayNumber: number | null; // 週間プールのじぶんメニューは NULL
+  cycleNumber: number | null; // プール行は NULL
   intensity: Intensity;
   status: "done" | "rest_done" | "skipped";
   addedCount: number;
@@ -205,6 +207,10 @@ export type WorkoutHistoryRow = {
   performedDayNumber: number | null;
   /** 本人が休養日に設定したか(のり予定の休養日=false)。 */
   isSelfRest: boolean;
+  /** 週間プール: じぶんメニュー実施か(day_number=NULLになりうる)。 */
+  isCustom: boolean;
+  /** じぶんメニューの部位(表示用)。 */
+  primaryTarget: string | null;
 };
 
 export type WorkoutHistory = {
@@ -236,7 +242,7 @@ export async function getMyWorkoutHistory(limit = 60): Promise<WorkoutHistory> {
     supabase
       .from("user_workout_logs")
       .select(
-        "id, date, day_number, cycle_number, intensity, status, memo, performed_day_number, is_self_rest, user_workout_log_items(source)"
+        "id, date, day_number, cycle_number, intensity, status, memo, performed_day_number, is_self_rest, is_custom, primary_target, user_workout_log_items(source)"
       )
       .eq("user_id", user.id)
       .order("date", { ascending: false })
@@ -251,13 +257,15 @@ export async function getMyWorkoutHistory(limit = 60): Promise<WorkoutHistory> {
   const rows0 = (logs ?? []) as {
     id: string;
     date: string;
-    day_number: number;
-    cycle_number: number;
+    day_number: number | null;
+    cycle_number: number | null;
     intensity: Intensity;
     status: "done" | "rest_done" | "skipped";
     memo: string | null;
     performed_day_number: number | null;
     is_self_rest: boolean | null;
+    is_custom: boolean | null;
+    primary_target: string | null;
     user_workout_log_items: { source: string }[] | null;
   }[];
 
@@ -274,6 +282,8 @@ export async function getMyWorkoutHistory(limit = 60): Promise<WorkoutHistory> {
       hasMemo: !!r.memo,
       performedDayNumber: r.performed_day_number ?? null,
       isSelfRest: !!r.is_self_rest,
+      isCustom: !!r.is_custom,
+      primaryTarget: r.primary_target ?? null,
     };
   });
 

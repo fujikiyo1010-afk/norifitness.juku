@@ -43,7 +43,7 @@ export async function getWorkoutHistoryForUser(
   const [{ data: logs }, { data: prog }, menu] = await Promise.all([
     admin
       .from("user_workout_logs")
-      .select("id, date, day_number, performed_day_number, is_self_rest, intensity, status, memo")
+      .select("id, date, day_number, performed_day_number, is_self_rest, is_custom, primary_target, intensity, status, memo")
       .eq("user_id", userId)
       .order("date", { ascending: false })
       .limit(limit),
@@ -58,9 +58,11 @@ export async function getWorkoutHistoryForUser(
   const rows = (logs ?? []) as {
     id: string;
     date: string;
-    day_number: number;
+    day_number: number | null;
     performed_day_number: number | null;
     is_self_rest: boolean | null;
+    is_custom: boolean | null;
+    primary_target: string | null;
     intensity: Intensity;
     status: "done" | "rest_done" | "skipped";
     memo: string | null;
@@ -99,15 +101,17 @@ export async function getWorkoutHistoryForUser(
     // 区別記録: 差分は「実際にやった日」のメニューで比較。
     const performedDay = r.performed_day_number ?? null;
     const effectiveDay = performedDay ?? r.day_number;
-    const scheduledMenu = menu ? resolveDayMenu(menu.cycles, r.intensity, r.day_number) : null;
-    const effectiveMenu = menu ? resolveDayMenu(menu.cycles, r.intensity, effectiveDay) : null;
+    const scheduledMenu = menu && r.day_number != null ? resolveDayMenu(menu.cycles, r.intensity, r.day_number) : null;
+    const effectiveMenu = menu && effectiveDay != null ? resolveDayMenu(menu.cycles, r.intensity, effectiveDay) : null;
     const originalNames = (effectiveMenu?.種目 ?? [])
       .filter((e) => e.種目名)
       .map((e) => cleanExerciseName(e.種目名));
     const doneSet = new Set(doneNames);
     return {
       date: r.date,
-      dayLabel: scheduledMenu?.日 ?? `${r.day_number}日目`,
+      dayLabel: r.is_custom
+        ? `じぶんメニュー${r.primary_target ? `（${r.primary_target}）` : ""}`
+        : (scheduledMenu?.日 ?? (r.day_number != null ? `${r.day_number}日目` : "トレーニング")),
       performedDayLabel:
         performedDay != null ? (effectiveMenu?.日 ?? `${performedDay}日目`) : null,
       isSelfRest: !!r.is_self_rest,

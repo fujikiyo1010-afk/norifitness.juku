@@ -63,6 +63,11 @@ export async function startWorkout(): Promise<ActionResult> {
  * 今日の実施を記録(完了/休養完了/スキップ)。
  * 1(周,日)=1行を upsert。done/rest_done は items を総入れ替え、skipped は items なし。
  * 完了後に progress を1日進める(周回ループ + 再配布の次1日目切替)。
+ *
+ * 【2026-07-22 週間プール改修・条件3】この関数は「非ゲート利用者(従来の一本道)＋下ナビ筋トレタブ」用に温存。
+ * (user,cycle,day)でのupsert=日付キーの週間プールとは相性が悪い(同メニュー再実施で先週行を上書き)。
+ * 藤田先行の週間プールでは、配布メニュー実施は pool-actions.recordDistWorkout(cycle_number=NULLで日付キーinsert)を使う。
+ * ★全公開時にこの一本道経路は退役し、pool経路へ一本化する。
  */
 export async function completeWorkoutDay(input: {
   dayNumber: number;

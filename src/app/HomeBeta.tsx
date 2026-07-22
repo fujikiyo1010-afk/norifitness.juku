@@ -5,6 +5,8 @@ import type { BoardItem } from "@/lib/member/board";
 import type { LastWatchedLesson } from "@/lib/member/last-watched";
 import type { TodayActivity } from "@/lib/member/today-activity";
 import type { MemberAlert, MemberAlertKey } from "@/lib/member/alerts";
+import type { WeeklyTraining } from "@/lib/workout/weekly";
+import { WeeklyTrainingCard } from "@/components/WeeklyTrainingCard";
 import { DocIcon, TargetIcon, BarIcon, BellIcon } from "@/components/icons";
 
 /**
@@ -39,6 +41,7 @@ export function HomeBeta({
   workoutDayNumber = null,
   workoutPartLabel = null,
   showTokuten = false,
+  weeklyPool = null,
 }: {
   displayName: string;
   daysSinceJoined: number;
@@ -56,6 +59,8 @@ export function HomeBeta({
   workoutPartLabel?: string | null; // トレカード タイトル=メニュー名(部位ラベル)
   /** 藤田さん限定 仮反映: true=コース一覧を隠し特典ライブラリを表示 / false=従来(コース一覧あり) */
   showTokuten?: boolean;
+  /** 週間プール改修(藤田先行): あればトレカードを週間表示に差し替え */
+  weeklyPool?: WeeklyTraining | null;
 }) {
   const learnPct =
     totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
@@ -146,23 +151,27 @@ export function HomeBeta({
               今日やること
             </h2>
             <div className="flex flex-col gap-2">
-              {/* トレーニング(点19先頭・点1色・ラベル文言=モック) */}
-              <TodayCard
-                cap={
-                  workoutDayNumber
-                    ? `今日のトレーニング ・ ${workoutDayNumber}日目`
-                    : "今日のトレーニング"
-                }
-                capColor={CARD_COLOR.workout}
-                title={
-                  today.hasWorkoutMenu
-                    ? (workoutPartLabel ?? "今日のトレーニング")
-                    : "メニューを開始しよう"
-                }
-                cta={today.recordedWorkout ? "タップして見る →" : "▶ 実施を記録 →"}
-                href="/workout/today"
-                done={today.recordedWorkout}
-              />
+              {/* トレーニング: 週間プール(藤田先行)ならカードを差し替え。それ以外は従来カード。 */}
+              {weeklyPool ? (
+                <WeeklyTrainingCard weekly={weeklyPool} />
+              ) : (
+                <TodayCard
+                  cap={
+                    workoutDayNumber
+                      ? `今日のトレーニング ・ ${workoutDayNumber}日目`
+                      : "今日のトレーニング"
+                  }
+                  capColor={CARD_COLOR.workout}
+                  title={
+                    today.hasWorkoutMenu
+                      ? (workoutPartLabel ?? "今日のトレーニング")
+                      : "メニューを開始しよう"
+                  }
+                  cta={today.recordedWorkout ? "タップして見る →" : "▶ 実施を記録 →"}
+                  href="/workout/today"
+                  done={today.recordedWorkout}
+                />
+              )}
               {/* 食事(M7 案1・1食で✓・ラベル文言=モック) */}
               <TodayCard
                 cap="食事添削 ・ 今日"

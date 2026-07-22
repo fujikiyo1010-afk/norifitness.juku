@@ -18,6 +18,8 @@ import { hasUnreadReply } from "@/lib/member/notifications";
 import { getTodayActivity } from "@/lib/member/today-activity";
 import { isBetaUser } from "@/lib/auth/beta";
 import { isTokutenPreviewUser } from "@/lib/auth/tokuten-preview";
+import { isWeeklyPoolUser } from "@/lib/workout/pool-gate";
+import { getWeeklyTraining } from "@/lib/workout/weekly";
 import { HomeBeta } from "./HomeBeta";
 
 export const dynamic = "force-dynamic";
@@ -108,6 +110,7 @@ export default async function Home() {
     streakDays,
     w,
     isTokutenPreview,
+    isPool,
   ] = await Promise.all([
     getMyAlerts(),
     getMyHomeStats(),
@@ -127,6 +130,8 @@ export default async function Home() {
     getTodayWorkout(),
     // 特典ライブラリの本番・藤田さん限定 仮反映(2026-07-17)
     isTokutenPreviewUser(),
+    // 週間プール改修の藤田さん先行ゲート(2026-07-22)
+    isWeeklyPoolUser(),
   ]);
 
   const displayName = stats?.displayName ?? "受講生";
@@ -160,6 +165,8 @@ export default async function Home() {
         workoutPartLabel = t && t !== "全身" ? `${t}の日` : `${w.dayNumber}日目`;
       }
     }
+    // 週間プール(藤田先行): この人だけトレカードを週間表示に差し替える。
+    const weeklyPool = isPool ? await getWeeklyTraining() : null;
     return (
       <HomeBeta
         displayName={displayName}
@@ -177,6 +184,7 @@ export default async function Home() {
         today={todayActivity}
         alerts={alerts}
         showTokuten={isBeta || isTokutenPreview}
+        weeklyPool={weeklyPool}
       />
     );
   }
