@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { MonthlyAuditItems } from "@/lib/monthly-audit/types";
 import type { GoalSheetRow } from "@/lib/goal-sheet/types";
+import type { AdminBodyPhoto } from "@/lib/admin/body-photos-shared";
 import { NormalView } from "./NormalView";
 import { RecordingView } from "./RecordingView";
 
@@ -60,6 +61,8 @@ export type DetailViewData = {
   adminInitial: string;
   /** 受講生の目標シート (録画モードの左パネル参考タブ用、未作成なら null) */
   goalSheet: GoalSheetRow | null;
+  /** 対象月に撮影された体型写真(動画返信エリア右の閲覧用・新しい順) */
+  bodyPhotos: AdminBodyPhoto[];
 };
 
 export type RecordedVideo = {

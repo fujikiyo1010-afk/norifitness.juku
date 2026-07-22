@@ -7,6 +7,7 @@ import {
   type AlertTag,
   type UserWithAlerts,
 } from "@/lib/admin/alerts";
+import { AckChatButton } from "./AckChatButton";
 
 export const dynamic = "force-dynamic";
 
@@ -281,6 +282,8 @@ function Section({
 
 function UserCard({ user }: { user: UserWithAlerts }) {
   const actions = buildUserActions(user);
+  // チャット未返信タグを持つ人だけ「完了にする」(返信不要マーク)を出す
+  const hasChatUnreplied = user.tags.some((t) => t.key === "nori_chat_unreplied");
 
   return (
     <div className="rounded-[10px] border border-[#e8ebe9] bg-white px-4 py-3.5 flex items-center gap-3.5 hover:border-[#00897b] transition-colors">
@@ -308,6 +311,7 @@ function UserCard({ user }: { user: UserWithAlerts }) {
             {a.label}
           </Link>
         ))}
+        {hasChatUnreplied && <AckChatButton userId={user.userId} />}
       </div>
     </div>
   );

@@ -151,6 +151,7 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
     progresses,
     convos,
     msgs,
+    chatAcks,
   ] = await Promise.all([
     admin
       .from("monthly_audits")
@@ -174,6 +175,8 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
     // 新3: チャットは dev にテーブルが無い場合がある→エラー時は data=null で握る(prodのみ発火)
     admin.from("conversations").select("id, user_id"),
     admin.from("messages").select("conversation_id, sender_kind, created_at"),
+    // チャット未返信の手動「完了にする」(返信不要マーク)。無い環境では data=null。
+    admin.from("admin_chat_acks").select("user_id, acked_at"),
   ]);
 
   // ア1: 管理者を受講生一覧から除外
@@ -233,6 +236,12 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
       if (uid && last.kind !== "admin") chatUnrepliedByUser.set(uid, last.at);
     }
   }
+  // チャット未返信の「完了にする」記録: user_id → 確認時刻(acked_at)。
+  //   警報計算時「受講生の最終発言 <= acked_at」なら抑制(=返信不要として片付け済み)。
+  const chatAckByUser = new Map<string, string>();
+  for (const a of chatAcks.data ?? [])
+    chatAckByUser.set(a.user_id as string, a.acked_at as string);
+
   // C: 最終利用 = max(last_sign_in_at[認証], last_seen_at[アプリを開いた点])。
   // アプリを開いただけでは last_sign_in_at は更新されないため、両者の新しい方を採る。
   const lastActivityByUser = new Map<string, Date>();
@@ -431,8 +440,20 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
     }
 
     // 新3(のり宿題): 受講生の最終メッセージからN日 未返信
+    //   ただし「完了にする」(acked_at)がその発言以降なら抑制。新しい発言が来れば再表示。
     const lastStudentMsg = chatUnrepliedByUser.get(user.id);
-    if (lastStudentMsg && daysSinceTsJST(lastStudentMsg) >= ALERT_THRESHOLDS.CHAT_UNREPLIED_DAYS) {
+    const chatAckedAt = chatAckByUser.get(user.id);
+    // 「返信不要」確認が受講生の最終発言以降なら抑制(時刻は数値で比較・文字列比較の誤差を避ける)。
+    const chatAcked = !!(
+      lastStudentMsg &&
+      chatAckedAt &&
+      Date.parse(lastStudentMsg) <= Date.parse(chatAckedAt)
+    );
+    if (
+      lastStudentMsg &&
+      !chatAcked &&
+      daysSinceTsJST(lastStudentMsg) >= ALERT_THRESHOLDS.CHAT_UNREPLIED_DAYS
+    ) {
       tags.push({
         key: "nori_chat_unreplied",
         label: "チャット未返信",
