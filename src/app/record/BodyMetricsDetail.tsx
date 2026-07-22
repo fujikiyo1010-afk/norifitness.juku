@@ -45,7 +45,7 @@ export function BodyMetricsDetail({
   targetDate = null,
   photoSummary,
   isBeta = false,
-  fujitaTwoWay = false,
+  staffPreview = false,
   nowMs,
 }: {
   rows: BodyMetricRow[]; // recorded_at 昇順
@@ -55,8 +55,8 @@ export function BodyMetricsDetail({
   photoSummary: BodyPhotoSummary;
   /** 体1(戻るで閉じる)・体13(ホイール—)のベータ出し分け。裏側(画像再取得)は全体。 */
   isBeta?: boolean;
-  /** 藤田さんだけの仮反映(2026-07-21)。目標推移タブを両方向シミュレーターに差し替える。 */
-  fujitaTwoWay?: boolean;
+  /** 社員4人への仮反映(2026-07-21)。目標推移タブを両方向シミュレーターに差し替える。 */
+  staffPreview?: boolean;
   /** hydration対策: サーバ確定の「今」(ms)。予測日はこれ基準で SSR/CSR 一致。 */
   nowMs: number;
 }) {
@@ -155,7 +155,7 @@ export function BodyMetricsDetail({
           prog={prog}
           eta={eta}
           isBeta={isBeta}
-          fujitaTwoWay={fujitaTwoWay}
+          staffPreview={staffPreview}
           nowMs={nowMs}
           onOpenCalc={() => setCalcOpen(true)}
         />
@@ -168,7 +168,7 @@ export function BodyMetricsDetail({
         rows={rows}
         pendingDelete={pendingDelete}
         deleting={isDeleting}
-        fujitaTwoWay={fujitaTwoWay}
+        staffPreview={staffPreview}
         onAsk={setPendingDelete}
         onCancel={() => setPendingDelete(null)}
         onConfirm={confirmDelete}
@@ -222,7 +222,7 @@ function WeightView({
   prog,
   eta,
   isBeta,
-  fujitaTwoWay,
+  staffPreview,
   nowMs,
   onOpenCalc,
 }: {
@@ -236,7 +236,7 @@ function WeightView({
   prog: ReturnType<typeof weightGoalProgress>;
   eta: ReturnType<typeof weightEta>;
   isBeta: boolean;
-  fujitaTwoWay: boolean;
+  staffPreview: boolean;
   nowMs: number;
   onOpenCalc: () => void;
 }) {
@@ -374,15 +374,15 @@ function WeightView({
       </div>
 
       {/* M20改: ベータは新「目標推移/現状推移」タブ切替リスト。旧=予測カードA-2+計算シート。
-          2026-07-21: 藤田さんだけ 目標推移タブを両方向シミュレーターに(fujitaTwoWay)。
-          ベータでなくても藤田さんには出す(isBeta || fujitaTwoWay)。 */}
-      {isBeta || fujitaTwoWay ? (
+          2026-07-21: 社員4人だけ 目標推移タブを両方向シミュレーターに(staffPreview)。
+          ベータでなくても社員4人には出す(isBeta || staffPreview)。 */}
+      {isBeta || staffPreview ? (
         <ProgressTrendCard
           current={currentWeight}
           target={targetWeightKg}
           targetDate={targetDate}
           pace={pace}
-          fujitaTwoWay={fujitaTwoWay}
+          staffPreview={staffPreview}
           nowMs={nowMs}
         />
       ) : (
@@ -675,7 +675,7 @@ function RecentRecords({
   rows,
   pendingDelete,
   deleting,
-  fujitaTwoWay = false,
+  staffPreview = false,
   onAsk,
   onCancel,
   onConfirm,
@@ -683,8 +683,8 @@ function RecentRecords({
   rows: BodyMetricRow[];
   pendingDelete: string | null;
   deleting: boolean;
-  /** 藤田さん仮反映(2026-07-22): カード地を白に */
-  fujitaTwoWay?: boolean;
+  /** 社員4人仮反映(2026-07-22): カード地を白に */
+  staffPreview?: boolean;
   onAsk: (id: string) => void;
   onCancel: () => void;
   onConfirm: (id: string) => void;
@@ -694,7 +694,7 @@ function RecentRecords({
   return (
     <div
       className={`rounded-2xl border border-[#e7dcc9] px-3 py-3 ${
-        fujitaTwoWay ? "bg-white" : "bg-[#fffdf8]"
+        staffPreview ? "bg-white" : "bg-[#fffdf8]"
       }`}
     >
       <div className="mb-0.5 px-0.5 text-[12px] font-bold text-[#5b5344]">最近の記録</div>
