@@ -61,7 +61,7 @@ export function ProgressTrendCard({
   target,
   targetDate,
   pace,
-  fujitaTwoWay = false,
+  staffPreview = false,
   nowMs,
 }: {
   current: number | null;
@@ -69,8 +69,8 @@ export function ProgressTrendCard({
   targetDate: string | null;
   /** 実測ペース kg/週(符号つき)。上部「現状ペース」ピルと同一値。<2記録は null */
   pace: number | null;
-  /** 藤田さんだけの仮反映(2026-07-21)。目標推移タブを両方向シミュレーターに差し替える。 */
-  fujitaTwoWay?: boolean;
+  /** 社員4人への仮反映(2026-07-21)。目標推移タブを両方向シミュレーターに差し替える。 */
+  staffPreview?: boolean;
   /** hydration対策: サーバ確定の「今」(ms)。client側 Date.now() を廃し SSR/CSR一致。 */
   nowMs: number;
 }) {
@@ -110,7 +110,7 @@ export function ProgressTrendCard({
   const goalMs = targetDate ? Date.parse(targetDate) : null;
   if (current == null || pace == null) {
     return (
-      <Shell white={fujitaTwoWay}>
+      <Shell white={staffPreview}>
         <p className="text-[12px] leading-relaxed text-[#6a6256]">
           記録が2回そろうと、ここに「このペースだと何kg」という道のりが出ます。
         </p>
@@ -119,7 +119,7 @@ export function ProgressTrendCard({
   }
   if (target == null || goalMs == null || Number.isNaN(goalMs)) {
     return (
-      <Shell white={fujitaTwoWay}>
+      <Shell white={staffPreview}>
         <p className="text-[12px] leading-relaxed text-[#6a6256]">
           目標体重と目標日を立てると、通過点と道のりが出せます。
         </p>
@@ -147,9 +147,9 @@ export function ProgressTrendCard({
 
   // 修2: チェックポイント(今日→レンジ刻み→到達日)。予測点は点線の丸。
   // 到達日以降の行は出さない(既存の < etaDays フィルタ維持)。
-  // 藤田さん仮反映(2026-07-22): 上限14点をやめ、到達日までの全点を表示。
+  // 社員4人仮反映(2026-07-22): 上限14点をやめ、到達日までの全点を表示。
   const cpCount =
-    fujitaTwoWay && etaDays != null ? Math.max(1, Math.ceil(etaDays / step)) : 14;
+    staffPreview && etaDays != null ? Math.max(1, Math.ceil(etaDays / step)) : 14;
   const interim = Array.from({ length: cpCount }, (_, i) => (i + 1) * step)
     .filter((d) => etaDays == null || d < etaDays)
     .map((d) => ({
@@ -171,7 +171,7 @@ export function ProgressTrendCard({
       : fc.message;
 
   return (
-    <Shell white={fujitaTwoWay}>
+    <Shell white={staffPreview}>
       {/* タブ */}
       <div className="flex rounded-[11px] bg-[#efe9dc] p-[3px]">
         {(
@@ -213,8 +213,8 @@ export function ProgressTrendCard({
         ))}
       </div>
 
-      {fujitaTwoWay && tab === "goal" ? (
-        // 藤田さんだけ: 両方向シミュレーター(目標日⇄ペースのシーソー・保存しない電卓)
+      {staffPreview && tab === "goal" ? (
+        // 社員4人だけ: 両方向シミュレーター(目標日⇄ペースのシーソー・保存しない電卓)
         <TwoWayGoalBody
           current={current}
           initialTarget={target}
@@ -307,7 +307,7 @@ export function ProgressTrendCard({
       {/* 下カード3点セット */}
       <div
         className={`mt-2.5 rounded-2xl border border-[#e7dcc9] p-[13px] ${
-          fujitaTwoWay ? "bg-white" : "bg-[#fffdf8]"
+          staffPreview ? "bg-white" : "bg-[#fffdf8]"
         }`}
       >
         <div className="flex items-baseline gap-2 border-b border-dashed border-[#f0ead9] py-1.5">
@@ -343,7 +343,7 @@ function Shell({
   white = false,
 }: {
   children: React.ReactNode;
-  /** 藤田さん仮反映(2026-07-22): カードの地を白に */
+  /** 社員4人仮反映(2026-07-22): カードの地を白に */
   white?: boolean;
 }) {
   return (
@@ -415,7 +415,7 @@ function CheckItem({
 }
 
 // =====================================================================
-// 藤田さんだけの仮反映(2026-07-21): 目標推移タブ = 両方向シミュレーター
+// 社員4人への仮反映(2026-07-21): 目標推移タブ = 両方向シミュレーター
 // モック: public/mock/goal-trend-simulator.html
 //
 // 目標体重・目標日・ペースを画面上で自由に動かせる「電卓」(保存しない)。
@@ -460,6 +460,49 @@ function FieldRow({
   );
 }
 
+/** 目標体重・ペースの −/＋ ステッパーボタン(共通・36px角) */
+function StepBtn({
+  label,
+  onClick,
+  children,
+}: {
+  label: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      onClick={onClick}
+      className="flex h-9 w-9 flex-none items-center justify-center rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white text-[16px] font-bold text-[#34603f]"
+    >
+      {children}
+    </button>
+  );
+}
+
+/** A1 ブラケットの見出しアイコン(鎖=連動) */
+function LinkIcon() {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M9 12h6" />
+      <path d="M10 8a4 4 0 0 0 0 8" />
+      <path d="M14 8a4 4 0 0 1 0 8" />
+    </svg>
+  );
+}
+
 function TwoWayGoalBody({
   current,
   initialTarget,
@@ -482,6 +525,14 @@ function TwoWayGoalBody({
   const [dateMs, setDateMs] = useState<number>(initialGoalMs);
   const [pace, setPace] = useState<number>(0.3);
   const [paceStr, setPaceStr] = useState<string>("0.30");
+  // C1 連動ハイライト: 自動追従した側(follower)が変わった瞬間に光らせる。
+  // n を増やすと follower 側の box が key 変化で再マウント → CSS アニメが再生。
+  const [flash, setFlash] = useState<{ side: "date" | "pace" | null; n: number }>({
+    side: null,
+    n: 0,
+  });
+  const bumpFlash = (side: "date" | "pace") =>
+    setFlash((f) => ({ side, n: f.n + 1 }));
 
   const needed = round1(current - tgt); // 減量前提(>0で有効)
   const invalid = needed <= 0;
@@ -513,6 +564,7 @@ function TwoWayGoalBody({
     setDriver("pace");
     setPace(c);
     setPaceStr(c.toFixed(2));
+    bumpFlash("date"); // ペースを確定 → 目標日が自動追従して光る
   }
   function stepPace(delta: number) {
     const base = driver === "date" ? effPace : pace;
@@ -520,6 +572,7 @@ function TwoWayGoalBody({
     setDriver("pace");
     setPace(c);
     setPaceStr(c.toFixed(2));
+    bumpFlash("date");
   }
   function commitTgt(raw: string) {
     const v = Number(raw);
@@ -529,17 +582,19 @@ function TwoWayGoalBody({
     }
     setTgt(round1(v));
     setTgtStr(round1(v).toFixed(1));
+    bumpFlash(driver === "date" ? "pace" : "date"); // 目標体重変更 → 自動側が再計算して光る
   }
   function stepTgt(delta: number) {
     const c = round1(tgt + delta);
     setTgt(c);
     setTgtStr(c.toFixed(1));
+    bumpFlash(driver === "date" ? "pace" : "date");
   }
 
   const days = Math.round((effDateMs - now) / DAY);
   const overSafe = effPace > SAFE_MAX;
 
-  // チェックポイント(今日→レンジ刻み→到達日)。藤田さん仮反映: 上限なしで全点表示。
+  // チェックポイント(今日→レンジ刻み→到達日)。社員4人仮反映: 上限なしで全点表示。
   const interim = invalid
     ? []
     : Array.from(
@@ -554,102 +609,114 @@ function TwoWayGoalBody({
 
   return (
     <>
-      {/* 設定フィールド(現在体重=固定 / 目標体重・目標日・ペース=編集可) */}
-      <div className="mt-[9px] divide-y divide-[#e8ede4] rounded-xl border border-[#e8ede4] bg-[#f6f8f4]">
-        {/* 現在体重: 案あ = 目標体重の箱と同じ列に読み取り専用の箱を置き、±分の
-            スペースを空けて数値の列を完璧に揃える。 */}
-        <FieldRow label="現在体重" sub="最新の記録">
-          <span className="ml-auto flex items-center gap-1.5">
-            <span className="h-9 w-9" aria-hidden="true" />
-            <span className="flex h-9 w-16 items-center justify-center rounded-[10px] border-[1.5px] border-[#e3e7e0] bg-[#eef1ec] font-mono text-[15px] font-extrabold text-[#4a4436]">
-              {round1(current).toFixed(1)}
+      {/* 設定フィールド。縦の列を揃える = [ラベル | 固定幅クラスター(148px) | 単位(36px)]。
+          現在体重・目標日 = −〜＋の端まで貫く1枚箱 / 目標体重・ペース = [−][箱][＋]。
+          目標日+ペースは連動する一組なので A1 ブラケット(見出し+左アクセント+背景)でくくる。 */}
+      <div className="mt-[9px] rounded-xl border border-[#e8ede4] bg-[#f6f8f4] p-1.5">
+        <div className="divide-y divide-[#e8ede4]">
+          {/* 現在体重: 読み取り専用の広い箱(−〜＋幅)。目標体重の箱列と完璧整列。 */}
+          <FieldRow label="現在体重" sub="最新の記録">
+            <span className="ml-auto flex items-center gap-1.5">
+              <span className="flex w-[148px] items-center justify-end">
+                <span className="flex h-9 w-full items-center justify-center rounded-[10px] border-[1.5px] border-[#e3e7e0] bg-[#eef1ec] font-mono text-[15px] font-extrabold text-[#4a4436]">
+                  {round1(current).toFixed(1)}
+                </span>
+              </span>
+              <span className="w-9 text-left text-[9px] font-bold text-[#a59b8c]">kg</span>
             </span>
-            <span className="h-9 w-9" aria-hidden="true" />
-            <span className="text-[9px] font-bold text-[#a59b8c]">kg</span>
-          </span>
-        </FieldRow>
-        <FieldRow label="目標体重" sub="初期=目標シート">
-          <span className="ml-auto flex items-center gap-1.5">
-            <button
-              type="button"
-              aria-label="目標体重を下げる"
-              onClick={() => stepTgt(-0.1)}
-              className="flex h-9 w-9 items-center justify-center rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white text-[16px] font-bold text-[#34603f]"
-            >
-              −
-            </button>
-            <input
-              type="text"
-              inputMode="decimal"
-              value={tgtStr}
-              onChange={(e) => setTgtStr(e.target.value)}
-              onBlur={(e) => commitTgt(e.target.value)}
-              className="h-9 w-16 rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white text-center font-mono text-[15px] font-extrabold text-[#2b2620] focus:outline-none"
-            />
-            <button
-              type="button"
-              aria-label="目標体重を上げる"
-              onClick={() => stepTgt(0.1)}
-              className="flex h-9 w-9 items-center justify-center rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white text-[16px] font-bold text-[#34603f]"
-            >
-              ＋
-            </button>
-            <span className="text-[9px] font-bold text-[#a59b8c]">kg</span>
-          </span>
-        </FieldRow>
-        <FieldRow label="目標日" auto={driver === "pace"}>
-          <input
-            type="date"
-            value={isoDate(effDateMs)}
-            onChange={(e) => {
-              const ms = Date.parse(`${e.target.value}T00:00:00`);
-              if (!Number.isNaN(ms)) {
-                setDriver("date");
-                setDateMs(ms);
-              }
-            }}
-            className="ml-auto h-9 rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white px-2 text-[13px] font-bold text-[#2b2620] focus:outline-none"
-          />
-        </FieldRow>
-        <FieldRow label="ペース" auto={driver === "date"}>
-          <span className="ml-auto flex items-center gap-1.5">
-            <button
-              type="button"
-              aria-label="ペースを下げる"
-              onClick={() => stepPace(-0.05)}
-              className="flex h-9 w-9 items-center justify-center rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white text-[16px] font-bold text-[#34603f]"
-            >
-              −
-            </button>
-            <input
-              type="text"
-              inputMode="decimal"
-              value={paceInputValue}
-              onChange={(e) => {
-                setDriver("pace");
-                setPaceStr(e.target.value);
-              }}
-              onBlur={(e) => commitPace(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  commitPace((e.target as HTMLInputElement).value);
-                  (e.target as HTMLInputElement).blur();
-                }
-              }}
-              className="h-9 w-16 rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white text-center font-mono text-[15px] font-extrabold text-[#2b2620] focus:outline-none"
-            />
-            <button
-              type="button"
-              aria-label="ペースを上げる"
-              onClick={() => stepPace(0.05)}
-              className="flex h-9 w-9 items-center justify-center rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white text-[16px] font-bold text-[#34603f]"
-            >
-              ＋
-            </button>
-            <span className="text-[9px] font-bold text-[#a59b8c]">kg/週</span>
-          </span>
-        </FieldRow>
+          </FieldRow>
+          {/* 目標体重: [−][箱][＋] 刻み0.1 */}
+          <FieldRow label="目標体重" sub="初期=目標シート">
+            <span className="ml-auto flex items-center gap-1.5">
+              <span className="flex w-[148px] items-center gap-1.5">
+                <StepBtn label="目標体重を下げる" onClick={() => stepTgt(-0.1)}>
+                  −
+                </StepBtn>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={tgtStr}
+                  onChange={(e) => setTgtStr(e.target.value)}
+                  onBlur={(e) => commitTgt(e.target.value)}
+                  className="h-9 min-w-0 flex-1 rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white text-center font-mono text-[15px] font-extrabold text-[#2b2620] focus:outline-none"
+                />
+                <StepBtn label="目標体重を上げる" onClick={() => stepTgt(0.1)}>
+                  ＋
+                </StepBtn>
+              </span>
+              <span className="w-9 text-left text-[9px] font-bold text-[#a59b8c]">kg</span>
+            </span>
+          </FieldRow>
+        </div>
+
+        {/* A1 連結ブラケット: 目標日 ⇄ ペース(連動) */}
+        <div className="mt-1.5 rounded-[12px] border-l-[3px] border-[#8cc39c] bg-[#eef6f0] pb-0.5">
+          <div className="flex items-center gap-1 px-[11px] pt-2 pb-1 text-[9px] font-extrabold tracking-wide text-[#34603f]">
+            <LinkIcon />
+            間に合わせ方（この2つは連動）
+          </div>
+          <div className="divide-y divide-[#d7e6dc]">
+            {/* 目標日: 広い箱(−〜＋幅)・太字。driver=pace のとき自動追従して光る */}
+            <FieldRow label="目標日" auto={driver === "pace"}>
+              <span className="ml-auto flex items-center gap-1.5">
+                <span className="flex w-[148px]">
+                  <input
+                    key={`date-${flash.side === "date" ? flash.n : 0}`}
+                    type="date"
+                    value={isoDate(effDateMs)}
+                    onChange={(e) => {
+                      const ms = Date.parse(`${e.target.value}T00:00:00`);
+                      if (!Number.isNaN(ms)) {
+                        setDriver("date");
+                        setDateMs(ms);
+                        bumpFlash("pace"); // 目標日を変更 → ペースが自動追従して光る
+                      }
+                    }}
+                    className={`h-9 w-full rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white px-2 text-[13px] font-bold text-[#2b2620] focus:outline-none ${
+                      driver === "pace" ? "goal-flash" : ""
+                    }`}
+                  />
+                </span>
+                <span className="w-9" aria-hidden="true" />
+              </span>
+            </FieldRow>
+            {/* ペース: [−][箱][＋] 刻み0.05。driver=date のとき自動追従して光る */}
+            <FieldRow label="ペース" auto={driver === "date"}>
+              <span className="ml-auto flex items-center gap-1.5">
+                <span className="flex w-[148px] items-center gap-1.5">
+                  <StepBtn label="ペースを下げる" onClick={() => stepPace(-0.05)}>
+                    −
+                  </StepBtn>
+                  <input
+                    key={`pace-${flash.side === "pace" ? flash.n : 0}`}
+                    type="text"
+                    inputMode="decimal"
+                    value={paceInputValue}
+                    onChange={(e) => {
+                      setDriver("pace");
+                      setPaceStr(e.target.value);
+                    }}
+                    onBlur={(e) => commitPace(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        commitPace((e.target as HTMLInputElement).value);
+                        (e.target as HTMLInputElement).blur();
+                      }
+                    }}
+                    className={`h-9 min-w-0 flex-1 rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white text-center font-mono text-[15px] font-extrabold text-[#2b2620] focus:outline-none ${
+                      driver === "date" ? "goal-flash" : ""
+                    }`}
+                  />
+                  <StepBtn label="ペースを上げる" onClick={() => stepPace(0.05)}>
+                    ＋
+                  </StepBtn>
+                </span>
+                <span className="w-9 text-left text-[9px] font-bold text-[#a59b8c]">kg/週</span>
+              </span>
+            </FieldRow>
+          </div>
+        </div>
       </div>
 
       {invalid && (

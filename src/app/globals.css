@@ -262,3 +262,21 @@ input[type="number"] {
 .btn3d:disabled {
   box-shadow: 0 5px 0 #2f5b3d, 0 8px 16px rgba(0, 0, 0, 0.12);
 }
+
+/* 目標推移タブ 連動ハイライト(C1): 目標日⇄ペースの自動追従側が変わった瞬間、ふわっと光る */
+@keyframes goalFlash {
+  0% {
+    background-color: #fff2b8;
+    border-color: #e9c94a;
+  }
+  60% {
+    background-color: #fff8dc;
+  }
+  100% {
+    background-color: #ffffff;
+    border-color: #cfe0d4;
+  }
+}
+.goal-flash {
+  animation: goalFlash 0.7s ease-out;
+}
