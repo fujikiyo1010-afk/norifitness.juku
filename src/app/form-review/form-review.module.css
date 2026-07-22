@@ -1,0 +1,293 @@
+/* フォーム添削ページ 新デザイン（モック form-review.html を移植）。
+   この画面だけ 背景=白。上部バー(MemberHeader)と下部ナビ(グローバル)は含めない。 */
+
+.page {
+  --ink: #2b2620;
+  --sub: #6f6858;
+  --muted: #9a917f;
+  --green: #2f6b3f;
+  --green-d: #26562f;
+  --green-soft: #e9f1ea;
+  --gold: #b28a3c;
+  --gold-d: #8f6d2b;
+  --gold-soft: #f7f0de;
+  --shadow: 0 6px 20px rgba(60, 50, 20, 0.07);
+  background: #ffffff;
+  min-height: 100dvh;
+  padding-bottom: 28px;
+  color: var(--ink);
+}
+
+/* ヒーロー：横フルブリード（画面いっぱい）＋完成画像 */
+.hero {
+  display: block;
+  width: 100%;
+  line-height: 0;
+  overflow: hidden;
+}
+.heroImg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ヒーロー下のコンテンツ（左右余白あり） */
+.body {
+  padding: 0 14px;
+}
+
+/* 特徴チップ：3つを1枚のカードに統合 */
+.feats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  background: #fff;
+  border-radius: 16px;
+  padding: 14px 4px;
+  box-shadow: var(--shadow);
+}
+.feat {
+  text-align: center;
+  padding: 0 4px;
+  position: relative;
+}
+.feat + .feat::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 14%;
+  height: 72%;
+  width: 1px;
+  background: #eee6d6;
+}
+.featIc {
+  display: block;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 8px;
+}
+.feat span {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #3f3a30;
+  line-height: 1.45;
+}
+
+/* 安心カード */
+.assure {
+  margin-top: 12px;
+  background: #fff;
+  border-radius: 18px;
+  padding: 16px 16px 17px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  box-shadow: var(--shadow);
+}
+.assureIc {
+  flex: none;
+  width: 60px;
+  height: 60px;
+  display: block;
+}
+.assure h3 {
+  margin: 3px 0 11px;
+  font-size: 15px;
+  font-weight: 900;
+}
+.assure ul {
+  margin: 0;
+  padding: 0;
+}
+.assure li {
+  list-style: none;
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #4a4436;
+  margin: 8px 0;
+}
+.chk {
+  flex: none;
+  margin-top: 1px;
+}
+
+/* 料金カード */
+.prices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 11px;
+  margin-top: 12px;
+}
+.price {
+  border-radius: 17px;
+  padding: 14px 12px 13px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow);
+}
+.gold {
+  background: var(--gold-soft);
+}
+.pPill {
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 800;
+  border-radius: 9px;
+  padding: 4px 10px;
+  color: #6b6456;
+  background: #fff;
+  border: 1px solid #ddd2b8;
+}
+.gold .pPill {
+  background: var(--gold);
+  color: #fff;
+  border-color: var(--gold);
+}
+.pAmt {
+  font-weight: 900;
+  line-height: 1;
+  margin: 9px 0 5px;
+}
+.pAmt b {
+  font-size: 32px;
+}
+.pAmtGold b {
+  color: var(--gold-d);
+}
+.pAmt small {
+  font-size: 15px;
+  font-weight: 800;
+  margin-left: 1px;
+}
+.pNote {
+  font-size: 11px;
+  font-weight: 700;
+  color: #4a4436;
+  line-height: 1.5;
+  min-height: 32px;
+}
+.pBtn {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  text-align: center;
+  min-height: 54px;
+  border-radius: 13px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+  color: #fff;
+  text-decoration: none;
+  padding: 6px 8px;
+}
+.pBtn svg {
+  flex: none;
+}
+.btnGreen {
+  background: linear-gradient(180deg, #4f8d61, #3a7350);
+  box-shadow: 0 4px 0 #2d5a3c, 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+.btnGold {
+  background: linear-gradient(180deg, #c39a48, #a67d31);
+  box-shadow: 0 4px 0 #7e5f22, 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+.pFoot {
+  margin-top: 9px;
+  text-align: center;
+  font-size: 10.5px;
+  color: var(--muted);
+}
+/* 初回利用済み（案B）：0円ボタンを無効化 */
+.done .pBtn {
+  background: #e6e2d7;
+  color: #a49c8a;
+  box-shadow: 0 4px 0 #cfc9ba;
+  pointer-events: none;
+}
+.done .pAmt b {
+  color: #a49c8a;
+}
+
+/* ご利用の流れ 3ステップ */
+.flowT {
+  text-align: center;
+  font-weight: 900;
+  color: var(--green);
+  font-size: 15px;
+  margin: 22px 0 14px;
+}
+.steps {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 3px;
+}
+.step {
+  flex: 1;
+  position: relative;
+  background: #fff;
+  border-radius: 16px;
+  padding: 13px 4px 12px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+.num {
+  position: absolute;
+  left: 9px;
+  top: 9px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--green-d);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sic {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px 0;
+}
+.stepIc {
+  display: block;
+  height: 42px;
+  width: auto;
+}
+.step span {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #3f3a30;
+  line-height: 1.4;
+  display: block;
+}
+.arrow {
+  align-self: center;
+  color: #1c1a15;
+  flex: none;
+}
+
+/* セクション区切り（薄いヘアライン） */
+.secDivider {
+  height: 1px;
+  background: #ececec;
+  margin: 22px 20px 0;
+}
+
+/* 受講者の声（完成画像をそのまま） */
+.voicesImg {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 18px;
+}
