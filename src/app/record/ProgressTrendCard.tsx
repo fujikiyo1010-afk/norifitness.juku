@@ -822,7 +822,7 @@ function TwoWayGoalBody({
           </button>
           <p className="mt-1.5 text-center text-[10px] leading-[1.5] text-[#a59b8c]">
             {dirty
-              ? "この目標体重・目標日を、あなたの目標に設定します"
+              ? "決定時点の数値が残り続けます。"
               : "目標体重や目標日を変えると、ここで目標を更新できます"}
           </p>
           {saveMsg && (
