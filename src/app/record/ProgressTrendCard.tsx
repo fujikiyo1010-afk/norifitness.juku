@@ -672,11 +672,11 @@ function TwoWayGoalBody({
           </FieldRow>
         </div>
 
-        {/* A1 連結ブラケット: 目標日 ⇄ ペース(連動) */}
-        <div className="mt-1.5 rounded-[12px] border-l-[3px] border-[#8cc39c] bg-[#eef6f0] pb-0.5">
+        {/* 連動ブラケット: 目標日 ⇄ ペース(背景の色差のみ・左の縦線は無し) */}
+        <div className="mt-1.5 rounded-[12px] bg-[#eef6f0] pb-0.5">
           <div className="flex items-center gap-1 px-[11px] pt-2 pb-1 text-[9px] font-extrabold tracking-wide text-[#34603f]">
             <LinkIcon />
-            間に合わせ方（この2つは連動）
+            各数値の増減を反映します。
           </div>
           <div className="divide-y divide-[#d7e6dc]">
             {/* 目標日: 広い箱(−〜＋幅)・太字。driver=pace のとき自動追従して光る */}
@@ -695,7 +695,7 @@ function TwoWayGoalBody({
                         bumpFlash("pace"); // 目標日を変更 → ペースが自動追従して光る
                       }
                     }}
-                    className={`h-9 w-full rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white px-2 text-[13px] font-bold text-[#2b2620] focus:outline-none ${
+                    className={`goal-date h-9 w-full rounded-[10px] border-[1.5px] border-[#cfe0d4] bg-white px-2 text-[13px] font-bold text-[#2b2620] focus:outline-none ${
                       driver === "pace" ? "goal-flash" : ""
                     }`}
                   />
