@@ -63,6 +63,7 @@ export default async function RecordHubPage() {
             photoSummary={photoSummary}
             isBeta={isBeta}
             staffPreview={staffPreview}
+            userId={user.id}
             nowMs={nowMs}
           />
         </div>
