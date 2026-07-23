@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   computeForecast,
@@ -9,6 +10,7 @@ import {
   SAFE_MAX,
   type ForecastPeriod,
 } from "@/lib/body-metrics/forecast";
+import { saveGoalBaselineFromRecord } from "@/lib/goal-sheet/actions";
 
 /**
  * 体重タブ 再設計 (M20改・確定版・ベータ限定)。
@@ -533,6 +535,12 @@ function TwoWayGoalBody({
   });
   const bumpFlash = (side: "date" | "pace") =>
     setFlash((f) => ({ side, n: f.n + 1 }));
+  // 「基準を決定する」(案P): いじった目標を目標シートへ反映。
+  const router = useRouter();
+  const [isSaving, startSave] = useTransition();
+  const [saveMsg, setSaveMsg] = useState<{ ok: boolean; text: string } | null>(
+    null
+  );
 
   const needed = round1(current - tgt); // 減量前提(>0で有効)
   const invalid = needed <= 0;
@@ -593,6 +601,21 @@ function TwoWayGoalBody({
 
   const days = Math.round((effDateMs - now) / DAY);
   const overSafe = effPace > SAFE_MAX;
+
+  // 初期値(=目標シート)から変わっている時だけ「基準を決定する」を押せる。
+  const dirty = tgt !== round1(initialTarget) || effDateMs !== initialGoalMs;
+  function decide() {
+    setSaveMsg(null);
+    startSave(async () => {
+      const r = await saveGoalBaselineFromRecord(round1(tgt), isoDate(effDateMs));
+      if (r.ok) {
+        setSaveMsg({ ok: true, text: "✓ 基準を決定しました" });
+        router.refresh();
+      } else {
+        setSaveMsg({ ok: false, text: r.message });
+      }
+    });
+  }
 
   // チェックポイント(今日→レンジ刻み→到達日)。社員4人仮反映: 上限なしで全点表示。
   const interim = invalid
@@ -787,6 +810,30 @@ function TwoWayGoalBody({
                   : "いいペースです。この調子でいきましょう"}
             </p>
           </div>
+
+          {/* 基準を決定する: いじった目標体重・目標日を公式の目標に反映(案P) */}
+          <button
+            type="button"
+            onClick={decide}
+            disabled={isSaving || !dirty}
+            className="btn3d mt-2.5 w-full rounded-xl py-3 text-[14px] font-bold text-white disabled:opacity-50"
+          >
+            {isSaving ? "決定中…" : "基準を決定する"}
+          </button>
+          <p className="mt-1.5 text-center text-[10px] leading-[1.5] text-[#a59b8c]">
+            {dirty
+              ? "この目標体重・目標日を、あなたの目標に設定します"
+              : "目標体重や目標日を変えると、ここで目標を更新できます"}
+          </p>
+          {saveMsg && (
+            <p
+              className={`mt-1 text-center text-[11px] font-bold ${
+                saveMsg.ok ? "text-[#34603f]" : "text-[#c0392b]"
+              }`}
+            >
+              {saveMsg.text}
+            </p>
+          )}
         </>
       )}
     </>

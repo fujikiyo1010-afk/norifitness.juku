@@ -250,3 +250,87 @@ export async function saveMyGoalSheet(
     filled_count: countFilledSections(contentToSave),
   };
 }
+
+/**
+ * 記録画面「目標推移」タブの「基準を決定する」用(2026-07-23・社員4人 仮反映)。
+ *
+ * 逆算シミュレーターでいじった 目標体重・目標日 だけを、目標シートの
+ * goal_selection に反映(＝案P: これが公式の目標になる)。
+ *
+ * 作法(重要):
+ *   - 既存 content を丸ごと読み、goal_selection の target_weight_kg / target_date
+ *     だけ差し替える(他セクション・添削 audits は維持)。
+ *   - notify は立てない(last_review_requested_at を触らない=添削依頼を飛ばさない)。
+ *   - 編集履歴は goal_sheet_revisions に残す(既存の保存と同じ)。
+ */
+export async function saveGoalBaselineFromRecord(
+  targetWeightKg: number,
+  targetDateISO: string
+): Promise<SaveGoalSheetResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, message: "ログインが必要です" };
+  }
+  if (!Number.isFinite(targetWeightKg) || targetWeightKg <= 0) {
+    return { ok: false, message: "目標体重が不正です" };
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(targetDateISO)) {
+    return { ok: false, message: "目標日が不正です" };
+  }
+
+  // 既存 content を丸ごと取得(他セクション・添削を壊さないため)
+  const { data: existing } = await supabase
+    .from("goal_sheets")
+    .select("content")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const existingContent = (existing?.content as GoalSheetContent | null) ?? {};
+
+  const contentToSave: GoalSheetContent = {
+    ...existingContent,
+    goal_selection: {
+      ...(existingContent.goal_selection ?? {}),
+      target_weight_kg: targetWeightKg,
+      target_date: targetDateISO,
+    },
+  };
+  contentToSave.filled_sections = calcFilledSections(contentToSave);
+
+  // notify なし(= last_review_requested_at を立てない)
+  const { data, error } = await supabase
+    .from("goal_sheets")
+    .upsert(
+      { user_id: user.id, content: contentToSave },
+      { onConflict: "user_id" }
+    )
+    .select("updated_at")
+    .single();
+  if (error) {
+    return { ok: false, message: error.message };
+  }
+
+  const { error: revError } = await supabase.from("goal_sheet_revisions").insert({
+    user_id: user.id,
+    snapshot: contentToSave,
+    edited_by: user.id,
+  });
+  if (revError) {
+    console.error(
+      "[saveGoalBaselineFromRecord] revisions insert failed:",
+      revError.message
+    );
+  }
+
+  revalidatePath("/record", "page");
+  revalidatePath("/goal-sheet", "page");
+  revalidatePath("/goal-sheet/edit", "page");
+
+  return {
+    ok: true,
+    updated_at: data.updated_at as string,
+    filled_count: countFilledSections(contentToSave),
+  };
+}
