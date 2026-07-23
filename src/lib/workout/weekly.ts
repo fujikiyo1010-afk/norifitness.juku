@@ -1,9 +1,9 @@
 /**
- * 週間プール改修(2026-07-22)のデータ層。
+ * 週間プール改修(2026-07-22 / 再設計 2026-07-23)のデータ層。
  * 破壊移行なし: 既存 user_workout_logs を「日付で読み替える」だけ。
  *  - 配布メニュー = user_workout_menu.cycles の各日(A,B,C…=配布順=推奨順)。
  *  - ②今週 = 今週(月〜日JST)の日付のログ。③先週 = 先週の日付のログ(案X)。
- *  - day_number → 配布メニュー(A脚/B胸背…)へ変換して表示。is_custom はじぶんメニュー(★)。
+ *  - グリッドは部位2文字略称で表示(A〜G記号は廃止)。色は状態のみ。is_custom=じぶん(★)。
  *  - ◯週目 = users.joined_at を含む週(月曜起点JST)を1週目とし、毎週月曜+1。
  */
 import { createClient } from "@/lib/supabase/server";
@@ -14,7 +14,7 @@ import { getExerciseTarget } from "@/lib/workout/menu-display";
 import { jstTodayStr } from "@/lib/date/jst";
 import type { WorkoutCycles } from "@/lib/workout/types";
 
-// 部位 → バッジ色(配布・じぶん共通)。C-3⑫: 主部位データ(getExerciseTarget)の一般名称に割り付け。
+// 部位 → バッジ色(一覧・棚のバッジ用。グリッドでは使わない=グリッドは状態色のみ)。
 const TARGET_COLOR: Record<string, string> = {
   脚: "#5b7a9d",
   胸: "#c88a4a",
@@ -30,12 +30,35 @@ export function targetColor(target: string | null | undefined): string {
   return TARGET_COLOR[first] ?? "#6a6256";
 }
 
+// 略称対応表(再設計§2-1・案A)。無い名前は「・」「の日」を除いた先頭2文字にフォールバック。
+const ABBR_TABLE: Record<string, string> = {
+  "胸・背中の日": "胸背",
+  "腕・肩の日": "腕肩",
+  "腹筋・脚の日": "腹脚",
+  "体幹の日": "体幹",
+  "脚の日": "脚",
+  "肩の日": "肩",
+  "胸の日": "胸",
+  "背中の日": "背中",
+  "腕の日": "腕",
+  "腹筋の日": "腹筋",
+  "休養日": "休",
+  "休養日・ストレッチ": "休",
+};
+export function menuAbbr(name: string, kind?: DistKind): string {
+  if (kind === "rest") return "休";
+  if (ABBR_TABLE[name]) return ABBR_TABLE[name];
+  const stripped = name.replace(/の日$/, "").replace(/・/g, "");
+  return stripped.slice(0, 2) || "他";
+}
+
 export type DistKind = "train" | "rest" | "personal";
 
 /** 配布メニュー1本(=cyclesの1日) */
 export type DistMenu = {
   index: number; // 1-based(配布順=推奨順)
-  letter: string; // A,B,C…
+  letter: string; // A,B,C…(内部識別・棚の並び等で使用)
+  abbr: string; // 部位2文字略称(グリッド表示)
   name: string; // 表示名「脚の日」
   target: string; // 部位「脚」
   color: string; // バッジ色
@@ -44,10 +67,15 @@ export type DistMenu = {
   doneThisWeek: boolean;
 };
 
+/**
+ * グリッド1マス。全マスタップ可(§2-2)。
+ *  - dist: 配布/配布実施。day=配布番号(モーダル取得キー)、date/logId は実施マスのみ。
+ *  - custom: じぶん実施(★)。rest: 休養。empty: 記録なし(タップ不可)。
+ */
 export type WeekCell =
-  | { kind: "dist"; letter: string; color: string }
-  | { kind: "custom" }
-  | { kind: "rest" }
+  | { kind: "dist"; abbr: string; day: number; date: string | null; logId: string | null }
+  | { kind: "custom"; abbr: string | null; date: string | null; logId: string | null }
+  | { kind: "rest"; date: string | null; logId: string | null }
   | { kind: "empty" };
 
 export type WeeklyTraining = {
@@ -62,6 +90,11 @@ export type WeeklyTraining = {
   nextRecommended: DistMenu | null; // 次のおすすめ(未実施の推奨順で先頭)
   todayDone: boolean;
   todayLabel: string | null; // 今日やった配布/じぶんの表示名
+  // 完了後メイン(§2-7)用: 今日の実施サマリー
+  todayLogId: string | null;
+  todayIsCustom: boolean;
+  todayExCount: number;
+  todayArranged: boolean; // 追加種目ありか(=一部アレンジ)
 };
 
 function menuLetter(i: number): string {
@@ -111,6 +144,7 @@ function emptyRow(): WeekCell[] {
 }
 
 type LogRow = {
+  id: string;
   date: string;
   day_number: number | null;
   is_custom: boolean | null;
@@ -119,27 +153,36 @@ type LogRow = {
   completed_at: string | null;
 };
 
-/** 1日分のログ(複数あれば最後に完了した1つ・⑤) → セル */
-function cellFromLogs(cycles: WorkoutCycles, dayLogs: LogRow[]): WeekCell {
-  if (dayLogs.length === 0) return { kind: "empty" };
-  const latest = dayLogs
+/** 1日分のログ(複数あれば最後に完了した1つ・⑤) を取り出す */
+function latestOf(dayLogs: LogRow[]): LogRow | null {
+  if (dayLogs.length === 0) return null;
+  return dayLogs
     .slice()
     .sort((a, b) => (a.completed_at ?? "").localeCompare(b.completed_at ?? ""))
     .at(-1)!;
-  if (latest.status === "rest_done") return { kind: "rest" };
-  if (latest.is_custom) return { kind: "custom" };
+}
+
+/** 1日分のログ → セル(date 付き=タップで実施記録モーダル) */
+function cellFromLogs(cycles: WorkoutCycles, date: string, dayLogs: LogRow[]): WeekCell {
+  const latest = latestOf(dayLogs);
+  if (!latest) return { kind: "empty" };
+  if (latest.status === "rest_done") return { kind: "rest", date, logId: latest.id };
+  if (latest.is_custom)
+    return {
+      kind: "custom",
+      abbr: latest.primary_target ? menuAbbr(`${latest.primary_target}の日`) : null,
+      date,
+      logId: latest.id,
+    };
   const day = latest.day_number ?? 0;
   const info = distMenuInfo(cycles, day);
-  return { kind: "dist", letter: menuLetter(day), color: targetColor(info.target) };
+  return { kind: "dist", abbr: menuAbbr(info.name, info.kind), day, date, logId: latest.id };
 }
 
 /** 1日分のログ → 表示名(今日ラベル用) */
 function labelFromLogs(cycles: WorkoutCycles, dayLogs: LogRow[]): string | null {
-  if (dayLogs.length === 0) return null;
-  const latest = dayLogs
-    .slice()
-    .sort((a, b) => (a.completed_at ?? "").localeCompare(b.completed_at ?? ""))
-    .at(-1)!;
+  const latest = latestOf(dayLogs);
+  if (!latest) return null;
   if (latest.status === "rest_done") return "休養日";
   if (latest.is_custom) return latest.primary_target ? `${latest.primary_target}の日` : "じぶんメニュー";
   return distMenuInfo(cycles, latest.day_number ?? 0).name;
@@ -162,6 +205,10 @@ export async function getWeeklyTraining(): Promise<WeeklyTraining> {
     nextRecommended: null,
     todayDone: false,
     todayLabel: null,
+    todayLogId: null,
+    todayIsCustom: false,
+    todayExCount: 0,
+    todayArranged: false,
   };
   if (!user) return empty;
 
@@ -181,7 +228,7 @@ export async function getWeeklyTraining(): Promise<WeeklyTraining> {
     supabase.from("users").select("joined_at").eq("id", user.id).maybeSingle(),
     supabase
       .from("user_workout_logs")
-      .select("date, day_number, is_custom, primary_target, status, completed_at")
+      .select("id, date, day_number, is_custom, primary_target, status, completed_at")
       .eq("user_id", user.id)
       .in("date", [...thisDates, ...lastDates]),
   ]);
@@ -217,6 +264,7 @@ export async function getWeeklyTraining(): Promise<WeeklyTraining> {
     return {
       index,
       letter: menuLetter(index),
+      abbr: menuAbbr(info.name, info.kind),
       name: info.name,
       target: info.target,
       color: targetColor(info.target),
@@ -226,23 +274,37 @@ export async function getWeeklyTraining(): Promise<WeeklyTraining> {
     };
   });
 
-  // ①推奨行(月..日): 配布順を先頭から並べる。休養/パーソナルは rest/empty 相当。7日超は詰めない。
+  // ①推奨行(月..日): 配布順を先頭から並べる。休養は rest、それ以外は dist。7日超は詰めない。
   const recRow: WeekCell[] = Array.from({ length: 7 }, (_, i) => {
     const m = distMenus[i];
     if (!m) return { kind: "empty" as const };
-    if (m.kind === "rest") return { kind: "rest" as const };
-    return { kind: "dist" as const, letter: m.letter, color: m.color };
+    if (m.kind === "rest") return { kind: "rest" as const, date: null, logId: null };
+    return { kind: "dist" as const, abbr: m.abbr, day: m.index, date: null, logId: null };
   });
 
-  const thisRow = thisDates.map((d) => cellFromLogs(cycles, byDate.get(d) ?? []));
-  const lastRow = lastDates.map((d) => cellFromLogs(cycles, byDate.get(d) ?? []));
+  const thisRow = thisDates.map((d) => cellFromLogs(cycles, d, byDate.get(d) ?? []));
+  const lastRow = lastDates.map((d) => cellFromLogs(cycles, d, byDate.get(d) ?? []));
 
   const remaining = distMenus.filter((m) => m.kind === "train" && !m.doneThisWeek).length;
   const nextRecommended = distMenus.find((m) => m.kind === "train" && !m.doneThisWeek) ?? null;
 
   const todayLogs = byDate.get(today) ?? [];
-  const todayDone = todayLogs.length > 0;
+  const todayLatest = latestOf(todayLogs);
+  const todayDone = !!todayLatest;
   const todayLabel = labelFromLogs(cycles, todayLogs);
+
+  // 完了後カード用: 今日ログの種目数・アレンジ有無(追加種目)
+  let todayExCount = 0;
+  let todayArranged = false;
+  if (todayLatest && todayLatest.status !== "rest_done") {
+    const { data: items } = await supabase
+      .from("user_workout_log_items")
+      .select("source")
+      .eq("log_id", todayLatest.id);
+    const rows = (items ?? []) as { source: string }[];
+    todayExCount = rows.length;
+    todayArranged = rows.some((r) => r.source === "added");
+  }
 
   return {
     hasMenu: true,
@@ -256,5 +318,9 @@ export async function getWeeklyTraining(): Promise<WeeklyTraining> {
     nextRecommended,
     todayDone,
     todayLabel,
+    todayLogId: todayLatest?.id ?? null,
+    todayIsCustom: !!todayLatest?.is_custom,
+    todayExCount,
+    todayArranged,
   };
 }

@@ -134,8 +134,10 @@ export async function getFavorites(): Promise<string[]> {
 }
 
 export type LastWeekEntry = {
+  logId: string; // 実績ログid(再実施=実績が初期値でセット表へ)
   label: string; // 「脚の日」/じぶんの名前
   kind: "dist" | "custom" | "rest";
+  target: string | null; // バッジ部位文字用
   color: string;
   dayLabel: string; // 「先週 月曜に実施」
   dayNumber: number | null; // 配布=letter/再投入用
@@ -165,14 +167,14 @@ export async function getLastWeekMenus(): Promise<LastWeekEntry[]> {
 
   const { data: logs } = await supabase
     .from("user_workout_logs")
-    .select("date, day_number, is_custom, primary_target, status, custom_menu_id, completed_at")
+    .select("id, date, day_number, is_custom, primary_target, status, custom_menu_id, completed_at")
     .eq("user_id", user.id)
     .in("date", dates)
     .order("completed_at", { ascending: true });
 
   const out: LastWeekEntry[] = [];
   for (const l of (logs ?? []) as {
-    date: string; day_number: number | null; is_custom: boolean | null;
+    id: string; date: string; day_number: number | null; is_custom: boolean | null;
     primary_target: string | null; status: string; custom_menu_id: string | null;
   }[]) {
     const wd = DOW[new Date(`${l.date}T00:00:00Z`).getUTCDay()];
@@ -180,8 +182,10 @@ export async function getLastWeekMenus(): Promise<LastWeekEntry[]> {
     if (l.status === "rest_done") continue; // 休養日は再投入対象外
     if (l.is_custom) {
       out.push({
+        logId: l.id,
         label: l.primary_target ? `${l.primary_target}の日` : "じぶんメニュー",
         kind: "custom",
+        target: l.primary_target,
         color: targetColor(l.primary_target),
         dayLabel,
         dayNumber: null,
@@ -190,8 +194,10 @@ export async function getLastWeekMenus(): Promise<LastWeekEntry[]> {
     } else {
       const info = distMenuInfo(cycles, l.day_number ?? 0);
       out.push({
+        logId: l.id,
         label: info.name,
         kind: "dist",
+        target: info.target,
         color: targetColor(info.target),
         dayLabel,
         dayNumber: l.day_number,

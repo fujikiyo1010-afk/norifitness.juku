@@ -3,6 +3,7 @@ import Link from "next/link";
 import { MemberHeader } from "@/components/MemberHeader";
 import { isWeeklyPoolUser } from "@/lib/workout/pool-gate";
 import { getLastWeekMenus } from "@/lib/workout/custom-queries";
+import { menuAbbr } from "@/lib/workout/weekly";
 
 export const dynamic = "force-dynamic";
 
@@ -26,12 +27,8 @@ export default async function LastWeekPage() {
             </p>
           ) : (
             entries.map((e, i) => {
-              const href =
-                e.kind === "dist" && e.dayNumber
-                  ? `/workout/week/menu/${e.dayNumber}`
-                  : e.customMenuId
-                    ? `/workout/week/custom?record=${e.customMenuId}`
-                    : "/workout/week/custom";
+              // 先週=実績が初期値でセット表へ(共通線・§2-9)
+              const href = `/workout/week/edit?last=${e.logId}&from=last`;
               return (
                 <Link
                   key={i}
@@ -42,7 +39,7 @@ export default async function LastWeekPage() {
                     className="flex h-[30px] min-w-[30px] flex-none items-center justify-center rounded-[9px] px-2 text-[10px] font-extrabold text-white"
                     style={{ background: e.kind === "custom" ? "#7a5af0" : e.color }}
                   >
-                    {e.kind === "custom" ? "じぶん" : "のり"}
+                    {e.kind === "custom" ? "じ" : menuAbbr(e.label)}
                   </span>
                   <div className="min-w-0 flex-1">
                     <b className="block truncate text-[12.5px] text-[#2b2620]">{e.label}</b>

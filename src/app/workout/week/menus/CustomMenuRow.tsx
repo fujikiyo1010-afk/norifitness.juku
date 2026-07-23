@@ -38,7 +38,7 @@ export function CustomMenuRow({ menu }: { menu: CustomMenuSummary }) {
           <b className="block truncate text-[12.5px] text-[#2b2620]">{menu.name}</b>
           <span className="text-[10px] font-bold text-[#6a6256]">{sub}</span>
         </div>
-        <Link href={`/workout/week/custom?record=${menu.id}`} className="flex-none rounded-full border-[1.5px] border-[#4a875b] px-2.5 py-1 text-[10px] font-extrabold text-[#34603f]">
+        <Link href={`/workout/week/edit?menu=${menu.id}&from=menus`} className="flex-none rounded-full border-[1.5px] border-[#4a875b] px-2.5 py-1 text-[10px] font-extrabold text-[#34603f]">
           今日やる
         </Link>
         <Link href={`/workout/week/custom?edit=${menu.id}`} className="flex-none rounded-full border-[1.5px] border-[#d8cdba] px-2.5 py-1 text-[10px] font-extrabold text-[#6a6256]">
