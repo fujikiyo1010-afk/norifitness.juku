@@ -675,22 +675,13 @@ function PhotoSummaryCard({
     const { first, last, count } = summary;
     return (
       <div className="mt-1 space-y-2.5">
-        <div className="flex items-start justify-between gap-2 px-0.5">
-          <div>
-            <div className="text-[13px] font-bold text-[#5b5344]">
-              ビフォーアフター
-            </div>
-            <div className="mt-0.5 text-[10.5px] text-[#a59b8c]">
-              毎月1枚追加して変化を記録しましょう
-            </div>
+        <div className="px-0.5">
+          <div className="text-[13px] font-bold text-[#5b5344]">
+            ビフォーアフター
           </div>
-          <button
-            type="button"
-            onClick={onAddPhoto}
-            className="btn3d flex-none rounded-full px-3.5 py-2 text-[12px] font-bold text-white"
-          >
-            ＋ 写真を追加
-          </button>
+          <div className="mt-0.5 text-[10.5px] text-[#a59b8c]">
+            毎月1枚追加して変化を記録しましょう
+          </div>
         </div>
         {count > 0 ? (
           <div className="text-right">
