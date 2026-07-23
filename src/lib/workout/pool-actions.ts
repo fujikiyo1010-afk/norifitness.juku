@@ -20,8 +20,22 @@ import { getMyCurrentMenu } from "@/lib/workout/queries";
 import { partByExerciseName } from "@/lib/workout/video-master";
 import { jstTodayStr } from "@/lib/date/jst";
 import { distMenuInfo } from "@/lib/workout/weekly";
+import {
+  getDistPreview as _getDistPreview,
+  getLogDetail as _getLogDetail,
+  type DistPreview,
+  type LogDetail,
+} from "@/lib/workout/pool-detail";
 import type { WorkoutCycles } from "@/lib/workout/types";
 import type { Intensity, LoggedItem } from "@/lib/workout/logs-types";
+
+// グリッド下見モーダル(§2-2)から呼ぶ server action ラッパー。
+export async function previewDistAction(day: number): Promise<DistPreview | null> {
+  return _getDistPreview(day);
+}
+export async function logDetailAction(logId: string): Promise<LogDetail | null> {
+  return _getLogDetail(logId);
+}
 
 type ActionResult<T = undefined> =
   | ({ ok: true } & (T extends undefined ? object : { data: T }))
@@ -29,6 +43,32 @@ type ActionResult<T = undefined> =
 
 export type SetInput = { weightKg: number | null; reps: number | null };
 export type CustomExerciseInput = { exerciseName: string; sets: SetInput[] };
+
+// 再設計(2026-07-23): 全経路をセット表(セット単位)に統一 → 表紙で完了。
+// 配布・じぶん共通の1経路。draft(表紙で確定した内容)を受け取り DB へ1回だけ書く。
+export type DraftSet = { kg: number | null; reps: number | null };
+export type DraftExercise = { name: string; source: "original" | "added"; sets: DraftSet[] };
+export type WeeklyDraft = {
+  kind: "dist" | "custom" | "rest";
+  dayNumber?: number | null; // dist のみ(グリッド letter/略称・primary_target 決定)
+  exercises?: DraftExercise[]; // rest では不要
+  memo?: string | null;
+  saveAsName?: string | null; // じぶんメニューとして棚に新規保存(全経路可・実施ログの種別は変えない)
+  fromMenuId?: string | null; // 元にしたじぶんメニュー(棚/先週じぶん)
+  editLogId?: string | null; // 当日修正(行id update)
+};
+
+/**
+ * §条件①の代表値ルール: セット別kgは custom_menu_sets にのみ持ち、log_items(種目単位1行)は
+ *  - sets = 実績セット数(kg か 回 が入った行数)
+ *  - reps = 先頭実績セットの回数(なければ null)
+ *  - weight_kg = null(従来の配布・じぶん両方と同じ)
+ * 管理・カレンダーは log_items の数値を集計に使わない(名前と source のみ)ため表示は改修前と一致。
+ */
+function repItem(sets: DraftSet[]): { setsCount: number; reps: number | null } {
+  const filled = sets.filter((s) => s.kg != null || s.reps != null);
+  return { setsCount: filled.length, reps: filled[0]?.reps ?? null };
+}
 
 /** 選んだ種目の主部位で多数決(§9・主部位1つ)。該当なしは「全身」。 */
 function dominantTarget(names: string[]): string {
@@ -47,6 +87,170 @@ async function requireUser() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   return { supabase, user };
+}
+
+// =====================================================================
+// 統合完了(再設計2026-07-23): 配布・じぶん共通の1経路。表紙「完了」から呼ぶ。
+// =====================================================================
+
+export async function completeWeeklyWorkout(
+  input: WeeklyDraft
+): Promise<ActionResult<{ logId: string }>> {
+  const { supabase, user } = await requireUser();
+  if (!user) return { ok: false, message: "ログインが必要です" };
+  const menu = await getMyCurrentMenu(user.id);
+
+  // ---- 休養日(§2-8): セット表を通らず表紙直行。既存の休養記録の形を維持。----
+  if (input.kind === "rest") {
+    const logFields = {
+      user_id: user.id,
+      menu_id: menu?.id ?? null,
+      date: jstTodayStr(),
+      day_number: input.dayNumber ?? null,
+      cycle_number: null as number | null,
+      intensity: "medium" as Intensity,
+      status: "rest_done" as const,
+      memo: input.memo?.trim() || null,
+      is_custom: false,
+      custom_menu_id: null,
+      primary_target: null,
+      completed_at: new Date().toISOString(),
+    };
+    if (input.editLogId) {
+      const { data, error } = await supabase
+        .from("user_workout_logs")
+        .update({ ...logFields, date: undefined })
+        .eq("id", input.editLogId)
+        .eq("user_id", user.id)
+        .select("id")
+        .single();
+      if (error || !data) return { ok: false, message: `保存エラー: ${error?.message}` };
+      await supabase.from("user_workout_log_items").delete().eq("log_id", data.id as string);
+      await supabase.from("user_custom_menu_sets").delete().eq("log_id", data.id as string);
+      revalidateWorkout();
+      return { ok: true, data: { logId: data.id as string } };
+    }
+    const { data, error } = await supabase
+      .from("user_workout_logs")
+      .insert(logFields)
+      .select("id")
+      .single();
+    if (error || !data) return { ok: false, message: `保存エラー: ${error?.message}` };
+    revalidateWorkout();
+    return { ok: true, data: { logId: data.id as string } };
+  }
+
+  // ---- 配布/じぶん共通 ----
+  const isCustom = input.kind === "custom";
+  // 実績セット(kg か 回 が入っている)のみ残す。空行は保存しない(§6・表紙で警告済み)。
+  const exercises = (input.exercises ?? [])
+    .map((ex) => ({
+      name: ex.name.trim(),
+      source: ex.source,
+      sets: ex.sets.filter((s) => s.kg != null || s.reps != null),
+    }))
+    .filter((ex) => ex.name.length > 0);
+  if (exercises.length === 0) return { ok: false, message: "記録する種目がありません" };
+
+  // primary_target: 配布=配布メニューの部位 / じぶん=種目の主部位で多数決
+  let primaryTarget: string | null;
+  if (isCustom) {
+    primaryTarget = dominantTarget(exercises.map((e) => e.name));
+  } else {
+    const cycles = (menu?.cycles ?? []) as WorkoutCycles;
+    const info = distMenuInfo(cycles, input.dayNumber ?? 0);
+    primaryTarget = info.target === "休" || info.target === "パーソナル" ? null : info.target;
+  }
+
+  // じぶんメニューとして棚に保存(全経路可・新規作成のみ・実施ログ種別は変えない)
+  let savedMenuId: string | null = input.fromMenuId ?? null;
+  if (input.saveAsName && input.saveAsName.trim()) {
+    const newId = await createCustomMenuInternal(
+      supabase,
+      user.id,
+      input.saveAsName.trim(),
+      primaryTarget ?? "全身",
+      exercises.map((e) => ({ exerciseName: e.name, sets: e.sets.map((s) => ({ weightKg: s.kg, reps: s.reps })) }))
+    );
+    if (newId) savedMenuId = newId;
+  }
+
+  const logFields = {
+    user_id: user.id,
+    menu_id: menu?.id ?? null,
+    date: jstTodayStr(),
+    day_number: isCustom ? null : (input.dayNumber ?? null),
+    cycle_number: null as number | null, // 条件1: プール行は NULL
+    intensity: "medium" as Intensity,
+    status: "done" as const,
+    memo: input.memo?.trim() || null,
+    is_custom: isCustom,
+    custom_menu_id: savedMenuId,
+    primary_target: primaryTarget,
+    completed_at: new Date().toISOString(),
+  };
+
+  let logId: string;
+  if (input.editLogId) {
+    const { data, error } = await supabase
+      .from("user_workout_logs")
+      .update({ ...logFields, date: undefined })
+      .eq("id", input.editLogId)
+      .eq("user_id", user.id)
+      .select("id")
+      .single();
+    if (error || !data) return { ok: false, message: `保存エラー: ${error?.message}` };
+    logId = data.id as string;
+    await supabase.from("user_workout_log_items").delete().eq("log_id", logId);
+    await supabase.from("user_custom_menu_sets").delete().eq("log_id", logId);
+  } else {
+    const { data, error } = await supabase
+      .from("user_workout_logs")
+      .insert(logFields)
+      .select("id")
+      .single();
+    if (error || !data) return { ok: false, message: `保存エラー: ${error?.message}` };
+    logId = data.id as string;
+  }
+
+  // log_items(種目単位・代表値。管理/カレンダー互換)
+  const itemRows = exercises.map((ex, i) => {
+    const rep = repItem(ex.sets);
+    return {
+      log_id: logId,
+      exercise_name: ex.name,
+      source: ex.source,
+      weight_kg: null as number | null,
+      reps: rep.reps,
+      sets: rep.setsCount,
+      sort_order: i,
+    };
+  });
+  if (itemRows.length > 0) {
+    const { error } = await supabase.from("user_workout_log_items").insert(itemRows);
+    if (error) return { ok: false, message: `種目の保存エラー: ${error.message}` };
+  }
+
+  // custom_menu_sets(セット別・実績。配布も custom_menu_id=NULL で流用)
+  const setRows = exercises.flatMap((ex, ei) =>
+    ex.sets.map((s, si) => ({
+      user_id: user.id,
+      custom_menu_id: savedMenuId,
+      log_id: logId,
+      exercise_name: ex.name,
+      exercise_order: ei,
+      set_number: si + 1,
+      weight_kg: s.kg,
+      reps: s.reps,
+    }))
+  );
+  if (setRows.length > 0) {
+    const { error: setErr } = await supabase.from("user_custom_menu_sets").insert(setRows);
+    if (setErr) return { ok: false, message: `セットの保存エラー: ${setErr.message}` };
+  }
+
+  revalidateWorkout();
+  return { ok: true, data: { logId } };
 }
 
 // =====================================================================
