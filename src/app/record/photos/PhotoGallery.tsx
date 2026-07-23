@@ -289,19 +289,24 @@ function Chip({
   );
 }
 
-function PhotoAddForm({
+export function PhotoAddForm({
   userId,
   onSaved,
   isBeta = false,
+  initialFile = null,
 }: {
   userId: string;
   onSaved: () => void;
   isBeta?: boolean;
+  /** 記録画面サマリーから「その場で追加」する時、選択済みファイルを渡すと即プレビュー */
+  initialFile?: File | null;
 }) {
   const [recordedAt, setRecordedAt] = useState(todayString());
   const [note, setNote] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(initialFile);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(() =>
+    initialFile ? URL.createObjectURL(initialFile) : null
+  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);

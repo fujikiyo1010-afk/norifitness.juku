@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { PhotoAddForm } from "./photos/PhotoGallery";
 import type { BodyMetricRow } from "@/lib/body-metrics/queries";
 import { deleteBodyMetric } from "@/lib/body-metrics/actions";
 import { useRefreshOnReturn } from "@/lib/hooks/useRefreshOnReturn";
@@ -46,6 +47,7 @@ export function BodyMetricsDetail({
   photoSummary,
   isBeta = false,
   staffPreview = false,
+  userId,
   nowMs,
 }: {
   rows: BodyMetricRow[]; // recorded_at 昇順
@@ -55,12 +57,33 @@ export function BodyMetricsDetail({
   photoSummary: BodyPhotoSummary;
   /** 体1(戻るで閉じる)・体13(ホイール—)のベータ出し分け。裏側(画像再取得)は全体。 */
   isBeta?: boolean;
-  /** 社員4人への仮反映(2026-07-21)。目標推移タブを両方向シミュレーターに差し替える。 */
+  /** 社員4人への仮反映。目標推移タブの両方向シミュレーター＋写真「その場で追加」。 */
   staffPreview?: boolean;
+  /** 写真「その場で追加」用(body_photos の user_id)。 */
+  userId: string;
   /** hydration対策: サーバ確定の「今」(ms)。予測日はこれ基準で SSR/CSR 一致。 */
   nowMs: number;
 }) {
   const [tab, setTab] = useState<Tab>("weight");
+  // タブ戻り修正(全員): 最後に見ていたタブを覚え、/record に戻った時に復元。
+  // (SSRは"weight"固定→マウント後に復元。写真一覧から戻ってもウエスト＋写真を保つ)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = sessionStorage.getItem("record-active-tab");
+    // マウント後に復元(SSRは"weight"固定=hydration一致のため、ここは effect で復元が正)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (saved === "waist" || saved === "weight") setTab(saved);
+  }, []);
+  const selectTab = (t: Tab) => {
+    setTab(t);
+    try {
+      sessionStorage.setItem("record-active-tab", t);
+    } catch {}
+  };
+  // 写真「その場で追加」(社員4人): サマリーの＋/タイル → 直接ファイル選択 → シート
+  const [photoAddOpen, setPhotoAddOpen] = useState(false);
+  const [pickedPhoto, setPickedPhoto] = useState<File | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
   const [calcOpen, setCalcOpen] = useState(false);
   const [recordOpen, setRecordOpen] = useState(false);
   // ② 保存/削除トースト  ① 誤日付記録の削除(2段階確認)
@@ -131,7 +154,7 @@ export function BodyMetricsDetail({
           <button
             key={t.key}
             type="button"
-            onClick={() => setTab(t.key)}
+            onClick={() => selectTab(t.key)}
             className={`flex-1 rounded-xl py-2.5 text-[12px] font-bold transition-colors ${
               tab === t.key
                 ? "bg-[#4a875b] text-white shadow-[0_2px_6px_rgba(74,135,91,0.35)]"
@@ -160,7 +183,12 @@ export function BodyMetricsDetail({
           onOpenCalc={() => setCalcOpen(true)}
         />
       ) : (
-        <WaistView waistRows={waistRows} photoSummary={photoSummary} />
+        <WaistView
+          waistRows={waistRows}
+          photoSummary={photoSummary}
+          staffPreview={staffPreview}
+          onAddPhoto={() => photoInputRef.current?.click()}
+        />
       )}
 
       {/* ① 最近の記録 (誤った日付の記録を削除・2段階確認) */}
@@ -207,6 +235,48 @@ export function BodyMetricsDetail({
       >
         <CalcSheetBody currentWeight={currentWeight} pace={pace} nowMs={nowMs} />
       </BottomSheet>
+
+      {/* 写真「その場で追加」(社員4人仮反映): サマリーの＋/タイル → 直接ファイル選択 →
+          選択後にこのシートでプレビュー＋撮影日＋メモ＋保存。追加ロジックは既存流用。 */}
+      {staffPreview && (
+        <>
+          <input
+            ref={photoInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0] ?? null;
+              e.target.value = ""; // 同じ写真を選び直せるようリセット
+              if (f) {
+                setPickedPhoto(f);
+                setPhotoAddOpen(true);
+              }
+            }}
+          />
+          <BottomSheet
+            open={photoAddOpen}
+            onClose={() => {
+              setPhotoAddOpen(false);
+              setPickedPhoto(null);
+            }}
+            title="写真を追加"
+            backClose={isBeta}
+          >
+            <PhotoAddForm
+              userId={userId}
+              isBeta={isBeta}
+              initialFile={pickedPhoto}
+              onSaved={() => {
+                setPhotoAddOpen(false);
+                setPickedPhoto(null);
+                showToast("写真を追加しました");
+                router.refresh();
+              }}
+            />
+          </BottomSheet>
+        </>
+      )}
     </div>
   );
 }
@@ -518,9 +588,13 @@ function CalcSheetBody({
 function WaistView({
   waistRows,
   photoSummary,
+  staffPreview,
+  onAddPhoto,
 }: {
   waistRows: BodyMetricRow[];
   photoSummary: BodyPhotoSummary;
+  staffPreview: boolean;
+  onAddPhoto: () => void;
 }) {
   const start = waistRows[0]?.waist_cm ?? null;
   const current = waistRows[waistRows.length - 1]?.waist_cm ?? null;
@@ -577,12 +651,91 @@ function WaistView({
       </div>
 
       {/* ビフォーアフター写真 (要点2枚 + 一覧へ) */}
-      <PhotoSummaryCard summary={photoSummary} />
+      <PhotoSummaryCard
+        summary={photoSummary}
+        staffPreview={staffPreview}
+        onAddPhoto={onAddPhoto}
+      />
     </>
   );
 }
 
-function PhotoSummaryCard({ summary }: { summary: BodyPhotoSummary }) {
+function PhotoSummaryCard({
+  summary,
+  staffPreview = false,
+  onAddPhoto,
+}: {
+  summary: BodyPhotoSummary;
+  staffPreview?: boolean;
+  onAddPhoto?: () => void;
+}) {
+  // 社員4人仮反映: ＋写真を追加ボタン + 3枠(入会時/現在/追加タイル)。
+  // ＋ボタン・追加タイルは「その場で追加」(直接ファイル選択→シート)を起動。
+  if (staffPreview) {
+    const { first, last, count } = summary;
+    return (
+      <div className="mt-1 space-y-2.5">
+        <div className="flex items-start justify-between gap-2 px-0.5">
+          <div>
+            <div className="text-[13px] font-bold text-[#5b5344]">
+              ビフォーアフター
+            </div>
+            <div className="mt-0.5 text-[10.5px] text-[#a59b8c]">
+              毎月1枚追加して変化を記録しましょう
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onAddPhoto}
+            className="btn3d flex-none rounded-full px-3.5 py-2 text-[12px] font-bold text-white"
+          >
+            ＋ 写真を追加
+          </button>
+        </div>
+        {count > 0 ? (
+          <div className="text-right">
+            <Link
+              href="/record/photos"
+              className="text-[11px] font-bold text-[#4a875b]"
+            >
+              写真をすべて見る（{count}枚）→
+            </Link>
+          </div>
+        ) : null}
+        <div className="grid grid-cols-3 gap-2.5">
+          <PhotoThumb
+            url={first?.url ?? null}
+            tag={count > 0 ? "入会時" : "記録"}
+            date={first?.recorded_at ?? null}
+          />
+          {last && count >= 2 ? (
+            <PhotoThumb url={last.url} tag="現在" date={last.recorded_at} />
+          ) : (
+            <div className="flex aspect-[3/4] flex-col items-center justify-center rounded-2xl border border-dashed border-[#d8cdba] bg-[#fffdf8] p-3 text-center text-[10px] font-bold text-[#a59b8c]">
+              現在の1枚を
+              <br />
+              追加しましょう
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={onAddPhoto}
+            className="flex aspect-[3/4] flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[#cdbfa6] bg-[#fffdf8] p-2 text-center transition-colors hover:border-[#4a875b]"
+          >
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#efe9dc] text-[18px] font-light text-[#6a6256]">
+              ＋
+            </span>
+            <span className="text-[9.5px] font-bold leading-tight text-[#8a8172]">
+              写真を追加して
+              <br />
+              変化を記録しよう
+            </span>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // 0枚: 記録を促す
   if (summary.count === 0) {
     return (
