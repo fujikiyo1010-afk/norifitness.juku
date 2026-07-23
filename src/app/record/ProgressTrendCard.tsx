@@ -823,7 +823,7 @@ function TwoWayGoalBody({
           <p className="mt-1.5 text-center text-[10px] leading-[1.5] text-[#a59b8c]">
             {dirty
               ? "決定時点の数値が残り続けます。"
-              : "目標体重や目標日を変えると、ここで目標を更新できます"}
+              : "目標体重や目標日を変えると、その基準値がそのまま保存されます"}
           </p>
           {saveMsg && (
             <p
