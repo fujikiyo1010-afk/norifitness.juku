@@ -8,6 +8,7 @@
  */
 import { createClient } from "@/lib/supabase/server";
 import { getMyCurrentMenu } from "@/lib/workout/queries";
+import { POOL_PREVIEW_EMAILS } from "@/lib/workout/pool-gate";
 import { getMyProgress } from "@/lib/workout/logs";
 import { resolveDayMenu, dayCount } from "@/lib/workout/logs-types";
 import { getExerciseTarget } from "@/lib/workout/menu-display";
@@ -73,9 +74,9 @@ export type DistMenu = {
  *  - custom: じぶん実施(★)。rest: 休養。empty: 記録なし(タップ不可)。
  */
 export type WeekCell =
-  | { kind: "dist"; abbr: string; day: number; date: string | null; logId: string | null }
-  | { kind: "custom"; abbr: string | null; date: string | null; logId: string | null }
-  | { kind: "rest"; date: string | null; logId: string | null }
+  | { kind: "dist"; abbr: string; day: number; date: string | null; logId: string | null; example?: boolean }
+  | { kind: "custom"; abbr: string | null; date: string | null; logId: string | null; example?: boolean }
+  | { kind: "rest"; date: string | null; logId: string | null; example?: boolean }
   | { kind: "empty" };
 
 export type WeeklyTraining = {
@@ -188,6 +189,36 @@ function labelFromLogs(cycles: WorkoutCycles, dayLogs: LogRow[]): string | null 
   return distMenuInfo(cycles, latest.day_number ?? 0).name;
 }
 
+/**
+ * DEMO(2026-07-24): 先週行が空だと機能が見えないので、3人だけ「先週の例」を表示に差し込む。
+ * のりの配布に似せつつ所々違う(木=じぶん★・金/日は休み)。表示だけ=DB非書込。
+ * 撤去はこの関数と getWeeklyTraining 内の呼び出しブロックを消すだけ。
+ */
+function buildExampleLastRow(distMenus: DistMenu[]): WeekCell[] {
+  const train = distMenus.filter((m) => m.kind === "train");
+  if (train.length === 0) return emptyRow();
+  const restExists = distMenus.some((m) => m.kind === "rest");
+  const t = (i: number) => train[i % train.length];
+  const dc = (m: DistMenu): WeekCell => ({
+    kind: "dist",
+    abbr: m.abbr,
+    day: m.index,
+    date: null,
+    logId: null,
+    example: true,
+  });
+  const empty: WeekCell = { kind: "empty" };
+  return [
+    dc(t(0)), // 月: 配布どおり実施
+    train.length > 1 ? dc(t(1)) : empty, // 火: 別の配布
+    restExists ? { kind: "rest", date: null, logId: null, example: true } : empty, // 水: 休
+    { kind: "custom", abbr: "脚", date: null, logId: null, example: true }, // 木: じぶん★(所々違う)
+    empty, // 金: 休み
+    train.length > 2 ? dc(t(2)) : dc(t(0)), // 土: もう1本
+    empty, // 日: 休み
+  ];
+}
+
 export async function getWeeklyTraining(): Promise<WeeklyTraining> {
   const supabase = await createClient();
   const {
@@ -283,7 +314,11 @@ export async function getWeeklyTraining(): Promise<WeeklyTraining> {
   });
 
   const thisRow = thisDates.map((d) => cellFromLogs(cycles, d, byDate.get(d) ?? []));
-  const lastRow = lastDates.map((d) => cellFromLogs(cycles, d, byDate.get(d) ?? []));
+  let lastRow = lastDates.map((d) => cellFromLogs(cycles, d, byDate.get(d) ?? []));
+
+  // DEMO(2026-07-24): 3人だけ、先週行を「例」で差し替え(表示だけ・DB非書込)。撤去はこの2行を消す。
+  const email = user.email?.toLowerCase();
+  if (email && POOL_PREVIEW_EMAILS.includes(email)) lastRow = buildExampleLastRow(distMenus);
 
   const remaining = distMenus.filter((m) => m.kind === "train" && !m.doneThisWeek).length;
   const nextRecommended = distMenus.find((m) => m.kind === "train" && !m.doneThisWeek) ?? null;

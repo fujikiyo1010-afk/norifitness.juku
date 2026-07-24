@@ -10,7 +10,13 @@ import type { WeekCell } from "@/lib/workout/weekly";
 
 const DOW = ["月", "火", "水", "木", "金", "土", "日"];
 
-type Tap = { t: "dist"; day: number } | { t: "log"; logId: string } | { t: "rest" } | null;
+type Tap =
+  | { t: "dist"; day: number; example?: boolean }
+  | { t: "log"; logId: string }
+  | { t: "rest" }
+  | { t: "exCustom" } // 先週の例: じぶんメニュー(見本)
+  | { t: "exRest" } // 先週の例: 休養(見本・操作ボタンなし)
+  | null;
 
 /**
  * 今週の表(§2-1・案A=罫線格子＋部位略称)＋下見モーダル(§2-2・中央)。
@@ -33,10 +39,18 @@ export function WeekGridCard({
   const [dist, setDist] = useState<DistPreview | null>(null);
   const [log, setLog] = useState<LogDetail | null>(null);
   const [restModal, setRestModal] = useState(false);
+  const [example, setExample] = useState(false); // 先週の例フラグ(モーダルに「先週の例」注記＋操作抑制)
+  const [exCustom, setExCustom] = useState(false);
   const [lightbox, setLightbox] = useState<{ url: string; name: string } | null>(null);
 
   function tapOf(cell: WeekCell, row: "rec" | "this" | "last"): Tap {
     if (cell.kind === "empty") return null;
+    // 先週の例マス: 中身(配布は本物のメニュー内容/じぶん・休は見本)を見せる
+    if ("example" in cell && cell.example) {
+      if (cell.kind === "dist") return { t: "dist", day: cell.day, example: true };
+      if (cell.kind === "custom") return { t: "exCustom" };
+      return { t: "exRest" };
+    }
     if (row === "rec") return cell.kind === "rest" ? { t: "rest" } : cell.kind === "dist" ? { t: "dist", day: cell.day } : null;
     // this/last: 記録マス
     if ("logId" in cell && cell.logId) return { t: "log", logId: cell.logId };
@@ -48,15 +62,24 @@ export function WeekGridCard({
     setDist(null);
     setLog(null);
     setRestModal(false);
+    setExCustom(false);
+    setExample(false);
     setOpen(true);
-    if (tap.t === "rest") {
+    if (tap.t === "rest" || tap.t === "exRest") {
       setRestModal(true);
+      if (tap.t === "exRest") setExample(true);
       return;
     }
+    if (tap.t === "exCustom") {
+      setExCustom(true);
+      setExample(true);
+      return;
+    }
+    if (tap.t === "dist" && tap.example) setExample(true);
     setLoading(true);
     try {
       if (tap.t === "dist") setDist(await previewDistAction(tap.day));
-      else setLog(await logDetailAction(tap.logId));
+      else if (tap.t === "log") setLog(await logDetailAction(tap.logId));
     } catch (e) {
       console.warn("[grid modal] load failed", e);
     } finally {
@@ -104,23 +127,49 @@ export function WeekGridCard({
 
             {!loading && restModal && (
               <div>
-                <div className="text-[10px] font-extrabold text-[#a5631f]">今日の内容</div>
+                {example && <ExampleTag />}
+                <div className="text-[10px] font-extrabold text-[#a5631f]">{example ? "先週やった内容" : "今日の内容"}</div>
                 <h2 className="mb-2 mt-1 text-[16px] font-bold text-[#2b2620]">休養日・ストレッチ</h2>
                 <p className="mb-3 text-[11.5px] leading-relaxed text-[#7a6a35]">疲労回復も大事なトレーニングです。</p>
-                <button
-                  type="button"
-                  onClick={() => router.push("/workout/week/confirm?rest=1")}
-                  className="w-full rounded-xl py-3 text-center text-[13px] font-bold text-white"
-                  style={{ background: "#b6a35c" }}
-                >
-                  今日は休養日にする
-                </button>
+                {!example && (
+                  <button
+                    type="button"
+                    onClick={() => router.push("/workout/week/confirm?rest=1")}
+                    className="w-full rounded-xl py-3 text-center text-[13px] font-bold text-white"
+                    style={{ background: "#b6a35c" }}
+                  >
+                    今日は休養日にする
+                  </button>
+                )}
+              </div>
+            )}
+
+            {!loading && exCustom && (
+              <div>
+                <ExampleTag />
+                <div className="text-[10px] font-extrabold text-[#7a5af0]">先週やった じぶんメニュー</div>
+                <h2 className="mb-2 mt-1 text-[16px] font-bold text-[#2b2620]">じぶんメニュー（脚）</h2>
+                <div className="mb-2 flex flex-col">
+                  {[
+                    { name: "スクワット", v: "40kg × 12回 × 3セット" },
+                    { name: "ブルガリアンスクワット", v: "20kg × 10回 × 3セット" },
+                    { name: "レッグカール", v: "30kg × 15回 × 3セット" },
+                  ].map((e, i) => (
+                    <div key={i} className="flex items-center gap-2 border-b border-[#f0ead9] py-1.5 last:border-b-0 text-[12.5px]">
+                      <span className="text-[#d8cdba]">・</span>
+                      <b className="text-[#2b2620]">{e.name}</b>
+                      <span className="ml-auto font-bold text-[#6a6256]">{e.v}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[10.5px] leading-relaxed text-[#a59b8c]">自分で組んだメニューの記録は、こんなふうに見られます。</p>
               </div>
             )}
 
             {!loading && dist && (
               <div>
-                <div className="text-[10px] font-extrabold text-[#b98a4d]">のりの配布メニュー</div>
+                {example && <ExampleTag />}
+                <div className="text-[10px] font-extrabold text-[#b98a4d]">{example ? "先週やった 配布メニュー" : "のりの配布メニュー"}</div>
                 <h2 className="mb-2 mt-1 text-[17px] font-bold text-[#2b2620]">{dist.name}</h2>
                 <div className="mb-2 flex flex-col">
                   {dist.exercises.map((e, i) => (
@@ -216,6 +265,15 @@ export function WeekGridCard({
 
 function mdOf(date: string): string {
   return `${Number(date.slice(5, 7))}/${Number(date.slice(8, 10))}`;
+}
+
+/** 先週の例マスであることを示すタグ(実データではない見本) */
+function ExampleTag() {
+  return (
+    <span className="mb-2 inline-block rounded-full bg-[#eef0f4] px-2.5 py-0.5 text-[10px] font-extrabold text-[#6a7385]">
+      これは「先週の例」です
+    </span>
+  );
 }
 
 function GridRow({
