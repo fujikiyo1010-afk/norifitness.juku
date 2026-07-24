@@ -77,6 +77,7 @@ export type WeekCell =
   | { kind: "dist"; abbr: string; day: number; date: string | null; logId: string | null; example?: boolean }
   | { kind: "custom"; abbr: string | null; date: string | null; logId: string | null; example?: boolean }
   | { kind: "rest"; date: string | null; logId: string | null; example?: boolean }
+  | { kind: "personal"; date: string | null; logId: string | null; example?: boolean }
   | { kind: "empty" };
 
 export type WeeklyTraining = {
@@ -197,7 +198,6 @@ function labelFromLogs(cycles: WorkoutCycles, dayLogs: LogRow[]): string | null 
 function buildExampleLastRow(distMenus: DistMenu[]): WeekCell[] {
   const train = distMenus.filter((m) => m.kind === "train");
   if (train.length === 0) return emptyRow();
-  const restExists = distMenus.some((m) => m.kind === "rest");
   const t = (i: number) => train[i % train.length];
   const dc = (m: DistMenu): WeekCell => ({
     kind: "dist",
@@ -207,15 +207,14 @@ function buildExampleLastRow(distMenus: DistMenu[]): WeekCell[] {
     logId: null,
     example: true,
   });
-  const empty: WeekCell = { kind: "empty" };
   return [
     dc(t(0)), // 月: 配布どおり実施
-    train.length > 1 ? dc(t(1)) : empty, // 火: 別の配布
-    restExists ? { kind: "rest", date: null, logId: null, example: true } : empty, // 水: 休
+    train.length > 1 ? dc(t(1)) : dc(t(0)), // 火: 別の配布
+    { kind: "rest", date: null, logId: null, example: true }, // 水: 休
     { kind: "custom", abbr: "脚", date: null, logId: null, example: true }, // 木: じぶん★(所々違う)
-    empty, // 金: 休み
+    { kind: "personal", date: null, logId: null, example: true }, // 金: パーソナル
     train.length > 2 ? dc(t(2)) : dc(t(0)), // 土: もう1本
-    empty, // 日: 休み
+    { kind: "empty" }, // 日: 休み
   ];
 }
 
@@ -310,6 +309,7 @@ export async function getWeeklyTraining(): Promise<WeeklyTraining> {
     const m = distMenus[i];
     if (!m) return { kind: "empty" as const };
     if (m.kind === "rest") return { kind: "rest" as const, date: null, logId: null };
+    if (m.kind === "personal") return { kind: "personal" as const, date: null, logId: null };
     return { kind: "dist" as const, abbr: m.abbr, day: m.index, date: null, logId: null };
   });
 

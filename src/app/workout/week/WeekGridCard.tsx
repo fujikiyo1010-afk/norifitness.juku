@@ -14,6 +14,7 @@ type Tap =
   | { t: "dist"; day: number; example?: boolean }
   | { t: "log"; logId: string }
   | { t: "rest" }
+  | { t: "personal"; example?: boolean } // パーソナル指導(見本・操作なし)
   | { t: "exCustom" } // 先週の例: じぶんメニュー(見本)
   | { t: "exRest" } // 先週の例: 休養(見本・操作ボタンなし)
   | null;
@@ -39,19 +40,25 @@ export function WeekGridCard({
   const [dist, setDist] = useState<DistPreview | null>(null);
   const [log, setLog] = useState<LogDetail | null>(null);
   const [restModal, setRestModal] = useState(false);
+  const [personalModal, setPersonalModal] = useState(false);
   const [example, setExample] = useState(false); // 先週の例フラグ(モーダルに「先週の例」注記＋操作抑制)
   const [exCustom, setExCustom] = useState(false);
   const [lightbox, setLightbox] = useState<{ url: string; name: string } | null>(null);
 
   function tapOf(cell: WeekCell, row: "rec" | "this" | "last"): Tap {
     if (cell.kind === "empty") return null;
-    // 先週の例マス: 中身(配布は本物のメニュー内容/じぶん・休は見本)を見せる
+    // 先週の例マス: 中身(配布は本物のメニュー内容/じぶん・休・パーソナルは見本)を見せる
     if ("example" in cell && cell.example) {
       if (cell.kind === "dist") return { t: "dist", day: cell.day, example: true };
       if (cell.kind === "custom") return { t: "exCustom" };
+      if (cell.kind === "personal") return { t: "personal", example: true };
       return { t: "exRest" };
     }
-    if (row === "rec") return cell.kind === "rest" ? { t: "rest" } : cell.kind === "dist" ? { t: "dist", day: cell.day } : null;
+    if (row === "rec") {
+      if (cell.kind === "rest") return { t: "rest" };
+      if (cell.kind === "personal") return { t: "personal" };
+      return cell.kind === "dist" ? { t: "dist", day: cell.day } : null;
+    }
     // this/last: 記録マス
     if ("logId" in cell && cell.logId) return { t: "log", logId: cell.logId };
     return null;
@@ -62,12 +69,18 @@ export function WeekGridCard({
     setDist(null);
     setLog(null);
     setRestModal(false);
+    setPersonalModal(false);
     setExCustom(false);
     setExample(false);
     setOpen(true);
     if (tap.t === "rest" || tap.t === "exRest") {
       setRestModal(true);
       if (tap.t === "exRest") setExample(true);
+      return;
+    }
+    if (tap.t === "personal") {
+      setPersonalModal(true);
+      if (tap.example) setExample(true);
       return;
     }
     if (tap.t === "exCustom") {
@@ -141,6 +154,20 @@ export function WeekGridCard({
                     今日は休養日にする
                   </button>
                 )}
+              </div>
+            )}
+
+            {!loading && personalModal && (
+              <div>
+                {example && <ExampleTag />}
+                <div className="text-[10px] font-extrabold text-[#3a6ea5]">{example ? "先週やった パーソナル" : "パーソナル指導"}</div>
+                <h2 className="mb-2 mt-1 text-[16px] font-bold text-[#2b2620]">パーソナル指導の日</h2>
+                <p className="mb-1 text-[11.5px] leading-relaxed text-[#5b6472]">
+                  外部のパーソナル指導を受ける日です。こちらのメニューはありません。
+                </p>
+                <p className="text-[10.5px] leading-relaxed text-[#a59b8c]">
+                  指導で行った内容は、じぶんメニューとして記録することもできます。
+                </p>
               </div>
             )}
 
@@ -323,6 +350,7 @@ function cellClass(c: WeekCell, row: "rec" | "this" | "last"): string {
   }
   if (row === "rec") {
     if (c.kind === "rest") return "bg-white text-[#a8955a]";
+    if (c.kind === "personal") return "bg-white text-[#3a6ea5]";
     if (c.kind === "dist") return "bg-white text-[#2b2620]";
     return "bg-white text-transparent";
   }
@@ -330,11 +358,13 @@ function cellClass(c: WeekCell, row: "rec" | "this" | "last"): string {
   if (c.kind === "dist") return "bg-[#e7efe6] text-[#34603f]";
   if (c.kind === "custom") return "bg-white text-[#6d5a8e]";
   if (c.kind === "rest") return "bg-white text-[#a8955a]";
+  if (c.kind === "personal") return "bg-white text-[#3a6ea5]";
   return "bg-white text-transparent";
 }
 function cellText(c: WeekCell): string {
   if (c.kind === "dist") return c.abbr;
   if (c.kind === "custom") return "★";
   if (c.kind === "rest") return "休";
+  if (c.kind === "personal") return "パ";
   return "";
 }
