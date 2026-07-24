@@ -27,6 +27,7 @@ import {
 } from "@/components/icons";
 import type { ReactNode } from "react";
 import { PhotoLightbox } from "@/components/PhotoLightbox";
+import { WorkoutDoneList } from "@/app/admin/_components/WorkoutDoneList";
 
 /**
  * デイリー添削 パネル（P2a v1）。モックM2準拠。
@@ -466,25 +467,12 @@ function TodayTab({ detail }: { detail: DailyDetail }) {
                 本人が休養日に設定（のり予定の休養日ではありません）
               </div>
             )}
-            {detail.workout.doneNames.length > 0 && (
-              <div>
-                <span className="text-[10px] font-bold text-[#34603f]">やった：</span>
-                <span className="text-zinc-700">{detail.workout.doneNames.join("、")}</span>
-              </div>
-            )}
-            {detail.workout.notDoneNames.length > 0 && (
-              <div>
-                <span className="text-[10px] font-bold text-[#b0640f]">やらなかった：</span>
-                <span className="text-zinc-400 line-through">
-                  {detail.workout.notDoneNames.join("、")}
-                </span>
-              </div>
-            )}
-            {detail.workout.addedNames.length > 0 && (
-              <div>
-                <span className="text-[10px] font-bold text-[#4a875b]">＋追加：</span>
-                <span className="text-zinc-700">{detail.workout.addedNames.join("、")}</span>
-              </div>
+            {(detail.workout.doneExercises.length > 0 || detail.workout.notDoneNames.length > 0) && (
+              <WorkoutDoneList
+                exercises={detail.workout.doneExercises}
+                totalVolume={detail.workout.totalVolume}
+                notDoneNames={detail.workout.notDoneNames}
+              />
             )}
             {detail.workout.memo && (
               <div className="rounded bg-[#faf7f0] px-2 py-1 text-[11px] italic text-zinc-500">
