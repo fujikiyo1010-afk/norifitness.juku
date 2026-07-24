@@ -37,8 +37,6 @@ export function SetTableClient({
   const [memo, setMemo] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [lightbox, setLightbox] = useState<{ url: string; name: string } | null>(null);
-  const [confirmLeave, setConfirmLeave] = useState(false);
-  const [dirty, setDirty] = useState(false); // ユーザーが実際に編集したか(§3・破棄確認の起点)
 
   // 「← 修正する」で戻ってきた時(resume)は端末ローカルのドラフトを復元(rAF後=同期setState回避)
   useEffect(() => {
@@ -54,27 +52,22 @@ export function SetTableClient({
   }, [resume, todayKey]);
 
   function patchSet(ei: number, si: number, p: Partial<DraftSet>) {
-    setDirty(true);
     setExercises((prev) =>
       prev.map((ex, i) => (i === ei ? { ...ex, sets: ex.sets.map((s, j) => (j === si ? { ...s, ...p } : s)) } : ex))
     );
   }
   function addSet(ei: number) {
-    setDirty(true);
     setExercises((prev) => prev.map((ex, i) => (i === ei ? { ...ex, sets: [...ex.sets, { kg: null, reps: null }] } : ex)));
   }
   function removeSet(ei: number) {
-    setDirty(true);
     setExercises((prev) =>
       prev.map((ex, i) => (i === ei && ex.sets.length > 1 ? { ...ex, sets: ex.sets.slice(0, -1) } : ex))
     );
   }
   function removeExercise(ei: number) {
-    setDirty(true);
     setExercises((prev) => prev.filter((_, i) => i !== ei));
   }
   function onAdd(picked: PickedExercise[]) {
-    setDirty(true);
     setExercises((prev) => [
       ...prev,
       ...picked
@@ -201,8 +194,7 @@ export function SetTableClient({
           <textarea
             value={memo}
             onChange={(e) => {
-              setDirty(true);
-              setMemo(e.target.value);
+                        setMemo(e.target.value);
             }}
             rows={2}
             placeholder="今日の調子など"
@@ -250,52 +242,8 @@ export function SetTableClient({
         </div>
       )}
 
-      {/* 変更ありで戻る時の破棄確認(§3・ヘッダ「＜」からも使えるようフラグ公開はせず内部完結) */}
-      {confirmLeave && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/30 p-5" onClick={() => setConfirmLeave(false)}>
-          <div className="w-full max-w-[340px] rounded-2xl border border-[#e7dcc9] bg-[#fffdf8] p-4" onClick={(e) => e.stopPropagation()}>
-            <b className="text-[13px]">編集内容は破棄されます。よろしいですか？</b>
-            <div className="mt-3 flex gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setConfirmLeave(false);
-                  // 番人を張り直す(戻る操作を再び受け止める)
-                  window.history.pushState(null, "", window.location.href);
-                }}
-                className="flex-1 rounded-lg border border-[#e7dcc9] bg-white py-2.5 text-[12px] font-bold text-[#6a6256]"
-              >
-                やめる
-              </button>
-              <button type="button" onClick={() => router.back()} className="flex-1 rounded-lg bg-[#c2693f] py-2.5 text-[12px] font-bold text-white">
-                破棄して戻る
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 変更ありでブラウザバック/ヘッダ戻る時、破棄確認を挟む(§3)。変更なしは素通り。 */}
-      <BackGuard changed={dirty} onGuard={() => setConfirmLeave(true)} />
     </main>
   );
-}
-
-/** ヘッダの「＜」/ブラウザバックの前に、変更ありなら破棄確認を挟む(§3)。 */
-function BackGuard({ changed, onGuard }: { changed: boolean; onGuard: () => void }) {
-  useEffect(() => {
-    if (!changed) return;
-    const handler = (e: PopStateEvent) => {
-      // 変更ありで戻ろうとしたら確認(履歴を一度戻し戻す)
-      e.preventDefault?.();
-      window.history.pushState(null, "", window.location.href);
-      onGuard();
-    };
-    window.history.pushState(null, "", window.location.href);
-    window.addEventListener("popstate", handler);
-    return () => window.removeEventListener("popstate", handler);
-  }, [changed, onGuard]);
-  return null;
 }
 
 function SetInput({

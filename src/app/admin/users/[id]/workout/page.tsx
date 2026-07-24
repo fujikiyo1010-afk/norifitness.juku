@@ -1,4 +1,5 @@
 import { getWorkoutHistoryForUser } from "@/lib/admin/workout";
+import { WorkoutDoneList } from "@/app/admin/_components/WorkoutDoneList";
 
 export const dynamic = "force-dynamic";
 
@@ -77,26 +78,13 @@ export default async function UserWorkoutPage({
                     本人が休養日に設定
                   </div>
                 )}
-                <div className="mt-1.5 space-y-0.5 text-[11.5px]">
-                  {d.doneNames.length > 0 && (
-                    <div>
-                      <span className="font-bold text-[#34603f]">やった：</span>
-                      <span className="text-zinc-700">{d.doneNames.join("、")}</span>
-                    </div>
-                  )}
-                  {d.notDoneNames.length > 0 && (
-                    <div>
-                      <span className="font-bold text-[#b0640f]">やらなかった：</span>
-                      <span className="text-zinc-400 line-through">
-                        {d.notDoneNames.join("、")}
-                      </span>
-                    </div>
-                  )}
-                  {d.addedNames.length > 0 && (
-                    <div>
-                      <span className="font-bold text-[#4a875b]">＋追加：</span>
-                      <span className="text-zinc-700">{d.addedNames.join("、")}</span>
-                    </div>
+                <div className="mt-1.5 space-y-1 text-[11.5px]">
+                  {(d.doneExercises.length > 0 || d.notDoneNames.length > 0) && (
+                    <WorkoutDoneList
+                      exercises={d.doneExercises}
+                      totalVolume={d.totalVolume}
+                      notDoneNames={d.notDoneNames}
+                    />
                   )}
                   {d.memo && (
                     <div className="text-[11px] italic text-zinc-400">「{d.memo}」</div>

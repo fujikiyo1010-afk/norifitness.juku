@@ -5,6 +5,7 @@ import { getGoalSheetForUser } from "@/lib/goal-sheet/queries";
 import { getCurrentMenuForAdmin } from "@/lib/workout/queries";
 import { resolveDayMenu, INTENSITY_LABEL, type Intensity } from "@/lib/workout/logs-types";
 import { cleanExerciseName } from "@/lib/workout/menu-display";
+import { buildDoneExercises, type AdminDoneExercise, type PerSetRow } from "@/lib/admin/workout-sets";
 import { jstTodayStr } from "@/lib/date/jst";
 
 /**
@@ -173,9 +174,11 @@ export type DailyWorkoutForAdmin = {
   performedDayLabel: string | null; // 予定と違う日をやった時、実施した日のラベル(予定通りなら null)
   isSelfRest: boolean; // 本人が休養日に設定したか(のり予定の休養日=false)
   intensity: string; // 小/中/大
-  doneNames: string[]; // 原本どおりやった種目
+  doneNames: string[]; // 原本どおりやった種目(後方互換)
   notDoneNames: string[]; // 原本にあってやらなかった
-  addedNames: string[]; // 原本外の追加
+  addedNames: string[]; // 原本外の追加(後方互換)
+  doneExercises: AdminDoneExercise[]; // やった種目+セット別(重量×回数)
+  totalVolume: number; // 総ボリューム(kg)
   memo: string | null;
 };
 
@@ -309,7 +312,7 @@ export async function getDailyDetail(
     // S2-D: 親(user_workout_logs)→子(items)の2往復をネストselectで1往復に(service role)。
     const { data: logRow } = await admin
       .from("user_workout_logs")
-      .select("id, day_number, performed_day_number, is_self_rest, is_custom, primary_target, intensity, status, memo, user_workout_log_items(exercise_name, source)")
+      .select("id, day_number, performed_day_number, is_self_rest, is_custom, primary_target, intensity, status, memo, user_workout_log_items(exercise_name, source, weight_kg, reps, sets, sort_order)")
       .eq("user_id", userId)
       .eq("date", dateStr)
       .maybeSingle();
@@ -317,13 +320,26 @@ export async function getDailyDetail(
       const items = ((logRow.user_workout_log_items ?? []) as {
         exercise_name: string;
         source: string;
-      }[]);
+        weight_kg: number | null;
+        reps: number | null;
+        sets: number | null;
+        sort_order: number | null;
+      }[]).slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
       const doneOriginal = items
         .filter((i) => i.source === "original")
         .map((i) => cleanExerciseName(i.exercise_name));
       const addedNames = items
         .filter((i) => i.source === "added")
         .map((i) => cleanExerciseName(i.exercise_name));
+      // セット別実績(custom_menu_sets)→ やった種目の重量×回数を組み立て
+      const { data: setRows } = await admin
+        .from("user_custom_menu_sets")
+        .select("exercise_name, exercise_order, set_number, weight_kg, reps")
+        .eq("log_id", logRow.id as string);
+      const { exercises: doneExercises, totalVolume } = buildDoneExercises(
+        items,
+        (setRows ?? []) as PerSetRow[]
+      );
       // 区別記録: 予定=day_number、実施=performed_day_number(あれば)。
       // 差分(やらなかった種目)は「実際にやった日のメニュー」で比較する(予定と違う日をやった時に脚メニューと胸実績を突合しない)。
       const scheduledDay = (logRow.day_number as number | null) ?? null;
@@ -352,6 +368,8 @@ export async function getDailyDetail(
         doneNames: doneOriginal,
         notDoneNames,
         addedNames,
+        doneExercises,
+        totalVolume,
         memo: (logRow.memo as string | null) ?? null,
       };
     }

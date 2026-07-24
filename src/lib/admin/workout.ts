@@ -2,6 +2,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentMenuForAdmin } from "@/lib/workout/queries";
 import { resolveDayMenu, INTENSITY_LABEL, type Intensity } from "@/lib/workout/logs-types";
 import { cleanExerciseName } from "@/lib/workout/menu-display";
+import { buildDoneExercises, type AdminDoneExercise, type LogItemRow, type PerSetRow } from "@/lib/admin/workout-sets";
 
 /**
  * 管理: ユーザーハブ「トレ記録」タブ(M3・P5)のデータ(service role)。
@@ -18,6 +19,8 @@ export type AdminWorkoutDay = {
   doneNames: string[];
   notDoneNames: string[];
   addedNames: string[];
+  doneExercises: AdminDoneExercise[]; // やった種目+セット別(重量×回数)
+  totalVolume: number;
   memo: string | null;
 };
 
@@ -70,19 +73,29 @@ export async function getWorkoutHistoryForUser(
   if (rows.length === 0)
     return { ...empty, cycleNumber: (prog?.cycle_number as number) ?? 1 };
 
-  const { data: itemRows } = await admin
-    .from("user_workout_log_items")
-    .select("log_id, exercise_name, source")
-    .in(
-      "log_id",
-      rows.map((r) => r.id)
-    );
+  const logIds = rows.map((r) => r.id);
+  const [{ data: itemRows }, { data: setRows }] = await Promise.all([
+    admin
+      .from("user_workout_log_items")
+      .select("log_id, exercise_name, source, weight_kg, reps, sets, sort_order")
+      .in("log_id", logIds),
+    admin
+      .from("user_custom_menu_sets")
+      .select("log_id, exercise_name, exercise_order, set_number, weight_kg, reps")
+      .in("log_id", logIds),
+  ]);
   const doneByLog = new Map<string, string[]>();
   const addedByLog = new Map<string, string[]>();
+  const itemsByLog = new Map<string, (LogItemRow & { sort_order: number | null })[]>();
+  const setsByLog = new Map<string, PerSetRow[]>();
   for (const it of (itemRows ?? []) as {
     log_id: string;
     exercise_name: string;
     source: string;
+    weight_kg: number | null;
+    reps: number | null;
+    sets: number | null;
+    sort_order: number | null;
   }[]) {
     const name = cleanExerciseName(it.exercise_name);
     if (it.source === "added") {
@@ -94,6 +107,14 @@ export async function getWorkoutHistoryForUser(
       d.push(name);
       doneByLog.set(it.log_id, d);
     }
+    const arr = itemsByLog.get(it.log_id) ?? [];
+    arr.push(it);
+    itemsByLog.set(it.log_id, arr);
+  }
+  for (const s of (setRows ?? []) as ({ log_id: string } & PerSetRow)[]) {
+    const arr = setsByLog.get(s.log_id) ?? [];
+    arr.push(s);
+    setsByLog.set(s.log_id, arr);
   }
 
   const days: AdminWorkoutDay[] = rows.map((r) => {
@@ -107,6 +128,13 @@ export async function getWorkoutHistoryForUser(
       .filter((e) => e.種目名)
       .map((e) => cleanExerciseName(e.種目名));
     const doneSet = new Set(doneNames);
+    const orderedItems = (itemsByLog.get(r.id) ?? [])
+      .slice()
+      .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+    const { exercises: doneExercises, totalVolume } = buildDoneExercises(
+      orderedItems,
+      setsByLog.get(r.id) ?? []
+    );
     return {
       date: r.date,
       dayLabel: r.is_custom
@@ -120,6 +148,8 @@ export async function getWorkoutHistoryForUser(
       doneNames,
       notDoneNames: originalNames.filter((n) => !doneSet.has(n)),
       addedNames: addedByLog.get(r.id) ?? [],
+      doneExercises,
+      totalVolume,
       memo: r.memo,
     };
   });
