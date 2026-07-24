@@ -75,6 +75,56 @@ export async function getMyUnreadCount(): Promise<number> {
   return count ?? 0;
 }
 
+/**
+ * 会話ごとの「未対応」状態を計算(ホーム警報 alerts.ts と同じ考え方＝統一)。
+ * 未対応 = 受講生の発言のうち、こちらの「最後の返信」と「完了(admin_chat_acks.acked_at)」の
+ * どちらよりも後に届いたものがある状態。開いただけでは変わらない(last_read_at_admin は使わない)。
+ * 返信する / 完了ボタンを押す のどちらかで解消し、受講生が新しく送ると再び未対応に戻る。
+ */
+type MsgMeta = { conversation_id: string; sender_kind: string; created_at: string };
+type ConvState = {
+  unhandled: boolean;
+  unread: number; // 未対応の受講生メッセージ数(=最後の対応より後の受講生発言)
+  lastSender: "user" | "admin" | null;
+};
+function computeConvStates(
+  msgs: MsgMeta[],
+  ackByUser: Map<string, string>,
+  userIdByConv: Map<string, string>
+): Map<string, ConvState> {
+  const byConv = new Map<string, MsgMeta[]>();
+  for (const m of msgs) {
+    const arr = byConv.get(m.conversation_id) ?? [];
+    arr.push(m);
+    byConv.set(m.conversation_id, arr);
+  }
+  const out = new Map<string, ConvState>();
+  for (const [cid, list] of byConv) {
+    let lastAdminMs = 0;
+    let last: MsgMeta | null = null;
+    for (const m of list) {
+      if (!last || m.created_at > last.created_at) last = m;
+      if (m.sender_kind === "admin") {
+        const t = Date.parse(m.created_at);
+        if (t > lastAdminMs) lastAdminMs = t;
+      }
+    }
+    const uid = userIdByConv.get(cid);
+    const ackedAt = uid ? ackByUser.get(uid) : undefined;
+    const handledMs = Math.max(lastAdminMs, ackedAt ? Date.parse(ackedAt) : 0);
+    let unread = 0;
+    for (const m of list) {
+      if (m.sender_kind === "user" && Date.parse(m.created_at) > handledMs) unread++;
+    }
+    out.set(cid, {
+      unhandled: unread > 0,
+      unread,
+      lastSender: (last?.sender_kind as "user" | "admin" | null) ?? null,
+    });
+  }
+  return out;
+}
+
 /** admin 視点 ・全 conversation 一覧 (= 受信箱) ・新着順 */
 export async function listConversationsForAdmin(): Promise<
   AdminConversationRow[]
@@ -87,53 +137,52 @@ export async function listConversationsForAdmin(): Promise<
   const conversations = (convs ?? []) as Conversation[];
   if (conversations.length === 0) return [];
 
-  // user_id → user_name + email
   const userIds = conversations.map((c) => c.user_id);
-  const { data: users } = await admin
-    .from("users")
-    .select("id, name, email")
-    .in("id", userIds);
+  const userIdByConv = new Map(conversations.map((c) => [c.id, c.user_id]));
+
+  // 氏名 / 完了(ack) / 全メッセージ を1波で取得(N+1回避・alerts.ts と同方式)。
+  const [{ data: users }, { data: acks }, { data: msgs }] = await Promise.all([
+    admin.from("users").select("id, name, email").in("id", userIds),
+    admin.from("admin_chat_acks").select("user_id, acked_at"),
+    admin
+      .from("messages")
+      .select("conversation_id, sender_kind, created_at, body")
+      .order("created_at", { ascending: true }),
+  ]);
+
   const userMap = new Map(
     ((users ?? []) as { id: string; name: string | null; email: string }[]).map(
       (u) => [u.id, { name: u.name ?? "(氏名未設定)", email: u.email }]
     )
   );
+  const ackByUser = new Map<string, string>();
+  for (const a of (acks ?? []) as { user_id: string; acked_at: string }[]) {
+    ackByUser.set(a.user_id, a.acked_at);
+  }
 
-  // 各 conv の最新メッセージ + 未読数。
-  // S2(N+1解消): 会話ごとに直列2クエリ×N本 → 会話間も会話内も並列化して1波に(順序・値は不変)。
-  const results: AdminConversationRow[] = await Promise.all(
-    conversations.map(async (conv) => {
-      const u = userMap.get(conv.user_id);
-      let unreadQ = admin
-        .from("messages")
-        .select("id", { count: "exact", head: true })
-        .eq("conversation_id", conv.id)
-        .eq("sender_kind", "user");
-      if (conv.last_read_at_admin) {
-        unreadQ = unreadQ.gt("created_at", conv.last_read_at_admin);
-      }
-      const [{ data: lastMsg }, { count: unread }] = await Promise.all([
-        admin
-          .from("messages")
-          .select("body, sender_kind")
-          .eq("conversation_id", conv.id)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .maybeSingle(),
-        unreadQ,
-      ]);
-      return {
-        conversation: conv,
-        user_name: u?.name ?? "(削除済受講生)",
-        user_email: u?.email ?? "",
-        last_message_body: (lastMsg?.body as string | null) ?? null,
-        last_message_sender:
-          (lastMsg?.sender_kind as "user" | "admin" | null) ?? null,
-        unread_count: unread ?? 0,
-      };
-    })
-  );
-  return results;
+  const allMsgs = (msgs ?? []) as (MsgMeta & { body: string | null })[];
+  const states = computeConvStates(allMsgs, ackByUser, userIdByConv);
+  // 昇順取得なので、会話ごとに最後に上書きされる本文 = 最新メッセージ本文。
+  const lastBodyByConv = new Map<string, string | null>();
+  for (const m of allMsgs) lastBodyByConv.set(m.conversation_id, m.body);
+
+  return conversations.map((conv) => {
+    const u = userMap.get(conv.user_id);
+    const st = states.get(conv.id) ?? {
+      unhandled: false,
+      unread: 0,
+      lastSender: null as "user" | "admin" | null,
+    };
+    return {
+      conversation: conv,
+      user_name: u?.name ?? "(削除済受講生)",
+      user_email: u?.email ?? "",
+      last_message_body: lastBodyByConv.get(conv.id) ?? null,
+      last_message_sender: st.lastSender,
+      unread_count: st.unread,
+      unhandled: st.unhandled,
+    };
+  });
 }
 
 /** admin 視点 ・特定 conversation の messages を取得 + 受講生情報 */
@@ -177,28 +226,55 @@ export async function getConversationForAdmin(
   };
 }
 
-/** admin 視点 ・全 conversation の合計未読数 (= ホーム KPI 用) */
-export async function getAdminTotalUnreadCount(): Promise<number> {
+/**
+ * admin 視点 ・「未対応」の会話 人数 (= サイドバー赤バッジ / ホーム連動)。
+ * 会話数(=人数)を返す。未読“メッセージ本数”ではなく、対応が要る受講生の人数。
+ */
+export async function getAdminUnhandledConvCount(): Promise<number> {
   const admin = createAdminClient();
   const { data: convs } = await admin
     .from("conversations")
-    .select("id, last_read_at_admin");
-  const conversations =
-    (convs ?? []) as { id: string; last_read_at_admin: string | null }[];
+    .select("id, user_id");
+  const conversations = (convs ?? []) as { id: string; user_id: string }[];
   if (conversations.length === 0) return 0;
+  const userIdByConv = new Map(conversations.map((c) => [c.id, c.user_id]));
 
-  let total = 0;
-  for (const c of conversations) {
-    let q = admin
-      .from("messages")
-      .select("id", { count: "exact", head: true })
-      .eq("conversation_id", c.id)
-      .eq("sender_kind", "user");
-    if (c.last_read_at_admin) {
-      q = q.gt("created_at", c.last_read_at_admin);
-    }
-    const { count } = await q;
-    total += count ?? 0;
+  const [{ data: acks }, { data: msgs }] = await Promise.all([
+    admin.from("admin_chat_acks").select("user_id, acked_at"),
+    admin.from("messages").select("conversation_id, sender_kind, created_at"),
+  ]);
+  const ackByUser = new Map<string, string>();
+  for (const a of (acks ?? []) as { user_id: string; acked_at: string }[]) {
+    ackByUser.set(a.user_id, a.acked_at);
   }
-  return total;
+  const states = computeConvStates(
+    (msgs ?? []) as MsgMeta[],
+    ackByUser,
+    userIdByConv
+  );
+  let n = 0;
+  for (const st of states.values()) if (st.unhandled) n++;
+  return n;
+}
+
+/**
+ * admin 視点 ・user_id からその受講生の会話を取得(なければ作成)。
+ * 個別ハブ / デイリー添削 → その人のチャットへ直接飛ぶための解決に使う。
+ */
+export async function getOrCreateConversationForUserAsAdmin(
+  userId: string
+): Promise<Conversation | null> {
+  const admin = createAdminClient();
+  const { data: existing } = await admin
+    .from("conversations")
+    .select("*")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (existing) return existing as Conversation;
+  const { data: created } = await admin
+    .from("conversations")
+    .insert({ user_id: userId })
+    .select("*")
+    .single();
+  return (created as Conversation | null) ?? null;
 }

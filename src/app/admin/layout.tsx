@@ -4,7 +4,7 @@ import { UploadIndicator } from "@/components/UploadIndicator";
 import { requireAdmin } from "@/lib/auth/admin";
 import { countAdminDashboardMetrics } from "@/lib/workout/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAdminTotalUnreadCount } from "@/lib/chat/queries";
+import { getAdminUnhandledConvCount } from "@/lib/chat/queries";
 import { AdminSideNav } from "./_components/AdminSideNav";
 
 /**
@@ -30,7 +30,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       .from("shipments")
       .select("id", { count: "exact", head: true })
       .eq("status", "pending"),
-    getAdminTotalUnreadCount(),
+    getAdminUnhandledConvCount(),
   ]);
 
   return (

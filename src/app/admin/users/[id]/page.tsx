@@ -285,6 +285,26 @@ export default async function AdminUserHubPage({
               </div>
             )}
           </div>
+          {/* 右上: この受講生のチャットを開く(なければ会話を作成して開く) */}
+          <Link
+            href={`/admin/messages?user=${userId}`}
+            className="inline-flex items-center gap-1.5 rounded-[4px] border border-[#cfe3df] bg-[#f0f7f5] px-3 py-1.5 text-xs font-bold text-[#00695c] hover:bg-[#e0efec]"
+            title="この受講生のチャットを開く"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z" />
+            </svg>
+            チャットを開く
+          </Link>
           {/* 右上: 管理者ホームへ直接戻る (左上 ← は親階層 = 受講生一覧) */}
           <Link
             href="/admin"

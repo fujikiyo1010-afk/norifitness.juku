@@ -23,5 +23,6 @@ export type AdminConversationRow = {
   user_email: string;
   last_message_body: string | null;
   last_message_sender: "user" | "admin" | null;
-  unread_count: number; // admin 視点 (= 受講生からの未読数)
+  unread_count: number; // 未対応の受講生メッセージ数(最後の対応より後)
+  unhandled: boolean; // 未対応(受講生の最終発言が返信/完了より後)= 一覧で強調・バッジ対象
 };

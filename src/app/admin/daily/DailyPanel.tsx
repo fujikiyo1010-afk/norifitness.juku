@@ -176,7 +176,7 @@ function PanelHead({ detail }: { detail: DailyDetail }) {
             受講生ハブ
           </Link>
           <Link
-            href={`/admin/messages`}
+            href={`/admin/messages?user=${detail.userId}`}
             className="text-[11px] font-semibold text-[#00695c] border border-[#e8ebe9] rounded-md px-2.5 py-1 bg-white hover:bg-zinc-50"
           >
             チャット
