@@ -66,6 +66,8 @@ export default async function WeekEditPage({
         todayKey={jstTodayStr()}
         initialExercises={exercises}
         initialFavorites={favorites}
+        initialIntensity={initial.intensity}
+        stageOptions={initial.stageOptions}
         resume={sp.resume === "1"}
       />
     </>

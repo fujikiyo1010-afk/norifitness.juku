@@ -55,6 +55,7 @@ export function ConfirmClient({
         : await completeWeeklyWorkout({
             kind: draft!.kind,
             dayNumber: draft!.dayNumber,
+            intensity: draft!.intensity,
             exercises: draft!.exercises.map((ex) => ({
               name: ex.name,
               source: ex.source,
