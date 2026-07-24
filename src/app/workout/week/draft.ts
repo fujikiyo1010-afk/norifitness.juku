@@ -20,6 +20,7 @@ export type WeeklyDraft = {
   exercises: DraftExercise[];
   memo: string;
   todayKey: string;
+  intensity: "small" | "medium" | "large"; // 記録する強度(小中大)。配布のみ切替、既定=中。
 };
 
 export function draftKey(todayKey: string): string {

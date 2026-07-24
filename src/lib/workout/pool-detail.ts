@@ -6,7 +6,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { jstTodayStr } from "@/lib/date/jst";
 import { getMyCurrentMenu } from "@/lib/workout/queries";
-import { resolveDayMenu, parseRepsSets, parseSetSpec } from "@/lib/workout/logs-types";
+import { resolveDayMenu, parseRepsSets, parseSetSpec, type Intensity } from "@/lib/workout/logs-types";
 import { distMenuInfo } from "@/lib/workout/weekly";
 import { cleanExerciseName } from "@/lib/workout/menu-display";
 import { resolveExerciseVideo, lookupVideoByName } from "@/lib/workout/video-master";
@@ -20,19 +20,42 @@ export type EditorExercise = {
   sets: EditorSet[];
   baseSets: EditorSet[] | null; // のり初期値(紫差分の基準)。通常色経路は null。
 };
+/** 小中大トグルの選択肢(のり配布メニューをそのままやる時だけ・§2026-07-24) */
+export type StageOption = { key: Intensity; label: string; exercises: EditorExercise[] };
 export type EditorInitial = {
   kind: "dist" | "custom";
   dayNumber: number | null;
   menuName: string;
   editLogId: string | null;
   exercises: EditorExercise[];
+  intensity: Intensity; // 記録する強度(小中大)。既定=中。
+  stageOptions: StageOption[]; // 小中大トグル(のり配布・そのまま始める時だけ・2つ以上ある時のみ)
 };
 
 type SupaClient = Awaited<ReturnType<typeof createClient>>;
 
+const STAGES: { key: Intensity; label: string; dankai: string }[] = [
+  { key: "small", label: "小", dankai: "小" },
+  { key: "medium", label: "中", dankai: "中" },
+  { key: "large", label: "大", dankai: "大" },
+];
+
+/** そのメニューに実在する段階(小中大)ぶんの選択肢を作る。1つしか無ければトグルは出さない側で判定。 */
+function buildStageOptions(cycles: WorkoutCycles, day: number): StageOption[] {
+  const opts: StageOption[] = [];
+  for (const st of STAGES) {
+    const has = Array.isArray(cycles) && cycles.some((c) => c.段階 === st.dankai);
+    if (!has) continue;
+    const ex = distInitialExercises(cycles, day, st.key);
+    if (ex.length === 0) continue;
+    opts.push({ key: st.key, label: st.label, exercises: ex });
+  }
+  return opts;
+}
+
 /** 配布メニュー1日 → のり初期値の EditorExercise[](source=original, baseSets=自分自身のコピー) */
-function distInitialExercises(cycles: WorkoutCycles, day: number): EditorExercise[] {
-  const dm = resolveDayMenu(cycles, "medium", day);
+function distInitialExercises(cycles: WorkoutCycles, day: number, intensity: Intensity = "medium"): EditorExercise[] {
+  const dm = resolveDayMenu(cycles, intensity, day);
   return (dm?.種目 ?? [])
     .filter((e) => e.種目名)
     .map((e) => {
@@ -55,12 +78,13 @@ async function loadLogExercises(
   supabase: SupaClient,
   logId: string,
   withBaseFromDistDay: number | null,
-  cycles: WorkoutCycles
+  cycles: WorkoutCycles,
+  baseIntensity: Intensity = "medium"
 ): Promise<EditorExercise[]> {
-  // のり基準(当日修正の配布など)。null なら通常色。
+  // のり基準(当日修正の配布など)。null なら通常色。記録時の強度で基準を引く。
   const baseByName = new Map<string, EditorSet[]>();
   if (withBaseFromDistDay != null) {
-    for (const e of distInitialExercises(cycles, withBaseFromDistDay)) {
+    for (const e of distInitialExercises(cycles, withBaseFromDistDay, baseIntensity)) {
       baseByName.set(e.name, e.sets.map((s) => ({ ...s })));
     }
   }
@@ -165,23 +189,25 @@ export async function getEditorInitial(params: {
   if (params.edit) {
     const { data: log } = await supabase
       .from("user_workout_logs")
-      .select("id, day_number, is_custom, primary_target")
+      .select("id, day_number, is_custom, primary_target, intensity")
       .eq("id", params.edit)
       .eq("user_id", user.id)
       .maybeSingle();
     if (!log) return null;
     const isCustom = !!log.is_custom;
     const dayNumber = (log.day_number as number | null) ?? null;
+    const intensity = ((log.intensity as Intensity | null) ?? "medium");
     const exercises = await loadLogExercises(
       supabase,
       params.edit,
       isCustom ? null : dayNumber,
-      cycles
+      cycles,
+      intensity
     );
     const menuName = isCustom
       ? "じぶんメニュー"
       : distMenuInfo(cycles, dayNumber ?? 0).name;
-    return { kind: isCustom ? "custom" : "dist", dayNumber, menuName, editLogId: params.edit, exercises };
+    return { kind: isCustom ? "custom" : "dist", dayNumber, menuName, editLogId: params.edit, exercises, intensity, stageOptions: [] };
   }
 
   // 先週再実施
@@ -199,7 +225,7 @@ export async function getEditorInitial(params: {
     const menuName = isCustom
       ? (log.primary_target ? `${log.primary_target}の日` : "じぶんメニュー")
       : distMenuInfo(cycles, dayNumber ?? 0).name;
-    return { kind: isCustom ? "custom" : "dist", dayNumber, menuName, editLogId: null, exercises };
+    return { kind: isCustom ? "custom" : "dist", dayNumber, menuName, editLogId: null, exercises, intensity: "medium", stageOptions: [] };
   }
 
   // 棚じぶん
@@ -244,6 +270,8 @@ export async function getEditorInitial(params: {
         sets: byEx.get(nm)!,
         baseSets: null,
       })),
+      intensity: "medium",
+      stageOptions: [],
     };
   }
 
@@ -261,25 +289,35 @@ export async function getEditorInitial(params: {
         source: "added" as const,
         baseSets: null, // 複製後はじぶん=通常色
       })),
+      intensity: "medium",
+      stageOptions: [],
     };
   }
 
-  // 配布そのまま(のり初期値・紫基準あり)
+  // 配布そのまま(のり初期値・紫基準あり・小中大トグル)
   if (params.day) {
     const day = Number(params.day);
     if (!Number.isFinite(day) || day < 1) return null;
     const info = distMenuInfo(cycles, day);
+    const stageOptions = buildStageOptions(cycles, day);
+    const defKey: Intensity =
+      stageOptions.find((o) => o.key === "medium")?.key ?? stageOptions[0]?.key ?? "medium";
+    const exercises =
+      stageOptions.find((o) => o.key === defKey)?.exercises ?? distInitialExercises(cycles, day, defKey);
     return {
       kind: "dist",
       dayNumber: day,
       menuName: info.name,
       editLogId: null,
-      exercises: distInitialExercises(cycles, day),
+      exercises,
+      intensity: defKey,
+      // トグルは段階が2つ以上ある時だけ
+      stageOptions: stageOptions.length > 1 ? stageOptions : [],
     };
   }
 
   // 1から(空・通常色)
-  return { kind: "custom", dayNumber: null, menuName: "じぶんメニュー", editLogId: null, exercises: [] };
+  return { kind: "custom", dayNumber: null, menuName: "じぶんメニュー", editLogId: null, exercises: [], intensity: "medium", stageOptions: [] };
 }
 
 // ---- グリッド下見モーダル(§2-2) ----

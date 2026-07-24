@@ -8,6 +8,9 @@ import { lookupVideoByName } from "@/lib/workout/video-master";
 import { ExercisePickerSheet, type PickedExercise } from "./ExercisePickerSheet";
 import { loadDraft, saveDraft, type DraftExercise, type DraftSet, type WeeklyDraft } from "../draft";
 
+type Intensity = "small" | "medium" | "large";
+type StageOption = { key: Intensity; label: string; exercises: DraftExercise[] };
+
 /**
  * セット表(§2-4・全経路の着地点)。のり初期値入りで開き最初から編集できる。
  * 触った所だけ紫(baseSets 基準)。追加種目はカード紫＋「追加」タグ。
@@ -21,6 +24,8 @@ export function SetTableClient({
   todayKey,
   initialExercises,
   initialFavorites,
+  initialIntensity,
+  stageOptions,
   resume,
 }: {
   kind: "dist" | "custom";
@@ -30,13 +35,25 @@ export function SetTableClient({
   todayKey: string;
   initialExercises: DraftExercise[];
   initialFavorites: string[];
+  initialIntensity: Intensity;
+  stageOptions: StageOption[];
   resume: boolean;
 }) {
   const router = useRouter();
   const [exercises, setExercises] = useState<DraftExercise[]>(initialExercises);
+  const [intensity, setIntensity] = useState<Intensity>(initialIntensity);
   const [memo, setMemo] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [lightbox, setLightbox] = useState<{ url: string; name: string } | null>(null);
+
+  // 小中大トグル(のり配布・そのまま始める時だけ・2段階以上)。切替でその段階の種目・回数(+kg)を読み直す。
+  const showStages = stageOptions.length > 1;
+  function switchStage(key: Intensity) {
+    const opt = stageOptions.find((o) => o.key === key);
+    if (!opt) return;
+    setIntensity(key);
+    setExercises(opt.exercises.map((ex) => ({ ...ex, sets: ex.sets.map((s) => ({ ...s })) })));
+  }
 
   // 「← 修正する」で戻ってきた時(resume)は端末ローカルのドラフトを復元(rAF後=同期setState回避)
   useEffect(() => {
@@ -46,6 +63,7 @@ export function SetTableClient({
       if (d) {
         setExercises(d.exercises);
         setMemo(d.memo ?? "");
+        if (d.intensity) setIntensity(d.intensity);
       }
     });
     return () => cancelAnimationFrame(id);
@@ -84,7 +102,7 @@ export function SetTableClient({
 
   function decide() {
     if (exercises.length === 0) return;
-    const draft: WeeklyDraft = { kind, dayNumber, menuName, editLogId, exercises, memo, todayKey };
+    const draft: WeeklyDraft = { kind, dayNumber, menuName, editLogId, exercises, memo, todayKey, intensity };
     saveDraft(draft);
     router.push("/workout/week/confirm");
   }
@@ -115,6 +133,26 @@ export function SetTableClient({
           <b className="text-[12.5px] font-extrabold text-[#34603f]">{menuName}</b>
           <span className="text-[10px] font-bold text-[#6a6256]">編集できます</span>
         </div>
+
+        {showStages && (
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold text-[#6a6256]">強度</span>
+            <div className="flex flex-1 overflow-hidden rounded-lg border border-[#d8cdba]">
+              {stageOptions.map((o) => (
+                <button
+                  key={o.key}
+                  type="button"
+                  onClick={() => switchStage(o.key)}
+                  className={`flex-1 py-1.5 text-[12px] font-extrabold ${
+                    intensity === o.key ? "bg-[#4a875b] text-white" : "bg-white text-[#6a6256]"
+                  }`}
+                >
+                  {o.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {exercises.map((ex, ei) => {
           const added = ex.source === "added";

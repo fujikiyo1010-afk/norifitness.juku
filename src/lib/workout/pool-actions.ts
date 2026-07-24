@@ -51,6 +51,7 @@ export type DraftExercise = { name: string; source: "original" | "added"; sets: 
 export type WeeklyDraft = {
   kind: "dist" | "custom" | "rest";
   dayNumber?: number | null; // dist のみ(グリッド letter/略称・primary_target 決定)
+  intensity?: Intensity; // dist の記録強度(小中大)。既定=中。
   exercises?: DraftExercise[]; // rest では不要
   memo?: string | null;
   saveAsName?: string | null; // じぶんメニューとして棚に新規保存(全経路可・実施ログの種別は変えない)
@@ -181,7 +182,8 @@ export async function completeWeeklyWorkout(
     date: jstTodayStr(),
     day_number: isCustom ? null : (input.dayNumber ?? null),
     cycle_number: null as number | null, // 条件1: プール行は NULL
-    intensity: "medium" as Intensity,
+    // 配布は選んだ強度(小中大)を保存。じぶんは 小中大 の概念なし=中。
+    intensity: (isCustom ? "medium" : (input.intensity ?? "medium")) as Intensity,
     status: "done" as const,
     memo: input.memo?.trim() || null,
     is_custom: isCustom,
