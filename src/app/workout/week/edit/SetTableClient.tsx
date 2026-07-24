@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { VimeoEmbed } from "@/components/VimeoEmbed";
 import { cleanExerciseName } from "@/lib/workout/menu-display";
 import { lookupVideoByName } from "@/lib/workout/video-master";
+import { isBodyweight } from "@/lib/workout/bodyweight";
 import { ExercisePickerSheet, type PickedExercise } from "./ExercisePickerSheet";
 import { loadDraft, saveDraft, type DraftExercise, type DraftSet, type WeeklyDraft } from "../draft";
 
@@ -102,7 +103,11 @@ export function SetTableClient({
 
   function decide() {
     if (exercises.length === 0) return;
-    const draft: WeeklyDraft = { kind, dayNumber, menuName, editLogId, exercises, memo, todayKey, intensity };
+    // 自重種目は kg を保存しない(入力欄はロックしているが念のため)
+    const cleaned = exercises.map((ex) =>
+      isBodyweight(ex.name) ? { ...ex, sets: ex.sets.map((s) => ({ ...s, kg: null })) } : ex
+    );
+    const draft: WeeklyDraft = { kind, dayNumber, menuName, editLogId, exercises: cleaned, memo, todayKey, intensity };
     saveDraft(draft);
     router.push("/workout/week/confirm");
   }
@@ -156,6 +161,7 @@ export function SetTableClient({
 
         {exercises.map((ex, ei) => {
           const added = ex.source === "added";
+          const bw = isBodyweight(ex.name); // 自重=kg欄ロック
           return (
             <div
               key={`${ex.name}-${ei}`}
@@ -193,7 +199,15 @@ export function SetTableClient({
                 {ex.sets.map((s, si) => (
                   <div key={si} className="flex items-center gap-2">
                     <span className="w-5 text-center text-[10px] font-extrabold text-[#a59b8c]">{si + 1}</span>
-                    <SetInput value={s.kg} onChange={(v) => patchSet(ei, si, { kg: v })} unit="kg" purple={kgChanged(ex, si)} />
+                    {bw ? (
+                      <div className="flex flex-1 items-center gap-1">
+                        <div className="flex h-10 w-full items-center justify-center rounded-[9px] border border-[#e7dcc9] bg-[#f5f1e8] text-[13px] font-extrabold text-[#a59b8c]">
+                          自重
+                        </div>
+                      </div>
+                    ) : (
+                      <SetInput value={s.kg} onChange={(v) => patchSet(ei, si, { kg: v })} unit="kg" purple={kgChanged(ex, si)} />
+                    )}
                     <span className="text-[11px] text-[#a59b8c]">×</span>
                     <SetInput value={s.reps} onChange={(v) => patchSet(ei, si, { reps: v })} unit="回" purple={repsChanged(ex, si)} />
                   </div>

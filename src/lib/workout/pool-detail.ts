@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { jstTodayStr } from "@/lib/date/jst";
 import { getMyCurrentMenu } from "@/lib/workout/queries";
 import { resolveDayMenu, parseRepsSets, parseSetSpec, type Intensity } from "@/lib/workout/logs-types";
+import { isBodyweight } from "@/lib/workout/bodyweight";
 import { distMenuInfo } from "@/lib/workout/weekly";
 import { cleanExerciseName } from "@/lib/workout/menu-display";
 import { resolveExerciseVideo, lookupVideoByName } from "@/lib/workout/video-master";
@@ -60,9 +61,11 @@ function distInitialExercises(cycles: WorkoutCycles, day: number, intensity: Int
     .filter((e) => e.種目名)
     .map((e) => {
       // のりが回数欄に重量を書いていれば(例「21kgx10x3」)それも初期値に反映。無ければ kg=null。
+      // 自重種目は kg を持たない(のりkgがあっても捨てる)。
       const rs = parseSetSpec(e.回数);
+      const bw = isBodyweight(e.種目名);
       const n = rs.sets && rs.sets > 0 ? rs.sets : 1;
-      const sets: EditorSet[] = Array.from({ length: n }, () => ({ kg: rs.kg, reps: rs.reps }));
+      const sets: EditorSet[] = Array.from({ length: n }, () => ({ kg: bw ? null : rs.kg, reps: rs.reps }));
       return {
         name: cleanExerciseName(e.種目名),
         videoUrl: resolveExerciseVideo(e) ?? lookupVideoByName(e.種目名),

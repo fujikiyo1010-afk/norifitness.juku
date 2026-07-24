@@ -18,6 +18,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getMyCurrentMenu } from "@/lib/workout/queries";
 import { partByExerciseName } from "@/lib/workout/video-master";
+import { isBodyweight } from "@/lib/workout/bodyweight";
 import { jstTodayStr } from "@/lib/date/jst";
 import { distMenuInfo } from "@/lib/workout/weekly";
 import {
@@ -145,11 +146,16 @@ export async function completeWeeklyWorkout(
   const isCustom = input.kind === "custom";
   // 実績セット(kg か 回 が入っている)のみ残す。空行は保存しない(§6・表紙で警告済み)。
   const exercises = (input.exercises ?? [])
-    .map((ex) => ({
-      name: ex.name.trim(),
-      source: ex.source,
-      sets: ex.sets.filter((s) => s.kg != null || s.reps != null),
-    }))
+    .map((ex) => {
+      const bw = isBodyweight(ex.name); // 自重は kg を持たせない
+      return {
+        name: ex.name.trim(),
+        source: ex.source,
+        sets: ex.sets
+          .map((s) => ({ kg: bw ? null : s.kg, reps: s.reps }))
+          .filter((s) => s.kg != null || s.reps != null),
+      };
+    })
     .filter((ex) => ex.name.length > 0);
   if (exercises.length === 0) return { ok: false, message: "記録する種目がありません" };
 
