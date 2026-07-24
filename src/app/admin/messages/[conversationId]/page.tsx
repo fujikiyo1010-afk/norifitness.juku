@@ -24,12 +24,8 @@ export default async function AdminChatPage({
   const data = await getConversationForAdmin(conversationId);
   if (!data) notFound();
 
-  // 既読セット (直接 update ・revalidate なし)
+  // 開いても既読にしない(2026-07-24 新モデル): 未対応は「返信」か一覧の「完了」でのみ解消する。
   const admin = createAdminClient();
-  await admin
-    .from("conversations")
-    .update({ last_read_at_admin: new Date().toISOString() })
-    .eq("id", conversationId);
 
   // サイドパネル用 ・受講生プロフィール詳細
   const { data: profile } = await admin
