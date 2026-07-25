@@ -25,12 +25,17 @@ import { usePathname } from "next/navigation";
 const TAB_RECORD = { label: "記録", href: "/record", mask: "record", exact: false };
 const TAB_CHAT = { label: "チャット", href: "/messages", chat: true, exact: false };
 
-function tabsFor(isBeta: boolean) {
+function tabsFor(isBeta: boolean, isCalendar: boolean) {
+  // 藤田さん先行(calendar-gate): 4番目「筋トレ」をカレンダーに置換。
+  // /workout(原本メニュー閲覧)はカレンダー内「配布メニューを見る」から到達(連携メモ §0a ガード①)。
+  const fourth = isCalendar
+    ? { label: "カレンダー", href: "/calendar", cal: true, exact: false }
+    : { label: "筋トレ", href: "/workout", mask: "workout", exact: false };
   return [
     { label: "ホーム", href: "/", mask: "home", exact: true },
     { label: "コース", href: "/courses", mask: "course", exact: false },
     isBeta ? TAB_CHAT : TAB_RECORD,
-    { label: "筋トレ", href: "/workout", mask: "workout", exact: false },
+    fourth,
     { label: "プロフィール", href: "/profile", mask: "profile", exact: false },
   ];
 }
@@ -51,10 +56,16 @@ const HIDDEN_PREFIXES = [
   // 完了直後の祝福画面(?done=1)だけは、その画面自身が :root[data-hide-membernav] を立てて隠す。
 ];
 
-export function MemberBottomNav({ isBeta = false }: { isBeta?: boolean }) {
+export function MemberBottomNav({
+  isBeta = false,
+  isCalendar = false,
+}: {
+  isBeta?: boolean;
+  isCalendar?: boolean;
+}) {
   const pathname = usePathname() ?? "/";
   if (HIDDEN_PREFIXES.some((p) => pathname.startsWith(p))) return null;
-  const TABS = tabsFor(isBeta);
+  const TABS = tabsFor(isBeta, isCalendar);
 
   return (
     <>
@@ -97,7 +108,9 @@ export function MemberBottomNav({ isBeta = false }: { isBeta?: boolean }) {
                     isActive ? "bg-[#eaf3ec]" : ""
                   }`}
                 >
-                  {"chat" in tab && tab.chat ? (
+                  {"cal" in tab && tab.cal ? (
+                    <CalendarIcon />
+                  ) : "chat" in tab && tab.chat ? (
                     <ChatIcon />
                   ) : (
                     <MaskIcon name={(tab as { mask: string }).mask} />
@@ -159,6 +172,27 @@ function ChatIcon() {
         strokeLinejoin="round"
       >
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      </svg>
+    </span>
+  );
+}
+
+// カレンダー(藤田先行・筋トレタブ置換)。他アイコンと同じ26px枠・細線でトーンを揃える。
+function CalendarIcon() {
+  return (
+    <span className="flex items-center justify-center" style={{ width: 26, height: 26 }}>
+      <svg
+        width="23"
+        height="23"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.7}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="3" y="4.5" width="18" height="16.5" rx="2.5" />
+        <path d="M3 9.5h18M8 2.5v4M16 2.5v4" />
       </svg>
     </span>
   );
