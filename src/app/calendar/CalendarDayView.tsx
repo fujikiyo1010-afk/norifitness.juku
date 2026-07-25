@@ -29,6 +29,8 @@ const PART_CLASS: Record<string, string> = {
   肩: "pc-shoulder",
   腕: "pc-arm",
   腹筋: "pc-abs",
+  お尻: "pc-hip",
+  全身: "pc-full",
 };
 
 export type CalendarViewProps = {
@@ -181,7 +183,7 @@ export function CalendarDayView({
           {meal.has ? (
             <>
               <div className="kcal-row">
-                <div className="ring">
+                <div className="kcal-ring">
                   <svg width="78" height="78" viewBox="0 0 78 78">
                     <circle cx="39" cy="39" r="33" fill="none" stroke="#f0e9db" strokeWidth="9" />
                     <circle cx="39" cy="39" r="33" fill="none" stroke="#4a875b" strokeWidth="9" strokeLinecap="round" strokeDasharray="207.3" strokeDashoffset={kcalOffset} transform="rotate(-90 39 39)" />
@@ -203,7 +205,7 @@ export function CalendarDayView({
               )}
               <div className="mlist">
                 {meal.rows.map((r, i) => (
-                  <div className="mrow" key={i}><span className="ml">{r.type}</span><span className="nm">{r.names}</span><span className="kc">{r.kcal || ""}</span></div>
+                  <div className="mrow" key={i}><span className="ml">{r.type}</span><span className="nm">{r.names}</span><span className="kc">{r.kcal ? `${r.kcal}kcal` : ""}</span></div>
                 ))}
               </div>
             </>
@@ -244,7 +246,7 @@ export function CalendarDayView({
                 <div className="t"><div className="k">実施部位</div><div className="chips">{workout.parts.length > 0 ? workout.parts.map((p, i) => (<span key={i} className={`pchip ${PART_CLASS[p] ?? ""}`}>{p}</span>)) : <span className="pchip">—</span>}</div></div>
               </div>
               {workout.exercises.map((e, i) => (
-                <div className="exrow" key={i}><span className="nm">{e.name}</span><span className="set">{setLabel(e.sets)}</span></div>
+                <div className="exrow" key={i}>{e.part && <span className={`epart ${PART_CLASS[e.part] ?? ""}`}>{e.part}</span>}<span className="nm">{e.name}</span><span className="set">{setLabel(e.sets)}</span></div>
               ))}
               <Link className="menu-link" href="/workout">配布メニューを見る</Link>
             </>
@@ -393,10 +395,10 @@ const CSS = `
 .bm3 .v small{font-size:10px;color:var(--ink3);font-weight:700;}
 .bm3 .df{font-size:9.5px;font-weight:700;margin-top:1px;color:var(--grn);min-height:12px;}
 .kcal-row{display:flex;align-items:center;gap:14px;}
-.ring{width:78px;height:78px;flex-shrink:0;position:relative;}
-.ring .ct{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.ring .ct b{font-size:18px;font-weight:800;line-height:1;}
-.ring .ct span{font-size:8.5px;color:var(--ink3);font-weight:700;margin-top:2px;}
+.kcal-ring{width:78px;height:78px;flex-shrink:0;position:relative;}
+.kcal-ring .ct{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.kcal-ring .ct b{font-size:18px;font-weight:800;line-height:1;}
+.kcal-ring .ct span{font-size:8.5px;color:var(--ink3);font-weight:700;margin-top:2px;}
 .pfc{flex:1;display:flex;flex-direction:column;gap:9px;}
 .pfc .p{display:flex;align-items:center;gap:8px;font-size:11.5px;}
 .pfc .p .tag{width:15px;font-weight:800;}
@@ -450,8 +452,9 @@ const CSS = `
 .tiles .t .v small{font-size:9px;color:var(--ink3);}
 .tiles .t .chips{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:6px;}
 .pchip{font-size:11px;font-weight:800;border-radius:99px;padding:4px 11px;color:#fff;background:var(--ink3);}
-.pc-chest{background:#c88a4a;}.pc-leg{background:#5b7a9d;}.pc-back{background:#7a9d5b;}.pc-shoulder{background:#c86a6a;}.pc-arm{background:#8a6ac8;}.pc-abs{background:#4a9d9d;}
+.pc-chest{background:#c88a4a;}.pc-leg{background:#5b7a9d;}.pc-back{background:#7a9d5b;}.pc-shoulder{background:#c86a6a;}.pc-arm{background:#8a6ac8;}.pc-abs{background:#4a9d9d;}.pc-hip{background:#6a6256;}.pc-full{background:#6a8a9d;}
 .exrow{display:flex;align-items:center;gap:9px;padding:9px 0;border-top:1px solid #f0e9db;}
+.exrow .epart{font-size:9.5px;font-weight:800;border-radius:6px;padding:2px 7px;color:#fff;background:var(--ink3);flex-shrink:0;}
 .exrow .nm{flex:1;font-size:13px;font-weight:700;}
 .exrow .set{font-size:11px;font-weight:800;color:var(--ink2);}
 .menu-link{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:11px;padding:10px;background:#f4f9f5;border:1px solid #dbe8df;border-radius:11px;font-size:12px;font-weight:800;color:var(--grn-d);}

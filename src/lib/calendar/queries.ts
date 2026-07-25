@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getLogDetail } from "@/lib/workout/pool-detail";
 import { getMyCurrentMenu } from "@/lib/workout/queries";
 import { distMenuInfo } from "@/lib/workout/weekly"; // 読むだけ(呼び出しのみ・改変しない)
+import { partByExerciseName } from "@/lib/workout/video-master"; // 種目名→8カテ主部位
 import type { WorkoutCycles } from "@/lib/workout/types";
 
 // ============================================================
@@ -39,8 +40,8 @@ export async function getBodyForCalendar(date: string): Promise<CalendarBodyMetr
   // date より前の直近記録(rowsは新しい順なので最初に見つかる過去日が直近)
   const prev = rows.find((r) => r.recorded_at < date) ?? null;
 
+  // グラフは常に直近まで固定表示(選択日で範囲を縮めない)。選択日はチャート側で線上ハイライト。
   const series = rows
-    .filter((r) => r.recorded_at <= date)
     .slice(0, 30)
     .map((r) => ({
       date: r.recorded_at,
@@ -185,6 +186,7 @@ export async function getReviewsForCalendar(
 // ============================================================
 export type CalendarWorkoutExercise = {
   name: string;
+  part: string | null; // 種目の主部位(8カテ・partByExerciseName)。不明は null=タグ無し
   sets: { kg: number | null; reps: number | null }[];
 };
 export type CalendarWorkout =
@@ -248,6 +250,7 @@ export async function getWorkoutForCalendar(date: string): Promise<CalendarWorko
 
   const exercises: CalendarWorkoutExercise[] = (detail?.exercises ?? []).map((e) => ({
     name: e.name,
+    part: partByExerciseName(e.name),
     sets: e.sets.map((s) => ({ kg: s.kg, reps: s.reps })),
   }));
 
