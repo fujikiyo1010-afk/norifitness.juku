@@ -25,8 +25,8 @@ export type CalendarBodyMetric = {
   weightDelta: number | null;
   bodyFatDelta: number | null;
   waistDelta: number | null;
-  // グラフ用: date以前の体重系列(古→新・weightありのみ・最大30点)。末尾が選択日(記録あれば)。
-  series: { date: string; weight: number }[];
+  // グラフ用: date以前の系列(古→新・最大30点)。体重+ウエスト+体脂肪(各null可)。末尾が選択日(記録あれば)。
+  series: { date: string; weight: number | null; waist: number | null; fat: number | null }[];
 };
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
@@ -40,9 +40,14 @@ export async function getBodyForCalendar(date: string): Promise<CalendarBodyMetr
   const prev = rows.find((r) => r.recorded_at < date) ?? null;
 
   const series = rows
-    .filter((r) => r.weight_kg != null && r.recorded_at <= date)
+    .filter((r) => r.recorded_at <= date)
     .slice(0, 30)
-    .map((r) => ({ date: r.recorded_at, weight: r.weight_kg as number }))
+    .map((r) => ({
+      date: r.recorded_at,
+      weight: r.weight_kg,
+      waist: r.waist_cm,
+      fat: r.body_fat_percent,
+    }))
     .reverse();
 
   return {
