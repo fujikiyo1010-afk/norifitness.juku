@@ -55,9 +55,9 @@ export default async function WeekPoolPage() {
 
               <Link
                 href="/workout/week/select"
-                className="block rounded-xl border-2 border-[#4a875b] bg-[#fffdf8] py-3 text-center text-[13px] font-extrabold text-[#34603f] opacity-90"
+                className="block rounded-[10px] border-2 border-[#4a875b] bg-[#fffdf8] py-3 text-center text-[13px] font-extrabold text-[#34603f] opacity-90"
               >
-                別のメニューを選ぶ
+                別の配布メニューを選ぶ
               </Link>
               <p className="text-center text-[10px] text-[#a59b8c]">（もう1回やりたい日もここから）</p>
             </div>
@@ -66,7 +66,9 @@ export default async function WeekPoolPage() {
             <div className="flex flex-col gap-3">
               <DraftGate todayKey={todayKey} />
               <p className="rounded-xl border border-[#cfe3d6] bg-[#f0f7f2] px-3.5 py-2.5 text-[12px] font-bold leading-relaxed text-[#34603f]">
-                1週間で全部を1回ずつ、が目安です。順番も組み合わせも自由。迷ったら上から順でOK。
+                順番も組み合わせも自由。1週間で全部を1回ずつが目安です。
+                <br />
+                迷ったら、そのまま推奨を始めましょう。
               </p>
 
               <WeekGridCard recRow={wk.recRow} thisRow={wk.thisRow} lastRow={wk.lastRow} remaining={wk.remaining} />
@@ -91,7 +93,7 @@ export default async function WeekPoolPage() {
                   {wk.nextRecommended.kind === "rest" ? (
                     <Link
                       href={`/workout/week/confirm?rest=1&day=${wk.nextRecommended.index}`}
-                      className="block rounded-xl py-3 text-center text-[14px] font-bold text-white"
+                      className="block rounded-xl py-[15px] text-center text-[14px] font-extrabold text-white"
                       style={{ background: "#b6a35c", boxShadow: "0 4px 0 #96854a" }}
                     >
                       今日は休養日にする
@@ -99,9 +101,9 @@ export default async function WeekPoolPage() {
                   ) : (
                     <Link
                       href={`/workout/week/edit?day=${wk.nextRecommended.index}&from=main`}
-                      className="btn3d block rounded-xl py-3 text-center text-[14px] font-bold"
+                      className="btn3d block rounded-xl py-[15px] text-center text-[14px] font-extrabold"
                     >
-                      そのまま始める
+                      推奨の配布メニューを始める
                     </Link>
                   )}
                 </>
@@ -111,23 +113,33 @@ export default async function WeekPoolPage() {
                 </div>
               )}
 
+              {/* 配布系: 別の配布メニュー + その子リンク「先週から選ぶ」 */}
               <Link
                 href="/workout/week/select"
-                className="block rounded-xl border-2 border-[#4a875b] bg-[#fffdf8] py-3 text-center text-[13px] font-extrabold text-[#34603f]"
+                className="block rounded-[10px] border-2 border-[#4a875b] bg-white py-3 text-center text-[13px] font-extrabold text-[#34603f]"
               >
-                別のメニューを選ぶ
+                別の配布メニューを選ぶ
               </Link>
               <Link
-                href="/workout/week/edit?from=main"
-                className="block rounded-xl border-2 border-[#4a875b] bg-[#fffdf8] py-3 text-center text-[13px] font-extrabold text-[#34603f]"
+                href="/workout/week/last"
+                className="-mt-1 block text-center text-[11.5px] font-extrabold text-[#34603f]"
               >
-                自分のメニューを組む（1から）
+                先週から選ぶ →
               </Link>
 
-              <div className="flex justify-center gap-6 py-1 text-[11.5px] font-extrabold text-[#34603f]">
-                <Link href="/workout/week/menus">じぶんメニュー棚 →</Link>
-                <Link href="/workout/week/last">先週から選ぶ →</Link>
-              </div>
+              {/* じぶん系: メニューを作成する（紫枠） + その子リンク「保存したメニューから選ぶ」 */}
+              <Link
+                href="/workout/week/edit?from=main"
+                className="block rounded-[10px] border-2 border-[#6d5a8e] bg-white py-3 text-center text-[13px] font-extrabold text-[#6d5a8e]"
+              >
+                メニューを作成する
+              </Link>
+              <Link
+                href="/workout/week/menus"
+                className="-mt-1 block text-center text-[11.5px] font-extrabold text-[#6d5a8e]"
+              >
+                保存したメニューから選ぶ →
+              </Link>
             </div>
           )}
         </div>

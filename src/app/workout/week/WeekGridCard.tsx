@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { VimeoEmbed } from "@/components/VimeoEmbed";
 import { cleanExerciseName } from "@/lib/workout/menu-display";
@@ -101,25 +101,35 @@ export function WeekGridCard({
   }
 
   return (
-    <div className="rounded-2xl border border-[#e7dcc9] bg-[#fffdf8] px-3 py-3">
-      <table className="w-full border-collapse">
+    <div>
+      {/* 確定版: 外枠カードなし・直置き大型化・7列完全等幅(table-fixed)・罫線完全格子 */}
+      <table className="w-full border-collapse border border-[#d9d2bf]" style={{ tableLayout: "fixed" }}>
+        <colgroup>
+          <col style={{ width: 46 }} />
+        </colgroup>
         <tbody>
           <tr>
-            <th className="w-[46px] border border-[#e0d9c8] bg-[#f5f1e6] px-1 py-1.5 text-[9px] font-extrabold text-[#a59b8c]" />
+            <th className="border border-[#d9d2bf] bg-[#f3eee1] text-[10.5px] font-extrabold text-[#98917f]" style={{ height: 30 }} />
             {DOW.map((d) => (
-              <th key={d} className="border border-[#e0d9c8] bg-[#f5f1e6] px-1 py-1.5 text-[9.5px] font-extrabold text-[#a59b8c]">
+              <th key={d} className="border border-[#d9d2bf] bg-[#f3eee1] text-[10.5px] font-extrabold text-[#98917f]">
                 {d}
               </th>
             ))}
           </tr>
-          <GridRow label="のりのおすすめ順" cells={recRow} row="rec" onTap={onTap} tapOf={tapOf} />
-          <GridRow label="今週の実施" cells={thisRow} row="this" onTap={onTap} tapOf={tapOf} />
+          <GridRow label={<>配布<br />メニュー</>} cells={recRow} row="rec" onTap={onTap} tapOf={tapOf} />
+          <GridRow label={<>今週の<br />実施</>} cells={thisRow} row="this" onTap={onTap} tapOf={tapOf} />
           <GridRow label="先週" cells={lastRow} row="last" onTap={onTap} tapOf={tapOf} />
         </tbody>
       </table>
-      <div className="mt-1.5 flex items-center justify-between text-[9.5px] font-bold text-[#a59b8c]">
-        <span>マスを押すと中身が見られます</span>
-        <b className="text-[10.5px] text-[#34603f]">今週の残り {remaining} メニュー</b>
+      <div className="mt-1.5 flex items-center justify-between text-[10px] font-bold text-[#98917f]">
+        <span className="flex items-center gap-1">
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden>
+            <circle cx="7" cy="5.5" r="3.4" stroke="#b98a4d" strokeWidth="1.4" />
+            <path d="M5.6 9.2h2.8M6 11.2h2" stroke="#b98a4d" strokeWidth="1.4" strokeLinecap="round" />
+          </svg>
+          マスを押すと中身が見られます
+        </span>
+        <b className="text-[11px] text-[#3f5c49]">今週の残り {remaining} メニュー</b>
       </div>
 
       {open && (
@@ -310,7 +320,7 @@ function GridRow({
   onTap,
   tapOf,
 }: {
-  label: string;
+  label: ReactNode;
   cells: WeekCell[];
   row: "rec" | "this" | "last";
   onTap: (t: Tap) => void;
@@ -318,18 +328,18 @@ function GridRow({
 }) {
   return (
     <tr>
-      <td className="border border-[#e0d9c8] bg-[#f5f1e6] px-1 py-1 text-[9px] font-extrabold leading-tight text-[#a59b8c]">
+      <td className="border border-[#d9d2bf] bg-[#f3eee1] px-1 text-[9.5px] font-extrabold leading-[1.3] text-[#98917f]">
         {label}
       </td>
       {cells.map((c, i) => {
         const tap = tapOf(c, row);
         return (
-          <td key={i} className="border border-[#e0d9c8] p-0">
+          <td key={i} className="border border-[#d9d2bf] p-0">
             <button
               type="button"
               disabled={!tap}
               onClick={() => onTap(tap)}
-              className={`flex h-[26px] w-full items-center justify-center text-[10px] font-extrabold ${cellClass(c, row)} ${
+              className={`flex h-[34px] w-full items-center justify-center text-[12.5px] font-extrabold ${cellClass(c, row)} ${
                 tap ? "" : "cursor-default"
               }`}
             >
@@ -342,7 +352,7 @@ function GridRow({
   );
 }
 
-// 色は状態のみ(§2-1)。先週行は全てグレー。
+// 色は状態のみ(§2-1・確定版トークン)。先週行は全てグレー。
 function cellClass(c: WeekCell, row: "rec" | "this" | "last"): string {
   if (row === "last") {
     if (c.kind === "empty") return "bg-white text-transparent";
@@ -351,11 +361,11 @@ function cellClass(c: WeekCell, row: "rec" | "this" | "last"): string {
   if (row === "rec") {
     if (c.kind === "rest") return "bg-white text-[#a8955a]";
     if (c.kind === "personal") return "bg-white text-[#3a6ea5]";
-    if (c.kind === "dist") return "bg-white text-[#2b2620]";
+    if (c.kind === "dist") return "bg-white text-[#33302a]";
     return "bg-white text-transparent";
   }
   // this
-  if (c.kind === "dist") return "bg-[#e7efe6] text-[#34603f]";
+  if (c.kind === "dist") return "bg-[#e7efe6] text-[#3f5c49]";
   if (c.kind === "custom") return "bg-white text-[#6d5a8e]";
   if (c.kind === "rest") return "bg-white text-[#a8955a]";
   if (c.kind === "personal") return "bg-white text-[#3a6ea5]";
