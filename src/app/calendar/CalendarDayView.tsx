@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import type { CalendarBodyMetric, CalendarWorkout } from "@/lib/calendar/queries";
 import type { CalendarLearnedLesson, CalendarReview, CalendarBodyPhoto } from "@/lib/calendar/queries";
 import type { LastWatchedLesson } from "@/lib/member/last-watched";
+import { CalendarBodyChart } from "./CalendarBodyChart";
 import { sumMeals, MEAL_ORDER, type MealLog } from "@/lib/meals/types";
 import {
   CONDITION_LABEL,
@@ -95,25 +96,6 @@ export function CalendarDayView({
     });
   }, [date]);
 
-  const graph = useMemo(() => {
-    const s = body.series;
-    if (s.length === 0) return null;
-    const W = 248,
-      H = 74,
-      pad = 6;
-    const ws = s.map((x) => x.weight);
-    const min = Math.min(...ws) - 0.3;
-    const max = Math.max(...ws) + 0.3;
-    const span = max - min || 1;
-    const xs = (i: number) => pad + i * ((W - pad * 2) / Math.max(1, s.length - 1));
-    const ys = (v: number) => H - pad - ((v - min) / span) * (H - pad * 2);
-    const pts = s.map((x, i) => `${xs(i).toFixed(1)},${ys(x.weight).toFixed(1)}`).join(" ");
-    const dots = s.map((x, i) => ({ cx: xs(i), cy: ys(x.weight) }));
-    const selIdx = s.findIndex((x) => x.date === date);
-    const hi = selIdx >= 0 ? { cx: xs(selIdx), cy: ys(s[selIdx].weight), v: s[selIdx].weight } : null;
-    return { W, H, pts, dots, hi };
-  }, [body.series, date]);
-
   const meal = useMemo(() => {
     const sorted = [...meals].sort((a, b) => MEAL_ORDER[a.meal_type] - MEAL_ORDER[b.meal_type]);
     const sum = sumMeals(meals);
@@ -173,20 +155,11 @@ export function CalendarDayView({
               体組成
             </div>
           </div>
-          {graph ? (
-            <svg className="bmgraph" viewBox={`0 0 ${graph.W} ${graph.H}`} preserveAspectRatio="none">
-              <polyline points={graph.pts} fill="none" stroke="#cfe3d6" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
-              {graph.dots.map((p, i) => (<circle key={i} cx={p.cx} cy={p.cy} r={2} fill="#9dc3a9" />))}
-              {graph.hi && (
-                <>
-                  <circle cx={graph.hi.cx} cy={graph.hi.cy} r={6.5} fill="#4a875b" stroke="#fff" strokeWidth={2.5} />
-                  <text x={graph.hi.cx} y={graph.hi.cy - 11} textAnchor="middle" fontSize={10} fontWeight={800} fill="#34603f">{graph.hi.v}</text>
-                </>
-              )}
-            </svg>
-          ) : (
-            <div className="empty">体組成の記録がまだありません</div>
-          )}
+          <div className="bm-legend">
+            <span className="lg wt"><i className="dot" />体重</span>
+            <span className="lg ws"><i className="dot" />ウエスト</span>
+          </div>
+          <CalendarBodyChart series={body.series} selectedDate={date} />
           <div className="bm3">
             <div className="n"><div className="k">体重</div><div className="v">{body.weight_kg ?? "—"}<small>kg</small></div><div className="df">{deltaText(body.weightDelta)}</div></div>
             <div className="n"><div className="k">体脂肪率</div><div className="v">{body.body_fat_percent ?? "—"}<small>%</small></div><div className="df">{deltaText(body.bodyFatDelta)}</div></div>
@@ -406,7 +379,11 @@ const CSS = `
 .cal-root .star{font-size:10px;font-weight:800;color:var(--grn-d);background:var(--grn-l);border-radius:99px;padding:3px 10px;}
 .dumbbell{display:inline-block;width:19px;height:19px;background:var(--grn);-webkit-mask:url(/icons/nav/workout.svg) center/contain no-repeat;mask:url(/icons/nav/workout.svg) center/contain no-repeat;flex-shrink:0;}
 .dumbbell-lg{display:inline-block;width:30px;height:30px;background:#cdc4b2;-webkit-mask:url(/icons/nav/workout.svg) center/contain no-repeat;mask:url(/icons/nav/workout.svg) center/contain no-repeat;margin:0 auto 6px;}
-.bmgraph{width:100%;height:74px;display:block;overflow:visible;}
+.bm-legend{display:flex;gap:14px;margin:2px 0 4px;}
+.bm-legend .lg{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--ink2);}
+.bm-legend .lg .dot{width:14px;height:3px;border-radius:2px;display:inline-block;}
+.bm-legend .lg.wt .dot{background:#4a875b;}
+.bm-legend .lg.ws .dot{background:#3f6fd8;}
 .cal-root .empty{text-align:center;font-size:11.5px;color:var(--ink3);padding:14px 0;}
 .bm3{display:flex;margin-top:12px;border-top:1px solid #f0e9db;padding-top:11px;}
 .bm3 .n{flex:1;text-align:center;position:relative;}
