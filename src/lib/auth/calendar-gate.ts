@@ -11,6 +11,9 @@ import { createClient } from "@/lib/supabase/server";
  */
 export const CALENDAR_PREVIEW_EMAILS = [
   "fujikiyo1010+kiyomu-test@gmail.com", // 藤田澄（きよむ・本番アカウント）
+  "hyuuga.morikawa@gmail.com", // 森川陽向
+  "icanfly.v3v@icloud.com", // 近藤優気
+  "asahakanari260@yahoo.co.jp", // 阿部紀洋
   "fujikiyo1010@gmail.com", // dev テスト用(本番には存在しない)
 ];
 

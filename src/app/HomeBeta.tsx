@@ -543,6 +543,14 @@ function TodayTasksV2({
           />
         </span>
         <span className="text-[12px] font-extrabold text-[#3f5c49]">{doneCount}/3</span>
+        {doneCount === 3 && (
+          <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-[#c9a227] px-2 py-0.5 text-[10.5px] font-extrabold text-white shadow-[0_1px_3px_rgba(201,162,39,0.4)]">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+              <path d="M5 16l-2-9 5 3 4-6 4 6 5-3-2 9zM5 20h14v-2H5z" />
+            </svg>
+            達成
+          </span>
+        )}
       </div>
       <div className="flex flex-col gap-2.5">
         <TaskCardV2
