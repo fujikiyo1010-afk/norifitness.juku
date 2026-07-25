@@ -3,13 +3,15 @@ import { createClient } from "@/lib/supabase/server";
 /**
  * 週間プール改修の限定公開ゲート。
  *  - 2026-07-22: 藤田だけ先行(骨格確認)。
- *  - 2026-07-23: 再設計後、藤田・森川・近藤の3人へ拡大(阿部さんは含めない)。
+ *  - 2026-07-23: 再設計後、藤田・森川・近藤の3人へ拡大。
+ *  - 2026-07-25: staff-preview と同じ4人(藤田・森川・近藤・阿部)へ拡大。
  * 全公開に切り替える時は、呼び出し側の条件を外す(常に true)だけ。
  */
 export const POOL_PREVIEW_EMAILS = [
   "fujikiyo1010+kiyomu-test@gmail.com", // 藤田澄（本番アカウント）
   "hyuuga.morikawa@gmail.com", // 森川陽向
   "icanfly.v3v@icloud.com", // 近藤優気
+  "asahakanari260@yahoo.co.jp", // 阿部紀洋（staff-preview と同じ登録）
   "fujikiyo1010@gmail.com", // dev テスト用(本番には存在しない)
 ];
 

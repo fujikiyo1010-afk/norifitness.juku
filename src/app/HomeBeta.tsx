@@ -6,8 +6,7 @@ import type { LastWatchedLesson } from "@/lib/member/last-watched";
 import type { TodayActivity } from "@/lib/member/today-activity";
 import type { MemberAlert, MemberAlertKey } from "@/lib/member/alerts";
 import type { WeeklyTraining } from "@/lib/workout/weekly";
-import { WeeklyTrainingCard } from "@/components/WeeklyTrainingCard";
-import { DocIcon, TargetIcon, BarIcon, BellIcon } from "@/components/icons";
+import { DocIcon, TargetIcon, BarIcon, BellIcon, DumbbellIcon } from "@/components/icons";
 
 /**
  * 受講生ホーム 確定7/7版(P3・v1・ベータ限定)。
@@ -145,16 +144,21 @@ export function HomeBeta({
             </div>
           )}
 
-          {/* 今日やること ゾーン(件H・案1): 薄緑の大枠で トレ/食事/学び+生活行+達成バー を包む */}
-          <section className="rounded-[16px] border-[1.5px] border-[#cfe3d6] bg-[#f0f7f2] p-2.5">
-            <h2 className="mb-1.5 ml-0.5 text-[11.5px] font-extrabold text-[#34603f]">
-              今日やること
-            </h2>
-            <div className="flex flex-col gap-2">
-              {/* トレーニング: 週間プール(藤田先行)ならカードを差し替え。それ以外は従来カード。 */}
-              {weeklyPool ? (
-                <WeeklyTrainingCard weekly={weeklyPool} />
-              ) : (
+          {/* 今日やること ゾーン。4人ゲート(weeklyPool有)は2行カード＋見出しゲージの新版・それ以外は従来版。 */}
+          {weeklyPool ? (
+            <TodayTasksV2
+              doneCount={doneCount}
+              recordedWorkout={today.recordedWorkout}
+              recordedMeal={today.recordedMeal}
+              learned={today.learned}
+              lastWatched={lastWatched}
+            />
+          ) : (
+            <section className="rounded-[16px] border-[1.5px] border-[#cfe3d6] bg-[#f0f7f2] p-2.5">
+              <h2 className="mb-1.5 ml-0.5 text-[11.5px] font-extrabold text-[#34603f]">
+                今日やること
+              </h2>
+              <div className="flex flex-col gap-2">
                 <TodayCard
                   cap={
                     workoutDayNumber
@@ -171,46 +175,39 @@ export function HomeBeta({
                   href="/workout/today"
                   done={today.recordedWorkout}
                 />
-              )}
-              {/* 食事(M7 案1・1食で✓・ラベル文言=モック) */}
-              <TodayCard
-                cap="食事添削 ・ 今日"
-                capColor={CARD_COLOR.meal}
-                title={mealTitle}
-                cta={today.recordedMeal ? "タップして見る →" : "＋写真で記録 →"}
-                href="/meals"
-                done={today.recordedMeal}
-              />
-              {/* 学び */}
-              <TodayCard
-                cap="続きから学ぶ"
-                capColor={CARD_COLOR.learn}
-                title={
-                  lastWatched
-                    ? lastWatched.lessonTitle
-                    : "最初のレッスンを見てみよう"
-                }
-                cta={lastWatched ? "▶ 続きを見る →" : "▶ レッスンへ →"}
-                href={lastWatched?.href ?? "/courses"}
-                done={today.learned}
-              />
-            </div>
-            {/* 達成バー: 件H で 3カードの上→ゾーン最下段へ移動 */}
-            <div className="mt-2 flex items-center gap-2.5 rounded-[14px] border border-[#e7dcc9] bg-[#fffdf8] px-3.5 py-2.5">
-              <span className="font-mono text-[15px] font-extrabold text-[#4a875b]">
-                {doneCount}/3
-              </span>
-              <div className="h-[7px] flex-1 overflow-hidden rounded-full bg-[#e7dcc9]">
-                <div
-                  className="h-full rounded-full"
-                  style={{ width: `${(doneCount / 3) * 100}%`, background: TEAL }}
+                <TodayCard
+                  cap="食事添削 ・ 今日"
+                  capColor={CARD_COLOR.meal}
+                  title={mealTitle}
+                  cta={today.recordedMeal ? "タップして見る →" : "＋写真で記録 →"}
+                  href="/meals"
+                  done={today.recordedMeal}
+                />
+                <TodayCard
+                  cap="続きから学ぶ"
+                  capColor={CARD_COLOR.learn}
+                  title={
+                    lastWatched ? lastWatched.lessonTitle : "最初のレッスンを見てみよう"
+                  }
+                  cta={lastWatched ? "▶ 続きを見る →" : "▶ レッスンへ →"}
+                  href={lastWatched?.href ?? "/courses"}
+                  done={today.learned}
                 />
               </div>
-              <span className="text-[10px] font-bold text-[#6a6256]">
-                今日の達成
-              </span>
-            </div>
-          </section>
+              <div className="mt-2 flex items-center gap-2.5 rounded-[14px] border border-[#e7dcc9] bg-[#fffdf8] px-3.5 py-2.5">
+                <span className="font-mono text-[15px] font-extrabold text-[#4a875b]">
+                  {doneCount}/3
+                </span>
+                <div className="h-[7px] flex-1 overflow-hidden rounded-full bg-[#e7dcc9]">
+                  <div
+                    className="h-full rounded-full"
+                    style={{ width: `${(doneCount / 3) * 100}%`, background: TEAL }}
+                  />
+                </div>
+                <span className="text-[10px] font-bold text-[#6a6256]">今日の達成</span>
+              </div>
+            </section>
+          )}
 
           {/* 細21: 生活の独立入口(4問・10秒)。2026-07-13: 今日やることゾーンの外・真下へ移動。 */}
           <LifeRow done={today.recordedLife} />
@@ -514,6 +511,158 @@ function TodayCard({
         </div>
       </div>
     </Link>
+  );
+}
+
+// =====================================================================
+// 今日やること 2行カード版(4人ゲート・モック「2行化」転写)
+// =====================================================================
+
+function TodayTasksV2({
+  doneCount,
+  recordedWorkout,
+  recordedMeal,
+  learned,
+  lastWatched,
+}: {
+  doneCount: number;
+  recordedWorkout: boolean;
+  recordedMeal: boolean;
+  learned: boolean;
+  lastWatched: LastWatchedLesson | null;
+}) {
+  return (
+    <section className="rounded-[16px] border-[1.5px] border-[#cfe3d6] bg-[#f0f7f2] p-2.5">
+      {/* B1: 見出し行に達成ゲージ＋n/3 を同居(下部の独立達成行は廃止) */}
+      <div className="mb-2.5 flex items-center gap-2.5 px-1">
+        <h2 className="text-[13.5px] font-extrabold text-[#3d5a3b]">今日やること</h2>
+        <span className="h-2 flex-1 overflow-hidden rounded-full bg-[#d8e0d3]">
+          <span
+            className="block h-full rounded-full"
+            style={{ width: `${(doneCount / 3) * 100}%`, background: "linear-gradient(90deg,#4a875b,#3f5c49)" }}
+          />
+        </span>
+        <span className="text-[12px] font-extrabold text-[#3f5c49]">{doneCount}/3</span>
+      </div>
+      <div className="flex flex-col gap-2.5">
+        <TaskCardV2
+          href="/workout/week"
+          icon={<DumbbellIcon size={22} />}
+          iconBg="#e2ecdf"
+          iconColor="#3f5c49"
+          capColor="#4a875b"
+          cap="トレーニング"
+          main={recordedWorkout ? "今日のメニューは完了しました" : "今日のメニューを開始する"}
+          done={recordedWorkout}
+          pill="実施済み"
+        />
+        <TaskCardV2
+          href="/meals"
+          icon={<ForkIcon />}
+          iconBg="#f6e9db"
+          iconColor="#c07a3a"
+          capColor="#c07a3a"
+          cap="食事添削"
+          main={recordedMeal ? "今日の食事を記録しました" : "今日の食事を記録する"}
+          done={recordedMeal}
+          pill="記録済み"
+        />
+        <TaskCardV2
+          href={lastWatched?.href ?? "/courses"}
+          icon={<PlayIcon />}
+          iconBg="#ece7f8"
+          iconColor="#7a5af0"
+          capColor="#7a5af0"
+          cap={learned ? "知識学習完了" : "学習"}
+          main="動画で知識学習をする"
+          link={lastWatched ? `▶︎ 続き：${lastWatched.lessonTitle}` : undefined}
+          linkColor="#4a875b"
+          done={learned}
+          pill="視聴済み"
+        />
+      </div>
+    </section>
+  );
+}
+
+function TaskCardV2({
+  href,
+  icon,
+  iconBg,
+  iconColor,
+  capColor,
+  cap,
+  main,
+  link,
+  linkColor,
+  done,
+  pill,
+}: {
+  href: string;
+  icon: ReactNode;
+  iconBg: string;
+  iconColor: string;
+  capColor: string;
+  cap: string;
+  main: string;
+  link?: string;
+  linkColor?: string;
+  done: boolean;
+  pill: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`relative flex gap-3 rounded-[13px] border px-[13px] py-3 shadow-[0_1px_3px_rgba(60,55,40,0.05)] ${
+        done ? "border-[#cfdec9] bg-[#eef4ea]" : "border-[#eee7d8] bg-[#fffdf8]"
+      }`}
+    >
+      <span
+        className="flex h-10 w-10 flex-none items-center justify-center rounded-[11px]"
+        style={{ background: done ? "#d7e6d2" : iconBg, color: done ? "#3f5c49" : iconColor }}
+      >
+        {icon}
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="text-[10.5px] font-extrabold" style={{ color: done ? "#3d5a3b" : capColor }}>
+          {cap}
+        </div>
+        <div
+          className={`mt-0.5 text-[14.5px] font-extrabold leading-[1.4] ${done ? "text-[#3d5a3b]" : "text-[#33302a]"}`}
+        >
+          {main}
+        </div>
+        {link && (
+          <div
+            className="mt-[3px] truncate text-[11px] font-extrabold"
+            style={{ color: done ? "#98917f" : (linkColor ?? "#4a875b") }}
+          >
+            {link}
+          </div>
+        )}
+      </div>
+      {done && (
+        <span className="absolute right-[11px] top-[10px] rounded-full bg-[#e3e8df] px-[11px] py-[3px] text-[10px] font-extrabold text-[#3d5a3b]">
+          {pill}
+        </span>
+      )}
+    </Link>
+  );
+}
+
+function ForkIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <path d="M6 2v7M4 2v4M8 2v4M6 9v9M13 2c-1.5 1.5-2 3.5-2 5.5 0 1.5 1 2.5 2 2.5s2-1 2-2.5c0-2-.5-4-2-5.5zM13 10v8" />
+    </svg>
+  );
+}
+function PlayIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
+      <rect x="2.5" y="3.5" width="15" height="13" rx="2.5" />
+      <path d="M8.5 7.5l4 2.5-4 2.5z" fill="currentColor" stroke="none" />
+    </svg>
   );
 }
 
