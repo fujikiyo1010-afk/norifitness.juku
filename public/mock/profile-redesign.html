@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>プロフィール 再設計モック</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+  body {
+    font-family: -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
+    background: #ece4d4; color: #2b2620; padding: 20px;
+    display: flex; justify-content: center; gap: 28px; flex-wrap: wrap; align-items: flex-start;
+  }
+  .frame { width: 390px; background: #f9f5ed; border: 1px solid #e7dcc9; border-radius: 22px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,.12); }
+  .caption { text-align:center; font-size:12.5px; font-weight:800; color:#4a4034; margin-bottom:8px; letter-spacing:.04em; }
+  .col { display:flex; flex-direction:column; }
+
+  .topline { height: 4px; background: linear-gradient(90deg,#c9e265,#7bc043); }
+  .header { display:flex; align-items:center; gap:10px; padding: 14px 16px; background:#f9f5ed; border-bottom:1px solid #eee2cc; }
+  .header .back { width:22px; height:22px; color:#6a6256; }
+  .header h1 { font-size:18px; font-weight:800; letter-spacing:.02em; }
+
+  .body { padding: 16px 16px 24px; display:flex; flex-direction:column; gap:16px; }
+  .card { background:#fffdf8; border:1px solid #e7dcc9; border-radius:18px; }
+  .seclabel { font-size:12px; font-weight:800; color:#6a6256; letter-spacing:.08em; padding:0 4px 8px; }
+
+  .idcard { display:flex; align-items:center; gap:14px; padding:18px; flex-wrap:wrap; }
+  .avatar { width:64px; height:64px; border-radius:50%; background:#4a875b; color:#fff; display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:800; flex-shrink:0; }
+  .idcard .name { font-size:20px; font-weight:800; line-height:1.2; }
+  .idcard .mail { font-size:12.5px; color:#6a6256; margin-top:3px; font-family: ui-monospace, monospace; }
+  .idcard .joined { font-size:12px; color:#a59b8c; margin-top:3px; }
+  .editbtn { align-self:stretch; display:flex; align-items:center; gap:6px; margin-top:14px; justify-content:center; border:1.5px solid #d8d2c4; background:#fff; border-radius:12px; padding:12px; font-size:14.5px; font-weight:700; color:#4a4034; width:100%; }
+  .editbtn svg { width:17px; height:17px; }
+
+  .carte-head { display:flex; align-items:center; gap:8px; padding:16px 18px 4px; flex-wrap:wrap; }
+  .carte-head .t { font-size:17px; font-weight:800; }
+  .badge { font-size:11.5px; font-weight:700; padding:3px 9px; border-radius:999px; }
+  .badge.green { background:#e8f3ec; color:#2f6b45; }
+  .badge.orange { background:#fff3e0; color:#a5631f; }
+  .carte-grid { display:grid; grid-template-columns:auto 1fr; gap:8px 14px; padding:10px 18px 4px; font-size:14.5px; }
+  .carte-grid .k { color:#a59b8c; }
+  .carte-grid .v { font-weight:700; }
+  .carte-btns { display:flex; gap:10px; padding:14px 18px 18px; }
+  .carte-btns a { flex:1; text-align:center; padding:14px; border-radius:14px; font-size:14.5px; font-weight:800; text-decoration:none; }
+  .btn-ghost { border:1.5px solid #4a875b; color:#34603f; background:#fff; }
+  .btn3d { background: linear-gradient(180deg,#528f62,#3c7550); color:#fff; box-shadow: 0 5px 0 #2f5b3d, 0 8px 16px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.28); }
+
+  /* 発送済み(脇役・1行) */
+  .protein-row { display:flex; align-items:center; gap:12px; padding:14px 16px; background:#fffdf8; border:1px solid #e7dcc9; border-radius:16px; }
+  .protein-row .gift { width:22px; height:22px; color:#a5631f; flex-shrink:0; }
+  .protein-row .txt { flex:1; font-size:13.5px; color:#6a6256; line-height:1.4; }
+  .protein-row .txt b { color:#2b2620; font-weight:700; }
+
+  /* 発送準備中(住所変更あり) */
+  .protein-pending .phead { display:flex; align-items:center; gap:10px; padding:14px 16px 6px; }
+  .protein-pending .gift { width:22px; height:22px; color:#a5631f; flex-shrink:0; }
+  .protein-pending .phead b { font-size:14.5px; font-weight:700; color:#2b2620; }
+  .protein-pending .addr { font-size:13px; color:#6a6256; line-height:1.6; padding:0 16px 10px 48px; }
+  .protein-pending .addr .zip { font-family:ui-monospace,monospace; }
+  .addrbtn { display:flex; align-items:center; gap:6px; padding:14px 16px; border-top:1px solid #f0ead9; font-size:14.5px; font-weight:700; color:#2b2620; text-decoration:none; }
+  .addrbtn .grow { flex:1; }
+  .addrbtn .chev { color:#c9bfa9; font-size:20px; }
+  .protein-pending .note { font-size:11.5px; color:#a59b8c; line-height:1.5; padding:8px 16px 14px; }
+
+  .menu { overflow:hidden; }
+  .menu a, .menu button { display:flex; align-items:center; gap:14px; width:100%; padding:16px 18px; background:transparent; border:none; border-bottom:1px solid #eee2cc; font-size:15.5px; font-weight:600; color:#2b2620; text-decoration:none; cursor:pointer; text-align:left; }
+  .menu a:last-child, .menu button:last-child { border-bottom:none; }
+  .menu .mi { width:21px; height:21px; color:#4a4034; flex-shrink:0; }
+  .menu .grow { flex:1; }
+  .menu .chev { color:#c9bfa9; font-size:20px; }
+  .menu .logout { color:#c0392b; }
+  .menu .logout .mi { color:#c0392b; }
+
+  .ver { text-align:center; font-size:11px; color:#a59b8c; font-family:ui-monospace,monospace; margin-top:4px; }
+</style>
+</head>
+<body>
+
+<!-- ============ 発送済み ============ -->
+<div class="col">
+  <div class="caption">① プロテイン「発送済み」の人</div>
+  <div class="frame">
+    <div class="topline"></div>
+    <div class="header">
+      <svg class="back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      <h1>プロフィール</h1>
+    </div>
+    <div class="body">
+      <div class="card idcard">
+        <div class="avatar">森</div>
+        <div style="min-width:0; flex:1;">
+          <div class="name">森川陽向</div>
+          <div class="mail">hyuuga.morikawa@gmail.com</div>
+          <div class="joined">入会日 2020/06/22</div>
+        </div>
+        <button class="editbtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
+          プロフィールを編集
+        </button>
+      </div>
+      <div>
+        <div class="seclabel">筋トレカルテ</div>
+        <div class="card">
+          <div class="carte-head"><span class="t">筋トレカルテ</span><span class="badge green">提出済み ・ 2020/06/22</span></div>
+          <div class="carte-grid">
+            <span class="k">性別</span><span class="v">男</span>
+            <span class="k">重点部位</span><span class="v">全身</span>
+            <span class="k">環境</span><span class="v">ダンベル</span>
+            <span class="k">頻度</span><span class="v">週5</span>
+          </div>
+          <div class="carte-btns"><a class="btn-ghost">カルテを見る</a><a class="btn3d">変更をリクエスト</a></div>
+        </div>
+      </div>
+      <div class="protein-row">
+        <svg class="gift" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+        <div class="txt"><b>入塾特典プロテイン</b>は発送済みです（2020/06/22）</div>
+      </div>
+      <div>
+        <div class="seclabel">各種メニュー</div>
+        <div class="card menu">
+          <a><svg class="mi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg><span class="grow">設定（通知・パスワード）</span><span class="chev">›</span></a>
+          <a><svg class="mi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg><span class="grow">お問い合わせ</span><span class="chev">›</span></a>
+          <button class="logout"><svg class="mi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="grow">ログアウト</span></button>
+        </div>
+      </div>
+      <div class="ver">のりfitness 筋肉塾 ・ v1.0.0</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 発送準備中 ============ -->
+<div class="col">
+  <div class="caption">② プロテイン「発送準備中」の人（住所変更あり）</div>
+  <div class="frame">
+    <div class="topline"></div>
+    <div class="header">
+      <svg class="back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      <h1>プロフィール</h1>
+    </div>
+    <div class="body">
+      <div class="card idcard">
+        <div class="avatar">田</div>
+        <div style="min-width:0; flex:1;">
+          <div class="name">田中太郎</div>
+          <div class="mail">tanaka@example.com</div>
+          <div class="joined">入会日 2026/07/20</div>
+        </div>
+        <button class="editbtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
+          プロフィールを編集
+        </button>
+      </div>
+      <div>
+        <div class="seclabel">筋トレカルテ</div>
+        <div class="card">
+          <div class="carte-head"><span class="t">筋トレカルテ</span><span class="badge green">提出済み ・ 2026/07/21</span></div>
+          <div class="carte-grid">
+            <span class="k">性別</span><span class="v">男</span>
+            <span class="k">重点部位</span><span class="v">胸 ・ 背中</span>
+            <span class="k">環境</span><span class="v">ジム</span>
+            <span class="k">頻度</span><span class="v">週3</span>
+          </div>
+          <div class="carte-btns"><a class="btn-ghost">カルテを見る</a><a class="btn3d">変更をリクエスト</a></div>
+        </div>
+      </div>
+      <!-- 発送準備中: 住所確認+変更を残す -->
+      <div>
+        <div class="seclabel">入塾特典</div>
+        <div class="card protein-pending">
+          <div class="phead">
+            <svg class="gift" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+            <b>入塾特典プロテイン</b>
+            <span class="badge orange">発送準備中</span>
+          </div>
+          <div class="addr">
+            <span class="zip">〒150-0001</span><br>
+            東京都渋谷区神宮前1-2-3 コーポ101<br>
+            宛 田中太郎
+          </div>
+          <a class="addrbtn"><span class="grow">住所を変更</span><span class="chev">›</span></a>
+          <div class="note">発送前ならお届け先を変更できます（変更はすぐ反映されます）。発送後は変更できません。</div>
+        </div>
+      </div>
+      <div>
+        <div class="seclabel">各種メニュー</div>
+        <div class="card menu">
+          <a><svg class="mi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg><span class="grow">設定（通知・パスワード）</span><span class="chev">›</span></a>
+          <a><svg class="mi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg><span class="grow">お問い合わせ</span><span class="chev">›</span></a>
+          <button class="logout"><svg class="mi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="grow">ログアウト</span></button>
+        </div>
+      </div>
+      <div class="ver">のりfitness 筋肉塾 ・ v1.0.0</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
