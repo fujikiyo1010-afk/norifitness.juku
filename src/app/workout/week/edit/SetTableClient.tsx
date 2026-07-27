@@ -76,7 +76,14 @@ export function SetTableClient({
     );
   }
   function addSet(ei: number) {
-    setExercises((prev) => prev.map((ex, i) => (i === ei ? { ...ex, sets: [...ex.sets, { kg: null, reps: null }] } : ex)));
+    // 直前(末尾)のセットの重量・回数を引き継いで追加(同じ重量×回数を繰り返す入力を省く)
+    setExercises((prev) =>
+      prev.map((ex, i) => {
+        if (i !== ei) return ex;
+        const last = ex.sets[ex.sets.length - 1];
+        return { ...ex, sets: [...ex.sets, { kg: last?.kg ?? null, reps: last?.reps ?? null }] };
+      })
+    );
   }
   function removeSet(ei: number) {
     setExercises((prev) =>
