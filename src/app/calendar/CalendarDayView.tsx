@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { CalendarBodyMetric, CalendarWorkout } from "@/lib/calendar/queries";
 import type { CalendarLearnedLesson, CalendarReview } from "@/lib/calendar/queries";
 import type { BodyPhotoSummary } from "@/lib/body-photos/queries";
 import type { LastWatchedLesson } from "@/lib/member/last-watched";
 import { CalendarBodyChart } from "./CalendarBodyChart";
+import { BottomSheet } from "@/app/record/BottomSheet";
+import { PhotoAddForm } from "@/app/record/photos/PhotoGallery";
 import { sumMeals, MEAL_ORDER, type MealLog } from "@/lib/meals/types";
 import {
   CONDITION_LABEL,
@@ -37,6 +40,7 @@ const PART_CLASS: Record<string, string> = {
 export type CalendarViewProps = {
   date: string;
   today: string;
+  userId: string;
   body: CalendarBodyMetric;
   workout: CalendarWorkout;
   meals: (MealLog & { photoUrls: string[] })[];
@@ -81,6 +85,7 @@ const pct = (v: number, t: number | null | undefined) =>
 export function CalendarDayView({
   date,
   today,
+  userId,
   body,
   workout,
   meals,
@@ -103,6 +108,13 @@ export function CalendarDayView({
       return { ds: d.toISOString().slice(0, 10), dnum: d.getUTCDate(), dow: i };
     });
   }, [date]);
+
+  const router = useRouter();
+
+  // 体型写真「その場で追加」: ＋タイル → ネイティブの撮る/ライブラリ → 追加シート(既存 PhotoAddForm 流用)
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const [pickedPhoto, setPickedPhoto] = useState<File | null>(null);
+  const [photoAddOpen, setPhotoAddOpen] = useState(false);
 
   // 日付タップ → ドロップダウン月カレンダー(案A)。開閉と表示中の月をクライアント管理。
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -162,6 +174,9 @@ export function CalendarDayView({
       </div>
 
       {pickerOpen && (
+        <>
+          <button type="button" className="cal-pop-mask" aria-label="閉じる" onClick={() => setPickerOpen(false)} />
+          <div className="cal-pop">
         <div className="dropdown">
           <div className="mgrid-head">
             <button type="button" className="mnav" onClick={() => shiftMonth(-1)} aria-label="前の月">‹</button>
@@ -185,6 +200,8 @@ export function CalendarDayView({
             })}
           </div>
         </div>
+          </div>
+        </>
       )}
 
       <div className="week">
@@ -236,7 +253,7 @@ export function CalendarDayView({
           <div className="ch">
             <div className="l">
               <span className="hic">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M4 2v7a3 3 0 0 0 3 3 3 3 0 0 0 3-3V2M7 12v10M20 2c-2 0-3.5 2.5-3.5 6 0 2.9 1 4.6 2.5 5.2V22" /></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M6 2v6M7.5 2v6M9 2v6M6 8a1.5 1.5 0 0 0 3 0M7.5 9.5V22" /><path d="M17 2c-1.4 0-2.3 2.3-2.3 5s.9 5 2.3 5 2.3-2.3 2.3-5S18.4 2 17 2zM17 12v10" /></svg>
               </span>
               食事
             </div>
@@ -273,7 +290,7 @@ export function CalendarDayView({
             </>
           ) : (
             <div className="none">
-              <span className="emptic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M4 2v7a3 3 0 0 0 3 3 3 3 0 0 0 3-3V2M7 12v10M20 2c-2 0-3.5 2.5-3.5 6 0 2.9 1 4.6 2.5 5.2V22" /></svg></span>
+              <span className="emptic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M6 2v6M7.5 2v6M9 2v6M6 8a1.5 1.5 0 0 0 3 0M7.5 9.5V22" /><path d="M17 2c-1.4 0-2.3 2.3-2.3 5s.9 5 2.3 5 2.3-2.3 2.3-5S18.4 2 17 2zM17 12v10" /></svg></span>
               <div className="t">この日の食事記録なし</div>
             </div>
           )}
@@ -329,7 +346,7 @@ export function CalendarDayView({
               体型写真
             </div>
             {photoSummary.count > 0 && (
-              <Link className="edit" href="/record/photos">写真をすべて見る（{photoSummary.count}枚）→</Link>
+              <Link className="edit" href="/record/photos">一覧を見る（{photoSummary.count}枚）→</Link>
             )}
           </div>
           <div className="bp-sub">入会時と直近を並べて、見た目の変化を記録しましょう</div>
@@ -361,18 +378,52 @@ export function CalendarDayView({
               </div>
             ) : (
               <div className="bp-cell">
-                <div className="bp-photo empty2">現在の1枚を<br />追加しましょう</div>
+                <button type="button" className="bp-photo empty2" onClick={() => photoInputRef.current?.click()}>現在の1枚を<br />追加しましょう</button>
                 <div className="bp-date">&nbsp;</div>
               </div>
             )}
             <div className="bp-cell">
-              <Link className="bp-add" href="/record/photos">
+              <button type="button" className="bp-add" onClick={() => photoInputRef.current?.click()}>
                 <span className="plus">＋</span>
                 <span className="lb">写真を追加して<br />変化を記録しよう</span>
-              </Link>
+              </button>
               <div className="bp-date">&nbsp;</div>
             </div>
           </div>
+
+          {/* 「その場で追加」: 隠しファイル入力(ネイティブの撮る/ライブラリ) → 追加シート */}
+          <input
+            ref={photoInputRef}
+            type="file"
+            accept="image/*"
+            className="bp-fileinput"
+            onChange={(e) => {
+              const f = e.target.files?.[0] ?? null;
+              e.target.value = "";
+              if (f) {
+                setPickedPhoto(f);
+                setPhotoAddOpen(true);
+              }
+            }}
+          />
+          <BottomSheet
+            open={photoAddOpen}
+            onClose={() => {
+              setPhotoAddOpen(false);
+              setPickedPhoto(null);
+            }}
+            title="写真を追加"
+          >
+            <PhotoAddForm
+              userId={userId}
+              initialFile={pickedPhoto}
+              onSaved={() => {
+                setPhotoAddOpen(false);
+                setPickedPhoto(null);
+                router.refresh();
+              }}
+            />
+          </BottomSheet>
         </div>
 
         {/* 添削(のりコメント・その日ある時だけ) */}
@@ -461,7 +512,7 @@ export function CalendarDayView({
 }
 
 const CSS = `
-.cal-root{--bg:#f9f5ed;--card:#fffdf8;--line:#e7dcc9;--ink:#2b2620;--ink2:#6a6256;--ink3:#a59b8c;--grn:#4a875b;--grn-d:#34603f;--grn-l:#eaf3ec;--blue:#3f6fd8;--amber:#e0a63f;--rose:#d8607a;max-width:460px;margin:0 auto;color:var(--ink);}
+.cal-root{--bg:#f9f5ed;--card:#fffdf8;--line:#e7dcc9;--ink:#2b2620;--ink2:#6a6256;--ink3:#a59b8c;--grn:#4a875b;--grn-d:#34603f;--grn-l:#eaf3ec;--blue:#3f6fd8;--amber:#e0a63f;--rose:#d8607a;max-width:460px;margin:0 auto;color:var(--ink);position:relative;}
 .cal-root a{text-decoration:none;color:inherit;}
 .cal-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 8px;}
 .cal-hd .hdt{font-size:16px;font-weight:800;color:var(--ink);display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:9px;background:none;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;}
@@ -470,20 +521,24 @@ const CSS = `
 .cal-hd .hdt.open .caret{transform:rotate(180deg);}
 .cal-hd .navbtn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:20px;color:var(--ink2);}
 .cal-hd .navbtn.dis{opacity:.3;}
-.dropdown{margin:0 14px 6px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 12px 10px;box-shadow:0 8px 22px rgba(43,38,32,.12);}
-.dropdown .mgrid-head{display:flex;align-items:center;justify-content:space-between;padding:2px 4px 10px;}
-.dropdown .mgrid-head .mnav{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:var(--ink2);font-size:18px;background:none;border:none;cursor:pointer;}
-.dropdown .mgrid-head .mtitle{font-size:13.5px;font-weight:800;color:var(--ink);}
-.dropdown .mgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px 0;}
-.dropdown .mgrid .wl{text-align:center;font-size:10px;font-weight:800;color:var(--ink3);padding-bottom:6px;}
-.dropdown .mgrid .wl.sun{color:#c2693f;}.dropdown .mgrid .wl.sat{color:var(--blue);}
+/* 日付ピッカー: 上にふわっと浮くオーバーレイ(下の内容は動かない)。案1=白基調ミニマル(Googleカレンダー風)・選択丸だけ深緑 */
+.cal-pop-mask{position:absolute;inset:0;z-index:20;background:none;border:none;padding:0;cursor:default;}
+.cal-pop{position:absolute;left:14px;right:14px;top:50px;z-index:21;}
+.dropdown{background:#fff;border:1px solid #ececef;border-radius:16px;padding:14px 13px 10px;box-shadow:0 14px 34px rgba(30,30,40,.20);}
+.dropdown .mgrid-head{display:flex;align-items:center;justify-content:space-between;padding:0 2px 10px;}
+.dropdown .mgrid-head .mnav{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:#5f6368;font-size:18px;background:none;border:none;cursor:pointer;}
+.dropdown .mgrid-head .mtitle{font-size:13.5px;font-weight:800;color:#202124;}
+.dropdown .mgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px 0;}
+.dropdown .mgrid .wl{text-align:center;font-size:10px;font-weight:700;color:#70757a;padding-bottom:6px;}
+.dropdown .mgrid .wl.sun{color:#d93025;}.dropdown .mgrid .wl.sat{color:#1a73e8;}
 .dropdown .mgrid .c{aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;}
-.dropdown .mgrid .c .dd{width:33px;height:33px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:13.5px;font-weight:700;color:var(--ink);}
-.dropdown .mgrid .c.sun .dd{color:#c2693f;}.dropdown .mgrid .c.sat .dd{color:var(--blue);}
-.dropdown .mgrid .c.sel .dd{background:var(--grn);color:#fff;font-weight:800;}
-.dropdown .mgrid .c.today .dd{box-shadow:inset 0 0 0 1.5px var(--grn);}
-.dropdown .mgrid .c.fut .dd{color:#d3cbbb;}
-.dropdown .mgrid .c .rec{width:4px;height:4px;border-radius:50%;background:var(--grn);position:absolute;bottom:3px;}
+.dropdown .mgrid .c .dd{width:33px;height:33px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:13.5px;font-weight:600;color:#3c4043;}
+.dropdown .mgrid .c.sun .dd{color:#d93025;}.dropdown .mgrid .c.sat .dd{color:#1a73e8;}
+.dropdown .mgrid .c.sel .dd{background:var(--grn-d);color:#fff;font-weight:800;}
+.dropdown .mgrid .c.today .dd{box-shadow:inset 0 0 0 1.5px var(--grn-d);color:var(--grn-d);}
+.dropdown .mgrid .c.sel.today .dd{color:#fff;}
+.dropdown .mgrid .c.fut .dd{color:#dadce0;}
+.dropdown .mgrid .c .rec{width:4px;height:4px;border-radius:50%;background:var(--grn-d);position:absolute;bottom:2px;}
 .dropdown .mgrid .c.sel .rec{background:#fff;}
 .week{display:flex;gap:3px;padding:2px 8px 12px;}
 .week .day{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0 8px;border-radius:13px;position:relative;}
@@ -599,14 +654,15 @@ const CSS = `
 .bp-cell{display:flex;flex-direction:column;gap:5px;}
 .bp-photo{aspect-ratio:3/4;border-radius:13px;overflow:hidden;position:relative;background:linear-gradient(160deg,#d9d2c4,#c4bcac);}
 .bp-photo img{width:100%;height:100%;object-fit:cover;display:block;}
-.bp-photo.empty2{display:flex;align-items:center;justify-content:center;text-align:center;font-size:10px;font-weight:700;color:var(--ink3);background:#fffdf8;border:1px dashed #d8cdba;padding:6px;}
+.bp-photo.empty2{display:flex;align-items:center;justify-content:center;text-align:center;font-size:10px;font-weight:700;color:var(--ink3);background:#fffdf8;border:1px dashed #d8cdba;padding:6px;width:100%;cursor:pointer;font-family:inherit;line-height:1.4;}
+.bp-fileinput{display:none;}
 .bp-silh{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;}
 .bp-silh svg{width:64%;height:78%;color:#9a9081;opacity:.55;}
 .bp-badge{position:absolute;top:7px;left:7px;font-size:9.5px;font-weight:800;color:#fff;border-radius:7px;padding:2px 8px;box-shadow:0 1px 2px rgba(0,0,0,.15);}
 .bp-badge.start{background:rgba(43,38,32,.82);}
 .bp-badge.now{background:var(--grn);}
 .bp-date{text-align:center;font-size:11px;font-weight:800;color:var(--ink2);}
-.bp-add{aspect-ratio:3/4;border-radius:13px;border:2px dashed #cdbfa6;background:#fffdf8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px;text-align:center;}
+.bp-add{aspect-ratio:3/4;width:100%;border-radius:13px;border:2px dashed #cdbfa6;background:#fffdf8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px;text-align:center;cursor:pointer;font-family:inherit;}
 .bp-add .plus{width:34px;height:34px;border-radius:50%;background:#efe9dc;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:300;color:var(--ink2);}
 .bp-add .lb{font-size:9.5px;font-weight:800;line-height:1.4;color:#8a8172;}
 `;
