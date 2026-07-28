@@ -37,12 +37,16 @@
    (きよむさん 2026-07-28)。本文背景(body = #f9f5ed)は F統一のまま維持。 */
 html {
   background: var(--nf-bg-card);
+  /* 案2a: 下に引っ張った時の跳ね返り(オーバースクロール)を止め、別色の帯を出さない
+     (きよむさん 2026-07-28)。※iOSの一部バージョン/PWAでは完全には効かない場合あり。 */
+  overscroll-behavior-y: none;
 }
 
 body {
   background: var(--nf-bg-app);   /* 全画面 F 統一 (= きよむさん 2026-06-18 確定、 outer 色概念は廃止) */
   color: var(--nf-ink);
   font-family: var(--font-noto-sans-jp), "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", system-ui, sans-serif;
+  overscroll-behavior-y: none;
 }
 
 /* PWA standalone mode で iPhone ホームインジケータの上に下部ナビが浮くようにする
