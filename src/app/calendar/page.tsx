@@ -5,7 +5,6 @@ import { MemberHeader } from "@/components/MemberHeader";
 import { jstTodayStr } from "@/lib/date/jst";
 import { getMealsForDate, signMealPhotos } from "@/lib/meals/queries";
 import { getDailyCondition } from "@/lib/conditions/queries";
-import { getMyHomeStats } from "@/lib/member/home-stats";
 import { getMyLastWatchedLesson } from "@/lib/member/last-watched";
 import {
   getBodyForCalendar,
@@ -73,7 +72,23 @@ export default async function CalendarPage({
       .maybeSingle(),
     getLearnedForCalendar(date),
     getReviewsForCalendar(date),
-    getMyHomeStats(),
+    // 学習の累計(完了/公開レッスン数)だけ軽量カウント。getMyHomeStats(4クエリ・視聴秒数全行スキャン)は
+    // カレンダーでは過剰なので、ページ既存クライアントで2カウントに絞る(切替のたびの無駄を削減)
+    (async () => {
+      const nowIso = new Date().toISOString();
+      const [completedQ, totalQ] = await Promise.all([
+        supabase
+          .from("lesson_progress")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", user.id)
+          .eq("is_completed", true),
+        supabase
+          .from("lessons")
+          .select("*", { count: "exact", head: true })
+          .or(`released_at.is.null,released_at.lte.${nowIso}`),
+      ]);
+      return { completed: completedQ.count ?? 0, total: totalQ.count ?? 0 };
+    })(),
     getMyLastWatchedLesson(),
     supabase
       .from("goal_sheets")
@@ -131,9 +146,7 @@ export default async function CalendarPage({
           learned={learned}
           reviews={reviews}
           learnStats={
-            learnStats
-              ? { completed: learnStats.completedLessons, total: learnStats.totalLessons }
-              : { completed: 0, total: 0 }
+            learnStats ?? { completed: 0, total: 0 }
           }
           lastWatched={lastWatched}
           hasCarte={!!carte}
