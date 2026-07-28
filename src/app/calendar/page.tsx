@@ -11,8 +11,8 @@ import {
   getWorkoutForCalendar,
   getLearnedForCalendar,
   getReviewsForCalendar,
+  getBodyPhotoForCalendar,
 } from "@/lib/calendar/queries";
-import { getMyBodyPhotoSummary } from "@/lib/body-photos/queries";
 import { getMyCarte } from "@/lib/workout/queries";
 import { CalendarDayView } from "./CalendarDayView";
 
@@ -54,7 +54,7 @@ export default async function CalendarPage({
     goalRes,
     weekMeals,
     carte,
-    photoSummary,
+    photoView,
   ] = await Promise.all([
     getBodyForCalendar(date),
     getWorkoutForCalendar(date),
@@ -101,7 +101,7 @@ export default async function CalendarPage({
       .select("date")
       .eq("user_id", user.id),
     getMyCarte(),
-    getMyBodyPhotoSummary(),
+    getBodyPhotoForCalendar(date),
   ]);
 
   const meals = mealsData.meals.map((m) => ({
@@ -150,7 +150,7 @@ export default async function CalendarPage({
           }
           lastWatched={lastWatched}
           hasCarte={!!carte}
-          photoSummary={photoSummary}
+          photoView={photoView}
           recordedDates={recordedDates}
         />
       </main>

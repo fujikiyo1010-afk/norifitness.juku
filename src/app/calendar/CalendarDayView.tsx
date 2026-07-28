@@ -4,8 +4,7 @@ import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { CalendarBodyMetric, CalendarWorkout } from "@/lib/calendar/queries";
-import type { CalendarLearnedLesson, CalendarReview } from "@/lib/calendar/queries";
-import type { BodyPhotoSummary } from "@/lib/body-photos/queries";
+import type { CalendarLearnedLesson, CalendarReview, CalendarBodyPhotoView } from "@/lib/calendar/queries";
 import type { LastWatchedLesson } from "@/lib/member/last-watched";
 import { CalendarBodyChart } from "./CalendarBodyChart";
 import { BottomSheet } from "@/app/record/BottomSheet";
@@ -52,7 +51,7 @@ export type CalendarViewProps = {
   learnStats: { completed: number; total: number };
   lastWatched: LastWatchedLesson | null;
   hasCarte: boolean;
-  photoSummary: BodyPhotoSummary;
+  photoView: CalendarBodyPhotoView;
   recordedDates: string[];
 };
 
@@ -97,7 +96,7 @@ export function CalendarDayView({
   learnStats,
   lastWatched,
   hasCarte,
-  photoSummary,
+  photoView,
   recordedDates,
 }: CalendarViewProps) {
   const week = useMemo(() => {
@@ -345,43 +344,39 @@ export function CalendarDayView({
               </span>
               体型写真
             </div>
-            {photoSummary.count > 0 && (
-              <Link className="edit" href="/record/photos">一覧を見る（{photoSummary.count}枚）→</Link>
+            {photoView.count > 0 && (
+              <Link className="edit" href="/record/photos">一覧を見る（{photoView.count}枚）→</Link>
             )}
           </div>
-          <div className="bp-sub">入会時と直近を並べて、見た目の変化を記録しましょう</div>
+          <div className="bp-sub">入会時と、その日時点の姿を並べています</div>
           <div className="bp-grid">
+            {/* 入会時(最古・固定) */}
             <div className="bp-cell">
               <div className="bp-photo">
-                <span className="bp-badge start">{photoSummary.count > 0 ? "入会時" : "記録"}</span>
-                {photoSummary.first?.url ? (
+                <span className="bp-badge start">{photoView.count > 0 ? "入会時" : "記録"}</span>
+                {photoView.first?.url ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={photoSummary.first.url} alt="入会時" />
+                  <img src={photoView.first.url} alt="入会時" />
                 ) : (
                   <span className="bp-silh"><svg viewBox="0 0 24 32" fill="currentColor"><ellipse cx="12" cy="5" rx="3.2" ry="3.6" /><path d="M12 9c-3.4 0-5.4 2.2-5.8 5.6-.3 2.4-.5 5.4-.5 8.4 0 3.2.3 6 .6 8H11l.3-8h1.4l.3 8h4.7c.3-2 .6-4.8.6-8 0-3-.2-6-.5-8.4C17.4 11.2 15.4 9 12 9z" /></svg></span>
                 )}
               </div>
-              <div className="bp-date">{photoSummary.first ? photoMD(photoSummary.first.recorded_at) : "—"}</div>
+              <div className="bp-date">{photoView.first ? photoMD(photoView.first.recorded_at) : "—"}</div>
             </div>
-            {photoSummary.last ? (
-              <div className="bp-cell">
-                <div className="bp-photo">
-                  <span className="bp-badge now">現在</span>
-                  {photoSummary.last.url ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img src={photoSummary.last.url} alt="現在" />
-                  ) : (
-                    <span className="bp-silh"><svg viewBox="0 0 24 32" fill="currentColor"><ellipse cx="12" cy="5" rx="3.2" ry="3.6" /><path d="M12 9c-3 0-4.9 1.8-5.4 4.8-.4 2.2-.6 5.2-.6 8.2 0 3.2.3 6 .6 8H11l.3-8h1.4l.3 8h4.7c.3-2 .6-4.8.6-8 0-3-.2-6-.6-8.2C16.9 10.8 15 9 12 9z" /></svg></span>
-                  )}
-                </div>
-                <div className="bp-date">{photoMD(photoSummary.last.recorded_at)}</div>
+            {/* その日時点(その日ちょうど or その日以前で最新) */}
+            <div className="bp-cell">
+              <div className="bp-photo">
+                <span className="bp-badge now">その日</span>
+                {photoView.asOf?.url ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={photoView.asOf.url} alt="その日時点" />
+                ) : (
+                  <span className="bp-silh"><svg viewBox="0 0 24 32" fill="currentColor"><ellipse cx="12" cy="5" rx="3.2" ry="3.6" /><path d="M12 9c-3 0-4.9 1.8-5.4 4.8-.4 2.2-.6 5.2-.6 8.2 0 3.2.3 6 .6 8H11l.3-8h1.4l.3 8h4.7c.3-2 .6-4.8.6-8 0-3-.2-6-.6-8.2C16.9 10.8 15 9 12 9z" /></svg></span>
+                )}
               </div>
-            ) : (
-              <div className="bp-cell">
-                <button type="button" className="bp-photo empty2" onClick={() => photoInputRef.current?.click()}>現在の1枚を<br />追加しましょう</button>
-                <div className="bp-date">&nbsp;</div>
-              </div>
-            )}
+              <div className="bp-date">{photoView.asOf ? photoMD(photoView.asOf.recorded_at) : "—"}</div>
+            </div>
+            {/* 追加 */}
             <div className="bp-cell">
               <button type="button" className="bp-add" onClick={() => photoInputRef.current?.click()}>
                 <span className="plus">＋</span>
@@ -390,6 +385,9 @@ export function CalendarDayView({
               <div className="bp-date">&nbsp;</div>
             </div>
           </div>
+          {!photoView.asOfIsSameDay && (
+            <div className="bp-note">この日の写真はありません。</div>
+          )}
 
           {/* 「その場で追加」: 隠しファイル入力(ネイティブの撮る/ライブラリ) → 追加シート */}
           <input
@@ -665,4 +663,5 @@ const CSS = `
 .bp-add{aspect-ratio:3/4;width:100%;border-radius:13px;border:2px dashed #cdbfa6;background:#fffdf8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px;text-align:center;cursor:pointer;font-family:inherit;}
 .bp-add .plus{width:34px;height:34px;border-radius:50%;background:#efe9dc;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:300;color:var(--ink2);}
 .bp-add .lb{font-size:9.5px;font-weight:800;line-height:1.4;color:#8a8172;}
+.bp-note{margin-top:10px;text-align:center;font-size:11.5px;font-weight:700;color:var(--ink3);}
 `;

@@ -265,46 +265,82 @@ export async function getWorkoutForCalendar(date: string): Promise<CalendarWorko
 }
 
 // ============================================================
-// ボディ写真: その日に撮った体型写真(body_photos・recorded_at=date)。署名URLを発行。
+// 体型写真(カレンダー用): 入会時(最古・固定) + その日基準の1枚。
+//   その日 = 選んだ日ちょうどの写真があればそれ、無ければ「その日以前で最新」の写真。
+//   asOfIsSameDay=false のとき、UI 側で「この日の写真はありません。」を出す。
+// ※ 記録画面(/record)のビフォーアフターとは別物(あちらは常に最新=現在)。
 // ============================================================
-export type CalendarBodyPhoto = {
-  id: string;
-  thumbUrl: string | null;
-  note: string | null;
+export type CalendarBodyPhotoView = {
+  count: number;
+  first: { url: string | null; recorded_at: string } | null; // 入会時(最古)
+  asOf: { url: string | null; recorded_at: string } | null; // その日時点(その日以前で最新)
+  asOfIsSameDay: boolean; // asOf が選んだ日ちょうどの写真か
 };
 
-export async function getBodyPhotosForCalendar(
+export async function getBodyPhotoForCalendar(
   date: string
-): Promise<CalendarBodyPhoto[]> {
+): Promise<CalendarBodyPhotoView> {
+  const empty: CalendarBodyPhotoView = {
+    count: 0,
+    first: null,
+    asOf: null,
+    asOfIsSameDay: false,
+  };
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return [];
-  const { data } = await supabase
-    .from("body_photos")
-    .select("id, note, storage_path, thumb_path")
-    .eq("user_id", user.id)
-    .eq("recorded_at", date)
-    .order("created_at", { ascending: true });
-  const rows = (data ?? []) as {
-    id: string;
-    note: string | null;
-    storage_path: string;
-    thumb_path: string | null;
-  }[];
-  if (rows.length === 0) return [];
-  const paths = Array.from(new Set(rows.map((r) => r.thumb_path ?? r.storage_path)));
+  if (!user) return empty;
+
+  const [{ count }, { data: firstRow }, { data: asOfRow }] = await Promise.all([
+    supabase
+      .from("body_photos")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id),
+    supabase
+      .from("body_photos")
+      .select("storage_path, recorded_at")
+      .eq("user_id", user.id)
+      .order("recorded_at", { ascending: true })
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("body_photos")
+      .select("storage_path, recorded_at")
+      .eq("user_id", user.id)
+      .lte("recorded_at", date)
+      .order("recorded_at", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
+
+  const total = count ?? 0;
+  if (total === 0) return empty;
+
+  const first = firstRow as { storage_path: string; recorded_at: string } | null;
+  const asOf = asOfRow as { storage_path: string; recorded_at: string } | null;
+
+  const paths = new Set<string>();
+  if (first?.storage_path) paths.add(first.storage_path);
+  if (asOf?.storage_path) paths.add(asOf.storage_path);
   const { data: signed } = await supabase.storage
     .from("body-photos")
-    .createSignedUrls(paths, 60 * 60);
+    .createSignedUrls([...paths], 60 * 60);
   const urlByPath = new Map<string, string>();
   for (const s of signed ?? []) {
     if (s.signedUrl && s.path) urlByPath.set(s.path, s.signedUrl);
   }
-  return rows.map((r) => ({
-    id: r.id,
-    thumbUrl: urlByPath.get(r.thumb_path ?? r.storage_path) ?? null,
-    note: r.note,
-  }));
+
+  return {
+    count: total,
+    first: first
+      ? { url: urlByPath.get(first.storage_path) ?? null, recorded_at: first.recorded_at }
+      : null,
+    asOf: asOf
+      ? { url: urlByPath.get(asOf.storage_path) ?? null, recorded_at: asOf.recorded_at }
+      : null,
+    asOfIsSameDay: !!asOf && asOf.recorded_at === date,
+  };
 }
