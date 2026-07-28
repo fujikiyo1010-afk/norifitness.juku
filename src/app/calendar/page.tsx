@@ -12,8 +12,8 @@ import {
   getWorkoutForCalendar,
   getLearnedForCalendar,
   getReviewsForCalendar,
-  getBodyPhotosForCalendar,
 } from "@/lib/calendar/queries";
+import { getMyBodyPhotoSummary } from "@/lib/body-photos/queries";
 import { getMyCarte } from "@/lib/workout/queries";
 import { CalendarDayView } from "./CalendarDayView";
 
@@ -42,15 +42,6 @@ export default async function CalendarPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/calendar");
 
-  // 週(日〜土)の範囲 — 記録ありドット用
-  const baseMs = Date.parse(`${date}T00:00:00Z`);
-  const sunday = new Date(baseMs - new Date(baseMs).getUTCDay() * 86_400_000)
-    .toISOString()
-    .slice(0, 10);
-  const saturday = new Date(Date.parse(`${sunday}T00:00:00Z`) + 6 * 86_400_000)
-    .toISOString()
-    .slice(0, 10);
-
   const [
     body,
     workout,
@@ -64,7 +55,7 @@ export default async function CalendarPage({
     goalRes,
     weekMeals,
     carte,
-    bodyPhotos,
+    photoSummary,
   ] = await Promise.all([
     getBodyForCalendar(date),
     getWorkoutForCalendar(date),
@@ -89,14 +80,13 @@ export default async function CalendarPage({
       .select("content")
       .eq("user_id", user.id)
       .maybeSingle(),
+    // 記録ありドット用: 週バー + 月カレンダー(過去日選択)の両方で使うため全期間の記録日を取得
     supabase
       .from("meal_logs")
       .select("date")
-      .eq("user_id", user.id)
-      .gte("date", sunday)
-      .lte("date", saturday),
+      .eq("user_id", user.id),
     getMyCarte(),
-    getBodyPhotosForCalendar(date),
+    getMyBodyPhotoSummary(),
   ]);
 
   const meals = mealsData.meals.map((m) => ({
@@ -146,7 +136,7 @@ export default async function CalendarPage({
           }
           lastWatched={lastWatched}
           hasCarte={!!carte}
-          bodyPhotos={bodyPhotos}
+          photoSummary={photoSummary}
           recordedDates={recordedDates}
         />
       </main>
