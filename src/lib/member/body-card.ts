@@ -17,6 +17,7 @@ export type BodyCard = {
   hasData: boolean; // 体重の記録が1件でもあるか
   currentWeight: number | null;
   currentBodyFat: number | null; // 直近の体脂肪率(点18・見せ方3で使用)
+  currentWaist: number | null; // 直近のウエスト(新ホームカードで使用)
   startWeight: number | null;
   targetWeightKg: number | null;
   ringPct: number | null; // 入会→目標のうち達成割合 (0-100)
@@ -30,6 +31,7 @@ const EMPTY: BodyCard = {
   hasData: false,
   currentWeight: null,
   currentBodyFat: null,
+  currentWaist: null,
   startWeight: null,
   targetWeightKg: null,
   ringPct: null,
@@ -49,7 +51,7 @@ export async function getMyBodyCard(): Promise<BodyCard> {
   const [{ data: metricRows }, { data: goal }] = await Promise.all([
     supabase
       .from("body_metrics")
-      .select("recorded_at, weight_kg, body_fat_percent")
+      .select("recorded_at, weight_kg, body_fat_percent, waist_cm")
       .eq("user_id", user.id)
       .order("recorded_at", { ascending: true }),
     supabase
@@ -63,6 +65,7 @@ export async function getMyBodyCard(): Promise<BodyCard> {
     recorded_at: string;
     weight_kg: number | null;
     body_fat_percent: number | null;
+    waist_cm: number | null;
   }[];
   const weightRows = rows.filter((r) => r.weight_kg != null);
   if (weightRows.length === 0) return EMPTY;
@@ -71,6 +74,11 @@ export async function getMyBodyCard(): Promise<BodyCard> {
   const bfRows = rows.filter((r) => r.body_fat_percent != null);
   const currentBodyFat =
     bfRows.length > 0 ? bfRows[bfRows.length - 1].body_fat_percent : null;
+
+  // 直近のウエスト(記録がある最新)
+  const waistRows = rows.filter((r) => r.waist_cm != null);
+  const currentWaist =
+    waistRows.length > 0 ? waistRows[waistRows.length - 1].waist_cm : null;
 
   const targetWeightKg =
     (
@@ -111,6 +119,7 @@ export async function getMyBodyCard(): Promise<BodyCard> {
     hasData: true,
     currentWeight,
     currentBodyFat,
+    currentWaist,
     startWeight,
     targetWeightKg,
     ringPct,

@@ -19,6 +19,7 @@ import { getTodayActivity } from "@/lib/member/today-activity";
 import { isBetaUser } from "@/lib/auth/beta";
 import { isTokutenPreviewUser } from "@/lib/auth/tokuten-preview";
 import { isWeeklyPoolUser } from "@/lib/workout/pool-gate";
+import { isNewHomeCardUser } from "@/lib/auth/home-card-gate";
 import { getWeeklyTraining } from "@/lib/workout/weekly";
 import { HomeBeta } from "./HomeBeta";
 
@@ -111,6 +112,7 @@ export default async function Home() {
     w,
     isTokutenPreview,
     isPool,
+    isNewHomeCard,
   ] = await Promise.all([
     getMyAlerts(),
     getMyHomeStats(),
@@ -132,6 +134,8 @@ export default async function Home() {
     isTokutenPreviewUser(),
     // 週間プール改修の藤田さん先行ゲート(2026-07-22)
     isWeeklyPoolUser(),
+    // ホーム身体カード新デザインの藤田さん先行ゲート(2026-07-28)
+    isNewHomeCardUser(),
   ]);
 
   const displayName = stats?.displayName ?? "受講生";
@@ -185,6 +189,7 @@ export default async function Home() {
         alerts={alerts}
         showTokuten={isBeta || isTokutenPreview}
         weeklyPool={weeklyPool}
+        newHomeCard={isNewHomeCard}
       />
     );
   }

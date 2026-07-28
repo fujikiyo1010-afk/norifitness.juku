@@ -41,6 +41,7 @@ export function HomeBeta({
   workoutPartLabel = null,
   showTokuten = false,
   weeklyPool = null,
+  newHomeCard = false,
 }: {
   displayName: string;
   daysSinceJoined: number;
@@ -60,6 +61,8 @@ export function HomeBeta({
   showTokuten?: boolean;
   /** 週間プール改修(藤田先行): あればトレカードを週間表示に差し替え */
   weeklyPool?: WeeklyTraining | null;
+  /** 身体カード新デザイン(藤田先行): true=リッチ版カード+挨拶/掲示板を約80%に圧縮 */
+  newHomeCard?: boolean;
 }) {
   const learnPct =
     totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
@@ -103,17 +106,18 @@ export function HomeBeta({
 
         {/* 挨拶ヒーロー (件I改・2026-07-13: グラデ帯の上下余白を14px均等にし文字を縦中央へ。
             掲示板との隙間はそこそこ近いまま=案A) */}
-        <section className="bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] px-5 py-3.5">
+        {/* newHomeCard(藤田先行): 挨拶帯+継続ピルの縦を約80%に圧縮(文字・余白を縮小) */}
+        <section className={`bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] px-5 ${newHomeCard ? "py-2.5" : "py-3.5"}`}>
           {/* 件E(2026-07-13): 挨拶+継続ピルは必ず横1行(改行禁止)。長い名前は挨拶側をtruncate。 */}
           <div className="flex items-center justify-between gap-2">
-            <h1 className="min-w-0 truncate text-[18px] font-bold text-[#2b2620]">
+            <h1 className={`min-w-0 truncate font-bold text-[#2b2620] ${newHomeCard ? "text-[14.5px]" : "text-[18px]"}`}>
               こんにちは、{displayName} さん
             </h1>
             {/* 点20: 炎+継続◯日目(0日は出さない)。挨拶と同格に拡大(文字16px・炎18) */}
             {streakDays > 0 && (
-              <div className="flex flex-shrink-0 items-center gap-1.5 rounded-full bg-[#fff3e0] px-3 py-1.5">
-                <FlameIcon size={18} />
-                <span className="whitespace-nowrap text-[16px] font-extrabold text-[#c2693f]">
+              <div className={`flex flex-shrink-0 items-center gap-1.5 rounded-full bg-[#fff3e0] ${newHomeCard ? "px-2.5 py-1" : "px-3 py-1.5"}`}>
+                <FlameIcon size={newHomeCard ? 14 : 18} />
+                <span className={`whitespace-nowrap font-extrabold text-[#c2693f] ${newHomeCard ? "text-[13px]" : "text-[16px]"}`}>
                   継続 {streakDays} 日目
                 </span>
               </div>
@@ -130,11 +134,15 @@ export function HomeBeta({
 
           {/* 掲示板「のりfitnessから」 */}
           {boardItems.length > 0 && (
-            <BoardCard items={boardItems} unreadReply={unreadReply} />
+            <BoardCard items={boardItems} unreadReply={unreadReply} compact={newHomeCard} />
           )}
 
-          {/* 今のからだ(点18・見せ方3=大きい数字型。リングは/record体重タブのみ) */}
-          <BodyBigCard bodyCard={bodyCard} />
+          {/* 今のからだ。newHomeCard(藤田先行)=リッチ版に差し替え / それ以外=従来カード */}
+          {newHomeCard ? (
+            <BodyBigCardV2 bodyCard={bodyCard} />
+          ) : (
+            <BodyBigCard bodyCard={bodyCard} />
+          )}
 
           {/* 件2(2026-07-13): 初日ガイド。新規の初日だけ・今日の達成3/3で消える・2日目以降は出さない。
               純導出(daysSinceJoined===0 && doneCount<3)=表示済み管理の保存なし。責めないトーン・絵文字なし。 */}
@@ -331,13 +339,16 @@ export function HomeBeta({
 function BoardCard({
   items,
   unreadReply,
+  compact = false,
 }: {
   items: BoardItem[];
   unreadReply: boolean;
+  /** newHomeCard(藤田先行): 縦を約80%に圧縮(上下余白・行高を詰める・中身は不変) */
+  compact?: boolean;
 }) {
   return (
-    <div className="rounded-[14px] border border-[#e7dcc9] bg-[#fffdf8] px-4 py-3.5">
-      <div className="mb-2 flex items-center justify-between">
+    <div className={`rounded-[14px] border border-[#e7dcc9] bg-[#fffdf8] px-4 ${compact ? "py-2.5" : "py-3.5"}`}>
+      <div className={`flex items-center justify-between ${compact ? "mb-1.5" : "mb-2"}`}>
         <div className="flex items-center gap-1.5">
           {/* 件F(2026-07-13): 「の」丸アイコンと「のりfitnessから」を撤去し見出しは「掲示板」に */}
           <span className="text-[13px] font-bold text-[#2b2620]">
@@ -364,7 +375,7 @@ function BoardCard({
           // 総2: ベータの日次FBは it.href(=その日の食事詳細)へ着地統一。無ければお知らせ一覧。
           const href = it.href ?? "/notices";
           return (
-            <li key={it.key} className="py-2 first:pt-0 last:pb-0">
+            <li key={it.key} className={`first:pt-0 last:pb-0 ${compact ? "py-1.5" : "py-2"}`}>
               <Link href={href} className="flex items-center gap-2 hover:opacity-90">
                 <span className="w-8 flex-shrink-0 font-mono text-[10px] text-[#a59b8c]">
                   {it.dateLabel}
@@ -457,6 +468,99 @@ function BodyBigCard({ bodyCard }: { bodyCard: BodyCard }) {
         </div>
       )}
     </Link>
+  );
+}
+
+// =====================================================================
+// 身体カード リッチ版(newHomeCard・藤田先行) — 参考デザイン採用
+//   緑ヘッダー帯 + 体重|ウエストの2大数字 + チップ4つ + ボタン2つ
+// =====================================================================
+
+function BodyBigCardV2({ bodyCard }: { bodyCard: BodyCard }) {
+  const recordedToday = bodyCard.daysSinceLatest === 0;
+  const weight = bodyCard.currentWeight != null ? bodyCard.currentWeight.toFixed(1) : "—";
+  const waist = bodyCard.currentWaist != null ? bodyCard.currentWaist.toFixed(1) : "—";
+  return (
+    <div className="overflow-hidden rounded-[16px] border border-[#dcd2bd] bg-[#fffdf8] shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+      {/* 緑ヘッダー帯 */}
+      <div
+        className="flex items-start justify-between gap-2 px-[15px] py-3"
+        style={{ background: "linear-gradient(135deg,#3c7a54,#2f5a3c)" }}
+      >
+        <div className="flex items-start gap-2.5">
+          <span className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[9px] bg-white/15 text-white">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="3" width="16" height="18" rx="4" /><circle cx="12" cy="10" r="2.4" /><path d="M12 12.4V15" /></svg>
+          </span>
+          <div>
+            <div className="text-[14.5px] font-extrabold leading-tight text-white">今日の身体記録</div>
+            <div className="mt-0.5 text-[10px] text-[#cfe6d6]">毎日の記録が、理想の自分への一歩です</div>
+          </div>
+        </div>
+        <span className="flex flex-none items-center gap-1.5 rounded-full border border-white/30 bg-white/15 px-2.5 py-1 text-[10px] font-bold text-white">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#cfe3d5]" />
+          {recordedToday ? "本日記録済み" : "本日未記録"}
+        </span>
+      </div>
+
+      {/* 2大数字(体重=黒 / ウエスト=緑) */}
+      <div className="flex px-[15px] pb-3 pt-[15px]">
+        <div className="relative flex-1 text-center">
+          <div className="text-[11px] font-bold text-[#6a6256]">体重</div>
+          <div className="mt-[3px] text-[32px] font-black leading-none tracking-[-0.5px] text-[#111]">
+            {weight}
+            <span className="ml-0.5 text-[12px] font-extrabold text-[#8a8172]">kg</span>
+          </div>
+        </div>
+        <div className="relative flex-1 text-center before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-px before:bg-[#eee3d0]">
+          <div className="text-[11px] font-bold text-[#6a6256]">ウエスト</div>
+          <div className="mt-[3px] text-[32px] font-black leading-none tracking-[-0.5px] text-[#34603f]">
+            {waist}
+            <span className="ml-0.5 text-[12px] font-extrabold text-[#4d7a5c]">cm</span>
+          </div>
+        </div>
+      </div>
+
+      {/* チップ4つ(アイコン上・テキスト下) */}
+      <div className="flex gap-[7px] px-[13px] pb-[13px]">
+        {[
+          { label: "体重", href: "/record", icon: <><rect x="4" y="4" width="16" height="16" rx="4" /><path d="M9 9l3-2 3 2" /></> },
+          { label: "体脂肪", href: "/record", icon: <path d="M6 12a6 6 0 1 0 12 0c0-4-6-9-6-9S6 8 6 12z" /> },
+          { label: "ウエスト", href: "/record", icon: <><path d="M3 12h18" /><path d="M6 9l-2 3 2 3" /><path d="M18 9l2 3-2 3" /></> },
+          { label: "写真", href: "/record/photos", icon: <><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></> },
+        ].map((c) => (
+          <Link
+            key={c.label}
+            href={c.href}
+            className="flex flex-1 flex-col items-center gap-[3px] rounded-[11px] border border-[#e3d9c6] bg-[#fffef9] px-0.5 py-2"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4a875b" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">{c.icon}</svg>
+            <span className="text-[10px] font-extrabold text-[#5b5344]">{c.label}</span>
+          </Link>
+        ))}
+      </div>
+
+      {/* ボタン2つ */}
+      <div className="flex flex-col gap-2 px-[13px] pb-[14px]">
+        <Link
+          href="/record"
+          className="flex items-center justify-center gap-1.5 rounded-[12px] py-[13px] text-[14px] font-extrabold text-white"
+          style={{
+            background: "linear-gradient(180deg,#529367,#4a875b 55%,#3f7350)",
+            boxShadow: "0 2px 0 #2f5a3c,0 6px 12px rgba(52,96,63,0.22)",
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" /></svg>
+          今日の体重・サイズを記録
+        </Link>
+        <Link
+          href="/record"
+          className="flex items-center justify-center gap-1.5 rounded-[12px] border border-[#dbe8df] bg-white py-[11px] text-[12.5px] font-extrabold text-[#4a875b]"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18M7 14l3-3 3 3 4-5" /></svg>
+          グラフを見る
+        </Link>
+      </div>
+    </div>
   );
 }
 
