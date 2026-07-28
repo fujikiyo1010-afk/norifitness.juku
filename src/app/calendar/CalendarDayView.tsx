@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { CalendarBodyMetric, CalendarWorkout } from "@/lib/calendar/queries";
-import type { CalendarLearnedLesson, CalendarReview, CalendarBodyPhoto } from "@/lib/calendar/queries";
+import type { CalendarLearnedLesson, CalendarReview } from "@/lib/calendar/queries";
+import type { BodyPhotoSummary } from "@/lib/body-photos/queries";
 import type { LastWatchedLesson } from "@/lib/member/last-watched";
 import { CalendarBodyChart } from "./CalendarBodyChart";
 import { sumMeals, MEAL_ORDER, type MealLog } from "@/lib/meals/types";
@@ -47,7 +48,7 @@ export type CalendarViewProps = {
   learnStats: { completed: number; total: number };
   lastWatched: LastWatchedLesson | null;
   hasCarte: boolean;
-  bodyPhotos: CalendarBodyPhoto[];
+  photoSummary: BodyPhotoSummary;
   recordedDates: string[];
 };
 
@@ -57,6 +58,11 @@ const shiftDate = (date: string, days: number) =>
 const labelDate = (date: string) => {
   const d = new Date(`${date}T00:00:00Z`);
   return `${d.getUTCMonth() + 1}月${d.getUTCDate()}日 (${WEEKDAYS[d.getUTCDay()]})`;
+};
+
+const photoMD = (ymd: string) => {
+  const [, m, d] = ymd.split("-");
+  return `${Number(m)}/${Number(d)}`;
 };
 
 const deltaText = (d: number | null) =>
@@ -86,7 +92,7 @@ export function CalendarDayView({
   learnStats,
   lastWatched,
   hasCarte,
-  bodyPhotos,
+  photoSummary,
   recordedDates,
 }: CalendarViewProps) {
   const week = useMemo(() => {
@@ -97,6 +103,32 @@ export function CalendarDayView({
       return { ds: d.toISOString().slice(0, 10), dnum: d.getUTCDate(), dow: i };
     });
   }, [date]);
+
+  // 日付タップ → ドロップダウン月カレンダー(案A)。開閉と表示中の月をクライアント管理。
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerMonth, setPickerMonth] = useState(() => date.slice(0, 7)); // "YYYY-MM"
+  const monthGrid = useMemo(() => {
+    const [y, m] = pickerMonth.split("-").map(Number);
+    const first = new Date(Date.UTC(y, m - 1, 1));
+    const lead = first.getUTCDay(); // 月初の曜日ぶん空セル
+    const daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
+    const cells: ({ ds: string; dnum: number; dow: number } | null)[] = [];
+    for (let i = 0; i < lead; i++) cells.push(null);
+    for (let d = 1; d <= daysInMonth; d++) {
+      const ds = `${pickerMonth}-${String(d).padStart(2, "0")}`;
+      cells.push({ ds, dnum: d, dow: (lead + d - 1) % 7 });
+    }
+    return { y, m, cells };
+  }, [pickerMonth]);
+  const shiftMonth = (delta: number) => {
+    const [y, m] = pickerMonth.split("-").map(Number);
+    const nd = new Date(Date.UTC(y, m - 1 + delta, 1));
+    setPickerMonth(`${nd.getUTCFullYear()}-${String(nd.getUTCMonth() + 1).padStart(2, "0")}`);
+  };
+  const openPicker = () => {
+    setPickerMonth(date.slice(0, 7));
+    setPickerOpen((v) => !v);
+  };
 
   const meal = useMemo(() => {
     const sorted = [...meals].sort((a, b) => MEAL_ORDER[a.meal_type] - MEAL_ORDER[b.meal_type]);
@@ -118,13 +150,42 @@ export function CalendarDayView({
 
       <div className="cal-hd">
         <Link className="navbtn" href={`/calendar?date=${shiftDate(date, -1)}`} aria-label="前日">‹</Link>
-        <div className="hdt">{labelDate(date)}</div>
+        <button type="button" className={`hdt ${pickerOpen ? "open" : ""}`} onClick={openPicker}>
+          {labelDate(date)}
+          <svg className="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round"><polyline points="6 9 12 15 18 9" /></svg>
+        </button>
         {today > date ? (
           <Link className="navbtn" href={`/calendar?date=${shiftDate(date, 1)}`} aria-label="翌日">›</Link>
         ) : (
           <span className="navbtn dis">›</span>
         )}
       </div>
+
+      {pickerOpen && (
+        <div className="dropdown">
+          <div className="mgrid-head">
+            <button type="button" className="mnav" onClick={() => shiftMonth(-1)} aria-label="前の月">‹</button>
+            <span className="mtitle">{monthGrid.y}年 {monthGrid.m}月</span>
+            <button type="button" className="mnav" onClick={() => shiftMonth(1)} aria-label="次の月">›</button>
+          </div>
+          <div className="mgrid">
+            {WEEKDAYS.map((w, i) => (
+              <div key={w} className={`wl ${i === 0 ? "sun" : ""} ${i === 6 ? "sat" : ""}`}>{w}</div>
+            ))}
+            {monthGrid.cells.map((c, i) => {
+              if (!c) return <div className="c" key={`e${i}`} />;
+              const future = c.ds > today;
+              const cls = ["c", c.dow === 0 ? "sun" : "", c.dow === 6 ? "sat" : "", c.ds === date ? "sel" : "", c.ds === today ? "today" : "", future ? "fut" : ""].filter(Boolean).join(" ");
+              const dot = recordedDates.includes(c.ds) && !future ? <span className="rec" /> : null;
+              return future ? (
+                <div className={cls} key={c.ds}><span className="dd">{c.dnum}</span></div>
+              ) : (
+                <Link className={cls} key={c.ds} href={`/calendar?date=${c.ds}`}><span className="dd">{c.dnum}</span>{dot}</Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="week">
         {week.map((d) => {
@@ -156,6 +217,7 @@ export function CalendarDayView({
               </span>
               体組成
             </div>
+            <Link className="edit" href="/record">記録 ›</Link>
           </div>
           <div className="bm-legend">
             <span className="lg wt"><i className="dot" />体重</span>
@@ -174,7 +236,7 @@ export function CalendarDayView({
           <div className="ch">
             <div className="l">
               <span className="hic">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M4 3v7a3 3 0 0 0 6 0V3M7 3v18M17 3c-1.5 1-2 3-2 6s.5 4 2 5v7" /></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M4 2v7a3 3 0 0 0 3 3 3 3 0 0 0 3-3V2M7 12v10M20 2c-2 0-3.5 2.5-3.5 6 0 2.9 1 4.6 2.5 5.2V22" /></svg>
               </span>
               食事
             </div>
@@ -210,7 +272,10 @@ export function CalendarDayView({
               </div>
             </>
           ) : (
-            <div className="empty">まだ食事の記録がありません</div>
+            <div className="none">
+              <span className="emptic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M4 2v7a3 3 0 0 0 3 3 3 3 0 0 0 3-3V2M7 12v10M20 2c-2 0-3.5 2.5-3.5 6 0 2.9 1 4.6 2.5 5.2V22" /></svg></span>
+              <div className="t">この日の食事記録なし</div>
+            </div>
           )}
         </div>
 
@@ -225,7 +290,10 @@ export function CalendarDayView({
         <div className="card">
           <div className="ch">
             <div className="l"><span className="dumbbell" />トレーニング</div>
-            {workout.state === "done" && workout.isCustom && <span className="star">★ じぶんメニュー</span>}
+            <div className="chr">
+              {workout.state === "done" && workout.isCustom && <span className="star">★ じぶんメニュー</span>}
+              <Link className="edit" href="/workout/week">記録 ›</Link>
+            </div>
           </div>
           {workout.state === "rest" && (
             <div className="rest">
@@ -234,10 +302,7 @@ export function CalendarDayView({
             </div>
           )}
           {workout.state === "none" && (
-            <>
-              <div className="none"><span className="dumbbell-lg" /><div className="t">トレ記録なし</div></div>
-              <Link className="btn3d" href="/workout/week">トレを記録する</Link>
-            </>
+            <div className="none"><span className="dumbbell-lg" /><div className="t">トレ記録なし</div></div>
           )}
           {workout.state === "done" && (
             <>
@@ -253,6 +318,62 @@ export function CalendarDayView({
           )}
         </div>
         )}
+
+        {/* 体型写真(入会時↔直近・常設。日付では変わらない) */}
+        <div className="card">
+          <div className="ch">
+            <div className="l">
+              <span className="hic">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
+              </span>
+              体型写真
+            </div>
+            {photoSummary.count > 0 && (
+              <Link className="edit" href="/record/photos">写真をすべて見る（{photoSummary.count}枚）→</Link>
+            )}
+          </div>
+          <div className="bp-sub">入会時と直近を並べて、見た目の変化を記録しましょう</div>
+          <div className="bp-grid">
+            <div className="bp-cell">
+              <div className="bp-photo">
+                <span className="bp-badge start">{photoSummary.count > 0 ? "入会時" : "記録"}</span>
+                {photoSummary.first?.url ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={photoSummary.first.url} alt="入会時" />
+                ) : (
+                  <span className="bp-silh"><svg viewBox="0 0 24 32" fill="currentColor"><ellipse cx="12" cy="5" rx="3.2" ry="3.6" /><path d="M12 9c-3.4 0-5.4 2.2-5.8 5.6-.3 2.4-.5 5.4-.5 8.4 0 3.2.3 6 .6 8H11l.3-8h1.4l.3 8h4.7c.3-2 .6-4.8.6-8 0-3-.2-6-.5-8.4C17.4 11.2 15.4 9 12 9z" /></svg></span>
+                )}
+              </div>
+              <div className="bp-date">{photoSummary.first ? photoMD(photoSummary.first.recorded_at) : "—"}</div>
+            </div>
+            {photoSummary.last ? (
+              <div className="bp-cell">
+                <div className="bp-photo">
+                  <span className="bp-badge now">現在</span>
+                  {photoSummary.last.url ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={photoSummary.last.url} alt="現在" />
+                  ) : (
+                    <span className="bp-silh"><svg viewBox="0 0 24 32" fill="currentColor"><ellipse cx="12" cy="5" rx="3.2" ry="3.6" /><path d="M12 9c-3 0-4.9 1.8-5.4 4.8-.4 2.2-.6 5.2-.6 8.2 0 3.2.3 6 .6 8H11l.3-8h1.4l.3 8h4.7c.3-2 .6-4.8.6-8 0-3-.2-6-.6-8.2C16.9 10.8 15 9 12 9z" /></svg></span>
+                  )}
+                </div>
+                <div className="bp-date">{photoMD(photoSummary.last.recorded_at)}</div>
+              </div>
+            ) : (
+              <div className="bp-cell">
+                <div className="bp-photo empty2">現在の1枚を<br />追加しましょう</div>
+                <div className="bp-date">&nbsp;</div>
+              </div>
+            )}
+            <div className="bp-cell">
+              <Link className="bp-add" href="/record/photos">
+                <span className="plus">＋</span>
+                <span className="lb">写真を追加して<br />変化を記録しよう</span>
+              </Link>
+              <div className="bp-date">&nbsp;</div>
+            </div>
+          </div>
+        </div>
 
         {/* 添削(のりコメント・その日ある時だけ) */}
         {feedback && (
@@ -281,7 +402,10 @@ export function CalendarDayView({
               <div className="lc"><span className="k">飲酒</span><span className="v">{condition?.alcohol ? ALCOHOL_LABEL[condition.alcohol] : "—"}</span></div>
             </div>
           ) : (
-            <div className="empty">まだ生活記録がありません</div>
+            <div className="none">
+              <span className="emptic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z" /></svg></span>
+              <div className="t">この日の生活記録なし</div>
+            </div>
           )}
         </div>
 
@@ -310,7 +434,10 @@ export function CalendarDayView({
               </div>
             ))
           ) : (
-            <div className="empty">この日は学習の記録がありません</div>
+            <div className="none">
+              <span className="emptic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg></span>
+              <div className="t">この日の学習記録なし</div>
+            </div>
           )}
           <div className="learn-foot">
             <span className="cum">累計 <b>{learnStats.completed}</b> / {learnStats.total} レッスン完了</span>
@@ -328,28 +455,6 @@ export function CalendarDayView({
             </div>
           )}
         </div>
-
-        {/* ボディ写真(その日ある時だけ) */}
-        {bodyPhotos.length > 0 && (
-          <div className="card">
-            <div className="ch">
-              <div className="l">
-                <span className="hic">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
-                </span>
-                ボディ写真
-              </div>
-            </div>
-            <div className="gallery">
-              {bodyPhotos.map((p) => (
-                <div className="g" key={p.id}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  {p.thumbUrl && <img src={p.thumbUrl} alt="ボディ写真" />}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -359,9 +464,27 @@ const CSS = `
 .cal-root{--bg:#f9f5ed;--card:#fffdf8;--line:#e7dcc9;--ink:#2b2620;--ink2:#6a6256;--ink3:#a59b8c;--grn:#4a875b;--grn-d:#34603f;--grn-l:#eaf3ec;--blue:#3f6fd8;--amber:#e0a63f;--rose:#d8607a;max-width:460px;margin:0 auto;color:var(--ink);}
 .cal-root a{text-decoration:none;color:inherit;}
 .cal-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 8px;}
-.cal-hd .hdt{font-size:16px;font-weight:800;color:var(--ink);}
+.cal-hd .hdt{font-size:16px;font-weight:800;color:var(--ink);display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:9px;background:none;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.cal-hd .hdt.open{background:#efe7d5;}
+.cal-hd .hdt .caret{width:13px;height:13px;color:var(--ink3);transition:transform .2s;}
+.cal-hd .hdt.open .caret{transform:rotate(180deg);}
 .cal-hd .navbtn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:20px;color:var(--ink2);}
 .cal-hd .navbtn.dis{opacity:.3;}
+.dropdown{margin:0 14px 6px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 12px 10px;box-shadow:0 8px 22px rgba(43,38,32,.12);}
+.dropdown .mgrid-head{display:flex;align-items:center;justify-content:space-between;padding:2px 4px 10px;}
+.dropdown .mgrid-head .mnav{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:var(--ink2);font-size:18px;background:none;border:none;cursor:pointer;}
+.dropdown .mgrid-head .mtitle{font-size:13.5px;font-weight:800;color:var(--ink);}
+.dropdown .mgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px 0;}
+.dropdown .mgrid .wl{text-align:center;font-size:10px;font-weight:800;color:var(--ink3);padding-bottom:6px;}
+.dropdown .mgrid .wl.sun{color:#c2693f;}.dropdown .mgrid .wl.sat{color:var(--blue);}
+.dropdown .mgrid .c{aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;}
+.dropdown .mgrid .c .dd{width:33px;height:33px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:13.5px;font-weight:700;color:var(--ink);}
+.dropdown .mgrid .c.sun .dd{color:#c2693f;}.dropdown .mgrid .c.sat .dd{color:var(--blue);}
+.dropdown .mgrid .c.sel .dd{background:var(--grn);color:#fff;font-weight:800;}
+.dropdown .mgrid .c.today .dd{box-shadow:inset 0 0 0 1.5px var(--grn);}
+.dropdown .mgrid .c.fut .dd{color:#d3cbbb;}
+.dropdown .mgrid .c .rec{width:4px;height:4px;border-radius:50%;background:var(--grn);position:absolute;bottom:3px;}
+.dropdown .mgrid .c.sel .rec{background:#fff;}
 .week{display:flex;gap:3px;padding:2px 8px 12px;}
 .week .day{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0 8px;border-radius:13px;position:relative;}
 .week .day .w{font-size:10px;color:var(--ink3);font-weight:700;}
@@ -376,6 +499,7 @@ const CSS = `
 .cal-root .ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;}
 .cal-root .ch .l{display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:800;}
 .cal-root .ch .edit{font-size:11.5px;font-weight:700;color:var(--grn-d);}
+.cal-root .ch .chr{display:flex;align-items:center;gap:8px;}
 .cal-root .hic{width:19px;height:19px;color:var(--grn);display:inline-flex;}
 .cal-root .hic svg{width:19px;height:19px;}
 .cal-root .star{font-size:10px;font-weight:800;color:var(--grn-d);background:var(--grn-l);border-radius:99px;padding:3px 10px;}
@@ -465,10 +589,24 @@ const CSS = `
 .rest .tx span{font-size:11px;color:#7a8a9c;}
 .none{text-align:center;padding:12px 0 6px;color:var(--ink3);}
 .none .t{font-size:12px;font-weight:700;}
+.none .emptic{display:block;width:30px;height:30px;margin:0 auto 6px;color:#cdc4b2;}
+.none .emptic svg{width:30px;height:30px;display:block;}
 .cal-root .btn3d{display:block;width:100%;text-align:center;padding:14px;border-radius:13px;font-size:14px;font-weight:800;color:#fff;}
 .carte-msg{font-size:12.5px;line-height:1.7;color:var(--ink);margin-bottom:12px;}
 .carte-msg b{color:var(--grn-d);}
-.gallery{display:flex;gap:8px;overflow-x:auto;}
-.gallery .g{width:82px;height:104px;border-radius:12px;overflow:hidden;background:#d6ddd8;flex-shrink:0;}
-.gallery .g img{width:100%;height:100%;object-fit:cover;display:block;}
+.bp-sub{font-size:10.5px;color:var(--ink3);font-weight:600;margin:-3px 0 11px;}
+.bp-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;}
+.bp-cell{display:flex;flex-direction:column;gap:5px;}
+.bp-photo{aspect-ratio:3/4;border-radius:13px;overflow:hidden;position:relative;background:linear-gradient(160deg,#d9d2c4,#c4bcac);}
+.bp-photo img{width:100%;height:100%;object-fit:cover;display:block;}
+.bp-photo.empty2{display:flex;align-items:center;justify-content:center;text-align:center;font-size:10px;font-weight:700;color:var(--ink3);background:#fffdf8;border:1px dashed #d8cdba;padding:6px;}
+.bp-silh{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;}
+.bp-silh svg{width:64%;height:78%;color:#9a9081;opacity:.55;}
+.bp-badge{position:absolute;top:7px;left:7px;font-size:9.5px;font-weight:800;color:#fff;border-radius:7px;padding:2px 8px;box-shadow:0 1px 2px rgba(0,0,0,.15);}
+.bp-badge.start{background:rgba(43,38,32,.82);}
+.bp-badge.now{background:var(--grn);}
+.bp-date{text-align:center;font-size:11px;font-weight:800;color:var(--ink2);}
+.bp-add{aspect-ratio:3/4;border-radius:13px;border:2px dashed #cdbfa6;background:#fffdf8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px;text-align:center;}
+.bp-add .plus{width:34px;height:34px;border-radius:50%;background:#efe9dc;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:300;color:var(--ink2);}
+.bp-add .lb{font-size:9.5px;font-weight:800;line-height:1.4;color:#8a8172;}
 `;
