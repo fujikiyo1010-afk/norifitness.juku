@@ -6,7 +6,7 @@ import type { LastWatchedLesson } from "@/lib/member/last-watched";
 import type { TodayActivity } from "@/lib/member/today-activity";
 import type { MemberAlert, MemberAlertKey } from "@/lib/member/alerts";
 import type { WeeklyTraining } from "@/lib/workout/weekly";
-import { DocIcon, TargetIcon, BarIcon, BellIcon, DumbbellIcon } from "@/components/icons";
+import { DocIcon, TargetIcon, BarIcon, BellIcon } from "@/components/icons";
 
 /**
  * 受講生ホーム 確定7/7版(P3・v1・ベータ限定)。
@@ -555,7 +555,7 @@ function TodayTasksV2({
       <div className="flex flex-col gap-2.5">
         <TaskCardV2
           href="/workout/week"
-          icon={<DumbbellIcon size={22} />}
+          icon={<WorkoutMaskIcon />}
           iconBg="#e2ecdf"
           iconColor="#3f5c49"
           capColor="#4a875b"
@@ -590,6 +590,24 @@ function TodayTasksV2({
         />
       </div>
     </section>
+  );
+}
+
+// カレンダーのトレーニングと同じダンベル(=筋トレタブ /icons/nav/workout.svg)を
+// CSSマスクで着色。TaskCardV2 の icon 枠は color:iconColor なので currentColor で合う。
+function WorkoutMaskIcon({ size = 22 }: { size?: number }) {
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        display: "inline-block",
+        width: size,
+        height: size,
+        background: "currentColor",
+        WebkitMask: "url(/icons/nav/workout.svg) center/contain no-repeat",
+        mask: "url(/icons/nav/workout.svg) center/contain no-repeat",
+      }}
+    />
   );
 }
 
