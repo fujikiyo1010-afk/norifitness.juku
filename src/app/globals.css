@@ -32,6 +32,13 @@
 
 /* ダークモード対応は 線① では行わない (= 受講生 UI はクリーム固定) */
 
+/* オーバースクロール(下に引っ張った時のラバーバンド)でめくれる土台の色を
+   固定ヘッダー(MemberHeader = #fffdf8 = --nf-bg-card)に統一し、別色の帯を消す
+   (きよむさん 2026-07-28)。本文背景(body = #f9f5ed)は F統一のまま維持。 */
+html {
+  background: var(--nf-bg-card);
+}
+
 body {
   background: var(--nf-bg-app);   /* 全画面 F 統一 (= きよむさん 2026-06-18 確定、 outer 色概念は廃止) */
   color: var(--nf-ink);
