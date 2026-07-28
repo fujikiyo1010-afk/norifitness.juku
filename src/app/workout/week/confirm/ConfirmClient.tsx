@@ -181,7 +181,14 @@ export function ConfirmClient({
           </button>
           <button
             type="button"
-            onClick={() => router.push("/workout/week/edit?resume=1")}
+            onClick={() =>
+              router.push(
+                // ①-A: 配布は身元(day)を持ち帰り「配布のまま」開き直す(じぶんメニューに化けない)。
+                d.kind === "dist" && d.dayNumber != null
+                  ? `/workout/week/edit?resume=1&day=${d.dayNumber}`
+                  : "/workout/week/edit?resume=1"
+              )
+            }
             disabled={busy}
             className="text-center text-[12px] font-extrabold text-[#34603f]"
           >
@@ -245,15 +252,17 @@ function FixedBar({ children }: { children: React.ReactNode }) {
 function isArranged(ex: DraftExercise): boolean {
   if (ex.source === "added") return true;
   if (!ex.baseSets) return false;
+  // 重量(kg)は必須入力なのでアレンジに数えない。回数の変更・セット追加のみアレンジ扱い。
   return ex.sets.some((s, i) => {
     const b = ex.baseSets![i];
-    return !b || s.kg !== b.kg || s.reps !== b.reps;
+    return !b || s.reps !== b.reps;
   });
 }
 function setChanged(ex: DraftExercise, si: number, field: "kg" | "reps"): boolean {
-  if (ex.source === "added") return true;
+  if (ex.source === "added") return true; // 追加種目は全部紫
+  if (field === "kg") return false; // 配布の規定種目の重量は紫にしない(必須入力なので"アレンジ"ではない)
   if (!ex.baseSets) return false;
   const b = ex.baseSets[si];
   if (!b) return true;
-  return field === "kg" ? ex.sets[si].kg !== b.kg : ex.sets[si].reps !== b.reps;
+  return ex.sets[si].reps !== b.reps;
 }

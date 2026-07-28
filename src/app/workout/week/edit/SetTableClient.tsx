@@ -120,11 +120,9 @@ export function SetTableClient({
   }
 
   // 紫判定: 追加種目=常に紫 / のり基準ありで値が異なる=紫
-  function kgChanged(ex: DraftExercise, si: number): boolean {
-    if (ex.source === "added") return true;
-    if (!ex.baseSets) return false;
-    const b = ex.baseSets[si];
-    return !b || ex.sets[si].kg !== b.kg;
+  function kgChanged(ex: DraftExercise): boolean {
+    // 配布の規定種目の重量は必須入力なので紫にしない。追加種目のみ紫。
+    return ex.source === "added";
   }
   function repsChanged(ex: DraftExercise, si: number): boolean {
     if (ex.source === "added") return true;
@@ -213,7 +211,7 @@ export function SetTableClient({
                         </div>
                       </div>
                     ) : (
-                      <SetInput value={s.kg} onChange={(v) => patchSet(ei, si, { kg: v })} unit="kg" purple={kgChanged(ex, si)} />
+                      <SetInput value={s.kg} onChange={(v) => patchSet(ei, si, { kg: v })} unit="kg" purple={kgChanged(ex)} />
                     )}
                     <span className="text-[11px] text-[#a59b8c]">×</span>
                     <SetInput value={s.reps} onChange={(v) => patchSet(ei, si, { reps: v })} unit="回" purple={repsChanged(ex, si)} />
