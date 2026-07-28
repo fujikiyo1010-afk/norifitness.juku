@@ -348,7 +348,7 @@ export function CalendarDayView({
               <Link className="edit" href="/record/photos">一覧を見る（{photoView.count}枚）→</Link>
             )}
           </div>
-          <div className="bp-sub">入会時と、その日時点の姿を並べています</div>
+          <div className="bp-sub">入会時と直近を並べて、見た目の変化を記録しましょう</div>
           <div className="bp-grid">
             {/* 入会時(最古・固定) */}
             <div className="bp-cell">
@@ -366,10 +366,10 @@ export function CalendarDayView({
             {/* その日時点(その日ちょうど or その日以前で最新) */}
             <div className="bp-cell">
               <div className="bp-photo">
-                <span className="bp-badge now">その日</span>
+                <span className="bp-badge now">直近</span>
                 {photoView.asOf?.url ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={photoView.asOf.url} alt="その日時点" />
+                  <img src={photoView.asOf.url} alt="直近" />
                 ) : (
                   <span className="bp-silh"><svg viewBox="0 0 24 32" fill="currentColor"><ellipse cx="12" cy="5" rx="3.2" ry="3.6" /><path d="M12 9c-3 0-4.9 1.8-5.4 4.8-.4 2.2-.6 5.2-.6 8.2 0 3.2.3 6 .6 8H11l.3-8h1.4l.3 8h4.7c.3-2 .6-4.8.6-8 0-3-.2-6-.6-8.2C16.9 10.8 15 9 12 9z" /></svg></span>
                 )}
