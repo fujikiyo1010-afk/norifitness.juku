@@ -121,6 +121,7 @@ export default async function CalendarPage({
         <CalendarDayView
           date={date}
           today={today}
+          userId={user.id}
           body={body}
           workout={workout}
           meals={meals}
