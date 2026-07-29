@@ -88,7 +88,7 @@ export function DailyPanel({
           <div className="flex gap-0.5 flex-1">
             {(
               [
-                { key: "today", label: "今日" },
+                { key: "today", label: "記録" },
                 { key: "body", label: "体組成" },
                 { key: "photo", label: "写真" },
                 { key: "plan", label: "計画・カルテ" },
@@ -266,14 +266,14 @@ function FourCards({ detail }: { detail: DailyDetail }) {
       </Card>
 
       {/* 今日のトレ（実状態 or トレクラ管理） */}
-      <MiniCard icon={<DumbbellIcon size={14} />} title="今日のトレ" value={workoutValue} />
+      <MiniCard icon={<DumbbellIcon size={14} />} title="トレ" value={workoutValue} />
 
       {/* 今日の食事（実状態 or トレクラ管理） */}
-      <MiniCard icon={<MealIcon size={14} />} title="今日の食事" value={mealValue} />
+      <MiniCard icon={<MealIcon size={14} />} title="食事" value={mealValue} />
 
       {/* 今日の学習（実データ） */}
       <Card dim={!learning.latestTitle}>
-        <CardHead icon={<BookOpenIcon size={14} />} title="今日の学習" />
+        <CardHead icon={<BookOpenIcon size={14} />} title="学習" />
         <div className="text-[14px] font-bold pt-0.5 leading-tight">
           {learning.percent != null ? `全体 ${learning.percent}%` : "—"}
           <span className="text-[10.5px] text-zinc-500 font-medium">
@@ -369,11 +369,11 @@ function TodayTab({ detail }: { detail: DailyDetail }) {
       {lightboxPhotos && (
         <PhotoLightbox photos={lightboxPhotos} onClose={() => setLightboxPhotos(null)} />
       )}
-      <SectionCard title="今日の食事" icon={<MealIcon size={15} />}>
+      <SectionCard title="食事" icon={<MealIcon size={15} />}>
         {!detail.isBeta ? (
           <PlaceholderBody text="この受講生はまだ食事機能の対象外です（ベータ公開後に表示されます）。" />
         ) : detail.meals.length === 0 ? (
-          <PlaceholderBody text="今日の食事の記録はまだありません。写真から判断してコメントする場合は、この下のFB欄へ。" />
+          <PlaceholderBody text="この日の食事の記録はまだありません。写真から判断してコメントする場合は、この下のFB欄へ。" />
         ) : (
           <div className="space-y-2">
             {detail.meals.map((m, i) => (
@@ -427,11 +427,11 @@ function TodayTab({ detail }: { detail: DailyDetail }) {
           </div>
         )}
       </SectionCard>
-      <SectionCard title="今日のトレーニング" icon={<DumbbellIcon size={15} />}>
+      <SectionCard title="トレーニング" icon={<DumbbellIcon size={15} />}>
         {!detail.isBeta ? (
           <PlaceholderBody text="この受講生はまだトレ実施記録の対象外です（ベータ公開後に表示されます）。" />
         ) : !detail.workout ? (
-          <PlaceholderBody text="今日のトレーニング記録はまだありません。" />
+          <PlaceholderBody text="この日のトレーニング記録はまだありません。" />
         ) : (
           <div className="space-y-2 text-[12px]">
             <div className="flex items-center gap-2">
@@ -482,7 +482,7 @@ function TodayTab({ detail }: { detail: DailyDetail }) {
           </div>
         )}
       </SectionCard>
-      <SectionCard title="今日の生活" icon={<MoonIcon size={15} />}>
+      <SectionCard title="生活" icon={<MoonIcon size={15} />}>
         {!detail.isBeta ? (
           <PlaceholderBody text="この受講生はまだ生活記録の対象外です（ベータ公開後に表示されます）。" />
         ) : !detail.condition ||
@@ -490,7 +490,7 @@ function TodayTab({ detail }: { detail: DailyDetail }) {
             !detail.condition.condition &&
             !detail.condition.bowel &&
             !detail.condition.alcohol) ? (
-          <PlaceholderBody text="今日の生活記録はまだありません（未入力またはスキップ）。" />
+          <PlaceholderBody text="この日の生活記録はまだありません（未入力またはスキップ）。" />
         ) : (
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-zinc-800">
             {detail.condition.sleepHours != null && (
@@ -1092,7 +1092,7 @@ function FbBar({
       {!summaryCollapsed && (
         <SummaryPanel detail={detail} onCollapse={() => setCollapsed(true)} />
       )}
-      <div className="w-[240px] flex-shrink-0 bg-[#f8faf9] border border-[#e8ebe9] rounded-[9px] px-3 py-2 text-[11px] text-zinc-600 leading-relaxed overflow-y-auto max-h-[92px]">
+      <div className="w-[240px] flex-shrink-0 bg-[#f8faf9] border border-[#e8ebe9] rounded-[9px] px-3 py-2 text-[11px] text-zinc-600 leading-relaxed overflow-y-auto">
         <b className="text-[9.5px] text-zinc-500 block mb-0.5">
           前回のフィードバック
           {detail.prevFeedback && `（${mdLabel(detail.prevFeedback.date)}）`}
@@ -1116,7 +1116,7 @@ function FbBar({
           onChange={(e) =>
             setDrafts((d) => ({ ...d, [draftKey]: e.target.value }))
           }
-          placeholder="今日のひとことを書く…"
+          placeholder="この日のひとことを書く…"
           className="w-full min-h-[168px] max-h-[320px] border border-[#e8ebe9] rounded-[9px] px-3 py-2 text-[12.5px] leading-relaxed resize-y focus:outline focus:outline-2 focus:outline-[#00897b]/35 focus:border-[#00897b]"
         />
         {error && <div className="text-[11px] text-red-600">⚠ {error}</div>}
