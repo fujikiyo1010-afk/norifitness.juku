@@ -108,7 +108,7 @@ export function HomeBeta({
         {/* 挨拶ヒーロー (件I改・2026-07-13: グラデ帯の上下余白を14px均等にし文字を縦中央へ。
             掲示板との隙間はそこそこ近いまま=案A) */}
         {/* newHomeCard(4人先行): 挨拶帯+継続ピルの縦を圧縮(元→約72%相当・文字/余白を縮小) */}
-        <section className={`bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] px-5 ${newHomeCard ? "py-2" : "py-3.5"}`}>
+        <section className={`bg-gradient-to-br from-[#e0f2f1] to-[#fffbe6] px-5 ${newHomeCard ? "py-1.5" : "py-3.5"}`}>
           {/* 件E(2026-07-13): 挨拶+継続ピルは必ず横1行(改行禁止)。長い名前は挨拶側をtruncate。 */}
           <div className="flex items-center justify-between gap-2">
             <h1 className={`min-w-0 truncate font-bold text-[#2b2620] ${newHomeCard ? "text-[13.5px]" : "text-[18px]"}`}>
@@ -348,8 +348,8 @@ function BoardCard({
   compact?: boolean;
 }) {
   return (
-    <div className={`rounded-[14px] border border-[#e7dcc9] bg-[#fffdf8] px-4 ${compact ? "py-[7px]" : "py-3.5"}`}>
-      <div className={`flex items-center justify-between ${compact ? "mb-[3px]" : "mb-2"}`}>
+    <div className={`rounded-[14px] border border-[#e7dcc9] bg-[#fffdf8] px-4 ${compact ? "py-1.5" : "py-3.5"}`}>
+      <div className={`flex items-center justify-between ${compact ? "mb-0.5" : "mb-2"}`}>
         <div className="flex items-center gap-1.5">
           {/* 件F(2026-07-13): 「の」丸アイコンと「のりfitnessから」を撤去し見出しは「掲示板」に */}
           <span className="text-[13px] font-bold text-[#2b2620]">
@@ -376,7 +376,7 @@ function BoardCard({
           // 総2: ベータの日次FBは it.href(=その日の食事詳細)へ着地統一。無ければお知らせ一覧。
           const href = it.href ?? "/notices";
           return (
-            <li key={it.key} className={`first:pt-0 last:pb-0 ${compact ? "py-1" : "py-2"}`}>
+            <li key={it.key} className={`first:pt-0 last:pb-0 ${compact ? "py-0.5" : "py-2"}`}>
               <Link href={href} className="flex items-center gap-2 hover:opacity-90">
                 <span className="w-8 flex-shrink-0 font-mono text-[10px] text-[#a59b8c]">
                   {it.dateLabel}
