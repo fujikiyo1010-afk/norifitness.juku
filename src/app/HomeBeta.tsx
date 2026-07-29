@@ -392,7 +392,7 @@ function BoardCard({
                       </span>
                     </>
                   ) : (
-                    <span className="truncate text-[12.5px] text-[#2b2620]">
+                    <span className={`truncate text-[#2b2620] ${compact ? "text-[11.25px]" : "text-[12.5px]"}`}>
                       のりから返信が届きました
                     </span>
                   )}
@@ -545,17 +545,18 @@ function TodayTasksV2({
   lastWatched: LastWatchedLesson | null;
 }) {
   return (
-    <section className="rounded-[16px] border-[1.5px] border-[#cfe3d6] bg-[#f0f7f2] p-2.5">
+    // 案5: 温グレー(グレージュ)地。トレの薄緑アイコンと被らない
+    <section className="rounded-[16px] border-[1.5px] border-[#e4e0d6] bg-[#f4f2ee] p-2.5">
       {/* B1: 見出し行に達成ゲージ＋n/3 を同居(下部の独立達成行は廃止) */}
       <div className="mb-2.5 flex items-center gap-2.5 px-1">
-        <h2 className="text-[13.5px] font-extrabold text-[#3d5a3b]">今日やること</h2>
-        <span className="h-2 flex-1 overflow-hidden rounded-full bg-[#d8e0d3]">
+        <h2 className="text-[13.5px] font-extrabold text-[#5b564d]">今日やること</h2>
+        <span className="h-2 flex-1 overflow-hidden rounded-full bg-[#e0ddd3]">
           <span
             className="block h-full rounded-full"
             style={{ width: `${(doneCount / 3) * 100}%`, background: "linear-gradient(90deg,#4a875b,#3f5c49)" }}
           />
         </span>
-        <span className="text-[12px] font-extrabold text-[#3f5c49]">{doneCount}/3</span>
+        <span className="text-[12px] font-extrabold text-[#5b564d]">{doneCount}/3</span>
         {doneCount === 3 && (
           <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-[#c9a227] px-2 py-0.5 text-[10.5px] font-extrabold text-white shadow-[0_1px_3px_rgba(201,162,39,0.4)]">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -653,21 +654,21 @@ function TaskCardV2({
     <Link
       href={href}
       className={`relative flex gap-3 rounded-[13px] border px-[13px] py-3 shadow-[0_1px_3px_rgba(60,55,40,0.05)] ${
-        done ? "border-[#cfdec9] bg-[#eef4ea]" : "border-[#eee7d8] bg-[#fffdf8]"
+        done ? "border-[#e2ded4] bg-[#efedea]" : "border-[#eee7d8] bg-[#fffdf8]"
       }`}
     >
       <span
         className="flex h-10 w-10 flex-none items-center justify-center rounded-[11px]"
-        style={{ background: done ? "#d7e6d2" : iconBg, color: done ? "#3f5c49" : iconColor }}
+        style={{ background: done ? "#e4e1da" : iconBg, color: done ? "#8a8378" : iconColor }}
       >
         {icon}
       </span>
       <div className="min-w-0 flex-1">
-        <div className="text-[10.5px] font-extrabold" style={{ color: done ? "#3d5a3b" : capColor }}>
+        <div className="text-[10.5px] font-extrabold" style={{ color: done ? "#8a8378" : capColor }}>
           {cap}
         </div>
         <div
-          className={`mt-0.5 text-[14.5px] font-extrabold leading-[1.4] ${done ? "text-[#3d5a3b]" : "text-[#33302a]"}`}
+          className={`mt-0.5 text-[14.5px] font-extrabold leading-[1.4] ${done ? "text-[#8a8378]" : "text-[#33302a]"}`}
         >
           {main}
         </div>
@@ -681,7 +682,7 @@ function TaskCardV2({
         )}
       </div>
       {done && (
-        <span className="absolute right-[11px] top-[10px] rounded-full bg-[#e3e8df] px-[11px] py-[3px] text-[10px] font-extrabold text-[#3d5a3b]">
+        <span className="absolute right-[11px] top-[10px] rounded-full bg-[#e6e3db] px-[11px] py-[3px] text-[10px] font-extrabold text-[#8a8378]">
           {pill}
         </span>
       )}
