@@ -34,10 +34,12 @@ export default async function AdminDailyPage({
 }) {
   await requireAdmin();
   const sp = await searchParams;
+  // デフォルトは「1日前(昨日)」。29日には28日分を添削する運用に合わせる。
+  // 日付指定(?date=)があればそれを優先(日付ナビで今日にも移動可)。
   const date =
     typeof sp.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(sp.date)
       ? sp.date
-      : jstToday();
+      : addDays(jstToday(), -1);
 
   // S2-A: listUsersWithAlerts(重い全件スキャン)は queue と detail の両方で必要。
   // 1回だけ取得して両方へ渡す(従来は各関数が個別に実行=1リクエストで2回走っていた)。
@@ -164,7 +166,7 @@ export default async function AdminDailyPage({
               </div>
             </div>
             <div>
-              <div className="text-[12px] font-extrabold">今日の添削</div>
+              <div className="text-[12px] font-extrabold">この日の添削</div>
               <div className="text-[10px] text-zinc-500 mt-0.5">
                 {progressSub}
               </div>
