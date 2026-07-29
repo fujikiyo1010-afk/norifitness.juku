@@ -5,13 +5,15 @@ import { isWeeklyPoolUser } from "@/lib/workout/pool-gate";
 import { getWeeklyTraining } from "@/lib/workout/weekly";
 import { jstTodayStr } from "@/lib/date/jst";
 import { WeekGridCard } from "./WeekGridCard";
-import { DraftGate } from "./DraftGate";
+import { ClearDraftOnMain } from "./ClearDraftOnMain";
 
 export const dynamic = "force-dynamic";
 
 /**
- * 週間トレ・メイン(再設計・モック画面1/7・3人先行)。
- * 未完了=メイン初期画面 / 決定済み未完了=表紙へ(DraftGate) / 完了済=完了後メイン。
+ * 週間トレ・メイン(再設計・モック画面1/7・4人先行)。
+ * 未完了=メイン初期画面 / 完了済=完了後メイン。
+ * ②-B(2026-07-29): 下書きは持ち越さない。メイン着地で ClearDraftOnMain が破棄する
+ * (旧 DraftGate の「下書きがあると表紙へ強制送還」は撤去)。
  */
 export default async function WeekPoolPage() {
   const isPool = await isWeeklyPoolUser();
@@ -24,6 +26,7 @@ export default async function WeekPoolPage() {
       <MemberHeader title={`今週のトレーニング ・ ${wk.weekNumber}週目`} fallbackHref="/" />
       <main className="min-h-[100dvh] bg-[#f9f5ed]">
         <div className="mx-auto max-w-[460px] px-4 py-4">
+          <ClearDraftOnMain todayKey={todayKey} />
           {!wk.hasMenu ? (
             <div className="rounded-2xl border border-[#e7dcc9] bg-[#fffdf8] p-8 text-center text-[13px] leading-relaxed text-[#6a6256]">
               まだトレーニングメニューが届いていません。
@@ -64,7 +67,6 @@ export default async function WeekPoolPage() {
           ) : (
             // ---- メイン初期画面(§2-1) ----
             <div className="flex flex-col gap-3">
-              <DraftGate todayKey={todayKey} />
               <p className="rounded-xl border border-[#cfe3d6] bg-[#f0f7f2] px-3.5 py-2.5 text-[12px] font-bold leading-relaxed text-[#34603f]">
                 順番も組み合わせも自由。1週間で全部を1回ずつが目安です。
                 <br />
