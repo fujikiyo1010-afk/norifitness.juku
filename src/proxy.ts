@@ -12,6 +12,8 @@ const PUBLIC_PATH_PREFIXES = [
   "/reset-password",  // リセットメールリンクの着地点
   "/api", // API は各エンドポイントで個別に認証
   "/mock", // 社内レビュー用の静的デザインモック (= 認証不要で共有 / レビュー後 削除可)
+  "/sw.js", // Service Worker スクリプト(認証不要・素で配る)
+  "/offline", // SW のオフライン fallback(precache 対象・認証不要)
 ];
 
 function isPublicPath(pathname: string): boolean {
@@ -60,6 +62,6 @@ export const config = {
      * - /icons/* (PWA アイコン、認証不要)
      * - 画像ファイル (svg, png, jpg, jpeg, gif, webp)
      */
-    "/((?!_next/static|_next/image|favicon.ico|manifest.json|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|manifest.json|sw.js|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
