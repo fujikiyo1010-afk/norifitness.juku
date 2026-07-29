@@ -3,6 +3,7 @@ import Link from "next/link";
 import { MemberHeader } from "@/components/MemberHeader";
 import { isWeeklyPoolUser } from "@/lib/workout/pool-gate";
 import { getWeeklyTraining } from "@/lib/workout/weekly";
+import { WeekGridCard } from "../WeekGridCard";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,8 @@ export default async function WeekSelectPage() {
       <MemberHeader title="今日のメニューを選ぶ" fallbackHref="/workout/week" />
       <main className="min-h-[100dvh] bg-[#f9f5ed]">
         <div className="mx-auto flex max-w-[460px] flex-col gap-2.5 px-4 py-4">
+          {/* 一番上に週間表(メインと同じ) */}
+          <WeekGridCard recRow={wk.recRow} thisRow={wk.thisRow} lastRow={wk.lastRow} remaining={wk.remaining} />
           <p className="rounded-xl border border-[#cfe3d6] bg-[#f0f7f2] px-3.5 py-2.5 text-[11.5px] font-bold text-[#34603f]">
             どのメニューを選んでもOK。体調や気分に合わせてどうぞ。
           </p>
@@ -69,6 +72,15 @@ export default async function WeekSelectPage() {
             </div>
             <span className="text-[#a59b8c]">›</span>
           </Link>
+
+          {/* 一番下: のりの配布メニュー原本(MenuView)への出口 */}
+          <Link
+            href="/workout"
+            className="mt-1.5 flex items-center justify-center gap-1.5 rounded-xl border-2 border-[#4a875b] bg-[#fffdf8] py-3 text-[13px] font-extrabold text-[#34603f]"
+          >
+            配布メニューを見る →
+          </Link>
+          <p className="-mt-1 text-center text-[10px] text-[#a59b8c]">のりが組んだメニュー全体を、参考に見られます</p>
         </div>
       </main>
     </>
