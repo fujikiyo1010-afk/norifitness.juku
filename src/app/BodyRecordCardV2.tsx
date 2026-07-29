@@ -42,8 +42,9 @@ export function BodyRecordCardV2({ bodyCard }: { bodyCard: BodyCard }) {
             <div className="mt-0.5 text-[9.5px] text-[#cfe6d6]">毎日の記録が、理想の自分への一歩です</div>
           </div>
         </div>
-        <span className="flex flex-none items-center gap-1.5 rounded-full border border-white/30 bg-white/15 px-2.5 py-1 text-[10px] font-bold text-white">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#cfe3d5]" />
+        {/* バッジ(案3): ヘッダーより濃い緑ソリッド + 白文字。●の色で状態を示す */}
+        <span className="flex flex-none items-center gap-1.5 rounded-full bg-[#25543a] px-2.5 py-1 text-[10px] font-bold text-white">
+          <span className={`h-1.5 w-1.5 rounded-full ${recordedToday ? "bg-[#7fe0a0]" : "bg-[#e0a06a]"}`} />
           {recordedToday ? "本日記録済み" : "本日未記録"}
         </span>
       </div>
@@ -59,9 +60,9 @@ export function BodyRecordCardV2({ bodyCard }: { bodyCard: BodyCard }) {
         </div>
         <div className="relative flex-1 text-center before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-px before:bg-[#eee3d0]">
           <div className="text-[11px] font-bold text-[#6a6256]">ウエスト</div>
-          <div className="mt-0.5 text-[32px] font-black leading-none tracking-[-0.5px] text-[#34603f]">
+          <div className="mt-0.5 text-[32px] font-black leading-none tracking-[-0.5px] text-[#111]">
             {waist}
-            <span className="ml-0.5 text-[12px] font-extrabold text-[#4d7a5c]">cm</span>
+            <span className="ml-0.5 text-[12px] font-extrabold text-[#8a8172]">cm</span>
           </div>
         </div>
       </div>
