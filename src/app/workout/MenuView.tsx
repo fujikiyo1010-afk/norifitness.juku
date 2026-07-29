@@ -11,6 +11,7 @@ import {
   formatDistributionDate,
   defaultNoriNote,
 } from "@/lib/workout/menu-display";
+import { menuAbbr, targetColor } from "@/lib/workout/part-color";
 import type {
   UserWorkoutMenuRow,
   CycleStage,
@@ -168,27 +169,27 @@ export function MenuView({
           {dayCount > 1 && (
             <div className="mt-3 flex gap-0.5 overflow-x-auto border-b-2 border-[#eee5d4]">
               {activeCycle["週"].map((w, i) => {
-                const kind = w["種別"];
-                const sub = kind ? kind : `${w["種目"]?.length ?? 0}種目`;
                 const on = i === activeDayIdx;
+                const chip = dayChip(w); // 部位色チップ(色分けタブ・2026-07-29)
                 return (
                   <button
                     key={i}
                     type="button"
                     onClick={() => setActiveDayIdx(i)}
-                    className={`min-w-[54px] flex-1 whitespace-nowrap px-1 py-1.5 text-[12px] font-extrabold transition-colors ${
-                      on
-                        ? "-mb-0.5 border-b-2 border-[#34603f] text-[#34603f]"
-                        : "text-[#a59b8c]"
+                    className={`flex min-w-0 flex-1 flex-col items-center gap-1 px-1 py-1.5 transition-colors ${
+                      on ? "-mb-0.5 border-b-2 border-[#34603f]" : ""
                     }`}
                   >
-                    {cleanDayLabel(w["日"])}
                     <span
-                      className={`mt-0.5 block text-[9px] font-bold ${
-                        kind ? "text-[#c08a2d]" : "text-[#a59b8c]"
-                      }`}
+                      className="inline-flex items-center justify-center rounded-[7px] px-1.5 py-0.5 text-[11px] font-extrabold leading-tight text-white"
+                      style={{ background: chip.color }}
                     >
-                      {sub}
+                      {chip.text}
+                    </span>
+                    <span
+                      className={`text-[10px] font-extrabold ${on ? "text-[#34603f]" : "text-[#a59b8c]"}`}
+                    >
+                      {cleanDayLabel(w["日"])}
                     </span>
                   </button>
                 );
@@ -325,6 +326,17 @@ function ExerciseList({
     }
   }
   return <div className="mt-2">{blocks}</div>;
+}
+
+// 日タブの部位色チップ(色分けタブ・2026-07-29)。休息=金茶/パーソナル=青/通常=主部位から略称・色。
+function dayChip(w: DayMenu): { text: string; color: string } {
+  const kind = w["種別"];
+  if (kind === "休息") return { text: "休", color: "#c9a227" };
+  if (kind === "パーソナル") return { text: "パ", color: "#3a6ea5" };
+  const target = getExerciseTarget((w["種目"] ?? []).flatMap((e) => e["主部位"] ?? []));
+  const dayLabel = w["日"];
+  const name = dayLabel && !/^\d+日目$/.test(dayLabel) ? dayLabel : `${target}の日`;
+  return { text: menuAbbr(name), color: targetColor(target) };
 }
 
 function ExerciseRow({
