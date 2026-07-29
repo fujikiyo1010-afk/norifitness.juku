@@ -5,6 +5,7 @@ import { getEditorInitial } from "@/lib/workout/pool-detail";
 import { getFavorites } from "@/lib/workout/custom-queries";
 import { jstTodayStr } from "@/lib/date/jst";
 import { SetTableClient } from "./SetTableClient";
+import { FlowLeaveGuard } from "../FlowLeaveGuard";
 import type { DraftExercise } from "../draft";
 
 export const dynamic = "force-dynamic";
@@ -58,6 +59,8 @@ export default async function WeekEditPage({
   return (
     <>
       <MemberHeader title={initial.menuName} fallbackHref={backHref} />
+      {/* ②-B: 編集中の離脱時に破棄確認。戻り先=来た入口。 */}
+      <FlowLeaveGuard active backHref={backHref} todayKey={jstTodayStr()} />
       <SetTableClient
         kind={initial.kind}
         dayNumber={initial.dayNumber}

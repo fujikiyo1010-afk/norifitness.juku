@@ -3,6 +3,7 @@ import { MemberHeader } from "@/components/MemberHeader";
 import { isWeeklyPoolUser } from "@/lib/workout/pool-gate";
 import { jstTodayStr } from "@/lib/date/jst";
 import { ConfirmClient } from "./ConfirmClient";
+import { FlowLeaveGuard } from "../FlowLeaveGuard";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +25,8 @@ export default async function WeekConfirmPage({
   return (
     <>
       <MemberHeader title="今日のトレーニング" fallbackHref="/workout/week" />
+      {/* ②-B: 休養日以外は離脱時に破棄確認。戻り先=メイン。 */}
+      <FlowLeaveGuard active={!rest} backHref="/workout/week" todayKey={jstTodayStr()} />
       <ConfirmClient
         todayKey={jstTodayStr()}
         rest={rest}
