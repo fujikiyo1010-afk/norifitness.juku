@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { listAuditsForUser } from "@/lib/monthly-audit/queries";
-import { formatTargetMonthLabel } from "@/lib/monthly-audit/types";
+import { cycleLabelOf } from "@/lib/monthly-audit/cycle";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,12 @@ export default async function UserMonthlyAuditsPage({
 }) {
   const { id: userId } = await params;
   const audits = await listAuditsForUser(userId);
+  const { data: u } = await createAdminClient()
+    .from("users")
+    .select("joined_at")
+    .eq("id", userId)
+    .maybeSingle();
+  const joinedAt = (u?.joined_at as string | null) ?? null;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6">
@@ -41,7 +48,7 @@ export default async function UserMonthlyAuditsPage({
               >
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-bold text-zinc-900">
-                    {formatTargetMonthLabel(audit.target_month)}
+                    {cycleLabelOf(joinedAt, audit.target_month)}
                   </div>
                   <div className="text-[11px] text-zinc-500 mt-0.5">
                     {audit.submitted_at
