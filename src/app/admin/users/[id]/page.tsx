@@ -39,6 +39,8 @@ import {
   listGoalSheetRevisionsForUser,
 } from "@/lib/goal-sheet/queries";
 import { countFilledSections } from "@/lib/goal-sheet/types";
+import { getGoalSheetState } from "@/lib/goal-sheet/state";
+import { GoalSheetStateBadge } from "@/components/GoalSheetStateBadge";
 import { Sparkline } from "./_components/Sparkline";
 import { MonthlyAuditSection } from "./MonthlyAuditSection";
 
@@ -158,12 +160,11 @@ export default async function AdminUserHubPage({
 
   // 対応事項の総件数 (対応事項セクションで使用)
   const hasCarteFlag = !!carte?.menu_review_needed;
-  // β: 目標シート 「送信して添削を依頼」 押下後で未対応の状態を検知
-  //   = last_review_requested_at が reviewed_at より新しい (or 未添削)
+  // 目標シートの状態を一元判定(記入待ち/添削待ち/再添削待ち/添削済)。
+  const goalSheetState = getGoalSheetState(goalSheet ?? null);
+  // 対応事項に載せるのは「のりの番」= 添削待ち or 再添削待ち。
   const hasGoalSheetReReviewFlag =
-    !!goalSheet?.last_review_requested_at &&
-    (!goalSheet.reviewed_at ||
-      goalSheet.last_review_requested_at > goalSheet.reviewed_at);
+    goalSheetState === "pending_review" || goalSheetState === "pending_rereview";
   const totalActions =
     pendingCounts.total +
     (hasCarteFlag ? 1 : 0) +
@@ -633,11 +634,9 @@ export default async function AdminUserHubPage({
           <div className="mb-3 flex items-center gap-2">
             <span className="h-5 w-1 rounded-full bg-[#00897b]" />
             <h2 className="text-sm font-semibold text-zinc-900">目標シート</h2>
-            {goalSheet?.reviewed_at && (
-              <span className="ml-auto rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-800">
-                添削済み
-              </span>
-            )}
+            <span className="ml-auto">
+              <GoalSheetStateBadge state={goalSheetState} />
+            </span>
           </div>
 
           {goalSheet ? (
