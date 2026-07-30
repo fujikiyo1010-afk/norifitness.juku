@@ -59,6 +59,11 @@ export function cycleLabel(n: number): string {
   return n <= 0 ? "入会後の初回" : `第${n}回`;
 }
 
+/** 2つの日付(YYYY-MM-DD)間の日数(to - from)。 */
+export function daysBetweenStr(from: string, to: string): number {
+  return Math.floor((toUTC(to) - toUTC(from)) / DAY_MS);
+}
+
 /** 「M/D」単日ラベル。 */
 export function mdLabel(dateStr: string): string {
   const [, mm, dd] = dateStr.split("-");

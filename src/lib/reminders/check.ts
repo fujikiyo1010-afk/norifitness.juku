@@ -1,5 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendPushToUser } from "@/lib/push/send";
+import { currentCycle, cycleLabel, cycleRangeLabel, daysBetweenStr } from "@/lib/monthly-audit/cycle";
+import { jstTodayStr } from "@/lib/date/jst";
 
 /**
  * リマインド検知 + 送信 (2026-06-18 線① R-1〜R-4 + B-6 ・ Push のみ)
@@ -198,35 +200,26 @@ export async function checkAndSendForUser(
     }
   }
 
-  // ─── B-6: 月次添削 提出リマインド ─────────────────────────────
-  // 当月分が未提出で、 月末 -3 / 当日 / +3 のいずれか → 同日重複防止のため
-  // reminder_key を「b6_audit_YYYY-MM-{stage}」 形式で日付混在防止
+  // ─── B-6: 月次添削(入会日起点) 受付リマインド ─────────────────
+  // 第N回の起点日(入会+30×N)に「受付開始」、その3日後に「まだの方へ」。未提出のときだけ。
+  // (2026-07-30: 旧・月末ベースから入会日起点サイクルへ変更。第◯回・全6回。)
   {
-    const monthEnd = endOfMonth(now);
-    const daysUntilMonthEnd = daysBetween(now, monthEnd);
-    let stage: string | null = null;
-    if (daysUntilMonthEnd === 3) stage = "3d_before";
-    else if (daysUntilMonthEnd === 0) stage = "due";
-    else if (daysUntilMonthEnd === -3) stage = "overdue_3d";
-
-    // ⏸ 2026-07-30 一旦停止: 月次を「入会日起点サイクル(第◯回)」へ移行中。
-    //   月末(当月 target_month)ベースのこのリマインドは新モデルと噛み合わず誤配信するため停止。
-    //   入会日起点のリマインドは別途実装する。再開する時だけ環境変数 MONTHLY_MONTH_END_REMINDER=1。
-    const monthEndReminderOn = process.env.MONTHLY_MONTH_END_REMINDER === "1";
-    if (monthEndReminderOn && stage) {
-      const targetMonth = startOfMonth(now).toISOString().slice(0, 10);
-      // 当月 audit 取得 (= 未提出か判定)
+    const joinedStr = user.joined_at.slice(0, 10);
+    const todayStr = jstTodayStr();
+    const cyc = currentCycle(joinedStr, todayStr);
+    const sinceAnchor = daysBetweenStr(joinedStr, todayStr) % 30;
+    const stage = sinceAnchor === 0 ? "open" : sinceAnchor === 3 ? "reminder" : null;
+    if (cyc.cycleNumber >= 1 && stage) {
+      // その回(起点日=target_month)の提出有無
       const { data: audit } = await supabase
         .from("monthly_audits")
         .select("submitted_at")
         .eq("user_id", user.id)
-        .eq("target_month", targetMonth)
+        .eq("target_month", cyc.anchor)
         .maybeSingle();
       const notSubmitted = !audit || !(audit as { submitted_at?: string }).submitted_at;
       if (notSubmitted) {
-        const monthLabel = `${now.getFullYear()}年${now.getMonth() + 1}月`;
-        const key = `b6_audit_${targetMonth}_${stage}`;
-        // 同月同 stage の重複防止 (cooldown 不要、 stage 固有日にのみ走る)
+        const key = `b6_cycle_${cyc.anchor}_${stage}`;
         const { data: existing } = await supabase
           .from("reminder_log")
           .select("id")
@@ -234,24 +227,18 @@ export async function checkAndSendForUser(
           .eq("reminder_key", key)
           .maybeSingle();
         if (!existing) {
-          const titleAndBody = (() => {
-            if (stage === "3d_before") {
-              return {
-                title: `${monthLabel} の月次添削 期限 3 日前`,
-                body: "提出 → のり氏動画返信。 今のうちに記入を始めましょう",
-              };
-            }
-            if (stage === "due") {
-              return {
-                title: `${monthLabel} の月次添削 本日が期限`,
-                body: "今日中に提出すると今月分の添削動画を受け取れます",
-              };
-            }
-            return {
-              title: `${monthLabel} の月次添削 期限超過`,
-              body: "まだ提出できます。 早めに記入してご提出ください",
-            };
-          })();
+          const label = cycleLabel(cyc.cycleNumber);
+          const range = cycleRangeLabel(cyc);
+          const titleAndBody =
+            stage === "open"
+              ? {
+                  title: `${label}の月次添削 受付開始`,
+                  body: `対象期間 ${range}。ご都合のよいときにご記入ください`,
+                }
+              : {
+                  title: `${label}の月次添削 まだの方へ`,
+                  body: `対象期間 ${range}。よければ振り返りをご記入ください`,
+                };
           await sendPushToUser(user.id, {
             ...titleAndBody,
             url: "/monthly-review/form",
@@ -267,12 +254,4 @@ export async function checkAndSendForUser(
   }
 
   return result;
-}
-
-function startOfMonth(d: Date): Date {
-  return new Date(d.getFullYear(), d.getMonth(), 1);
-}
-function endOfMonth(d: Date): Date {
-  // 翌月 0 日 = 当月最終日
-  return new Date(d.getFullYear(), d.getMonth() + 1, 0);
 }
