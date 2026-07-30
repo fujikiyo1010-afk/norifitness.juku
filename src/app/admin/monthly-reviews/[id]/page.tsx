@@ -9,11 +9,11 @@ import { getGoalSheetForUser } from "@/lib/goal-sheet/queries";
 import { listBodyPhotosForUser } from "@/lib/admin/body-photos";
 import {
   AUDIT_QUESTIONS,
-  formatTargetMonthLabel,
   type ScoreAnswer,
   type MonthlyAuditItems,
   type MonthlyAuditRow,
 } from "@/lib/monthly-audit/types";
+import { cycleLabelOf } from "@/lib/monthly-audit/cycle";
 import { DetailClient, type DetailViewData } from "./DetailClient";
 
 export const dynamic = "force-dynamic";
@@ -86,7 +86,7 @@ export default async function AdminMonthlyReviewDetailPage({
       id: audit.id,
       items: audit.items,
       targetMonth: audit.target_month,
-      monthLabel: formatTargetMonthLabel(audit.target_month),
+      monthLabel: cycleLabelOf(user.joinedAt, audit.target_month),
       daysSinceSubmit,
       avgScore: calcAverageScore(audit.items),
     },
@@ -99,7 +99,7 @@ export default async function AdminMonthlyReviewDetailPage({
     },
     pastReplied: pastReplied.map((p) => ({
       id: p.id,
-      targetMonthLabel: p.target_month.substring(0, 7).replace("-", "/"),
+      targetMonthLabel: cycleLabelOf(user.joinedAt, p.target_month),
       publishedDateLabel: p.nori_video_published_at
         ? new Date(p.nori_video_published_at).toLocaleDateString("ja-JP", {
             month: "2-digit",

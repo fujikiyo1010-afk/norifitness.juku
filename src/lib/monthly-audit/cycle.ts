@@ -59,6 +59,13 @@ export function cycleLabel(n: number): string {
   return n <= 0 ? "入会後の初回" : `第${n}回`;
 }
 
+/** 入会日と target_month(起点日) から「第N回」ラベル。管理表示用。入会日不明は年月にフォールバック。 */
+export function cycleLabelOf(joinedDate: string | null | undefined, targetDate: string): string {
+  if (!joinedDate) return targetDate.slice(0, 7).replace("-", "年") + "月";
+  const n = cycleNumberOf(joinedDate.slice(0, 10), targetDate);
+  return n <= 0 ? "0回目(入会直後)" : `第${n}回`;
+}
+
 /** 2つの日付(YYYY-MM-DD)間の日数(to - from)。 */
 export function daysBetweenStr(from: string, to: string): number {
   return Math.floor((toUTC(to) - toUTC(from)) / DAY_MS);

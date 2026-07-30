@@ -525,6 +525,7 @@ export default async function AdminUserHubPage({
           latestAudit={latestAudit}
           auditStatus={auditStatus}
           userId={userId}
+          joinedAt={(userRow.joined_at as string | null) ?? null}
         />
 
         {/* 配布中のメニュー (状態 2: 未配布カルテ準備済 = 橙線で「のり氏アクション要」) */}

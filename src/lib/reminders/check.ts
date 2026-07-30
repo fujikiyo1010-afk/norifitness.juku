@@ -208,8 +208,8 @@ export async function checkAndSendForUser(
     const todayStr = jstTodayStr();
     const cyc = currentCycle(joinedStr, todayStr);
     const sinceAnchor = daysBetweenStr(joinedStr, todayStr) % 30;
-    // 締切なし(次の回が開くまで入力可)。起点日に受付開始、その1週間後にもう一度だけ後押し。
-    const stage = sinceAnchor === 0 ? "open" : sinceAnchor === 7 ? "reminder" : null;
+    // 締切なし(次の回が開くまで入力可)。起点日に受付開始、その3日後にもう一度だけ後押し。
+    const stage = sinceAnchor === 0 ? "open" : sinceAnchor === 3 ? "reminder" : null;
     if (cyc.cycleNumber >= 1 && stage) {
       // その回(起点日=target_month)の提出有無
       const { data: audit } = await supabase

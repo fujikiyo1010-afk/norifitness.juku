@@ -17,20 +17,22 @@ import { useRouter } from "next/navigation";
 import { useUploadJob } from "@/lib/upload/UploadJobContext";
 import {
   AUDIT_STATUS_LABELS_ADMIN,
-  formatTargetMonthLabel,
   type AuditStatus,
   type MonthlyAuditRow,
 } from "@/lib/monthly-audit/types";
+import { cycleLabelOf } from "@/lib/monthly-audit/cycle";
 import { formatDistributionDateTime } from "@/lib/workout/menu-display";
 
 export function MonthlyAuditSection({
   latestAudit,
   auditStatus,
   userId,
+  joinedAt,
 }: {
   latestAudit: MonthlyAuditRow | null;
   auditStatus: AuditStatus;
   userId: string;
+  joinedAt: string | null;
 }) {
   const { job } = useUploadJob();
   const router = useRouter();
@@ -76,7 +78,7 @@ export function MonthlyAuditSection({
           <dl className="grid grid-cols-[100px_1fr] gap-y-1.5 gap-x-3 text-xs mb-4">
             <dt className="text-zinc-500">最新月</dt>
             <dd className="text-zinc-900 font-medium">
-              {formatTargetMonthLabel(latestAudit.target_month)}
+              {cycleLabelOf(joinedAt, latestAudit.target_month)}
             </dd>
             <dt className="text-zinc-500">進捗</dt>
             <dd className="text-zinc-900 font-medium">
