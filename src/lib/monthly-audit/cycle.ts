@@ -59,11 +59,13 @@ export function cycleLabel(n: number): string {
   return n <= 0 ? "入会後の初回" : `第${n}回`;
 }
 
+/** 「M/D」単日ラベル。 */
+export function mdLabel(dateStr: string): string {
+  const [, mm, dd] = dateStr.split("-");
+  return `${Number(mm)}/${Number(dd)}`;
+}
+
 /** 「M/D〜M/D」対象期間ラベル。 */
 export function cycleRangeLabel(info: CycleInfo): string {
-  const md = (d: string) => {
-    const [, mm, dd] = d.split("-");
-    return `${Number(mm)}/${Number(dd)}`;
-  };
-  return `${md(info.periodStart)}〜${md(info.periodEnd)}`;
+  return `${mdLabel(info.periodStart)}〜${mdLabel(info.periodEnd)}`;
 }
