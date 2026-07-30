@@ -108,9 +108,9 @@ export function AdminChatClient({
               }
             }}
             placeholder="返信を入力 (Cmd+Enter で確認)"
-            rows={2}
+            rows={4}
             maxLength={2000}
-            className="flex-1 resize-none rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm leading-[1.5] max-h-[160px] focus:outline-none focus:border-[#00897b]"
+            className="flex-1 resize-none rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm leading-[1.5] max-h-[320px] focus:outline-none focus:border-[#00897b]"
           />
           <div className="relative flex-shrink-0">
             {/* 誤送信防止の確認(案C): 送信ボタンの真上に吹き出し */}
