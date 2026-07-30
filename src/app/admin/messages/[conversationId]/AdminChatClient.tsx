@@ -20,6 +20,8 @@ export function AdminChatClient({
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [text, setText] = useState("");
   const [sending, startSending] = useTransition();
+  // 誤送信防止: 送信ボタンの真上に「送信しますか？」の確認を出してから送る(案C)。
+  const [confirming, setConfirming] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const handleNew = useCallback((msg: ChatMessage) => {
@@ -46,6 +48,17 @@ export function AdminChatClient({
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
+
+  // 送信ボタン/Cmd+Enter は即送信せず、まず確認の吹き出しを出す。
+  function askConfirm() {
+    if (text.trim().length === 0 || sending) return;
+    setConfirming(true);
+  }
+  // 「はい」で実送信。
+  function confirmSend() {
+    setConfirming(false);
+    handleSend();
+  }
 
   function handleSend() {
     const body = text.trim();
@@ -91,28 +104,59 @@ export function AdminChatClient({
             onKeyDown={(e) => {
               if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault();
-                handleSend();
+                askConfirm();
               }
             }}
-            placeholder="返信を入力 (Cmd+Enter で送信)"
+            placeholder="返信を入力 (Cmd+Enter で確認)"
             rows={2}
             maxLength={2000}
             className="flex-1 resize-none rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm leading-[1.5] max-h-[160px] focus:outline-none focus:border-[#00897b]"
           />
-          <button
-            type="button"
-            disabled={sending || text.trim().length === 0}
-            onClick={handleSend}
-            className="flex-shrink-0 rounded-md bg-[#00897b] hover:bg-[#00695c] text-white px-5 py-2 text-sm font-bold disabled:bg-zinc-400"
-          >
-            {sending ? (
-              <>
-                <LoadingSpinner /> 送信中…
-              </>
-            ) : (
-              "送信"
+          <div className="relative flex-shrink-0">
+            {/* 誤送信防止の確認(案C): 送信ボタンの真上に吹き出し */}
+            {confirming && !sending && (
+              <div
+                className="absolute bottom-full right-0 mb-2 w-[188px] rounded-lg border border-zinc-200 bg-white p-2.5 shadow-lg"
+                style={{ filter: "drop-shadow(0 4px 10px rgba(0,0,0,.1))" }}
+              >
+                <div className="mb-2 text-center text-[12px] font-bold text-zinc-800">
+                  送信しますか？
+                </div>
+                <div className="flex gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setConfirming(false)}
+                    className="flex-1 rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-[12px] font-semibold text-zinc-600 hover:bg-zinc-50"
+                  >
+                    いいえ
+                  </button>
+                  <button
+                    type="button"
+                    onClick={confirmSend}
+                    className="flex-1 rounded-md bg-[#00897b] px-2 py-1.5 text-[12px] font-bold text-white hover:bg-[#00695c]"
+                  >
+                    はい
+                  </button>
+                </div>
+                {/* 下向きの三角(ボタンを指す) */}
+                <div className="absolute top-full right-6 -mt-1.5 h-2.5 w-2.5 rotate-45 border-b border-r border-zinc-200 bg-white" />
+              </div>
             )}
-          </button>
+            <button
+              type="button"
+              disabled={sending || text.trim().length === 0}
+              onClick={askConfirm}
+              className="rounded-md bg-[#00897b] hover:bg-[#00695c] text-white px-5 py-2 text-sm font-bold disabled:bg-zinc-400"
+            >
+              {sending ? (
+                <>
+                  <LoadingSpinner /> 送信中…
+                </>
+              ) : (
+                "送信"
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </>
