@@ -1,25 +1,27 @@
-import { getMyCurrentMonthAudit } from "@/lib/monthly-audit/queries";
+import { getMyCurrentCycle, getMyAudit } from "@/lib/monthly-audit/queries";
 import { getAuditStatus, type AuditStatus } from "@/lib/monthly-audit/types";
 
 /**
- * ホーム画面 横長カード用 月次添削 状態取得。
+ * ホーム画面 横長カード用 月次添削 状態取得(入会日起点サイクル対応・2026-07-30)。
  *
- * 表示は 4 パターン:
- *   - a_empty:       「まだ記入されていません」 (グレー)
- *   - b_in_progress: 「記入中 ・ 提出を待っています」 (グレー)
- *   - c_submitted:   「記入済 ・ 添削待ち」 (グレー)
- *   - d_replied:     「のりfitness から添削が届いています」 (黄バッジ)
+ * cycleNumber:
+ *   - 0        : 第1回前(入会30日未満)。「第1回は入会30日後」を出す。
+ *   - 1..6     : その回。status に応じて 未記入/記入中/添削待ち/添削あり。
  */
 export type HomeMonthlyAuditStatus = {
   status: AuditStatus;
   hasReviewNotice: boolean;
+  cycleNumber: number;
 };
 
 export async function getMyMonthlyAuditHomeStatus(): Promise<HomeMonthlyAuditStatus> {
-  const audit = await getMyCurrentMonthAudit();
+  const cycle = await getMyCurrentCycle();
+  const cycleNumber = cycle?.cycleNumber ?? 0;
+  const audit = cycle && cycleNumber >= 1 ? await getMyAudit(cycle.anchor) : null;
   const status = getAuditStatus(audit);
   return {
     status,
     hasReviewNotice: status === "d_replied",
+    cycleNumber,
   };
 }
