@@ -209,7 +209,11 @@ export async function checkAndSendForUser(
     else if (daysUntilMonthEnd === 0) stage = "due";
     else if (daysUntilMonthEnd === -3) stage = "overdue_3d";
 
-    if (stage) {
+    // ⏸ 2026-07-30 一旦停止: 月次を「入会日起点サイクル(第◯回)」へ移行中。
+    //   月末(当月 target_month)ベースのこのリマインドは新モデルと噛み合わず誤配信するため停止。
+    //   入会日起点のリマインドは別途実装する。再開する時だけ環境変数 MONTHLY_MONTH_END_REMINDER=1。
+    const monthEndReminderOn = process.env.MONTHLY_MONTH_END_REMINDER === "1";
+    if (monthEndReminderOn && stage) {
       const targetMonth = startOfMonth(now).toISOString().slice(0, 10);
       // 当月 audit 取得 (= 未提出か判定)
       const { data: audit } = await supabase

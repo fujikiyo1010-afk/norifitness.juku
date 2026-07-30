@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import Image from "next/image";
-import { getMyCurrentMonthAudit } from "@/lib/monthly-audit/queries";
+import { getMyCurrentMonthAudit, getMyCurrentCycle } from "@/lib/monthly-audit/queries";
 import { formatTargetMonthLabel } from "@/lib/monthly-audit/types";
+import { cycleLabel } from "@/lib/monthly-audit/cycle";
 import { MemberHeader } from "@/components/MemberHeader";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +27,10 @@ export const dynamic = "force-dynamic";
  *   - サブリンク: ホームに戻る
  */
 export default async function MonthlyReviewCompletePage() {
-  const audit = await getMyCurrentMonthAudit();
+  const [audit, cycle] = await Promise.all([
+    getMyCurrentMonthAudit(),
+    getMyCurrentCycle(),
+  ]);
 
   // 未提出の場合はフォームへリダイレクト
   if (!audit || !audit.submitted_at) {
@@ -41,7 +45,10 @@ export default async function MonthlyReviewCompletePage() {
     hour: "2-digit",
     minute: "2-digit",
   });
-  const monthLabel = formatTargetMonthLabel(audit.target_month);
+  const monthLabel =
+    cycle && cycle.cycleNumber >= 1
+      ? `${cycleLabel(cycle.cycleNumber)}月次添削`
+      : formatTargetMonthLabel(audit.target_month);
 
   return (
     <>
