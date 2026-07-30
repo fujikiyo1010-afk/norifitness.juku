@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { UserListSummary } from "@/lib/workout/queries";
 import { AUDIT_STATUS_LABELS_ADMIN } from "@/lib/monthly-audit/types";
+import { GoalSheetStateBadge } from "@/components/GoalSheetStateBadge";
 
 type SortKey = "lastAction" | "joinedAt" | "name" | "actionsNeeded";
 type FilterKey = "all" | "actionsNeeded" | "noMenu";
@@ -308,32 +309,8 @@ function GoalSheetStatusBadge({
 }: {
   state: UserListSummary["goalSheetState"];
 }) {
-  const config = {
-    not_started: {
-      label: "未記入",
-      cls: "bg-zinc-100 text-zinc-600 border border-zinc-200",
-    },
-    in_review: {
-      label: "添削待ち",
-      cls: "bg-amber-50 text-amber-800 border border-amber-200 font-bold",
-    },
-    review_requested: {
-      label: "再添削依頼",
-      cls: "bg-orange-100 text-orange-800 border border-orange-300 font-bold",
-    },
-    reviewed: {
-      label: "添削済",
-      cls: "bg-emerald-50 text-emerald-700 border border-emerald-200",
-    },
-  }[state];
-
-  return (
-    <span
-      className={`inline-flex rounded-full px-2 py-0.5 text-[10px] ${config.cls}`}
-    >
-      {config.label}
-    </span>
-  );
+  // 見た目は共通部品(モック転写)に集約。状態は getGoalSheetState() 由来の4状態。
+  return <GoalSheetStateBadge state={state} />;
 }
 
 function AuditStatusBadge({
