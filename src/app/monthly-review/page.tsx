@@ -2,8 +2,18 @@ import Link from "next/link";
 import { MemberHeader } from "@/components/MemberHeader";
 import {
   getMyCurrentMonthAudit,
+  getMyCurrentCycle,
   listMyAudits,
 } from "@/lib/monthly-audit/queries";
+import {
+  cycleInfoFor,
+  cycleLabel,
+  cycleRangeLabel,
+  mdLabel,
+  MAX_CYCLE,
+  type CycleInfo,
+} from "@/lib/monthly-audit/cycle";
+import { NextCycleCard } from "./NextCycleCard";
 import {
   getAuditStatus,
   formatTargetMonthLabel,
@@ -37,6 +47,7 @@ export default async function MonthlyReviewHistoryPage() {
   const currentAudit = await getMyCurrentMonthAudit();
   const allAudits = await listMyAudits(24); // 過去 2 年分
   const currentStatus = getAuditStatus(currentAudit);
+  const cycle = await getMyCurrentCycle(); // 入会日起点の今の回(第1回前=cycleNumber 0)
 
   // 過去月 (当月を除く、新しい順)
   const pastAudits = currentAudit
@@ -63,7 +74,12 @@ export default async function MonthlyReviewHistoryPage() {
         <div className="bg-[#f9f5ed] pb-20">
           {/* ====== ブロック A: 今月の月次添削 (4 状態カード) ====== */}
           <BlockWrapper title="今月の月次添削" icon="clipboard">
-            <CurrentMonthCard status={currentStatus} audit={currentAudit} />
+            <CurrentMonthCard
+              status={currentStatus}
+              audit={currentAudit}
+              cycle={cycle}
+              hasAnyAudit={allAudits.length > 0}
+            />
           </BlockWrapper>
 
           {/* ====== ブロック B-1: 最新カテゴリ別スコア (2026-06-17 1 件目から表示) ====== */}
@@ -184,14 +200,79 @@ function BlockIcon({ name }: { name: "clipboard" | "bar" | "line" | "calendar" }
 function CurrentMonthCard({
   status,
   audit,
+  cycle,
+  hasAnyAudit,
 }: {
   status: AuditStatus;
   audit: MonthlyAuditRow | null;
+  cycle: (CycleInfo & { joined: string }) | null;
+  hasAnyAudit: boolean;
 }) {
-  if (status === "a_empty") return <StateCardA />;
-  if (status === "b_in_progress") return <StateCardB audit={audit!} />;
-  if (status === "c_submitted") return <StateCardC audit={audit!} />;
-  return <StateCardD audit={audit!} />;
+  // 入会30日未満(第1回前): まだ第1回が無いので専用の案内を出す
+  if (cycle && cycle.cycleNumber < 1) {
+    const first = cycleInfoFor(cycle.joined, 1);
+    return <FirstCyclePendingCard first={first} hasZero={hasAnyAudit} />;
+  }
+
+  const card =
+    status === "a_empty" ? (
+      <StateCardA />
+    ) : status === "b_in_progress" ? (
+      <StateCardB audit={audit!} />
+    ) : status === "c_submitted" ? (
+      <StateCardC audit={audit!} />
+    ) : (
+      <StateCardD audit={audit!} />
+    );
+
+  // 提出済み(C)/添削あり(D)で、次の回があれば「次回のご案内」を添える
+  const n = cycle?.cycleNumber ?? 0;
+  const showNext =
+    !!cycle && n >= 1 && n < MAX_CYCLE && (status === "c_submitted" || status === "d_replied");
+  const next = showNext ? cycleInfoFor(cycle!.joined, n + 1) : null;
+
+  if (!next) return card;
+  return (
+    <div className="flex flex-col gap-2.5">
+      {card}
+      <NextCycleCard
+        title={`次回：${cycleLabel(next.cycleNumber)}`}
+        dateText={`${mdLabel(next.anchor)} から`}
+        rangeText={`対象期間 ${cycleRangeLabel(next)}`}
+        note="その日になったら、通知でお知らせします。"
+      />
+    </div>
+  );
+}
+
+// 入会30日未満(第1回前)の案内カード
+function FirstCyclePendingCard({
+  first,
+  hasZero,
+}: {
+  first: CycleInfo;
+  hasZero: boolean;
+}) {
+  return (
+    <div className="flex flex-col gap-2.5">
+      <div className="bg-[#fafafa] border border-[#e7dcc9] rounded-2xl px-4 py-4">
+        <span className="inline-flex items-center justify-center leading-none text-[13px] font-bold px-3 py-1 rounded-full bg-[#fffdf8] text-[#6a6256] border border-[#e7dcc9]">
+          第1回はもうすぐ
+        </span>
+        <div className="text-[12.5px] text-[#5b5346] leading-relaxed mt-3">
+          {hasZero
+            ? "入会後の初回分は受け付けています。第1回の月次添削は、入会から30日後にご案内します。"
+            : "第1回の月次添削は、入会から30日後にご案内します。もう少しお待ちください。"}
+        </div>
+      </div>
+      <NextCycleCard
+        title="第1回"
+        dateText={`${mdLabel(first.anchor)} から`}
+        rangeText={`対象期間 ${cycleRangeLabel(first)}`}
+        note="入会30日後です。その日になったら、通知でお知らせします。"
+      />
+    </div>
+  );
 }
 
 // 状態 A: 未記入

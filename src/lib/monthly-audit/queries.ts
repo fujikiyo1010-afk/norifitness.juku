@@ -39,7 +39,9 @@ function rowToRecord(data: Record<string, unknown>): MonthlyAuditRow {
  * 現在のログインユーザーの「今の回」(入会日起点サイクル)を返す。
  * 入会30日未満なら cycleNumber=0(まだ第1回前)。joined_at 不明なら null。
  */
-export async function getMyCurrentCycle(): Promise<CycleInfo | null> {
+export async function getMyCurrentCycle(): Promise<
+  (CycleInfo & { joined: string }) | null
+> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -53,7 +55,7 @@ export async function getMyCurrentCycle(): Promise<CycleInfo | null> {
   const joinedRaw = (data?.joined_at as string | null) ?? null;
   if (!joinedRaw) return null;
   const joined = joinedRaw.slice(0, 10);
-  return currentCycle(joined, jstTodayStr());
+  return { ...currentCycle(joined, jstTodayStr()), joined };
 }
 
 /**

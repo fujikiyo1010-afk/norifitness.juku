@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import Image from "next/image";
 import { getMyCurrentMonthAudit, getMyCurrentCycle } from "@/lib/monthly-audit/queries";
 import { formatTargetMonthLabel } from "@/lib/monthly-audit/types";
-import { cycleLabel } from "@/lib/monthly-audit/cycle";
+import { cycleLabel, cycleInfoFor, cycleRangeLabel, mdLabel, MAX_CYCLE } from "@/lib/monthly-audit/cycle";
+import { NextCycleCard } from "../NextCycleCard";
 import { MemberHeader } from "@/components/MemberHeader";
 
 export const dynamic = "force-dynamic";
@@ -49,6 +50,11 @@ export default async function MonthlyReviewCompletePage() {
     cycle && cycle.cycleNumber >= 1
       ? `${cycleLabel(cycle.cycleNumber)}月次添削`
       : formatTargetMonthLabel(audit.target_month);
+
+  // 次回のご案内(第N回提出後 → 第N+1回。最終回=第6回の後は出さない)
+  const curN = cycle?.cycleNumber ?? 0;
+  const nextInfo =
+    cycle && curN >= 1 && curN < MAX_CYCLE ? cycleInfoFor(cycle.joined, curN + 1) : null;
 
   return (
     <>
@@ -142,6 +148,18 @@ export default async function MonthlyReviewCompletePage() {
                 </span>
               </div>
             </div>
+
+            {/* 次回のご案内 */}
+            {nextInfo && (
+              <div className="w-full max-w-[340px] mb-7">
+                <NextCycleCard
+                  title={`次回：${cycleLabel(nextInfo.cycleNumber)}`}
+                  dateText={`${mdLabel(nextInfo.anchor)} から`}
+                  rangeText={`対象期間 ${cycleRangeLabel(nextInfo)}`}
+                  note="その日になったら、通知でお知らせします。"
+                />
+              </div>
+            )}
 
             {/* CTA ボタン: 履歴を見る */}
             <Link
