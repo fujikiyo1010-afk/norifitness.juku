@@ -332,13 +332,15 @@ export default async function Home() {
               )}
             </div>
             <div className="text-[10px] text-[#6a6256]">
-              {monthlyAudit.status === "d_replied"
-                ? "のりfitness から添削が届いています"
-                : monthlyAudit.status === "c_submitted"
-                  ? "記入済 ・ 添削待ち"
-                  : monthlyAudit.status === "b_in_progress"
-                    ? "記入中 ・ 提出を待っています"
-                    : "今月分はまだ記入されていません"}
+              {monthlyAudit.cycleNumber < 1
+                ? "第1回は入会30日後にご案内します"
+                : monthlyAudit.status === "d_replied"
+                  ? "のりfitness から添削が届いています"
+                  : monthlyAudit.status === "c_submitted"
+                    ? "記入済 ・ 添削待ち"
+                    : monthlyAudit.status === "b_in_progress"
+                      ? "記入中 ・ 提出を待っています"
+                      : `第${monthlyAudit.cycleNumber}回をご記入いただけます`}
             </div>
           </div>
           <span className="text-[#a59b8c] font-mono text-xs">→</span>
