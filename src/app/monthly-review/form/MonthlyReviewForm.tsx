@@ -10,7 +10,6 @@ import {
   AUDIT_CATEGORIES,
   countFilledItems,
   listMissingRequiredKeys,
-  formatTargetMonthLabel,
   type MonthlyAuditItems,
   type AuditQuestion,
   type AuditCategoryKey,
@@ -34,12 +33,18 @@ import {
  */
 export function MonthlyReviewForm({
   targetMonth,
+  cycleTitle,
+  cycleSubtitle,
   initialItems,
   initialLastSavedAt,
   prevQ1Weight,
   prevQ2Waist,
 }: {
   targetMonth: string;
+  /** 見出し「第◯回月次添削」(入会日起点) */
+  cycleTitle: string;
+  /** 見出し補足「対象期間 M/D〜M/D」 */
+  cycleSubtitle: string;
   initialItems: MonthlyAuditItems;
   initialLastSavedAt: string | null;
   /** 前月の Q1 (体重) current_value、初回受講生は undefined */
@@ -76,7 +81,6 @@ export function MonthlyReviewForm({
 
   const filledCount = useMemo(() => countFilledItems(items), [items]);
   const totalCount = AUDIT_QUESTIONS.length;
-  const monthLabel = formatTargetMonthLabel(targetMonth);
 
   // ===== 各項目の更新関数 =====
   const updateAnswer = (
@@ -170,10 +174,10 @@ export function MonthlyReviewForm({
               のりfitness の月次添削
             </div>
             <div className="text-2xl font-bold text-[#2b2620] mb-2 tracking-wide leading-tight">
-              {monthLabel}
+              {cycleTitle}
             </div>
             <div className="text-xs text-zinc-700 mb-3">
-              受付中 ・ 毎月 1 日が、振り返りの日です。
+              {cycleSubtitle}
             </div>
             <div className="text-[11px] text-[#6a6256] leading-relaxed pt-2.5 border-t border-[#e7dcc9]">
               0〜10 点で各自評価をお願いします。
@@ -280,7 +284,7 @@ export function MonthlyReviewForm({
       ) : (
         // === プレビューモード ===
         <PreviewView
-          monthLabel={monthLabel}
+          monthLabel={cycleTitle}
           items={items}
           onEdit={() => setMode("form")}
           onSubmit={handleSubmit}

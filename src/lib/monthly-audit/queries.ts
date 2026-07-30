@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { MonthlyAuditRow, MonthlyAuditItems } from "./types";
-import { getCurrentTargetMonth } from "./types";
+import { currentCycle, type CycleInfo } from "./cycle";
+import { jstTodayStr } from "@/lib/date/jst";
 
 /**
  * 月次添削 (monthly_audits) の読み取り関数群。
@@ -35,11 +36,34 @@ function rowToRecord(data: Record<string, unknown>): MonthlyAuditRow {
 // ===== 受講生向け =====
 
 /**
- * 現在のログインユーザーの当月の月次添削を取得。
- * なければ null (= A 状態 未記入)。
+ * 現在のログインユーザーの「今の回」(入会日起点サイクル)を返す。
+ * 入会30日未満なら cycleNumber=0(まだ第1回前)。joined_at 不明なら null。
+ */
+export async function getMyCurrentCycle(): Promise<CycleInfo | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const { data } = await supabase
+    .from("users")
+    .select("joined_at")
+    .eq("id", user.id)
+    .maybeSingle();
+  const joinedRaw = (data?.joined_at as string | null) ?? null;
+  if (!joinedRaw) return null;
+  const joined = joinedRaw.slice(0, 10);
+  return currentCycle(joined, jstTodayStr());
+}
+
+/**
+ * 現在のログインユーザーの「今の回」の月次添削を取得。
+ * なければ null (= 未記入)。入会30日未満(cycleNumber=0)も null(まだ第1回無し)。
  */
 export async function getMyCurrentMonthAudit(): Promise<MonthlyAuditRow | null> {
-  return getMyAudit(getCurrentTargetMonth());
+  const cycle = await getMyCurrentCycle();
+  if (!cycle || cycle.cycleNumber < 1) return null;
+  return getMyAudit(cycle.anchor);
 }
 
 /**
