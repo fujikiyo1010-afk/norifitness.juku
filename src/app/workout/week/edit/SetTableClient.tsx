@@ -7,7 +7,8 @@ import { cleanExerciseName } from "@/lib/workout/menu-display";
 import { lookupVideoByName } from "@/lib/workout/video-master";
 import { isBodyweight } from "@/lib/workout/bodyweight";
 import { ExercisePickerSheet, type PickedExercise } from "./ExercisePickerSheet";
-import { loadDraft, saveDraft, type DraftExercise, type DraftSet, type WeeklyDraft } from "../draft";
+import { deleteWorkoutLog } from "@/lib/workout/pool-actions";
+import { clearDraft, loadDraft, saveDraft, type DraftExercise, type DraftSet, type WeeklyDraft } from "../draft";
 
 type Intensity = "small" | "medium" | "large";
 type StageOption = { key: Intensity; label: string; exercises: DraftExercise[] };
@@ -23,6 +24,7 @@ export function SetTableClient({
   menuName,
   editLogId,
   todayKey,
+  targetDate,
   initialExercises,
   initialFavorites,
   initialIntensity,
@@ -34,6 +36,7 @@ export function SetTableClient({
   menuName: string;
   editLogId: string | null;
   todayKey: string;
+  targetDate: string | null; // 過去日記録(バックデート)の対象日。null=今日。
   initialExercises: DraftExercise[];
   initialFavorites: string[];
   initialIntensity: Intensity;
@@ -46,6 +49,27 @@ export function SetTableClient({
   const [memo, setMemo] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [lightbox, setLightbox] = useState<{ url: string; name: string } | null>(null);
+  // 過去記録の削除(編集画面のみ)
+  const [delOpen, setDelOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [delError, setDelError] = useState<string | null>(null);
+  const canDelete = !!(editLogId && targetDate); // 過去日の既存記録を編集している時だけ
+
+  async function doDelete() {
+    if (!editLogId) return;
+    setDelError(null);
+    setDeleting(true);
+    try {
+      const r = await deleteWorkoutLog(editLogId);
+      if (!r.ok) throw new Error(r.message);
+      clearDraft(todayKey);
+      router.replace("/workout/week/history");
+    } catch (e) {
+      console.warn("[set table] delete failed", e);
+      setDelError("削除に失敗しました。もう一度お試しください。");
+      setDeleting(false);
+    }
+  }
 
   // 小中大トグル(のり配布・そのまま始める時だけ・2段階以上)。切替でその段階の種目・回数(+kg)を読み直す。
   const showStages = stageOptions.length > 1;
@@ -114,9 +138,9 @@ export function SetTableClient({
     const cleaned = exercises.map((ex) =>
       isBodyweight(ex.name) ? { ...ex, sets: ex.sets.map((s) => ({ ...s, kg: null })) } : ex
     );
-    const draft: WeeklyDraft = { kind, dayNumber, menuName, editLogId, exercises: cleaned, memo, todayKey, intensity };
+    const draft: WeeklyDraft = { kind, dayNumber, menuName, editLogId, exercises: cleaned, memo, todayKey, intensity, date: targetDate };
     saveDraft(draft);
-    router.push("/workout/week/confirm");
+    router.push(targetDate ? `/workout/week/confirm?date=${targetDate}` : "/workout/week/confirm");
   }
 
   // 紫判定: 追加種目=常に紫 / のり基準ありで値が異なる=紫
@@ -139,6 +163,17 @@ export function SetTableClient({
   return (
     <main className="min-h-[100dvh] bg-[#f9f5ed] pb-40">
       <div className="mx-auto flex max-w-[460px] flex-col gap-2.5 px-4 py-4">
+        {targetDate && (
+          <div className="flex items-center gap-2 rounded-xl border-[1.5px] border-[#cfe3d6] bg-[#eef4ec] px-3.5 py-2.5">
+            <span className="flex h-6 w-6 flex-none items-center justify-center rounded-[7px] bg-[#4a875b] text-white">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="3" /><path d="M3 10h18M8 2v4M16 2v4" /></svg>
+            </span>
+            <div className="leading-tight">
+              <b className="block text-[12.5px] font-extrabold text-[#2b5a3c]">{formatBackdate(targetDate)}を記録</b>
+              <span className="text-[10px] text-[#5b7a63]">{editLogId ? "この日の記録を編集しています" : "過去の日として登録されます"}</span>
+            </div>
+          </div>
+        )}
         <div className="flex items-center justify-between rounded-xl border border-[#cfe3d6] bg-[#f0f7f2] px-3.5 py-2">
           <b className="text-[12.5px] font-extrabold text-[#34603f]">{menuName}</b>
           <span className="text-[10px] font-bold text-[#6a6256]">編集できます</span>
@@ -259,8 +294,19 @@ export function SetTableClient({
           />
         </div>
         <p className="text-[10.5px] leading-relaxed text-[#a59b8c]">
-          ここでは「決定」まで。完了は次の確認画面（今日のトレーニングの表紙）で押します。
+          ここでは「決定」まで。完了は次の確認画面で押します。
         </p>
+
+        {canDelete && (
+          <button
+            type="button"
+            onClick={() => setDelOpen(true)}
+            className="mt-1 text-center text-[12px] font-extrabold text-[#c05a4a]"
+          >
+            この日の記録を削除
+          </button>
+        )}
+        {delError && <p className="text-center text-[12px] text-[#8a4b32]">{delError}</p>}
       </div>
 
       <div
@@ -287,6 +333,35 @@ export function SetTableClient({
         initialFavorites={initialFavorites}
       />
 
+      {delOpen && (
+        <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/40 px-4 pb-[calc(env(safe-area-inset-bottom)+16px)]" onClick={() => !deleting && setDelOpen(false)}>
+          <div className="w-full max-w-[360px] rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="text-[14px] font-extrabold text-[#2b2620]">この日の記録を削除しますか？</div>
+            <p className="mt-1.5 text-[12px] leading-relaxed text-[#6a6256]">
+              {targetDate ? `${formatBackdate(targetDate)}の記録を削除します。` : ""}この操作は元に戻せません。
+            </p>
+            <div className="mt-4 flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={doDelete}
+                disabled={deleting}
+                className="w-full rounded-xl border-2 border-[#c2693f] py-2.5 text-[13px] font-extrabold text-[#b0532c] disabled:opacity-50"
+              >
+                {deleting ? "削除中…" : "削除する"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setDelOpen(false)}
+                disabled={deleting}
+                className="w-full rounded-xl bg-[#eef2ee] py-2.5 text-[13px] font-extrabold text-[#34603f] disabled:opacity-50"
+              >
+                やめる
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {lightbox && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4" onClick={() => setLightbox(null)}>
           <div className="w-full max-w-[440px] overflow-hidden rounded-xl bg-black" onClick={(e) => e.stopPropagation()}>
@@ -301,6 +376,13 @@ export function SetTableClient({
 
     </main>
   );
+}
+
+/** "YYYY-MM-DD" → "M月D日（曜）"。曜日はローカル日付から算出(tzずれ回避のため数値で構築)。 */
+function formatBackdate(d: string): string {
+  const [y, m, day] = d.split("-").map(Number);
+  const wd = ["日", "月", "火", "水", "木", "金", "土"][new Date(y, m - 1, day).getDay()];
+  return `${m}月${day}日（${wd}）`;
 }
 
 function SetInput({

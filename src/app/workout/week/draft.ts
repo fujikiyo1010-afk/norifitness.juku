@@ -21,6 +21,10 @@ export type WeeklyDraft = {
   memo: string;
   todayKey: string;
   intensity: "small" | "medium" | "large"; // 記録する強度(小中大)。配布のみ切替、既定=中。
+  /** 過去日記録(バックデート・2026-07-31): 対象日(YYYY-MM-DD)。省略/ null=今日。
+   *  todayKey は「対象日」で名前空間化する(今日の下書きと衝突させない)。
+   *  editLogId 指定時の update では書き込まない(既存行の日付を保持)。 */
+  date?: string | null;
 };
 
 export function draftKey(todayKey: string): string {
