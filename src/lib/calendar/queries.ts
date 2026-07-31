@@ -191,9 +191,10 @@ export type CalendarWorkoutExercise = {
 };
 export type CalendarWorkout =
   | { state: "none" }
-  | { state: "rest" }
+  | { state: "rest"; logId: string } // logId: 過去日の「編集」用(バックデート)
   | {
       state: "done";
+      logId: string; // 過去日の「編集」用(バックデート)
       isCustom: boolean;
       menuName: string;
       exCount: number;
@@ -226,7 +227,7 @@ export async function getWorkoutForCalendar(date: string): Promise<CalendarWorko
       }
     | undefined;
   if (!log) return { state: "none" };
-  if (log.status === "rest_done") return { state: "rest" };
+  if (log.status === "rest_done") return { state: "rest", logId: log.id };
 
   const detail = await getLogDetail(log.id);
   const isCustom = !!log.is_custom;
@@ -256,6 +257,7 @@ export async function getWorkoutForCalendar(date: string): Promise<CalendarWorko
 
   return {
     state: "done",
+    logId: log.id,
     isCustom,
     menuName: detail?.menuName ?? (isCustom ? "じぶんメニュー" : ""),
     exCount: exercises.length,

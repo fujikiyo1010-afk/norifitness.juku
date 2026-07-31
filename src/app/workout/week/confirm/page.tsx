@@ -14,21 +14,27 @@ export const dynamic = "force-dynamic";
 export default async function WeekConfirmPage({
   searchParams,
 }: {
-  searchParams: Promise<{ rest?: string; day?: string }>;
+  searchParams: Promise<{ rest?: string; day?: string; date?: string }>;
 }) {
   const isPool = await isWeeklyPoolUser();
   if (!isPool) redirect("/workout/today");
   const sp = await searchParams;
   const rest = sp.rest === "1";
   const restDayNumber = rest && sp.day ? Number(sp.day) : null;
+  // 過去日記録(バックデート): 対象日。無ければ今日。todayKey(下書き名前空間)も対象日で分離。
+  const targetDate =
+    sp.date && /^\d{4}-\d{2}-\d{2}$/.test(sp.date) && sp.date <= jstTodayStr() ? sp.date : null;
+  const flowKey = targetDate ?? jstTodayStr();
+  const backHref = targetDate ? "/workout/week/history" : "/workout/week";
 
   return (
     <>
-      <MemberHeader title="今日のトレーニング" fallbackHref="/workout/week" />
-      {/* ②-B: 休養日以外は離脱時に破棄確認。戻り先=メイン。 */}
-      <FlowLeaveGuard active={!rest} backHref="/workout/week" todayKey={jstTodayStr()} />
+      <MemberHeader title={targetDate ? "過去の日の記録" : "今日のトレーニング"} fallbackHref={backHref} />
+      {/* ②-B: 休養日以外は離脱時に破棄確認。戻り先=来た入口。 */}
+      <FlowLeaveGuard active={!rest} backHref={backHref} todayKey={flowKey} />
       <ConfirmClient
-        todayKey={jstTodayStr()}
+        todayKey={flowKey}
+        date={targetDate}
         rest={rest}
         restDayNumber={Number.isFinite(restDayNumber) ? restDayNumber : null}
       />

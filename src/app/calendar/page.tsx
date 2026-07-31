@@ -14,6 +14,7 @@ import {
   getBodyPhotoForCalendar,
 } from "@/lib/calendar/queries";
 import { getMyCarte } from "@/lib/workout/queries";
+import { isWeeklyPoolUser } from "@/lib/workout/pool-gate";
 import { CalendarDayView } from "./CalendarDayView";
 
 export const dynamic = "force-dynamic";
@@ -55,6 +56,7 @@ export default async function CalendarPage({
     weekMeals,
     carte,
     photoView,
+    canBackdate,
   ] = await Promise.all([
     getBodyForCalendar(date),
     getWorkoutForCalendar(date),
@@ -102,6 +104,7 @@ export default async function CalendarPage({
       .eq("user_id", user.id),
     getMyCarte(),
     getBodyPhotoForCalendar(date),
+    isWeeklyPoolUser(),
   ]);
 
   const meals = mealsData.meals.map((m) => ({
@@ -152,6 +155,7 @@ export default async function CalendarPage({
           hasCarte={!!carte}
           photoView={photoView}
           recordedDates={recordedDates}
+          canBackdate={canBackdate}
         />
       </main>
     </>

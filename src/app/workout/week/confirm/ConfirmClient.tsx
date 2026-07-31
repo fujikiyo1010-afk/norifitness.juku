@@ -13,10 +13,12 @@ import { clearDraft, loadDraft, type DraftExercise, type WeeklyDraft } from "../
  */
 export function ConfirmClient({
   todayKey,
+  date,
   rest,
   restDayNumber,
 }: {
   todayKey: string;
+  date: string | null; // 過去日記録(バックデート)の対象日。null=今日。
   rest: boolean;
   restDayNumber: number | null;
 }) {
@@ -51,7 +53,7 @@ export function ConfirmClient({
     setBusy(true);
     try {
       const r = rest
-        ? await completeWeeklyWorkout({ kind: "rest", dayNumber: restDayNumber })
+        ? await completeWeeklyWorkout({ kind: "rest", dayNumber: restDayNumber, date })
         : await completeWeeklyWorkout({
             kind: draft!.kind,
             dayNumber: draft!.dayNumber,
@@ -64,10 +66,12 @@ export function ConfirmClient({
             memo: draft!.memo,
             saveAsName: saveAs,
             editLogId: draft!.editLogId,
+            date: draft!.date ?? null, // 過去日=対象日で保存。編集時はサーバ側が既存日付を保持。
           });
       if (!r.ok) throw new Error(r.message);
       clearDraft(todayKey);
-      router.replace("/workout/week/do?done=1");
+      // 過去日は一覧へ戻る(今日の完了祝福は出さない)。今日は従来どおり祝福画面へ。
+      router.replace(date ? "/workout/week/history" : "/workout/week/do?done=1");
     } catch (e) {
       console.warn("[confirm] complete failed", e);
       setError("保存に失敗しました。もう一度お試しください。");
@@ -184,9 +188,11 @@ export function ConfirmClient({
             onClick={() =>
               router.push(
                 // ①-A: 配布は身元(day)を持ち帰り「配布のまま」開き直す(じぶんメニューに化けない)。
-                d.kind === "dist" && d.dayNumber != null
+                // 過去日(date)は対象日を持ち帰る(下書き名前空間・書込先を保つ)。
+                (d.kind === "dist" && d.dayNumber != null
                   ? `/workout/week/edit?resume=1&day=${d.dayNumber}`
-                  : "/workout/week/edit?resume=1"
+                  : "/workout/week/edit?resume=1") +
+                  (date ? `&date=${date}&from=list` : "")
               )
             }
             disabled={busy}

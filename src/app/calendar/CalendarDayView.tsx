@@ -53,6 +53,7 @@ export type CalendarViewProps = {
   hasCarte: boolean;
   photoView: CalendarBodyPhotoView;
   recordedDates: string[];
+  canBackdate: boolean; // 週間プール利用者=過去日記録(バックデート)可
 };
 
 const shiftDate = (date: string, days: number) =>
@@ -98,7 +99,18 @@ export function CalendarDayView({
   hasCarte,
   photoView,
   recordedDates,
+  canBackdate,
 }: CalendarViewProps) {
+  // 過去日(バックデート): その日 < 今日。当日は大ボタンを出さない(既存フロー)。
+  const isPast = date < today;
+  // 記録ありの過去日は「編集」でその記録を直接開く(log id 直参照)。
+  const workoutLogId =
+    workout.state === "done" || workout.state === "rest" ? workout.logId : null;
+  const trainHeaderHref =
+    canBackdate && isPast && workoutLogId
+      ? `/workout/week/edit?edit=${workoutLogId}&date=${date}&from=list`
+      : "/workout/week";
+  const trainHeaderLabel = canBackdate && isPast && workoutLogId ? "編集 ›" : "記録 ›";
   const week = useMemo(() => {
     const base = new Date(`${date}T00:00:00Z`);
     const sundayMs = base.getTime() - base.getUTCDay() * 86_400_000;
@@ -308,7 +320,7 @@ export function CalendarDayView({
             <div className="l"><span className="dumbbell" />トレーニング</div>
             <div className="chr">
               {workout.state === "done" && workout.isCustom && <span className="star">★ じぶんメニュー</span>}
-              <Link className="edit" href="/workout/week">記録 ›</Link>
+              <Link className="edit" href={trainHeaderHref}>{trainHeaderLabel}</Link>
             </div>
           </div>
           {workout.state === "rest" && (
@@ -319,6 +331,10 @@ export function CalendarDayView({
           )}
           {workout.state === "none" && (
             <div className="none"><span className="dumbbell-lg" /><div className="t">トレ記録なし</div></div>
+          )}
+          {/* 過去日 × 記録なし → その日を記録する大ボタン(当日は出さない=既存フロー) */}
+          {canBackdate && isPast && workout.state === "none" && (
+            <Link className="btn3d rec-btn" href={`/workout/week/select?date=${date}`}>この日のトレーニングを記録する</Link>
           )}
           {workout.state === "done" && (
             <>
@@ -331,6 +347,13 @@ export function CalendarDayView({
               ))}
               <Link className="menu-link" href="/workout">配布メニューを見る</Link>
             </>
+          )}
+          {/* 案あ-2: 記録の一覧・過去日を追加(カレンダーはカレンダーのまま、一覧は別画面) */}
+          {canBackdate && (
+            <Link className="menu-link sub" href="/workout/week/history">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" /></svg>
+              記録の一覧・過去日を追加 ›
+            </Link>
           )}
         </div>
         )}
@@ -635,6 +658,9 @@ const CSS = `
 .exrow .nm{flex:1;font-size:13px;font-weight:700;}
 .exrow .set{font-size:11px;font-weight:800;color:var(--ink2);}
 .menu-link{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:11px;padding:10px;background:#f4f9f5;border:1px solid #dbe8df;border-radius:11px;font-size:12px;font-weight:800;color:var(--grn-d);}
+.menu-link.sub{background:#faf7f0;border-color:#e8e0d0;color:var(--ink2);}
+.menu-link svg{width:14px;height:14px;}
+.cal-root .btn3d.rec-btn{margin-top:6px;}
 .rest{display:flex;align-items:center;gap:12px;background:#eef1f5;border:1px solid #dbe2ea;border-radius:12px;padding:14px;}
 .rest .cir{width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid #cdd6e0;display:flex;align-items:center;justify-content:center;color:#6b7a8f;flex-shrink:0;}
 .rest .cir svg{width:22px;height:22px;}

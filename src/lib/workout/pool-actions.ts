@@ -58,6 +58,9 @@ export type WeeklyDraft = {
   saveAsName?: string | null; // じぶんメニューとして棚に新規保存(全経路可・実施ログの種別は変えない)
   fromMenuId?: string | null; // 元にしたじぶんメニュー(棚/先週じぶん)
   editLogId?: string | null; // 当日修正(行id update)
+  /** 過去日記録(バックデート・2026-07-30): 対象日(YYYY-MM-DD)。省略時は今日。
+   *  新規insert時のみ適用。editLogId 指定時は既存行の日付を保持(date は書き換えない)。 */
+  date?: string | null;
 };
 
 /**
@@ -107,7 +110,7 @@ export async function completeWeeklyWorkout(
     const logFields = {
       user_id: user.id,
       menu_id: menu?.id ?? null,
-      date: jstTodayStr(),
+      date: input.date ?? jstTodayStr(),
       day_number: input.dayNumber ?? null,
       cycle_number: null as number | null,
       intensity: "medium" as Intensity,
@@ -185,7 +188,7 @@ export async function completeWeeklyWorkout(
   const logFields = {
     user_id: user.id,
     menu_id: menu?.id ?? null,
-    date: jstTodayStr(),
+    date: input.date ?? jstTodayStr(),
     day_number: isCustom ? null : (input.dayNumber ?? null),
     cycle_number: null as number | null, // 条件1: プール行は NULL
     // 配布は選んだ強度(小中大)を保存。じぶんは 小中大 の概念なし=中。
@@ -276,6 +279,7 @@ export async function recordDistWorkout(input: {
   memo?: string | null;
   status?: "done" | "rest_done";
   editLogId?: string | null;
+  date?: string | null; // 過去日記録(バックデート): 省略時 today・edit時は既存日付を保持
 }): Promise<ActionResult<{ logId: string }>> {
   const { supabase, user } = await requireUser();
   if (!user) return { ok: false, message: "ログインが必要です" };
@@ -290,7 +294,7 @@ export async function recordDistWorkout(input: {
   const logFields = {
     user_id: user.id,
     menu_id: menu.id,
-    date: jstTodayStr(),
+    date: input.date ?? jstTodayStr(),
     day_number: input.dayNumber,
     cycle_number: null as number | null, // 条件1: プール行は NULL
     intensity: input.intensity,
@@ -358,6 +362,7 @@ export async function recordCustomWorkout(input: {
   saveAsName?: string | null; // 指定=じぶんメニューとして保存
   fromMenuId?: string | null; // 元にしたじぶんメニュー(あれば)
   editLogId?: string | null;
+  date?: string | null; // 過去日記録(バックデート): 省略時 today・edit時は既存日付を保持
 }): Promise<ActionResult<{ logId: string }>> {
   const { supabase, user } = await requireUser();
   if (!user) return { ok: false, message: "ログインが必要です" };
@@ -384,7 +389,7 @@ export async function recordCustomWorkout(input: {
   const logFields = {
     user_id: user.id,
     menu_id: menu?.id ?? null,
-    date: jstTodayStr(),
+    date: input.date ?? jstTodayStr(),
     day_number: null as number | null, // じぶんメニューは配布日に紐づかない
     cycle_number: null as number | null, // 条件1
     intensity: "medium" as Intensity,
@@ -449,6 +454,27 @@ export async function recordCustomWorkout(input: {
 
   revalidateWorkout();
   return { ok: true, data: { logId } };
+}
+
+/**
+ * 実施記録(1日ぶん)を削除。過去日記録(バックデート)の編集画面「この日の記録を削除」から呼ぶ。
+ * 子(log_items・実績セット custom_menu_sets の log_id 有り行)も明示削除。テンプレ(log_id NULL)は無傷。
+ * 自分の行のみ(user_id 一致)。
+ */
+export async function deleteWorkoutLog(logId: string): Promise<ActionResult> {
+  const { supabase, user } = await requireUser();
+  if (!user) return { ok: false, message: "ログインが必要です" };
+  if (!logId) return { ok: false, message: "対象がありません" };
+  await supabase.from("user_workout_log_items").delete().eq("log_id", logId);
+  await supabase.from("user_custom_menu_sets").delete().eq("log_id", logId);
+  const { error } = await supabase
+    .from("user_workout_logs")
+    .delete()
+    .eq("id", logId)
+    .eq("user_id", user.id);
+  if (error) return { ok: false, message: `削除エラー: ${error.message}` };
+  revalidateWorkout();
+  return { ok: true };
 }
 
 // =====================================================================

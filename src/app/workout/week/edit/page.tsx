@@ -16,7 +16,14 @@ const FROM_HREF: Record<string, string> = {
   menus: "/workout/week/menus",
   last: "/workout/week/last",
   main: "/workout/week",
+  list: "/workout/week/history", // 過去日記録の一覧(バックデート)から来た
 };
+
+/** 対象日(バックデート)を検証。YYYY-MM-DD かつ 今日以前のみ採用。不正/未来は null(=今日扱い)。 */
+function sanitizeDate(d: string | undefined): string | null {
+  if (!d || !/^\d{4}-\d{2}-\d{2}$/.test(d)) return null;
+  return d <= jstTodayStr() ? d : null;
+}
 
 /**
  * セット表(§2-4・全経路の着地点)。
@@ -34,11 +41,15 @@ export default async function WeekEditPage({
     edit?: string;
     from?: string;
     resume?: string;
+    date?: string;
   }>;
 }) {
   const isPool = await isWeeklyPoolUser();
   if (!isPool) redirect("/workout/today");
   const sp = await searchParams;
+  // 過去日記録(バックデート): 対象日。無ければ今日。todayKey(下書き名前空間)も対象日で分離。
+  const targetDate = sanitizeDate(sp.date);
+  const flowKey = targetDate ?? jstTodayStr();
 
   const [initial, favorites] = await Promise.all([
     getEditorInitial(sp),
@@ -60,13 +71,14 @@ export default async function WeekEditPage({
     <>
       <MemberHeader title={initial.menuName} fallbackHref={backHref} />
       {/* ②-B: 編集中の離脱時に破棄確認。戻り先=来た入口。 */}
-      <FlowLeaveGuard active backHref={backHref} todayKey={jstTodayStr()} />
+      <FlowLeaveGuard active backHref={backHref} todayKey={flowKey} />
       <SetTableClient
         kind={initial.kind}
         dayNumber={initial.dayNumber}
         menuName={initial.menuName}
         editLogId={initial.editLogId}
-        todayKey={jstTodayStr()}
+        todayKey={flowKey}
+        targetDate={targetDate}
         initialExercises={exercises}
         initialFavorites={favorites}
         initialIntensity={initial.intensity}
