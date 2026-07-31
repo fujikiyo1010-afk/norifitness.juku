@@ -20,6 +20,7 @@ import { isBetaUser } from "@/lib/auth/beta";
 import { isTokutenPreviewUser } from "@/lib/auth/tokuten-preview";
 import { isWeeklyPoolUser } from "@/lib/workout/pool-gate";
 import { isNewHomeCardUser } from "@/lib/auth/home-card-gate";
+import { isPausedUser } from "@/lib/auth/paused-gate";
 import { getWeeklyTraining } from "@/lib/workout/weekly";
 import { HomeBeta } from "./HomeBeta";
 
@@ -113,6 +114,7 @@ export default async function Home() {
     isTokutenPreview,
     isPool,
     isNewHomeCard,
+    paused,
   ] = await Promise.all([
     getMyAlerts(),
     getMyHomeStats(),
@@ -136,7 +138,15 @@ export default async function Home() {
     isWeeklyPoolUser(),
     // ホーム身体カード新デザインの藤田さん先行ゲート(2026-07-28)
     isNewHomeCardUser(),
+    // 休止(一時停止)ユーザー: アプリ内バナー/お知らせ/月次NEWを一切出さない(2026-07-31)
+    isPausedUser(),
   ]);
+
+  // 休止ユーザーはホームの"ナグ"(黄バナー・月次NEW・お知らせフラッシュバック)を全て抑止。
+  // プッシュ/メール通知はDB側で別途停止済み。
+  const effAlerts = paused ? [] : alerts;
+  const effBoardItems = paused ? [] : boardItems;
+  const effMonthlyBadge = paused ? false : (monthlyAudit?.hasReviewNotice ?? false);
 
   const displayName = stats?.displayName ?? "受講生";
   const joinedAtLabel = stats
@@ -182,11 +192,11 @@ export default async function Home() {
         completedLessons={stats?.completedLessons ?? 0}
         totalLessons={stats?.totalLessons ?? 0}
         lastWatched={lastWatched}
-        monthlyBadge={monthlyAudit?.hasReviewNotice ?? false}
-        boardItems={boardItems}
+        monthlyBadge={effMonthlyBadge}
+        boardItems={effBoardItems}
         unreadReply={unreadReply}
         today={todayActivity}
-        alerts={alerts}
+        alerts={effAlerts}
         showTokuten={isBeta || isTokutenPreview}
         weeklyPool={weeklyPool}
         newHomeCard={isNewHomeCard}
@@ -236,15 +246,15 @@ export default async function Home() {
 
       {/* 黄バナー 3 (該当アラートのみ表示) */}
       <div className="px-4 pt-3.5 flex flex-col gap-2">
-        {alerts.map((alert) => (
+        {effAlerts.map((alert) => (
           <NoticeBanner key={alert.key} alert={alert} />
         ))}
       </div>
 
       {/* 掲示板「のりfitnessから」(P2b-1) ＋ 返信あり緑バッジ(P2b-2) */}
-      {boardItems.length > 0 && (
+      {effBoardItems.length > 0 && (
         <div className="px-4 pt-3.5">
-          <BoardSection items={boardItems} hasUnreadReply={unreadReply} />
+          <BoardSection items={effBoardItems} hasUnreadReply={unreadReply} />
         </div>
       )}
 
@@ -313,7 +323,8 @@ export default async function Home() {
         </Link>
       </div>
 
-      {/* 横長 月次添削 */}
+      {/* 横長 月次添削 (休止ユーザーは非表示) */}
+      {!paused && (
       <div className="px-4 pt-2">
         <Link
           href="/monthly-review"
@@ -346,6 +357,7 @@ export default async function Home() {
           <span className="text-[#a59b8c] font-mono text-xs">→</span>
         </Link>
       </div>
+      )}
 
       {/* 横長 体組成 (2026-07-06 P7) */}
       <div className="px-4 pt-2">
