@@ -54,7 +54,7 @@ export default async function WeekPoolPage() {
                 )}
               </div>
 
-              <WeekGridCard recRow={wk.recRow} thisRow={wk.thisRow} lastRow={wk.lastRow} remaining={wk.remaining} />
+              <WeekGridCard recRow={wk.recRow} thisRow={wk.thisRow} lastRow={wk.lastRow} today={wk.today} remaining={wk.remaining} />
 
               <Link
                 href="/workout/week/select"
@@ -73,7 +73,7 @@ export default async function WeekPoolPage() {
                 迷ったら、そのまま推奨を始めましょう。
               </p>
 
-              <WeekGridCard recRow={wk.recRow} thisRow={wk.thisRow} lastRow={wk.lastRow} remaining={wk.remaining} />
+              <WeekGridCard recRow={wk.recRow} thisRow={wk.thisRow} lastRow={wk.lastRow} today={wk.today} remaining={wk.remaining} />
 
               {wk.nextRecommended ? (
                 <>

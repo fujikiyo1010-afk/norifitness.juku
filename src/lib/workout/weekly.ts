@@ -54,6 +54,7 @@ export type WeeklyTraining = {
   recRow: WeekCell[]; // ①推奨 7セル(月..日)
   thisRow: WeekCell[]; // ②今週 7セル
   lastRow: WeekCell[]; // ③先週 7セル
+  today: string; // JST今日(YYYY-MM-DD)。実施行の空マス=過去日記録の可否判定に使う
   remaining: number; // 残り配布メニュー(train・未実施)
   nextRecommended: DistMenu | null; // 次のおすすめ(未実施の推奨順で先頭)
   todayDone: boolean;
@@ -197,6 +198,7 @@ export async function getWeeklyTraining(): Promise<WeeklyTraining> {
     recRow: emptyRow(),
     thisRow: emptyRow(),
     lastRow: emptyRow(),
+    today: jstTodayStr(),
     remaining: 0,
     nextRecommended: null,
     todayDone: false,
@@ -315,6 +317,7 @@ export async function getWeeklyTraining(): Promise<WeeklyTraining> {
     recRow,
     thisRow,
     lastRow,
+    today,
     remaining,
     nextRecommended,
     todayDone,
