@@ -108,7 +108,7 @@ function Row({ d, cycles }: { d: BackdateDay; cycles: WorkoutCycles | null }) {
   if (d.kind === "gap") {
     return (
       <Link
-        href={`/workout/week/select?date=${d.date}`}
+        href={`/workout/week/add?date=${d.date}`}
         className="flex min-h-[56px] items-center gap-2.5 border-t border-[#f0e9db] bg-[#fdf8ec] px-3.5 py-2.5 first:border-t-0"
       >
         {dt}

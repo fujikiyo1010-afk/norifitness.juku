@@ -39,8 +39,8 @@ export default async function WeekSelectPage({
   return (
     <>
       <MemberHeader
-        title={targetDate ? `${fmtDate(targetDate)}のメニュー` : "今日のメニューを選ぶ"}
-        fallbackHref={targetDate ? "/workout/week/history" : "/workout/week"}
+        title={targetDate ? `${fmtDate(targetDate)}の配布メニュー` : "今日のメニューを選ぶ"}
+        fallbackHref={targetDate ? `/workout/week/add?date=${targetDate}` : "/workout/week"}
       />
       <main className="min-h-[100dvh] bg-[#f9f5ed]">
         <div className="mx-auto flex max-w-[460px] flex-col gap-2.5 px-4 py-4">
