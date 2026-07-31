@@ -52,9 +52,6 @@ export function WeekMenuDetail({
           )}
         </div>
 
-        <div className="rounded-xl border border-[#f0e0a0] bg-[#fffbe6] px-3.5 py-2.5 text-[11.5px] font-bold leading-relaxed text-[#6b5410]">
-          ポイント: 無理のない重量で、フォームを意識して丁寧に行いましょう。
-        </div>
       </div>
 
       {/* 下部固定: このメニューを実施する → 既存記録画面(pool保存) */}

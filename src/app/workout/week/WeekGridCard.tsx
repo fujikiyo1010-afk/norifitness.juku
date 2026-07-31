@@ -223,9 +223,6 @@ export function WeekGridCard({
                     </div>
                   ))}
                 </div>
-                <div className="mb-3 rounded-lg border border-[#ecdfb4] bg-[#fbf6e2] px-3 py-2 text-[11px] leading-relaxed text-[#7a6a35]">
-                  ポイント: 無理のない重量で、フォームを意識して丁寧に行いましょう。
-                </div>
                 <button
                   type="button"
                   onClick={() => router.push(`/workout/week/edit?day=${dist.day}&from=main`)}
