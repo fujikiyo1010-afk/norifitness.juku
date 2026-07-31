@@ -106,9 +106,12 @@ export function CalendarDayView({
   // 記録ありの過去日は「編集」でその記録を直接開く(log id 直参照)。
   const workoutLogId =
     workout.state === "done" || workout.state === "rest" ? workout.logId : null;
+  // 過去日は今日のフロー(/workout/week)へ飛ばさない。記録あり=その記録を編集 / 記録なし=過去日ハブ。
   const trainHeaderHref =
-    canBackdate && isPast && workoutLogId
-      ? `/workout/week/edit?edit=${workoutLogId}&date=${date}&from=list`
+    canBackdate && isPast
+      ? workoutLogId
+        ? `/workout/week/edit?edit=${workoutLogId}&date=${date}&from=list`
+        : `/workout/week/add?date=${date}`
       : "/workout/week";
   const trainHeaderLabel = canBackdate && isPast && workoutLogId ? "編集 ›" : "記録 ›";
   const week = useMemo(() => {
