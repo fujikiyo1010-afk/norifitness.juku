@@ -17,6 +17,7 @@ type Tap =
   | { t: "personal"; example?: boolean } // パーソナル指導(見本・操作なし)
   | { t: "exCustom" } // 先週の例: じぶんメニュー(見本)
   | { t: "exRest" } // 先週の例: 休養(見本・操作ボタンなし)
+  | { t: "recordDay"; date: string; isPast: boolean } // 実施行の空マス=その日を記録(過去日=バックデート/今日)
   | null;
 
 /**
@@ -27,14 +28,17 @@ export function WeekGridCard({
   recRow,
   thisRow,
   lastRow,
+  today,
   remaining,
 }: {
   recRow: WeekCell[];
   thisRow: WeekCell[];
   lastRow: WeekCell[];
+  today: string; // JST今日(YYYY-MM-DD)
   remaining: number;
 }) {
   const router = useRouter();
+  const monday = mondayOf(today); // 今週の月曜。実施行の各マスの日付 = monday + 列index
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [dist, setDist] = useState<DistPreview | null>(null);
@@ -43,10 +47,21 @@ export function WeekGridCard({
   const [personalModal, setPersonalModal] = useState(false);
   const [example, setExample] = useState(false); // 先週の例フラグ(モーダルに「先週の例」注記＋操作抑制)
   const [exCustom, setExCustom] = useState(false);
+  const [recordDay, setRecordDay] = useState<{ date: string; isPast: boolean } | null>(null);
   const [lightbox, setLightbox] = useState<{ url: string; name: string } | null>(null);
 
-  function tapOf(cell: WeekCell, row: "rec" | "this" | "last"): Tap {
-    if (cell.kind === "empty") return null;
+  function tapOf(
+    cell: WeekCell,
+    row: "rec" | "this" | "last",
+    cellDate?: string | null
+  ): Tap {
+    if (cell.kind === "empty") {
+      // 実施行の空マス: 今日＋その週の過去日だけ「記録なし→この日を記録」を許可(未来は不可)
+      if (row === "this" && cellDate && cellDate <= today) {
+        return { t: "recordDay", date: cellDate, isPast: cellDate < today };
+      }
+      return null;
+    }
     // 先週の例マス: 中身(配布は本物のメニュー内容/じぶん・休・パーソナルは見本)を見せる
     if ("example" in cell && cell.example) {
       if (cell.kind === "dist") return { t: "dist", day: cell.day, example: true };
@@ -72,7 +87,12 @@ export function WeekGridCard({
     setPersonalModal(false);
     setExCustom(false);
     setExample(false);
+    setRecordDay(null);
     setOpen(true);
+    if (tap.t === "recordDay") {
+      setRecordDay({ date: tap.date, isPast: tap.isPast });
+      return;
+    }
     if (tap.t === "rest" || tap.t === "exRest") {
       setRestModal(true);
       if (tap.t === "exRest") setExample(true);
@@ -116,9 +136,9 @@ export function WeekGridCard({
               </th>
             ))}
           </tr>
-          <GridRow label={<>配布<br />メニュー</>} cells={recRow} row="rec" onTap={onTap} tapOf={tapOf} />
-          <GridRow label={<>今週の<br />実施</>} cells={thisRow} row="this" onTap={onTap} tapOf={tapOf} />
-          <GridRow label="先週" cells={lastRow} row="last" onTap={onTap} tapOf={tapOf} />
+          <GridRow label={<>配布<br />メニュー</>} cells={recRow} row="rec" onTap={onTap} tapOf={tapOf} monday={monday} />
+          <GridRow label={<>今週の<br />実施</>} cells={thisRow} row="this" onTap={onTap} tapOf={tapOf} monday={monday} />
+          <GridRow label="先週" cells={lastRow} row="last" onTap={onTap} tapOf={tapOf} monday={monday} />
         </tbody>
       </table>
       <div className="mt-1.5 flex items-center justify-between text-[10px] font-bold text-[#98917f]">
@@ -200,6 +220,29 @@ export function WeekGridCard({
                   ))}
                 </div>
                 <p className="text-[10.5px] leading-relaxed text-[#a59b8c]">自分で組んだメニューの記録は、こんなふうに見られます。</p>
+              </div>
+            )}
+
+            {!loading && recordDay && (
+              <div>
+                <div className="text-[10px] font-extrabold text-[#6a6256]">{mdDowOf(recordDay.date)}</div>
+                <h2 className="mb-2 mt-1 text-[16px] font-bold text-[#2b2620]">
+                  {recordDay.isPast ? "この日はまだ記録がありません" : "今日はまだ記録がありません"}
+                </h2>
+                <p className="mb-3 text-[12px] leading-relaxed text-[#7a6a35]">
+                  {recordDay.isPast
+                    ? "この日にやったトレーニングを、あとから記録できます。"
+                    : "今日のトレーニングを記録します。"}
+                </p>
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push(recordDay.isPast ? `/workout/week/add?date=${recordDay.date}` : "/workout/week")
+                  }
+                  className="btn3d w-full rounded-xl py-3 text-center text-[13px] font-bold"
+                >
+                  {recordDay.isPast ? "この日のトレーニングを記録する" : "今日のトレーニングを記録する"}
+                </button>
               </div>
             )}
 
@@ -301,6 +344,32 @@ function mdOf(date: string): string {
   return `${Number(date.slice(5, 7))}/${Number(date.slice(8, 10))}`;
 }
 
+// 実施行の空マス=過去日記録 用の日付ヘルパ(クライアント安全・純カレンダー計算。tzズレ回避のため文字列を分解)
+function fmtDate(dt: Date): string {
+  const y = dt.getFullYear();
+  const m = String(dt.getMonth() + 1).padStart(2, "0");
+  const d = String(dt.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+function mondayOf(date: string): string {
+  const [y, m, d] = date.split("-").map(Number);
+  const dt = new Date(y, m - 1, d);
+  const dow = (dt.getDay() + 6) % 7; // 月=0 … 日=6
+  dt.setDate(dt.getDate() - dow);
+  return fmtDate(dt);
+}
+function addDays(date: string, n: number): string {
+  const [y, m, d] = date.split("-").map(Number);
+  const dt = new Date(y, m - 1, d);
+  dt.setDate(dt.getDate() + n);
+  return fmtDate(dt);
+}
+function mdDowOf(date: string): string {
+  const [y, m, d] = date.split("-").map(Number);
+  const dow = DOW[(new Date(y, m - 1, d).getDay() + 6) % 7];
+  return `${m}月${d}日（${dow}）`;
+}
+
 /** 先週の例マスであることを示すタグ(実データではない見本) */
 function ExampleTag() {
   return (
@@ -316,12 +385,14 @@ function GridRow({
   row,
   onTap,
   tapOf,
+  monday,
 }: {
   label: ReactNode;
   cells: WeekCell[];
   row: "rec" | "this" | "last";
   onTap: (t: Tap) => void;
-  tapOf: (c: WeekCell, r: "rec" | "this" | "last") => Tap;
+  tapOf: (c: WeekCell, r: "rec" | "this" | "last", cellDate?: string | null) => Tap;
+  monday: string;
 }) {
   return (
     <tr>
@@ -329,7 +400,9 @@ function GridRow({
         {label}
       </td>
       {cells.map((c, i) => {
-        const tap = tapOf(c, row);
+        // 実施行のマスは 月曜+列index で日付を持つ(空マスの過去日記録の判定に使う)
+        const cellDate = row === "this" ? addDays(monday, i) : null;
+        const tap = tapOf(c, row, cellDate);
         return (
           <td key={i} className="border border-[#d9d2bf] p-0">
             <button

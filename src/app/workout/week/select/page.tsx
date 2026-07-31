@@ -58,7 +58,7 @@ export default async function WeekSelectPage({
           ) : (
             <>
               {/* 一番上に週間表(メインと同じ) */}
-              <WeekGridCard recRow={wk.recRow} thisRow={wk.thisRow} lastRow={wk.lastRow} remaining={wk.remaining} />
+              <WeekGridCard recRow={wk.recRow} thisRow={wk.thisRow} lastRow={wk.lastRow} today={wk.today} remaining={wk.remaining} />
               <p className="rounded-xl border border-[#cfe3d6] bg-[#f0f7f2] px-3.5 py-2.5 text-[11.5px] font-bold text-[#34603f]">
                 どのメニューを選んでもOK。体調や気分に合わせてどうぞ。
               </p>
