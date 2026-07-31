@@ -106,14 +106,15 @@ export function CalendarDayView({
   // 記録ありの過去日は「編集」でその記録を直接開く(log id 直参照)。
   const workoutLogId =
     workout.state === "done" || workout.state === "rest" ? workout.logId : null;
-  // 過去日は今日のフロー(/workout/week)へ飛ばさない。記録あり=その記録を編集 / 記録なし=過去日ハブ。
+  // 過去日は今日のフロー(/workout/week)へ飛ばさない。記録あり=その記録を編集。
+  // 記録なしの過去日はヘッダーリンクを出さない(下の大ボタンで記録する)。
   const trainHeaderHref =
-    canBackdate && isPast
-      ? workoutLogId
-        ? `/workout/week/edit?edit=${workoutLogId}&date=${date}&from=list`
-        : `/workout/week/add?date=${date}`
+    canBackdate && isPast && workoutLogId
+      ? `/workout/week/edit?edit=${workoutLogId}&date=${date}&from=list`
       : "/workout/week";
   const trainHeaderLabel = canBackdate && isPast && workoutLogId ? "編集 ›" : "記録 ›";
+  // 記録なしの過去日=ヘッダーの記録/編集コマンドは非表示
+  const showTrainHeaderLink = !(canBackdate && isPast && !workoutLogId);
   const week = useMemo(() => {
     const base = new Date(`${date}T00:00:00Z`);
     const sundayMs = base.getTime() - base.getUTCDay() * 86_400_000;
@@ -323,7 +324,9 @@ export function CalendarDayView({
             <div className="l"><span className="dumbbell" />トレーニング</div>
             <div className="chr">
               {workout.state === "done" && workout.isCustom && <span className="star">★ じぶんメニュー</span>}
-              <Link className="edit" href={trainHeaderHref}>{trainHeaderLabel}</Link>
+              {showTrainHeaderLink && (
+                <Link className="edit" href={trainHeaderHref}>{trainHeaderLabel}</Link>
+              )}
             </div>
           </div>
           {workout.state === "rest" && (
