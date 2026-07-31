@@ -334,7 +334,7 @@ export function CalendarDayView({
           )}
           {/* 過去日 × 記録なし → その日を記録する大ボタン(当日は出さない=既存フロー) */}
           {canBackdate && isPast && workout.state === "none" && (
-            <Link className="btn3d rec-btn" href={`/workout/week/select?date=${date}`}>この日のトレーニングを記録する</Link>
+            <Link className="btn3d rec-btn" href={`/workout/week/add?date=${date}`}>この日のトレーニングを記録する</Link>
           )}
           {workout.state === "done" && (
             <>

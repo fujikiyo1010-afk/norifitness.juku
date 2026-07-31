@@ -70,8 +70,13 @@ export function ConfirmClient({
           });
       if (!r.ok) throw new Error(r.message);
       clearDraft(todayKey);
-      // 過去日は一覧へ戻る(今日の完了祝福は出さない)。今日は従来どおり祝福画面へ。
-      router.replace(date ? "/workout/week/history" : "/workout/week/do?done=1");
+      // 過去日は「記録/更新しました」画面へ(今日の祝福とは別トーン)。今日は従来どおり祝福画面へ。
+      if (date) {
+        const isUpdate = !rest && !!draft?.editLogId;
+        router.replace(`/workout/week/do?recorded=1&date=${date}${isUpdate ? "&mode=update" : ""}`);
+      } else {
+        router.replace("/workout/week/do?done=1");
+      }
     } catch (e) {
       console.warn("[confirm] complete failed", e);
       setError("保存に失敗しました。もう一度お試しください。");

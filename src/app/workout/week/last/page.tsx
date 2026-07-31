@@ -4,18 +4,30 @@ import { MemberHeader } from "@/components/MemberHeader";
 import { isWeeklyPoolUser } from "@/lib/workout/pool-gate";
 import { getLastWeekMenus } from "@/lib/workout/custom-queries";
 import { menuAbbr } from "@/lib/workout/weekly";
+import { jstTodayStr } from "@/lib/date/jst";
 
 export const dynamic = "force-dynamic";
 
-/** 先週から選ぶ(モック画面9)。先週やった配布/じぶんを「今日やる」で今週に再投入。 */
-export default async function LastWeekPage() {
+/**
+ * 先週から選ぶ(モック画面9)。先週やった配布/じぶんを「今日やる」で今週に再投入。
+ * 過去日記録(バックデート): ?date= が来たら対象日を持ち回り、戻り先=ハブ。
+ */
+export default async function LastWeekPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ date?: string }>;
+}) {
   const isPool = await isWeeklyPoolUser();
   if (!isPool) redirect("/workout/today");
+  const sp = await searchParams;
+  const targetDate =
+    sp.date && /^\d{4}-\d{2}-\d{2}$/.test(sp.date) && sp.date <= jstTodayStr() ? sp.date : null;
+  const dateQS = targetDate ? `&date=${targetDate}` : "";
   const entries = await getLastWeekMenus();
 
   return (
     <>
-      <MemberHeader title="先週から選ぶ" fallbackHref="/workout/week" />
+      <MemberHeader title="先週から選ぶ" fallbackHref={targetDate ? `/workout/week/add?date=${targetDate}` : "/workout/week"} />
       <main className="min-h-[100dvh] bg-[#f9f5ed]">
         <div className="mx-auto flex max-w-[460px] flex-col gap-2 px-4 py-4">
           <p className="rounded-xl border border-[#cfe3d6] bg-[#f0f7f2] px-3.5 py-2.5 text-[11.5px] font-bold text-[#34603f]">
@@ -28,7 +40,9 @@ export default async function LastWeekPage() {
           ) : (
             entries.map((e, i) => {
               // 先週=実績が初期値でセット表へ(共通線・§2-9)
-              const href = `/workout/week/edit?last=${e.logId}&from=last`;
+              const href = targetDate
+                ? `/workout/week/edit?last=${e.logId}&from=list${dateQS}`
+                : `/workout/week/edit?last=${e.logId}&from=last`;
               return (
                 <Link
                   key={i}

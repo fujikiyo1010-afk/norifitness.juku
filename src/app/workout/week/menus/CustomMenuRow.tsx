@@ -6,8 +6,9 @@ import { useRouter } from "next/navigation";
 import { deleteCustomMenu } from "@/lib/workout/pool-actions";
 import type { CustomMenuSummary } from "@/lib/workout/custom-queries";
 
-/** じぶんメニュー棚の1行(今日やる/編集/⋮削除)。削除確認=モック画面11。 */
-export function CustomMenuRow({ menu }: { menu: CustomMenuSummary }) {
+/** じぶんメニュー棚の1行(今日やる/編集/⋮削除)。削除確認=モック画面11。
+ *  targetDate 有り(バックデート)は対象日を持ち回り、from=list で記録する。 */
+export function CustomMenuRow({ menu, targetDate = null }: { menu: CustomMenuSummary; targetDate?: string | null }) {
   const router = useRouter();
   const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -38,8 +39,11 @@ export function CustomMenuRow({ menu }: { menu: CustomMenuSummary }) {
           <b className="block truncate text-[12.5px] text-[#2b2620]">{menu.name}</b>
           <span className="text-[10px] font-bold text-[#6a6256]">{sub}</span>
         </div>
-        <Link href={`/workout/week/edit?menu=${menu.id}&from=menus`} className="flex-none rounded-full border-[1.5px] border-[#4a875b] px-2.5 py-1 text-[10px] font-extrabold text-[#34603f]">
-          今日やる
+        <Link
+          href={targetDate ? `/workout/week/edit?menu=${menu.id}&from=list&date=${targetDate}` : `/workout/week/edit?menu=${menu.id}&from=menus`}
+          className="flex-none rounded-full border-[1.5px] border-[#4a875b] px-2.5 py-1 text-[10px] font-extrabold text-[#34603f]"
+        >
+          {targetDate ? "選ぶ" : "今日やる"}
         </Link>
         <Link href={`/workout/week/custom?edit=${menu.id}`} className="flex-none rounded-full border-[1.5px] border-[#d8cdba] px-2.5 py-1 text-[10px] font-extrabold text-[#6a6256]">
           編集
