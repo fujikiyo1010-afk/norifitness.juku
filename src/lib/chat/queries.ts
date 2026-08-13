@@ -77,53 +77,20 @@ export async function getMyUnreadCount(): Promise<number> {
 }
 
 /**
- * 会話ごとの「未対応」状態を計算(ホーム警報 alerts.ts と同じ考え方＝統一)。
- * 未対応 = 受講生の発言のうち、こちらの「最後の返信」と「完了(admin_chat_acks.acked_at)」の
- * どちらよりも後に届いたものがある状態。開いただけでは変わらない(last_read_at_admin は使わない)。
- * 返信する / 完了ボタンを押す のどちらかで解消し、受講生が新しく送ると再び未対応に戻る。
+ * 会話1件が「未対応」か(段5・非正規化ベース＝全メッセージを読まない)。
+ * 未対応 = 最新メッセージが受講生発 かつ 完了(admin_chat_acks.acked_at)がそれより前(または未完了)。
+ * 「最後の返信より後か」は、返信すると last_message_sender が 'admin' になることで自動的に成立
+ * (＝last_message_sender='user' の時点で、こちらの最後の返信より後の受講生発言がある)。
+ * ホーム警報 alerts.ts と同じ考え方。開いただけでは変わらない。
  */
-type MsgMeta = { conversation_id: string; sender_kind: string; created_at: string };
-type ConvState = {
-  unhandled: boolean;
-  unread: number; // 未対応の受講生メッセージ数(=最後の対応より後の受講生発言)
-  lastSender: "user" | "admin" | null;
-};
-function computeConvStates(
-  msgs: MsgMeta[],
-  ackByUser: Map<string, string>,
-  userIdByConv: Map<string, string>
-): Map<string, ConvState> {
-  const byConv = new Map<string, MsgMeta[]>();
-  for (const m of msgs) {
-    const arr = byConv.get(m.conversation_id) ?? [];
-    arr.push(m);
-    byConv.set(m.conversation_id, arr);
-  }
-  const out = new Map<string, ConvState>();
-  for (const [cid, list] of byConv) {
-    let lastAdminMs = 0;
-    let last: MsgMeta | null = null;
-    for (const m of list) {
-      if (!last || m.created_at > last.created_at) last = m;
-      if (m.sender_kind === "admin") {
-        const t = Date.parse(m.created_at);
-        if (t > lastAdminMs) lastAdminMs = t;
-      }
-    }
-    const uid = userIdByConv.get(cid);
-    const ackedAt = uid ? ackByUser.get(uid) : undefined;
-    const handledMs = Math.max(lastAdminMs, ackedAt ? Date.parse(ackedAt) : 0);
-    let unread = 0;
-    for (const m of list) {
-      if (m.sender_kind === "user" && Date.parse(m.created_at) > handledMs) unread++;
-    }
-    out.set(cid, {
-      unhandled: unread > 0,
-      unread,
-      lastSender: (last?.sender_kind as "user" | "admin" | null) ?? null,
-    });
-  }
-  return out;
+function isConvUnhandled(
+  lastSender: "user" | "admin" | null | undefined,
+  lastMessageAt: string,
+  ackedAt: string | undefined
+): boolean {
+  if (lastSender !== "user") return false;
+  if (!ackedAt) return true;
+  return Date.parse(ackedAt) < Date.parse(lastMessageAt);
 }
 
 /** admin 視点 ・全 conversation 一覧 (= 受信箱) ・新着順 */
@@ -139,16 +106,11 @@ export async function listConversationsForAdmin(): Promise<
   if (conversations.length === 0) return [];
 
   const userIds = conversations.map((c) => c.user_id);
-  const userIdByConv = new Map(conversations.map((c) => [c.id, c.user_id]));
 
-  // 氏名 / 完了(ack) / 全メッセージ を1波で取得(N+1回避・alerts.ts と同方式)。
-  const [{ data: users }, { data: acks }, { data: msgs }] = await Promise.all([
+  // 氏名 と 完了(ack) だけ取得(メッセージは読まない＝総件数に依存しない)。
+  const [{ data: users }, { data: acks }] = await Promise.all([
     admin.from("users").select("id, name, email").in("id", userIds),
     admin.from("admin_chat_acks").select("user_id, acked_at"),
-    admin
-      .from("messages")
-      .select("conversation_id, sender_kind, created_at, body")
-      .order("created_at", { ascending: true }),
   ]);
 
   const userMap = new Map(
@@ -161,27 +123,21 @@ export async function listConversationsForAdmin(): Promise<
     ackByUser.set(a.user_id, a.acked_at);
   }
 
-  const allMsgs = (msgs ?? []) as (MsgMeta & { body: string | null })[];
-  const states = computeConvStates(allMsgs, ackByUser, userIdByConv);
-  // 昇順取得なので、会話ごとに最後に上書きされる本文 = 最新メッセージ本文。
-  const lastBodyByConv = new Map<string, string | null>();
-  for (const m of allMsgs) lastBodyByConv.set(m.conversation_id, m.body);
-
   return conversations.map((conv) => {
     const u = userMap.get(conv.user_id);
-    const st = states.get(conv.id) ?? {
-      unhandled: false,
-      unread: 0,
-      lastSender: null as "user" | "admin" | null,
-    };
+    const lastSender = conv.last_message_sender ?? null;
     return {
       conversation: conv,
       user_name: u?.name ?? "(削除済受講生)",
       user_email: u?.email ?? "",
-      last_message_body: lastBodyByConv.get(conv.id) ?? null,
-      last_message_sender: st.lastSender,
-      unread_count: st.unread,
-      unhandled: st.unhandled,
+      last_message_body: conv.last_message_body ?? null,
+      last_message_sender: lastSender,
+      unread_count: 0, // 軽量化のため件数は出さない(未対応は unhandled の強調で表現)
+      unhandled: isConvUnhandled(
+        lastSender,
+        conv.last_message_at,
+        ackByUser.get(conv.user_id)
+      ),
     };
   });
 }
@@ -233,28 +189,29 @@ export async function getConversationForAdmin(
  */
 export async function getAdminUnhandledConvCount(): Promise<number> {
   const admin = createAdminClient();
-  const { data: convs } = await admin
-    .from("conversations")
-    .select("id, user_id");
-  const conversations = (convs ?? []) as { id: string; user_id: string }[];
-  if (conversations.length === 0) return 0;
-  const userIdByConv = new Map(conversations.map((c) => [c.id, c.user_id]));
-
-  const [{ data: acks }, { data: msgs }] = await Promise.all([
+  // 会話(最新sender/時刻)と ack だけ(メッセージは読まない＝総件数に依存しない)。
+  const [{ data: convs }, { data: acks }] = await Promise.all([
+    admin
+      .from("conversations")
+      .select("user_id, last_message_at, last_message_sender"),
     admin.from("admin_chat_acks").select("user_id, acked_at"),
-    admin.from("messages").select("conversation_id, sender_kind, created_at"),
   ]);
   const ackByUser = new Map<string, string>();
   for (const a of (acks ?? []) as { user_id: string; acked_at: string }[]) {
     ackByUser.set(a.user_id, a.acked_at);
   }
-  const states = computeConvStates(
-    (msgs ?? []) as MsgMeta[],
-    ackByUser,
-    userIdByConv
-  );
   let n = 0;
-  for (const st of states.values()) if (st.unhandled) n++;
+  for (const c of (convs ?? []) as {
+    user_id: string;
+    last_message_at: string;
+    last_message_sender: "user" | "admin" | null;
+  }[]) {
+    if (
+      isConvUnhandled(c.last_message_sender, c.last_message_at, ackByUser.get(c.user_id))
+    ) {
+      n++;
+    }
+  }
   return n;
 }
 
