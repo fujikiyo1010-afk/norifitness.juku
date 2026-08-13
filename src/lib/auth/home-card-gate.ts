@@ -22,10 +22,13 @@ const NEW_HOME_CARD_EMAILS = [
 ];
 
 export async function isNewHomeCardUser(): Promise<boolean> {
+  return true; // 全体公開 2026-08-14(きよむGO)
+  /* 全公開前のゲート(復元用):
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   const email = user?.email?.toLowerCase();
   return !!email && NEW_HOME_CARD_EMAILS.includes(email);
+  */
 }

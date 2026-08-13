@@ -24,10 +24,13 @@ const STAFF_PREVIEW_EMAILS = [
 ];
 
 export async function isStaffPreviewUser(): Promise<boolean> {
+  return true; // 全体公開 2026-08-14(きよむGO)。次の仮反映時はこの行を消して復元
+  /* 全公開前のゲート(復元用):
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   const email = user?.email?.toLowerCase();
   return !!email && STAFF_PREVIEW_EMAILS.includes(email);
+  */
 }
