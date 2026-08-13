@@ -354,7 +354,8 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
       }
     } else {
       // ⑦ JST基準の暦日差（recorded_at は date 型 = UTC解釈で「N日記録なし」が深夜にズレるため）
-      const gap = daysSinceDateJST(bm.latestDateStr);
+      //    入会日で頭打ち = 移行で取り込んだ入会前の記録から「途絶」を数えない(2026-08-13)
+      const gap = Math.min(daysSinceDateJST(bm.latestDateStr), daysSinceJoined);
       if (gap >= ALERT_THRESHOLDS.BODY_METRICS_OVERDUE_DAYS) {
         tags.push({
           key: "body_metrics_stalled",
@@ -466,7 +467,11 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
     const startedAt = startedAtByUser.get(user.id);
     if (isBeta && startedAt) {
       const lastWorkout = lastWorkoutDateByUser.get(user.id);
-      const gap = lastWorkout ? daysSinceDateJST(lastWorkout) : daysSinceTsJST(startedAt);
+      // 入会日で頭打ち(移行組の入会前記録から数えない・2026-08-13)
+      const gap = Math.min(
+        lastWorkout ? daysSinceDateJST(lastWorkout) : daysSinceTsJST(startedAt),
+        daysSinceJoined
+      );
       if (gap >= ALERT_THRESHOLDS.WORKOUT_STALLED_DAYS) {
         tags.push({ key: "workout_stalled", label: `トレ ${gap} 日途絶`, severity: "warn" });
       }
@@ -475,7 +480,8 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
     // 新5(ベータ): 食事記録がN日 途絶
     const lastMeal = lastMealDateByUser.get(user.id);
     if (isBeta && lastMeal) {
-      const gap = daysSinceDateJST(lastMeal);
+      // 入会日で頭打ち(移行組の入会前記録から数えない・2026-08-13)
+      const gap = Math.min(daysSinceDateJST(lastMeal), daysSinceJoined);
       if (gap >= ALERT_THRESHOLDS.MEAL_STALLED_DAYS) {
         tags.push({ key: "meal_stalled", label: `食事 ${gap} 日途絶`, severity: "warn" });
       }
