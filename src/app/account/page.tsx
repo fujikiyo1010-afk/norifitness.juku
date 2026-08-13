@@ -78,6 +78,12 @@ export default async function AccountPage() {
 
         {/* その他 */}
         <Section title="その他">
+          <LinkRow
+            icon={<DocIcon />}
+            label="取扱説明書（使い方ガイド）"
+            href="https://guide.norifitness.com/"
+            external
+          />
           <LinkRow icon={<InfoIcon />} label="ヘルプ" href="/account/help" />
           <LinkRow icon={<DocIcon />} label="利用規約" href="/account/terms" />
           <LinkRow icon={<ShieldIcon />} label="プライバシーポリシー" href="/account/privacy" />
@@ -123,22 +129,35 @@ function LinkRow({
   label,
   href,
   last,
+  external,
 }: {
   icon: React.ReactNode;
   label: string;
   href: string;
   last?: boolean;
+  /** 外部サイト(取説等)は新しいタブで開く */
+  external?: boolean;
 }) {
-  return (
-    <Link
-      href={href}
-      className={`flex items-center gap-3 px-4 py-3 hover:bg-[#f0e6d3] transition-colors ${
-        last ? "" : "border-b border-[#e7dcc9]"
-      }`}
-    >
+  const className = `flex items-center gap-3 px-4 py-3 hover:bg-[#f0e6d3] transition-colors ${
+    last ? "" : "border-b border-[#e7dcc9]"
+  }`;
+  const inner = (
+    <>
       <span className="w-4 h-4 text-zinc-700">{icon}</span>
       <span className="flex-1 text-[13px] text-[#2b2620]">{label}</span>
       <span className="text-[#a59b8c] text-sm">→</span>
+    </>
+  );
+  if (external) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+        {inner}
+      </a>
+    );
+  }
+  return (
+    <Link href={href} className={className}>
+      {inner}
     </Link>
   );
 }
