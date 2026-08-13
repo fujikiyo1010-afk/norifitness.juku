@@ -10,6 +10,7 @@ import { useRealtimeMessages } from "@/lib/chat/useRealtimeMessages";
 import { MessageBody } from "@/components/chat/MessageBody";
 import { ChatImage } from "@/components/chat/ChatImage";
 import { listLessonsForPicker, type LessonPickerItem } from "./_lessons";
+import { getRecordsForQuote, type QuoteRecords } from "./_records";
 import type { ChatMessage } from "@/lib/chat/types";
 
 /**
@@ -17,9 +18,11 @@ import type { ChatMessage } from "@/lib/chat/types";
  */
 export function AdminChatClient({
   conversationId,
+  userId,
   initialMessages,
 }: {
   conversationId: string;
+  userId: string;
   initialMessages: ChatMessage[];
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
@@ -31,6 +34,10 @@ export function AdminChatClient({
   const [lessonOpen, setLessonOpen] = useState(false);
   const [lessons, setLessons] = useState<LessonPickerItem[] | null>(null);
   const [lessonQ, setLessonQ] = useState("");
+  // 記録を引用(段3)。
+  const [recordOpen, setRecordOpen] = useState(false);
+  const [records, setRecords] = useState<QuoteRecords | null>(null);
+  const [recordTab, setRecordTab] = useState<"meals" | "weights">("meals");
   // 画像添付(段4)。
   const imageInputRef = useRef<HTMLInputElement>(null);
   const [uploadingImg, setUploadingImg] = useState(false);
@@ -95,6 +102,24 @@ export function AdminChatClient({
   const filteredLessons = (lessons ?? [])
     .filter((l) => l.title.toLowerCase().includes(lessonQ.trim().toLowerCase()))
     .slice(0, 60);
+
+  // 記録を引用ピッカー: 開いた時に一度だけ取得。
+  async function toggleRecordPicker() {
+    const next = !recordOpen;
+    setRecordOpen(next);
+    setLessonOpen(false);
+    if (next && records === null) {
+      try {
+        setRecords(await getRecordsForQuote(userId));
+      } catch {
+        setRecords({ meals: [], weights: [] });
+      }
+    }
+  }
+  function insertQuote(text: string) {
+    setText((t) => (t.trim() ? `${t}\n${text}` : text));
+    setRecordOpen(false);
+  }
 
   // 画像を選ぶ → クライアント圧縮(フル+サムネ) → アップロード送信(本文=キャプション)。
   async function onPickImage(e: React.ChangeEvent<HTMLInputElement>) {
@@ -236,6 +261,67 @@ export function AdminChatClient({
                       ▶ {l.title}
                     </button>
                   ))
+                )}
+              </div>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={toggleRecordPicker}
+            className="inline-flex items-center gap-1 rounded-md border border-[#e8ebe9] bg-white px-2 py-1 text-[12px] font-semibold text-[#00695c] hover:border-[#00897b] hover:bg-[#00897b]/10"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <path d="M14 2v6h6M9 13h6M9 17h4" />
+            </svg>
+            記録を引用
+          </button>
+
+          {recordOpen && (
+            <div className="absolute bottom-full left-0 z-10 mb-2 w-[340px] rounded-lg border border-zinc-200 bg-white p-2 shadow-xl">
+              <div className="px-1 pb-1.5 text-[11px] font-bold text-zinc-500">
+                この受講生の記録を引用
+              </div>
+              <div className="mb-1.5 flex gap-1.5">
+                {(["meals", "weights"] as const).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setRecordTab(t)}
+                    className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
+                      recordTab === t
+                        ? "bg-[#00897b] text-white"
+                        : "border border-zinc-300 bg-white text-zinc-500"
+                    }`}
+                  >
+                    {t === "meals" ? "食事" : "体重"}
+                  </button>
+                ))}
+              </div>
+              <div className="max-h-52 overflow-y-auto">
+                {records === null ? (
+                  <div className="px-2 py-3 text-center text-[12px] text-zinc-400">
+                    読み込み中…
+                  </div>
+                ) : (recordTab === "meals" ? records.meals : records.weights)
+                    .length === 0 ? (
+                  <div className="px-2 py-3 text-center text-[12px] text-zinc-400">
+                    記録なし
+                  </div>
+                ) : (
+                  (recordTab === "meals" ? records.meals : records.weights).map(
+                    (r) => (
+                      <button
+                        key={r.key}
+                        type="button"
+                        onClick={() => insertQuote(r.text)}
+                        className="block w-full rounded-md px-2 py-1.5 text-left text-[12px] text-zinc-700 hover:bg-[#f0f7f5] hover:text-[#00695c]"
+                      >
+                        {r.label}
+                      </button>
+                    )
+                  )
                 )}
               </div>
             </div>

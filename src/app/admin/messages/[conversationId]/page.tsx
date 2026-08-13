@@ -73,6 +73,7 @@ export default async function AdminChatPage({
 
         <AdminChatClient
           conversationId={conversationId}
+          userId={data.user_id}
           initialMessages={data.messages}
         />
       </div>
