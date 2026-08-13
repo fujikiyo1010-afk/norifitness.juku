@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAdminInfo } from "@/lib/auth/admin";
 import { sendPushToUser, sendPushToAllAdmins } from "@/lib/push/send";
+import { signChatImages } from "./image-sign";
 import type { ChatMessage } from "./types";
 
 const PREVIEW_MAX = 80;
@@ -145,6 +146,89 @@ export async function sendMessageAsAdmin(
   return { ok: true, message: data as ChatMessage };
 }
 
+/**
+ * 管理者 ・画像メッセージ送信(段4)。クライアントで圧縮済みの フル+サムネ を受け取り、
+ * 非公開バケット chat-images にアップロード → 画像付きメッセージを作成 → 署名URL付きで返す。
+ * 画像は管理者→受講生の一方向。30日で cron 削除。
+ */
+export async function sendImageMessageAsAdmin(
+  conversationId: string,
+  formData: FormData
+): Promise<SendResult> {
+  const me = await getAdminInfo();
+  if (!me) return { ok: false, message: "管理者権限が必要です" };
+
+  const full = formData.get("full");
+  const thumb = formData.get("thumb");
+  const caption = ((formData.get("caption") as string | null) ?? "").trim();
+  if (!(full instanceof File)) {
+    return { ok: false, message: "画像がありません" };
+  }
+
+  const admin = createAdminClient();
+  const base = `${conversationId}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
+  const fullPath = `${base}.jpg`;
+  const thumbPath = `${base}_t.jpg`;
+
+  const up1 = await admin.storage
+    .from("chat-images")
+    .upload(fullPath, full, { contentType: "image/jpeg", upsert: false });
+  if (up1.error) return { ok: false, message: up1.error.message };
+
+  let thumbOk = false;
+  if (thumb instanceof File) {
+    const up2 = await admin.storage
+      .from("chat-images")
+      .upload(thumbPath, thumb, { contentType: "image/jpeg", upsert: false });
+    thumbOk = !up2.error;
+  }
+
+  const { data, error } = await admin
+    .from("messages")
+    .insert({
+      conversation_id: conversationId,
+      sender_kind: "admin",
+      sender_id: me.id,
+      body: caption,
+      image_path: fullPath,
+      image_thumb_path: thumbOk ? thumbPath : null,
+    })
+    .select("*")
+    .single();
+  if (error) {
+    // 後始末: 挿入失敗ならアップした画像を消す
+    await admin.storage
+      .from("chat-images")
+      .remove([fullPath, ...(thumbOk ? [thumbPath] : [])]);
+    return { ok: false, message: error.message };
+  }
+
+  // 受講生へ push 通知
+  try {
+    const { data: conv } = await admin
+      .from("conversations")
+      .select("user_id")
+      .eq("id", conversationId)
+      .maybeSingle();
+    const targetUserId = (conv as { user_id?: string } | null)?.user_id;
+    if (targetUserId) {
+      void sendPushToUser(targetUserId, {
+        title: "のりfitness から新着メッセージ",
+        body: caption ? shortPreview(caption) : "📷 画像が届きました",
+        url: "/messages",
+        tag: "chat-user",
+      }).catch((e) => console.error("[push] chat img→user failed", e));
+    }
+  } catch (e) {
+    console.error("[push] chat img lookup failed", e);
+  }
+
+  revalidatePath("/admin/messages");
+  revalidatePath(`/admin/messages/${conversationId}`);
+  const [signed] = await signChatImages([data as ChatMessage]);
+  return { ok: true, message: signed };
+}
+
 /** 受講生 ・自分の conversation の messages 全件取得 (= ポーリング用、 Realtime フォールバック) */
 export async function fetchMyLatestMessages(
   conversationId: string
@@ -168,7 +252,7 @@ export async function fetchMyLatestMessages(
     .select("*")
     .eq("conversation_id", conversationId)
     .order("created_at", { ascending: true });
-  return (data ?? []) as ChatMessage[];
+  return signChatImages((data ?? []) as ChatMessage[]);
 }
 
 /** 受講生 ・既読をセット */

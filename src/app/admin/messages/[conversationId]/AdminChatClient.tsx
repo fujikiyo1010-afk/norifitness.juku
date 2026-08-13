@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition, useCallback } from "react";
-import { sendMessageAsAdmin } from "@/lib/chat/actions";
+import { sendMessageAsAdmin, sendImageMessageAsAdmin } from "@/lib/chat/actions";
 import { fetchMessagesForAdmin } from "./_actions";
+import { compressImage } from "@/lib/images/compress";
+import { PhotoLightbox } from "@/components/PhotoLightbox";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { useRealtimeMessages } from "@/lib/chat/useRealtimeMessages";
 import { MessageBody } from "@/components/chat/MessageBody";
+import { ChatImage } from "@/components/chat/ChatImage";
 import { listLessonsForPicker, type LessonPickerItem } from "./_lessons";
 import type { ChatMessage } from "@/lib/chat/types";
 
@@ -28,6 +31,10 @@ export function AdminChatClient({
   const [lessonOpen, setLessonOpen] = useState(false);
   const [lessons, setLessons] = useState<LessonPickerItem[] | null>(null);
   const [lessonQ, setLessonQ] = useState("");
+  // 画像添付(段4)。
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingImg, setUploadingImg] = useState(false);
+  const [lightbox, setLightbox] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const handleNew = useCallback((msg: ChatMessage) => {
@@ -89,6 +96,39 @@ export function AdminChatClient({
     .filter((l) => l.title.toLowerCase().includes(lessonQ.trim().toLowerCase()))
     .slice(0, 60);
 
+  // 画像を選ぶ → クライアント圧縮(フル+サムネ) → アップロード送信(本文=キャプション)。
+  async function onPickImage(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      alert("画像ファイルを選んでください");
+      return;
+    }
+    setUploadingImg(true);
+    try {
+      const full = await compressImage(file, 1600, 0.82);
+      const thumb = await compressImage(file, 400, 0.7);
+      const fd = new FormData();
+      fd.append("full", new File([full], "full.jpg", { type: "image/jpeg" }));
+      fd.append("thumb", new File([thumb], "thumb.jpg", { type: "image/jpeg" }));
+      fd.append("caption", text.trim());
+      const r = await sendImageMessageAsAdmin(conversationId, fd);
+      if (!r.ok) {
+        alert(r.message);
+        return;
+      }
+      setText("");
+      setMessages((prev) =>
+        prev.some((m) => m.id === r.message.id) ? prev : [...prev, r.message]
+      );
+    } catch {
+      alert("画像の送信に失敗しました");
+    } finally {
+      setUploadingImg(false);
+    }
+  }
+
   function handleSend() {
     const body = text.trim();
     if (body.length === 0 || sending) return;
@@ -109,6 +149,9 @@ export function AdminChatClient({
 
   return (
     <>
+      {lightbox && (
+        <PhotoLightbox photos={[lightbox]} onClose={() => setLightbox(null)} />
+      )}
       {/* メッセージリスト */}
       <div
         className="flex-1 px-6 py-4 space-y-3 overflow-y-auto bg-[#e8efe1]"
@@ -119,15 +162,37 @@ export function AdminChatClient({
             まだメッセージがありません。
           </div>
         ) : (
-          messages.map((m) => <MessageBubble key={m.id} message={m} />)
+          messages.map((m) => (
+            <MessageBubble key={m.id} message={m} onImageClick={setLightbox} />
+          ))
         )}
         <div ref={bottomRef} />
       </div>
 
       {/* 送信フォーム */}
       <div className="border-t border-zinc-200 bg-white px-4 py-3">
-        {/* ツールバー(段2: レッスンを貼る) */}
+        {/* ツールバー(段2: レッスン / 段4: 画像) */}
         <div className="relative mb-2 flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => imageInputRef.current?.click()}
+            disabled={uploadingImg}
+            className="inline-flex items-center gap-1 rounded-md border border-[#e8ebe9] bg-white px-2 py-1 text-[12px] font-semibold text-[#00695c] hover:border-[#00897b] hover:bg-[#00897b]/10 disabled:opacity-50"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <path d="m21 15-5-5L5 21" />
+            </svg>
+            {uploadingImg ? "送信中…" : "画像"}
+          </button>
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={onPickImage}
+          />
           <button
             type="button"
             onClick={toggleLessonPicker}
@@ -243,7 +308,13 @@ export function AdminChatClient({
   );
 }
 
-function MessageBubble({ message }: { message: ChatMessage }) {
+function MessageBubble({
+  message,
+  onImageClick,
+}: {
+  message: ChatMessage;
+  onImageClick?: (url: string) => void;
+}) {
   // admin 視点: admin 発 = 右、 user 発 = 左
   const isAdmin = message.sender_kind === "admin";
   return (
@@ -255,9 +326,12 @@ function MessageBubble({ message }: { message: ChatMessage }) {
             : "max-w-[78%] bg-[#fffdf8] text-[#2b2620] rounded-[16px] rounded-tl-[4px] px-3.5 py-2 shadow-sm"
         }
       >
-        <p className="text-[14px] leading-[1.55] whitespace-pre-wrap break-words">
-          <MessageBody text={message.body} />
-        </p>
+        <ChatImage message={message} onImageClick={onImageClick} />
+        {message.body && (
+          <p className="text-[14px] leading-[1.55] whitespace-pre-wrap break-words">
+            <MessageBody text={message.body} />
+          </p>
+        )}
         <p
           className={`text-[10px] mt-1 font-mono ${
             isAdmin ? "text-[#34603f]/70" : "text-zinc-500"
