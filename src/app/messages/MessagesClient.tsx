@@ -6,6 +6,7 @@ import {
   fetchMyLatestMessages,
 } from "@/lib/chat/actions";
 import { useRealtimeMessages } from "@/lib/chat/useRealtimeMessages";
+import { MessageBody } from "@/components/chat/MessageBody";
 import type { ChatMessage } from "@/lib/chat/types";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 
@@ -154,7 +155,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         }
       >
         <p className="text-[14px] leading-[1.55] whitespace-pre-wrap break-words">
-          {message.body}
+          <MessageBody text={message.body} />
         </p>
         <p
           className={`text-[10px] mt-1 font-mono ${
