@@ -5,6 +5,9 @@ export type Conversation = {
   last_message_at: string;
   last_read_at_user: string | null;
   last_read_at_admin: string | null;
+  // 段5: 最新メッセージの sender/body を非正規化(受信箱・バッジの軽量化用)。
+  last_message_sender?: "user" | "admin" | null;
+  last_message_body?: string | null;
 };
 
 export type ChatMessage = {
