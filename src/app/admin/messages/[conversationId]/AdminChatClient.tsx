@@ -6,6 +6,7 @@ import { fetchMessagesForAdmin } from "./_actions";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { useRealtimeMessages } from "@/lib/chat/useRealtimeMessages";
 import { MessageBody } from "@/components/chat/MessageBody";
+import { listLessonsForPicker, type LessonPickerItem } from "./_lessons";
 import type { ChatMessage } from "@/lib/chat/types";
 
 /**
@@ -23,6 +24,10 @@ export function AdminChatClient({
   const [sending, startSending] = useTransition();
   // 誤送信防止: 送信ボタンの真上に「送信しますか？」の確認を出してから送る(案C)。
   const [confirming, setConfirming] = useState(false);
+  // レッスンを選んで貼る(段2)。
+  const [lessonOpen, setLessonOpen] = useState(false);
+  const [lessons, setLessons] = useState<LessonPickerItem[] | null>(null);
+  const [lessonQ, setLessonQ] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const handleNew = useCallback((msg: ChatMessage) => {
@@ -61,6 +66,29 @@ export function AdminChatClient({
     handleSend();
   }
 
+  // レッスンピッカー: 開いた時に一度だけ取得。
+  async function toggleLessonPicker() {
+    const next = !lessonOpen;
+    setLessonOpen(next);
+    if (next && lessons === null) {
+      try {
+        setLessons(await listLessonsForPicker());
+      } catch {
+        setLessons([]);
+      }
+    }
+  }
+  // 選択 → 「タイトル + URL」を本文に挿入(URLは送信後チップになる)。
+  function insertLesson(item: LessonPickerItem) {
+    const ins = `${item.title}\n${item.url}`;
+    setText((t) => (t.trim() ? `${t}\n${ins}` : ins));
+    setLessonOpen(false);
+    setLessonQ("");
+  }
+  const filteredLessons = (lessons ?? [])
+    .filter((l) => l.title.toLowerCase().includes(lessonQ.trim().toLowerCase()))
+    .slice(0, 60);
+
   function handleSend() {
     const body = text.trim();
     if (body.length === 0 || sending) return;
@@ -98,6 +126,57 @@ export function AdminChatClient({
 
       {/* 送信フォーム */}
       <div className="border-t border-zinc-200 bg-white px-4 py-3">
+        {/* ツールバー(段2: レッスンを貼る) */}
+        <div className="relative mb-2 flex items-center gap-1">
+          <button
+            type="button"
+            onClick={toggleLessonPicker}
+            className="inline-flex items-center gap-1 rounded-md border border-[#e8ebe9] bg-white px-2 py-1 text-[12px] font-semibold text-[#00695c] hover:border-[#00897b] hover:bg-[#00897b]/10"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+              <rect x="2" y="4" width="20" height="16" rx="2" />
+              <path d="m10 9 5 3-5 3z" fill="currentColor" stroke="none" />
+            </svg>
+            レッスンを貼る
+          </button>
+
+          {lessonOpen && (
+            <div className="absolute bottom-full left-0 z-10 mb-2 w-[340px] rounded-lg border border-zinc-200 bg-white p-2 shadow-xl">
+              <div className="px-1 pb-1.5 text-[11px] font-bold text-zinc-500">
+                レッスンを選んで貼る
+              </div>
+              <input
+                value={lessonQ}
+                onChange={(e) => setLessonQ(e.target.value)}
+                placeholder="レッスン名で検索…"
+                className="mb-1.5 w-full rounded border border-zinc-300 px-2 py-1 text-[12px] focus:border-[#00897b] focus:outline-none"
+              />
+              <div className="max-h-52 overflow-y-auto">
+                {lessons === null ? (
+                  <div className="px-2 py-3 text-center text-[12px] text-zinc-400">
+                    読み込み中…
+                  </div>
+                ) : filteredLessons.length === 0 ? (
+                  <div className="px-2 py-3 text-center text-[12px] text-zinc-400">
+                    該当なし
+                  </div>
+                ) : (
+                  filteredLessons.map((l) => (
+                    <button
+                      key={l.id}
+                      type="button"
+                      onClick={() => insertLesson(l)}
+                      className="block w-full rounded-md px-2 py-1.5 text-left text-[12px] text-zinc-700 hover:bg-[#f0f7f5] hover:text-[#00695c]"
+                    >
+                      ▶ {l.title}
+                    </button>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
         <div className="flex items-end gap-2">
           <textarea
             value={text}
