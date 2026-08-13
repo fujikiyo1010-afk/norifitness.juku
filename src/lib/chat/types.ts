@@ -14,6 +14,13 @@ export type ChatMessage = {
   sender_id: string;
   body: string;
   created_at: string;
+  // 画像添付(段4・管理者送信のみ)。chat-images バケットのパス。
+  image_path?: string | null;
+  image_thumb_path?: string | null;
+  // サーバで付与する署名URL(表示用)。30日超は image_expired=true で URL は null。
+  image_url?: string | null;
+  image_thumb_url?: string | null;
+  image_expired?: boolean;
 };
 
 /** admin 受信箱 行 */

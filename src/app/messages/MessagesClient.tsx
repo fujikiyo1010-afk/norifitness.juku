@@ -7,6 +7,8 @@ import {
 } from "@/lib/chat/actions";
 import { useRealtimeMessages } from "@/lib/chat/useRealtimeMessages";
 import { MessageBody } from "@/components/chat/MessageBody";
+import { ChatImage } from "@/components/chat/ChatImage";
+import { PhotoLightbox } from "@/components/PhotoLightbox";
 import type { ChatMessage } from "@/lib/chat/types";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 
@@ -32,6 +34,7 @@ export function MessagesClient({
   void myName;
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [text, setText] = useState("");
+  const [lightbox, setLightbox] = useState<string | null>(null);
   const [sending, startSending] = useTransition();
   const listRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -85,6 +88,9 @@ export function MessagesClient({
 
   return (
     <>
+      {lightbox && (
+        <PhotoLightbox photos={[lightbox]} onClose={() => setLightbox(null)} />
+      )}
       {/* メッセージリスト (スクロール) */}
       <div
         ref={listRef}
@@ -97,7 +103,9 @@ export function MessagesClient({
             気軽に質問・相談を送ってみましょう。
           </div>
         ) : (
-          messages.map((m) => <MessageBubble key={m.id} message={m} />)
+          messages.map((m) => (
+            <MessageBubble key={m.id} message={m} onImageClick={setLightbox} />
+          ))
         )}
         <div ref={bottomRef} />
       </div>
@@ -143,7 +151,13 @@ export function MessagesClient({
   );
 }
 
-function MessageBubble({ message }: { message: ChatMessage }) {
+function MessageBubble({
+  message,
+  onImageClick,
+}: {
+  message: ChatMessage;
+  onImageClick?: (url: string) => void;
+}) {
   const isUser = message.sender_kind === "user";
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
@@ -154,9 +168,12 @@ function MessageBubble({ message }: { message: ChatMessage }) {
             : "max-w-[78%] bg-[#fffdf8] text-[#2b2620] rounded-[16px] rounded-tl-[4px] px-3.5 py-2 shadow-sm"
         }
       >
-        <p className="text-[14px] leading-[1.55] whitespace-pre-wrap break-words">
-          <MessageBody text={message.body} />
-        </p>
+        <ChatImage message={message} onImageClick={onImageClick} />
+        {message.body && (
+          <p className="text-[14px] leading-[1.55] whitespace-pre-wrap break-words">
+            <MessageBody text={message.body} />
+          </p>
+        )}
         <p
           className={`text-[10px] mt-1 font-mono ${
             isUser ? "text-[#34603f]/70" : "text-[#a59b8c]"

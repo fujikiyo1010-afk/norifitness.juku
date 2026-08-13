@@ -2,6 +2,7 @@
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAdminInfo } from "@/lib/auth/admin";
+import { signChatImages } from "@/lib/chat/image-sign";
 import type { ChatMessage } from "@/lib/chat/types";
 
 /** admin ・特定 conversation の messages 全件取得 (= ポーリング用) */
@@ -17,5 +18,5 @@ export async function fetchMessagesForAdmin(
     .select("*")
     .eq("conversation_id", conversationId)
     .order("created_at", { ascending: true });
-  return (data ?? []) as ChatMessage[];
+  return signChatImages((data ?? []) as ChatMessage[]);
 }

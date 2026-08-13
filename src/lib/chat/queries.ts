@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { signChatImages } from "./image-sign";
 import type {
   Conversation,
   ChatMessage,
@@ -44,7 +45,7 @@ export async function listMyMessages(
     .eq("conversation_id", conversationId)
     .order("created_at", { ascending: true })
     .limit(limit);
-  return (data ?? []) as ChatMessage[];
+  return signChatImages((data ?? []) as ChatMessage[]);
 }
 
 /** 受講生視点 ・未読数 (admin 発で last_read_at_user 以降のもの) */
@@ -222,7 +223,7 @@ export async function getConversationForAdmin(
       (user as { name?: string | null } | null)?.name ?? "(氏名未設定)",
     user_email: (user as { email?: string } | null)?.email ?? "",
     user_id: conversation.user_id,
-    messages: (messages ?? []) as ChatMessage[],
+    messages: await signChatImages((messages ?? []) as ChatMessage[]),
   };
 }
 
