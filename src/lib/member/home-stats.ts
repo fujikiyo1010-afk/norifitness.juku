@@ -46,7 +46,7 @@ export async function getMyHomeStats(): Promise<HomeStats | null> {
       .eq("user_id", user.id),
     supabase
       .from("users")
-      .select("name, joined_at")
+      .select("name, joined_at, service_started_at")
       .eq("id", user.id)
       .maybeSingle(),
   ]);
@@ -54,7 +54,11 @@ export async function getMyHomeStats(): Promise<HomeStats | null> {
   const watchedSum =
     watchedQ.data?.reduce((acc, row) => acc + (row.watched_seconds ?? 0), 0) ?? 0;
 
-  const joinedAt = (profileQ.data?.joined_at as string | null) ?? nowIso;
+  // ◯日目の起点 = サービス開始日(トレクラ移行組はトレクラ時代の開始日)。未設定者は入会日。
+  const joinedAt =
+    (profileQ.data?.service_started_at as string | null) ??
+    (profileQ.data?.joined_at as string | null) ??
+    nowIso;
   const daysSinceJoined = Math.max(
     0,
     Math.floor((Date.now() - new Date(joinedAt).getTime()) / (1000 * 60 * 60 * 24))

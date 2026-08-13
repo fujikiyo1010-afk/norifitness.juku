@@ -95,8 +95,12 @@ export async function getMyAlerts(): Promise<MemberAlert[]> {
     }
   } else {
     const latest = new Date(body.data.recorded_at as string);
+    // 起点 = 最終記録と入会日の新しい方(移行で取り込んだ入会前の記録から「途絶」を数えない)
+    const joinedMs = userRow.data?.joined_at
+      ? new Date(userRow.data.joined_at as string).getTime()
+      : 0;
     const daysSinceLatest = Math.floor(
-      (Date.now() - latest.getTime()) / (1000 * 60 * 60 * 24)
+      (Date.now() - Math.max(latest.getTime(), joinedMs)) / (1000 * 60 * 60 * 24)
     );
     if (daysSinceLatest >= BODY_METRICS_STALLED_DAYS) {
       alerts.push({ key: "body_metrics_stalled", daysSinceLatest });
