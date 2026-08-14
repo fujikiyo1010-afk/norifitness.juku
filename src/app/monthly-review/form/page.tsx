@@ -3,6 +3,8 @@ import { getMyAudit, getMyCurrentCycle, listMyAudits } from "@/lib/monthly-audit
 import { MemberHeader } from "@/components/MemberHeader";
 import { cycleLabel, cycleRangeLabel } from "@/lib/monthly-audit/cycle";
 import { MonthlyReviewForm } from "./MonthlyReviewForm";
+import { isServiceExpiredUser } from "@/lib/auth/service-expired";
+import { ServiceExpiredNotice } from "@/components/ServiceExpiredNotice";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +18,10 @@ export const dynamic = "force-dynamic";
  *   - 案3(2026-06-03): 前回 audit の今回値を「先月」欄に自動入力(編集可)。
  */
 export default async function MonthlyReviewFormPage() {
+  // サービス満了(180日)ユーザーは期間サポート機能を閉じる(2026-08-14)
+  if (await isServiceExpiredUser()) {
+    return <ServiceExpiredNotice title="月次添削" />;
+  }
   const cycle = await getMyCurrentCycle();
 
   // 入会30日未満 or 入会日不明 → まだ第1回無し

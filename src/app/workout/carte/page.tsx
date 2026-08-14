@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getMyCarte, getMyCurrentMenu } from "@/lib/workout/queries";
 import { MemberHeader } from "@/components/MemberHeader";
 import { RefreshOnFocus } from "@/components/RefreshOnFocus";
+import { isServiceExpiredUser } from "@/lib/auth/service-expired";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,7 @@ export const dynamic = "force-dynamic";
  *   - メニューあり → 「メニュー配布済」バナー + メニュー閲覧 CTA
  */
 export default async function WorkoutCartePage() {
+  const serviceExpired = await isServiceExpiredUser();
   const carte = await getMyCarte();
   if (!carte) {
     redirect("/workout/carte/new");
@@ -202,7 +204,8 @@ export default async function WorkoutCartePage() {
             </table>
           </div>
 
-          {/* ⑤ フッター */}
+          {/* ⑤ フッター (サービス満了ユーザーには更新リクエスト導線を出さない 2026-08-14) */}
+          {!serviceExpired && (
           <div className="px-5 py-3 bg-[#fafafa] border-t border-[#e7dcc9] flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
             <div className="text-[10px] text-zinc-600 leading-relaxed">
               内容を変更したい時は、右のボタンから
@@ -228,6 +231,7 @@ export default async function WorkoutCartePage() {
               カルテ更新リクエスト
             </Link>
           </div>
+          )}
         </div>
       </div>
     </main>

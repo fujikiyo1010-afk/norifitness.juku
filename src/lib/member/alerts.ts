@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { isServiceExpiredUser } from "@/lib/auth/service-expired";
 
 /**
  * 受講生本人用 アラート集計 (ホーム v4 黄バナー用)
@@ -79,9 +80,11 @@ export async function getMyAlerts(): Promise<MemberAlert[]> {
       .maybeSingle(),
   ]);
 
+  // サービス満了(180日)ユーザー: 目標シートは閉鎖済みのため未記入バナーを出さない(2026-08-14)
+  const serviceExpired = await isServiceExpiredUser();
   const alerts: MemberAlert[] = [];
   if (!carte.data) alerts.push({ key: "carte_blank" });
-  if (!sheet.data) alerts.push({ key: "goal_sheet_blank" });
+  if (!sheet.data && !serviceExpired) alerts.push({ key: "goal_sheet_blank" });
   if (!body.data) {
     // 未記入: 入会から 3 日の猶予を過ぎてから表示 (= 入会直後は煽らない)
     const joinedAt = userRow.data?.joined_at

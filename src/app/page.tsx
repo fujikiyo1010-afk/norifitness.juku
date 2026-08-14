@@ -21,6 +21,7 @@ import { isTokutenPreviewUser } from "@/lib/auth/tokuten-preview";
 import { isWeeklyPoolUser } from "@/lib/workout/pool-gate";
 import { isNewHomeCardUser } from "@/lib/auth/home-card-gate";
 import { isPausedUser } from "@/lib/auth/paused-gate";
+import { isServiceExpiredUser } from "@/lib/auth/service-expired";
 import { getWeeklyTraining } from "@/lib/workout/weekly";
 import { HomeBeta } from "./HomeBeta";
 
@@ -115,6 +116,7 @@ export default async function Home() {
     isPool,
     isNewHomeCard,
     paused,
+    serviceExpired,
   ] = await Promise.all([
     getMyAlerts(),
     getMyHomeStats(),
@@ -140,13 +142,16 @@ export default async function Home() {
     isNewHomeCardUser(),
     // 休止(一時停止)ユーザー: アプリ内バナー/お知らせ/月次NEWを一切出さない(2026-07-31)
     isPausedUser(),
+    // サービス満了(180日)ユーザー: 月次カード等の期間サポート導線を出さない(2026-08-14)
+    isServiceExpiredUser(),
   ]);
 
   // 休止ユーザーはホームの"ナグ"(黄バナー・月次NEW・お知らせフラッシュバック)を全て抑止。
   // プッシュ/メール通知はDB側で別途停止済み。
   const effAlerts = paused ? [] : alerts;
   const effBoardItems = paused ? [] : boardItems;
-  const effMonthlyBadge = paused ? false : (monthlyAudit?.hasReviewNotice ?? false);
+  const effMonthlyBadge =
+    paused || serviceExpired ? false : (monthlyAudit?.hasReviewNotice ?? false);
 
   const displayName = stats?.displayName ?? "受講生";
   const joinedAtLabel = stats
@@ -200,6 +205,7 @@ export default async function Home() {
         showTokuten={isBeta || isTokutenPreview}
         weeklyPool={weeklyPool}
         newHomeCard={isNewHomeCard}
+        serviceExpired={serviceExpired}
       />
     );
   }
@@ -323,8 +329,8 @@ export default async function Home() {
         </Link>
       </div>
 
-      {/* 横長 月次添削 (休止ユーザーは非表示) */}
-      {!paused && (
+      {/* 横長 月次添削 (休止/サービス満了ユーザーは非表示) */}
+      {!paused && !serviceExpired && (
       <div className="px-4 pt-2">
         <Link
           href="/monthly-review"

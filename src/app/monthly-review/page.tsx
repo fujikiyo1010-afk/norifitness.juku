@@ -29,6 +29,8 @@ import {
 import { CategoryScoresBlock } from "./CategoryScoresBlock";
 import { CategoryTrendChart } from "./CategoryTrendChart";
 import { TrendChart } from "./TrendChart";
+import { isServiceExpiredUser } from "@/lib/auth/service-expired";
+import { ServiceExpiredNotice } from "@/components/ServiceExpiredNotice";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +46,10 @@ export const dynamic = "force-dynamic";
  *   - ブロック C: 月別ログ一覧 (タップで月詳細へ)
  */
 export default async function MonthlyReviewHistoryPage() {
+  // サービス満了(180日)ユーザーは期間サポート機能を閉じる(2026-08-14)
+  if (await isServiceExpiredUser()) {
+    return <ServiceExpiredNotice title="月次添削" />;
+  }
   const currentAudit = await getMyCurrentMonthAudit();
   const allAudits = await listMyAudits(24); // 過去 2 年分
   const currentStatus = getAuditStatus(currentAudit);

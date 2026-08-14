@@ -5,6 +5,8 @@ import { getMyCarte } from "@/lib/workout/queries";
 import type { Gender as CarteGender } from "@/lib/workout/types";
 import type { Gender as ToolGender } from "@/lib/tools/types";
 import { GoalSheetEditor } from "./GoalSheetEditor";
+import { isServiceExpiredUser } from "@/lib/auth/service-expired";
+import { ServiceExpiredNotice } from "@/components/ServiceExpiredNotice";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +33,10 @@ function mapGender(g: CarteGender | undefined): ToolGender | null {
  *   - 体脂肪率自動計算用に カルテ から gender を取得して渡す
  */
 export default async function GoalSheetEditPage() {
+  // サービス満了(180日)ユーザーは期間サポート機能を閉じる(2026-08-14)
+  if (await isServiceExpiredUser()) {
+    return <ServiceExpiredNotice title="目標シート" />;
+  }
   const [sheet, carte] = await Promise.all([getMyGoalSheet(), getMyCarte()]);
   const initialContent = sheet?.content ?? {};
   const gender = mapGender(carte?.gender);

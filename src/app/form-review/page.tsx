@@ -9,6 +9,8 @@ import {
   FORM_REVIEW_PRICE_REPEAT,
 } from "@/lib/form-review/config";
 import styles from "./form-review.module.css";
+import { isServiceExpiredUser } from "@/lib/auth/service-expired";
+import { ServiceExpiredNotice } from "@/components/ServiceExpiredNotice";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +22,10 @@ export const dynamic = "force-dynamic";
  * 動線は案B: 初回未完了→初回0円ボタン有効 / 初回完了→0円ボタンを無効化(有料URLへ誘導)。
  */
 export default async function FormReviewPage() {
+  // サービス満了(180日)ユーザーは期間サポート機能を閉じる(2026-08-14)
+  if (await isServiceExpiredUser()) {
+    return <ServiceExpiredNotice title="フォーム添削" />;
+  }
   const isBeta = await isBetaUser();
   if (!isBeta) redirect("/");
 

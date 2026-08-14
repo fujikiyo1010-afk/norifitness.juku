@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { getMyCarte } from "@/lib/workout/queries";
 import { RequestForm } from "../../_components/RequestForm";
 import { MemberHeader } from "@/components/MemberHeader";
+import { isServiceExpiredUser } from "@/lib/auth/service-expired";
+import { ServiceExpiredNotice } from "@/components/ServiceExpiredNotice";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +15,10 @@ export const dynamic = "force-dynamic";
  *   - カルテあり → 現状カルテのサマリを表示 + リクエスト入力
  */
 export default async function CarteRequestPage() {
+  // サービス満了(180日)ユーザーは期間サポート機能を閉じる(2026-08-14)
+  if (await isServiceExpiredUser()) {
+    return <ServiceExpiredNotice title="カルテ更新リクエスト" />;
+  }
   const carte = await getMyCarte();
   if (!carte) {
     redirect("/workout/carte/new");

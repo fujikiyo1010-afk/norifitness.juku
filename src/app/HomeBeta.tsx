@@ -34,6 +34,7 @@ export function HomeBeta({
   totalLessons,
   lastWatched,
   monthlyBadge,
+  serviceExpired = false,
   boardItems,
   unreadReply,
   today,
@@ -52,6 +53,8 @@ export function HomeBeta({
   totalLessons: number;
   lastWatched: LastWatchedLesson | null;
   monthlyBadge: boolean;
+  /** サービス満了(180日)ユーザー: 月次/目標シートの導線を出さない(2026-08-14) */
+  serviceExpired?: boolean;
   boardItems: BoardItem[];
   unreadReply: boolean;
   today: TodayActivity;
@@ -242,15 +245,17 @@ export function HomeBeta({
               iconBg="#eaf3ec"
               badge={unreadReply ? "NEW" : undefined}
             />
-            <BigTile
-              href="/monthly-review"
-              name="月次添削"
-              desc="動画返信・履歴"
-              icon={<MonthlyTileIcon />}
-              iconColor="#d6536a"
-              iconBg="#fbe9ee"
-              badge={monthlyBadge ? "NEW" : undefined}
-            />
+            {!serviceExpired && (
+              <BigTile
+                href="/monthly-review"
+                name="月次添削"
+                desc="動画返信・履歴"
+                icon={<MonthlyTileIcon />}
+                iconColor="#d6536a"
+                iconBg="#fbe9ee"
+                badge={monthlyBadge ? "NEW" : undefined}
+              />
+            )}
             {/* 2行目: 学びの記録(左・金) / 目標シート(右) */}
             <BigTile
               href="/my-log"
@@ -260,14 +265,16 @@ export function HomeBeta({
               iconColor="#b8860b"
               iconBg="#f7efd4"
             />
-            <BigTile
-              href="/goal-sheet"
-              name="目標シート"
-              desc="今月の目標"
-              icon={<GoalTileIcon />}
-              iconColor="#2f7d6b"
-              iconBg="#e3f1ee"
-            />
+            {!serviceExpired && (
+              <BigTile
+                href="/goal-sheet"
+                name="目標シート"
+                desc="今月の目標"
+                icon={<GoalTileIcon />}
+                iconColor="#2f7d6b"
+                iconBg="#e3f1ee"
+              />
+            )}
             {/* コース一覧: 通常は表示。藤田さん限定 仮反映(showTokuten)では非表示にし、
                 代わりに末尾へ「特典ライブラリ」を出す。どちらも8枚=4行×2列で揃う(2026-07-17)。 */}
             {!showTokuten && (

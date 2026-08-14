@@ -12,6 +12,8 @@ import {
   type AuditComment,
 } from "@/lib/goal-sheet/types";
 import { SavedToast } from "./SavedToast";
+import { isServiceExpiredUser } from "@/lib/auth/service-expired";
+import { ServiceExpiredNotice } from "@/components/ServiceExpiredNotice";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +26,10 @@ export const dynamic = "force-dynamic";
  *   編集画面(edit/GoalSheetEditor.tsx)には一切触れない。
  */
 export default async function GoalSheetPage() {
+  // サービス満了(180日)ユーザーは期間サポート機能を閉じる(2026-08-14)
+  if (await isServiceExpiredUser()) {
+    return <ServiceExpiredNotice title="目標シート" />;
+  }
   const sheet = await getMyGoalSheet();
 
   // === シート未作成: 初回記入 CTA(現状維持) ===

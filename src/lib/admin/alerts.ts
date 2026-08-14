@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { daysSinceDateJST, daysSinceTsJST } from "@/lib/date/jst";
+import { SERVICE_EXPIRED_EMAILS } from "@/lib/auth/service-expired";
 
 /**
  * 管理画面 アラートタグ集計
@@ -130,7 +131,7 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
   // 受講生一覧(ア1: 退塾者を除外＝在籍中 status='active' のみ)
   const { data: allUsers } = await admin
     .from("users")
-    .select("id, name, joined_at, last_seen_at, is_beta")
+    .select("id, name, email, joined_at, last_seen_at, is_beta")
     .eq("status", "active")
     .order("joined_at", { ascending: false });
 
@@ -300,6 +301,10 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
 
   return users.map((user) => {
     const tags: AlertTag[] = [];
+    // サービス満了(180日)ユーザー: 月次/目標シートは閉鎖済みのため警告を出さない(2026-08-14)
+    const serviceExpired = SERVICE_EXPIRED_EMAILS.includes(
+      ((user as { email?: string | null }).email ?? "").toLowerCase()
+    );
     // ア2: 入会からの経過は JST暦日で数える(UTC直だと深夜に1日ズレる)
     const daysSinceJoined = daysSinceTsJST(user.joined_at as string);
 
@@ -309,7 +314,7 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
       .filter((a) => !a.submitted_at)
       .sort((a, b) => (a.target_month > b.target_month ? -1 : 1))[0];
 
-    if (pendingAudit) {
+    if (pendingAudit && !serviceExpired) {
       const deadline = monthEndOf(pendingAudit.target_month);
       const daysUntilDeadline = daysBetween(now, deadline);
       if (daysUntilDeadline < 0) {
@@ -375,7 +380,7 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
     }
 
     // 6. 目標シート空
-    if (!sheetUserIds.has(user.id) && daysSinceJoined >= ALERT_THRESHOLDS.GOAL_SHEET_BLANK_DAYS) {
+    if (!sheetUserIds.has(user.id) && !serviceExpired && daysSinceJoined >= ALERT_THRESHOLDS.GOAL_SHEET_BLANK_DAYS) {
       tags.push({
         key: "goal_sheet_blank",
         label: "目標シート空",
