@@ -42,6 +42,63 @@ const MEAL_TYPE_CODE: Record<MealType, string> = {
   間: "snack",
 };
 
+// ─── 写真保存の堅牢化(2026-08-17) ───
+// 失敗の切り分け用エラー: stage=どの段で失敗したか / userMessage=利用者向け文言 / detail=真因(ログ用)
+class UploadError extends Error {
+  stage: string;
+  userMessage: string;
+  detail?: unknown;
+  constructor(stage: string, userMessage: string, detail?: unknown) {
+    super(userMessage);
+    this.name = "UploadError";
+    this.stage = stage;
+    this.userMessage = userMessage;
+    this.detail = detail;
+  }
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// 固まり防止: 実リクエストは中断できないが、上書きアップロードなので次の試行が安全
+function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    p,
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error("timeout")), ms)),
+  ]);
+}
+
+// アップロードのリトライ(通信の瞬断を救う)。同じパスへ upsert=true で上書き=重複/ゴミ防止。
+// 成功時は1回で終わり=普段は重くならない。失敗時のみ最大3回まで少し待って再送。
+async function uploadWithRetry(
+  supabase: ReturnType<typeof createClient>,
+  path: string,
+  blob: Blob,
+  attempts = 3,
+  timeoutMs = 20000
+): Promise<void> {
+  let lastErr: unknown = null;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const result = await withTimeout(
+        supabase.storage
+          .from("meal-photos")
+          .upload(path, blob, { contentType: "image/jpeg", upsert: true }),
+        timeoutMs
+      );
+      if (result.error) throw new Error(result.error.message);
+      return; // 成功
+    } catch (e) {
+      lastErr = e;
+      if (i < attempts - 1) await sleep(600 * (i + 1)); // 0.6s, 1.2s の指数バックオフ
+    }
+  }
+  throw new UploadError(
+    "upload",
+    "写真の保存に失敗しました。電波の良い場所やWi-Fiで、もう一度お試しください。",
+    lastErr
+  );
+}
+
 export function MealSheet({
   userId,
   date,
@@ -136,20 +193,53 @@ export function MealSheet({
 
   async function handleSubmit() {
     setError(null);
+
+    // オフライン事前チェック(送信を試す前に弾く・一瞬・ネット往復なし)
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      setError("通信がオフラインのようです。電波・Wi-Fiを確認して、もう一度お試しください。");
+      return;
+    }
+
     setBusy(true);
     const supabase = createClient();
     const uploaded: string[] = [];
+    let stage = "start"; // 予期せぬ失敗時のログ用フォールバック
     try {
+      // セッション事前確認(ローカルのみ・ネット往復なし)。切れていれば再ログイン案内。
+      stage = "session";
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        throw new UploadError(
+          "session",
+          "ログインの有効期限が切れているかもしれません。一度ログインし直してから、もう一度お試しください。"
+        );
+      }
+
       for (const nf of newFiles) {
         // 細1: ストレージキーに日本語(mealType)を入れるとSupabaseが Invalid key で拒否する。英語コードで生成。
         const path = `${userId}/${date}-${MEAL_TYPE_CODE[mealType]}-${Date.now()}-${uploaded.length}.jpg`;
-        const blob = await compressImage(nf.file, 1080, 0.82);
-        const up = await supabase.storage
-          .from("meal-photos")
-          .upload(path, blob, { contentType: "image/jpeg", upsert: false });
-        if (up.error) throw new Error(up.error.message);
+
+        // 圧縮(画像は1回だけ処理=二重処理しない)。画像側の失敗を切り分け。
+        stage = "compress";
+        let blob: Blob;
+        try {
+          blob = await compressImage(nf.file, 1080, 0.82);
+        } catch (ce) {
+          throw new UploadError(
+            "compress",
+            "この写真は読み込めませんでした。別の写真でお試しください（HEIC形式や非常に大きい画像は保存できないことがあります）。",
+            ce
+          );
+        }
+
+        // アップロード(リトライ+タイムアウト)
+        stage = "upload";
+        await uploadWithRetry(supabase, path, blob);
         uploaded.push(path);
       }
+
       const photos = [...keepPhotos.map((p) => p.path), ...uploaded];
       const payloadItems: MealItemInput[] = items
         .filter((it) => it.name.trim())
@@ -181,26 +271,32 @@ export function MealSheet({
           };
         });
 
+      // DB保存(ここでの失敗は「写真」ではなく「記録」の失敗として切り分ける)
+      stage = "db";
       if (isEdit && editLog) {
         const r = await updateMealLog(editLog.id, { memo, photos, items: payloadItems });
-        if (!r.ok) throw new Error(r.message);
+        if (!r.ok) throw new UploadError("db", "記録の保存に失敗しました。もう一度お試しください。", r.message);
       } else {
         const r = await createMealLog({ date, meal_type: mealType, memo, photos, items: payloadItems });
-        if (!r.ok) throw new Error(r.message);
+        if (!r.ok) throw new UploadError("db", "記録の保存に失敗しました。もう一度お試しください。", r.message);
       }
       onSaved(`${MEAL_LABEL[mealType]}を記録しました`);
     } catch (e) {
+      // アップロード済み写真の後始末(孤立防止)
       if (uploaded.length) {
         try {
           await supabase.storage.from("meal-photos").remove(uploaded);
         } catch {}
       }
-      // 細7: 生エラー(英語/内部ID)は見せない。人の言葉に変換(入力は保持)。
-      console.warn("[meal] save failed", e);
+      // 6A: 真因を我々が拾えるよう詳しくログ(利用者には出さない)。どの段で失敗したか＋生エラー。
+      const ue = e instanceof UploadError ? e : null;
+      console.warn(`[meal] save failed (stage=${ue?.stage ?? stage})`, ue?.detail ?? e);
+      // 細7: 利用者には人の言葉。段が特定できていればその文言、不明時は従来の汎用文言(入力は保持)。
       setError(
-        newFiles.length > 0
-          ? "写真の保存に失敗しました。もう一度お試しください。"
-          : "保存に失敗しました。もう一度お試しください。"
+        ue?.userMessage ??
+          (newFiles.length > 0
+            ? "写真の保存に失敗しました。もう一度お試しください。"
+            : "保存に失敗しました。もう一度お試しください。")
       );
     } finally {
       setBusy(false);
