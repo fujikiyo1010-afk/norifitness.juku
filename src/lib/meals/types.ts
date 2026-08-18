@@ -16,7 +16,9 @@ export const MEAL_LABEL: Record<MealType, string> = {
 export type MealItem = {
   id: string;
   name: string;
-  source: "table" | "manual" | "none";
+  source: "table" | "built" | "manual" | "none";
+  grams: number | null;
+  recipe_snapshot: RecipeSnapshotItem[] | null;
   food_table_id: string | null;
   quantity: number | null;
   unit: string | null;
@@ -51,7 +53,43 @@ export type FoodItem = {
   proteinG: number | null;
   fatG: number | null;
   carbG: number | null;
+  category: string | null;
+  method: string | null; // 数値ソース(転記/積算/市販平均 等)
+  isPriority: boolean;
+  countDesc: string | null; // 数え方の説明
+  unitGrams: number | null; // 1単位(base_qty)の目安グラム
 };
+
+/** 内訳(材料)1行。food_recipe_items の行、および記録時のスナップショット。 */
+export type RecipeItem = {
+  seq: number;
+  materialName: string;
+  materialRef: string | null; // 成分表の食品番号 or (手動)
+  grams: number;
+  kcal: number | null;
+  proteinG: number | null;
+  fatG: number | null;
+  carbG: number | null;
+};
+
+/** meal_log_items.recipe_snapshot(JSONB)の1要素(保存形はスネークケース) */
+export type RecipeSnapshotItem = {
+  name: string;
+  grams: number;
+  kcal: number | null;
+  protein_g: number | null;
+  fat_g: number | null;
+  carb_g: number | null;
+};
+
+/** かな正規化(カタカナ→ひらがな・空白除去・小文字化)。777品検索の共通則 */
+export function kanaNorm(s: string): string {
+  return (s || "")
+    .normalize("NFKC")
+    .replace(/[\s・]/g, "")
+    .replace(/[ァ-ヶ]/g, (m) => String.fromCharCode(m.charCodeAt(0) - 0x60))
+    .toLowerCase();
+}
 
 /** food_table値 × 数量 で栄養を算出(base_qtyあたり→実量) */
 export function calcNutrition(
@@ -64,17 +102,17 @@ export function calcNutrition(
   return { kcal: r(food.kcal), p: r(food.proteinG), f: r(food.fatG), c: r(food.carbG) };
 }
 
-/** かな・別名を含めた検索 */
+/** かな・別名を含めた検索(777品対応: かな正規化・上位20件) */
 export function searchFoods(foods: FoodItem[], q: string): FoodItem[] {
-  const s = q.trim().toLowerCase();
+  const s = kanaNorm(q);
   if (!s) return [];
   return foods
     .filter(
       (f) =>
-        f.name.toLowerCase().includes(s) ||
-        f.aliases.some((a) => a.toLowerCase().includes(s))
+        kanaNorm(f.name).includes(s) ||
+        f.aliases.some((a) => kanaNorm(a).includes(s))
     )
-    .slice(0, 8);
+    .slice(0, 20);
 }
 
 /** 数値のある品目だけを合計(数値なし品目数も返す) */
