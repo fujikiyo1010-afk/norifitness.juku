@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>目標超過時のゲージ表示 5案比較</title>
+<style>
+  :root{ --teal:#14b8a6; --teal-l:#5eead4; --ink:#1f2937; --sub:#6b7280; --amber:#f59e0b; --amber-t:#b45309; --red:#ef4444; --red-t:#dc2626; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  body{ font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif; background:#d1d5db; color:var(--ink); display:flex; flex-direction:column; align-items:center; gap:16px; padding:20px 0 80px; }
+  .note{ max-width:390px; width:100%; background:#fffbe6; border:1px solid #f4d67c; border-radius:10px; padding:10px 12px; font-size:12px; line-height:1.6; color:#7a5d00; }
+  .case{ width:390px; }
+  .case .label{ font-size:13px; font-weight:800; margin-bottom:6px; }
+  .case .label small{ font-weight:600; color:#4b5563; font-size:11px; margin-left:6px; }
+  .frame{ background:#f6f7f8; border-radius:20px; padding:14px; box-shadow:0 4px 14px rgba(0,0,0,.12); }
+  .sum2{ background:#fff; border-radius:18px; padding:16px; display:flex; gap:16px; align-items:center; }
+  .ring{ position:relative; width:112px; height:112px; flex:none; }
+  .ring svg{ transform:rotate(-90deg); }
+  .ring .mid{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .ring .mid b{ font-size:22px; font-weight:800; line-height:1; }
+  .ring .mid span{ font-size:9.5px; color:var(--sub); margin-top:3px; }
+  .ring .mid .ov{ font-size:9.5px; font-weight:800; margin-top:2px; }
+  .bars{ flex:1; display:flex; flex-direction:column; gap:10px; }
+  .row2 .lab{ display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:3px; }
+  .row2 .lab b{ font-weight:700; }
+  .row2 .lab span{ color:var(--sub); }
+  .row2 .lab .ovt{ font-weight:800; }
+  .bar{ height:7px; background:#eef1f1; border-radius:4px; overflow:hidden; position:relative; }
+  .bar i{ display:block; height:100%; border-radius:4px; background:var(--teal-l); }
+  .bar .seg{ position:absolute; top:0; bottom:0; right:0; border-radius:0 4px 4px 0; }
+</style>
+</head>
+<body>
+
+<div class="note"><b>目標を超えた時のゲージ表示・5案比較</b>。数値は全案同一(kcal 2,004/1,800で<b>+204</b>・脂質<b>+5g</b>・炭水化物<b>+74g</b>超過、たんぱく質は未達82%)。今の本体は案1です。<b>補足</b>: 増量目的の人は「超える=良い」の場合もあるため、色の意味づけは実装時に目標タイプで調整できます——ここでは「見え方」だけ決めてください。番号で選んでください。</div>
+
+<div id="cases"></div>
+
+<script>
+const D = { kcal:{v:2004,g:1800}, p:{v:98,g:120}, f:{v:55,g:50}, c:{v:294,g:220} };
+const rows = [ ['たんぱく質','p','g'], ['脂質','f','g'], ['炭水化物','c','g'] ];
+const pct = k => Math.min(100, D[k].v/D[k].g*100);
+const overPct = k => D[k].v>D[k].g ? (1 - D[k].g/D[k].v)*100 : 0;  // バー内の「はみ出し分」の割合
+const ringBase = `<circle cx="56" cy="56" r="49" fill="none" stroke="#eef1f1" stroke-width="10"/><circle cx="56" cy="56" r="49" fill="none" stroke="#14b8a6" stroke-width="10" stroke-linecap="round" stroke-dasharray="308 308"/>`;
+const ringOverArc = c => `<circle cx="56" cy="56" r="49" fill="none" stroke="${c}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${(D.kcal.v/D.kcal.g-1)*308} 308"/>`;
+const ringFull = c => `<circle cx="56" cy="56" r="49" fill="none" stroke="#eef1f1" stroke-width="10"/><circle cx="56" cy="56" r="49" fill="none" stroke="${c}" stroke-width="10" stroke-linecap="round" stroke-dasharray="308 308"/>`;
+
+function card(opt){
+  // opt: {ring, midOver, numColor(k), barHTML(k)}
+  const mid = `<div class="mid"><b>2,004</b><span>/ 1,800 kcal</span>${opt.midOver||''}</div>`;
+  return `<div class="sum2">
+    <div class="ring"><svg width="112" height="112" viewBox="0 0 112 112">${opt.ring}</svg>${mid}</div>
+    <div class="bars">${rows.map(([nm,k])=>{
+      const over = D[k].v>D[k].g;
+      const numHtml = opt.num ? opt.num(k, over) : `${D[k].v} / ${D[k].g}g`;
+      return `<div class="row2"><div class="lab"><b>${nm}</b><span>${numHtml}</span></div>
+        <div class="bar"><i style="width:${pct(k)}%"></i>${opt.seg ? opt.seg(k, over) : ''}</div></div>`;
+    }).join('')}</div>
+  </div>`;
+}
+const numPlain = k => `${D[k].v} / ${D[k].g}g`;
+const numMark = col => (k, over) => over
+  ? `<span class="ovt" style="color:${col}">${D[k].v}</span> / ${D[k].g}g <span class="ovt" style="color:${col}">(+${D[k].v-D[k].g})</span>`
+  : numPlain(k);
+const segOver = col => (k, over) => over ? `<span class="seg" style="width:${overPct(k)}%; background:${col}"></span>` : '';
+
+const cases = [
+  { label:'案1(現状)', small:'満タンで止まる: 超えても緑のまま・数字でだけ分かる。一番「責めない」', 
+    html: card({ ring: ringBase, num: numPlain }) },
+  { label:'案2', small:'数字だけ合図: バー・円はそのまま・超えた項目の数字だけ琥珀色+「(+74)」',
+    html: card({ ring: ringBase, num: numMark('var(--amber-t)') }) },
+  { label:'案3(推奨)', small:'超過分だけ琥珀色: はみ出した量がバーの端と円の2周目に見える。量の感覚が残る',
+    html: card({ ring: ringBase + ringOverArc('var(--amber)'), num: numMark('var(--amber-t)'), seg: segOver('var(--amber)'),
+      midOver: `<span class="ov" style="color:var(--amber-t)">+204</span>` }) },
+  { label:'案4', small:'超えたゲージごと琥珀色: バー全体・円全体が変わる。ひと目で分かるが強め',
+    html: (()=>{ const o = { ring: ringFull('var(--amber)'), num: numMark('var(--amber-t)'),
+      seg: null, midOver: `<span class="ov" style="color:var(--amber-t)">+204</span>` };
+      const mid = `<div class="mid"><b>2,004</b><span>/ 1,800 kcal</span>${o.midOver}</div>`;
+      return `<div class="sum2"><div class="ring"><svg width="112" height="112" viewBox="0 0 112 112">${o.ring}</svg>${mid}</div>
+      <div class="bars">${rows.map(([nm,k])=>{ const over = D[k].v>D[k].g;
+        return `<div class="row2"><div class="lab"><b>${nm}</b><span>${o.num(k,over)}</span></div>
+        <div class="bar"><i style="width:${pct(k)}%; ${over?'background:var(--amber)':''}"></i></div></div>`; }).join('')}</div></div>`; })() },
+  { label:'案5', small:'超えたゲージごと赤: あすけん系の強い注意色。「食べ過ぎた感」は一番強い',
+    html: (()=>{ const mid = `<div class="mid"><b>2,004</b><span>/ 1,800 kcal</span><span class="ov" style="color:var(--red-t)">+204</span></div>`;
+      return `<div class="sum2"><div class="ring"><svg width="112" height="112" viewBox="0 0 112 112">${ringFull('var(--red)')}</svg>${mid}</div>
+      <div class="bars">${rows.map(([nm,k])=>{ const over = D[k].v>D[k].g;
+        return `<div class="row2"><div class="lab"><b>${nm}</b><span>${over?`<span class="ovt" style="color:var(--red-t)">${D[k].v}</span> / ${D[k].g}g <span class="ovt" style="color:var(--red-t)">(+${D[k].v-D[k].g})</span>`:numPlain(k)}</span></div>
+        <div class="bar"><i style="width:${pct(k)}%; ${over?'background:var(--red)':''}"></i></div></div>`; }).join('')}</div></div>`; })() },
+];
+document.getElementById('cases').innerHTML = cases.map(c =>
+  `<div class="case"><div class="label">${c.label}<small>${c.small}</small></div><div class="frame">${c.html}</div></div>`
+).join('');
+</script>
+</body>
+</html>

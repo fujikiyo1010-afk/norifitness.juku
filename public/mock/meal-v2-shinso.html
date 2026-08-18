@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>食事 新装フル動作モック(開く→入力→保存→閉じる)</title>
+<style>
+  :root{ --teal:#14b8a6; --teal-d:#0f766e; --teal-bg:#f0fdfa; --ink:#1f2937; --sub:#6b7280; --line:#e5e7eb; --bg:#f6f7f8; --gold:#8a6d10; --gold-bg:#f6ecc8; --gray-bg:#f3f4f6; --pcol:#0f766e; --fcol:#d97706; --ccol:#2563eb; --amber:#f59e0b; --amber-t:#b45309; }
+  *{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body{ font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif; background:#d1d5db; color:var(--ink); display:flex; flex-direction:column; align-items:center; padding:16px 0 60px; }
+  .note-top{ max-width:390px; width:100%; background:#fffbe6; border:1px solid #f4d67c; border-radius:10px; padding:10px 12px; font-size:12px; line-height:1.6; color:#7a5d00; margin-bottom:10px; }
+  .phone{ width:390px; height:800px; background:var(--bg); border-radius:28px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,.25); position:relative; }
+  .screen{ position:absolute; inset:0; display:none; flex-direction:column; overflow-y:auto; }
+  .screen.show{ display:flex; }
+
+  .hd{ background:#fff; padding:14px 16px 10px; border-bottom:1px solid var(--line); position:sticky; top:0; z-index:5; flex:none; }
+  .hd .row{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .hd h1{ font-size:16px; font-weight:700; flex:none; }
+  .datenav{ display:flex; align-items:center; gap:6px; font-size:13.5px; font-weight:700; flex:none; }
+  .datenav button{ width:28px; height:28px; border:1px solid var(--line); background:#fff; border-radius:8px; font-size:13px; color:var(--sub); cursor:pointer; flex:none; }
+  .datenav .datebtn{ width:auto; white-space:nowrap; padding:0 10px; }
+  .datebtn span{ white-space:nowrap; }
+
+  /* 案2サマリーカード */
+  .sum2{ margin:12px 14px; background:#fff; border-radius:18px; padding:16px; display:flex; gap:16px; align-items:center; }
+  .ring{ position:relative; width:118px; height:118px; flex:none; }
+  .ring svg{ transform:rotate(-90deg); }
+  .ring .mid{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .ring .mid b{ font-size:23px; font-weight:800; line-height:1; }
+  .ring .mid span{ font-size:10px; color:var(--sub); margin-top:3px; }
+  .sum2 .bars{ flex:1; display:flex; flex-direction:column; gap:10px; }
+  .sum2 .row2 .lab{ display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:3px; }
+  .sum2 .row2 .lab b{ font-weight:700; }
+  .sum2 .row2 .lab span{ color:var(--sub); }
+  .sum2 .bar{ height:7px; background:#eef1f1; border-radius:4px; overflow:hidden; position:relative; }
+  .sum2 .bar i{ display:block; height:100%; border-radius:4px; transition:width .4s; }
+  .sum2 .bar .seg{ position:absolute; top:0; bottom:0; right:0; background:var(--amber); border-radius:0 4px 4px 0; }
+  .sum2 .lab .ovt{ font-weight:800; color:var(--amber-t); }
+  .ring .mid .ov{ font-size:10px; font-weight:800; color:var(--amber-t); margin-top:2px; }
+
+  .slot{ margin:0 14px 12px; background:#fff; border-radius:16px; padding:14px; }
+  .slot .top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .slot .name{ font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px; }
+  .slot .name .tag{ font-size:10.5px; color:var(--teal-d); background:var(--teal-bg); padding:2px 8px; border-radius:99px; font-weight:700; }
+  .slot .sum{ font-size:13px; font-weight:700; color:var(--teal-d); }
+  .slot ul{ list-style:none; }
+  .slot li{ display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:13px; padding:7px 0; border-top:1px dashed var(--line); }
+  .slot li .r{ text-align:right; flex:none; }
+  .slot li .r b{ font-size:13px; font-weight:700; color:#374151; }
+  .slot li .r small{ display:block; font-size:9.5px; color:var(--sub); margin-top:1px; }
+  .slot .addbtn{ width:100%; padding:11px; border:none; border-radius:12px; background:#faf3dc; color:#8a6d10; font-size:13.5px; font-weight:700; cursor:pointer; }
+  .slot .hint{ font-size:11px; color:var(--sub); margin-top:8px; }
+  .slot .rowab{ display:flex; gap:8px; align-items:stretch; }
+  .slot .rowab .addbtn{ flex:1; }
+  .slot .camsq{ width:46px; flex:none; border:1.5px solid var(--line); border-radius:12px; background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .phrow{ display:flex; gap:7px; margin-top:10px; flex-wrap:wrap; }
+  .phrow .ph{ width:58px; height:58px; border-radius:10px; position:relative; overflow:hidden; flex:none; cursor:pointer; }
+  .phrow .ph svg{ position:absolute; inset:0; margin:auto; opacity:.85; }
+  .phrow .addph{ width:58px; height:58px; border:1.5px dashed #cbd5d1; border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; color:var(--sub); font-size:9px; font-weight:700; cursor:pointer; background:#fff; }
+  .phbig{ width:100%; height:280px; border-radius:16px; position:relative; overflow:hidden; margin:6px 0 10px; }
+  .phbig svg{ position:absolute; inset:0; margin:auto; opacity:.85; }
+  .phdel{ width:100%; padding:10px; border:1.5px solid #fca5a5; border-radius:11px; background:#fff; color:#b91c1c; font-size:12.5px; font-weight:700; cursor:pointer; }
+  .addplus{ margin-top:8px; font-size:11.5px; font-weight:700; color:var(--teal-d); cursor:pointer; display:inline-block; }
+  .disclaimer{ margin:4px 14px 16px; font-size:10.5px; color:#9ca3af; line-height:1.6; }
+
+  /* 記録画面 */
+  .b-hd{ background:#fff; padding:12px 16px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--line); position:sticky; top:0; z-index:5; flex:none; }
+  .b-hd .back{ width:32px; height:32px; border:1px solid var(--line); border-radius:9px; background:#fff; font-size:15px; color:var(--sub); cursor:pointer; }
+  .b-hd h2{ font-size:15.5px; font-weight:800; }
+  .searchbox{ margin:12px 16px 8px; position:relative; flex:none; }
+  .searchbox input{ width:100%; padding:13px 14px 13px 42px; border:2px solid var(--teal); border-radius:14px; font-size:15px; outline:none; background:#fff; }
+  .searchbox svg{ position:absolute; left:13px; top:50%; transform:translateY(-50%); }
+  .catchips{ display:flex; gap:6px; overflow-x:auto; padding:2px 16px 8px; scrollbar-width:none; flex:none; }
+  .catchips::-webkit-scrollbar{ display:none; }
+  .catchips b{ flex:none; padding:7px 13px; border-radius:99px; background:#fff; border:1px solid var(--line); font-size:12px; color:var(--sub); font-weight:600; cursor:pointer; }
+  .catchips b.on{ background:var(--teal-d); border-color:var(--teal-d); color:#fff; }
+  .photoonly{ margin:0 16px 8px; display:flex; align-items:center; gap:8px; justify-content:center; padding:11px; border:1.5px solid var(--teal); border-radius:12px; background:#fff; color:var(--teal-d); font-size:13px; font-weight:700; cursor:pointer; flex:none; }
+  .scroll{ flex:1; overflow-y:auto; padding:0 16px 120px; }
+  .rescount{ font-size:11px; color:var(--sub); margin:2px 2px 6px; }
+  .item{ display:flex; align-items:center; justify-content:space-between; padding:11px 12px; background:#fff; border:1px solid var(--line); border-radius:12px; margin-bottom:7px; cursor:pointer; }
+  .item:active{ background:var(--teal-bg); }
+  .item .l .nm{ font-size:13.5px; font-weight:700; }
+  .item .l .un{ font-size:11px; color:var(--sub); margin-top:2px; }
+  .item .r{ text-align:right; }
+  .item .r .kc{ font-size:13.5px; font-weight:700; color:var(--teal-d); }
+  .item .r .pf{ font-size:10px; color:var(--sub); margin-top:2px; }
+  .addfree{ padding:11px; border:1.5px dashed #cbd5d1; border-radius:12px; text-align:center; font-size:12.5px; color:var(--sub); cursor:pointer; margin-bottom:7px; }
+
+  /* カートバー */
+  .cartbar{ position:absolute; left:0; right:0; bottom:0; background:#fff; border-top:1px solid var(--line); padding:12px 16px 16px; z-index:10; box-shadow:0 -6px 16px rgba(0,0,0,.08); cursor:pointer; }
+  .cartbar .in{ display:flex; align-items:center; justify-content:space-between; }
+  .cartbar .cnt{ font-size:13.5px; font-weight:800; }
+  .cartbar .cnt small{ font-weight:600; color:var(--sub); margin-left:6px; }
+  .cartbar .kc{ font-size:15px; font-weight:800; color:var(--teal-d); }
+  .cartbar .openhint{ font-size:10.5px; color:var(--sub); margin-top:3px; }
+
+  /* モーダル共通 */
+  .modal{ position:absolute; inset:0; background:rgba(0,0,0,.45); z-index:20; display:none; align-items:flex-end; }
+  .modal.show{ display:flex; }
+  .panel{ width:100%; background:#fff; border-radius:22px 22px 0 0; padding:14px 18px 22px; max-height:92%; overflow-y:auto; }
+  .panel h3{ font-size:15.5px; font-weight:800; margin:6px 0 2px; }
+  .src{ font-size:11px; color:var(--teal-d); background:var(--teal-bg); display:inline-block; padding:2px 9px; border-radius:99px; font-weight:700; margin-bottom:10px; }
+  .src.manual{ color:var(--gold); background:var(--gold-bg); }
+  .src.noval{ color:#6b7280; background:#f0f1f3; }
+  .cnm-in{ width:100%; padding:10px 12px; border:1.5px solid var(--line); border-radius:10px; font-size:14px; font-weight:700; outline:none; margin:2px 0 10px; }
+  .cnm-in:focus{ border-color:var(--teal); }
+  .cgin{ display:flex; align-items:center; gap:8px; margin:0 0 6px; }
+  .cgin input{ width:110px; padding:9px 10px; border:1.5px solid var(--line); border-radius:10px; font-size:15px; font-weight:700; text-align:center; outline:none; }
+  .cgin input:focus{ border-color:var(--teal); }
+  .cgin span{ font-size:12px; font-weight:700; color:var(--sub); }
+  .unit-switch{ display:flex; background:var(--gray-bg); border-radius:10px; padding:3px; margin:6px 0 12px; }
+  .unit-switch b{ flex:1; text-align:center; padding:7px 0; border-radius:8px; font-size:12.5px; color:var(--sub); font-weight:700; cursor:pointer; }
+  .unit-switch b.on{ background:#fff; color:var(--teal-d); box-shadow:0 1px 3px rgba(0,0,0,.12); }
+  .stepper{ display:flex; align-items:center; justify-content:center; gap:18px; margin:8px 0 4px; }
+  .stepper button{ width:52px; height:52px; border-radius:50%; border:none; background:var(--teal-bg); color:var(--teal-d); font-size:24px; font-weight:700; cursor:pointer; box-shadow:0 2px 0 #b5e0da; }
+  .stepper .val{ text-align:center; min-width:120px; }
+  .stepper .val b{ font-size:28px; font-weight:800; }
+  .stepper .val span{ display:block; font-size:11.5px; color:var(--sub); margin-top:2px; }
+  .ginput{ display:flex; align-items:center; justify-content:center; gap:8px; margin:8px 0 4px; }
+  .ginput input{ width:120px; padding:12px; border:2px solid var(--teal); border-radius:12px; font-size:22px; font-weight:800; text-align:center; outline:none; }
+  .ginput span{ font-size:14px; font-weight:700; color:var(--sub); }
+  .calcline{ text-align:center; margin:10px 0 4px; }
+  .calcline b{ font-size:22px; font-weight:800; color:var(--teal-d); }
+  .calcline small{ font-size:11px; color:var(--sub); }
+  .pfcline{ display:flex; justify-content:center; gap:14px; font-size:12px; color:var(--sub); margin-bottom:10px; }
+  .pfcline b{ color:var(--ink); }
+  .uchiwake-btn{ display:inline-flex; align-items:center; gap:5px; font-size:11.5px; color:var(--teal-d); border:1px solid var(--teal); border-radius:99px; padding:5px 12px; background:#fff; cursor:pointer; font-weight:700; margin:2px 0 10px; }
+  .uchiwake{ background:var(--teal-bg); border-radius:14px; padding:12px; margin-bottom:12px; display:none; }
+  .uchiwake.show{ display:block; }
+  .uchiwake .uh{ font-size:11.5px; font-weight:700; color:var(--teal-d); margin-bottom:4px; }
+  .urow{ display:flex; align-items:center; gap:6px; padding:6px 0; font-size:12.5px; border-top:1px dashed #b5e0da; }
+  .urow .un{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .urow .uq{ display:flex; align-items:center; gap:5px; flex:none; }
+  .urow .uq button{ width:24px; height:24px; border-radius:6px; border:1px solid var(--teal); background:#fff; color:var(--teal-d); font-weight:700; cursor:pointer; font-size:13px; }
+  .urow .ug{ min-width:44px; text-align:center; font-weight:700; }
+  .urow .uk{ min-width:52px; text-align:right; color:var(--sub); font-size:11px; flex:none; }
+  .urow .ux{ width:22px; height:22px; border:none; background:#fee2e2; color:#b91c1c; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer; flex:none; }
+  .uadd{ margin-top:8px; }
+  .uadd .uadd-btn{ width:100%; padding:8px; border:1.5px dashed var(--teal); border-radius:10px; background:#fff; color:var(--teal-d); font-size:12px; font-weight:700; cursor:pointer; }
+  .uadd input{ width:100%; padding:9px 12px; border:1.5px solid var(--teal); border-radius:10px; font-size:13px; outline:none; margin-bottom:6px; display:none; }
+  .uadd input.show{ display:block; }
+  .uadd .mini-res .item{ padding:8px 10px; margin-bottom:5px; }
+  .unote{ font-size:10.5px; color:var(--sub); margin-top:8px; line-height:1.5; }
+  .manual4{ background:var(--gold-bg); border-radius:12px; padding:10px 12px; margin-bottom:12px; }
+  .manual4 .mh{ font-size:11.5px; font-weight:700; color:var(--gold); margin-bottom:6px; }
+  .manual4 .cells{ display:flex; gap:6px; }
+  .manual4 input{ flex:1; width:25%; padding:8px 4px; border:1px solid #e3cf8f; border-radius:8px; font-size:13px; text-align:center; background:#fff; outline:none; }
+  .qok{ width:100%; padding:13px; border:none; border-radius:13px; background:var(--teal); color:#fff; font-size:14px; font-weight:800; box-shadow:0 3px 0 var(--teal-d); cursor:pointer; }
+
+  /* カートシート */
+  .cs-head{ display:flex; align-items:center; justify-content:space-between; margin:4px 0 10px; }
+  .cs-head h3{ font-size:15px; font-weight:800; }
+  .cs-head .kc{ font-size:14px; font-weight:800; color:var(--teal-d); }
+  .cs-item{ display:flex; align-items:center; gap:8px; padding:10px 0; border-top:1px solid var(--line); }
+  .cs-item .l{ flex:1; cursor:pointer; min-width:0; }
+  .cs-item .l .nm{ font-size:13.5px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .cs-item .l .qt{ font-size:11px; color:var(--sub); margin-top:2px; }
+  .cs-item .kc{ font-size:13px; font-weight:700; color:var(--teal-d); flex:none; }
+  .cs-item .del{ width:26px; height:26px; border:none; background:#fee2e2; color:#b91c1c; border-radius:8px; font-weight:700; cursor:pointer; flex:none; }
+  .cs-extra{ display:flex; gap:8px; margin:10px 0; }
+  .cs-extra .tbtn{ flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:10px 0; border:1.5px solid var(--line); border-radius:10px; background:#fff; font-size:12.5px; font-weight:600; color:var(--sub); cursor:pointer; }
+  .cs-memo{ width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:10px; font-size:13px; outline:none; margin-bottom:10px; resize:none; font-family:inherit; }
+  .cs-empty{ text-align:center; color:var(--sub); font-size:12.5px; padding:18px 0; }
+
+  /* 週チップ(案4: 下線型) */
+  .weekchips{ display:flex; padding:8px 14px 2px; }
+  .weekchips a{ flex:1; text-align:center; padding:4px 0 7px; border-bottom:2.5px solid transparent; position:relative; cursor:pointer; }
+  .weekchips a .dw{ display:block; font-size:9.5px; color:var(--sub); }
+  .weekchips a .dn{ display:block; font-size:15px; font-weight:700; margin-top:2px; color:#374151; }
+  .weekchips a.sel{ border-bottom-color:var(--teal-d); }
+  .weekchips a.sel .dn{ color:var(--teal-d); font-weight:800; }
+  .weekchips a.fut{ opacity:.4; cursor:default; }
+  .weekchips a .dot{ position:absolute; left:50%; transform:translateX(-50%); bottom:2px; width:4px; height:4px; border-radius:50%; background:var(--teal); }
+  .weekchips a.sel .dot{ display:none; }
+  /* 内訳の列切替タブ(案C) */
+  .coltabs{ display:flex; gap:4px; margin:2px 0 6px; }
+  .coltabs b{ padding:4px 12px; border-radius:99px; background:#fff; border:1px solid var(--line); font-size:10.5px; color:var(--sub); font-weight:700; cursor:pointer; }
+  .coltabs b.on{ background:var(--teal-d); border-color:var(--teal-d); color:#fff; }
+  .todaybtn{ font-size:11px; color:var(--teal-d); font-weight:700; border:1px solid var(--teal); background:#fff; border-radius:99px; padding:4px 10px; cursor:pointer; }
+  .datebtn{ display:flex; align-items:center; gap:5px; font-size:14px; font-weight:700; background:none; border:none; cursor:pointer; }
+
+  /* カレンダーピッカー */
+  .pick-head{ display:flex; align-items:center; justify-content:space-between; margin:4px 0 10px; }
+  .pick-head h3{ font-size:14.5px; font-weight:800; }
+  .pick-head button{ width:32px; height:32px; border:1px solid var(--line); background:#fff; border-radius:9px; font-size:14px; color:var(--sub); cursor:pointer; }
+  .pick-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:3px; margin-bottom:8px; }
+  .pick-grid .wd{ text-align:center; font-size:10px; color:var(--sub); padding:4px 0; font-weight:700; }
+  .pick-grid .d{ text-align:center; padding:9px 0; border-radius:10px; font-size:13px; font-weight:600; cursor:pointer; position:relative; }
+  .pick-grid .d:hover{ background:var(--teal-bg); }
+  .pick-grid .d.sel{ background:var(--teal-d); color:#fff; font-weight:800; }
+  .pick-grid .d.today{ box-shadow:inset 0 0 0 1.5px var(--teal); }
+  .pick-grid .d.out{ color:#c7ccd1; }
+  .pick-grid .d .dot{ position:absolute; left:50%; transform:translateX(-50%); bottom:2px; width:4px; height:4px; border-radius:50%; background:var(--teal); }
+
+  /* 生活記録行(b2) */
+  .liferow{ margin:0 14px 12px; background:#fff; border-radius:14px; padding:11px 14px; display:flex; align-items:center; gap:8px; cursor:pointer; }
+  .liferow .items{ flex:1; display:flex; gap:12px; flex-wrap:wrap; }
+  .liferow .it{ font-size:11.5px; color:var(--sub); }
+  .liferow .it b{ color:var(--ink); font-weight:700; margin-left:3px; }
+  .liferow.empty .it b{ color:#c7ccd1; }
+  .liferow .cta{ font-size:11.5px; color:var(--teal-d); font-weight:700; flex:none; }
+  /* 生活記録セクション(b1) */
+  .lifesec{ margin:0 14px 12px; background:#fff; border-radius:16px; padding:14px; cursor:pointer; }
+  .lifesec .top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+  .lifesec .name{ font-size:14px; font-weight:700; }
+  .lifesec .cta{ font-size:11.5px; color:var(--teal-d); font-weight:700; }
+  .lifesec .items{ display:flex; gap:14px; flex-wrap:wrap; }
+  .lifesec .it{ font-size:12px; color:var(--sub); }
+  .lifesec .it b{ color:var(--ink); font-weight:700; margin-left:3px; }
+  .lifesec.empty .it b{ color:#c7ccd1; }
+
+  /* 4問シート */
+  .lf-q{ margin-bottom:14px; }
+  .lf-q .qq{ font-size:12.5px; font-weight:700; margin-bottom:7px; }
+  .lf-q .opts{ display:flex; gap:6px; flex-wrap:wrap; }
+  .lf-q .opts b{ padding:8px 14px; border-radius:99px; background:var(--gray-bg); font-size:12.5px; color:var(--sub); font-weight:700; cursor:pointer; }
+  .lf-q .opts b.on{ background:var(--teal-d); color:#fff; }
+
+  /* 量入力エリアの高さ固定(人前⇔g切替でガタつかない) */
+  .qty-io{ min-height:76px; display:flex; align-items:center; justify-content:center; }
+  .qty-io .stepper, .qty-io .ginput{ margin:0; }
+  /* リセット(案5: ↺円形) */
+  .mreset{ width:24px; height:24px; display:flex; align-items:center; justify-content:center; cursor:pointer; flex:none; border:1.2px solid #e3cf8f; background:#fff; border-radius:50%; }
+
+  /* モック用切替 */
+
+  /* 保存後の画面 */
+  .inter{ display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; padding:30px; text-align:center; }
+  .inter .ok{ width:72px; height:72px; border-radius:50%; background:var(--teal-bg); display:flex; align-items:center; justify-content:center; margin-bottom:18px; }
+  .inter h2{ font-size:18px; font-weight:800; margin-bottom:8px; }
+  .inter p{ font-size:13px; color:var(--sub); line-height:1.7; margin-bottom:22px; }
+  .inter .go{ width:100%; padding:14px; border:none; border-radius:13px; background:var(--teal); color:#fff; font-size:14.5px; font-weight:800; box-shadow:0 3px 0 var(--teal-d); cursor:pointer; }
+  .inter .skip{ margin-top:12px; font-size:12px; color:var(--sub); background:none; border:none; cursor:pointer; text-decoration:underline; }
+</style>
+</head>
+<body>
+
+<div class="note-top"><b>フル動作モック</b>: 「＋記録する」→検索→量・内訳(6品実働)→追加→バーで確認→保存→1日の画面に反映。<b>今回の追加(決めごと3つ+写真の反映)</b>: <b>写真=食事カードから</b>(サムネ横並び+「＋追加」/未記録カードは記録ボタン横のカメラ=写真だけの記録。タップで拡大・外す。8/15の昼に見本あり)/<b>カスタム品の「組み立て」</b>(表にない食べ物→材料を表から足すと自動計算・緑。4セル手入力は最終上書き)/<b>生活記録はb2(上部)に固定</b>/<b>目標超過は超過分だけ琥珀色</b>(バー右端+円の2周目+数字。見本=週の15(土))。</div>
+
+
+<div class="phone">
+
+  <!-- ===== 1日の画面 ===== -->
+  <div class="screen show" id="scr-day">
+    <div class="hd"><div class="row">
+      <h1>食事</h1>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <button class="todaybtn" id="todayBtn" onclick="selectDate(TODAY)" style="display:none">今日へ</button>
+        <div class="datenav">
+          <button onclick="moveDay(-1)">&lt;</button>
+          <button class="datebtn" onclick="openPicker()"><span id="dateLabel"></span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+          </button>
+          <button onclick="moveDay(1)">&gt;</button>
+        </div>
+      </div>
+    </div></div>
+    <div class="weekchips" id="weekchips"></div>
+    <div class="sum2">
+      <div class="ring">
+        <svg width="118" height="118" viewBox="0 0 118 118">
+          <circle cx="59" cy="59" r="52" fill="none" stroke="#eef1f1" stroke-width="10"/>
+          <circle id="ringArc" cx="59" cy="59" r="52" fill="none" stroke="#14b8a6" stroke-width="10" stroke-linecap="round" stroke-dasharray="0 327" style="transition:stroke-dasharray .5s"/>
+          <circle id="ringOver" cx="59" cy="59" r="52" fill="none" stroke="var(--amber)" stroke-width="10" stroke-linecap="round" stroke-dasharray="0 327" style="transition:stroke-dasharray .5s"/>
+        </svg>
+        <div class="mid"><b id="dayKcal">0</b><span id="dayGoal">/ 1,800 kcal</span><span class="ov" id="dayOver" style="display:none"></span></div>
+      </div>
+      <div class="bars">
+        <div class="row2"><div class="lab"><b>たんぱく質</b><span id="pTxt"></span></div><div class="bar"><i id="pBar" style="background:#5eead4"></i></div></div>
+        <div class="row2"><div class="lab"><b>脂質</b><span id="fTxt"></span></div><div class="bar"><i id="fBar" style="background:#5eead4"></i></div></div>
+        <div class="row2"><div class="lab"><b>炭水化物</b><span id="cTxt"></span></div><div class="bar"><i id="cBar" style="background:#5eead4"></i></div></div>
+      </div>
+    </div>
+    <div id="lifeTop"></div>
+    <div id="slots"></div>
+    <div class="disclaimer">数値は目安です。日本食品標準成分表(八訂)ほかを元にした平均値で、実際の食事とは差があります。本機能は医療・診断を目的とするものではありません。</div>
+  </div>
+
+  <!-- ===== 記録画面 ===== -->
+  <div class="screen" id="scr-rec">
+    <div class="b-hd"><button class="back" onclick="go('day')">&lt;</button><h2>夕食を記録</h2></div>
+    <div class="searchbox">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/></svg>
+      <input id="q" placeholder="料理名・食材で検索" oninput="renderResults()">
+    </div>
+    <div class="catchips" id="cats"></div>
+    <div class="scroll" id="res"></div>
+    <div class="cartbar" id="cartbar" onclick="openCart()">
+      <div class="in"><div class="cnt" id="cartCnt">まだ何も入っていません<small>品を選ぶとここに溜まります</small></div><div class="kc" id="cartKc"></div></div>
+      <div class="openhint" id="cartHint"></div>
+    </div>
+  </div>
+
+  <!-- ===== 保存後(接ぎ木の案内) ===== -->
+  <div class="screen" id="scr-inter">
+    <div class="inter">
+      <div class="ok"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2.4"><path d="M4 12.5l5 5L20 6.5"/></svg></div>
+      <h2>夕食を記録しました</h2>
+      <p>続けて、今日の生活記録(4つの質問)に進みます。<br>睡眠・体調・お通じ・お酒の4つだけ、30秒で終わります。</p>
+      <button class="go" onclick="go('day')">生活記録へ進む(デモでは1日の画面へ)</button>
+      <button class="skip" onclick="go('day')">あとで(1日の画面へ戻る)</button>
+    </div>
+  </div>
+
+  <!-- ===== 量パネル ===== -->
+  <div class="modal" id="qtyModal"><div class="panel" id="qpanel"></div></div>
+  <!-- ===== カートシート ===== -->
+  <div class="modal" id="cartModal"><div class="panel" id="cpanel"></div></div>
+  <!-- ===== カレンダーピッカー ===== -->
+  <div class="modal" id="pickModal"><div class="panel" id="ppanel"></div></div>
+
+  <div class="modal" id="phModal"><div class="panel" id="phpanel"></div></div>
+  <!-- ===== 生活記録4問シート ===== -->
+  <div class="modal" id="lifeModal"><div class="panel" id="lpanel"></div></div>
+</div>
+
+<script>
+const FOODS = [{"id":1,"cat":"基本食材(のり監修)","name":"鶏むね(皮なし) 120g","unit":"g","g":120.0,"step":"g(10刻み)","alias":"とりむね/鶏胸肉/むね肉","method":"確定済(のり監修)","kcal":126,"p":28.0,"f":2.3,"c":0.1},{"id":2,"cat":"基本食材(のり監修)","name":"鶏ささみ 150g","unit":"g","g":150.0,"step":"g(10刻み)","alias":"ささみ/とりささみ","method":"確定済(のり監修)","kcal":147,"p":35.8,"f":1.2,"c":0.2},{"id":3,"cat":"基本食材(のり監修)","name":"豚ヒレ 120g","unit":"g","g":120.0,"step":"g(10刻み)","alias":"ぶたひれ/ヒレ肉","method":"確定済(のり監修)","kcal":142,"p":26.6,"f":4.4,"c":0.4},{"id":4,"cat":"基本食材(のり監修)","name":"全卵 1個","unit":"個","g":50.0,"step":"個","alias":"卵/たまご","method":"確定済(のり監修)","kcal":71,"p":6.1,"f":5.1,"c":0.2},{"id":5,"cat":"基本食材(のり監修)","name":"サバ水煮缶 1缶","unit":"缶","g":100.0,"step":"缶","alias":"さば缶/鯖缶/さばみずに","method":"確定済(のり監修)","kcal":174,"p":20.9,"f":10.7,"c":0.2},{"id":6,"cat":"基本食材(のり監修)","name":"鮭 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"さけ/しゃけ/サーモン","method":"確定済(のり監修)","kcal":124,"p":22.3,"f":4.1,"c":0.1},{"id":7,"cat":"基本食材(のり監修)","name":"木綿豆腐 150g","unit":"g","g":150.0,"step":"g(10刻み)","alias":"とうふ/もめんどうふ","method":"確定済(のり監修)","kcal":110,"p":10.5,"f":7.4,"c":2.2},{"id":8,"cat":"基本食材(のり監修)","name":"納豆 1パック","unit":"パック","g":45.0,"step":"パック","alias":"なっとう","method":"確定済(のり監修)","kcal":86,"p":7.4,"f":4.5,"c":5.4},{"id":9,"cat":"基本食材(のり監修)","name":"無脂肪ギリシャヨーグルト 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"ヨーグルト/ぎりしゃ/オイコス","method":"確定済(のり監修)","kcal":59,"p":10.2,"f":0.2,"c":4.0},{"id":10,"cat":"基本食材(のり監修)","name":"プロテイン(WPC) 1杯","unit":"杯","g":30.0,"step":"杯","alias":"ぷろていん/ホエイ","method":"確定済(のり監修)","kcal":117,"p":21.9,"f":1.5,"c":3.0},{"id":11,"cat":"基本食材(のり監修)","name":"白米(飯) 180g","unit":"g","g":180.0,"step":"g(10刻み)","alias":"ごはん/白ごはん/はくまい","method":"確定済(のり監修)","kcal":281,"p":4.5,"f":0.5,"c":66.8},{"id":12,"cat":"基本食材(のり監修)","name":"玄米(飯) 180g","unit":"g","g":180.0,"step":"g(10刻み)","alias":"げんまい","method":"確定済(のり監修)","kcal":274,"p":5.0,"f":1.8,"c":64.1},{"id":13,"cat":"基本食材(のり監修)","name":"もち麦飯 150g","unit":"g","g":150.0,"step":"g(10刻み)","alias":"もちむぎ/もち麦ごはん","method":"確定済(のり監修)","kcal":218,"p":4.1,"f":0.9,"c":46.5},{"id":14,"cat":"基本食材(のり監修)","name":"オートミール(乾) 40g","unit":"g","g":40.0,"step":"g(10刻み)","alias":"おーとみーる","method":"確定済(のり監修)","kcal":140,"p":5.5,"f":2.3,"c":27.6},{"id":15,"cat":"基本食材(のり監修)","name":"バナナ 1本","unit":"本","g":100.0,"step":"本","alias":"ばなな","method":"確定済(のり監修)","kcal":93,"p":1.1,"f":0.2,"c":22.5},{"id":16,"cat":"基本食材(のり監修)","name":"さつまいも 120g","unit":"g","g":120.0,"step":"g(10刻み)","alias":"さつま芋/やきいも","method":"確定済(のり監修)","kcal":151,"p":1.4,"f":0.2,"c":38.3},{"id":17,"cat":"基本食材(のり監修)","name":"そば(ゆで) 180g","unit":"g","g":180.0,"step":"g(10刻み)","alias":"蕎麦","method":"確定済(のり監修)","kcal":234,"p":8.6,"f":1.8,"c":46.8},{"id":18,"cat":"基本食材(のり監修)","name":"ブロッコリー 80g","unit":"g","g":80.0,"step":"g(10刻み)","alias":"ぶろっこりー","method":"確定済(のり監修)","kcal":24,"p":2.1,"f":0.3,"c":3.4},{"id":19,"cat":"基本食材(のり監修)","name":"ほうれん草 80g","unit":"g","g":80.0,"step":"g(10刻み)","alias":"ほうれんそう","method":"確定済(のり監修)","kcal":18,"p":2.1,"f":0.4,"c":3.2},{"id":20,"cat":"基本食材(のり監修)","name":"キャベツ 80g","unit":"g","g":80.0,"step":"g(10刻み)","alias":"きゃべつ","method":"確定済(のり監修)","kcal":17,"p":1.0,"f":0.1,"c":4.2},{"id":21,"cat":"基本食材(のり監修)","name":"玉ねぎ 50g","unit":"g","g":50.0,"step":"g(10刻み)","alias":"たまねぎ","method":"確定済(のり監修)","kcal":16,"p":0.5,"f":0.1,"c":4.2},{"id":22,"cat":"基本食材(のり監修)","name":"なす 60g","unit":"g","g":60.0,"step":"g(10刻み)","alias":"茄子/ナス","method":"確定済(のり監修)","kcal":11,"p":0.7,"f":0.1,"c":3.1},{"id":23,"cat":"基本食材(のり監修)","name":"ピーマン 40g","unit":"g","g":40.0,"step":"g(10刻み)","alias":"ぴーまん","method":"確定済(のり監修)","kcal":8,"p":0.4,"f":0.1,"c":2.0},{"id":24,"cat":"基本食材(のり監修)","name":"トマト 80g","unit":"g","g":80.0,"step":"g(10刻み)","alias":"とまと","method":"確定済(のり監修)","kcal":16,"p":0.6,"f":0.1,"c":3.8},{"id":25,"cat":"基本食材(のり監修)","name":"わかめ(戻し) 30g","unit":"g","g":30.0,"step":"g(10刻み)","alias":"ワカメ","method":"確定済(のり監修)","kcal":5,"p":0.6,"f":0.1,"c":1.7},{"id":26,"cat":"基本食材(のり監修)","name":"しめじ 50g","unit":"g","g":50.0,"step":"g(10刻み)","alias":"シメジ","method":"確定済(のり監修)","kcal":11,"p":1.4,"f":0.2,"c":2.4},{"id":27,"cat":"基本食材(のり監修)","name":"キムチ 40g","unit":"g","g":40.0,"step":"g(10刻み)","alias":"きむち","method":"確定済(のり監修)","kcal":11,"p":0.9,"f":0.1,"c":2.2},{"id":28,"cat":"基本食材(のり監修)","name":"枝豆(ゆで) 60g","unit":"g","g":60.0,"step":"g(10刻み)","alias":"えだまめ","method":"確定済(のり監修)","kcal":71,"p":6.9,"f":3.7,"c":5.3},{"id":29,"cat":"基本食材(のり監修)","name":"アボカド 1個","unit":"個","g":140.0,"step":"個","alias":"あぼかど","method":"確定済(のり監修)","kcal":246,"p":2.9,"f":24.5,"c":11.1},{"id":30,"cat":"基本食材(のり監修)","name":"アーモンド 15g","unit":"g","g":15.0,"step":"g(10刻み)","alias":"あーもんど/ナッツ","method":"確定済(のり監修)","kcal":88,"p":2.9,"f":7.8,"c":3.1},{"id":31,"cat":"基本食材(のり監修)","name":"オリーブ油 10g","unit":"g","g":10.0,"step":"g(10刻み)","alias":"オリーブオイル/おりーぶゆ","method":"確定済(のり監修)","kcal":89,"p":0.0,"f":10.0,"c":0.0},{"id":32,"cat":"基本食材(のり監修)","name":"はちみつ 10g","unit":"g","g":10.0,"step":"g(10刻み)","alias":"ハチミツ/蜂蜜","method":"確定済(のり監修)","kcal":33,"p":0.0,"f":0.0,"c":8.2},{"id":33,"cat":"基本食材(のり監修)","name":"きなこ 10g","unit":"g","g":10.0,"step":"g(10刻み)","alias":"きな粉/黄粉","method":"確定済(のり監修)","kcal":45,"p":3.7,"f":2.6,"c":2.9},{"id":34,"cat":"基本食材(のり監修)","name":"ブルーベリー 50g","unit":"g","g":50.0,"step":"g(10刻み)","alias":"ぶるーべりー","method":"確定済(のり監修)","kcal":24,"p":0.2,"f":0.1,"c":6.5},{"id":35,"cat":"基本食材(のり監修)","name":"じゃがいも 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"ジャガイモ/馬鈴薯","method":"確定済(のり監修)","kcal":59,"p":1.8,"f":0.1,"c":17.3},{"id":36,"cat":"基本食材(のり監修)","name":"豚もも(脂身なし) 120g","unit":"g","g":120.0,"step":"g(10刻み)","alias":"ぶたもも/豚もも肉","method":"確定済(のり監修)","kcal":143,"p":26.5,"f":4.3,"c":0.2},{"id":37,"cat":"基本食材(のり監修)","name":"牛もも(脂身なし) 120g","unit":"g","g":120.0,"step":"g(10刻み)","alias":"ぎゅうもも/牛もも肉","method":"確定済(のり監修)","kcal":156,"p":25.6,"f":5.9,"c":0.5},{"id":38,"cat":"基本食材(のり監修)","name":"うどん(ゆで) 250g","unit":"g","g":250.0,"step":"g(10刻み)","alias":"饂飩","method":"確定済(のり監修)","kcal":238,"p":6.5,"f":1.0,"c":54.0},{"id":39,"cat":"基本食材(のり監修)","name":"小松菜 80g","unit":"g","g":80.0,"step":"g(10刻み)","alias":"こまつな","method":"確定済(のり監修)","kcal":10,"p":1.2,"f":0.2,"c":1.9},{"id":40,"cat":"基本食材(のり監修)","name":"ごぼう 50g","unit":"g","g":50.0,"step":"g(10刻み)","alias":"牛蒡/ゴボウ","method":"確定済(のり監修)","kcal":29,"p":0.9,"f":0.1,"c":7.7},{"id":41,"cat":"基本食材(のり監修)","name":"にんじん 50g","unit":"g","g":50.0,"step":"g(10刻み)","alias":"人参/ニンジン","method":"確定済(のり監修)","kcal":18,"p":0.3,"f":0.1,"c":4.7},{"id":42,"cat":"基本食材(のり監修)","name":"きくらげ(ゆで) 30g","unit":"g","g":30.0,"step":"g(10刻み)","alias":"キクラゲ/木耳","method":"確定済(のり監修)","kcal":4,"p":0.2,"f":0.1,"c":1.6},{"id":43,"cat":"基本食材(のり監修)","name":"えのき 50g","unit":"g","g":50.0,"step":"g(10刻み)","alias":"エノキ/えのきたけ","method":"確定済(のり監修)","kcal":17,"p":1.4,"f":0.1,"c":3.8},{"id":44,"cat":"基本食材(のり監修)","name":"まいたけ 50g","unit":"g","g":50.0,"step":"g(10刻み)","alias":"マイタケ/舞茸","method":"確定済(のり監修)","kcal":11,"p":1.0,"f":0.2,"c":2.2},{"id":45,"cat":"基本食材(のり監修)","name":"こんにゃく 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"コンニャク/蒟蒻","method":"確定済(のり監修)","kcal":5,"p":0.1,"f":0.0,"c":2.3},{"id":46,"cat":"基本食材(のり監修)","name":"しらたき 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"白滝/糸こんにゃく","method":"確定済(のり監修)","kcal":7,"p":0.2,"f":0.0,"c":3.0},{"id":47,"cat":"基本食材(のり監修)","name":"大豆ミート(乾) 25g","unit":"g","g":25.0,"step":"g(10刻み)","alias":"だいずみーと/ソイミート","method":"確定済(のり監修)","kcal":80,"p":11.6,"f":0.8,"c":9.2},{"id":48,"cat":"基本食材(のり監修)","name":"チアシード 12g","unit":"g","g":12.0,"step":"g(10刻み)","alias":"ちあしーど","method":"確定済(のり監修)","kcal":54,"p":2.3,"f":4.1,"c":4.1},{"id":49,"cat":"基本食材(のり監修)","name":"味噌 15g","unit":"g","g":15.0,"step":"g(10刻み)","alias":"みそ","method":"確定済(のり監修)","kcal":27,"p":1.9,"f":0.9,"c":3.3},{"id":50,"cat":"基本食材(のり監修)","name":"豆乳(無調整) 200g","unit":"g","g":200.0,"step":"g(10刻み)","alias":"とうにゅう","method":"確定済(のり監修)","kcal":92,"p":7.2,"f":4.0,"c":6.2},{"id":51,"cat":"基本食材(のり監修)","name":"カットトマト缶 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"トマト缶/ホールトマト","method":"確定済(のり監修)","kcal":21,"p":0.9,"f":0.2,"c":4.4},{"id":52,"cat":"基本食材(のり監修)","name":"梅干し 1個","unit":"個","g":10.0,"step":"個","alias":"うめぼし","method":"確定済(のり監修)","kcal":3,"p":0.1,"f":0.1,"c":0.9},{"id":53,"cat":"基本食材(のり監修)","name":"りんご酢 1杯","unit":"杯","g":15.0,"step":"杯","alias":"リンゴ酢/アップルビネガー","method":"確定済(のり監修)","kcal":4,"p":0.0,"f":0.0,"c":0.4},{"id":54,"cat":"基本食材(のり監修)","name":"ゼラチン 1杯","unit":"杯","g":5.0,"step":"杯","alias":"ぜらちん/コラーゲン","method":"確定済(のり監修)","kcal":17,"p":4.4,"f":0.0,"c":0.0},{"id":55,"cat":"基本食材(のり監修)","name":"プロセスチーズ(スライス) 1枚","unit":"枚","g":18.0,"step":"枚","alias":"チーズ/スライスチーズ","method":"確定済(のり監修)","kcal":56,"p":4.1,"f":4.7,"c":0.2},{"id":56,"cat":"基本食材(のり監修)","name":"サラダチキン(市販・プレーン) 1袋","unit":"袋","g":110.0,"step":"袋","alias":"さらだちきん","method":"確定済(のり監修)","kcal":121,"p":26.0,"f":1.5,"c":1.0},{"id":57,"cat":"基本食材(のり監修)","name":"食パン(6枚切) 1枚","unit":"枚","g":60.0,"step":"枚","alias":"しょくぱん/パン","method":"確定済(のり監修)","kcal":149,"p":5.3,"f":2.5,"c":27.8},{"id":58,"cat":"基本食材(のり監修)","name":"ハイボール 1杯","unit":"杯","g":350.0,"step":"杯","alias":"はいぼーる/ウイスキー","method":"確定済(のり監修)","kcal":90,"p":0.0,"f":0.0,"c":0.0},{"id":59,"cat":"主食","name":"ごはん 茶碗1杯","unit":"杯","g":150.0,"step":"杯(0.5刻み)","alias":"ごはん/白米/はくまい","method":"転記","kcal":234,"p":3.8,"f":0.5,"c":55.6},{"id":60,"cat":"主食","name":"ごはん 大盛り1杯","unit":"杯","g":240.0,"step":"杯(0.5刻み)","alias":"おおもり","method":"転記","kcal":374,"p":6.0,"f":0.7,"c":89.0},{"id":61,"cat":"主食","name":"ごはん 子ども茶碗1杯","unit":"杯","g":100.0,"step":"杯(0.5刻み)","alias":"こども/小盛り","method":"転記","kcal":156,"p":2.5,"f":0.3,"c":37.1},{"id":62,"cat":"主食","name":"玄米ごはん 茶碗1杯","unit":"杯","g":150.0,"step":"杯(0.5刻み)","alias":"げんまい","method":"転記","kcal":228,"p":4.2,"f":1.5,"c":53.4},{"id":63,"cat":"主食","name":"もち麦ごはん 茶碗1杯","unit":"杯","g":150.0,"step":"杯(0.5刻み)","alias":"もちむぎ","method":"転記","kcal":177,"p":3.3,"f":0.8,"c":42.8},{"id":64,"cat":"主食","name":"雑穀米 茶碗1杯","unit":"杯","g":150.0,"step":"杯(0.5刻み)","alias":"ざっこくまい/十六穀","method":"積算","kcal":233,"p":3.8,"f":0.6,"c":55.4},{"id":65,"cat":"主食","name":"おかゆ 1杯","unit":"杯","g":250.0,"step":"杯(0.5刻み)","alias":"お粥/かゆ","method":"転記","kcal":162,"p":2.8,"f":0.2,"c":39.2},{"id":66,"cat":"主食","name":"雑炊 1杯","unit":"杯","g":300.0,"step":"杯(0.5刻み)","alias":"ぞうすい/おじや","method":"積算","kcal":233,"p":7.0,"f":2.9,"c":46.3},{"id":67,"cat":"主食","name":"おにぎり(鮭) 1個","unit":"個","g":110.0,"step":"個","alias":"さけ/しゃけ","method":"積算","kcal":185,"p":5.4,"f":0.8,"c":39.4},{"id":68,"cat":"主食","name":"おにぎり(ツナマヨ) 1個","unit":"個","g":110.0,"step":"個","alias":"つなまよ","method":"積算","kcal":223,"p":4.5,"f":5.5,"c":39.6},{"id":69,"cat":"主食","name":"おにぎり(梅) 1個","unit":"個","g":110.0,"step":"個","alias":"うめ","method":"積算","kcal":181,"p":2.9,"f":0.4,"c":42.1},{"id":70,"cat":"主食","name":"おにぎり(昆布) 1個","unit":"個","g":110.0,"step":"個","alias":"こんぶ","method":"積算","kcal":182,"p":3.2,"f":0.4,"c":42.1},{"id":71,"cat":"主食","name":"おにぎり(明太子) 1個","unit":"個","g":110.0,"step":"個","alias":"めんたいこ","method":"積算","kcal":182,"p":4.8,"f":0.6,"c":39.7},{"id":72,"cat":"主食","name":"焼きおにぎり 1個","unit":"個","g":90.0,"step":"個","alias":"やきおにぎり","method":"転記","kcal":149,"p":2.8,"f":0.3,"c":35.5},{"id":73,"cat":"主食","name":"赤飯 茶碗1杯","unit":"杯","g":150.0,"step":"杯(0.5刻み)","alias":"せきはん/お赤飯","method":"転記","kcal":279,"p":6.5,"f":0.9,"c":62.9},{"id":74,"cat":"主食","name":"もち 1個","unit":"個","g":50.0,"step":"個","alias":"餅/切り餅","method":"転記","kcal":112,"p":2.0,"f":0.3,"c":25.4},{"id":75,"cat":"主食","name":"食パン(8枚切) 1枚","unit":"枚","g":45.0,"step":"枚","alias":"うすぎり","method":"転記","kcal":112,"p":4.0,"f":1.8,"c":20.9},{"id":76,"cat":"主食","name":"ロールパン 1個","unit":"個","g":30.0,"step":"個","alias":"ろーるぱん","method":"転記","kcal":93,"p":3.0,"f":2.7,"c":14.6},{"id":77,"cat":"主食","name":"クロワッサン 1個","unit":"個","g":45.0,"step":"個","alias":"くろわっさん","method":"転記","kcal":197,"p":3.6,"f":12.1,"c":19.8},{"id":78,"cat":"主食","name":"フランスパン 2切れ","unit":"個","g":50.0,"step":"個","alias":"ばげっと/バゲット","method":"転記","kcal":144,"p":4.7,"f":0.7,"c":28.8},{"id":79,"cat":"主食","name":"ベーグル 1個","unit":"個","g":90.0,"step":"個","alias":"べーぐる","method":"転記","kcal":243,"p":8.6,"f":1.8,"c":49.1},{"id":80,"cat":"主食","name":"全粒粉パン 1枚","unit":"枚","g":60.0,"step":"枚","alias":"ぜんりゅうふん","method":"転記","kcal":151,"p":4.7,"f":3.4,"c":27.3},{"id":81,"cat":"主食","name":"菓子パン(あんぱん) 1個","unit":"個","g":100.0,"step":"個","alias":"あんぱん","method":"転記","kcal":267,"p":6.8,"f":3.6,"c":53.5},{"id":82,"cat":"主食","name":"菓子パン(クリームパン) 1個","unit":"個","g":100.0,"step":"個","alias":"くりーむぱん","method":"転記","kcal":286,"p":7.9,"f":7.4,"c":48.3},{"id":83,"cat":"主食","name":"菓子パン(メロンパン) 1個","unit":"個","g":100.0,"step":"個","alias":"めろんぱん","method":"転記","kcal":349,"p":8.0,"f":10.5,"c":59.9},{"id":84,"cat":"主食","name":"カレーパン 1個","unit":"個","g":120.0,"step":"個","alias":"かれーぱん","method":"転記","kcal":362,"p":7.9,"f":22.0,"c":38.8},{"id":85,"cat":"主食","name":"総菜パン(焼きそばパン) 1個","unit":"個","g":130.0,"step":"個","alias":"そうざいぱん","method":"積算","kcal":311,"p":9.0,"f":9.4,"c":51.4},{"id":86,"cat":"主食","name":"サンドイッチ(ハムレタス) 1人前","unit":"人前","g":140.0,"step":"人前(0.5刻み)","alias":"さんどいっち","method":"積算","kcal":348,"p":12.0,"f":15.9,"c":42.9},{"id":87,"cat":"主食","name":"サンドイッチ(たまご) 1人前","unit":"人前","g":140.0,"step":"人前(0.5刻み)","alias":"たまごさんど","method":"積算","kcal":348,"p":13.2,"f":15.4,"c":43.2},{"id":88,"cat":"主食","name":"ホットドッグ 1個","unit":"個","g":120.0,"step":"個","alias":"ほっとどっぐ","method":"積算","kcal":317,"p":10.7,"f":18.6,"c":29.6},{"id":89,"cat":"主食","name":"シリアル(コーンフレーク) 1食","unit":"人前","g":40.0,"step":"人前(0.5刻み)","alias":"こーんふれーく","method":"転記","kcal":152,"p":3.1,"f":0.7,"c":33.4},{"id":90,"cat":"主食","name":"グラノーラ 1食","unit":"人前","g":50.0,"step":"人前(0.5刻み)","alias":"ぐらのーら/フルグラ","method":"市販平均","kcal":220,"p":4.0,"f":8.0,"c":33.0},{"id":91,"cat":"主食","name":"ホットケーキ 2枚","unit":"人前","g":160.0,"step":"人前(0.5刻み)","alias":"ぱんけーき/パンケーキ","method":"転記","kcal":405,"p":12.3,"f":8.6,"c":72.5},{"id":92,"cat":"主食","name":"フレンチトースト 1枚","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"ふれんちとーすと","method":"積算","kcal":238,"p":8.4,"f":10.0,"c":30.9},{"id":93,"cat":"主食","name":"お好み焼き(豚) 1枚","unit":"枚","g":350.0,"step":"枚(0.5刻み)","alias":"おこのみやき","method":"転記","kcal":476,"p":18.2,"f":22.8,"c":53.2},{"id":94,"cat":"主食","name":"たこ焼き 6個","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"たこやき","method":"積算","kcal":195,"p":10.9,"f":5.2,"c":26.6},{"id":95,"cat":"主食","name":"ピザ(マルゲリータ) 1切れ","unit":"個","g":100.0,"step":"個","alias":"ぴざ/ぴっつぁ","method":"積算","kcal":217,"p":8.1,"f":8.6,"c":28.1},{"id":96,"cat":"主食","name":"ピザトースト 1枚","unit":"枚","g":120.0,"step":"枚","alias":"ぴざとーすと","method":"積算","kcal":273,"p":12.0,"f":10.9,"c":33.9},{"id":97,"cat":"丼・ワンプレート","name":"カレーライス 1人前","unit":"人前","g":450.0,"step":"人前(0.5刻み)","alias":"かれー/カレー","method":"積算","kcal":592,"p":16.5,"f":17.4,"c":101.3},{"id":98,"cat":"丼・ワンプレート","name":"カレー(ルーのみ) 1人前","unit":"人前","g":250.0,"step":"人前(0.5刻み)","alias":"かれーるー","method":"積算","kcal":316,"p":13.9,"f":18.8,"c":30.2},{"id":99,"cat":"丼・ワンプレート","name":"ビーフカレー 1人前","unit":"人前","g":450.0,"step":"人前(0.5刻み)","alias":"びーふかれー","method":"転記","kcal":536,"p":10.8,"f":40.5,"c":36.4},{"id":100,"cat":"丼・ワンプレート","name":"キーマカレー 1人前","unit":"人前","g":400.0,"step":"人前(0.5刻み)","alias":"きーまかれー","method":"積算","kcal":657,"p":21.2,"f":27.5,"c":89.6},{"id":101,"cat":"丼・ワンプレート","name":"バターチキンカレー 1人前","unit":"人前","g":430.0,"step":"人前(0.5刻み)","alias":"ばたーちきん","method":"積算","kcal":617,"p":20.1,"f":25.2,"c":84.7},{"id":102,"cat":"丼・ワンプレート","name":"スープカレー 1人前","unit":"人前","g":500.0,"step":"人前(0.5刻み)","alias":"すーぷかれー","method":"積算","kcal":517,"p":20.6,"f":17.7,"c":78.6},{"id":103,"cat":"丼・ワンプレート","name":"ハヤシライス 1人前","unit":"人前","g":450.0,"step":"人前(0.5刻み)","alias":"はやしらいす/ハッシュドビーフ","method":"積算","kcal":634,"p":17.4,"f":24.8,"c":92.1},{"id":104,"cat":"丼・ワンプレート","name":"牛丼 並盛1杯","unit":"杯","g":400.0,"step":"杯(0.5刻み)","alias":"ぎゅうどん","method":"積算","kcal":589,"p":18.9,"f":14.6,"c":100.4},{"id":105,"cat":"丼・ワンプレート","name":"牛丼(具のみ) 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"ぎゅうどんのぐ","method":"積算","kcal":219,"p":13.0,"f":13.9,"c":12.0},{"id":106,"cat":"丼・ワンプレート","name":"親子丼 1杯","unit":"杯","g":400.0,"step":"杯(0.5刻み)","alias":"おやこどん","method":"積算","kcal":536,"p":19.4,"f":9.0,"c":98.0},{"id":107,"cat":"丼・ワンプレート","name":"カツ丼 1杯","unit":"杯","g":450.0,"step":"杯(0.5刻み)","alias":"かつどん","method":"積算","kcal":842,"p":31.7,"f":37.1,"c":103.5},{"id":108,"cat":"丼・ワンプレート","name":"豚丼 1杯","unit":"杯","g":400.0,"step":"杯(0.5刻み)","alias":"ぶたどん","method":"積算","kcal":670,"p":17.2,"f":25.9,"c":97.4},{"id":109,"cat":"丼・ワンプレート","name":"天丼 1杯","unit":"杯","g":420.0,"step":"杯(0.5刻み)","alias":"てんどん","method":"積算","kcal":672,"p":24.1,"f":17.2,"c":111.0},{"id":110,"cat":"丼・ワンプレート","name":"海鮮丼 1杯","unit":"杯","g":380.0,"step":"杯(0.5刻み)","alias":"かいせんどん","method":"積算","kcal":535,"p":28.5,"f":8.4,"c":90.4},{"id":111,"cat":"丼・ワンプレート","name":"鉄火丼 1杯","unit":"杯","g":360.0,"step":"杯(0.5刻み)","alias":"てっかどん/まぐろ丼","method":"積算","kcal":480,"p":28.1,"f":2.1,"c":90.9},{"id":112,"cat":"丼・ワンプレート","name":"ねぎとろ丼 1杯","unit":"杯","g":370.0,"step":"杯(0.5刻み)","alias":"ねぎとろ","method":"積算","kcal":519,"p":25.5,"f":7.7,"c":90.9},{"id":113,"cat":"丼・ワンプレート","name":"うな丼 1杯","unit":"杯","g":400.0,"step":"杯(0.5刻み)","alias":"うなどん/うなぎ","method":"積算","kcal":675,"p":29.4,"f":21.7,"c":95.6},{"id":114,"cat":"丼・ワンプレート","name":"中華丼 1杯","unit":"杯","g":450.0,"step":"杯(0.5刻み)","alias":"ちゅうかどん","method":"積算","kcal":490,"p":16.4,"f":6.5,"c":95.9},{"id":115,"cat":"丼・ワンプレート","name":"麻婆丼 1杯","unit":"杯","g":430.0,"step":"杯(0.5刻み)","alias":"まーぼーどん","method":"積算","kcal":562,"p":20.0,"f":13.0,"c":95.9},{"id":116,"cat":"丼・ワンプレート","name":"ロコモコ丼 1人前","unit":"人前","g":450.0,"step":"人前(0.5刻み)","alias":"ろこもこ","method":"積算","kcal":700,"p":27.8,"f":22.6,"c":102.9},{"id":117,"cat":"丼・ワンプレート","name":"タコライス 1人前","unit":"人前","g":400.0,"step":"人前(0.5刻み)","alias":"たこらいす","method":"積算","kcal":617,"p":21.6,"f":17.9,"c":97.9},{"id":118,"cat":"丼・ワンプレート","name":"ガパオライス 1人前","unit":"人前","g":400.0,"step":"人前(0.5刻み)","alias":"がぱお","method":"積算","kcal":694,"p":29.3,"f":24.3,"c":97.2},{"id":119,"cat":"丼・ワンプレート","name":"オムライス 1人前","unit":"人前","g":410.0,"step":"人前(0.5刻み)","alias":"おむらいす","method":"積算","kcal":666,"p":24.7,"f":27.0,"c":85.4},{"id":120,"cat":"丼・ワンプレート","name":"チャーハン 1人前","unit":"人前","g":300.0,"step":"人前(0.5刻み)","alias":"ちゃーはん/炒飯/焼き飯","method":"転記","kcal":618,"p":15.0,"f":15.6,"c":99.9},{"id":121,"cat":"丼・ワンプレート","name":"エビピラフ 1人前","unit":"人前","g":300.0,"step":"人前(0.5刻み)","alias":"ぴらふ","method":"転記","kcal":438,"p":9.9,"f":6.9,"c":89.4},{"id":122,"cat":"丼・ワンプレート","name":"チキンライス 1人前","unit":"人前","g":300.0,"step":"人前(0.5刻み)","alias":"ちきんらいす","method":"積算","kcal":469,"p":12.4,"f":11.2,"c":83.6},{"id":123,"cat":"丼・ワンプレート","name":"ドリア 1人前","unit":"人前","g":350.0,"step":"人前(0.5刻み)","alias":"どりあ","method":"積算","kcal":532,"p":15.2,"f":19.0,"c":78.5},{"id":124,"cat":"丼・ワンプレート","name":"リゾット 1人前","unit":"人前","g":300.0,"step":"人前(0.5刻み)","alias":"りぞっと","method":"積算","kcal":413,"p":11.1,"f":15.2,"c":62.6},{"id":125,"cat":"丼・ワンプレート","name":"ビビンバ 1人前","unit":"人前","g":450.0,"step":"人前(0.5刻み)","alias":"びびんば","method":"積算","kcal":711,"p":24.5,"f":26.5,"c":101.9},{"id":126,"cat":"丼・ワンプレート","name":"ルーロー飯 1杯","unit":"杯","g":400.0,"step":"杯(0.5刻み)","alias":"るーろーはん/魯肉飯","method":"積算","kcal":779,"p":25.1,"f":34.3,"c":97.9},{"id":127,"cat":"丼・ワンプレート","name":"寿司(にぎり10貫) 1人前","unit":"人前","g":350.0,"step":"人前(0.5刻み)","alias":"すし/おすし/握り","method":"積算","kcal":511,"p":29.4,"f":10.4,"c":79.3},{"id":128,"cat":"丼・ワンプレート","name":"いなり寿司 1個","unit":"個","g":60.0,"step":"個","alias":"いなり","method":"積算","kcal":133,"p":4.6,"f":5.3,"c":17.8},{"id":129,"cat":"丼・ワンプレート","name":"巻き寿司(太巻き) 1切れ","unit":"個","g":50.0,"step":"個","alias":"まきずし/のり巻き","method":"積算","kcal":71,"p":3.0,"f":0.7,"c":14.4},{"id":130,"cat":"丼・ワンプレート","name":"ちらし寿司 1人前","unit":"人前","g":350.0,"step":"人前(0.5刻み)","alias":"ちらし","method":"積算","kcal":514,"p":24.5,"f":8.1,"c":90.6},{"id":131,"cat":"麺類","name":"かけうどん 1杯","unit":"杯","g":450.0,"step":"杯(0.5刻み)","alias":"うどん","method":"積算","kcal":308,"p":10.4,"f":0.9,"c":67.5},{"id":132,"cat":"麺類","name":"きつねうどん 1杯","unit":"杯","g":500.0,"step":"杯(0.5刻み)","alias":"きつね","method":"積算","kcal":421,"p":16.6,"f":9.5,"c":71.9},{"id":133,"cat":"麺類","name":"肉うどん 1杯","unit":"杯","g":500.0,"step":"杯(0.5刻み)","alias":"にくうどん","method":"積算","kcal":443,"p":19.4,"f":10.8,"c":72.2},{"id":134,"cat":"麺類","name":"天ぷらうどん 1杯","unit":"杯","g":500.0,"step":"杯(0.5刻み)","alias":"てんぷらうどん","method":"積算","kcal":386,"p":18.4,"f":5.0,"c":70.1},{"id":135,"cat":"麺類","name":"カレーうどん 1杯","unit":"杯","g":550.0,"step":"杯(0.5刻み)","alias":"かれーうどん","method":"積算","kcal":516,"p":15.3,"f":18.4,"c":78.3},{"id":136,"cat":"麺類","name":"焼きうどん 1人前","unit":"人前","g":350.0,"step":"人前(0.5刻み)","alias":"やきうどん","method":"積算","kcal":461,"p":13.8,"f":21.2,"c":58.9},{"id":137,"cat":"麺類","name":"ざるそば 1人前","unit":"人前","g":300.0,"step":"人前(0.5刻み)","alias":"そば/もりそば","method":"積算","kcal":371,"p":13.9,"f":2.8,"c":74.0},{"id":138,"cat":"麺類","name":"かけそば 1杯","unit":"杯","g":450.0,"step":"杯(0.5刻み)","alias":"かけ","method":"積算","kcal":419,"p":16.5,"f":2.6,"c":83.7},{"id":139,"cat":"麺類","name":"月見そば 1杯","unit":"杯","g":500.0,"step":"杯(0.5刻み)","alias":"つきみ","method":"積算","kcal":497,"p":23.2,"f":8.2,"c":83.9},{"id":140,"cat":"麺類","name":"天ぷらそば 1杯","unit":"杯","g":500.0,"step":"杯(0.5刻み)","alias":"てんぷらそば","method":"積算","kcal":497,"p":24.5,"f":6.7,"c":86.3},{"id":141,"cat":"麺類","name":"鴨南蛮そば 1杯","unit":"杯","g":520.0,"step":"杯(0.5刻み)","alias":"かもなんばん","method":"積算","kcal":543,"p":26.9,"f":11.1,"c":85.8},{"id":142,"cat":"麺類","name":"山かけそば 1杯","unit":"杯","g":500.0,"step":"杯(0.5刻み)","alias":"やまかけ/とろろそば","method":"積算","kcal":452,"p":17.6,"f":2.9,"c":90.6},{"id":143,"cat":"麺類","name":"そうめん 1人前","unit":"人前","g":270.0,"step":"人前(0.5刻み)","alias":"素麺/にゅうめん","method":"積算","kcal":299,"p":9.6,"f":1.0,"c":67.1},{"id":144,"cat":"麺類","name":"醤油ラーメン 1杯","unit":"杯","g":550.0,"step":"杯(0.5刻み)","alias":"らーめん/ラーメン","method":"積算","kcal":514,"p":22.3,"f":18.9,"c":70.3},{"id":145,"cat":"麺類","name":"味噌ラーメン 1杯","unit":"杯","g":580.0,"step":"杯(0.5刻み)","alias":"みそらーめん","method":"積算","kcal":484,"p":21.6,"f":13.7,"c":76.6},{"id":146,"cat":"麺類","name":"塩ラーメン 1杯","unit":"杯","g":550.0,"step":"杯(0.5刻み)","alias":"しおらーめん","method":"積算","kcal":478,"p":20.6,"f":16.1,"c":69.2},{"id":147,"cat":"麺類","name":"とんこつラーメン 1杯","unit":"杯","g":550.0,"step":"杯(0.5刻み)","alias":"とんこつ","method":"積算","kcal":567,"p":21.9,"f":25.6,"c":69.1},{"id":148,"cat":"麺類","name":"つけ麺 1人前","unit":"人前","g":600.0,"step":"人前(0.5刻み)","alias":"つけめん","method":"積算","kcal":731,"p":28.7,"f":24.5,"c":108.3},{"id":149,"cat":"麺類","name":"担々麺 1杯","unit":"杯","g":580.0,"step":"杯(0.5刻み)","alias":"たんたんめん","method":"積算","kcal":636,"p":27.1,"f":29.2,"c":75.6},{"id":150,"cat":"麺類","name":"冷やし中華 1人前","unit":"人前","g":450.0,"step":"人前(0.5刻み)","alias":"ひやしちゅうか","method":"積算","kcal":474,"p":20.3,"f":8.5,"c":85.0},{"id":151,"cat":"麺類","name":"焼きそば 1人前","unit":"人前","g":350.0,"step":"人前(0.5刻み)","alias":"やきそば/ソース焼きそば","method":"積算","kcal":530,"p":16.4,"f":23.4,"c":73.2},{"id":152,"cat":"麺類","name":"あんかけ焼きそば 1人前","unit":"人前","g":450.0,"step":"人前(0.5刻み)","alias":"あんかけ","method":"積算","kcal":474,"p":19.9,"f":17.3,"c":68.1},{"id":153,"cat":"麺類","name":"ちゃんぽん 1杯","unit":"杯","g":600.0,"step":"杯(0.5刻み)","alias":"ちゃんぽん","method":"積算","kcal":513,"p":25.3,"f":16.6,"c":73.0},{"id":154,"cat":"麺類","name":"沖縄そば 1杯","unit":"杯","g":550.0,"step":"杯(0.5刻み)","alias":"おきなわそば/ソーキそば","method":"積算","kcal":522,"p":22.3,"f":19.7,"c":69.7},{"id":155,"cat":"麺類","name":"ミートソーススパゲッティ 1人前","unit":"人前","g":350.0,"step":"人前(0.5刻み)","alias":"みーとそーす/ボロネーゼ","method":"積算","kcal":495,"p":19.0,"f":12.4,"c":84.0},{"id":156,"cat":"麺類","name":"ナポリタン 1人前","unit":"人前","g":350.0,"step":"人前(0.5刻み)","alias":"なぽりたん","method":"積算","kcal":565,"p":18.2,"f":19.9,"c":86.2},{"id":157,"cat":"麺類","name":"カルボナーラ 1人前","unit":"人前","g":320.0,"step":"人前(0.5刻み)","alias":"かるぼなーら","method":"積算","kcal":622,"p":27.8,"f":27.4,"c":73.3},{"id":158,"cat":"麺類","name":"ペペロンチーノ 1人前","unit":"人前","g":280.0,"step":"人前(0.5刻み)","alias":"ぺぺろん","method":"積算","kcal":475,"p":15.6,"f":16.2,"c":72.9},{"id":159,"cat":"麺類","name":"たらこスパゲッティ 1人前","unit":"人前","g":300.0,"step":"人前(0.5刻み)","alias":"たらこぱすた","method":"積算","kcal":470,"p":20.5,"f":14.5,"c":71.4},{"id":160,"cat":"麺類","name":"和風きのこパスタ 1人前","unit":"人前","g":320.0,"step":"人前(0.5刻み)","alias":"きのこぱすた","method":"積算","kcal":468,"p":17.7,"f":13.9,"c":75.8},{"id":161,"cat":"麺類","name":"トマトソースパスタ 1人前","unit":"人前","g":330.0,"step":"人前(0.5刻み)","alias":"とまとぱすた","method":"積算","kcal":454,"p":13.9,"f":12.2,"c":78.5},{"id":162,"cat":"麺類","name":"ジェノベーゼ 1人前","unit":"人前","g":300.0,"step":"人前(0.5刻み)","alias":"じぇのべーぜ/バジル","method":"積算","kcal":597,"p":18.7,"f":28.6,"c":72.9},{"id":163,"cat":"麺類","name":"ラザニア 1人前","unit":"人前","g":300.0,"step":"人前(0.5刻み)","alias":"らざにあ","method":"積算","kcal":403,"p":16.8,"f":14.7,"c":55.2},{"id":164,"cat":"麺類","name":"グラタン(マカロニ) 1人前","unit":"人前","g":300.0,"step":"人前(0.5刻み)","alias":"ぐらたん","method":"積算","kcal":428,"p":17.1,"f":20.7,"c":47.1},{"id":165,"cat":"麺類","name":"ビーフン(焼き) 1人前","unit":"人前","g":250.0,"step":"人前(0.5刻み)","alias":"びーふん","method":"積算","kcal":391,"p":8.9,"f":16.3,"c":54.0},{"id":166,"cat":"麺類","name":"フォー 1杯","unit":"杯","g":450.0,"step":"杯(0.5刻み)","alias":"ふぉー","method":"積算","kcal":324,"p":18.1,"f":3.0,"c":57.6},{"id":167,"cat":"麺類","name":"パッタイ 1人前","unit":"人前","g":350.0,"step":"人前(0.5刻み)","alias":"ぱったい","method":"積算","kcal":468,"p":16.9,"f":16.4,"c":65.2},{"id":168,"cat":"麺類","name":"冷麺(盛岡風) 1人前","unit":"人前","g":450.0,"step":"人前(0.5刻み)","alias":"れいめん","method":"積算","kcal":401,"p":17.8,"f":4.7,"c":78.2},{"id":169,"cat":"麺類","name":"カップラーメン 1個","unit":"個","g":78.0,"step":"個","alias":"かっぷめん/カップ麺","method":"市販平均","kcal":351,"p":10.5,"f":14.6,"c":45.7},{"id":170,"cat":"麺類","name":"カップ焼きそば 1個","unit":"個","g":130.0,"step":"個","alias":"かっぷやきそば/ペヤング","method":"市販平均","kcal":556,"p":9.0,"f":27.0,"c":74.0},{"id":171,"cat":"肉料理","name":"鶏の唐揚げ 1個","unit":"個","g":30.0,"step":"個","alias":"からあげ/竜田揚げ","method":"積算","kcal":92,"p":7.3,"f":5.4,"c":4.0},{"id":172,"cat":"肉料理","name":"鶏の照り焼き 1人前","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"てりやき/照焼チキン","method":"積算","kcal":250,"p":17.2,"f":17.2,"c":6.7},{"id":173,"cat":"肉料理","name":"焼き鳥(もも・タレ) 1本","unit":"本","g":45.0,"step":"本","alias":"やきとり","method":"積算","kcal":81,"p":6.5,"f":5.4,"c":2.0},{"id":174,"cat":"肉料理","name":"焼き鳥(ねぎま) 1本","unit":"本","g":45.0,"step":"本","alias":"ねぎま","method":"積算","kcal":65,"p":5.0,"f":4.0,"c":2.7},{"id":175,"cat":"肉料理","name":"焼き鳥(皮) 1本","unit":"本","g":30.0,"step":"本","alias":"かわ","method":"積算","kcal":138,"p":2.0,"f":14.4,"c":1.1},{"id":176,"cat":"肉料理","name":"焼き鳥(ささみ) 1本","unit":"本","g":40.0,"step":"本","alias":"ささみぐし","method":"積算","kcal":39,"p":9.6,"f":0.3,"c":0.0},{"id":177,"cat":"肉料理","name":"チキンステーキ 1枚","unit":"枚","g":200.0,"step":"枚(0.5刻み)","alias":"ちきんすてーき","method":"積算","kcal":393,"p":30.4,"f":30.6,"c":0.9},{"id":178,"cat":"肉料理","name":"グリルチキン(むね) 1枚","unit":"枚","g":150.0,"step":"枚(0.5刻み)","alias":"ぐりるちきん","method":"積算","kcal":233,"p":30.1,"f":13.3,"c":0.4},{"id":179,"cat":"肉料理","name":"チキン南蛮 1人前","unit":"人前","g":180.0,"step":"人前(0.5刻み)","alias":"ちきんなんばん","method":"積算","kcal":521,"p":21.1,"f":44.1,"c":13.4},{"id":180,"cat":"肉料理","name":"鶏むねの塩麹焼き 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"しおこうじ","method":"積算","kcal":193,"p":30.8,"f":6.6,"c":4.9},{"id":181,"cat":"肉料理","name":"蒸し鶏(よだれ鶏) 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"むしどり/よだれどり","method":"積算","kcal":194,"p":28.9,"f":7.8,"c":3.7},{"id":182,"cat":"肉料理","name":"棒々鶏 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"ばんばんじー","method":"積算","kcal":161,"p":27.0,"f":4.4,"c":5.2},{"id":183,"cat":"肉料理","name":"豚の生姜焼き 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"しょうがやき","method":"積算","kcal":345,"p":22.1,"f":25.2,"c":7.4},{"id":184,"cat":"肉料理","name":"豚しゃぶ(冷しゃぶ) 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"ひやしゃぶ/れいしゃぶ","method":"積算","kcal":296,"p":20.7,"f":21.5,"c":5.9},{"id":185,"cat":"肉料理","name":"とんかつ(ロース) 1枚","unit":"枚","g":150.0,"step":"枚(0.5刻み)","alias":"とんかつ","method":"転記","kcal":644,"p":33.0,"f":53.9,"c":14.7},{"id":186,"cat":"肉料理","name":"とんかつ(ヒレ) 1人前","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"ひれかつ","method":"転記","kcal":455,"p":30.1,"f":30.4,"c":17.9},{"id":187,"cat":"肉料理","name":"豚の角煮 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"かくに","method":"積算","kcal":462,"p":16.7,"f":38.9,"c":11.8},{"id":188,"cat":"肉料理","name":"豚キムチ炒め 1人前","unit":"人前","g":180.0,"step":"人前(0.5刻み)","alias":"ぶたきむち","method":"積算","kcal":398,"p":15.1,"f":37.0,"c":4.7},{"id":189,"cat":"肉料理","name":"回鍋肉 1人前","unit":"人前","g":200.0,"step":"人前(0.5刻み)","alias":"ほいこーろー","method":"積算","kcal":401,"p":13.9,"f":35.4,"c":10.1},{"id":190,"cat":"肉料理","name":"豚バラ焼き(サムギョプサル) 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"さむぎょぷさる","method":"積算","kcal":485,"p":18.1,"f":45.8,"c":3.7},{"id":191,"cat":"肉料理","name":"ハンバーグ 1個","unit":"個","g":150.0,"step":"個(0.5刻み)","alias":"はんばーぐ","method":"転記","kcal":296,"p":20.1,"f":18.3,"c":15.0},{"id":192,"cat":"肉料理","name":"チーズハンバーグ 1個","unit":"個","g":170.0,"step":"個(0.5刻み)","alias":"ちーずはんばーぐ","method":"積算","kcal":338,"p":22.7,"f":21.4,"c":15.9},{"id":193,"cat":"肉料理","name":"豆腐ハンバーグ 1個","unit":"個","g":150.0,"step":"個(0.5刻み)","alias":"とうふはんばーぐ","method":"転記","kcal":213,"p":14.8,"f":13.8,"c":12.6},{"id":194,"cat":"肉料理","name":"ビーフステーキ(サーロイン) 1枚","unit":"枚","g":200.0,"step":"枚(0.5刻み)","alias":"すてーき/ステーキ","method":"積算","kcal":634,"p":31.7,"f":57.0,"c":1.2},{"id":195,"cat":"肉料理","name":"ビーフステーキ(赤身・ヒレ) 1枚","unit":"枚","g":150.0,"step":"枚(0.5刻み)","alias":"あかみすてーき","method":"積算","kcal":294,"p":30.4,"f":20.2,"c":1.0},{"id":196,"cat":"肉料理","name":"焼肉(カルビ) 1人前","unit":"人前","g":100.0,"step":"人前(0.5刻み)","alias":"かるび","method":"積算","kcal":348,"p":11.5,"f":33.8,"c":5.1},{"id":197,"cat":"肉料理","name":"焼肉(ロース) 1人前","unit":"人前","g":100.0,"step":"人前(0.5刻み)","alias":"やきにく","method":"積算","kcal":275,"p":14.4,"f":22.8,"c":5.0},{"id":198,"cat":"肉料理","name":"焼肉(ハラミ) 1人前","unit":"人前","g":100.0,"step":"人前(0.5刻み)","alias":"はらみ","method":"積算","kcal":269,"p":13.2,"f":23.5,"c":5.1},{"id":199,"cat":"肉料理","name":"焼肉(タン) 1人前","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"たん/牛タン","method":"積算","kcal":250,"p":9.3,"f":25.3,"c":0.6},{"id":200,"cat":"肉料理","name":"ローストビーフ 1人前","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"ろーすとびーふ","method":"転記","kcal":152,"p":17.4,"f":9.4,"c":0.7},{"id":201,"cat":"肉料理","name":"牛すじ煮込み 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"ぎゅうすじ","method":"積算","kcal":174,"p":26.6,"f":4.8,"c":9.3},{"id":202,"cat":"肉料理","name":"肉じゃが 1人前","unit":"人前","g":200.0,"step":"人前(0.5刻み)","alias":"にくじゃが","method":"転記","kcal":156,"p":8.6,"f":2.6,"c":26.0},{"id":203,"cat":"肉料理","name":"青椒肉絲 1人前","unit":"人前","g":180.0,"step":"人前(0.5刻み)","alias":"ちんじゃおろーす","method":"積算","kcal":235,"p":16.8,"f":15.3,"c":9.4},{"id":204,"cat":"肉料理","name":"ミートボール 3個","unit":"人前","g":90.0,"step":"人前(0.5刻み)","alias":"みーとぼーる/肉団子","method":"転記","kcal":179,"p":9.2,"f":11.2,"c":12.1},{"id":205,"cat":"肉料理","name":"メンチカツ 1個","unit":"個","g":90.0,"step":"個","alias":"めんちかつ","method":"転記","kcal":246,"p":9.6,"f":16.8,"c":16.8},{"id":206,"cat":"肉料理","name":"コロッケ(ポテト) 1個","unit":"個","g":80.0,"step":"個","alias":"ころっけ","method":"転記","kcal":181,"p":4.2,"f":10.1,"c":20.2},{"id":207,"cat":"肉料理","name":"ロールキャベツ 1個","unit":"個","g":120.0,"step":"個","alias":"ろーるきゃべつ","method":"積算","kcal":127,"p":9.0,"f":7.6,"c":8.2},{"id":208,"cat":"肉料理","name":"餃子 1個","unit":"個","g":25.0,"step":"個","alias":"ぎょうざ","method":"転記","kcal":52,"p":1.7,"f":2.8,"c":5.6},{"id":209,"cat":"肉料理","name":"シュウマイ 1個","unit":"個","g":25.0,"step":"個","alias":"しゅうまい/焼売","method":"転記","kcal":48,"p":2.3,"f":2.3,"c":4.9},{"id":210,"cat":"肉料理","name":"春巻き 1本","unit":"本","g":60.0,"step":"本","alias":"はるまき","method":"転記","kcal":133,"p":3.6,"f":5.1,"c":18.1},{"id":211,"cat":"肉料理","name":"酢豚 1人前","unit":"人前","g":200.0,"step":"人前(0.5刻み)","alias":"すぶた","method":"転記","kcal":154,"p":9.2,"f":6.6,"c":15.2},{"id":212,"cat":"肉料理","name":"麻婆豆腐 1人前","unit":"人前","g":220.0,"step":"人前(0.5刻み)","alias":"まーぼーどうふ","method":"転記","kcal":229,"p":17.2,"f":15.0,"c":8.4},{"id":213,"cat":"肉料理","name":"麻婆茄子 1人前","unit":"人前","g":200.0,"step":"人前(0.5刻み)","alias":"まーぼーなす","method":"積算","kcal":240,"p":9.6,"f":18.8,"c":12.2},{"id":214,"cat":"肉料理","name":"ジンギスカン 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"じんぎすかん/ラム","method":"積算","kcal":200,"p":21.3,"f":12.4,"c":7.7},{"id":215,"cat":"肉料理","name":"ソーセージ 1本","unit":"本","g":20.0,"step":"本","alias":"そーせーじ/ウインナー","method":"転記","kcal":64,"p":2.3,"f":6.1,"c":0.7},{"id":216,"cat":"肉料理","name":"ベーコン 1枚","unit":"枚","g":17.0,"step":"枚","alias":"べーこん","method":"転記","kcal":34,"p":2.9,"f":2.5,"c":0.5},{"id":217,"cat":"肉料理","name":"ハム(ロース) 1枚","unit":"枚","g":15.0,"step":"枚","alias":"はむ","method":"転記","kcal":32,"p":2.8,"f":2.2,"c":0.3},{"id":218,"cat":"肉料理","name":"生ハム 3枚","unit":"人前","g":30.0,"step":"人前(0.5刻み)","alias":"なまはむ","method":"転記","kcal":73,"p":7.2,"f":5.0,"c":0.1},{"id":219,"cat":"肉料理","name":"鶏レバー煮 1人前","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"ればー/レバニラ用","method":"積算","kcal":97,"p":13.6,"f":2.2,"c":6.2},{"id":220,"cat":"肉料理","name":"レバニラ炒め 1人前","unit":"人前","g":180.0,"step":"人前(0.5刻み)","alias":"ればにら","method":"積算","kcal":163,"p":17.0,"f":8.6,"c":6.2},{"id":221,"cat":"肉料理","name":"もつ煮込み 1人前","unit":"人前","g":180.0,"step":"人前(0.5刻み)","alias":"もつに","method":"積算","kcal":244,"p":13.4,"f":19.3,"c":6.9},{"id":222,"cat":"魚料理","name":"鮭の塩焼き 1切れ","unit":"個","g":80.0,"step":"個","alias":"しゃけ/やきざかな","method":"積算","kcal":99,"p":17.8,"f":3.3,"c":0.1},{"id":223,"cat":"魚料理","name":"銀鮭の塩焼き 1切れ","unit":"個","g":80.0,"step":"個","alias":"ぎんじゃけ","method":"積算","kcal":150,"p":15.7,"f":10.2,"c":0.2},{"id":224,"cat":"魚料理","name":"サバの塩焼き 1切れ","unit":"個","g":90.0,"step":"個","alias":"さば/鯖","method":"積算","kcal":190,"p":18.5,"f":15.1,"c":0.3},{"id":225,"cat":"魚料理","name":"サバの味噌煮 1切れ","unit":"個","g":120.0,"step":"個","alias":"さばみそ","method":"転記","kcal":252,"p":19.6,"f":16.7,"c":7.9},{"id":226,"cat":"魚料理","name":"アジの開き 1枚","unit":"枚","g":90.0,"step":"枚","alias":"あじ/干物","method":"積算","kcal":135,"p":18.2,"f":7.9,"c":0.1},{"id":227,"cat":"魚料理","name":"ホッケの開き 半身","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"ほっけ","method":"積算","kcal":242,"p":30.9,"f":14.1,"c":0.2},{"id":228,"cat":"魚料理","name":"サンマの塩焼き 1尾","unit":"本","g":100.0,"step":"本","alias":"さんま/秋刀魚","method":"積算","kcal":287,"p":18.1,"f":25.6,"c":0.1},{"id":229,"cat":"魚料理","name":"イワシの塩焼き 1尾","unit":"本","g":60.0,"step":"本","alias":"いわし","method":"積算","kcal":94,"p":11.5,"f":5.5,"c":0.1},{"id":230,"cat":"魚料理","name":"ブリの照り焼き 1切れ","unit":"個","g":90.0,"step":"個","alias":"ぶりてり","method":"転記","kcal":234,"p":23.6,"f":18.4,"c":0.3},{"id":231,"cat":"魚料理","name":"ぶり大根 1人前","unit":"人前","g":250.0,"step":"人前(0.5刻み)","alias":"ぶりだいこん","method":"積算","kcal":234,"p":16.4,"f":12.4,"c":17.1},{"id":232,"cat":"魚料理","name":"カレイの煮付け 1切れ","unit":"個","g":120.0,"step":"個","alias":"かれい/煮魚","method":"積算","kcal":132,"p":20.3,"f":1.3,"c":8.2},{"id":233,"cat":"魚料理","name":"金目鯛の煮付け 1切れ","unit":"個","g":120.0,"step":"個","alias":"きんめだい","method":"積算","kcal":195,"p":18.4,"f":9.0,"c":9.5},{"id":234,"cat":"魚料理","name":"タラの塩焼き 1切れ","unit":"個","g":80.0,"step":"個","alias":"たら/鱈","method":"積算","kcal":58,"p":14.1,"f":0.2,"c":0.1},{"id":235,"cat":"魚料理","name":"ムニエル(タラ・鮭) 1切れ","unit":"個","g":100.0,"step":"個","alias":"むにえる","method":"積算","kcal":186,"p":20.5,"f":10.3,"c":4.2},{"id":236,"cat":"魚料理","name":"アクアパッツァ 1人前","unit":"人前","g":250.0,"step":"人前(0.5刻み)","alias":"あくあぱっつぁ","method":"積算","kcal":186,"p":16.9,"f":10.5,"c":3.6},{"id":237,"cat":"魚料理","name":"アジフライ 1枚","unit":"枚","g":80.0,"step":"枚","alias":"あじふらい","method":"転記","kcal":216,"p":16.1,"f":14.6,"c":6.3},{"id":238,"cat":"魚料理","name":"白身魚フライ 1枚","unit":"枚","g":80.0,"step":"枚","alias":"しろみふらい","method":"転記","kcal":239,"p":7.8,"f":17.4,"c":13.0},{"id":239,"cat":"魚料理","name":"エビフライ 1本","unit":"本","g":40.0,"step":"本","alias":"えびふらい","method":"転記","kcal":94,"p":6.4,"f":4.6,"c":8.2},{"id":240,"cat":"魚料理","name":"カキフライ 1個","unit":"個","g":40.0,"step":"個","alias":"かきふらい","method":"転記","kcal":102,"p":3.0,"f":4.4,"c":13.2},{"id":241,"cat":"魚料理","name":"天ぷら盛り合わせ 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"てんぷら","method":"積算","kcal":350,"p":14.0,"f":24.5,"c":21.5},{"id":242,"cat":"魚料理","name":"エビの天ぷら 1本","unit":"本","g":35.0,"step":"本","alias":"えびてん","method":"転記","kcal":68,"p":7.0,"f":3.6,"c":2.3},{"id":243,"cat":"魚料理","name":"エビチリ 1人前","unit":"人前","g":180.0,"step":"人前(0.5刻み)","alias":"えびちり","method":"積算","kcal":183,"p":20.4,"f":7.4,"c":10.1},{"id":244,"cat":"魚料理","name":"エビマヨ 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"えびまよ","method":"積算","kcal":334,"p":20.1,"f":26.1,"c":8.0},{"id":245,"cat":"魚料理","name":"刺身盛り合わせ 1人前","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"さしみ/お造り","method":"積算","kcal":195,"p":25.8,"f":11.0,"c":0.6},{"id":246,"cat":"魚料理","name":"マグロ刺身(赤身) 5切れ","unit":"人前","g":60.0,"step":"人前(0.5刻み)","alias":"まぐろ","method":"転記","kcal":69,"p":15.8,"f":0.8,"c":0.1},{"id":247,"cat":"魚料理","name":"サーモン刺身 5切れ","unit":"人前","g":60.0,"step":"人前(0.5刻み)","alias":"さーもんさしみ","method":"転記","kcal":134,"p":11.8,"f":10.2,"c":0.1},{"id":248,"cat":"魚料理","name":"カツオのたたき 1人前","unit":"人前","g":100.0,"step":"人前(0.5刻み)","alias":"かつお","method":"転記","kcal":108,"p":25.8,"f":0.5,"c":0.1},{"id":249,"cat":"魚料理","name":"しらす(釜揚げ) 大さじ2","unit":"人前","g":20.0,"step":"人前(0.5刻み)","alias":"しらす","method":"転記","kcal":17,"p":3.5,"f":0.3,"c":0.0},{"id":250,"cat":"魚料理","name":"ちくわ 1本","unit":"本","g":30.0,"step":"本","alias":"竹輪","method":"転記","kcal":32,"p":4.0,"f":0.1,"c":4.0},{"id":251,"cat":"魚料理","name":"かまぼこ 2切れ","unit":"人前","g":30.0,"step":"人前(0.5刻み)","alias":"蒲鉾","method":"転記","kcal":28,"p":3.6,"f":0.3,"c":2.9},{"id":252,"cat":"魚料理","name":"カニカマ 1本","unit":"本","g":15.0,"step":"本","alias":"かにかま","method":"転記","kcal":13,"p":1.8,"f":0.1,"c":1.4},{"id":253,"cat":"魚料理","name":"さつま揚げ 1枚","unit":"枚","g":60.0,"step":"枚","alias":"さつまあげ","method":"転記","kcal":70,"p":6.8,"f":1.4,"c":7.6},{"id":254,"cat":"魚料理","name":"はんぺん 1枚","unit":"枚","g":100.0,"step":"枚","alias":"はんぺん","method":"転記","kcal":93,"p":9.9,"f":1.0,"c":11.4},{"id":255,"cat":"魚料理","name":"ツナ缶(水煮) 1缶","unit":"個","g":70.0,"step":"個","alias":"つな/シーチキン","method":"転記","kcal":49,"p":11.2,"f":0.5,"c":0.1},{"id":256,"cat":"魚料理","name":"ツナ缶(油漬) 1缶","unit":"個","g":70.0,"step":"個","alias":"つなあぶら","method":"転記","kcal":186,"p":12.4,"f":15.2,"c":0.1},{"id":257,"cat":"魚料理","name":"イワシ缶(味付) 1缶","unit":"個","g":100.0,"step":"個","alias":"いわしかん","method":"転記","kcal":203,"p":20.4,"f":11.9,"c":5.7},{"id":258,"cat":"魚料理","name":"エビ(ボイル) 5尾","unit":"人前","g":60.0,"step":"人前(0.5刻み)","alias":"えび/海老","method":"転記","kcal":49,"p":11.8,"f":0.4,"c":0.4},{"id":259,"cat":"魚料理","name":"イカ(刺身・焼き) 1人前","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"いか","method":"転記","kcal":61,"p":14.3,"f":0.6,"c":0.1},{"id":260,"cat":"魚料理","name":"タコ(ゆで) 1人前","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"たこ","method":"転記","kcal":73,"p":17.4,"f":0.6,"c":0.1},{"id":261,"cat":"魚料理","name":"ホタテ(刺身・焼き) 3個","unit":"人前","g":60.0,"step":"人前(0.5刻み)","alias":"ほたて","method":"転記","kcal":49,"p":10.1,"f":0.2,"c":2.1},{"id":262,"cat":"魚料理","name":"あさりの酒蒸し 1人前","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"あさり","method":"積算","kcal":67,"p":5.8,"f":3.1,"c":1.4},{"id":263,"cat":"魚料理","name":"牡蠣(生・蒸し) 3個","unit":"人前","g":60.0,"step":"人前(0.5刻み)","alias":"かき","method":"転記","kcal":35,"p":4.1,"f":1.3,"c":2.9},{"id":264,"cat":"魚料理","name":"うなぎの蒲焼 1串","unit":"人前","g":100.0,"step":"人前(0.5刻み)","alias":"うなぎかばやき","method":"転記","kcal":285,"p":23.0,"f":21.0,"c":3.1},{"id":265,"cat":"卵・大豆・乳","name":"ゆで卵 1個","unit":"個","g":50.0,"step":"個","alias":"ゆでたまご","method":"転記","kcal":67,"p":6.2,"f":5.2,"c":0.1},{"id":266,"cat":"卵・大豆・乳","name":"目玉焼き 1個","unit":"個","g":55.0,"step":"個","alias":"めだまやき","method":"転記","kcal":113,"p":8.1,"f":9.7,"c":0.2},{"id":267,"cat":"卵・大豆・乳","name":"スクランブルエッグ 卵2個分","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"すくらんぶる/炒り卵","method":"積算","kcal":204,"p":13.8,"f":16.5,"c":0.9},{"id":268,"cat":"卵・大豆・乳","name":"だし巻き卵 2切れ","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"だしまき/卵焼き","method":"転記","kcal":98,"p":8.8,"f":7.4,"c":0.4},{"id":269,"cat":"卵・大豆・乳","name":"オムレツ(プレーン) 1個","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"おむれつ","method":"積算","kcal":203,"p":13.7,"f":16.4,"c":0.8},{"id":270,"cat":"卵・大豆・乳","name":"温泉卵 1個","unit":"個","g":50.0,"step":"個","alias":"おんせんたまご/おんたま","method":"転記","kcal":71,"p":6.1,"f":5.1,"c":0.2},{"id":271,"cat":"卵・大豆・乳","name":"茶碗蒸し 1個","unit":"個","g":150.0,"step":"個","alias":"ちゃわんむし","method":"積算","kcal":78,"p":7.2,"f":4.6,"c":2.7},{"id":272,"cat":"卵・大豆・乳","name":"ニラ玉 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"にらたま","method":"積算","kcal":222,"p":14.2,"f":17.3,"c":2.9},{"id":273,"cat":"卵・大豆・乳","name":"かに玉 1人前","unit":"人前","g":200.0,"step":"人前(0.5刻み)","alias":"かにたま/天津飯の具","method":"積算","kcal":288,"p":17.2,"f":19.5,"c":11.1},{"id":274,"cat":"卵・大豆・乳","name":"冷奴 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"ひややっこ","method":"積算","kcal":82,"p":8.1,"f":4.6,"c":3.4},{"id":275,"cat":"卵・大豆・乳","name":"湯豆腐 1人前","unit":"人前","g":200.0,"step":"人前(0.5刻み)","alias":"ゆどうふ","method":"積算","kcal":119,"p":11.4,"f":7.4,"c":3.7},{"id":276,"cat":"卵・大豆・乳","name":"揚げ出し豆腐 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"あげだしどうふ","method":"積算","kcal":209,"p":8.3,"f":15.4,"c":10.9},{"id":277,"cat":"卵・大豆・乳","name":"絹ごし豆腐 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"きぬごし","method":"転記","kcal":56,"p":5.3,"f":3.5,"c":2.0},{"id":278,"cat":"卵・大豆・乳","name":"厚揚げ(焼き) 1/2枚","unit":"人前","g":100.0,"step":"人前(0.5刻み)","alias":"あつあげ","method":"転記","kcal":143,"p":10.7,"f":11.3,"c":0.9},{"id":279,"cat":"卵・大豆・乳","name":"油揚げ 1枚","unit":"枚","g":30.0,"step":"枚","alias":"あぶらあげ","method":"転記","kcal":113,"p":7.0,"f":10.3,"c":0.1},{"id":280,"cat":"卵・大豆・乳","name":"高野豆腐の煮物 1人前","unit":"人前","g":100.0,"step":"人前(0.5刻み)","alias":"こうやどうふ","method":"積算","kcal":112,"p":9.2,"f":5.8,"c":6.6},{"id":281,"cat":"卵・大豆・乳","name":"おから(卯の花) 小鉢1","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"うのはな/おから","method":"転記","kcal":67,"p":3.5,"f":3.3,"c":8.6},{"id":282,"cat":"卵・大豆・乳","name":"豆乳(調製) コップ1杯","unit":"杯","g":200.0,"step":"杯(0.5刻み)","alias":"ちょうせいとうにゅう","method":"転記","kcal":122,"p":6.4,"f":7.2,"c":9.6},{"id":283,"cat":"卵・大豆・乳","name":"牛乳 コップ1杯","unit":"杯","g":200.0,"step":"杯(0.5刻み)","alias":"ぎゅうにゅう/ミルク","method":"転記","kcal":122,"p":6.6,"f":7.6,"c":9.6},{"id":284,"cat":"卵・大豆・乳","name":"低脂肪乳 コップ1杯","unit":"杯","g":200.0,"step":"杯(0.5刻み)","alias":"ていしぼうにゅう","method":"転記","kcal":84,"p":7.6,"f":2.0,"c":11.0},{"id":285,"cat":"卵・大豆・乳","name":"飲むヨーグルト コップ1杯","unit":"杯","g":180.0,"step":"杯(0.5刻み)","alias":"のむよーぐると","method":"転記","kcal":115,"p":5.2,"f":0.9,"c":22.0},{"id":286,"cat":"卵・大豆・乳","name":"ヨーグルト(加糖) 1個","unit":"個","g":80.0,"step":"個","alias":"かとうよーぐると","method":"転記","kcal":52,"p":3.4,"f":0.2,"c":9.5},{"id":287,"cat":"卵・大豆・乳","name":"カッテージチーズ 大さじ2","unit":"人前","g":30.0,"step":"人前(0.5刻み)","alias":"かってーじ","method":"転記","kcal":30,"p":4.0,"f":1.4,"c":0.6},{"id":288,"cat":"卵・大豆・乳","name":"モッツァレラチーズ 1/2個","unit":"人前","g":50.0,"step":"人前(0.5刻み)","alias":"もっつぁれら","method":"転記","kcal":134,"p":9.2,"f":9.9,"c":2.1},{"id":289,"cat":"卵・大豆・乳","name":"カマンベールチーズ 1/4個","unit":"人前","g":25.0,"step":"人前(0.5刻み)","alias":"かまんべーる","method":"転記","kcal":73,"p":4.8,"f":6.2,"c":0.2},{"id":290,"cat":"鍋・汁物","name":"味噌汁(豆腐・わかめ) 1杯","unit":"杯","g":180.0,"step":"杯(0.5刻み)","alias":"みそしる/おみそしる","method":"積算","kcal":38,"p":3.2,"f":1.4,"c":4.0},{"id":291,"cat":"鍋・汁物","name":"味噌汁(なめこ) 1杯","unit":"杯","g":180.0,"step":"杯(0.5刻み)","alias":"なめこじる","method":"積算","kcal":30,"p":2.5,"f":0.7,"c":4.3},{"id":292,"cat":"鍋・汁物","name":"豚汁 1杯","unit":"杯","g":250.0,"step":"杯(0.5刻み)","alias":"とんじる/ぶたじる","method":"転記","kcal":65,"p":3.8,"f":3.8,"c":5.0},{"id":293,"cat":"鍋・汁物","name":"けんちん汁 1杯","unit":"杯","g":250.0,"step":"杯(0.5刻み)","alias":"けんちん","method":"積算","kcal":69,"p":3.4,"f":4.5,"c":5.0},{"id":294,"cat":"鍋・汁物","name":"すまし汁 1杯","unit":"杯","g":180.0,"step":"杯(0.5刻み)","alias":"おすまし/お吸い物","method":"積算","kcal":11,"p":1.4,"f":0.0,"c":1.3},{"id":295,"cat":"鍋・汁物","name":"あら汁 1杯","unit":"杯","g":250.0,"step":"杯(0.5刻み)","alias":"あらじる","method":"積算","kcal":119,"p":11.0,"f":7.8,"c":4.0},{"id":296,"cat":"鍋・汁物","name":"コーンスープ 1杯","unit":"杯","g":180.0,"step":"杯(0.5刻み)","alias":"こーんすーぷ/ポタージュ","method":"転記","kcal":765,"p":14.6,"f":24.7,"c":121.3},{"id":297,"cat":"鍋・汁物","name":"ミネストローネ 1杯","unit":"杯","g":200.0,"step":"杯(0.5刻み)","alias":"みねすとろーね","method":"積算","kcal":81,"p":4.2,"f":4.4,"c":7.8},{"id":298,"cat":"鍋・汁物","name":"クラムチャウダー 1杯","unit":"杯","g":200.0,"step":"杯(0.5刻み)","alias":"くらむちゃうだー","method":"積算","kcal":169,"p":7.6,"f":10.2,"c":15.2},{"id":299,"cat":"鍋・汁物","name":"オニオンスープ 1杯","unit":"杯","g":180.0,"step":"杯(0.5刻み)","alias":"おにおんすーぷ","method":"積算","kcal":64,"p":2.6,"f":4.2,"c":5.3},{"id":300,"cat":"鍋・汁物","name":"わかめスープ 1杯","unit":"杯","g":180.0,"step":"杯(0.5刻み)","alias":"わかめすーぷ","method":"積算","kcal":39,"p":2.0,"f":3.3,"c":0.9},{"id":301,"cat":"鍋・汁物","name":"卵スープ 1杯","unit":"杯","g":180.0,"step":"杯(0.5刻み)","alias":"たまごすーぷ","method":"積算","kcal":56,"p":4.7,"f":3.2,"c":2.1},{"id":302,"cat":"鍋・汁物","name":"参鶏湯風スープ 1人前","unit":"人前","g":350.0,"step":"人前(0.5刻み)","alias":"さむげたん","method":"積算","kcal":195,"p":17.6,"f":11.3,"c":8.9},{"id":303,"cat":"鍋・汁物","name":"寄せ鍋 1人前","unit":"人前","g":400.0,"step":"人前(0.5刻み)","alias":"よせなべ","method":"積算","kcal":198,"p":19.1,"f":9.3,"c":10.9},{"id":304,"cat":"鍋・汁物","name":"水炊き 1人前","unit":"人前","g":400.0,"step":"人前(0.5刻み)","alias":"みずたき/鶏鍋","method":"積算","kcal":197,"p":16.1,"f":12.0,"c":7.9},{"id":305,"cat":"鍋・汁物","name":"しゃぶしゃぶ(豚) 1人前","unit":"人前","g":300.0,"step":"人前(0.5刻み)","alias":"しゃぶしゃぶ","method":"積算","kcal":299,"p":20.1,"f":19.9,"c":11.4},{"id":306,"cat":"鍋・汁物","name":"すき焼き 1人前","unit":"人前","g":350.0,"step":"人前(0.5刻み)","alias":"すきやき","method":"積算","kcal":462,"p":26.4,"f":29.4,"c":24.0},{"id":307,"cat":"鍋・汁物","name":"キムチ鍋 1人前","unit":"人前","g":400.0,"step":"人前(0.5刻み)","alias":"きむちなべ/チゲ","method":"積算","kcal":285,"p":15.9,"f":21.7,"c":10.2},{"id":308,"cat":"鍋・汁物","name":"スンドゥブチゲ 1人前","unit":"人前","g":350.0,"step":"人前(0.5刻み)","alias":"すんどぅぶ","method":"積算","kcal":240,"p":15.6,"f":17.8,"c":6.9},{"id":309,"cat":"鍋・汁物","name":"もつ鍋 1人前","unit":"人前","g":350.0,"step":"人前(0.5刻み)","alias":"もつなべ","method":"積算","kcal":246,"p":14.1,"f":19.0,"c":7.1},{"id":310,"cat":"鍋・汁物","name":"おでん(定番5品) 1人前","unit":"人前","g":400.0,"step":"人前(0.5刻み)","alias":"おでん","method":"積算","kcal":281,"p":14.0,"f":6.2,"c":46.1},{"id":311,"cat":"鍋・汁物","name":"おでん(大根) 1個","unit":"個","g":80.0,"step":"個","alias":"おでんだいこん","method":"転記","kcal":12,"p":0.4,"f":0.1,"c":3.2},{"id":312,"cat":"鍋・汁物","name":"おでん(卵) 1個","unit":"個","g":55.0,"step":"個","alias":"おでんたまご","method":"転記","kcal":74,"p":6.9,"f":5.7,"c":0.2},{"id":313,"cat":"鍋・汁物","name":"おでん(しらたき) 1個","unit":"個","g":80.0,"step":"個","alias":"おでんしらたき","method":"転記","kcal":273,"p":0.2,"f":0.2,"c":70.2},{"id":314,"cat":"鍋・汁物","name":"湯どうふ鍋(1人鍋) 1人前","unit":"人前","g":350.0,"step":"人前(0.5刻み)","alias":"ひとりなべ","method":"積算","kcal":132,"p":12.1,"f":7.4,"c":6.0},{"id":315,"cat":"副菜・野菜","name":"野菜炒め 1人前","unit":"人前","g":180.0,"step":"人前(0.5刻み)","alias":"やさいいため","method":"積算","kcal":196,"p":5.8,"f":17.0,"c":7.0},{"id":316,"cat":"副菜・野菜","name":"もやし炒め 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"もやしいため","method":"積算","kcal":96,"p":2.8,"f":8.1,"c":3.8},{"id":317,"cat":"副菜・野菜","name":"ほうれん草のおひたし 小鉢1","unit":"人前","g":60.0,"step":"人前(0.5刻み)","alias":"おひたし","method":"転記","kcal":16,"p":2.2,"f":0.3,"c":2.6},{"id":318,"cat":"副菜・野菜","name":"小松菜のおひたし 小鉢1","unit":"人前","g":60.0,"step":"人前(0.5刻み)","alias":"こまつなおひたし","method":"積算","kcal":12,"p":1.5,"f":0.1,"c":1.7},{"id":319,"cat":"副菜・野菜","name":"ほうれん草の胡麻和え 小鉢1","unit":"人前","g":60.0,"step":"人前(0.5刻み)","alias":"ごまあえ","method":"積算","kcal":44,"p":2.3,"f":2.4,"c":4.7},{"id":320,"cat":"副菜・野菜","name":"いんげんの胡麻和え 小鉢1","unit":"人前","g":60.0,"step":"人前(0.5刻み)","alias":"いんげん","method":"転記","kcal":46,"p":2.2,"f":2.0,"c":5.5},{"id":321,"cat":"副菜・野菜","name":"きんぴらごぼう 小鉢1","unit":"人前","g":60.0,"step":"人前(0.5刻み)","alias":"きんぴら","method":"転記","kcal":50,"p":0.8,"f":2.7,"c":6.8},{"id":322,"cat":"副菜・野菜","name":"ひじきの煮物 小鉢1","unit":"人前","g":60.0,"step":"人前(0.5刻み)","alias":"ひじき","method":"転記","kcal":45,"p":1.9,"f":2.4,"c":5.9},{"id":323,"cat":"副菜・野菜","name":"切り干し大根の煮物 小鉢1","unit":"人前","g":60.0,"step":"人前(0.5刻み)","alias":"きりぼし","method":"転記","kcal":29,"p":1.4,"f":1.5,"c":3.4},{"id":324,"cat":"副菜・野菜","name":"かぼちゃの煮物 小鉢1","unit":"人前","g":100.0,"step":"人前(0.5刻み)","alias":"かぼちゃ","method":"積算","kcal":97,"p":2.0,"f":0.3,"c":24.2},{"id":325,"cat":"副菜・野菜","name":"里芋の煮物 小鉢1","unit":"人前","g":100.0,"step":"人前(0.5刻み)","alias":"さといも","method":"積算","kcal":72,"p":1.7,"f":0.1,"c":16.8},{"id":326,"cat":"副菜・野菜","name":"筑前煮 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"ちくぜんに/がめ煮","method":"転記","kcal":128,"p":6.6,"f":5.2,"c":15.3},{"id":327,"cat":"副菜・野菜","name":"なすの煮浸し 小鉢1","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"にびたし","method":"積算","kcal":65,"p":1.1,"f":5.1,"c":5.2},{"id":328,"cat":"副菜・野菜","name":"なすの味噌炒め 1人前","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"なすみそ","method":"積算","kcal":170,"p":4.1,"f":13.8,"c":9.8},{"id":329,"cat":"副菜・野菜","name":"ゴーヤチャンプルー 1人前","unit":"人前","g":180.0,"step":"人前(0.5刻み)","alias":"ごーやちゃんぷる","method":"積算","kcal":239,"p":12.5,"f":20.4,"c":3.6},{"id":330,"cat":"副菜・野菜","name":"ラタトゥイユ 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"らたとぅいゆ","method":"積算","kcal":108,"p":1.8,"f":8.2,"c":8.7},{"id":331,"cat":"副菜・野菜","name":"アスパラベーコン 1人前","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"あすぱら","method":"積算","kcal":77,"p":4.7,"f":6.0,"c":2.6},{"id":332,"cat":"副菜・野菜","name":"ブロッコリーの塩ゆで 小鉢1","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"ぶろっこりーゆで","method":"転記","kcal":24,"p":3.1,"f":0.3,"c":4.2},{"id":333,"cat":"副菜・野菜","name":"オクラのおかか和え 小鉢1","unit":"人前","g":50.0,"step":"人前(0.5刻み)","alias":"おくら","method":"積算","kcal":17,"p":1.9,"f":0.1,"c":3.2},{"id":334,"cat":"副菜・野菜","name":"冷やしトマト 1人前","unit":"人前","g":100.0,"step":"人前(0.5刻み)","alias":"ひやしとまと","method":"転記","kcal":20,"p":0.7,"f":0.1,"c":4.7},{"id":335,"cat":"副菜・野菜","name":"枝豆 1人前","unit":"人前","g":60.0,"step":"人前(0.5刻み)","alias":"えだまめさや","method":"転記","kcal":71,"p":6.9,"f":3.7,"c":5.3},{"id":336,"cat":"副菜・野菜","name":"もろきゅう 1人前","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"きゅうり/もろきゅう","method":"積算","kcal":30,"p":1.7,"f":0.4,"c":5.9},{"id":337,"cat":"副菜・野菜","name":"たたききゅうり 小鉢1","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"たたききゅうり","method":"積算","kcal":48,"p":1.2,"f":3.9,"c":2.7},{"id":338,"cat":"副菜・野菜","name":"キャベツの千切り 付け合わせ1","unit":"人前","g":50.0,"step":"人前(0.5刻み)","alias":"せんぎり","method":"転記","kcal":26,"p":2.9,"f":0.1,"c":5.0},{"id":339,"cat":"副菜・野菜","name":"コールスロー 小鉢1","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"こーるすろー","method":"積算","kcal":96,"p":1.1,"f":7.7,"c":7.1},{"id":340,"cat":"副菜・野菜","name":"ポテトサラダ 小鉢1","unit":"人前","g":100.0,"step":"人前(0.5刻み)","alias":"ぽてさら","method":"積算","kcal":144,"p":2.9,"f":11.1,"c":12.2},{"id":341,"cat":"副菜・野菜","name":"マカロニサラダ 小鉢1","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"まかろにさらだ","method":"積算","kcal":173,"p":4.1,"f":12.2,"c":14.3},{"id":342,"cat":"副菜・野菜","name":"かぼちゃサラダ 小鉢1","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"かぼちゃさらだ","method":"積算","kcal":140,"p":1.4,"f":9.3,"c":16.0},{"id":343,"cat":"副菜・野菜","name":"グリーンサラダ 1皿","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"さらだ/サラダ","method":"積算","kcal":30,"p":0.8,"f":1.5,"c":3.9},{"id":344,"cat":"副菜・野菜","name":"シーザーサラダ 1皿","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"しーざー","method":"積算","kcal":151,"p":8.1,"f":10.7,"c":7.7},{"id":345,"cat":"副菜・野菜","name":"海藻サラダ 1皿","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"かいそう","method":"積算","kcal":32,"p":1.1,"f":1.9,"c":3.7},{"id":346,"cat":"副菜・野菜","name":"大根サラダ 1皿","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"だいこんさらだ","method":"積算","kcal":35,"p":1.3,"f":1.9,"c":3.7},{"id":347,"cat":"副菜・野菜","name":"トマトとモッツァレラのカプレーゼ 1人前","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"かぷれーぜ","method":"積算","kcal":192,"p":7.8,"f":16.0,"c":4.6},{"id":348,"cat":"副菜・野菜","name":"ナムル盛り合わせ 小鉢1","unit":"人前","g":60.0,"step":"人前(0.5刻み)","alias":"なむる","method":"積算","kcal":67,"p":1.7,"f":6.0,"c":2.7},{"id":349,"cat":"副菜・野菜","name":"チョレギサラダ 1皿","unit":"人前","g":90.0,"step":"人前(0.5刻み)","alias":"ちょれぎ","method":"積算","kcal":74,"p":1.2,"f":6.6,"c":3.0},{"id":350,"cat":"副菜・野菜","name":"野菜スティック 1人前","unit":"人前","g":100.0,"step":"人前(0.5刻み)","alias":"すてぃっく","method":"積算","kcal":71,"p":1.7,"f":4.2,"c":8.5},{"id":351,"cat":"副菜・野菜","name":"浅漬け(きゅうり・白菜) 小鉢1","unit":"人前","g":50.0,"step":"人前(0.5刻み)","alias":"あさづけ/つけもの","method":"転記","kcal":8,"p":0.8,"f":0.1,"c":1.6},{"id":352,"cat":"副菜・野菜","name":"ぬか漬け 小鉢1","unit":"人前","g":40.0,"step":"人前(0.5刻み)","alias":"ぬかづけ","method":"転記","kcal":11,"p":0.6,"f":0.0,"c":2.5},{"id":353,"cat":"副菜・野菜","name":"たくあん 3切れ","unit":"人前","g":20.0,"step":"人前(0.5刻み)","alias":"たくあん","method":"転記","kcal":9,"p":0.1,"f":0.1,"c":2.2},{"id":354,"cat":"副菜・野菜","name":"梅きゅうり 小鉢1","unit":"人前","g":60.0,"step":"人前(0.5刻み)","alias":"うめきゅう","method":"積算","kcal":17,"p":0.6,"f":0.1,"c":4.1},{"id":355,"cat":"副菜・野菜","name":"もずく酢 1パック","unit":"個","g":70.0,"step":"個","alias":"もずく","method":"転記","kcal":3,"p":0.1,"f":0.1,"c":1.0},{"id":356,"cat":"副菜・野菜","name":"めかぶ 1パック","unit":"個","g":50.0,"step":"個","alias":"めかぶ","method":"転記","kcal":7,"p":0.5,"f":0.3,"c":1.7},{"id":357,"cat":"副菜・野菜","name":"ところてん 1パック","unit":"個","g":150.0,"step":"個","alias":"ところてん","method":"転記","kcal":3,"p":0.3,"f":0.0,"c":0.9},{"id":358,"cat":"副菜・野菜","name":"紅白なます 小鉢1","unit":"人前","g":50.0,"step":"人前(0.5刻み)","alias":"なます","method":"転記","kcal":17,"p":0.3,"f":0.3,"c":3.6},{"id":359,"cat":"副菜・野菜","name":"酢の物(わかめ・きゅうり) 小鉢1","unit":"人前","g":60.0,"step":"人前(0.5刻み)","alias":"すのもの","method":"積算","kcal":22,"p":0.7,"f":0.1,"c":4.9},{"id":360,"cat":"副菜・野菜","name":"白和え 小鉢1","unit":"人前","g":70.0,"step":"人前(0.5刻み)","alias":"しらあえ","method":"転記","kcal":57,"p":2.9,"f":2.4,"c":7.3},{"id":361,"cat":"副菜・野菜","name":"青菜の白和え 小鉢1","unit":"人前","g":70.0,"step":"人前(0.5刻み)","alias":"あおな","method":"転記","kcal":57,"p":2.9,"f":2.4,"c":7.3},{"id":362,"cat":"副菜・野菜","name":"とろろ(長芋すりおろし) 小鉢1","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"とろろ/ながいも","method":"転記","kcal":51,"p":1.8,"f":0.2,"c":11.1},{"id":363,"cat":"副菜・野菜","name":"焼きいも(中1本) 1本","unit":"本","g":200.0,"step":"本(0.5刻み)","alias":"やきいも","method":"転記","kcal":302,"p":2.8,"f":0.4,"c":78.0},{"id":364,"cat":"副菜・野菜","name":"ふかし芋 1人前","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"ふかしいも","method":"転記","kcal":157,"p":1.4,"f":0.2,"c":38.3},{"id":365,"cat":"副菜・野菜","name":"フライドポテト 1人前","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"ぽてと/フライドポテト","method":"転記","kcal":184,"p":3.2,"f":6.7,"c":30.5},{"id":366,"cat":"洋食おかず","name":"エビグラタン 1人前","unit":"人前","g":300.0,"step":"人前(0.5刻み)","alias":"えびぐらたん","method":"転記","kcal":384,"p":16.5,"f":20.7,"c":36.3},{"id":367,"cat":"洋食おかず","name":"シチュー(クリーム) 1皿","unit":"人前","g":300.0,"step":"人前(0.5刻み)","alias":"しちゅー/ホワイトシチュー","method":"転記","kcal":372,"p":18.6,"f":24.0,"c":23.4},{"id":368,"cat":"洋食おかず","name":"ビーフシチュー 1皿","unit":"人前","g":300.0,"step":"人前(0.5刻み)","alias":"びーふしちゅー","method":"転記","kcal":459,"p":12.3,"f":37.8,"c":21.3},{"id":369,"cat":"洋食おかず","name":"オムレツ(チーズ) 1個","unit":"人前","g":140.0,"step":"人前(0.5刻み)","alias":"ちーずおむれつ","method":"積算","kcal":248,"p":17.3,"f":19.4,"c":1.5},{"id":370,"cat":"洋食おかず","name":"キッシュ 1切れ","unit":"個","g":100.0,"step":"個","alias":"きっしゅ","method":"積算","kcal":288,"p":9.7,"f":22.4,"c":13.9},{"id":371,"cat":"洋食おかず","name":"アヒージョ(エビ・きのこ) 1人前","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"あひーじょ","method":"積算","kcal":405,"p":9.0,"f":40.4,"c":3.1},{"id":372,"cat":"洋食おかず","name":"チキンナゲット 5個","unit":"人前","g":100.0,"step":"人前(0.5刻み)","alias":"なげっと","method":"転記","kcal":235,"p":15.5,"f":13.7,"c":14.9},{"id":373,"cat":"洋食おかず","name":"フライドチキン 1個","unit":"個","g":90.0,"step":"個","alias":"ふらいどちきん/ケンタ","method":"積算","kcal":245,"p":12.6,"f":19.4,"c":6.1},{"id":374,"cat":"洋食おかず","name":"ハンバーガー 1個","unit":"個","g":110.0,"step":"個","alias":"はんばーがー","method":"積算","kcal":239,"p":10.8,"f":9.6,"c":29.1},{"id":375,"cat":"洋食おかず","name":"チーズバーガー 1個","unit":"個","g":120.0,"step":"個","alias":"ちーずばーがー","method":"積算","kcal":276,"p":13.5,"f":12.7,"c":29.2},{"id":376,"cat":"洋食おかず","name":"ミックスフライ盛り合わせ 1人前","unit":"人前","g":180.0,"step":"人前(0.5刻み)","alias":"みっくすふらい","method":"積算","kcal":381,"p":19.9,"f":21.3,"c":31.0},{"id":377,"cat":"洋食おかず","name":"カニクリームコロッケ 1個","unit":"個","g":70.0,"step":"個","alias":"かにくりーむ","method":"転記","kcal":178,"p":3.6,"f":12.0,"c":15.4},{"id":378,"cat":"洋食おかず","name":"チーズフォンデュ 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"ふぉんでゅ","method":"積算","kcal":297,"p":17.2,"f":15.9,"c":23.6},{"id":379,"cat":"洋食おかず","name":"タンドリーチキン 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"たんどりー","method":"積算","kcal":270,"p":22.5,"f":19.2,"c":3.9},{"id":380,"cat":"洋食おかず","name":"チーズタッカルビ 1人前","unit":"人前","g":250.0,"step":"人前(0.5刻み)","alias":"たっかるび","method":"積算","kcal":406,"p":25.9,"f":27.4,"c":16.4},{"id":381,"cat":"洋食おかず","name":"トッポギ 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"とっぽぎ","method":"積算","kcal":296,"p":5.3,"f":3.8,"c":60.9},{"id":382,"cat":"洋食おかず","name":"チヂミ 1枚","unit":"枚","g":200.0,"step":"枚(0.5刻み)","alias":"ちぢみ","method":"積算","kcal":373,"p":10.8,"f":15.7,"c":48.1},{"id":383,"cat":"洋食おかず","name":"キンパ 1本","unit":"本","g":250.0,"step":"本(0.5刻み)","alias":"きんぱ/韓国のり巻き","method":"積算","kcal":379,"p":11.5,"f":14.2,"c":54.7},{"id":384,"cat":"洋食おかず","name":"生春巻き 1本","unit":"本","g":80.0,"step":"本","alias":"なまはるまき","method":"積算","kcal":84,"p":4.3,"f":0.4,"c":16.4},{"id":385,"cat":"洋食おかず","name":"ケバブ(チキン) 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"けばぶ","method":"積算","kcal":247,"p":16.0,"f":19.3,"c":4.8},{"id":386,"cat":"コンビニ・市販","name":"コンビニおにぎり 1個","unit":"個","g":110.0,"step":"個","alias":"こんびにおにぎり","method":"市販平均","kcal":180,"p":4.0,"f":1.5,"c":38.0},{"id":387,"cat":"コンビニ・市販","name":"サラダチキンバー 1本","unit":"本","g":60.0,"step":"本","alias":"ちきんばー","method":"市販平均","kcal":60,"p":13.0,"f":0.7,"c":0.3},{"id":388,"cat":"コンビニ・市販","name":"スモークチキン 1袋","unit":"個","g":80.0,"step":"個","alias":"すもーくちきん","method":"市販平均","kcal":95,"p":17.0,"f":2.5,"c":1.0},{"id":389,"cat":"コンビニ・市販","name":"焼き鳥缶 1缶","unit":"個","g":75.0,"step":"個","alias":"やきとりかん","method":"市販平均","kcal":130,"p":12.0,"f":7.0,"c":5.0},{"id":390,"cat":"コンビニ・市販","name":"コンビニ幕の内弁当 1個","unit":"個","g":450.0,"step":"個","alias":"まくのうち/弁当","method":"市販平均","kcal":650,"p":25.0,"f":18.0,"c":95.0},{"id":391,"cat":"コンビニ・市販","name":"コンビニのり弁当 1個","unit":"個","g":400.0,"step":"個","alias":"のりべん","method":"市販平均","kcal":700,"p":18.0,"f":22.0,"c":105.0},{"id":392,"cat":"コンビニ・市販","name":"コンビニ唐揚げ弁当 1個","unit":"個","g":450.0,"step":"個","alias":"からあげべんとう","method":"市販平均","kcal":800,"p":28.0,"f":28.0,"c":110.0},{"id":393,"cat":"コンビニ・市販","name":"コンビニパスタ(ミート) 1個","unit":"個","g":300.0,"step":"個","alias":"こんびにぱすた","method":"市販平均","kcal":480,"p":18.0,"f":14.0,"c":70.0},{"id":394,"cat":"コンビニ・市販","name":"コンビニサンドイッチ(ミックス) 1包装","unit":"個","g":140.0,"step":"個","alias":"こんびにさんど","method":"市販平均","kcal":330,"p":12.0,"f":17.0,"c":33.0},{"id":395,"cat":"コンビニ・市販","name":"コンビニ冷やし中華 1個","unit":"個","g":400.0,"step":"個","alias":"こんびにひやしちゅうか","method":"市販平均","kcal":450,"p":17.0,"f":12.0,"c":68.0},{"id":396,"cat":"コンビニ・市販","name":"コンビニおでんセット 1人前","unit":"人前","g":350.0,"step":"人前(0.5刻み)","alias":"こんびにおでん","method":"市販平均","kcal":180,"p":12.0,"f":6.0,"c":18.0},{"id":397,"cat":"コンビニ・市販","name":"肉まん 1個","unit":"個","g":110.0,"step":"個","alias":"にくまん","method":"転記","kcal":266,"p":11.0,"f":5.6,"c":47.7},{"id":398,"cat":"コンビニ・市販","name":"あんまん 1個","unit":"個","g":100.0,"step":"個","alias":"あんまん","method":"転記","kcal":273,"p":6.1,"f":5.6,"c":51.3},{"id":399,"cat":"コンビニ・市販","name":"ピザまん 1個","unit":"個","g":100.0,"step":"個","alias":"ぴざまん","method":"市販平均","kcal":240,"p":8.0,"f":8.0,"c":34.0},{"id":400,"cat":"コンビニ・市販","name":"アメリカンドッグ 1本","unit":"本","g":100.0,"step":"本","alias":"あめりかんどっぐ","method":"積算","kcal":268,"p":7.9,"f":13.0,"c":30.9},{"id":401,"cat":"コンビニ・市販","name":"フランクフルト 1本","unit":"本","g":90.0,"step":"本","alias":"ふらんくふると","method":"転記","kcal":266,"p":11.4,"f":22.2,"c":5.6},{"id":402,"cat":"コンビニ・市販","name":"コンビニホットスナック(からあげ) 5個","unit":"人前","g":125.0,"step":"人前(0.5刻み)","alias":"ほっとすなっく/ななちき","method":"市販平均","kcal":330,"p":19.0,"f":19.0,"c":19.0},{"id":403,"cat":"コンビニ・市販","name":"カットサラダ+蒸し鶏 1袋","unit":"個","g":150.0,"step":"個","alias":"かっとさらだ","method":"市販平均","kcal":90,"p":12.0,"f":2.0,"c":6.0},{"id":404,"cat":"コンビニ・市販","name":"冷凍餃子(調理後) 5個","unit":"人前","g":125.0,"step":"人前(0.5刻み)","alias":"れいとうぎょうざ","method":"市販平均","kcal":250,"p":10.0,"f":13.0,"c":25.0},{"id":405,"cat":"コンビニ・市販","name":"冷凍チャーハン 1人前","unit":"人前","g":250.0,"step":"人前(0.5刻み)","alias":"れいとうちゃーはん","method":"市販平均","kcal":460,"p":11.0,"f":17.0,"c":66.0},{"id":406,"cat":"コンビニ・市販","name":"冷凍うどん(素うどん) 1玉","unit":"個","g":200.0,"step":"個","alias":"れいとううどん","method":"転記","kcal":190,"p":5.2,"f":0.8,"c":43.2},{"id":407,"cat":"コンビニ・市販","name":"カップ味噌汁 1個","unit":"個","g":160.0,"step":"個","alias":"かっぷみそしる","method":"市販平均","kcal":35,"p":2.5,"f":1.0,"c":4.5},{"id":408,"cat":"コンビニ・市販","name":"カップ春雨スープ 1個","unit":"個","g":160.0,"step":"個","alias":"はるさめすーぷ","method":"市販平均","kcal":80,"p":1.5,"f":1.5,"c":15.0},{"id":409,"cat":"コンビニ・市販","name":"ゼリー飲料(エネルギー系) 1個","unit":"個","g":180.0,"step":"個","alias":"ぜりーいんりょう/ウィダー","method":"市販平均","kcal":180,"p":0.0,"f":0.0,"c":45.0},{"id":410,"cat":"コンビニ・市販","name":"プロテインドリンク(紙パック) 1本","unit":"本","g":200.0,"step":"本","alias":"ぷろていんどりんく/ザバス","method":"市販平均","kcal":102,"p":15.0,"f":0.0,"c":10.0},{"id":411,"cat":"コンビニ・市販","name":"プロテインバー 1本","unit":"本","g":40.0,"step":"本","alias":"ぷろていんばー","method":"市販平均","kcal":180,"p":15.0,"f":8.5,"c":12.0},{"id":412,"cat":"コンビニ・市販","name":"ゆで卵(味付き・市販) 1個","unit":"個","g":50.0,"step":"個","alias":"あじたま","method":"市販平均","kcal":65,"p":6.0,"f":4.4,"c":0.6},{"id":413,"cat":"コンビニ・市販","name":"チーズ(6P) 1個","unit":"個","g":15.0,"step":"個","alias":"ろっぴーちーず","method":"転記","kcal":47,"p":3.4,"f":3.9,"c":0.2},{"id":414,"cat":"コンビニ・市販","name":"小魚アーモンド 1袋","unit":"個","g":25.0,"step":"個","alias":"こざかな","method":"市販平均","kcal":120,"p":7.0,"f":7.0,"c":6.0},{"id":415,"cat":"コンビニ・市販","name":"ミックスナッツ(小袋) 1袋","unit":"個","g":25.0,"step":"個","alias":"なっつ","method":"市販平均","kcal":160,"p":4.5,"f":14.0,"c":4.5},{"id":416,"cat":"コンビニ・市販","name":"するめ・あたりめ 1つかみ","unit":"人前","g":20.0,"step":"人前(0.5刻み)","alias":"するめ/あたりめ","method":"転記","kcal":15,"p":3.6,"f":0.2,"c":0.0},{"id":417,"cat":"コンビニ・市販","name":"ビーフジャーキー 1袋","unit":"個","g":30.0,"step":"個","alias":"じゃーきー","method":"転記","kcal":91,"p":16.4,"f":2.3,"c":1.9},{"id":418,"cat":"コンビニ・市販","name":"茎わかめ 1袋","unit":"個","g":60.0,"step":"個","alias":"くきわかめ","method":"市販平均","kcal":15,"p":0.5,"f":0.1,"c":3.0},{"id":419,"cat":"コンビニ・市販","name":"干し芋 1袋","unit":"個","g":60.0,"step":"個","alias":"ほしいも","method":"転記","kcal":166,"p":1.9,"f":0.4,"c":43.1},{"id":420,"cat":"間食・デザート","name":"ショートケーキ 1切れ","unit":"個","g":110.0,"step":"個","alias":"けーき/しょーとけーき","method":"転記","kcal":345,"p":7.6,"f":16.2,"c":47.0},{"id":421,"cat":"間食・デザート","name":"チョコレートケーキ 1切れ","unit":"個","g":100.0,"step":"個","alias":"ちょこけーき/ガトーショコラ","method":"積算","kcal":371,"p":6.6,"f":21.5,"c":42.6},{"id":422,"cat":"間食・デザート","name":"チーズケーキ 1切れ","unit":"個","g":100.0,"step":"個","alias":"ちーずけーき","method":"転記","kcal":299,"p":8.5,"f":21.2,"c":23.3},{"id":423,"cat":"間食・デザート","name":"シュークリーム 1個","unit":"個","g":70.0,"step":"個","alias":"しゅーくりーむ","method":"転記","kcal":148,"p":4.2,"f":8.0,"c":17.9},{"id":424,"cat":"間食・デザート","name":"エクレア 1個","unit":"個","g":80.0,"step":"個","alias":"えくれあ","method":"転記","kcal":169,"p":4.8,"f":9.1,"c":20.4},{"id":425,"cat":"間食・デザート","name":"プリン 1個","unit":"個","g":90.0,"step":"個","alias":"ぷりん","method":"転記","kcal":104,"p":5.1,"f":5.0,"c":12.6},{"id":426,"cat":"間食・デザート","name":"ゼリー(果物) 1個","unit":"個","g":150.0,"step":"個","alias":"ぜりー","method":"転記","kcal":120,"p":3.1,"f":0.1,"c":29.7},{"id":427,"cat":"間食・デザート","name":"杏仁豆腐 1個","unit":"個","g":120.0,"step":"個","alias":"あんにん","method":"積算","kcal":149,"p":4.9,"f":7.7,"c":16.9},{"id":428,"cat":"間食・デザート","name":"アイスクリーム(バニラ) 1個","unit":"個","g":110.0,"step":"個","alias":"あいす","method":"転記","kcal":196,"p":4.3,"f":8.8,"c":25.5},{"id":429,"cat":"間食・デザート","name":"ソフトクリーム 1個","unit":"個","g":120.0,"step":"個","alias":"そふとくりーむ","method":"転記","kcal":175,"p":4.6,"f":6.7,"c":24.1},{"id":430,"cat":"間食・デザート","name":"かき氷(シロップ) 1杯","unit":"杯","g":200.0,"step":"杯(0.5刻み)","alias":"かきごおり","method":"積算","kcal":118,"p":0.0,"f":0.0,"c":29.9},{"id":431,"cat":"間食・デザート","name":"大福 1個","unit":"個","g":70.0,"step":"個","alias":"だいふく","method":"転記","kcal":156,"p":3.2,"f":0.3,"c":37.2},{"id":432,"cat":"間食・デザート","name":"どら焼き 1個","unit":"個","g":70.0,"step":"個","alias":"どらやき","method":"転記","kcal":197,"p":4.6,"f":2.2,"c":40.9},{"id":433,"cat":"間食・デザート","name":"たい焼き 1個","unit":"個","g":100.0,"step":"個","alias":"たいやき","method":"転記","kcal":217,"p":4.5,"f":1.1,"c":48.3},{"id":434,"cat":"間食・デザート","name":"みたらし団子 1本","unit":"本","g":60.0,"step":"本","alias":"だんご/みたらし","method":"転記","kcal":116,"p":1.9,"f":0.2,"c":26.9},{"id":435,"cat":"間食・デザート","name":"おはぎ 1個","unit":"個","g":80.0,"step":"個","alias":"おはぎ/ぼたもち","method":"積算","kcal":164,"p":3.2,"f":0.2,"c":38.4},{"id":436,"cat":"間食・デザート","name":"カステラ 1切れ","unit":"個","g":50.0,"step":"個","alias":"かすてら","method":"転記","kcal":156,"p":3.5,"f":2.5,"c":30.9},{"id":437,"cat":"間食・デザート","name":"ようかん 1切れ","unit":"個","g":50.0,"step":"個","alias":"ようかん","method":"転記","kcal":144,"p":1.8,"f":0.1,"c":35.0},{"id":438,"cat":"間食・デザート","name":"わらび餅 1人前","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"わらびもち","method":"積算","kcal":165,"p":3.0,"f":2.1,"c":34.1},{"id":439,"cat":"間食・デザート","name":"クッキー 1枚","unit":"枚","g":10.0,"step":"枚","alias":"くっきー/ビスケット","method":"転記","kcal":51,"p":0.6,"f":2.8,"c":6.3},{"id":440,"cat":"間食・デザート","name":"チョコレート(板チョコ) 1かけ","unit":"個","g":5.0,"step":"個","alias":"ちょこ/チョコ","method":"転記","kcal":28,"p":0.3,"f":1.7,"c":2.8},{"id":441,"cat":"間食・デザート","name":"ポテトチップス 1袋(60g)","unit":"個","g":60.0,"step":"個","alias":"ぽてち","method":"転記","kcal":325,"p":2.8,"f":21.1,"c":32.8},{"id":442,"cat":"間食・デザート","name":"ポテトチップス 小袋(28g)","unit":"個","g":28.0,"step":"個","alias":"ぽてちしょう","method":"転記","kcal":151,"p":1.3,"f":9.9,"c":15.3},{"id":443,"cat":"間食・デザート","name":"せんべい 1枚","unit":"枚","g":15.0,"step":"枚","alias":"せんべい","method":"転記","kcal":55,"p":1.1,"f":0.1,"c":12.6},{"id":444,"cat":"間食・デザート","name":"柿の種(小袋) 1袋","unit":"個","g":30.0,"step":"個","alias":"かきのたね","method":"市販平均","kcal":140,"p":3.5,"f":4.0,"c":21.0},{"id":445,"cat":"間食・デザート","name":"ポップコーン 1袋","unit":"個","g":50.0,"step":"個","alias":"ぽっぷこーん","method":"転記","kcal":236,"p":5.1,"f":11.4,"c":29.8},{"id":446,"cat":"間食・デザート","name":"グミ 1袋","unit":"個","g":50.0,"step":"個","alias":"ぐみ","method":"市販平均","kcal":170,"p":3.5,"f":0.0,"c":39.0},{"id":447,"cat":"間食・デザート","name":"ラムネ菓子 1本","unit":"個","g":29.0,"step":"個","alias":"らむね/ブドウ糖","method":"市販平均","kcal":108,"p":0.0,"f":0.0,"c":27.0},{"id":448,"cat":"間食・デザート","name":"カロリーメイト 1本","unit":"本","g":20.0,"step":"本","alias":"かろりーめいと","method":"市販平均","kcal":100,"p":2.0,"f":5.5,"c":10.5},{"id":449,"cat":"間食・デザート","name":"ドーナツ(オールドファッション) 1個","unit":"個","g":60.0,"step":"個","alias":"どーなつ","method":"転記","kcal":220,"p":4.3,"f":7.0,"c":36.1},{"id":450,"cat":"間食・デザート","name":"ワッフル 1個","unit":"個","g":60.0,"step":"個","alias":"わっふる","method":"転記","kcal":145,"p":4.4,"f":4.7,"c":22.9},{"id":451,"cat":"間食・デザート","name":"マカロン 1個","unit":"個","g":20.0,"step":"個","alias":"まかろん","method":"積算","kcal":77,"p":2.0,"f":3.9,"c":9.2},{"id":452,"cat":"間食・デザート","name":"みかん 1個","unit":"個","g":80.0,"step":"個","alias":"みかん","method":"転記","kcal":39,"p":0.6,"f":0.1,"c":9.6},{"id":453,"cat":"間食・デザート","name":"りんご 1/2個","unit":"個","g":125.0,"step":"個","alias":"りんご","method":"転記","kcal":70,"p":0.2,"f":0.4,"c":20.2},{"id":454,"cat":"間食・デザート","name":"キウイ 1個","unit":"個","g":85.0,"step":"個","alias":"きうい/キウイ","method":"転記","kcal":43,"p":0.8,"f":0.2,"c":11.4},{"id":455,"cat":"間食・デザート","name":"ぶどう(シャインマスカット等) 10粒","unit":"人前","g":100.0,"step":"人前(0.5刻み)","alias":"ぶどう/マスカット","method":"転記","kcal":69,"p":0.6,"f":0.2,"c":16.9},{"id":456,"cat":"間食・デザート","name":"いちご 5粒","unit":"人前","g":75.0,"step":"人前(0.5刻み)","alias":"いちご","method":"転記","kcal":23,"p":0.7,"f":0.1,"c":6.4},{"id":457,"cat":"間食・デザート","name":"梨 1/2個","unit":"個","g":130.0,"step":"個","alias":"なし","method":"転記","kcal":49,"p":0.4,"f":0.1,"c":14.7},{"id":458,"cat":"間食・デザート","name":"桃 1個","unit":"個","g":170.0,"step":"個","alias":"もも","method":"転記","kcal":65,"p":1.0,"f":0.2,"c":17.3},{"id":459,"cat":"間食・デザート","name":"柿 1個","unit":"個","g":150.0,"step":"個","alias":"かき(果物)","method":"転記","kcal":94,"p":0.6,"f":0.3,"c":23.9},{"id":460,"cat":"間食・デザート","name":"スイカ 1切れ","unit":"個","g":200.0,"step":"個","alias":"すいか","method":"転記","kcal":82,"p":1.2,"f":0.2,"c":19.0},{"id":461,"cat":"間食・デザート","name":"パイナップル 3切れ","unit":"人前","g":90.0,"step":"人前(0.5刻み)","alias":"ぱいなっぷる","method":"転記","kcal":49,"p":0.5,"f":0.1,"c":12.3},{"id":462,"cat":"間食・デザート","name":"ミックスフルーツ(カップ) 1個","unit":"個","g":130.0,"step":"個","alias":"ふるーつ","method":"市販平均","kcal":80,"p":0.5,"f":0.2,"c":20.0},{"id":463,"cat":"間食・デザート","name":"ドライフルーツ(小袋) 1袋","unit":"個","g":30.0,"step":"個","alias":"どらいふるーつ","method":"転記","kcal":97,"p":0.8,"f":0.1,"c":24.1},{"id":464,"cat":"飲料・酒","name":"水・お茶 0kcal","unit":"杯","g":200.0,"step":"杯","alias":"みず/おちゃ/緑茶","method":"転記","kcal":0,"p":0,"f":0,"c":0},{"id":465,"cat":"飲料・酒","name":"ブラックコーヒー 1杯","unit":"杯","g":150.0,"step":"杯","alias":"こーひー/珈琲","method":"転記","kcal":6,"p":0.3,"f":0.0,"c":1.1},{"id":466,"cat":"飲料・酒","name":"カフェラテ(ミルク入り) 1杯","unit":"杯","g":200.0,"step":"杯(0.5刻み)","alias":"かふぇらて/カフェオレ","method":"積算","kcal":54,"p":2.9,"f":3.0,"c":4.7},{"id":467,"cat":"飲料・酒","name":"カフェラテ(無糖・コンビニ) 1杯","unit":"杯","g":240.0,"step":"杯","alias":"むとうらて","method":"市販平均","kcal":90,"p":4.5,"f":5.0,"c":6.0},{"id":468,"cat":"飲料・酒","name":"紅茶(無糖) 1杯","unit":"杯","g":150.0,"step":"杯","alias":"こうちゃ","method":"転記","kcal":2,"p":0.1,"f":0.0,"c":0.1},{"id":469,"cat":"飲料・酒","name":"ミルクティー(加糖) 1杯","unit":"杯","g":200.0,"step":"杯(0.5刻み)","alias":"みるくてぃー","method":"積算","kcal":57,"p":1.5,"f":1.5,"c":10.0},{"id":470,"cat":"飲料・酒","name":"オレンジジュース コップ1杯","unit":"杯","g":200.0,"step":"杯(0.5刻み)","alias":"おれんじじゅーす","method":"転記","kcal":92,"p":1.4,"f":0.2,"c":21.4},{"id":471,"cat":"飲料・酒","name":"りんごジュース コップ1杯","unit":"杯","g":200.0,"step":"杯(0.5刻み)","alias":"りんごじゅーす","method":"転記","kcal":94,"p":0.2,"f":0.4,"c":22.8},{"id":472,"cat":"飲料・酒","name":"野菜ジュース 1本","unit":"本","g":200.0,"step":"本","alias":"やさいじゅーす","method":"市販平均","kcal":70,"p":1.5,"f":0.0,"c":16.0},{"id":473,"cat":"飲料・酒","name":"スポーツドリンク 1本(500ml)","unit":"本","g":500.0,"step":"本","alias":"すぽどり/ポカリ","method":"市販平均","kcal":125,"p":0.0,"f":0.0,"c":31.0},{"id":474,"cat":"飲料・酒","name":"コーラ 1本(500ml)","unit":"本","g":500.0,"step":"本","alias":"こーら","method":"転記","kcal":230,"p":0.5,"f":0.0,"c":57.0},{"id":475,"cat":"飲料・酒","name":"コーラ(ゼロ) 1本","unit":"本","g":500.0,"step":"本","alias":"ぜろこーら","method":"市販平均","kcal":0,"p":0,"f":0,"c":0},{"id":476,"cat":"飲料・酒","name":"サイダー 1本(500ml)","unit":"本","g":500.0,"step":"本","alias":"さいだー","method":"転記","kcal":205,"p":0.0,"f":0.0,"c":51.0},{"id":477,"cat":"飲料・酒","name":"エナジードリンク 1本","unit":"本","g":250.0,"step":"本","alias":"えなじー/レッドブル/モンスター","method":"市販平均","kcal":113,"p":0.0,"f":0.0,"c":28.0},{"id":478,"cat":"飲料・酒","name":"甘酒 1杯","unit":"杯","g":150.0,"step":"杯(0.5刻み)","alias":"あまざけ","method":"転記","kcal":114,"p":2.5,"f":0.1,"c":27.4},{"id":479,"cat":"飲料・酒","name":"ビール 中ジョッキ1杯","unit":"杯","g":435.0,"step":"杯(0.5刻み)","alias":"びーる/生ビール","method":"転記","kcal":170,"p":1.3,"f":0.0,"c":13.5},{"id":480,"cat":"飲料・酒","name":"ビール 缶(350ml)","unit":"本","g":350.0,"step":"本","alias":"かんびーる","method":"転記","kcal":136,"p":1.1,"f":0.0,"c":10.8},{"id":481,"cat":"飲料・酒","name":"発泡酒 缶(350ml)","unit":"本","g":350.0,"step":"本","alias":"はっぽうしゅ","method":"転記","kcal":154,"p":0.3,"f":0.0,"c":12.6},{"id":482,"cat":"飲料・酒","name":"ノンアルコールビール 1本","unit":"本","g":350.0,"step":"本","alias":"のんある","method":"市販平均","kcal":25,"p":0.1,"f":0.0,"c":5.6},{"id":483,"cat":"飲料・酒","name":"レモンサワー 1杯","unit":"杯","g":350.0,"step":"杯(0.5刻み)","alias":"れもんさわー/チューハイ","method":"積算","kcal":109,"p":0.0,"f":0.0,"c":6.0},{"id":484,"cat":"飲料・酒","name":"ストロング系チューハイ 缶(350ml)","unit":"本","g":350.0,"step":"本","alias":"すとろんぐ","method":"市販平均","kcal":220,"p":0.0,"f":0.0,"c":0.7},{"id":485,"cat":"飲料・酒","name":"日本酒 1合","unit":"杯","g":180.0,"step":"杯(0.5刻み)","alias":"にほんしゅ/清酒","method":"転記","kcal":193,"p":0.7,"f":0.0,"c":8.8},{"id":486,"cat":"飲料・酒","name":"焼酎(ロック) 1杯","unit":"杯","g":60.0,"step":"杯(0.5刻み)","alias":"しょうちゅう","method":"転記","kcal":86,"p":0.0,"f":0.0,"c":0.0},{"id":487,"cat":"飲料・酒","name":"ウイスキー(シングル) 1杯","unit":"杯","g":30.0,"step":"杯(0.5刻み)","alias":"ういすきー","method":"転記","kcal":70,"p":0.0,"f":0.0,"c":0.0},{"id":488,"cat":"飲料・酒","name":"ワイン(赤) グラス1杯","unit":"杯","g":120.0,"step":"杯(0.5刻み)","alias":"あかわいん/ワイン","method":"転記","kcal":82,"p":0.2,"f":0.0,"c":1.8},{"id":489,"cat":"飲料・酒","name":"ワイン(白) グラス1杯","unit":"杯","g":120.0,"step":"杯(0.5刻み)","alias":"しろわいん","method":"転記","kcal":90,"p":0.1,"f":0.0,"c":2.4},{"id":490,"cat":"飲料・酒","name":"梅酒(ロック) 1杯","unit":"杯","g":60.0,"step":"杯(0.5刻み)","alias":"うめしゅ","method":"転記","kcal":93,"p":0.1,"f":0.0,"c":12.4},{"id":491,"cat":"調味・トッピング","name":"マヨネーズ 大さじ1","unit":"杯","g":12.0,"step":"杯","alias":"まよねーず/マヨ","method":"転記","kcal":80,"p":0.2,"f":9.1,"c":0.4},{"id":492,"cat":"調味・トッピング","name":"ケチャップ 大さじ1","unit":"杯","g":15.0,"step":"杯","alias":"けちゃっぷ","method":"転記","kcal":17,"p":0.2,"f":0.0,"c":4.1},{"id":493,"cat":"調味・トッピング","name":"和風ドレッシング 大さじ1","unit":"杯","g":15.0,"step":"杯","alias":"どれっしんぐ","method":"転記","kcal":27,"p":0.3,"f":2.2,"c":1.4},{"id":494,"cat":"調味・トッピング","name":"ごまドレッシング 大さじ1","unit":"杯","g":15.0,"step":"杯","alias":"ごまどれ","method":"転記","kcal":60,"p":0.4,"f":5.7,"c":2.2},{"id":495,"cat":"調味・トッピング","name":"ノンオイルドレッシング 大さじ1","unit":"杯","g":15.0,"step":"杯","alias":"のんおいる","method":"市販平均","kcal":12,"p":0.5,"f":0.0,"c":2.5},{"id":496,"cat":"調味・トッピング","name":"焼肉のタレ 大さじ1","unit":"杯","g":18.0,"step":"杯","alias":"やきにくのたれ","method":"転記","kcal":30,"p":0.8,"f":0.4,"c":5.8},{"id":497,"cat":"調味・トッピング","name":"ポン酢 大さじ1","unit":"杯","g":18.0,"step":"杯","alias":"ぽんず","method":"転記","kcal":9,"p":0.6,"f":0.0,"c":1.3},{"id":498,"cat":"調味・トッピング","name":"めんつゆ(ストレート) 100ml","unit":"g","g":100.0,"step":"g(10刻み)","alias":"めんつゆ","method":"転記","kcal":44,"p":2.2,"f":0.0,"c":8.7},{"id":499,"cat":"調味・トッピング","name":"ソース(中濃) 大さじ1","unit":"杯","g":18.0,"step":"杯","alias":"そーす","method":"転記","kcal":23,"p":0.1,"f":0.0,"c":5.6},{"id":500,"cat":"調味・トッピング","name":"バター 10g","unit":"g","g":10.0,"step":"g(10刻み)※5刻み要検討","alias":"ばたー","method":"転記","kcal":70,"p":0.1,"f":8.1,"c":0.0},{"id":501,"cat":"調味・トッピング","name":"ジャム(いちご) 大さじ1","unit":"杯","g":20.0,"step":"杯","alias":"じゃむ","method":"転記","kcal":50,"p":0.1,"f":0.0,"c":12.7},{"id":502,"cat":"調味・トッピング","name":"ピーナッツバター 大さじ1","unit":"杯","g":17.0,"step":"杯","alias":"ぴーなっつばたー","method":"転記","kcal":102,"p":3.5,"f":8.6,"c":4.2},{"id":503,"cat":"調味・トッピング","name":"粉チーズ 大さじ1","unit":"杯","g":6.0,"step":"杯","alias":"こなちーず/パルメザン","method":"転記","kcal":27,"p":2.6,"f":1.8,"c":0.1},{"id":504,"cat":"調味・トッピング","name":"すりごま 大さじ1","unit":"杯","g":9.0,"step":"杯","alias":"ごま","method":"転記","kcal":54,"p":1.8,"f":4.9,"c":1.7},{"id":505,"cat":"調味・トッピング","name":"天かす 大さじ2","unit":"杯","g":10.0,"step":"杯","alias":"てんかす/揚げ玉","method":"積算","kcal":67,"p":0.4,"f":6.1,"c":3.0},{"id":506,"cat":"主食","name":"ナン 1枚","unit":"枚","g":80.0,"step":"枚","alias":"なん","method":"転記","kcal":206,"p":8.2,"f":2.7,"c":38.1},{"id":507,"cat":"主食","name":"卵かけごはん 1杯","unit":"杯","g":210.0,"step":"杯(0.5刻み)","alias":"たまごかけ/TKG","method":"積算","kcal":316,"p":10.8,"f":6.1,"c":56.3},{"id":508,"cat":"主食","name":"お茶漬け 1杯","unit":"杯","g":230.0,"step":"杯(0.5刻み)","alias":"おちゃづけ","method":"積算","kcal":251,"p":5.1,"f":0.7,"c":58.0},{"id":509,"cat":"主食","name":"ライ麦パン 1枚","unit":"枚","g":60.0,"step":"枚","alias":"らいむぎぱん","method":"転記","kcal":151,"p":5.0,"f":1.3,"c":31.6},{"id":510,"cat":"主食","name":"ベースブレッド 1袋","unit":"個","g":70.0,"step":"個","alias":"べーすぶれっど/BASE","method":"市販平均","kcal":205,"p":13.5,"f":5.4,"c":23.9},{"id":511,"cat":"丼・ワンプレート","name":"天津飯 1杯","unit":"杯","g":450.0,"step":"杯(0.5刻み)","alias":"てんしんはん","method":"積算","kcal":645,"p":21.6,"f":19.2,"c":99.6},{"id":512,"cat":"肉料理","name":"チキンカツ 1枚","unit":"枚","g":130.0,"step":"枚(0.5刻み)","alias":"ちきんかつ","method":"積算","kcal":295,"p":23.9,"f":18.0,"c":11.4},{"id":513,"cat":"肉料理","name":"串カツ(豚) 1本","unit":"本","g":40.0,"step":"本","alias":"くしかつ","method":"積算","kcal":116,"p":5.2,"f":8.5,"c":5.4},{"id":514,"cat":"肉料理","name":"小籠包 1個","unit":"個","g":30.0,"step":"個","alias":"しょうろんぽう","method":"積算","kcal":67,"p":3.8,"f":3.4,"c":6.0},{"id":515,"cat":"肉料理","name":"焼き鳥(つくね) 1本","unit":"本","g":45.0,"step":"本","alias":"つくね","method":"積算","kcal":76,"p":6.4,"f":4.2,"c":3.7},{"id":516,"cat":"肉料理","name":"焼き鳥(砂肝) 1本","unit":"本","g":35.0,"step":"本","alias":"すなぎも","method":"積算","kcal":30,"p":6.4,"f":0.6,"c":0.0},{"id":517,"cat":"肉料理","name":"八宝菜 1人前","unit":"人前","g":220.0,"step":"人前(0.5刻み)","alias":"はっぽうさい","method":"転記","kcal":141,"p":12.8,"f":7.0,"c":8.4},{"id":518,"cat":"肉料理","name":"麻婆春雨 1人前","unit":"人前","g":180.0,"step":"人前(0.5刻み)","alias":"まーぼーはるさめ","method":"積算","kcal":244,"p":8.3,"f":11.3,"c":29.3},{"id":519,"cat":"麺類","name":"皿うどん 1人前","unit":"人前","g":350.0,"step":"人前(0.5刻み)","alias":"さらうどん","method":"積算","kcal":459,"p":16.8,"f":23.0,"c":53.1},{"id":520,"cat":"副菜・野菜","name":"春雨サラダ 小鉢1","unit":"人前","g":70.0,"step":"人前(0.5刻み)","alias":"はるさめさらだ","method":"積算","kcal":125,"p":2.9,"f":5.0,"c":17.0},{"id":521,"cat":"副菜・野菜","name":"がんもどきの煮物 1個","unit":"個","g":80.0,"step":"個","alias":"がんも","method":"転記","kcal":178,"p":12.2,"f":14.2,"c":1.3},{"id":522,"cat":"魚料理","name":"明太子 1腹","unit":"個","g":30.0,"step":"個","alias":"めんたいこ/たらこ","method":"転記","kcal":36,"p":6.3,"f":1.0,"c":0.9},{"id":523,"cat":"間食・デザート","name":"パフェ(いちご・チョコ) 1個","unit":"個","g":220.0,"step":"個","alias":"ぱふぇ","method":"積算","kcal":438,"p":7.0,"f":23.9,"c":52.5},{"id":524,"cat":"間食・デザート","name":"クレープ(チョコバナナ) 1個","unit":"個","g":150.0,"step":"個","alias":"くれーぷ","method":"積算","kcal":363,"p":6.4,"f":19.4,"c":43.1},{"id":525,"cat":"飲料・酒","name":"タピオカミルクティー 1杯","unit":"杯","g":350.0,"step":"杯","alias":"たぴおか","method":"市販平均","kcal":350,"p":4.0,"f":6.0,"c":70.0},{"id":526,"cat":"飲料・酒","name":"グリーンスムージー 1杯","unit":"杯","g":250.0,"step":"杯","alias":"すむーじー","method":"市販平均","kcal":100,"p":1.0,"f":0.0,"c":24.0},{"id":527,"cat":"飲料・酒","name":"青汁 1杯","unit":"杯","g":150.0,"step":"杯","alias":"あおじる","method":"市販平均","kcal":12,"p":0.5,"f":0.0,"c":2.5},{"id":528,"cat":"素材(追加)","name":"卵白 1個分","unit":"個","g":35.0,"step":"個","alias":"らんぱく","method":"転記","kcal":15,"p":3.5,"f":0.0,"c":0.2},{"id":529,"cat":"素材(追加)","name":"鶏もも(皮なし) 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"とりもも","method":"転記","kcal":113,"p":19.0,"f":5.0,"c":0.0},{"id":530,"cat":"素材(追加)","name":"鶏もも(皮つき) 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"とりももかわつき","method":"転記","kcal":190,"p":16.6,"f":14.2,"c":0.0},{"id":531,"cat":"素材(追加)","name":"鶏ひき肉 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"とりひき/鶏ミンチ","method":"転記","kcal":171,"p":17.5,"f":12.0,"c":0.0},{"id":532,"cat":"素材(追加)","name":"豚ひき肉 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"ぶたひき","method":"転記","kcal":209,"p":17.7,"f":17.2,"c":0.1},{"id":533,"cat":"素材(追加)","name":"牛ひき肉 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"ぎゅうひき","method":"転記","kcal":251,"p":17.1,"f":21.1,"c":0.3},{"id":534,"cat":"素材(追加)","name":"合いびき肉 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"あいびき","method":"転記","kcal":230,"p":17.4,"f":19.2,"c":0.2},{"id":535,"cat":"素材(追加)","name":"豚バラ 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"ぶたばら","method":"転記","kcal":366,"p":14.4,"f":35.4,"c":0.1},{"id":536,"cat":"素材(追加)","name":"豚ロース 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"ぶたろーす","method":"転記","kcal":248,"p":19.3,"f":19.2,"c":0.2},{"id":537,"cat":"素材(追加)","name":"牛肩ロース 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"ぎゅうかたろーす","method":"転記","kcal":295,"p":16.2,"f":26.4,"c":0.2},{"id":538,"cat":"素材(追加)","name":"きゅうり 1本","unit":"本","g":100.0,"step":"本","alias":"きゅうり/胡瓜","method":"転記","kcal":13,"p":1.0,"f":0.1,"c":3.0},{"id":539,"cat":"素材(追加)","name":"レタス 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"れたす","method":"転記","kcal":11,"p":0.6,"f":0.1,"c":2.8},{"id":540,"cat":"素材(追加)","name":"大根 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"だいこん","method":"転記","kcal":15,"p":0.4,"f":0.1,"c":4.1},{"id":541,"cat":"素材(追加)","name":"白菜 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"はくさい","method":"転記","kcal":13,"p":0.8,"f":0.1,"c":3.2},{"id":542,"cat":"素材(追加)","name":"もやし 1袋","unit":"個","g":200.0,"step":"個","alias":"もやし","method":"転記","kcal":30,"p":3.6,"f":0.2,"c":4.8},{"id":543,"cat":"素材(追加)","name":"長ねぎ 1本","unit":"本","g":60.0,"step":"本","alias":"ねぎ","method":"転記","kcal":21,"p":0.8,"f":0.1,"c":5.0},{"id":544,"cat":"素材(追加)","name":"かぼちゃ 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"かぼちゃなま","method":"転記","kcal":78,"p":1.9,"f":0.3,"c":20.6},{"id":545,"cat":"素材(追加)","name":"れんこん 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"れんこん/蓮根","method":"転記","kcal":66,"p":1.9,"f":0.1,"c":15.5},{"id":546,"cat":"素材(追加)","name":"長芋 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"ながいも/山芋","method":"転記","kcal":64,"p":2.2,"f":0.3,"c":13.9},{"id":547,"cat":"のりレシピ","name":"高たんぱくチーズケーキ 1切れ","unit":"個","g":80.0,"step":"個","alias":"ちーずけーき/のりちーず","method":"積算(のりレシピ)","kcal":110,"p":12.0,"f":4.0,"c":6.0},{"id":548,"cat":"のりレシピ","name":"ダイエットティラミス 1人前","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"てぃらみす","method":"積算(のりレシピ)","kcal":130,"p":15.0,"f":3.0,"c":10.0},{"id":549,"cat":"のりレシピ","name":"プロテインチョコバナナパンケーキ 1人前","unit":"人前","g":200.0,"step":"人前(0.5刻み)","alias":"ぱんけーき/ぷろてぱん","method":"積算(のりレシピ)","kcal":464,"p":38.0,"f":11.0,"c":52.0},{"id":550,"cat":"のりレシピ","name":"バナナチョコケーキ 1切れ","unit":"個","g":80.0,"step":"個","alias":"ばななちょこ","method":"積算(のりレシピ)","kcal":95,"p":8.3,"f":2.6,"c":9.5},{"id":551,"cat":"のりレシピ","name":"プロテインチョコアイスケーキ 1人前","unit":"人前","g":100.0,"step":"人前(0.5刻み)","alias":"あいすけーき","method":"積算(のりレシピ)","kcal":120,"p":10.5,"f":3.3,"c":12.0},{"id":552,"cat":"のりレシピ","name":"コーヒーゼリー(糖質ゼロ) 1個","unit":"個","g":120.0,"step":"個","alias":"こーひーぜりー","method":"積算(のりレシピ)","kcal":15,"p":3.0,"f":0.0,"c":0.5},{"id":553,"cat":"のりレシピ","name":"炊飯器かぼちゃケーキ 1切れ","unit":"個","g":80.0,"step":"個","alias":"かぼちゃけーき","method":"積算(のりレシピ)","kcal":110,"p":5.0,"f":2.5,"c":18.0},{"id":554,"cat":"のりレシピ","name":"腸活豆乳ヨーグルトボウル 1杯","unit":"杯","g":180.0,"step":"杯(0.5刻み)","alias":"とうにゅうよーぐると","method":"積算(のりレシピ)","kcal":160,"p":8.0,"f":5.0,"c":22.0},{"id":555,"cat":"のりレシピ","name":"焼き餅ココア 1人前","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"やきもちここあ","method":"積算(のりレシピ)","kcal":190,"p":4.0,"f":1.5,"c":40.0},{"id":556,"cat":"のりレシピ","name":"オートミールクッキー 3枚","unit":"人前","g":45.0,"step":"人前(0.5刻み)","alias":"おーとみーるくっきー","method":"積算(のりレシピ)","kcal":150,"p":6.0,"f":5.0,"c":20.0},{"id":557,"cat":"のりレシピ","name":"ヘルシーチョコスプレッド 大さじ1","unit":"杯","g":15.0,"step":"杯","alias":"ちょこすぷれっど","method":"積算(のりレシピ)","kcal":20,"p":1.8,"f":0.6,"c":2.0},{"id":558,"cat":"のりレシピ","name":"プロテインゼリー 1個","unit":"個","g":150.0,"step":"個","alias":"ぷろていんぜりー","method":"積算(のりレシピ)","kcal":70,"p":13.0,"f":0.5,"c":2.0},{"id":559,"cat":"のりレシピ","name":"きなこ餅(食物繊維) 1人前","unit":"人前","g":100.0,"step":"人前(0.5刻み)","alias":"きなこもち","method":"積算(のりレシピ)","kcal":143,"p":5.0,"f":3.0,"c":19.0},{"id":560,"cat":"のりレシピ","name":"揚げないフライドポテト 1人前","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"あげないぽてと","method":"積算(のりレシピ)","kcal":100,"p":2.2,"f":3.1,"c":16.0},{"id":561,"cat":"のりレシピ","name":"鶏むねと白滝の担々麺 1人前","unit":"人前","g":400.0,"step":"人前(0.5刻み)","alias":"たんたんめん/しらたきたんたん","method":"積算(のりレシピ)","kcal":350,"p":35.0,"f":15.0,"c":18.0},{"id":562,"cat":"のりレシピ","name":"野菜カレー蕎麦 1人前","unit":"人前","g":400.0,"step":"人前(0.5刻み)","alias":"かれーそば","method":"積算(のりレシピ)","kcal":420,"p":18.0,"f":6.0,"c":75.0},{"id":563,"cat":"のりレシピ","name":"のり流野菜カレー 1人前","unit":"人前","g":300.0,"step":"人前(0.5刻み)","alias":"やさいかれー/低脂質カレー","method":"積算(のりレシピ)","kcal":280,"p":25.0,"f":8.0,"c":28.0},{"id":564,"cat":"のりレシピ","name":"オートミールピザ 1枚","unit":"枚","g":150.0,"step":"枚(0.5刻み)","alias":"おーとみーるぴざ","method":"積算(のりレシピ)","kcal":280,"p":16.0,"f":10.0,"c":30.0},{"id":565,"cat":"のりレシピ","name":"豆腐お好み焼き 1枚","unit":"枚","g":250.0,"step":"枚(0.5刻み)","alias":"とうふおこのみ","method":"積算(のりレシピ)","kcal":300,"p":20.0,"f":12.0,"c":26.0},{"id":566,"cat":"のりレシピ","name":"5割麦ごはん 茶碗1杯","unit":"杯","g":150.0,"step":"杯(0.5刻み)","alias":"むぎごはん","method":"積算(のりレシピ)","kcal":204,"p":4.5,"f":0.8,"c":42.7},{"id":567,"cat":"のりレシピ","name":"玄米キムチ焼きめし 1人前","unit":"人前","g":300.0,"step":"人前(0.5刻み)","alias":"きむちちゃーはん","method":"積算(のりレシピ)","kcal":420,"p":14.0,"f":10.0,"c":65.0},{"id":568,"cat":"のりレシピ","name":"栄養満点炊き込みご飯 茶碗1杯","unit":"杯","g":180.0,"step":"杯(0.5刻み)","alias":"たきこみごはん","method":"積算(のりレシピ)","kcal":250,"p":8.0,"f":2.0,"c":50.0},{"id":569,"cat":"のりレシピ","name":"牛モモチャーハン 1人前","unit":"人前","g":300.0,"step":"人前(0.5刻み)","alias":"ぎゅうももちゃーはん","method":"積算(のりレシピ)","kcal":450,"p":28.0,"f":12.0,"c":55.0},{"id":570,"cat":"のりレシピ","name":"オートミール豆乳卵雑炊 1杯","unit":"杯","g":300.0,"step":"杯(0.5刻み)","alias":"おーつぞうすい","method":"積算(のりレシピ)","kcal":260,"p":17.0,"f":9.0,"c":28.0},{"id":571,"cat":"のりレシピ","name":"サバ水煮缶の焼うどん 1人前","unit":"人前","g":350.0,"step":"人前(0.5刻み)","alias":"さばやきうどん","method":"積算(のりレシピ)","kcal":450,"p":28.0,"f":14.0,"c":50.0},{"id":572,"cat":"のりレシピ","name":"卵のあんかけ野菜うどん 1人前","unit":"人前","g":450.0,"step":"人前(0.5刻み)","alias":"あんかけうどん","method":"積算(のりレシピ)","kcal":380,"p":18.0,"f":8.0,"c":58.0},{"id":573,"cat":"のりレシピ","name":"麻薬鶏むねチャーシュー 1人前","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"ちゃーしゅー/まやくちきん","method":"積算(のりレシピ)","kcal":144,"p":27.6,"f":3.6,"c":0.0},{"id":574,"cat":"のりレシピ","name":"豚ひれチャーシュー 1人前","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"ぶたひれちゃーしゅー","method":"積算(のりレシピ)","kcal":144,"p":26.0,"f":4.0,"c":1.0},{"id":575,"cat":"のりレシピ","name":"鶏むね麻婆豆腐 1人前","unit":"人前","g":220.0,"step":"人前(0.5刻み)","alias":"むねまーぼー","method":"積算(のりレシピ)","kcal":250,"p":30.0,"f":8.0,"c":10.0},{"id":576,"cat":"のりレシピ","name":"鶏むねの焼きつくね 1人前","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"やきつくね","method":"積算(のりレシピ)","kcal":160,"p":22.0,"f":5.0,"c":6.0},{"id":577,"cat":"のりレシピ","name":"マグロアボカド 1人前","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"まぐろあぼかど","method":"積算(のりレシピ)","kcal":422,"p":41.0,"f":28.0,"c":4.0},{"id":578,"cat":"のりレシピ","name":"のり流卵焼き 2切れ","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"のりたまごやき","method":"積算(のりレシピ)","kcal":234,"p":20.0,"f":17.0,"c":0.0},{"id":579,"cat":"のりレシピ","name":"キクラゲときゅうりの中華風リンゴ酢和え 1人前","unit":"人前","g":100.0,"step":"人前(0.5刻み)","alias":"きくらげきゅうり","method":"積算(のりレシピ)","kcal":40,"p":1.5,"f":2.0,"c":4.0},{"id":580,"cat":"のりレシピ","name":"鶏むねとキクラゲのリンゴ酢蒸し 1人前","unit":"人前","g":180.0,"step":"人前(0.5刻み)","alias":"きくらげむし","method":"積算(のりレシピ)","kcal":180,"p":28.0,"f":3.0,"c":8.0},{"id":581,"cat":"のりレシピ","name":"キクラゲと豚もものスタミナ炒め 1人前","unit":"人前","g":180.0,"step":"人前(0.5刻み)","alias":"きくらげすたみな","method":"積算(のりレシピ)","kcal":220,"p":24.0,"f":10.0,"c":8.0},{"id":582,"cat":"のりレシピ","name":"キクラゲと豚もも・キムチの韓国風炒め 1人前","unit":"人前","g":180.0,"step":"人前(0.5刻み)","alias":"きくらげきむち","method":"積算(のりレシピ)","kcal":230,"p":23.0,"f":11.0,"c":9.0},{"id":583,"cat":"のりレシピ","name":"キクラゲと鶏むね・パプリカの甘酢炒め 1人前","unit":"人前","g":180.0,"step":"人前(0.5刻み)","alias":"きくらげあまず","method":"積算(のりレシピ)","kcal":200,"p":26.0,"f":4.0,"c":14.0},{"id":584,"cat":"のりレシピ","name":"鶏むねとブロッコリーの塩炒め 1人前","unit":"人前","g":180.0,"step":"人前(0.5刻み)","alias":"むねぶろっこりー","method":"積算(のりレシピ)","kcal":210,"p":30.0,"f":6.0,"c":6.0},{"id":585,"cat":"のりレシピ","name":"大豆ミートと卵白のオムレツ風 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"そいおむれつ","method":"積算(のりレシピ)","kcal":140,"p":20.0,"f":4.0,"c":6.0},{"id":586,"cat":"のりレシピ","name":"タラの蒸し焼きポン酢おろし 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"たらぽんず","method":"積算(のりレシピ)","kcal":100,"p":16.0,"f":1.0,"c":6.0},{"id":587,"cat":"のりレシピ","name":"ささみと枝豆のねぎ塩レンジ蒸し 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"ささみねぎしお","method":"積算(のりレシピ)","kcal":160,"p":25.0,"f":4.0,"c":5.0},{"id":588,"cat":"のりレシピ","name":"そば納豆チキンサラダ 1人前","unit":"人前","g":300.0,"step":"人前(0.5刻み)","alias":"そばさらだ","method":"積算(のりレシピ)","kcal":380,"p":30.0,"f":8.0,"c":48.0},{"id":589,"cat":"のりレシピ","name":"ライ麦パン×オイコス×ツナ 1人前","unit":"人前","g":180.0,"step":"人前(0.5刻み)","alias":"らいむぎおいこす","method":"積算(のりレシピ)","kcal":290,"p":28.0,"f":5.0,"c":32.0},{"id":590,"cat":"のりレシピ","name":"ダイエットスープ 1杯","unit":"杯","g":300.0,"step":"杯(0.5刻み)","alias":"だいえっとすーぷ","method":"積算(のりレシピ)","kcal":120,"p":10.0,"f":3.0,"c":14.0},{"id":591,"cat":"のりレシピ","name":"1日分の野菜味噌汁 1杯","unit":"杯","g":300.0,"step":"杯(0.5刻み)","alias":"やさいみそしる","method":"積算(のりレシピ)","kcal":275,"p":25.0,"f":4.0,"c":39.0},{"id":592,"cat":"のりレシピ","name":"キクラゲと卵のリンゴ酢中華スープ 1杯","unit":"杯","g":250.0,"step":"杯(0.5刻み)","alias":"きくらげすーぷ","method":"積算(のりレシピ)","kcal":80,"p":6.0,"f":4.5,"c":4.0},{"id":593,"cat":"のりレシピ","name":"サバ缶キムチ鍋 1人前","unit":"人前","g":400.0,"step":"人前(0.5刻み)","alias":"さばきむちなべ","method":"積算(のりレシピ)","kcal":350,"p":30.0,"f":18.0,"c":12.0},{"id":594,"cat":"のりレシピ","name":"鮭ときのこの味噌鍋 1人前","unit":"人前","g":400.0,"step":"人前(0.5刻み)","alias":"さけみそなべ","method":"積算(のりレシピ)","kcal":320,"p":32.0,"f":12.0,"c":16.0},{"id":595,"cat":"のりレシピ","name":"豆乳鍋 1人前","unit":"人前","g":400.0,"step":"人前(0.5刻み)","alias":"とうにゅうなべ","method":"積算(のりレシピ)","kcal":330,"p":28.0,"f":16.0,"c":18.0},{"id":596,"cat":"のりレシピ","name":"のり流味噌鍋 1人前","unit":"人前","g":400.0,"step":"人前(0.5刻み)","alias":"みそなべ","method":"積算(のりレシピ)","kcal":300,"p":28.0,"f":12.0,"c":16.0},{"id":597,"cat":"のりレシピ","name":"かぼちゃと鶏モモ煮 1人前","unit":"人前","g":250.0,"step":"人前(0.5刻み)","alias":"かぼちゃとりもも","method":"積算(のりレシピ)","kcal":320,"p":22.0,"f":12.0,"c":28.0},{"id":598,"cat":"のりレシピ","name":"レモン炭酸水 1杯","unit":"杯","g":200.0,"step":"杯","alias":"れもんたんさん","method":"積算(のりレシピ)","kcal":5,"p":0.0,"f":0.0,"c":1.0},{"id":599,"cat":"のりレシピ","name":"イヌリン水 1杯","unit":"杯","g":200.0,"step":"杯","alias":"いぬりん","method":"積算(のりレシピ)","kcal":10,"p":0.0,"f":0.0,"c":5.0},{"id":600,"cat":"のりレシピ","name":"リンゴ酢炭酸水 1杯","unit":"杯","g":200.0,"step":"杯","alias":"りんごすたんさん","method":"積算(のりレシピ)","kcal":10,"p":0.0,"f":0.0,"c":2.0},{"id":601,"cat":"のりレシピ","name":"ブラックコーヒー+MCTオイル 1杯","unit":"杯","g":150.0,"step":"杯","alias":"MCT/えむしーてぃー","method":"積算(のりレシピ)","kcal":95,"p":0.2,"f":10.0,"c":0.7},{"id":602,"cat":"のりレシピ","name":"梅干し炭酸水 1杯","unit":"杯","g":200.0,"step":"杯","alias":"うめたんさん","method":"積算(のりレシピ)","kcal":5,"p":0.1,"f":0.0,"c":1.0},{"id":603,"cat":"ダイエット定番","name":"オートミール米化 1食","unit":"個","g":105.0,"step":"個(0.5刻み)","alias":"べいか/おこめか","method":"積算","kcal":105,"p":4.1,"f":1.7,"c":20.7},{"id":604,"cat":"ダイエット定番","name":"オーバーナイトオーツ 1杯","unit":"杯","g":180.0,"step":"杯(0.5刻み)","alias":"おーばーないと","method":"積算","kcal":244,"p":9.9,"f":7.0,"c":40.5},{"id":605,"cat":"ダイエット定番","name":"オートミール蒸しパン 1個","unit":"個","g":120.0,"step":"個","alias":"むしぱん","method":"積算","kcal":230,"p":11.6,"f":8.3,"c":30.1},{"id":606,"cat":"ダイエット定番","name":"プロテインオートミール 1杯","unit":"杯","g":200.0,"step":"杯(0.5刻み)","alias":"ぷろておーつ","method":"積算","kcal":317,"p":28.0,"f":8.5,"c":36.4},{"id":607,"cat":"ダイエット定番","name":"おから蒸しパン 1個","unit":"個","g":120.0,"step":"個","alias":"おからむしぱん","method":"積算","kcal":205,"p":12.5,"f":9.7,"c":22.3},{"id":608,"cat":"ダイエット定番","name":"おからパウダー 大さじ2","unit":"杯","g":12.0,"step":"杯","alias":"おからぱうだー","method":"転記","kcal":40,"p":2.8,"f":1.6,"c":6.3},{"id":609,"cat":"ダイエット定番","name":"鶏ハム 1人前","unit":"人前","g":100.0,"step":"人前(0.5刻み)","alias":"とりはむ/自家製サラダチキン","method":"積算","kcal":113,"p":23.3,"f":1.9,"c":2.1},{"id":610,"cat":"ダイエット定番","name":"鶏むねそぼろ 1人前","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"むねそぼろ","method":"積算","kcal":136,"p":12.6,"f":8.4,"c":3.4},{"id":611,"cat":"ダイエット定番","name":"沼 1食","unit":"人前","g":400.0,"step":"人前(0.5刻み)","alias":"ぬま","method":"積算","kcal":449,"p":30.1,"f":3.1,"c":81.8},{"id":612,"cat":"ダイエット定番","name":"マグマ 1食","unit":"人前","g":400.0,"step":"人前(0.5刻み)","alias":"まぐま","method":"積算","kcal":454,"p":29.7,"f":3.1,"c":82.2},{"id":613,"cat":"ダイエット定番","name":"鶏むね+ブロッコリー+玄米弁当 1食","unit":"人前","g":350.0,"step":"人前(0.5刻み)","alias":"きんとれべんとう/ミールプレップ","method":"積算","kcal":390,"p":38.3,"f":4.4,"c":58.2},{"id":614,"cat":"ダイエット定番","name":"脂肪燃焼スープ 1杯","unit":"杯","g":300.0,"step":"杯(0.5刻み)","alias":"しぼうねんしょう/デトックススープ","method":"積算","kcal":64,"p":3.1,"f":0.4,"c":14.3},{"id":615,"cat":"ダイエット定番","name":"糖質0麺 1袋","unit":"個","g":180.0,"step":"個","alias":"とうしつぜろめん","method":"市販平均","kcal":15,"p":1.0,"f":0.2,"c":6.0},{"id":616,"cat":"ダイエット定番","name":"こんにゃく麺 1袋","unit":"個","g":150.0,"step":"個","alias":"こんにゃくめん","method":"市販平均","kcal":10,"p":0.1,"f":0.0,"c":4.0},{"id":617,"cat":"ダイエット定番","name":"豆腐そうめん 1パック","unit":"個","g":150.0,"step":"個","alias":"とうふそうめん","method":"市販平均","kcal":94,"p":4.9,"f":2.5,"c":14.0},{"id":618,"cat":"ダイエット定番","name":"カリフラワーライス 1食","unit":"個","g":150.0,"step":"個","alias":"かりふらわーらいす","method":"市販平均","kcal":40,"p":2.4,"f":0.2,"c":7.5},{"id":619,"cat":"ダイエット定番","name":"ブランパン 1個","unit":"個","g":45.0,"step":"個","alias":"ぶらんぱん","method":"市販平均","kcal":65,"p":6.3,"f":2.7,"c":8.6},{"id":620,"cat":"ダイエット定番","name":"低糖質パン 1個","unit":"個","g":50.0,"step":"個","alias":"ていとうしつぱん/ロカボパン","method":"市販平均","kcal":110,"p":8.0,"f":4.5,"c":13.0},{"id":621,"cat":"ダイエット定番","name":"全粒粉パスタ(ゆで) 1人前","unit":"人前","g":220.0,"step":"人前(0.5刻み)","alias":"ぜんりゅうふんぱすた","method":"転記","kcal":330,"p":12.8,"f":2.0,"c":70.8},{"id":622,"cat":"ダイエット定番","name":"パワーサラダ 1皿","unit":"人前","g":300.0,"step":"人前(0.5刻み)","alias":"ぱわーさらだ","method":"積算","kcal":255,"p":24.1,"f":15.8,"c":10.7},{"id":623,"cat":"ダイエット定番","name":"サラダボウル(玄米入り) 1皿","unit":"人前","g":350.0,"step":"人前(0.5刻み)","alias":"さらだぼうる","method":"積算","kcal":324,"p":18.7,"f":9.7,"c":46.3},{"id":624,"cat":"ダイエット定番","name":"豆腐サラダ 1皿","unit":"人前","g":200.0,"step":"人前(0.5刻み)","alias":"とうふさらだ","method":"積算","kcal":117,"p":8.6,"f":7.2,"c":6.2},{"id":625,"cat":"ダイエット定番","name":"温野菜(蒸し野菜) 1皿","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"おんやさい/むしやさい","method":"積算","kcal":68,"p":4.6,"f":0.5,"c":15.7},{"id":626,"cat":"ダイエット定番","name":"納豆キムチ豆腐 1人前","unit":"人前","g":200.0,"step":"人前(0.5刻み)","alias":"なっとうきむち","method":"積算","kcal":158,"p":14.5,"f":8.7,"c":9.5},{"id":627,"cat":"ダイエット定番","name":"塩昆布キャベツ 小鉢1","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"しおこんぶきゃべつ","method":"積算","kcal":52,"p":1.7,"f":3.1,"c":5.5},{"id":628,"cat":"ダイエット定番","name":"酢キャベツ 小鉢1","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"すきゃべつ","method":"積算","kcal":26,"p":0.8,"f":0.1,"c":5.8},{"id":629,"cat":"ダイエット定番","name":"無限ピーマン 小鉢1","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"むげんぴーまん","method":"積算","kcal":81,"p":3.3,"f":6.4,"c":3.4},{"id":630,"cat":"ダイエット定番","name":"サラダフィッシュ 1袋","unit":"個","g":70.0,"step":"個","alias":"さらだふぃっしゅ","method":"市販平均","kcal":90,"p":14.0,"f":3.5,"c":0.3},{"id":631,"cat":"ダイエット定番","name":"ヨーグルトバーク 1人前","unit":"人前","g":100.0,"step":"人前(0.5刻み)","alias":"よーぐるとばーく","method":"積算","kcal":68,"p":2.7,"f":2.1,"c":10.8},{"id":632,"cat":"ダイエット定番","name":"冷凍フルーツミックス 1人前","unit":"人前","g":100.0,"step":"人前(0.5刻み)","alias":"れいとうふるーつ","method":"転記","kcal":48,"p":0.5,"f":0.1,"c":12.9},{"id":633,"cat":"ダイエット定番","name":"寒天ゼリー(0kcal系) 1個","unit":"個","g":200.0,"step":"個","alias":"かんてんぜりー/ゼロカロリーゼリー","method":"市販平均","kcal":0,"p":0,"f":0,"c":0},{"id":634,"cat":"ダイエット定番","name":"ハイカカオチョコ(72%) 1かけ","unit":"個","g":5.0,"step":"個","alias":"はいかかお","method":"市販平均","kcal":28,"p":0.5,"f":2.0,"c":1.6},{"id":635,"cat":"ダイエット定番","name":"甘栗 1袋","unit":"個","g":80.0,"step":"個","alias":"あまぐり","method":"転記","kcal":166,"p":3.9,"f":0.7,"c":38.8},{"id":636,"cat":"ダイエット定番","name":"ソイジョイ 1本","unit":"本","g":30.0,"step":"本","alias":"そいじょい","method":"市販平均","kcal":135,"p":5.0,"f":7.5,"c":13.0},{"id":637,"cat":"ダイエット定番","name":"プロテイン(ソイ) 1杯","unit":"杯","g":30.0,"step":"杯","alias":"そいぷろてん","method":"市販平均","kcal":110,"p":16.0,"f":1.0,"c":9.0},{"id":638,"cat":"ダイエット定番","name":"炭酸水(無糖) 1本","unit":"本","g":500.0,"step":"本","alias":"たんさんすい","method":"転記","kcal":0,"p":0,"f":0,"c":0},{"id":639,"cat":"ダイエット定番","name":"トマトジュース(無塩) 1本","unit":"本","g":200.0,"step":"本","alias":"とまとじゅーす","method":"転記","kcal":36,"p":1.2,"f":0.0,"c":8.6},{"id":640,"cat":"ダイエット定番","name":"アーモンドミルク(無糖) コップ1杯","unit":"杯","g":200.0,"step":"杯(0.5刻み)","alias":"あーもんどみるく","method":"市販平均","kcal":40,"p":2.0,"f":3.0,"c":1.8},{"id":641,"cat":"ダイエット定番","name":"オーツミルク コップ1杯","unit":"杯","g":200.0,"step":"杯(0.5刻み)","alias":"おーつみるく","method":"市販平均","kcal":80,"p":0.6,"f":3.0,"c":13.0},{"id":642,"cat":"ダイエット定番","name":"EAA/BCAAドリンク 1杯","unit":"杯","g":500.0,"step":"杯","alias":"いーえーえー/びーしーえーえー","method":"市販平均","kcal":50,"p":12.0,"f":0.0,"c":1.0},{"id":643,"cat":"筋トレ・増量","name":"塩むすび 1個","unit":"個","g":100.0,"step":"個","alias":"しおむすび/トレ前おにぎり","method":"転記","kcal":170,"p":2.7,"f":0.3,"c":39.4},{"id":644,"cat":"筋トレ・増量","name":"鶏むね+白米セット 1食","unit":"人前","g":350.0,"step":"人前(0.5刻み)","alias":"とれごはん/トレ後セット","method":"積算","kcal":470,"p":40.0,"f":3.4,"c":74.4},{"id":645,"cat":"筋トレ・増量","name":"あんこトースト 1枚","unit":"枚","g":90.0,"step":"枚","alias":"あんトースト","method":"積算","kcal":167,"p":7.9,"f":2.2,"c":32.4},{"id":646,"cat":"筋トレ・増量","name":"はちみつトースト 1枚","unit":"枚","g":75.0,"step":"枚","alias":"はちみつとーすと","method":"積算","kcal":247,"p":4.1,"f":9.9,"c":37.3},{"id":647,"cat":"筋トレ・増量","name":"ピーナッツバタートースト 1枚","unit":"枚","g":77.0,"step":"枚","alias":"ぴーなつとーすと","method":"積算","kcal":303,"p":10.6,"f":18.0,"c":28.8},{"id":648,"cat":"筋トレ・増量","name":"オートミールバナナボウル 1杯","unit":"杯","g":250.0,"step":"杯(0.5刻み)","alias":"ばななぼうる","method":"積算","kcal":327,"p":9.9,"f":6.3,"c":63.1},{"id":649,"cat":"筋トレ・増量","name":"磯辺餅 2個","unit":"人前","g":110.0,"step":"人前(0.5刻み)","alias":"いそべもち/磯辺焼き","method":"積算","kcal":242,"p":4.9,"f":0.6,"c":54.7},{"id":650,"cat":"筋トレ・増量","name":"ウェイトゲイナーシェイク 1杯","unit":"杯","g":400.0,"step":"杯","alias":"げいなー/増量シェイク","method":"市販平均","kcal":400,"p":30.0,"f":5.0,"c":60.0},{"id":651,"cat":"筋トレ・増量","name":"カーボドリンク 1杯","unit":"杯","g":500.0,"step":"杯","alias":"かーぼ/マルトデキストリン","method":"市販平均","kcal":180,"p":0.0,"f":0.0,"c":45.0},{"id":652,"cat":"筋トレ・増量","name":"プロテイン牛乳割り 1杯","unit":"杯","g":230.0,"step":"杯","alias":"ぷろてぎゅうにゅう","method":"積算","kcal":239,"p":28.5,"f":9.1,"c":12.6},{"id":653,"cat":"筋トレ・増量","name":"鶏もも+白米弁当 1食","unit":"人前","g":400.0,"step":"人前(0.5刻み)","alias":"ぞうりょうべんとう","method":"積算","kcal":640,"p":29.0,"f":19.3,"c":92.7},{"id":654,"cat":"筋トレ・増量","name":"バナナジュース 1杯","unit":"杯","g":250.0,"step":"杯(0.5刻み)","alias":"ばななじゅーす","method":"積算","kcal":184,"p":6.0,"f":5.9,"c":29.7},{"id":655,"cat":"ダイエット定番","name":"ゆで鶏(鶏しゃぶ) 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"とりしゃぶ/ゆでどり","method":"積算","kcal":152,"p":33.0,"f":2.7,"c":0.9},{"id":656,"cat":"ダイエット定番","name":"鶏むねのレンジ蒸しポン酢 1人前","unit":"人前","g":160.0,"step":"人前(0.5刻み)","alias":"れんじむしどり","method":"積算","kcal":156,"p":33.2,"f":2.7,"c":1.7},{"id":657,"cat":"ダイエット定番","name":"鶏むねピカタ 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"ぴかた","method":"積算","kcal":223,"p":31.5,"f":9.8,"c":4.0},{"id":658,"cat":"ダイエット定番","name":"揚げない塩唐揚げ 1人前","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"あげないからあげ/ノンフライ","method":"積算","kcal":192,"p":23.5,"f":7.9,"c":7.5},{"id":659,"cat":"ダイエット定番","name":"鶏むねナゲット 5個","unit":"人前","g":125.0,"step":"人前(0.5刻み)","alias":"むねなげっと","method":"積算","kcal":259,"p":22.9,"f":16.6,"c":6.4},{"id":660,"cat":"ダイエット定番","name":"ささみの梅しそ焼き 1人前","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"うめしそ","method":"積算","kcal":149,"p":24.3,"f":3.9,"c":5.7},{"id":661,"cat":"ダイエット定番","name":"ささみチーズ焼き 1人前","unit":"人前","g":130.0,"step":"人前(0.5刻み)","alias":"ささみちーず","method":"積算","kcal":192,"p":27.9,"f":7.8,"c":4.0},{"id":662,"cat":"ダイエット定番","name":"ガーリックチキンステーキ 1人前","unit":"人前","g":180.0,"step":"人前(0.5刻み)","alias":"がーりっくちきん","method":"積算","kcal":340,"p":25.6,"f":26.3,"c":1.8},{"id":663,"cat":"ダイエット定番","name":"蒸しささみ 2本","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"むしささみ","method":"積算","kcal":82,"p":19.1,"f":0.6,"c":0.2},{"id":664,"cat":"ダイエット定番","name":"鶏むねの柚子胡椒焼き 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"ゆずこしょう","method":"積算","kcal":176,"p":30.6,"f":6.5,"c":0.7},{"id":665,"cat":"ダイエット定番","name":"卵白オムレツ 1人前","unit":"人前","g":130.0,"step":"人前(0.5刻み)","alias":"らんぱくおむれつ","method":"積算","kcal":83,"p":12.3,"f":3.2,"c":0.8},{"id":666,"cat":"ダイエット定番","name":"全卵+卵白スクランブル 1人前","unit":"人前","g":140.0,"step":"人前(0.5刻み)","alias":"らんぱくすくらんぶる","method":"積算","kcal":142,"p":14.1,"f":9.0,"c":1.0},{"id":667,"cat":"ダイエット定番","name":"自家製味玉 1個","unit":"個","g":55.0,"step":"個","alias":"あじたま/煮卵","method":"積算","kcal":72,"p":6.5,"f":5.2,"c":1.2},{"id":668,"cat":"ダイエット定番","name":"エッグマフィン 1個","unit":"個","g":120.0,"step":"個","alias":"えっぐまふぃん","method":"積算","kcal":294,"p":16.1,"f":16.9,"c":22.3},{"id":669,"cat":"ダイエット定番","name":"サバ缶トマト煮 1人前","unit":"人前","g":220.0,"step":"人前(0.5刻み)","alias":"さばとまと","method":"積算","kcal":220,"p":21.0,"f":13.4,"c":6.3},{"id":670,"cat":"ダイエット定番","name":"サバ缶キムチ和え 1人前","unit":"人前","g":150.0,"step":"人前(0.5刻み)","alias":"さばきむち","method":"積算","kcal":203,"p":20.8,"f":13.2,"c":2.4},{"id":671,"cat":"ダイエット定番","name":"ツナ豆腐 1人前","unit":"人前","g":200.0,"step":"人前(0.5刻み)","alias":"つなどうふ","method":"積算","kcal":115,"p":14.6,"f":5.5,"c":3.4},{"id":672,"cat":"ダイエット定番","name":"エビとブロッコリーの炒め 1人前","unit":"人前","g":180.0,"step":"人前(0.5刻み)","alias":"えびぶろっこりー","method":"積算","kcal":201,"p":18.3,"f":13.5,"c":6.7},{"id":673,"cat":"ダイエット定番","name":"魚肉ソーセージ 1本","unit":"本","g":70.0,"step":"本","alias":"ぎょにそ/フィッシュソーセージ","method":"市販平均","kcal":110,"p":8.1,"f":5.0,"c":8.8},{"id":674,"cat":"ダイエット定番","name":"もち麦100%飯 茶碗1杯","unit":"杯","g":150.0,"step":"杯(0.5刻み)","alias":"もちむぎひゃくぱー","method":"転記","kcal":177,"p":3.3,"f":0.8,"c":42.8},{"id":675,"cat":"ダイエット定番","name":"しらたき混ぜごはん 茶碗1杯","unit":"杯","g":180.0,"step":"杯(0.5刻み)","alias":"しらたきごはん","method":"積算","kcal":193,"p":3.3,"f":0.4,"c":46.3},{"id":676,"cat":"ダイエット定番","name":"カリフラワーライスチャーハン 1人前","unit":"人前","g":280.0,"step":"人前(0.5刻み)","alias":"かりふらちゃーはん","method":"積算","kcal":234,"p":14.8,"f":16.0,"c":10.3},{"id":677,"cat":"ダイエット定番","name":"オートミールチャーハン 1人前","unit":"人前","g":250.0,"step":"人前(0.5刻み)","alias":"おーつちゃーはん","method":"積算","kcal":314,"p":15.7,"f":16.1,"c":30.0},{"id":678,"cat":"ダイエット定番","name":"オートミールリゾット 1杯","unit":"杯","g":280.0,"step":"杯(0.5刻み)","alias":"おーつりぞっと","method":"積算","kcal":249,"p":13.3,"f":8.8,"c":34.9},{"id":679,"cat":"ダイエット定番","name":"ゼンパスタ 1人前","unit":"人前","g":250.0,"step":"人前(0.5刻み)","alias":"ぜんぱすた/乾燥しらたき麺","method":"積算","kcal":78,"p":1.2,"f":5.2,"c":9.9},{"id":680,"cat":"ダイエット定番","name":"プロテインスムージー(バナナ) 1杯","unit":"杯","g":300.0,"step":"杯","alias":"ぷろてすむーじー","method":"積算","kcal":302,"p":28.0,"f":7.4,"c":32.7},{"id":681,"cat":"ダイエット定番","name":"プロテインヨーグルト 1杯","unit":"杯","g":180.0,"step":"杯(0.5刻み)","alias":"ぷろてよーぐると","method":"積算","kcal":142,"p":16.4,"f":5.2,"c":8.9},{"id":682,"cat":"ダイエット定番","name":"プロテインコーヒー 1杯","unit":"杯","g":250.0,"step":"杯","alias":"ぷろてこーひー/カフェオレプロテイン","method":"積算","kcal":106,"p":18.7,"f":1.2,"c":4.0},{"id":683,"cat":"ダイエット定番","name":"プロテインアイス(自家製) 1個","unit":"個","g":100.0,"step":"個","alias":"ぷろてあいす","method":"積算","kcal":130,"p":17.0,"f":2.8,"c":9.4},{"id":684,"cat":"ダイエット定番","name":"プロテインパンケーキ 1人前","unit":"人前","g":180.0,"step":"人前(0.5刻み)","alias":"ぷろてぱんけーき","method":"積算","kcal":327,"p":29.6,"f":8.7,"c":34.7},{"id":685,"cat":"ダイエット定番","name":"きのこのソテー 1人前","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"きのこそてー","method":"積算","kcal":72,"p":2.8,"f":5.3,"c":5.8},{"id":686,"cat":"ダイエット定番","name":"しらたき明太パスタ風 1人前","unit":"人前","g":220.0,"step":"人前(0.5刻み)","alias":"しらたきめんたい","method":"積算","kcal":101,"p":5.9,"f":7.3,"c":6.5},{"id":687,"cat":"ダイエット定番","name":"キャベツの塩だれ和え 小鉢1","unit":"人前","g":90.0,"step":"人前(0.5刻み)","alias":"しおだれきゃべつ","method":"積算","kcal":58,"p":1.2,"f":4.1,"c":5.0},{"id":688,"cat":"ダイエット定番","name":"豆腐グラタン 1人前","unit":"人前","g":250.0,"step":"人前(0.5刻み)","alias":"とうふぐらたん","method":"積算","kcal":228,"p":15.6,"f":15.2,"c":9.3},{"id":689,"cat":"ダイエット定番","name":"MCTオイル 小さじ1","unit":"杯","g":4.0,"step":"杯","alias":"えむしーてぃーおいる","method":"転記","kcal":36,"p":0.0,"f":4.0,"c":0.0},{"id":690,"cat":"ダイエット定番","name":"粉飴(マルトデキストリン) 大さじ1","unit":"杯","g":9.0,"step":"杯","alias":"こなあめ","method":"市販平均","kcal":35,"p":0.0,"f":0.0,"c":8.7},{"id":691,"cat":"コンビニ・市販","name":"高たんぱくヨーグルト(パルテノ型) 1個","unit":"個","g":100.0,"step":"個","alias":"ぱるての/高たんぱくよーぐると","method":"市販平均","kcal":100,"p":10.0,"f":4.3,"c":4.5},{"id":692,"cat":"コンビニ・市販","name":"グリルチキン(コンビニ) 1個","unit":"個","g":80.0,"step":"個","alias":"ぐりるちきんこんびに","method":"市販平均","kcal":130,"p":14.0,"f":7.0,"c":2.0},{"id":693,"cat":"コンビニ・市販","name":"砂肝スモーク 1袋","unit":"個","g":60.0,"step":"個","alias":"すなぎもすもーく","method":"市販平均","kcal":60,"p":11.0,"f":1.5,"c":1.0},{"id":694,"cat":"コンビニ・市販","name":"プロテインin ゼリー飲料 1個","unit":"個","g":180.0,"step":"個","alias":"ぷろていんぜりーいんりょう","method":"市販平均","kcal":90,"p":10.0,"f":0.0,"c":12.0},{"id":695,"cat":"コンビニ・市販","name":"高たんぱく豆乳 1本","unit":"本","g":200.0,"step":"本","alias":"こうたんぱくとうにゅう","method":"市販平均","kcal":100,"p":10.0,"f":5.0,"c":3.5},{"id":696,"cat":"コンビニ・市販","name":"もち麦おにぎり 1個","unit":"個","g":110.0,"step":"個","alias":"もちむぎおにぎり","method":"市販平均","kcal":170,"p":3.5,"f":1.5,"c":36.0},{"id":697,"cat":"コンビニ・市販","name":"玄米おにぎり 1個","unit":"個","g":110.0,"step":"個","alias":"げんまいおにぎり","method":"市販平均","kcal":170,"p":3.5,"f":1.5,"c":36.0},{"id":698,"cat":"コンビニ・市販","name":"サラダチキンの全粒粉サンド 1包装","unit":"個","g":150.0,"step":"個","alias":"ちきんさんど","method":"市販平均","kcal":260,"p":22.0,"f":7.0,"c":28.0},{"id":699,"cat":"コンビニ・市販","name":"サラダチキン(ハーブ) 1袋","unit":"個","g":110.0,"step":"個","alias":"はーぶちきん","method":"市販平均","kcal":115,"p":24.0,"f":1.5,"c":1.5},{"id":700,"cat":"コンビニ・市販","name":"サラダチキン(スモーク) 1袋","unit":"個","g":110.0,"step":"個","alias":"すもーくさらだちきん","method":"市販平均","kcal":115,"p":24.0,"f":1.5,"c":1.5},{"id":701,"cat":"コンビニ・市販","name":"サラダチキン(タンドリー・スパイシー) 1袋","unit":"個","g":110.0,"step":"個","alias":"たんどりーちきん","method":"市販平均","kcal":115,"p":24.0,"f":1.5,"c":1.5},{"id":702,"cat":"コンビニ・市販","name":"サラダチキン(レモン) 1袋","unit":"個","g":110.0,"step":"個","alias":"れもんちきん","method":"市販平均","kcal":115,"p":24.0,"f":1.5,"c":1.5},{"id":703,"cat":"コンビニ・市販","name":"ほぐしサラダチキン 1袋","unit":"個","g":80.0,"step":"個","alias":"ほぐしちきん","method":"市販平均","kcal":90,"p":18.0,"f":1.0,"c":1.0},{"id":704,"cat":"コンビニ・市販","name":"ささみソーセージ 1本","unit":"本","g":65.0,"step":"本","alias":"ささみそーせーじ","method":"市販平均","kcal":80,"p":10.0,"f":3.0,"c":3.5},{"id":705,"cat":"コンビニ・市販","name":"こんにゃくゼリー 1個","unit":"個","g":25.0,"step":"個","alias":"こんにゃくぜりー","method":"市販平均","kcal":25,"p":0.0,"f":0.0,"c":6.0},{"id":706,"cat":"ダイエット定番","name":"プロテイン(WPI) 1杯","unit":"杯","g":30.0,"step":"杯","alias":"あいそれーと/WPI","method":"市販平均","kcal":110,"p":25.0,"f":0.5,"c":1.5},{"id":707,"cat":"ダイエット定番","name":"プロテイン(カゼイン) 1杯","unit":"杯","g":30.0,"step":"杯","alias":"かぜいん","method":"市販平均","kcal":110,"p":23.0,"f":1.0,"c":2.5},{"id":708,"cat":"ダイエット定番","name":"ヨーグルト(プレーン無糖) 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"ぷれーんよーぐると","method":"転記","kcal":56,"p":3.6,"f":3.0,"c":4.9},{"id":709,"cat":"ダイエット定番","name":"ヨーグルト(低脂肪無糖) 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"ていしぼうよーぐると","method":"転記","kcal":40,"p":3.7,"f":1.0,"c":5.2},{"id":710,"cat":"ダイエット定番","name":"豆乳ヨーグルト 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"とうにゅうよーぐると/大豆ヨーグルト","method":"転記","kcal":43,"p":3.6,"f":2.8,"c":2.3},{"id":711,"cat":"素材(追加)","name":"鶏むね(皮つき) 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"むねかわつき","method":"転記","kcal":133,"p":21.3,"f":5.9,"c":0.1},{"id":712,"cat":"素材(追加)","name":"鶏むねひき肉 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"むねひきにく","method":"転記","kcal":171,"p":17.5,"f":12.0,"c":0.0},{"id":713,"cat":"主食","name":"ごはん どんぶり1杯","unit":"杯","g":300.0,"step":"杯(0.5刻み)","alias":"どんぶりめし","method":"転記","kcal":468,"p":7.5,"f":0.9,"c":111.3},{"id":714,"cat":"主食","name":"おにぎり(おかか) 1個","unit":"個","g":110.0,"step":"個","alias":"おかか","method":"積算","kcal":178,"p":4.4,"f":0.4,"c":39.6},{"id":715,"cat":"魚料理","name":"サバ味噌煮缶 1缶","unit":"個","g":190.0,"step":"個","alias":"さばみそかん","method":"転記","kcal":399,"p":31.0,"f":26.4,"c":12.5},{"id":716,"cat":"卵・大豆・乳","name":"充填豆腐(3連) 1個","unit":"個","g":150.0,"step":"個","alias":"じゅうてんどうふ/小分け豆腐","method":"転記","kcal":84,"p":7.5,"f":4.7,"c":3.8},{"id":717,"cat":"卵・大豆・乳","name":"豆腐干 1人前","unit":"人前","g":100.0,"step":"人前(0.5刻み)","alias":"とうふかん/干し豆腐","method":"市販平均","kcal":150,"p":16.0,"f":8.0,"c":4.0},{"id":718,"cat":"卵・大豆・乳","name":"さけるチーズ 1本","unit":"本","g":25.0,"step":"本","alias":"さけるちーず","method":"市販平均","kcal":80,"p":6.8,"f":5.7,"c":0.2},{"id":719,"cat":"間食・デザート","name":"くるみ 1つかみ","unit":"人前","g":15.0,"step":"人前(0.5刻み)","alias":"くるみ/ウォールナッツ","method":"転記","kcal":107,"p":2.2,"f":10.3,"c":1.8},{"id":720,"cat":"間食・デザート","name":"カシューナッツ 1つかみ","unit":"人前","g":15.0,"step":"人前(0.5刻み)","alias":"かしゅー","method":"転記","kcal":89,"p":3.0,"f":7.1,"c":4.0},{"id":721,"cat":"麺類","name":"十割そば(ゆで) 1人前","unit":"人前","g":300.0,"step":"人前(0.5刻み)","alias":"じゅうわりそば","method":"転記","kcal":390,"p":14.4,"f":3.0,"c":78.0},{"id":722,"cat":"肉料理","name":"焼き鳥(もも・塩) 1本","unit":"本","g":45.0,"step":"本","alias":"やきとりしお","method":"積算","kcal":84,"p":7.3,"f":6.2,"c":0.0},{"id":723,"cat":"間食・デザート","name":"ゆであずき(あんこ) 大さじ1","unit":"杯","g":20.0,"step":"杯","alias":"あんこ/こしあん/つぶあん","method":"転記","kcal":25,"p":1.7,"f":0.2,"c":5.1},{"id":724,"cat":"素材(追加)","name":"キヌア(炊) 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"きぬあ","method":"転記","kcal":140,"p":4.7,"f":1.2,"c":24.7},{"id":725,"cat":"素材(追加)","name":"紫芋(冷) 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"むらさきいも","method":"転記","kcal":122,"p":1.2,"f":0.3,"c":31.4},{"id":726,"cat":"間食・デザート","name":"マカダミアナッツ 1つかみ","unit":"人前","g":15.0,"step":"人前(0.5刻み)","alias":"まかだみあ","method":"転記","kcal":113,"p":1.2,"f":11.5,"c":1.8},{"id":727,"cat":"調味・トッピング","name":"えごま油 小さじ1","unit":"杯","g":4.0,"step":"杯","alias":"えごまゆ","method":"転記","kcal":36,"p":0.0,"f":4.0,"c":0.0},{"id":728,"cat":"調味・トッピング","name":"アマニ油 小さじ1","unit":"杯","g":4.0,"step":"杯","alias":"あまにゆ/亜麻仁油","method":"転記","kcal":36,"p":0.0,"f":4.0,"c":0.0},{"id":729,"cat":"卵・大豆・乳","name":"テンペ 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"てんぺ","method":"転記","kcal":180,"p":15.8,"f":9.0,"c":15.4},{"id":730,"cat":"素材(追加)","name":"ラム肉 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"らむにく/羊肉","method":"転記","kcal":164,"p":20.0,"f":12.0,"c":0.3},{"id":731,"cat":"ダイエット定番","name":"キヌアサラダ 1皿","unit":"人前","g":200.0,"step":"人前(0.5刻み)","alias":"きぬあさらだ","method":"積算","kcal":253,"p":5.6,"f":14.3,"c":27.9},{"id":732,"cat":"ダイエット定番","name":"アボカドトースト 1枚","unit":"枚","g":120.0,"step":"枚","alias":"あぼかどとーすと","method":"積算","kcal":244,"p":5.3,"f":15.3,"c":25.8},{"id":733,"cat":"かんたん・ズボラ飯","name":"アボカド納豆 1人前","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"あぼかどなっとう","method":"積算","kcal":193,"p":8.9,"f":15.1,"c":10.8},{"id":734,"cat":"かんたん・ズボラ飯","name":"ブルーベリーヨーグルト 1杯","unit":"杯","g":150.0,"step":"杯(0.5刻み)","alias":"ぶるーべりーよーぐると","method":"積算","kcal":82,"p":4.5,"f":3.6,"c":9.8},{"id":735,"cat":"かんたん・ズボラ飯","name":"りんごヨーグルト 1杯","unit":"杯","g":180.0,"step":"杯(0.5刻み)","alias":"りんごよーぐると","method":"積算","kcal":101,"p":4.8,"f":4.1,"c":14.5},{"id":736,"cat":"ダイエット定番","name":"テンペ焼き 1人前","unit":"人前","g":100.0,"step":"人前(0.5刻み)","alias":"てんぺやき","method":"積算","kcal":218,"p":14.5,"f":14.1,"c":14.2},{"id":737,"cat":"ダイエット定番","name":"もち麦入り野菜スープ 1杯","unit":"杯","g":300.0,"step":"杯(0.5刻み)","alias":"もちむぎすーぷ","method":"積算","kcal":118,"p":5.7,"f":1.9,"c":22.2},{"id":738,"cat":"ダイエット定番","name":"蒸しじゃがいも(冷) 1個","unit":"個","g":120.0,"step":"個","alias":"ひやしじゃが/冷やしいも","method":"転記","kcal":91,"p":2.3,"f":0.4,"c":21.7},{"id":739,"cat":"ダイエット定番","name":"冷やし焼き芋 1本","unit":"本","g":200.0,"step":"本(0.5刻み)","alias":"ひやしやきいも","method":"転記","kcal":302,"p":2.8,"f":0.4,"c":78.0},{"id":740,"cat":"かんたん・ズボラ飯","name":"納豆ごはん 1杯","unit":"杯","g":200.0,"step":"杯(0.5刻み)","alias":"なっとうごはん","method":"積算","kcal":318,"p":11.3,"f":5.0,"c":61.3},{"id":741,"cat":"かんたん・ズボラ飯","name":"納豆卵かけごはん 1杯","unit":"杯","g":260.0,"step":"杯(0.5刻み)","alias":"なっとうたまごかけ/納豆TKG","method":"積算","kcal":398,"p":18.2,"f":10.6,"c":61.6},{"id":742,"cat":"かんたん・ズボラ飯","name":"サバ缶ごはん 1杯","unit":"杯","g":250.0,"step":"杯(0.5刻み)","alias":"さばかんごはん","method":"積算","kcal":402,"p":23.8,"f":10.6,"c":56.1},{"id":743,"cat":"かんたん・ズボラ飯","name":"しらす丼 1杯","unit":"杯","g":180.0,"step":"杯(0.5刻み)","alias":"しらすどん","method":"積算","kcal":259,"p":8.6,"f":0.9,"c":56.1},{"id":744,"cat":"かんたん・ズボラ飯","name":"マグロ納豆 1人前","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"まぐろなっとう","method":"積算","kcal":167,"p":26.2,"f":5.5,"c":6.0},{"id":745,"cat":"かんたん・ズボラ飯","name":"キムチ奴 1人前","unit":"人前","g":180.0,"step":"人前(0.5刻み)","alias":"きむちやっこ","method":"積算","kcal":112,"p":8.0,"f":7.6,"c":4.9},{"id":746,"cat":"かんたん・ズボラ飯","name":"めかぶ奴 1人前","unit":"人前","g":200.0,"step":"人前(0.5刻み)","alias":"めかぶやっこ","method":"積算","kcal":88,"p":8.2,"f":5.2,"c":4.8},{"id":747,"cat":"かんたん・ズボラ飯","name":"はちみつヨーグルト 1杯","unit":"杯","g":120.0,"step":"杯(0.5刻み)","alias":"はちみつよーぐると","method":"積算","kcal":108,"p":3.8,"f":3.2,"c":17.4},{"id":748,"cat":"かんたん・ズボラ飯","name":"バナナヨーグルト 1杯","unit":"杯","g":200.0,"step":"杯(0.5刻み)","alias":"ばななよーぐると","method":"積算","kcal":159,"p":5.1,"f":3.7,"c":28.2},{"id":749,"cat":"かんたん・ズボラ飯","name":"納豆そば 1人前","unit":"人前","g":350.0,"step":"人前(0.5刻み)","alias":"なっとうそば","method":"積算","kcal":447,"p":21.1,"f":7.1,"c":78.5},{"id":750,"cat":"かんたん・ズボラ飯","name":"オートミール茶漬け 1杯","unit":"杯","g":250.0,"step":"杯(0.5刻み)","alias":"おーつちゃづけ","method":"積算","kcal":124,"p":5.7,"f":1.9,"c":23.4},{"id":751,"cat":"かんたん・ズボラ飯","name":"サバ缶味噌汁 1杯","unit":"杯","g":250.0,"step":"杯(0.5刻み)","alias":"さばかんみそしる","method":"積算","kcal":166,"p":18.7,"f":9.3,"c":3.7},{"id":752,"cat":"かんたん・ズボラ飯","name":"アボカド醤油(刺身風) 1人前","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"あぼかどしょうゆ","method":"積算","kcal":133,"p":2.0,"f":12.5,"c":6.8},{"id":753,"cat":"かんたん・ズボラ飯","name":"ツナ玉ねぎサラダ 1人前","unit":"人前","g":120.0,"step":"人前(0.5刻み)","alias":"つなたまねぎ","method":"積算","kcal":172,"p":7.2,"f":13.8,"c":6.6},{"id":754,"cat":"かんたん・ズボラ飯","name":"ちくわきゅうり 1人前","unit":"人前","g":80.0,"step":"人前(0.5刻み)","alias":"ちくわきゅうり","method":"積算","kcal":57,"p":6.9,"f":0.2,"c":7.6},{"id":755,"cat":"素材(追加)","name":"オクラ 5本","unit":"人前","g":40.0,"step":"人前(0.5刻み)","alias":"おくら","method":"転記","kcal":10,"p":0.8,"f":0.1,"c":2.6},{"id":756,"cat":"素材(追加)","name":"パプリカ 1/2個","unit":"個","g":70.0,"step":"個","alias":"ぱぷりか","method":"転記","kcal":20,"p":0.7,"f":0.1,"c":5.0},{"id":757,"cat":"素材(追加)","name":"ズッキーニ 1/2本","unit":"個","g":80.0,"step":"個","alias":"ずっきーに","method":"転記","kcal":13,"p":1.0,"f":0.1,"c":2.2},{"id":758,"cat":"素材(追加)","name":"アスパラガス 3本","unit":"人前","g":60.0,"step":"人前(0.5刻み)","alias":"あすぱらがす","method":"転記","kcal":13,"p":1.6,"f":0.1,"c":2.3},{"id":759,"cat":"素材(追加)","name":"カリフラワー 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"かりふらわー","method":"転記","kcal":28,"p":3.0,"f":0.1,"c":5.2},{"id":760,"cat":"素材(追加)","name":"水菜 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"みずな","method":"転記","kcal":23,"p":2.2,"f":0.1,"c":4.8},{"id":761,"cat":"素材(追加)","name":"チンゲン菜 1株","unit":"個","g":100.0,"step":"個","alias":"ちんげんさい","method":"転記","kcal":9,"p":0.6,"f":0.1,"c":2.0},{"id":762,"cat":"素材(追加)","name":"ニラ 1/2束","unit":"個","g":50.0,"step":"個","alias":"にら","method":"転記","kcal":9,"p":0.8,"f":0.1,"c":2.0},{"id":763,"cat":"素材(追加)","name":"ゴーヤ 1/2本","unit":"個","g":100.0,"step":"個","alias":"ごーや/にがうり","method":"転記","kcal":15,"p":1.0,"f":0.1,"c":3.9},{"id":764,"cat":"素材(追加)","name":"とうもろこし 1本","unit":"本","g":175.0,"step":"本(0.5刻み)","alias":"とうもろこし/コーン","method":"転記","kcal":166,"p":6.1,"f":3.0,"c":32.6},{"id":765,"cat":"素材(追加)","name":"さやいんげん 10本","unit":"人前","g":50.0,"step":"人前(0.5刻み)","alias":"いんげん","method":"転記","kcal":12,"p":0.9,"f":0.1,"c":2.5},{"id":766,"cat":"素材(追加)","name":"ミニトマト 5個","unit":"人前","g":75.0,"step":"人前(0.5刻み)","alias":"みにとまと/プチトマト","method":"転記","kcal":22,"p":0.8,"f":0.1,"c":5.4},{"id":767,"cat":"素材(追加)","name":"セロリ 1本","unit":"本","g":65.0,"step":"本","alias":"せろり","method":"転記","kcal":8,"p":0.3,"f":0.1,"c":2.3},{"id":768,"cat":"素材(追加)","name":"かぶ 1個","unit":"個","g":80.0,"step":"個","alias":"かぶ","method":"転記","kcal":14,"p":0.6,"f":0.1,"c":3.7},{"id":769,"cat":"素材(追加)","name":"春菊 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"しゅんぎく","method":"転記","kcal":20,"p":2.3,"f":0.3,"c":3.9},{"id":770,"cat":"素材(追加)","name":"しいたけ(生) 3枚","unit":"人前","g":45.0,"step":"人前(0.5刻み)","alias":"しいたけ","method":"転記","kcal":11,"p":1.4,"f":0.1,"c":2.9},{"id":771,"cat":"素材(追加)","name":"エリンギ 1本","unit":"本","g":50.0,"step":"本","alias":"えりんぎ","method":"転記","kcal":16,"p":1.4,"f":0.2,"c":3.0},{"id":772,"cat":"素材(追加)","name":"なめこ 1袋","unit":"個","g":100.0,"step":"個","alias":"なめこ","method":"転記","kcal":21,"p":1.8,"f":0.2,"c":5.4},{"id":773,"cat":"素材(追加)","name":"手羽元 1本","unit":"本","g":60.0,"step":"本","alias":"てばもと","method":"転記","kcal":105,"p":10.9,"f":7.7,"c":0.0},{"id":774,"cat":"素材(追加)","name":"手羽先 1本","unit":"本","g":50.0,"step":"本","alias":"てばさき","method":"転記","kcal":104,"p":8.7,"f":8.1,"c":0.0},{"id":775,"cat":"素材(追加)","name":"豚こま切れ 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"ぶたこま","method":"転記","kcal":171,"p":20.5,"f":10.2,"c":0.2},{"id":776,"cat":"素材(追加)","name":"牛切り落とし 100g","unit":"g","g":100.0,"step":"g(10刻み)","alias":"ぎゅうきりおとし","method":"転記","kcal":231,"p":17.1,"f":19.8,"c":0.3},{"id":777,"cat":"素材(追加)","name":"春雨(乾) 30g","unit":"g","g":30.0,"step":"g(10刻み)","alias":"はるさめ","method":"転記","kcal":104,"p":0.0,"f":0.1,"c":26.0}];
+const RECIPES = {"オムライス 1人前":[{"n":"ごはん(精白米)","g":200,"kcalPerG":1.56,"p":0.025,"f":0.003,"c":0.371},{"n":"鶏卵","g":100,"kcalPerG":1.42,"p":0.122,"f":0.102,"c":0.004},{"n":"鶏もも(皮つき)","g":40,"kcalPerG":1.9,"p":0.166,"f":0.142,"c":0.0},{"n":"たまねぎ","g":30,"kcalPerG":0.33,"p":0.01,"f":0.001,"c":0.084},{"n":"ケチャップ","g":30,"kcalPerG":1.16,"p":0.016,"f":0.002,"c":0.276},{"n":"バター","g":8,"kcalPerG":7.0,"p":0.006,"f":0.81,"c":0.002},{"n":"サラダ油","g":4,"kcalPerG":8.86,"p":0.0,"f":1.0,"c":0.0}],"カレーライス 1人前":[{"n":"ごはん(精白米)","g":200,"kcalPerG":1.56,"p":0.025,"f":0.003,"c":0.371},{"n":"豚もも(脂身つき)","g":60,"kcalPerG":1.71,"p":0.205,"f":0.102,"c":0.002},{"n":"じゃがいも","g":60,"kcalPerG":0.59,"p":0.018,"f":0.001,"c":0.173},{"n":"たまねぎ","g":60,"kcalPerG":0.33,"p":0.01,"f":0.001,"c":0.084},{"n":"にんじん","g":30,"kcalPerG":0.35,"p":0.007,"f":0.002,"c":0.093},{"n":"カレールウ","g":20,"kcalPerG":4.74,"p":0.065,"f":0.341,"c":0.447},{"n":"サラダ油","g":3,"kcalPerG":8.86,"p":0.0,"f":1.0,"c":0.0}],"親子丼 1杯":[{"n":"ごはん(精白米)","g":250,"kcalPerG":1.56,"p":0.025,"f":0.003,"c":0.371},{"n":"鶏もも(皮つき)","g":80,"kcalPerG":1.9,"p":0.166,"f":0.142,"c":0.0},{"n":"鶏卵","g":60,"kcalPerG":1.42,"p":0.122,"f":0.102,"c":0.004},{"n":"たまねぎ","g":40,"kcalPerG":0.33,"p":0.01,"f":0.001,"c":0.084},{"n":"めんつゆ","g":30,"kcalPerG":0.44,"p":0.022,"f":0.0,"c":0.087},{"n":"砂糖","g":3,"kcalPerG":3.91,"p":0.0,"f":0.0,"c":0.993}],"豚の生姜焼き 1人前":[{"n":"豚ロース(脂身つき)","g":100,"kcalPerG":2.48,"p":0.193,"f":0.192,"c":0.002},{"n":"たまねぎ","g":30,"kcalPerG":0.33,"p":0.01,"f":0.001,"c":0.084},{"n":"しょうゆ","g":12,"kcalPerG":0.76,"p":0.077,"f":0.0,"c":0.079},{"n":"みりん","g":6,"kcalPerG":2.25,"p":0.001,"f":0.0,"c":0.557},{"n":"サラダ油","g":4,"kcalPerG":8.86,"p":0.0,"f":1.0,"c":0.0}],"沼 1食":[{"n":"鶏むね(皮なし)","g":150,"kcalPerG":1.13,"p":0.244,"f":0.019,"c":0.0},{"n":"米(乾)","g":75,"kcalPerG":3.42,"p":0.061,"f":0.009,"c":0.776},{"n":"オクラ","g":50,"kcalPerG":0.26,"p":0.021,"f":0.002,"c":0.066},{"n":"干し椎茸","g":5,"kcalPerG":2.58,"p":0.212,"f":0.028,"c":0.625},{"n":"カットわかめ(乾)","g":2,"kcalPerG":1.86,"p":0.179,"f":0.04,"c":0.421}],"納豆ごはん 1杯":[{"n":"ごはん(精白米)","g":150,"kcalPerG":1.56,"p":0.025,"f":0.003,"c":0.371},{"n":"納豆","g":45,"kcalPerG":1.84,"p":0.165,"f":0.1,"c":0.121},{"n":"しょうゆ","g":3,"kcalPerG":0.76,"p":0.077,"f":0.0,"c":0.079}]};
+const GOAL = { kcal: 1800, p: 120, f: 50, c: 220 };
+const FIXED = {
+  asa: { label: '朝食', items: [ {name:'ごはん 茶碗1杯', kcal:234,p:3.8,f:0.5,c:55.7}, {name:'納豆 1パック', kcal:86,p:7.4,f:4.5,c:5.4}, {name:'ゆで卵 1個', kcal:71,p:6.1,f:5.1,c:0.2} ] },
+  hiru: { label: '昼食', items: [ {name:'オムライス 1人前', kcal:666,p:24.7,f:27.0,c:85.4} ] },
+  kan: { label: '間食', items: [ {name:'プロテイン(WPC) 1杯', kcal:117,p:21.9,f:1.5,c:3.0}, {name:'バナナ 1本', kcal:93,p:1.1,f:0.2,c:22.5} ] },
+};
+let dinner = [];   // 保存済みの夕食(今日・完全体)
+let cart = [];     // 記録中のカート
+let editIdx = null; // カートの再編集index
+let cur = null;    // 量パネルの編集中ドラフト
+
+/* ===== 日付・生活記録の状態 ===== */
+const TODAY = '2026-08-18';
+let selDate = TODAY;
+const PAST_MEALS = {  // 過去日のサンプル(8/15のみ)
+  '2026-08-15': { asa: [ {name:'オートミール米化 1食', kcal:105,p:4.5,f:1.8,c:18.5}, {name:'無脂肪ギリシャヨーグルト 100g', kcal:59,p:10.2,f:0.2,c:4.0} ], hiru: [ {name:'沼 1食', kcal:456,p:45.1,f:4.9,c:64.6} ], yu: [ {name:'カレーライス 1人前', kcal:602,p:17.6,f:17.4,c:92.6}, {name:'冷凍餃子(調理後) 5個', kcal:225,p:11.2,f:7.5,c:28.1}, {name:'ビール 中ジョッキ1杯', kcal:195,p:2.4,f:1.1,c:43.9} ], kan: [ {name:'アイスクリーム(バニラ) 1個', kcal:310,p:4.7,f:12.1,c:45.7}, {name:'ポテトチップス 1袋(60g)', kcal:170,p:2.5,f:6.6,c:25.1} ] },
+};
+const lifeByDate = { '2026-08-15': { sleep:'7.5h', cond:'◎', poo:'あり', alc:'なし' } };
+const WD = ['日','月','火','水','木','金','土'];
+function d2obj(ds){ const [y,m,d] = ds.split('-').map(Number); return new Date(Date.UTC(y, m-1, d)); }
+function obj2d(dt){ return dt.toISOString().slice(0,10); }
+function addDays(ds, n){ const dt = d2obj(ds); dt.setUTCDate(dt.getUTCDate()+n); return obj2d(dt); }
+function dateLabel(ds){ const dt = d2obj(ds); return `${dt.getUTCMonth()+1}/${dt.getUTCDate()}(${WD[dt.getUTCDay()]})`; }
+function hasRecord(ds){ return ds===TODAY || !!PAST_MEALS[ds]; }
+function mealsOf(ds){
+  if(ds===TODAY) return { asa: FIXED.asa.items, hiru: FIXED.hiru.items, yu: dinner.map(x=>({name: x.customFree ? x.name+(x.grams?` 約${Math.round(x.grams)}g`:'') : x.name.replace(/ [^ ]+$/,'')+' '+x.disp.replace(/\(.*\)/,''), kcal:x.kcal,p:x.p,f:x.f,c:x.c, noVal:x.noVal})), kan: FIXED.kan.items };
+  return PAST_MEALS[ds] || { asa:[], hiru:[], yu:[], kan:[] };
+}
+
+function kana(s){ return (s||'').replace(/[ァ-ヶ]/g, m=>String.fromCharCode(m.charCodeAt(0)-0x60)).toLowerCase(); }
+function r1(x){ return Math.round(x*10)/10; }
+
+/* ===== 画面遷移 ===== */
+function go(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('show'));
+  document.getElementById('scr-'+name).classList.add('show');
+  if(name==='day') renderDay();
+  if(name==='rec'){ renderResults(); renderCartbar(); }
+}
+function selectDate(ds){ if(ds > TODAY) return; selDate = ds; renderDay(); }
+function moveDay(n){ selectDate(addDays(selDate, n)); }
+
+/* ===== 週チップ ===== */
+function renderWeek(){
+  const dt = d2obj(selDate); const sun = addDays(selDate, -dt.getUTCDay());
+  let html = '';
+  for(let i=0;i<7;i++){
+    const ds = addDays(sun, i); const d = d2obj(ds);
+    const fut = ds > TODAY;
+    html += `<a class="${ds===selDate?'sel':''} ${fut?'fut':''}" ${fut?'':`onclick="selectDate('${ds}')"`}>
+      <span class="dw">${WD[d.getUTCDay()]}</span><span class="dn">${d.getUTCDate()}</span>
+      ${hasRecord(ds)?'<span class="dot"></span>':''}</a>`;
+  }
+  document.getElementById('weekchips').innerHTML = html;
+}
+
+/* ===== カレンダーピッカー(a3: 選んだ日+その週へ) ===== */
+let pickYM = null;
+function openPicker(){
+  const d = d2obj(selDate); pickYM = [d.getUTCFullYear(), d.getUTCMonth()];
+  renderPicker(); document.getElementById('pickModal').classList.add('show');
+  const m = document.getElementById('pickModal'); m.onclick = e => { if(e.target===m) m.classList.remove('show'); };
+}
+function pickMove(n){ pickYM[1]+=n; if(pickYM[1]<0){pickYM[1]=11;pickYM[0]--;} if(pickYM[1]>11){pickYM[1]=0;pickYM[0]++;} renderPicker(); }
+function renderPicker(){
+  const [y,m] = pickYM;
+  const first = new Date(Date.UTC(y,m,1)); const startDow = first.getUTCDay();
+  const dim = new Date(Date.UTC(y,m+1,0)).getUTCDate();
+  let cells = WD.map(w=>`<div class="wd">${w}</div>`).join('');
+  for(let i=0;i<startDow;i++) cells += `<div></div>`;
+  for(let d=1;d<=dim;d++){
+    const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const fut = ds > TODAY;
+    cells += `<div class="d ${ds===selDate?'sel':''} ${ds===TODAY?'today':''} ${fut?'out':''}" ${fut?'':`onclick="pickDate('${ds}')"`}>${d}${hasRecord(ds)?'<span class=dot></span>':''}</div>`;
+  }
+  document.getElementById('ppanel').innerHTML = `
+    <div class="pick-head"><button onclick="pickMove(-1)">&lt;</button><h3>${y}年${m+1}月</h3><button onclick="pickMove(1)">&gt;</button></div>
+    <div class="pick-grid">${cells}</div>
+    <div class="unote" style="text-align:center">日を選ぶと、その日とその週の表示に切り替わります</div>`;
+}
+function pickDate(ds){ document.getElementById('pickModal').classList.remove('show'); selectDate(ds); }
+
+/* ===== 生活記録(4問) ===== */
+function lifeHTML(){
+  const v = lifeByDate[selDate];
+  const isToday = selDate===TODAY;
+  const items = v
+    ? `<span class="it">睡眠<b>${v.sleep}</b></span><span class="it">体調<b>${v.cond}</b></span><span class="it">お通じ<b>${v.poo}</b></span><span class="it">お酒<b>${v.alc}</b></span>`
+    : `<span class="it">睡眠<b>−</b></span><span class="it">体調<b>−</b></span><span class="it">お通じ<b>−</b></span><span class="it">お酒<b>−</b></span>`;
+  const cta = v ? '' : `<span class="cta">${isToday?'記録する':'この日の分を記録'} &gt;</span>`;
+  return `<div class="liferow ${v?'':'empty'}" onclick="openLife()">${'<div class=items>'+items+'</div>'}${cta}</div>`;
+}
+let lifeDraft = {};
+function openLife(){
+  lifeDraft = { ...(lifeByDate[selDate] || {}) };
+  renderLife(); document.getElementById('lifeModal').classList.add('show');
+  const m = document.getElementById('lifeModal'); m.onclick = e => { if(e.target===m) m.classList.remove('show'); };
+}
+function renderLife(){
+  const q = (key, label, opts) => `<div class="lf-q"><div class="qq">${label}</div><div class="opts">${opts.map(o=>`<b class="${lifeDraft[key]===o?'on':''}" onclick="lifeDraft['${key}']='${o}'; renderLife()">${o}</b>`).join('')}</div></div>`;
+  document.getElementById('lpanel').innerHTML = `
+    <h3 style="font-size:15.5px; font-weight:800; margin:6px 0 12px;">${selDate===TODAY?'今日':dateLabel(selDate)}の生活記録(4つ)</h3>
+    ${q('sleep','睡眠時間', ['5h以下','6h','6.5h','7h','7.5h','8h','9h以上'])}
+    ${q('cond','体調', ['◎','○','△'])}
+    ${q('poo','お通じ', ['あり','なし'])}
+    ${q('alc','お酒', ['なし','1〜2杯','3杯以上'])}
+    <button class="qok" onclick="saveLife()">保存する</button>`;
+}
+function saveLife(){
+  if(lifeDraft.sleep && lifeDraft.cond && lifeDraft.poo && lifeDraft.alc){
+    lifeByDate[selDate] = { ...lifeDraft };
+    document.getElementById('lifeModal').classList.remove('show'); renderDay();
+  } else alert('4つとも選んでください(デモ)');
+}
+
+/* ===== 1日の画面 ===== */
+function mealSum(items){ return items.reduce((a,x)=>({kcal:a.kcal+x.kcal,p:a.p+x.p,f:a.f+x.f,c:a.c+x.c}),{kcal:0,p:0,f:0,c:0}); }
+function renderDay(){
+  document.getElementById('dateLabel').textContent = dateLabel(selDate);
+  document.getElementById('todayBtn').style.display = selDate===TODAY ? 'none' : '';
+  renderWeek();
+  const m = mealsOf(selDate);
+  const all = [...m.asa, ...m.hiru, ...m.yu, ...m.kan];
+  const t = mealSum(all);
+  document.getElementById('dayKcal').textContent = Math.round(t.kcal).toLocaleString();
+  const kr = t.kcal/GOAL.kcal;
+  const arcEl = document.getElementById('ringArc');
+  arcEl.setAttribute('stroke-dasharray', `${327*Math.min(1,kr)} 327`);
+  arcEl.style.display = t.kcal > 0 ? '' : 'none';
+  const ovEl = document.getElementById('ringOver');
+  ovEl.setAttribute('stroke-dasharray', `${kr>1 ? 327*Math.min(1,kr-1) : 0} 327`);
+  ovEl.style.display = kr>1 ? '' : 'none';
+  const dOv = document.getElementById('dayOver');
+  dOv.style.display = kr>1 ? '' : 'none';
+  if(kr>1) dOv.textContent = `+${Math.round(t.kcal-GOAL.kcal)}`;
+  const set = (id, bar, val, goal) => {
+    const over = val > goal;
+    document.getElementById(id).innerHTML = over
+      ? `<span class="ovt">${Math.round(val)}</span> / ${goal}g <span class="ovt">(+${Math.round(val-goal)})</span>`
+      : `${Math.round(val)} / ${goal}g`;
+    const barEl = document.getElementById(bar);
+    barEl.style.width = Math.min(100, val/goal*100) + '%';
+    const oldSeg = barEl.parentElement.querySelector('.seg');
+    if(oldSeg) oldSeg.remove();
+    if(over){
+      const sg = document.createElement('span'); sg.className = 'seg';
+      sg.style.width = ((1 - goal/val)*100) + '%';
+      barEl.parentElement.appendChild(sg);
+    }
+  };
+  set('pTxt','pBar',t.p,GOAL.p); set('fTxt','fBar',t.f,GOAL.f); set('cTxt','cBar',t.c,GOAL.c);
+
+  const isToday = selDate===TODAY;
+  const camSvg = `<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.2"/></svg>`;
+  const plateSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/></svg>`;
+  const phrowHTML = (key, phs) => {
+    if(!phs.length && !isToday) return '';
+    return `<div class="phrow">` + phs.map((ph,i)=>`<div class="ph" style="background:${PH_GRADS[ph.gi%PH_GRADS.length]}" onclick="event.stopPropagation(); openPhoto('${key}',${i})">${plateSvg}</div>`).join('') +
+      (isToday ? `<div class="addph" onclick="event.stopPropagation(); addPhoto('${key}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.2"/></svg>追加</div>` : '') + `</div>`;
+  };
+  const slotHTML = (label, key, items, isDinner) => {
+    const phs = photosOf(selDate, key);
+    if(!items.length && !phs.length){
+      const recClick = (isToday&&isDinner) ? "go('rec')" : "alert('デモでは品の記録は今日の夕食のみです(実装では全スロット・過去日も可能)')";
+      const camClick = isToday ? `addPhoto('${key}')` : "alert('デモでは写真は今日だけ付けられます(実装では過去日も可能)')";
+      return `<div class="slot"><div class="top"><div class="name">${label}</div></div>
+        <div class="rowab"><button class="addbtn" onclick="${recClick}">＋ 記録する</button><button class="camsq" onclick="${camClick}" title="写真だけ記録">${camSvg}</button></div>
+        ${isDinner&&isToday?`<div class="hint">カメラ=写真だけの記録(品選びなし)。夕食を保存すると、続けて今日の生活記録(4つの質問)に進みます。</div>`:''}</div>`;
+    }
+    if(!items.length){
+      return `<div class="slot"><div class="top"><div class="name">${label} <span class="tag">記録済み</span></div></div>
+        ${phrowHTML(key, phs)}
+        <div class="hint">写真のみの記録です(写真とメモをのりが見ます)。</div>
+        ${isToday&&isDinner ? `<span class="addplus" onclick="go('rec')">＋ 品も記録する(数値が出ます)</span>` : ''}</div>`;
+    }
+    const s = mealSum(items);
+    const editable = isDinner && isToday && dinner.length;
+    return `<div class="slot" ${editable?`onclick="editDinner()" style="cursor:pointer"`:''}><div class="top"><div class="name">${label} <span class="tag">記録済み</span></div><div class="sum">${Math.round(s.kcal)} kcal</div></div>
+      <ul>${items.map(x=>`<li><span>${x.name}</span><span class="r"><b>${x.noVal?'--':Math.round(x.kcal)}</b><small>${x.noVal?'P-- F-- C--':`P${r1(x.p)} F${r1(x.f)} C${r1(x.c)}`}</small></span></li>`).join('')}</ul>
+      ${phrowHTML(key, phs)}
+      ${items.some(x=>x.noVal) ? `<div class="hint">「--」は数値なしの記録(写真・名前でのりが確認します)</div>` : ''}
+      ${editable ? `<div class="hint">タップすると記録し直せます(量・内訳の再編集)</div>` : ''}</div>`;
+  };
+  document.getElementById('slots').innerHTML =
+    slotHTML('朝食', 'asa', m.asa, false) + slotHTML('昼食', 'hiru', m.hiru, false) +
+    slotHTML('夕食', 'yu', m.yu, true) + slotHTML('間食', 'kan', m.kan, false);
+  document.getElementById('lifeTop').innerHTML = lifeHTML();
+}
+function editDinner(){
+  cart = JSON.parse(JSON.stringify(dinner));
+  go('rec');
+}
+
+/* ===== 検索 ===== */
+let catFilter = 'すべて';
+const CATS = ['すべて','基本食材(のり監修)','ダイエット定番','筋トレ・増量','かんたん・ズボラ飯','のりレシピ','主食','丼・ワンプレート','麺類','肉料理','魚料理','卵・大豆・乳','鍋・汁物','副菜・野菜','洋食おかず','コンビニ・市販','間食・デザート','飲料・酒','素材(追加)','調味・トッピング'];
+document.getElementById('cats').innerHTML = CATS.map((c,i)=>`<b class="${i===0?'on':''}" onclick="pickCat(this,'${c}')">${c}</b>`).join('');
+function pickCat(el,c){ document.querySelectorAll('#cats b').forEach(b=>b.classList.remove('on')); el.classList.add('on'); catFilter=c; renderResults(); }
+function search(q){
+  q = kana(q.trim());
+  let list = FOODS;
+  if(catFilter!=='すべて') list = list.filter(f=>f.cat===catFilter);
+  if(!q) return { hits: catFilter==='すべて' ? [] : list, total: catFilter==='すべて' ? 0 : list.length };
+  const hits = list.filter(f => kana(f.name).includes(q) || kana(f.alias).includes(q));
+  hits.sort((a,b)=>{ const ap=kana(a.name).startsWith(q)?0:1, bp=kana(b.name).startsWith(q)?0:1; return ap-bp; });
+  return { hits, total: hits.length };
+}
+function itemHTML(f){
+  return `<div class="item" onclick="openQty(${f.id})">
+    <div class="l"><div class="nm">${f.name}</div><div class="un">${f.g}g ・ ${f.cat}</div></div>
+    <div class="r"><div class="kc">${f.kcal} kcal</div><div class="pf">P${f.p} F${f.f} C${f.c}</div></div>
+  </div>`;
+}
+function renderResults(){
+  const q = document.getElementById('q').value;
+  const box = document.getElementById('res');
+  const { hits, total } = search(q);
+  if(!q && catFilter==='すべて'){
+    box.innerHTML = `<div class="rescount">よく使うもの</div>` + [59, 119, 740, 609, 56].map(id=>itemHTML(FOODS.find(f=>f.id===id))).join('') +
+      `<div class="rescount" style="margin-top:10px">検索すると全${FOODS.length}品から探せます</div>` +
+      `<div class="addfree" onclick="openCustomFromSearch()">＋ 表にない食べ物を自分で記録(名前だけでもOK)</div>`;
+    return;
+  }
+  const top = hits.slice(0, 20);
+  box.innerHTML = `<div class="rescount">${total ? `${total}件ヒット${total>20?'(上位20件を表示)':''}` : '見つかりませんでした'}</div>` + top.map(itemHTML).join('') +
+    `<div class="addfree" onclick="openCustomFromSearch()">${q ? `「${q}」を表にない食べ物としてそのまま記録(数値は任意)` : '＋ 表にない食べ物を自分で記録(名前だけでもOK)'}</div>`;
+}
+
+/* ===== 量パネル(連動設計: 真実は内訳) ===== */
+function makeDraft(f, existing){
+  if(existing) return JSON.parse(JSON.stringify(existing));
+  const rec = RECIPES[f.name];
+  return { foodId: f.id, name: f.name, baseG: f.g, grams: f.g, custom: false, manual: null,
+           recipe: rec ? rec.map(m=>({...m})) : null };
+}
+function calcDraft(d){
+  if(d.manual) return d.manual;
+  if(d.recipe){
+    const kcal = d.recipe.reduce((s,m)=>s+m.g*m.kcalPerG,0);
+    return { kcal, p: d.recipe.reduce((s,m)=>s+m.g*m.p,0), f: d.recipe.reduce((s,m)=>s+m.g*m.f,0), c: d.recipe.reduce((s,m)=>s+m.g*m.c,0) };
+  }
+  const f = FOODS.find(x=>x.id===d.foodId); const r = d.grams/d.baseG;
+  return { kcal: f.kcal*r, p: f.p*r, f: f.f*r, c: f.c*r };
+}
+function draftGrams(d){ return d.recipe ? d.recipe.reduce((s,m)=>s+m.g,0) : d.grams; }
+
+let uwCol = 'kcal';
+function colVal(m){
+  if(uwCol==='P') return r1(m.g*m.p)+'g';
+  if(uwCol==='F') return r1(m.g*m.f)+'g';
+  if(uwCol==='C') return r1(m.g*m.c)+'g';
+  return Math.round(m.g*m.kcalPerG)+'kcal';
+}
+function uwColSw(c){ uwCol = c; renderQty(); document.getElementById('uw').classList.add('show'); }
+function openQty(id, fromCartIdx){
+  const f = FOODS.find(x=>x.id===id);
+  editIdx = (fromCartIdx!==undefined) ? fromCartIdx : null;
+  cur = makeDraft(f, editIdx!==null ? cart[editIdx] : null);
+  uwCol = 'kcal';
+  renderQty(f);
+  document.getElementById('qtyModal').classList.add('show');
+}
+function renderQty(f){
+  f = f || FOODS.find(x=>x.id===cur.foodId);
+  const isSekisan = f.method.startsWith('積算');
+  const hasRec = !!cur.recipe;
+  const unitName = f.unit;
+  const grams = draftGrams(cur);
+  const qty = r1(grams / cur.baseG);
+  const v = calcDraft(cur);
+  const isCustom = cur.custom;
+  document.getElementById('qpanel').innerHTML = `
+    <h3>${f.name.replace(/ [^ ]+$/,'')}</h3>
+    <span class="src ${cur.manual?'manual':''}">${cur.manual?'手入力(金茶)':f.method==='市販平均'?'市販品の平均値':'表から自動計算(緑)'}</span>
+    <div class="unit-switch"><b class="${cur.mode!=='g'?'on':''}" onclick="swMode('unit')">${unitName}で入力</b><b class="${cur.mode==='g'?'on':''}" onclick="swMode('g')">gで入力</b></div>
+    <div class="qty-io">${cur.mode!=='g' ? `
+    <div class="stepper">
+      <button onclick="stepQty(-1)">−</button>
+      <div class="val"><b>${qty}</b><span>${unitName} ・ 約${Math.round(grams)}g</span></div>
+      <button onclick="stepQty(1)">＋</button>
+    </div>` : `
+    <div class="ginput"><input id="gIn" value="${Math.round(grams)}" inputmode="numeric" oninput="gInput(this.value)"><span>g</span></div>`}</div>
+    <div class="calcline"><b>${Math.round(v.kcal)}</b> <small>kcal</small></div>
+    <div class="pfcline"><span>P <b>${r1(v.p)}</b>g</span><span>F <b>${r1(v.f)}</b>g</span><span>C <b>${r1(v.c)}</b>g</span></div>
+    ${hasRec ? `<button class="uchiwake-btn" onclick="document.getElementById('uw').classList.toggle('show')">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="1.6" fill="#0f766e"/><circle cx="14" cy="12" r="1.6" fill="#0f766e"/><circle cx="10" cy="18" r="1.6" fill="#0f766e"/></svg>
+      内訳を見る・整える</button>
+    <div class="uchiwake" id="uw">
+      <div class="uh">この数値の想定(量の変更も、この内訳と連動しています)</div>
+      <div class="coltabs">${['kcal','P','F','C'].map(t=>`<b class="${uwCol===t?'on':''}" onclick="uwColSw('${t}')">${t}</b>`).join('')}</div>
+      <div id="uwRows">${cur.recipe.map((m,i)=>`<div class="urow">
+        <span class="un">${m.n}</span>
+        <span class="uq"><button onclick="uwStep(${i},-1)">−</button><span class="ug" onclick="uwEdit(${i},this)" title="タップで直接入力">${r1(m.g)}g</span><button onclick="uwStep(${i},1)">＋</button></span>
+        <span class="uk">${colVal(m)}</span>
+        <button class="ux" onclick="uwDel(${i})">×</button>
+      </div>`).join('')}</div>
+      <div class="uadd">
+        <input id="uaddQ" placeholder="材料を検索して追加(例: ちーず)" oninput="uaddSearch(this.value)">
+        <div class="mini-res" id="uaddRes"></div>
+        <button class="uadd-btn" onclick="uaddToggle()">＋ 材料を追加</button>
+      </div>
+      <div class="unote">−＋は1g刻み・数字をタップすると直接入力。×で材料を外せます。人前・gの変更もこの内訳が伸び縮みして計算されます。</div>
+    </div>` : isSekisan ? `<div class="unote" style="margin:0 0 10px">内訳(材料の想定)は段階2で全品分を整備します。このモックでは6品(オムライス/カレーライス/親子丼/豚の生姜焼き/沼/納豆ごはん)が実働です。</div>` : ''}
+    ${f.method==='市販平均' ? `<div class="unote" style="margin:0 0 10px">市販品の平均値です(お手元の商品の表示があればそちらが正確)。</div>` : ''}
+    <div class="manual4">
+      <div class="mh" style="display:flex; align-items:center; justify-content:space-between; gap:8px;"><span style="flex:1">数値が合わない時は直接手入力もできます(手入力/金茶)</span>
+        <span class="mreset" onclick="resetManual()" title="手入力をリセットして自動計算に戻す"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8a6d10" stroke-width="2.4"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></span></div>
+      <div class="cells">
+        <input placeholder="kcal" id="m0" value="${cur.manual?Math.round(cur.manual.kcal):''}" oninput="manualIn()">
+        <input placeholder="P g" id="m1" value="${cur.manual?r1(cur.manual.p):''}" oninput="manualIn()">
+        <input placeholder="F g" id="m2" value="${cur.manual?r1(cur.manual.f):''}" oninput="manualIn()">
+        <input placeholder="C g" id="m3" value="${cur.manual?r1(cur.manual.c):''}" oninput="manualIn()">
+      </div>
+    </div>
+    <button class="qok" onclick="commitQty()">${editIdx!==null?'変更を保存':'この内容で追加'}</button>
+  `;
+  const modal = document.getElementById('qtyModal');
+  modal.onclick = e => { if(e.target===modal){ modal.classList.remove('show'); } };
+}
+function swMode(m){ cur.mode = m==='g' ? 'g' : 'unit'; renderQty(); if(m==='g'){ const el=document.getElementById('gIn'); el.focus(); } }
+function scaleTo(newGrams){
+  const now = draftGrams(cur);
+  if(now <= 0) return;
+  const factor = newGrams / now;
+  if(cur.recipe) cur.recipe.forEach(m => m.g = r1(m.g * factor));
+  cur.grams = newGrams;
+}
+function stepQty(d){
+  const step = 0.5;
+  const qty = Math.max(step, r1(draftGrams(cur)/cur.baseG + d*step));
+  scaleTo(cur.baseG * qty);
+  renderQty();
+}
+function gInput(v){
+  const g = parseFloat(v)||0;
+  if(g>0){ scaleTo(g); }
+  // 入力中は再描画せず数値だけ更新(フォーカス維持)
+  const val = calcDraft(cur);
+  document.querySelector('#qpanel .calcline b').textContent = Math.round(val.kcal);
+  const pf = document.querySelectorAll('#qpanel .pfcline b');
+  pf[0].textContent = r1(val.p); pf[1].textContent = r1(val.f); pf[2].textContent = r1(val.c);
+  if(cur.recipe){
+    document.querySelectorAll('#uwRows .urow').forEach((row,i)=>{
+      row.querySelector('.ug').textContent = r1(cur.recipe[i].g)+'g';
+      row.querySelector('.uk').textContent = Math.round(cur.recipe[i].g*cur.recipe[i].kcalPerG)+'kcal';
+    });
+  }
+}
+function uwStep(i,d){ cur.recipe[i].g = Math.max(0, r1(cur.recipe[i].g + d)); cur.custom = true; cur.grams = draftGrams(cur); renderQty(); document.getElementById('uw').classList.add('show'); }
+function uwEdit(i, el){
+  el.outerHTML = `<input id="ugIn" value="${r1(cur.recipe[i].g)}" inputmode="decimal" style="width:54px; padding:3px 2px; border:1.5px solid var(--teal); border-radius:6px; text-align:center; font-size:12.5px; font-weight:700; outline:none;" onblur="uwEditDone(${i},this.value)" onkeydown="if(event.key==='Enter')this.blur()">`;
+  const inp = document.getElementById('ugIn'); inp.focus(); inp.select();
+}
+function uwEditDone(i, v){
+  const g = parseFloat(v);
+  if(!isNaN(g) && g >= 0){ cur.recipe[i].g = r1(g); cur.custom = true; cur.grams = draftGrams(cur); }
+  renderQty(); document.getElementById('uw').classList.add('show');
+}
+function uwDel(i){ cur.recipe.splice(i,1); cur.custom = true; cur.grams = draftGrams(cur); renderQty(); document.getElementById('uw').classList.add('show'); }
+function uaddToggle(){ const el = document.getElementById('uaddQ'); el.classList.toggle('show'); if(el.classList.contains('show')) el.focus(); }
+function uaddSearch(q){
+  const box = document.getElementById('uaddRes');
+  if(!q.trim()){ box.innerHTML=''; return; }
+  const hits = FOODS.filter(f => kana(f.name).includes(kana(q)) || kana(f.alias).includes(kana(q))).slice(0,4);
+  box.innerHTML = hits.map(f=>`<div class="item" onclick="uaddPick(${f.id})"><div class="l"><div class="nm">${f.name}</div></div><div class="r"><div class="kc">${f.kcal}kcal/${f.g}g</div></div></div>`).join('');
+}
+function uaddPick(id){
+  const f = FOODS.find(x=>x.id===id);
+  cur.recipe.push({ n: f.name.replace(/ [^ ]+$/,''), g: f.g, kcalPerG: f.kcal/f.g, p: f.p/f.g, f: f.f/f.g, c: f.c/f.g });
+  cur.custom = true; cur.grams = draftGrams(cur);
+  renderQty(); document.getElementById('uw').classList.add('show');
+}
+function resetManual(){
+  cur.manual = null;
+  renderQty();
+}
+function manualIn(){
+  const v = ['m0','m1','m2','m3'].map(id=>parseFloat(document.getElementById(id).value));
+  if(v.some(x=>!isNaN(x))){
+    cur.manual = { kcal: v[0]||0, p: v[1]||0, f: v[2]||0, c: v[3]||0 };
+  } else cur.manual = null;
+  const val = calcDraft(cur);
+  document.querySelector('#qpanel .calcline b').textContent = Math.round(val.kcal);
+}
+function commitQty(){
+  const f = FOODS.find(x=>x.id===cur.foodId);
+  const v = calcDraft(cur);
+  const grams = draftGrams(cur);
+  const qtyTxt = cur.custom ? `約${Math.round(grams)}g` : `${r1(grams/cur.baseG)}${f.unit}(約${Math.round(grams)}g)`;
+  const item = { ...cur, disp: qtyTxt, kcal: v.kcal, p: v.p, f: v.f, c: v.c };
+  if(editIdx!==null){ cart[editIdx] = item; } else { cart.push(item); }
+  document.getElementById('qtyModal').classList.remove('show');
+  document.getElementById('q').value = ''; renderResults(); renderCartbar();
+  if(editIdx!==null){ openCart(); editIdx = null; }
+}
+
+/* ===== 表にない食べ物(自分で記録) ===== */
+function openCustomFromSearch(){ openCustom(document.getElementById('q').value.trim()); }
+function openCustom(name, fromCartIdx){
+  editIdx = (fromCartIdx!==undefined) ? fromCartIdx : null;
+  cur = editIdx!==null ? JSON.parse(JSON.stringify(cart[editIdx]))
+      : { customFree:true, foodId:null, name: name||'', grams:null, manual:null, mats: [] };
+  if(!cur.mats) cur.mats = [];
+  cwCol = 'kcal';
+  renderCustomQty();
+  document.getElementById('qtyModal').classList.add('show');
+  if(!cur.name){ const el=document.getElementById('cNm'); if(el) el.focus(); }
+}
+function cCalcVal(){
+  if(cur.manual) return cur.manual;
+  if(cur.mats && cur.mats.length){
+    return { kcal: cur.mats.reduce((s,m)=>s+m.g*m.kcalPerG,0), p: cur.mats.reduce((s,m)=>s+m.g*m.p,0), f: cur.mats.reduce((s,m)=>s+m.g*m.f,0), c: cur.mats.reduce((s,m)=>s+m.g*m.c,0) };
+  }
+  return null;
+}
+function cBadge(){ return cur.manual ? ['manual','手入力(金茶)'] : (cur.mats&&cur.mats.length) ? ['','表から自動計算(緑)'] : ['noval','数値なし']; }
+function customPfcLine(v){
+  return `<span>P <b>${v?r1(v.p):'--'}</b>g</span><span>F <b>${v?r1(v.f):'--'}</b>g</span><span>C <b>${v?r1(v.c):'--'}</b>g</span>`;
+}
+let cwCol = 'kcal';
+function cColVal(m){
+  if(cwCol==='P') return r1(m.g*m.p)+'g';
+  if(cwCol==='F') return r1(m.g*m.f)+'g';
+  if(cwCol==='C') return r1(m.g*m.c)+'g';
+  return Math.round(m.g*m.kcalPerG)+'kcal';
+}
+function cColSw(t){ cwCol = t; renderCustomQty(); }
+function renderCustomQty(){
+  const v = cCalcVal();
+  const bg = cBadge();
+  const matsG = cur.mats.reduce((s,m)=>s+m.g,0);
+  document.getElementById('qpanel').innerHTML = `
+    <h3>表にない食べ物を記録</h3>
+    <span class="src ${bg[0]}" id="cBadge">${bg[1]}</span>
+    <div class="unote" style="margin:0 0 8px">名前だけで記録できます。<b>中身がだいたい分かる時は「組み立てる」と数値が自動で出ます</b>。数値4セルは最終上書き。どちらも空なら「数値なし」で、写真とメモをのりが見ます。</div>
+    <input class="cnm-in" id="cNm" placeholder="名前(例: 会社の弁当、居酒屋の唐揚げ)" value="${(cur.name||'').replace(/"/g,'&quot;')}" oninput="cur.name=this.value">
+    ${cur.mats.length
+      ? `<div class="cgin"><span style="font-size:12px; font-weight:700; color:var(--sub)">量: 材料合計 約${Math.round(matsG)}g(自動)</span></div>`
+      : `<div class="cgin"><input id="cG" value="${cur.grams?Math.round(cur.grams):''}" inputmode="numeric" placeholder="量" oninput="cur.grams=parseFloat(this.value)||null"><span>g ・ わかれば(任意)</span></div>`}
+    <div class="calcline"><b id="cKc">${v?Math.round(v.kcal):'--'}</b> <small>kcal</small></div>
+    <div class="pfcline" id="cPfc">${customPfcLine(v)}</div>
+    <div class="uchiwake show" style="margin:0 0 12px">
+      <div class="uh">中身を表から組み立てる(足した分だけ自動計算・緑)</div>
+      ${cur.mats.length ? `<div class="coltabs">${['kcal','P','F','C'].map(tb=>`<b class="${cwCol===tb?'on':''}" onclick="cColSw('${tb}')">${tb}</b>`).join('')}</div>` : ''}
+      <div id="cRows">${cur.mats.map((mm,i)=>`<div class="urow">
+        <span class="un">${mm.n}</span>
+        <span class="uq"><button onclick="cStep(${i},-1)">−</button><span class="ug" onclick="cEdit(${i},this)" title="タップで直接入力">${r1(mm.g)}g</span><button onclick="cStep(${i},1)">＋</button></span>
+        <span class="uk">${cColVal(mm)}</span>
+        <button class="ux" onclick="cDel(${i})">×</button>
+      </div>`).join('')}</div>
+      <div class="uadd">
+        <input id="cQ" placeholder="材料・料理を検索して足す(例: ごはん、からあげ)" oninput="cAddSearch(this.value)">
+        <div class="mini-res" id="cRes"></div>
+        <button class="uadd-btn" onclick="cAddToggle()">＋ ${cur.mats.length?'材料を追加':'表から材料を足して組み立てる(自動計算)'}</button>
+      </div>
+      ${cur.mats.length?`<div class="unote">−＋は1g刻み・数字をタップで直接入力・×で外す。</div>`:''}
+    </div>
+    <div class="manual4">
+      <div class="mh" style="display:flex; align-items:center; justify-content:space-between; gap:8px;"><span style="flex:1">数値が分かる時・合わない時は直接手入力(最優先/金茶)</span>
+        <span class="mreset" onclick="cur.manual=null; renderCustomQty()" title="手入力を消す"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8a6d10" stroke-width="2.4"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></span></div>
+      <div class="cells">
+        <input placeholder="kcal" id="m0" value="${cur.manual?Math.round(cur.manual.kcal):''}" oninput="customManualIn()">
+        <input placeholder="P g" id="m1" value="${cur.manual?r1(cur.manual.p):''}" oninput="customManualIn()">
+        <input placeholder="F g" id="m2" value="${cur.manual?r1(cur.manual.f):''}" oninput="customManualIn()">
+        <input placeholder="C g" id="m3" value="${cur.manual?r1(cur.manual.c):''}" oninput="customManualIn()">
+      </div>
+    </div>
+    <button class="qok" onclick="commitCustom()">${editIdx!==null?'変更を保存':'この内容で追加'}</button>
+  `;
+  const modal = document.getElementById('qtyModal');
+  modal.onclick = e => { if(e.target===modal){ modal.classList.remove('show'); } };
+}
+function cAddToggle(){ const el = document.getElementById('cQ'); el.classList.toggle('show'); if(el.classList.contains('show')) el.focus(); }
+function cAddSearch(q){
+  const box = document.getElementById('cRes');
+  if(!q.trim()){ box.innerHTML=''; return; }
+  const hits = FOODS.filter(f => kana(f.name).includes(kana(q)) || kana(f.alias).includes(kana(q))).slice(0,4);
+  box.innerHTML = hits.map(f=>`<div class="item" onclick="cAddPick(${f.id})"><div class="l"><div class="nm">${f.name}</div></div><div class="r"><div class="kc">${f.kcal}kcal/${Math.round(f.g)}g</div></div></div>`).join('');
+}
+function cAddPick(id){
+  const f = FOODS.find(x=>x.id===id);
+  cur.mats.push({ n: f.name.replace(/ [^ ]+$/,''), g: f.g, kcalPerG: f.kcal/f.g, p: f.p/f.g, f: f.f/f.g, c: f.c/f.g });
+  renderCustomQty();
+  const el = document.getElementById('cQ'); el.classList.add('show');
+}
+function cStep(i,d){ cur.mats[i].g = Math.max(0, r1(cur.mats[i].g + d)); renderCustomQty(); }
+function cDel(i){ cur.mats.splice(i,1); renderCustomQty(); }
+function cEdit(i, el){
+  el.outerHTML = `<input id="cgIn" value="${r1(cur.mats[i].g)}" inputmode="decimal" style="width:54px; padding:3px 2px; border:1.5px solid var(--teal); border-radius:6px; text-align:center; font-size:12.5px; font-weight:700; outline:none;" onblur="cEditDone(${i},this.value)" onkeydown="if(event.key==='Enter')this.blur()">`;
+  const inp = document.getElementById('cgIn'); inp.focus(); inp.select();
+}
+function cEditDone(i, v){
+  const g = parseFloat(v);
+  if(!isNaN(g) && g >= 0){ cur.mats[i].g = r1(g); }
+  renderCustomQty();
+}
+function customManualIn(){
+  const v4 = ['m0','m1','m2','m3'].map(id=>parseFloat(document.getElementById(id).value));
+  cur.manual = v4.some(x=>!isNaN(x)) ? { kcal: v4[0]||0, p: v4[1]||0, f: v4[2]||0, c: v4[3]||0 } : null;
+  const v = cCalcVal();
+  document.getElementById('cKc').textContent = v ? Math.round(v.kcal) : '--';
+  document.getElementById('cPfc').innerHTML = customPfcLine(v);
+  const bg = cBadge();
+  const b = document.getElementById('cBadge');
+  b.className = 'src ' + bg[0]; b.textContent = bg[1];
+}
+function commitCustom(){
+  const nm = (cur.name||'').trim();
+  if(!nm){ const el=document.getElementById('cNm'); el.style.borderColor='#dc2626'; el.placeholder='名前を入れてください(ここだけ必須です)'; el.focus(); return; }
+  const val = cCalcVal();
+  const v = val || { kcal:0, p:0, f:0, c:0 };
+  const grams = (cur.mats && cur.mats.length) ? cur.mats.reduce((s,m)=>s+m.g,0) : cur.grams;
+  const item = { ...cur, name:nm, noVal: !val, disp: grams?`約${Math.round(grams)}g`:'量は未記入', kcal:v.kcal, p:v.p, f:v.f, c:v.c };
+  if(editIdx!==null){ cart[editIdx] = item; } else { cart.push(item); }
+  document.getElementById('qtyModal').classList.remove('show');
+  document.getElementById('q').value = ''; renderResults(); renderCartbar();
+  if(editIdx!==null){ openCart(); editIdx = null; }
+}
+
+/* ===== 写真(モック: ダミー画像) ===== */
+const PH_GRADS = ['linear-gradient(135deg,#d9a066,#a3714b)','linear-gradient(135deg,#8aa36b,#5c744a)','linear-gradient(135deg,#c98d8d,#8d5b5b)','linear-gradient(135deg,#7fa6b8,#4e7286)'];
+let photos = { asa: [], hiru: [], yu: [], kan: [] };
+let phSeq = 2;
+const PAST_PHOTOS = { '2026-08-15': { hiru: [{gi:1}] } };
+function photosOf(ds, key){ return ds===TODAY ? photos[key] : ((PAST_PHOTOS[ds]||{})[key]||[]); }
+function addPhoto(key){
+  photos[key].push({ gi: phSeq++ });
+  renderDay();
+}
+let phCtx = null;
+function openPhoto(key, i){
+  const isPast = selDate!==TODAY;
+  const list = photosOf(selDate, key);
+  const ph = list[i]; if(!ph) return;
+  phCtx = { key, i };
+  document.getElementById('phpanel').innerHTML = `
+    <h3>写真</h3>
+    <div class="phbig" style="background:${PH_GRADS[ph.gi%PH_GRADS.length]}"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/></svg></div>
+    <div class="unote" style="margin:0 0 10px">モックのダミー画像です。実装では実際の食事写真が入ります(のりも同じ写真を見て添削します)。</div>
+    ${isPast ? '' : `<button class="phdel" onclick="delPhoto()">この写真を外す</button>`}
+  `;
+  const modal = document.getElementById('phModal');
+  modal.classList.add('show');
+  modal.onclick = e => { if(e.target===modal) modal.classList.remove('show'); };
+}
+function delPhoto(){
+  photos[phCtx.key].splice(phCtx.i, 1);
+  document.getElementById('phModal').classList.remove('show');
+  renderDay();
+}
+
+/* ===== カート ===== */
+function cartSum(){ return cart.reduce((a,x)=>({kcal:a.kcal+x.kcal,p:a.p+x.p,f:a.f+x.f,c:a.c+x.c}),{kcal:0,p:0,f:0,c:0}); }
+function renderCartbar(){
+  const bar = document.getElementById('cartbar');
+  if(!cart.length){
+    document.getElementById('cartCnt').innerHTML = 'まだ何も入っていません<small>品を選ぶとここに溜まります</small>';
+    document.getElementById('cartKc').textContent = ''; document.getElementById('cartHint').textContent = '';
+    return;
+  }
+  const s = cartSum();
+  document.getElementById('cartCnt').innerHTML = `夕食に ${cart.length}品`;
+  document.getElementById('cartKc').textContent = `${Math.round(s.kcal)} kcal`;
+  document.getElementById('cartHint').textContent = 'タップして確認・保存 ▲';
+}
+function openCart(){
+  if(!cart.length) return;
+  const s = cartSum();
+  document.getElementById('cpanel').innerHTML = `
+    <div class="cs-head"><h3>今日の夕食 (${cart.length}品)</h3><div class="kc">${Math.round(s.kcal)} kcal ・ P${r1(s.p)} F${r1(s.f)} C${r1(s.c)}</div></div>
+    ${cart.some(x=>x.noVal) ? `<div class="unote" style="margin:0 0 8px">「--」は数値なしの記録です(合計には入りません。写真とメモでのりが見ます)。</div>` : ''}
+    ${cart.map((x,i)=>`<div class="cs-item">
+      <div class="l" onclick="document.getElementById('cartModal').classList.remove('show'); ${x.customFree?`openCustom(null, ${i})`:`openQty(${x.foodId}, ${i})`}">
+        <div class="nm">${x.customFree?x.name:x.name.replace(/ [^ ]+$/,'')}</div><div class="qt">${x.disp} ・ タップで${x.customFree?'名前・中身・数値を編集':'量・内訳を編集'}</div>
+      </div>
+      <div class="kc">${x.noVal?'--':Math.round(x.kcal)}</div>
+      <button class="del" onclick="cart.splice(${i},1); renderCartbar(); cart.length ? openCart() : document.getElementById('cartModal').classList.remove('show')">×</button>
+    </div>`).join('')}
+    <textarea class="cs-memo" rows="2" placeholder="メモ(内訳や気づいたことを自由に)"></textarea>
+    <button class="qok" onclick="saveDinner()">保存する</button>
+    <div class="unote" style="text-align:center">夕食の保存後は、生活記録4問に進みます</div>
+  `;
+  const modal = document.getElementById('cartModal');
+  modal.classList.add('show');
+  modal.onclick = e => { if(e.target===modal) modal.classList.remove('show'); };
+}
+function saveDinner(){
+  dinner = JSON.parse(JSON.stringify(cart));  // 完全体で保存(再編集可能)
+  cart = [];
+  document.getElementById('cartModal').classList.remove('show');
+  go('inter');
+}
+
+renderDay();
+</script>
+</body>
+</html>
