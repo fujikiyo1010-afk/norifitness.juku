@@ -8,7 +8,7 @@
 //   4. ★ ナビゲーション キャッシュ (= 一度開いたページを再訪時 瞬時表示)
 //   5. ★ 静的アセット キャッシュ (= /icons / 画像等を network-first → cache-fallback)
 
-const CACHE_VERSION = "v15-2026-08-19-meal-shinso";
+const CACHE_VERSION = "v16-2026-08-19-meal-migaki5";
 const CACHE_PAGES = `pages-${CACHE_VERSION}`;
 const CACHE_STATIC = `static-${CACHE_VERSION}`;
 

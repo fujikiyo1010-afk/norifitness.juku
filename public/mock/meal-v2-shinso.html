@@ -87,12 +87,13 @@
   .addfree{ padding:11px; border:1.5px dashed #cbd5d1; border-radius:12px; text-align:center; font-size:12.5px; color:var(--sub); cursor:pointer; margin-bottom:7px; }
 
   /* カートバー */
-  .cartbar{ position:absolute; left:0; right:0; bottom:0; background:#fff; border-top:1px solid var(--line); padding:12px 16px 16px; z-index:10; box-shadow:0 -6px 16px rgba(0,0,0,.08); cursor:pointer; }
-  .cartbar .in{ display:flex; align-items:center; justify-content:space-between; }
-  .cartbar .cnt{ font-size:13.5px; font-weight:800; }
-  .cartbar .cnt small{ font-weight:600; color:var(--sub); margin-left:6px; }
-  .cartbar .kc{ font-size:15px; font-weight:800; color:var(--teal-d); }
-  .cartbar .openhint{ font-size:10.5px; color:var(--sub); margin-top:3px; }
+  .cartbar{ position:absolute; left:0; right:0; bottom:0; background:var(--bg); border-top:1px solid var(--line); padding:10px 16px 16px; z-index:10; cursor:pointer; }
+  .cartbar .empty{ font-size:13.5px; font-weight:800; }
+  .cartbar .empty small{ font-weight:600; color:var(--sub); margin-left:6px; }
+  .cartbar .gobtn{ display:flex; align-items:center; justify-content:space-between; width:100%; border:none; border-radius:13px; background:var(--teal); box-shadow:0 3px 0 var(--teal-d); padding:13px 14px; cursor:pointer; font-family:inherit; }
+  .cartbar .gobtn .l{ font-size:12.5px; font-weight:700; color:rgba(255,255,255,.92); }
+  .cartbar .gobtn .l b{ font-size:13.5px; font-weight:800; color:#fff; margin-left:6px; }
+  .cartbar .gobtn .r{ font-size:14px; font-weight:800; color:#fff; }
 
   /* モーダル共通 */
   .modal{ position:absolute; inset:0; background:rgba(0,0,0,.45); z-index:20; display:none; align-items:flex-end; }
@@ -102,10 +103,10 @@
   .src{ font-size:11px; color:var(--teal-d); background:var(--teal-bg); display:inline-block; padding:2px 9px; border-radius:99px; font-weight:700; margin-bottom:10px; }
   .src.manual{ color:var(--gold); background:var(--gold-bg); }
   .src.noval{ color:#6b7280; background:#f0f1f3; }
-  .cnm-in{ width:100%; padding:10px 12px; border:1.5px solid var(--line); border-radius:10px; font-size:14px; font-weight:700; outline:none; margin:2px 0 10px; }
+  .cnm-in{ width:100%; padding:10px 12px; border:1.5px solid var(--line); border-radius:10px; font-size:14px; font-weight:700; outline:none; margin:2px 0 10px; background:#fff; }
   .cnm-in:focus{ border-color:var(--teal); }
   .cgin{ display:flex; align-items:center; gap:8px; margin:0 0 6px; }
-  .cgin input{ width:110px; padding:9px 10px; border:1.5px solid var(--line); border-radius:10px; font-size:15px; font-weight:700; text-align:center; outline:none; }
+  .cgin input{ width:110px; padding:9px 10px; border:1.5px solid var(--line); border-radius:10px; font-size:15px; font-weight:700; text-align:center; outline:none; background:#fff; }
   .cgin input:focus{ border-color:var(--teal); }
   .cgin span{ font-size:12px; font-weight:700; color:var(--sub); }
   .unit-switch{ display:flex; background:var(--gray-bg); border-radius:10px; padding:3px; margin:6px 0 12px; }
@@ -117,7 +118,7 @@
   .stepper .val b{ font-size:28px; font-weight:800; }
   .stepper .val span{ display:block; font-size:11.5px; color:var(--sub); margin-top:2px; }
   .ginput{ display:flex; align-items:center; justify-content:center; gap:8px; margin:8px 0 4px; }
-  .ginput input{ width:120px; padding:12px; border:2px solid var(--teal); border-radius:12px; font-size:22px; font-weight:800; text-align:center; outline:none; }
+  .ginput input{ width:120px; padding:12px; border:2px solid var(--teal); border-radius:12px; font-size:22px; font-weight:800; text-align:center; outline:none; background:#fff; }
   .ginput span{ font-size:14px; font-weight:700; color:var(--sub); }
   .calcline{ text-align:center; margin:10px 0 4px; }
   .calcline b{ font-size:22px; font-weight:800; color:var(--teal-d); }
@@ -137,7 +138,7 @@
   .urow .ux{ width:22px; height:22px; border:none; background:#fee2e2; color:#b91c1c; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer; flex:none; }
   .uadd{ margin-top:8px; }
   .uadd .uadd-btn{ width:100%; padding:8px; border:1.5px dashed var(--teal); border-radius:10px; background:#fff; color:var(--teal-d); font-size:12px; font-weight:700; cursor:pointer; }
-  .uadd input{ width:100%; padding:9px 12px; border:1.5px solid var(--teal); border-radius:10px; font-size:13px; outline:none; margin-bottom:6px; display:none; }
+  .uadd input{ width:100%; padding:9px 12px; border:1.5px solid var(--teal); border-radius:10px; font-size:13px; outline:none; margin-bottom:6px; display:none; background:#fff; }
   .uadd input.show{ display:block; }
   .uadd .mini-res .item{ padding:8px 10px; margin-bottom:5px; }
   .unote{ font-size:10.5px; color:var(--sub); margin-top:8px; line-height:1.5; }
@@ -159,7 +160,7 @@
   .cs-item .del{ width:26px; height:26px; border:none; background:#fee2e2; color:#b91c1c; border-radius:8px; font-weight:700; cursor:pointer; flex:none; }
   .cs-extra{ display:flex; gap:8px; margin:10px 0; }
   .cs-extra .tbtn{ flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:10px 0; border:1.5px solid var(--line); border-radius:10px; background:#fff; font-size:12.5px; font-weight:600; color:var(--sub); cursor:pointer; }
-  .cs-memo{ width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:10px; font-size:13px; outline:none; margin-bottom:10px; resize:none; font-family:inherit; }
+  .cs-memo{ width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:10px; font-size:13px; outline:none; margin-bottom:10px; resize:none; font-family:inherit; background:#fff; }
   .cs-empty{ text-align:center; color:var(--sub); font-size:12.5px; padding:18px 0; }
 
   /* 週チップ(案4: 下線型) */
@@ -286,8 +287,7 @@
     <div class="catchips" id="cats"></div>
     <div class="scroll" id="res"></div>
     <div class="cartbar" id="cartbar" onclick="openCart()">
-      <div class="in"><div class="cnt" id="cartCnt">まだ何も入っていません<small>品を選ぶとここに溜まります</small></div><div class="kc" id="cartKc"></div></div>
-      <div class="openhint" id="cartHint"></div>
+      <div class="empty">まだ何も入っていません<small>品を選ぶとここに溜まります</small></div>
     </div>
   </div>
 
@@ -552,14 +552,19 @@ function makeDraft(f, existing){
   return { foodId: f.id, name: f.name, baseG: f.g, grams: f.g, custom: false, manual: null,
            recipe: rec ? rec.map(m=>({...m})) : null };
 }
-function calcDraft(d){
-  if(d.manual) return d.manual;
+function calcAuto(d){
   if(d.recipe){
     const kcal = d.recipe.reduce((s,m)=>s+m.g*m.kcalPerG,0);
     return { kcal, p: d.recipe.reduce((s,m)=>s+m.g*m.p,0), f: d.recipe.reduce((s,m)=>s+m.g*m.f,0), c: d.recipe.reduce((s,m)=>s+m.g*m.c,0) };
   }
   const f = FOODS.find(x=>x.id===d.foodId); const r = d.grams/d.baseG;
   return { kcal: f.kcal*r, p: f.p*r, f: f.f*r, c: f.c*r };
+}
+/* 手入力はセル単位で上書き(未入力セルは自動値のまま) */
+function calcDraft(d){
+  const auto = calcAuto(d);
+  if(d.manual) return { kcal: d.manual.kcal ?? auto.kcal, p: d.manual.p ?? auto.p, f: d.manual.f ?? auto.f, c: d.manual.c ?? auto.c };
+  return auto;
 }
 function draftGrams(d){ return d.recipe ? d.recipe.reduce((s,m)=>s+m.g,0) : d.grams; }
 
@@ -625,10 +630,10 @@ function renderQty(f){
       <div class="mh" style="display:flex; align-items:center; justify-content:space-between; gap:8px;"><span style="flex:1">数値が合わない時は直接手入力もできます(手入力/金茶)</span>
         <span class="mreset" onclick="resetManual()" title="手入力をリセットして自動計算に戻す"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8a6d10" stroke-width="2.4"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></span></div>
       <div class="cells">
-        <input placeholder="kcal" id="m0" value="${cur.manual?Math.round(cur.manual.kcal):''}" oninput="manualIn()">
-        <input placeholder="P g" id="m1" value="${cur.manual?r1(cur.manual.p):''}" oninput="manualIn()">
-        <input placeholder="F g" id="m2" value="${cur.manual?r1(cur.manual.f):''}" oninput="manualIn()">
-        <input placeholder="C g" id="m3" value="${cur.manual?r1(cur.manual.c):''}" oninput="manualIn()">
+        <input placeholder="kcal" id="m0" value="${cur.manual&&cur.manual.kcal!=null?Math.round(cur.manual.kcal):''}" oninput="manualIn()">
+        <input placeholder="P g" id="m1" value="${cur.manual&&cur.manual.p!=null?r1(cur.manual.p):''}" oninput="manualIn()">
+        <input placeholder="F g" id="m2" value="${cur.manual&&cur.manual.f!=null?r1(cur.manual.f):''}" oninput="manualIn()">
+        <input placeholder="C g" id="m3" value="${cur.manual&&cur.manual.c!=null?r1(cur.manual.c):''}" oninput="manualIn()">
       </div>
     </div>
     <button class="qok" onclick="commitQty()">${editIdx!==null?'変更を保存':'この内容で追加'}</button>
@@ -667,7 +672,7 @@ function gInput(v){
 }
 function uwStep(i,d){ cur.recipe[i].g = Math.max(0, r1(cur.recipe[i].g + d)); cur.custom = true; cur.grams = draftGrams(cur); renderQty(); document.getElementById('uw').classList.add('show'); }
 function uwEdit(i, el){
-  el.outerHTML = `<input id="ugIn" value="${r1(cur.recipe[i].g)}" inputmode="decimal" style="width:54px; padding:3px 2px; border:1.5px solid var(--teal); border-radius:6px; text-align:center; font-size:12.5px; font-weight:700; outline:none;" onblur="uwEditDone(${i},this.value)" onkeydown="if(event.key==='Enter')this.blur()">`;
+  el.outerHTML = `<input id="ugIn" value="${r1(cur.recipe[i].g)}" inputmode="decimal" style="width:54px; padding:3px 2px; border:1.5px solid var(--teal); border-radius:6px; text-align:center; font-size:12.5px; font-weight:700; outline:none; background:#fff;" onblur="uwEditDone(${i},this.value)" onkeydown="if(event.key==='Enter')this.blur()">`;
   const inp = document.getElementById('ugIn'); inp.focus(); inp.select();
 }
 function uwEditDone(i, v){
@@ -694,10 +699,8 @@ function resetManual(){
   renderQty();
 }
 function manualIn(){
-  const v = ['m0','m1','m2','m3'].map(id=>parseFloat(document.getElementById(id).value));
-  if(v.some(x=>!isNaN(x))){
-    cur.manual = { kcal: v[0]||0, p: v[1]||0, f: v[2]||0, c: v[3]||0 };
-  } else cur.manual = null;
+  const cells = ['m0','m1','m2','m3'].map(id=>{ const n=parseFloat(document.getElementById(id).value); return isNaN(n)?null:n; });
+  cur.manual = cells.some(x=>x!=null) ? { kcal: cells[0], p: cells[1], f: cells[2], c: cells[3] } : null;
   const val = calcDraft(cur);
   document.querySelector('#qpanel .calcline b').textContent = Math.round(val.kcal);
 }
@@ -726,15 +729,15 @@ function openCustom(name, fromCartIdx){
   if(!cur.name){ const el=document.getElementById('cNm'); if(el) el.focus(); }
 }
 function cCalcVal(){
-  if(cur.manual) return cur.manual;
-  if(cur.mats && cur.mats.length){
-    return { kcal: cur.mats.reduce((s,m)=>s+m.g*m.kcalPerG,0), p: cur.mats.reduce((s,m)=>s+m.g*m.p,0), f: cur.mats.reduce((s,m)=>s+m.g*m.f,0), c: cur.mats.reduce((s,m)=>s+m.g*m.c,0) };
-  }
-  return null;
+  const auto = (cur.mats && cur.mats.length)
+    ? { kcal: cur.mats.reduce((s,m)=>s+m.g*m.kcalPerG,0), p: cur.mats.reduce((s,m)=>s+m.g*m.p,0), f: cur.mats.reduce((s,m)=>s+m.g*m.f,0), c: cur.mats.reduce((s,m)=>s+m.g*m.c,0) }
+    : null;
+  if(cur.manual) return { kcal: cur.manual.kcal ?? (auto?auto.kcal:null), p: cur.manual.p ?? (auto?auto.p:null), f: cur.manual.f ?? (auto?auto.f:null), c: cur.manual.c ?? (auto?auto.c:null) };
+  return auto;
 }
 function cBadge(){ return cur.manual ? ['manual','手入力(金茶)'] : (cur.mats&&cur.mats.length) ? ['','表から自動計算(緑)'] : ['noval','数値なし']; }
 function customPfcLine(v){
-  return `<span>P <b>${v?r1(v.p):'--'}</b>g</span><span>F <b>${v?r1(v.f):'--'}</b>g</span><span>C <b>${v?r1(v.c):'--'}</b>g</span>`;
+  return `<span>P <b>${v&&v.p!=null?r1(v.p):'--'}</b>g</span><span>F <b>${v&&v.f!=null?r1(v.f):'--'}</b>g</span><span>C <b>${v&&v.c!=null?r1(v.c):'--'}</b>g</span>`;
 }
 let cwCol = 'kcal';
 function cColVal(m){
@@ -805,7 +808,7 @@ function cAddPick(id){
 function cStep(i,d){ cur.mats[i].g = Math.max(0, r1(cur.mats[i].g + d)); renderCustomQty(); }
 function cDel(i){ cur.mats.splice(i,1); renderCustomQty(); }
 function cEdit(i, el){
-  el.outerHTML = `<input id="cgIn" value="${r1(cur.mats[i].g)}" inputmode="decimal" style="width:54px; padding:3px 2px; border:1.5px solid var(--teal); border-radius:6px; text-align:center; font-size:12.5px; font-weight:700; outline:none;" onblur="cEditDone(${i},this.value)" onkeydown="if(event.key==='Enter')this.blur()">`;
+  el.outerHTML = `<input id="cgIn" value="${r1(cur.mats[i].g)}" inputmode="decimal" style="width:54px; padding:3px 2px; border:1.5px solid var(--teal); border-radius:6px; text-align:center; font-size:12.5px; font-weight:700; outline:none; background:#fff;" onblur="cEditDone(${i},this.value)" onkeydown="if(event.key==='Enter')this.blur()">`;
   const inp = document.getElementById('cgIn'); inp.focus(); inp.select();
 }
 function cEditDone(i, v){
@@ -814,10 +817,10 @@ function cEditDone(i, v){
   renderCustomQty();
 }
 function customManualIn(){
-  const v4 = ['m0','m1','m2','m3'].map(id=>parseFloat(document.getElementById(id).value));
-  cur.manual = v4.some(x=>!isNaN(x)) ? { kcal: v4[0]||0, p: v4[1]||0, f: v4[2]||0, c: v4[3]||0 } : null;
+  const v4 = ['m0','m1','m2','m3'].map(id=>{ const n=parseFloat(document.getElementById(id).value); return isNaN(n)?null:n; });
+  cur.manual = v4.some(x=>x!=null) ? { kcal: v4[0], p: v4[1], f: v4[2], c: v4[3] } : null;
   const v = cCalcVal();
-  document.getElementById('cKc').textContent = v ? Math.round(v.kcal) : '--';
+  document.getElementById('cKc').textContent = v && v.kcal!=null ? Math.round(v.kcal) : '--';
   document.getElementById('cPfc').innerHTML = customPfcLine(v);
   const bg = cBadge();
   const b = document.getElementById('cBadge');
@@ -827,7 +830,7 @@ function commitCustom(){
   const nm = (cur.name||'').trim();
   if(!nm){ const el=document.getElementById('cNm'); el.style.borderColor='#dc2626'; el.placeholder='名前を入れてください(ここだけ必須です)'; el.focus(); return; }
   const val = cCalcVal();
-  const v = val || { kcal:0, p:0, f:0, c:0 };
+  const v = val || { kcal:null, p:null, f:null, c:null };
   const grams = (cur.mats && cur.mats.length) ? cur.mats.reduce((s,m)=>s+m.g,0) : cur.grams;
   const item = { ...cur, name:nm, noVal: !val, disp: grams?`約${Math.round(grams)}g`:'量は未記入', kcal:v.kcal, p:v.p, f:v.f, c:v.c };
   if(editIdx!==null){ cart[editIdx] = item; } else { cart.push(item); }
@@ -869,18 +872,15 @@ function delPhoto(){
 }
 
 /* ===== カート ===== */
-function cartSum(){ return cart.reduce((a,x)=>({kcal:a.kcal+x.kcal,p:a.p+x.p,f:a.f+x.f,c:a.c+x.c}),{kcal:0,p:0,f:0,c:0}); }
+function cartSum(){ return cart.reduce((a,x)=>({kcal:a.kcal+(x.kcal||0),p:a.p+(x.p||0),f:a.f+(x.f||0),c:a.c+(x.c||0)}),{kcal:0,p:0,f:0,c:0}); }
 function renderCartbar(){
   const bar = document.getElementById('cartbar');
   if(!cart.length){
-    document.getElementById('cartCnt').innerHTML = 'まだ何も入っていません<small>品を選ぶとここに溜まります</small>';
-    document.getElementById('cartKc').textContent = ''; document.getElementById('cartHint').textContent = '';
+    bar.innerHTML = '<div class="empty">まだ何も入っていません<small>品を選ぶとここに溜まります</small></div>';
     return;
   }
   const s = cartSum();
-  document.getElementById('cartCnt').innerHTML = `夕食に ${cart.length}品`;
-  document.getElementById('cartKc').textContent = `${Math.round(s.kcal)} kcal`;
-  document.getElementById('cartHint').textContent = 'タップして確認・保存 ▲';
+  bar.innerHTML = `<button class="gobtn" type="button"><span class="l">夕食に ${cart.length}品<b>${Math.round(s.kcal)} kcal</b></span><span class="r">確認して保存 ▲</span></button>`;
 }
 function openCart(){
   if(!cart.length) return;
@@ -892,7 +892,7 @@ function openCart(){
       <div class="l" onclick="document.getElementById('cartModal').classList.remove('show'); ${x.customFree?`openCustom(null, ${i})`:`openQty(${x.foodId}, ${i})`}">
         <div class="nm">${x.customFree?x.name:x.name.replace(/ [^ ]+$/,'')}</div><div class="qt">${x.disp} ・ タップで${x.customFree?'名前・中身・数値を編集':'量・内訳を編集'}</div>
       </div>
-      <div class="kc">${x.noVal?'--':Math.round(x.kcal)}</div>
+      <div class="kc">${x.kcal==null?'--':Math.round(x.kcal)}</div>
       <button class="del" onclick="cart.splice(${i},1); renderCartbar(); cart.length ? openCart() : document.getElementById('cartModal').classList.remove('show')">×</button>
     </div>`).join('')}
     <textarea class="cs-memo" rows="2" placeholder="メモ(内訳や気づいたことを自由に)"></textarea>
