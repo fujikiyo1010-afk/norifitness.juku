@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>食事カードの写真の見え方 3案+入口2案</title>
+<style>
+  :root{ --teal:#14b8a6; --teal-d:#0f766e; --teal-bg:#f0fdfa; --ink:#1f2937; --sub:#6b7280; --line:#e5e7eb; --bg:#f6f7f8; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  body{ font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif; background:#d1d5db; color:var(--ink); display:flex; flex-direction:column; align-items:center; gap:16px; padding:20px 0 80px; }
+  .note{ max-width:390px; width:100%; background:#fffbe6; border:1px solid #f4d67c; border-radius:10px; padding:10px 12px; font-size:12px; line-height:1.6; color:#7a5d00; }
+  .sect{ max-width:390px; width:100%; font-size:14px; font-weight:800; margin-top:6px; }
+  .case{ width:390px; }
+  .case .label{ font-size:13px; font-weight:800; margin-bottom:6px; }
+  .case .label small{ font-weight:600; color:#4b5563; font-size:11px; margin-left:6px; }
+  .frame{ background:var(--bg); border-radius:18px; padding:12px; box-shadow:0 4px 14px rgba(0,0,0,.12); }
+  .slot{ background:#fff; border-radius:16px; padding:14px; }
+  .slot .top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:2px; }
+  .slot .name{ font-size:14px; font-weight:700; display:flex; align-items:center; gap:7px; }
+  .slot .tag{ font-size:9.5px; font-weight:700; color:var(--teal-d); background:var(--teal-bg); padding:2px 8px; border-radius:99px; }
+  .slot .sum{ font-size:13.5px; font-weight:800; color:var(--teal-d); }
+  .slot ul{ list-style:none; }
+  .slot li{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:7px 0; border-top:1px dashed #eef0f0; font-size:13px; }
+  .slot li:first-child{ border-top:none; }
+  .slot li .r{ text-align:right; flex:none; }
+  .slot li .r b{ font-size:13px; font-weight:700; color:#374151; }
+  .slot li .r small{ display:block; font-size:9.5px; color:var(--sub); margin-top:1px; }
+  .slot .hint{ font-size:10px; color:var(--sub); margin-top:8px; }
+  /* 写真タイル(モックのダミー画像) */
+  .ph{ border-radius:10px; background:linear-gradient(135deg,#d9a066,#a3714b); position:relative; overflow:hidden; flex:none; }
+  .ph.g2{ background:linear-gradient(135deg,#8aa36b,#5c744a); }
+  .ph svg{ position:absolute; inset:0; margin:auto; opacity:.85; }
+  /* 案1: サムネ横並び */
+  .phrow{ display:flex; gap:7px; margin-top:10px; }
+  .phrow .ph{ width:58px; height:58px; }
+  .phrow .add{ width:58px; height:58px; border:1.5px dashed #cbd5d1; border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; color:var(--sub); font-size:9px; font-weight:700; cursor:pointer; background:#fff; }
+  /* 案2: 代表1枚 */
+  .bigph{ margin-top:10px; }
+  .bigph .ph{ width:100%; height:118px; border-radius:12px; }
+  .bigph .more{ position:absolute; right:8px; bottom:8px; background:rgba(0,0,0,.55); color:#fff; font-size:11px; font-weight:800; padding:3px 9px; border-radius:99px; }
+  .bigph .addline{ margin-top:7px; font-size:11px; font-weight:700; color:var(--sub); display:flex; align-items:center; gap:5px; cursor:pointer; }
+  /* 案3: アイコン畳み */
+  .camchip{ display:flex; align-items:center; gap:4px; font-size:11px; font-weight:700; color:var(--teal-d); background:var(--teal-bg); padding:3px 9px; border-radius:99px; cursor:pointer; }
+  .fold{ display:none; }
+  .fold.show{ display:flex; }
+  /* 未記録スロット */
+  .addbtn{ width:100%; padding:11px; border:none; border-radius:12px; background:#faf3dc; color:#8a6d10; font-size:13.5px; font-weight:700; cursor:pointer; }
+  .rowab{ display:flex; gap:8px; margin-top:2px; }
+  .rowab .addbtn{ flex:1; }
+  .camsq{ width:44px; height:44px; flex:none; border:1.5px solid var(--line); border-radius:12px; background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .photodash{ margin-top:8px; width:100%; padding:10px; border:1.5px dashed #cbd5d1; border-radius:12px; background:#fff; color:var(--sub); font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer; }
+</style>
+</head>
+<body>
+
+<div class="note"><b>写真は「1日の画面の食事カードから」に一本化</b>が確定したので、その見え方の比較です。<b>前半: 写真が付いている食事カードの表示3案</b>(写真2枚付きの夕食・画像はダミー)/<b>後半: まだ何もない食事カードの写真入口2案</b>(写真だけの人はここが入口)。案3はタップが動きます。前半と後半を1つずつ選んでください。</div>
+
+<div class="sect">■ 前半: 写真が付いた食事カードの見え方</div>
+
+<div class="case">
+  <div class="label">写真案1(推奨) <small>サムネ横並び型: 品リストの下に小さく並ぶ+「＋」枠が常設(あすけん系)</small></div>
+  <div class="frame"><div class="slot">
+    <div class="top"><div class="name">夕食 <span class="tag">記録済み</span></div><div class="sum">355 kcal</div></div>
+    <ul>
+      <li><span>ごはん 1杯</span><span class="r"><b>234</b><small>P3.8 F0.5 C55.7</small></span></li>
+      <li><span>サラダチキン(市販・プレーン) 1袋</span><span class="r"><b>121</b><small>P26 F1.5 C1</small></span></li>
+    </ul>
+    <div class="phrow">
+      <div class="ph"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/></svg></div>
+      <div class="ph g2"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/></svg></div>
+      <div class="add"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.2"/></svg>追加</div>
+    </div>
+    <div class="hint">サムネをタップすると拡大。「＋追加」からいつでも足せます(未保存でも保存後でも)。</div>
+  </div></div>
+</div>
+
+<div class="case">
+  <div class="label">写真案2 <small>代表1枚型: 1枚目を大きく・残りは「+1」。写真が主役に見える</small></div>
+  <div class="frame"><div class="slot">
+    <div class="top"><div class="name">夕食 <span class="tag">記録済み</span></div><div class="sum">355 kcal</div></div>
+    <ul>
+      <li><span>ごはん 1杯</span><span class="r"><b>234</b><small>P3.8 F0.5 C55.7</small></span></li>
+      <li><span>サラダチキン(市販・プレーン) 1袋</span><span class="r"><b>121</b><small>P26 F1.5 C1</small></span></li>
+    </ul>
+    <div class="bigph">
+      <div class="ph"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.4"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/></svg><span class="more">+1</span></div>
+      <div class="addline"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.2"/></svg>写真を追加</div>
+    </div>
+    <div class="hint">タップで全枚を拡大表示。カードの縦が一番伸びます。</div>
+  </div></div>
+</div>
+
+<div class="case">
+  <div class="label">写真案3 <small>アイコン畳み型: 見出しにカメラ+枚数だけ・タップで開閉(動きます)。カードが一番スリム</small></div>
+  <div class="frame"><div class="slot">
+    <div class="top"><div class="name">夕食 <span class="tag">記録済み</span><span class="camchip" onclick="document.getElementById('f3').classList.toggle('show')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.2"/></svg>2</span></div><div class="sum">355 kcal</div></div>
+    <ul>
+      <li><span>ごはん 1杯</span><span class="r"><b>234</b><small>P3.8 F0.5 C55.7</small></span></li>
+      <li><span>サラダチキン(市販・プレーン) 1袋</span><span class="r"><b>121</b><small>P26 F1.5 C1</small></span></li>
+    </ul>
+    <div class="phrow fold" id="f3">
+      <div class="ph"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/></svg></div>
+      <div class="ph g2"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/></svg></div>
+      <div class="add"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.2"/></svg>追加</div>
+    </div>
+    <div class="hint">見出しのカメラ「2」をタップすると開きます。普段は畳まれていてスリム。</div>
+  </div></div>
+</div>
+
+<div class="sect">■ 後半: まだ何もない食事カードの写真入口(写真だけの人はここから)</div>
+
+<div class="case">
+  <div class="label">入口案a(推奨) <small>横並び型: 記録ボタンの横にカメラの正方形。1行に収まる</small></div>
+  <div class="frame"><div class="slot">
+    <div class="top"><div class="name">夕食</div></div>
+    <div class="rowab">
+      <button class="addbtn">＋ 記録する</button>
+      <div class="camsq"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.2"/></svg></div>
+    </div>
+    <div class="hint">カメラを押すと撮影/アルバム→即この夕食に付いて「記録済み(写真のみ)」になります。品選びは経由しません。</div>
+  </div></div>
+</div>
+
+<div class="case">
+  <div class="label">入口案b <small>下段型: 記録ボタンの下に点線の写真枠。目立つが縦に伸びる</small></div>
+  <div class="frame"><div class="slot">
+    <div class="top"><div class="name">夕食</div></div>
+    <button class="addbtn">＋ 記録する</button>
+    <div class="photodash"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.2"/></svg>写真を付ける</div>
+    <div class="hint">押すと撮影/アルバム→即この夕食に付きます。</div>
+  </div></div>
+</div>
+
+</body>
+</html>

@@ -160,11 +160,13 @@ export type DailyWord = {
   status: "sent" | "checked" | "skipped";
 };
 
+import type { AdminMealItemData } from "@/components/admin/AdminMealItems";
+
 export type DailyMealForAdmin = {
   mealType: string; // 朝/昼/夕/間
   postedAt: string;
   memo: string | null;
-  items: string[];
+  items: AdminMealItemData[];
   photoUrls: string[];
 };
 
@@ -259,7 +261,7 @@ export async function getDailyDetail(
     // S2-D: 親(meal_logs)→子(meal_log_items)の2往復をネストselectで1往復に(service role)。
     const { data: mealRows } = await admin
       .from("meal_logs")
-      .select("id, meal_type, posted_at, memo, photos, meal_log_items(name, sort_order)")
+      .select("id, meal_type, posted_at, memo, photos, meal_log_items(name, sort_order, kcal, protein_g, fat_g, carb_g, source, grams, recipe_snapshot)")
       .eq("user_id", userId)
       .eq("date", dateStr)
       .order("posted_at", { ascending: true });
@@ -269,7 +271,17 @@ export async function getDailyDetail(
       posted_at: string;
       memo: string | null;
       photos: string[] | null;
-      meal_log_items: { name: string; sort_order: number | null }[] | null;
+      meal_log_items: {
+        name: string;
+        sort_order: number | null;
+        kcal: number | null;
+        protein_g: number | null;
+        fat_g: number | null;
+        carb_g: number | null;
+        source: string | null;
+        grams: number | null;
+        recipe_snapshot: { name: string; grams: number; kcal: number | null }[] | null;
+      }[] | null;
     }[];
     if (rows.length > 0) {
       const allPaths = rows.flatMap((r) => r.photos ?? []);
@@ -284,10 +296,19 @@ export async function getDailyDetail(
       }
       const order: Record<string, number> = { 朝: 0, 昼: 1, 夕: 2, 間: 3 };
       for (const r of rows) {
-        const items = (r.meal_log_items ?? [])
+        const items: AdminMealItemData[] = (r.meal_log_items ?? [])
           .slice()
           .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
-          .map((i) => i.name);
+          .map((i) => ({
+            name: i.name,
+            kcal: i.kcal,
+            p: i.protein_g,
+            f: i.fat_g,
+            c: i.carb_g,
+            source: i.source,
+            grams: i.grams,
+            recipe: i.recipe_snapshot ?? null,
+          }));
         meals.push({
           mealType: r.meal_type,
           postedAt: r.posted_at,

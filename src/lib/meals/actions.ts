@@ -16,7 +16,7 @@ type ActionResult<T = undefined> =
 
 export type MealItemInput = {
   name: string;
-  source?: "table" | "manual" | "none";
+  source?: "table" | "built" | "manual" | "none";
   food_table_id?: string | null;
   quantity?: number | null;
   unit?: string | null;
@@ -24,6 +24,8 @@ export type MealItemInput = {
   protein_g?: number | null;
   fat_g?: number | null;
   carb_g?: number | null;
+  grams?: number | null;
+  recipe_snapshot?: import("./types").RecipeSnapshotItem[] | null;
 };
 
 const VALID_TYPES: MealType[] = ["朝", "昼", "夕", "間"];
@@ -42,6 +44,8 @@ function normalizeItems(items: MealItemInput[], userScopeOk: boolean) {
       protein_g: it.protein_g ?? null,
       fat_g: it.fat_g ?? null,
       carb_g: it.carb_g ?? null,
+      grams: it.grams ?? null,
+      recipe_snapshot: it.recipe_snapshot ?? null,
       sort_order: i,
     }));
 }

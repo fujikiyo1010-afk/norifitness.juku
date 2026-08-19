@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { BottomSheet } from "@/app/record/BottomSheet";
 import { deleteMealLog } from "@/lib/meals/actions";
 import { sumMeals, MEAL_TYPES, MEAL_LABEL, type MealLog, type MealType, type FoodItem } from "@/lib/meals/types";
-import { MealSheet } from "./MealSheet";
+import { MealSheet } from "./MealSheetLegacy";
 import { LifeConditionForm } from "./LifeConditionForm";
 import {
   hasAnyCondition,
@@ -17,7 +17,7 @@ import {
 } from "@/lib/conditions/types";
 
 type MealWithUrls = MealLog & { photoUrls: string[] };
-export type TargetPFC = { kcal: number | null; p: number | null; f: number | null; c: number | null };
+type TargetPFC = { kcal: number | null; p: number | null; f: number | null; c: number | null };
 
 const DAY = 86_400_000;
 
@@ -93,7 +93,7 @@ function WeekStrip({
   );
 }
 
-export function DayDetail({
+export function DayDetailLegacy({
   date,
   meals,
   today,

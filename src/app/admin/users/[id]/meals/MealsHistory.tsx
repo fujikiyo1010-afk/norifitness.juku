@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { AdminMealDay } from "@/lib/admin/meals";
 import { PhotoLightbox } from "@/components/PhotoLightbox";
+import { AdminMealItems, AdminDayMealTotal } from "@/components/admin/AdminMealItems";
 
 const MEAL_LABEL: Record<string, string> = {
   朝: "朝食",
@@ -63,6 +64,7 @@ export function MealsHistory({ days }: { days: AdminMealDay[] }) {
 
             {isOpen && (
               <div className="space-y-2 border-t border-[#eef1f0] bg-[#fafbfb] px-4 py-3">
+                <AdminDayMealTotal meals={day.meals} />
                 {day.meals.map((m, i) => (
                   <div key={i} className="flex items-start gap-3">
                     {m.photoUrls[0] ? (
@@ -95,11 +97,7 @@ export function MealsHistory({ days }: { days: AdminMealDay[] }) {
                           {timeLabel(m.postedAt)}
                         </span>
                       </div>
-                      {m.items.length > 0 && (
-                        <div className="text-[11px] text-zinc-600">
-                          {m.items.join("、")}
-                        </div>
-                      )}
+                      <AdminMealItems items={m.items} />
                       {m.memo && (
                         <div className="text-[11px] italic text-zinc-400">{m.memo}</div>
                       )}
