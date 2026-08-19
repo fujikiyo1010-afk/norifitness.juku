@@ -122,6 +122,7 @@ const CATS = [
   "副菜・野菜",
   "洋食おかず",
   "コンビニ・市販",
+  "ナッシュ",
   "間食・デザート",
   "飲料・酒",
   "素材(追加)",
@@ -223,10 +224,21 @@ export function MealSheetV2({
     return { hits: list.slice(0, 20), total: list.length, filtered: !!s || cat !== "すべて" };
   }, [foods, q, cat]);
 
-  const popular = useMemo(
-    () => foods.filter((f) => f.isPriority).slice(0, 5),
-    [foods]
-  );
+  // よく使うもの(初期表示)= 受講生の実記録の頻出順(2026-08集計)。無ければ優先フラグ上位で補完
+  const popular = useMemo(() => {
+    const wanted = [
+      "ごはん 茶碗1杯",
+      "プロテイン(WPC) 1杯",
+      "ゆで卵 1個",
+      "鶏むね(皮なし) 120g",
+      "納豆 1パック",
+      "バナナ 1本",
+    ];
+    const byName = new Map(foods.map((f) => [f.name, f]));
+    const hits = wanted.map((n) => byName.get(n)).filter((f): f is FoodItem => !!f);
+    if (hits.length >= 4) return hits;
+    return foods.filter((f) => f.isPriority).slice(0, 6);
+  }, [foods]);
 
   // ─── 量パネルを開く(表の品) ───
   async function openQty(f: FoodItem, fromIdx: number | null = null) {
