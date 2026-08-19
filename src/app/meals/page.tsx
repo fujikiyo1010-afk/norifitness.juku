@@ -7,6 +7,8 @@ import { getMealsForDates, signMealPhotos } from "@/lib/meals/queries";
 import { getActiveFoods } from "@/lib/meals/food";
 import { getDailyConditions, shouldAskYesterday } from "@/lib/conditions/queries";
 import { DayDetailV2, type DayData } from "./DayDetailV2";
+import { DayDetailLegacy } from "./DayDetailLegacy";
+import { isMealV2User } from "@/lib/auth/meal-v2-gate";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +24,8 @@ export default async function MealsDayPage({
 }) {
   const isBeta = await isBetaUser();
   if (!isBeta) redirect("/");
+  // 食事新装の4人ゲート(2026-08-19): リスト外は従来画面(Legacy)のまま
+  const mealV2 = await isMealV2User();
 
   const sp = await searchParams;
   const today = jstTodayStr();
@@ -98,19 +102,36 @@ export default async function MealsDayPage({
   return (
     <>
       <MemberHeader title="食事" fallbackHref="/" />
-      <main className="min-h-[100dvh] bg-[#f6f7f8]">
+      <main className={`min-h-[100dvh] ${mealV2 ? "bg-[#f6f7f8]" : "bg-[#f9f5ed]"}`}>
         <div className="mx-auto max-w-[460px] px-4 py-4">
-          <DayDetailV2
-            initialDate={date}
-            today={today}
-            week={week}
-            target={target}
-            userId={user.id}
-            canEditPast={canEditPast}
-            askYesterday={askYesterday}
-            foods={foods}
-            autoOpenLife={autoOpenLife}
-          />
+          {mealV2 ? (
+            <DayDetailV2
+              initialDate={date}
+              today={today}
+              week={week}
+              target={target}
+              userId={user.id}
+              canEditPast={canEditPast}
+              askYesterday={askYesterday}
+              foods={foods}
+              autoOpenLife={autoOpenLife}
+            />
+          ) : (
+            <DayDetailLegacy
+              date={date}
+              meals={week.find((d) => d.date === date)?.meals ?? []}
+              today={today}
+              feedback={week.find((d) => d.date === date)?.feedback ?? null}
+              target={target}
+              userId={user.id}
+              canEditPast={canEditPast}
+              condition={week.find((d) => d.date === date)?.condition ?? null}
+              askYesterday={askYesterday}
+              foods={foods}
+              recordedDates={week.filter((d) => d.meals.length > 0).map((d) => d.date)}
+              autoOpenLife={autoOpenLife}
+            />
+          )}
         </div>
       </main>
     </>
