@@ -32,7 +32,7 @@ export async function getMealsForDate(date: string): Promise<MealLog[]> {
   const { data: logs } = await supabase
     .from("meal_logs")
     .select(
-      "id, date, meal_type, posted_at, memo, photos, meal_log_items(id, name, source, food_table_id, quantity, unit, kcal, protein_g, fat_g, carb_g, sort_order)"
+      "id, date, meal_type, posted_at, memo, photos, meal_log_items(id, name, source, food_table_id, quantity, unit, kcal, protein_g, fat_g, carb_g, grams, recipe_snapshot, sort_order)"
     )
     .eq("user_id", user.id)
     .eq("date", date)
@@ -103,4 +103,42 @@ export async function getMealLogById(id: string): Promise<MealLog | null> {
     photos: (log.photos as string[] | null) ?? [],
     items: (items ?? []) as MealItem[],
   };
+}
+
+/** 複数日(週先読み用)の自分の食事を一括で返す。返りは date→logs のマップ(全日キーあり)。 */
+export async function getMealsForDates(dates: string[]): Promise<Record<string, MealLog[]>> {
+  const out: Record<string, MealLog[]> = {};
+  for (const d of dates) out[d] = [];
+  if (dates.length === 0) return out;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return out;
+
+  const { data: logs } = await supabase
+    .from("meal_logs")
+    .select(
+      "id, date, meal_type, posted_at, memo, photos, meal_log_items(id, name, source, food_table_id, quantity, unit, kcal, protein_g, fat_g, carb_g, grams, recipe_snapshot, sort_order)"
+    )
+    .eq("user_id", user.id)
+    .in("date", dates)
+    .order("posted_at", { ascending: true });
+
+  const rows = (logs ?? []) as (Omit<MealLog, "items"> & {
+    meal_log_items: MealItem[] | null;
+  })[];
+  for (const r of rows) {
+    const { meal_log_items, ...rest } = r;
+    const items = (meal_log_items ?? []).slice().sort((a, b) => a.sort_order - b.sort_order);
+    (out[rest.date] ??= []).push({ ...rest, photos: rest.photos ?? [], items });
+  }
+  for (const d of Object.keys(out)) {
+    out[d].sort(
+      (a, b) =>
+        MEAL_ORDER[a.meal_type] - MEAL_ORDER[b.meal_type] ||
+        a.posted_at.localeCompare(b.posted_at)
+    );
+  }
+  return out;
 }

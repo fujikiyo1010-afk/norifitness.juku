@@ -63,3 +63,31 @@ export async function shouldAskYesterday(yesterday: string): Promise<boolean> {
   ]);
   return !cond && (meals?.length ?? 0) > 0;
 }
+
+/** 複数日(週先読み用)の生活記録を一括で返す。行が無い日はキーごと欠落。 */
+export async function getDailyConditions(
+  dates: string[]
+): Promise<Record<string, DailyConditionData>> {
+  const out: Record<string, DailyConditionData> = {};
+  if (dates.length === 0) return out;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return out;
+
+  const { data } = await supabase
+    .from("daily_conditions")
+    .select("date, sleep_hours, condition, bowel, alcohol")
+    .eq("user_id", user.id)
+    .in("date", dates);
+  for (const row of (data ?? []) as Record<string, unknown>[]) {
+    out[row.date as string] = {
+      sleepHours: (row.sleep_hours as number | null) ?? null,
+      condition: (row.condition as Condition | null) ?? null,
+      bowel: (row.bowel as Bowel | null) ?? null,
+      alcohol: (row.alcohol as Alcohol | null) ?? null,
+    };
+  }
+  return out;
+}
