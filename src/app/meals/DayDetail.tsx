@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { BottomSheet } from "@/app/record/BottomSheet";
 import { deleteMealLog } from "@/lib/meals/actions";
 import { sumMeals, MEAL_TYPES, MEAL_LABEL, type MealLog, type MealType, type FoodItem } from "@/lib/meals/types";
-import { MealSheet } from "./MealSheet";
+import { MealSheetV2 } from "./MealSheetV2";
 import { LifeConditionForm } from "./LifeConditionForm";
 import {
   hasAnyCondition,
@@ -366,7 +366,7 @@ export function DayDetail({
         title={sheet ? `${MEAL_LABEL[sheet.mealType]}を記録` : undefined}
       >
         {sheet && (
-          <MealSheet
+          <MealSheetV2
             userId={userId}
             date={date}
             mealType={sheet.mealType}
