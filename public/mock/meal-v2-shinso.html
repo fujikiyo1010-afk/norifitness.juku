@@ -164,15 +164,15 @@
   .cs-empty{ text-align:center; color:var(--sub); font-size:12.5px; padding:18px 0; }
 
   /* 週チップ(案4: 下線型) */
-  .weekchips{ display:flex; padding:8px 14px 2px; }
-  .weekchips a{ flex:1; text-align:center; padding:4px 0 7px; border-bottom:2.5px solid transparent; position:relative; cursor:pointer; }
-  .weekchips a .dw{ display:block; font-size:9.5px; color:var(--sub); }
-  .weekchips a .dn{ display:block; font-size:15px; font-weight:700; margin-top:2px; color:#374151; }
-  .weekchips a.sel{ border-bottom-color:var(--teal-d); }
-  .weekchips a.sel .dn{ color:var(--teal-d); font-weight:800; }
+  .weekchips{ display:flex; gap:3px; padding:2px 8px 6px; }
+  .weekchips a{ flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:6px 0 8px; border-radius:13px; position:relative; cursor:pointer; }
+  .weekchips a .dw{ font-size:10px; color:#a59b8c; font-weight:700; }
+  .weekchips a .dn{ font-size:15px; font-weight:800; color:var(--ink); width:30px; height:30px; display:flex; align-items:center; justify-content:center; border-radius:50%; }
+  .weekchips a.sat .dw, .weekchips a.sat .dn{ color:#3f6fd8; }
+  .weekchips a.sun .dw, .weekchips a.sun .dn{ color:#c2693f; }
+  .weekchips a.sel .dn{ background:#4a875b; color:#fff; }
   .weekchips a.fut{ opacity:.4; cursor:default; }
-  .weekchips a .dot{ position:absolute; left:50%; transform:translateX(-50%); bottom:2px; width:4px; height:4px; border-radius:50%; background:var(--teal); }
-  .weekchips a.sel .dot{ display:none; }
+  .weekchips a .dot{ position:absolute; left:50%; transform:translateX(-50%); bottom:1px; width:5px; height:5px; border-radius:50%; background:#4a875b; }
   /* 内訳の列切替タブ(案C) */
   .coltabs{ display:flex; gap:4px; margin:2px 0 6px; }
   .coltabs b{ padding:4px 12px; border-radius:99px; background:#fff; border:1px solid var(--line); font-size:10.5px; color:var(--sub); font-weight:700; cursor:pointer; }
@@ -180,18 +180,31 @@
   .todaybtn{ font-size:11px; color:var(--teal-d); font-weight:700; border:1px solid var(--teal); background:#fff; border-radius:99px; padding:4px 10px; cursor:pointer; }
   .datebtn{ display:flex; align-items:center; gap:5px; font-size:14px; font-weight:700; background:none; border:none; cursor:pointer; }
 
-  /* カレンダーピッカー */
-  .pick-head{ display:flex; align-items:center; justify-content:space-between; margin:4px 0 10px; }
-  .pick-head h3{ font-size:14.5px; font-weight:800; }
-  .pick-head button{ width:32px; height:32px; border:1px solid var(--line); background:#fff; border-radius:9px; font-size:14px; color:var(--sub); cursor:pointer; }
-  .pick-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:3px; margin-bottom:8px; }
-  .pick-grid .wd{ text-align:center; font-size:10px; color:var(--sub); padding:4px 0; font-weight:700; }
-  .pick-grid .d{ text-align:center; padding:9px 0; border-radius:10px; font-size:13px; font-weight:600; cursor:pointer; position:relative; }
-  .pick-grid .d:hover{ background:var(--teal-bg); }
-  .pick-grid .d.sel{ background:var(--teal-d); color:#fff; font-weight:800; }
-  .pick-grid .d.today{ box-shadow:inset 0 0 0 1.5px var(--teal); }
-  .pick-grid .d.out{ color:#c7ccd1; }
-  .pick-grid .d .dot{ position:absolute; left:50%; transform:translateX(-50%); bottom:2px; width:4px; height:4px; border-radius:50%; background:var(--teal); }
+  /* 上部ナビ+ドロップダウン月カレンダー(カレンダー画面と統一・修正6) */
+  .mcal-hd{ display:flex; align-items:center; justify-content:space-between; padding:8px 14px 0; }
+  .mcal-hd .mnavb{ width:32px; height:32px; display:flex; align-items:center; justify-content:center; border:none; background:none; border-radius:9px; font-size:20px; color:#6a6256; cursor:pointer; }
+  .mcal-hd .mnavb.dis{ opacity:.3; pointer-events:none; }
+  .mcal-hd .mdt{ font-size:16px; font-weight:800; color:var(--ink); display:inline-flex; align-items:center; gap:5px; padding:4px 8px; border-radius:9px; border:none; background:none; cursor:pointer; font-family:inherit; }
+  .mcal-hd .mdt.open{ background:#e9ecec; }
+  .mcal-hd .mdt .mcaret{ color:#a59b8c; transition:transform .2s; }
+  .mcal-hd .mdt.open .mcaret{ transform:rotate(180deg); }
+  .pickmask{ position:absolute; inset:0; z-index:29; }
+  .pickpop{ position:absolute; left:14px; right:14px; top:96px; z-index:30; }
+  .pdrop{ background:#fff; border:1px solid #ececef; border-radius:16px; padding:14px 13px 10px; box-shadow:0 14px 34px rgba(30,30,40,.20); }
+  .pick-head{ display:flex; align-items:center; justify-content:space-between; padding:0 2px 10px; }
+  .pick-head h3{ font-size:13.5px; font-weight:800; color:#202124; }
+  .pick-head button{ width:30px; height:30px; border:none; background:none; border-radius:8px; font-size:18px; color:#5f6368; cursor:pointer; }
+  .pick-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:1px 0; }
+  .pick-grid .wd{ text-align:center; font-size:10px; color:#70757a; padding-bottom:6px; font-weight:700; }
+  .pick-grid .wd.sun{ color:#d93025; } .pick-grid .wd.sat{ color:#1a73e8; }
+  .pick-grid .d{ aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; position:relative; cursor:pointer; }
+  .pick-grid .d i{ width:33px; height:33px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:13.5px; font-weight:600; color:#3c4043; font-style:normal; }
+  .pick-grid .d.sun i{ color:#d93025; } .pick-grid .d.sat i{ color:#1a73e8; }
+  .pick-grid .d.sel i{ background:#34603f; color:#fff; font-weight:800; }
+  .pick-grid .d.today i{ box-shadow:inset 0 0 0 1.5px #34603f; color:#34603f; }
+  .pick-grid .d.sel.today i{ color:#fff; }
+  .pick-grid .d.out i{ color:#dadce0; }
+  .pick-grid .d .dot{ position:absolute; left:50%; transform:translateX(-50%); bottom:2px; width:4px; height:4px; border-radius:50%; background:#34603f; }
 
   /* 生活記録行(b2) */
   .liferow{ margin:0 14px 12px; background:#fff; border-radius:14px; padding:11px 14px; display:flex; align-items:center; gap:8px; cursor:pointer; }
@@ -245,17 +258,16 @@
   <div class="screen show" id="scr-day">
     <div class="hd"><div class="row">
       <h1>食事</h1>
-      <div style="display:flex; align-items:center; gap:8px;">
-        <button class="todaybtn" id="todayBtn" onclick="selectDate(TODAY)" style="display:none">今日へ</button>
-        <div class="datenav">
-          <button onclick="moveDay(-1)">&lt;</button>
-          <button class="datebtn" onclick="openPicker()"><span id="dateLabel"></span>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
-          </button>
-          <button onclick="moveDay(1)">&gt;</button>
-        </div>
-      </div>
     </div></div>
+    <div class="mcal-hd">
+      <button class="mnavb" onclick="moveDay(-1)">‹</button>
+      <button class="mdt" id="mdtBtn" onclick="openPicker()"><span id="dateLabel"></span>
+        <svg class="mcaret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <button class="mnavb" id="nextBtn" onclick="moveDay(1)">›</button>
+    </div>
+    <div class="pickmask" id="pickMask" onclick="closePicker()" style="display:none"></div>
+    <div class="pickpop" id="pickPop" style="display:none"><div class="pdrop" id="ppanel"></div></div>
     <div class="weekchips" id="weekchips"></div>
     <div class="sum2">
       <div class="ring">
@@ -307,7 +319,6 @@
   <!-- ===== カートシート ===== -->
   <div class="modal" id="cartModal"><div class="panel" id="cpanel"></div></div>
   <!-- ===== カレンダーピッカー ===== -->
-  <div class="modal" id="pickModal"><div class="panel" id="ppanel"></div></div>
 
   <div class="modal" id="phModal"><div class="panel" id="phpanel"></div></div>
   <!-- ===== 生活記録4問シート ===== -->
@@ -339,7 +350,7 @@ const WD = ['日','月','火','水','木','金','土'];
 function d2obj(ds){ const [y,m,d] = ds.split('-').map(Number); return new Date(Date.UTC(y, m-1, d)); }
 function obj2d(dt){ return dt.toISOString().slice(0,10); }
 function addDays(ds, n){ const dt = d2obj(ds); dt.setUTCDate(dt.getUTCDate()+n); return obj2d(dt); }
-function dateLabel(ds){ const dt = d2obj(ds); return `${dt.getUTCMonth()+1}/${dt.getUTCDate()}(${WD[dt.getUTCDay()]})`; }
+function dateLabel(ds){ const dt = d2obj(ds); return `${dt.getUTCMonth()+1}月${dt.getUTCDate()}日 (${WD[dt.getUTCDay()]})`; }
 function hasRecord(ds){ return ds===TODAY || !!PAST_MEALS[ds]; }
 function mealsOf(ds){
   if(ds===TODAY) return { asa: FIXED.asa.items, hiru: FIXED.hiru.items, yu: dinner.map(x=>({name: x.customFree ? x.name+(x.grams?` 約${Math.round(x.grams)}g`:'') : x.name.replace(/ [^ ]+$/,'')+' '+x.disp.replace(/\(.*\)/,''), kcal:x.kcal,p:x.p,f:x.f,c:x.c, noVal:x.noVal})), kan: FIXED.kan.items };
@@ -366,9 +377,9 @@ function renderWeek(){
   for(let i=0;i<7;i++){
     const ds = addDays(sun, i); const d = d2obj(ds);
     const fut = ds > TODAY;
-    html += `<a class="${ds===selDate?'sel':''} ${fut?'fut':''}" ${fut?'':`onclick="selectDate('${ds}')"`}>
+    html += `<a class="${ds===selDate?'sel':''} ${fut?'fut':''} ${i===0?'sun':''} ${i===6?'sat':''}" ${fut?'':`onclick="selectDate('${ds}')"`}>
       <span class="dw">${WD[d.getUTCDay()]}</span><span class="dn">${d.getUTCDate()}</span>
-      ${hasRecord(ds)?'<span class="dot"></span>':''}</a>`;
+      ${hasRecord(ds)&&!fut?'<span class="dot"></span>':''}</a>`;
   }
   document.getElementById('weekchips').innerHTML = html;
 }
@@ -376,28 +387,35 @@ function renderWeek(){
 /* ===== カレンダーピッカー(a3: 選んだ日+その週へ) ===== */
 let pickYM = null;
 function openPicker(){
+  const pop = document.getElementById('pickPop');
+  if(pop.style.display !== 'none'){ closePicker(); return; }
   const d = d2obj(selDate); pickYM = [d.getUTCFullYear(), d.getUTCMonth()];
-  renderPicker(); document.getElementById('pickModal').classList.add('show');
-  const m = document.getElementById('pickModal'); m.onclick = e => { if(e.target===m) m.classList.remove('show'); };
+  renderPicker();
+  pop.style.display = ''; document.getElementById('pickMask').style.display = '';
+  document.getElementById('mdtBtn').classList.add('open');
+}
+function closePicker(){
+  document.getElementById('pickPop').style.display = 'none';
+  document.getElementById('pickMask').style.display = 'none';
+  document.getElementById('mdtBtn').classList.remove('open');
 }
 function pickMove(n){ pickYM[1]+=n; if(pickYM[1]<0){pickYM[1]=11;pickYM[0]--;} if(pickYM[1]>11){pickYM[1]=0;pickYM[0]++;} renderPicker(); }
 function renderPicker(){
   const [y,m] = pickYM;
   const first = new Date(Date.UTC(y,m,1)); const startDow = first.getUTCDay();
   const dim = new Date(Date.UTC(y,m+1,0)).getUTCDate();
-  let cells = WD.map(w=>`<div class="wd">${w}</div>`).join('');
-  for(let i=0;i<startDow;i++) cells += `<div></div>`;
+  let cells = WD.map((w,i)=>`<div class="wd ${i===0?'sun':''} ${i===6?'sat':''}">${w}</div>`).join('');
+  for(let i=0;i<startDow;i++) cells += `<div class="d"></div>`;
   for(let d=1;d<=dim;d++){
     const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const fut = ds > TODAY;
-    cells += `<div class="d ${ds===selDate?'sel':''} ${ds===TODAY?'today':''} ${fut?'out':''}" ${fut?'':`onclick="pickDate('${ds}')"`}>${d}${hasRecord(ds)?'<span class=dot></span>':''}</div>`;
+    const fut = ds > TODAY; const dow = (startDow + d - 1) % 7;
+    cells += `<div class="d ${dow===0?'sun':''} ${dow===6?'sat':''} ${ds===selDate?'sel':''} ${ds===TODAY?'today':''} ${fut?'out':''}" ${fut?'':`onclick="pickDate('${ds}')"`}><i>${d}</i>${hasRecord(ds)&&!fut?'<span class=dot></span>':''}</div>`;
   }
   document.getElementById('ppanel').innerHTML = `
-    <div class="pick-head"><button onclick="pickMove(-1)">&lt;</button><h3>${y}年${m+1}月</h3><button onclick="pickMove(1)">&gt;</button></div>
-    <div class="pick-grid">${cells}</div>
-    <div class="unote" style="text-align:center">日を選ぶと、その日とその週の表示に切り替わります</div>`;
+    <div class="pick-head"><button onclick="pickMove(-1)">‹</button><h3>${y}年 ${m+1}月</h3><button onclick="pickMove(1)">›</button></div>
+    <div class="pick-grid">${cells}</div>`;
 }
-function pickDate(ds){ document.getElementById('pickModal').classList.remove('show'); selectDate(ds); }
+function pickDate(ds){ closePicker(); selectDate(ds); }
 
 /* ===== 生活記録(4問) ===== */
 function lifeHTML(){
@@ -436,7 +454,7 @@ function saveLife(){
 function mealSum(items){ return items.reduce((a,x)=>({kcal:a.kcal+x.kcal,p:a.p+x.p,f:a.f+x.f,c:a.c+x.c}),{kcal:0,p:0,f:0,c:0}); }
 function renderDay(){
   document.getElementById('dateLabel').textContent = dateLabel(selDate);
-  document.getElementById('todayBtn').style.display = selDate===TODAY ? 'none' : '';
+  document.getElementById('nextBtn').classList.toggle('dis', selDate===TODAY);
   renderWeek();
   const m = mealsOf(selDate);
   const all = [...m.asa, ...m.hiru, ...m.yu, ...m.kan];
