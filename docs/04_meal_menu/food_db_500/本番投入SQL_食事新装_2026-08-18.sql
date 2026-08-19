@@ -30,6 +30,10 @@ alter table public.meal_log_items
   add column if not exists source text,
   add column if not exists recipe_snapshot jsonb;
 
+-- source制約の拡張('built'=組み立てを許可・2026-08-19実走検証で発見)
+alter table public.meal_log_items drop constraint if exists meal_log_items_source_check;
+alter table public.meal_log_items add constraint meal_log_items_source_check check (source = any (array['table'::text,'built'::text,'manual'::text,'none'::text]));
+
 insert into public.food_table (name,aliases,unit_type,base_qty,default_qty,step_qty,unit_label,kcal,protein_g,fat_g,carb_g,sort_order,is_active,category,method,is_priority,count_desc,unit_grams,notes) values
 ('鶏むね(皮なし) 120g',ARRAY['とりむね','鶏胸肉','むね肉']::text[],'weight',100,100,1,'g',126,28.0,2.3,0.1,100,true,'基本食材(のり監修)','確定済(のり監修)',true,'g(10刻み)',120,''),
 ('鶏ささみ 150g',ARRAY['ささみ','とりささみ']::text[],'weight',100,100,1,'g',147,35.8,1.2,0.2,101,true,'基本食材(のり監修)','確定済(のり監修)',true,'g(10刻み)',150,''),
