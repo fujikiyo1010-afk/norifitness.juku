@@ -100,6 +100,9 @@ export function DayDetailV2({
   const router = useRouter();
   const [selDate, setSelDate] = useState(initialDate);
   const [sheet, setSheet] = useState<{ mealType: MealType; editLog: MealWithUrls | null } | null>(null);
+  // 修正2(2026-08-19): シートに途中状態がある時、画面外タップで即捨てずに破棄確認を挟む
+  const [sheetDirty, setSheetDirty] = useState(false);
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
   const [lifeSheet, setLifeSheet] = useState<{ date: string; initial: DailyConditionData | null } | null>(
     autoOpenLife ? { date: initialDate, initial: week.find((d) => d.date === initialDate)?.condition ?? null } : null
   );
@@ -430,7 +433,7 @@ export function DayDetailV2({
       {/* 投稿/編集シート */}
       <BottomSheet
         open={!!sheet}
-        onClose={() => setSheet(null)}
+        onClose={() => (sheetDirty ? setConfirmDiscard(true) : setSheet(null))}
         title={sheet ? `${MEAL_LABEL[sheet.mealType]}を記録` : undefined}
       >
         {sheet && (
@@ -442,9 +445,45 @@ export function DayDetailV2({
             foods={foods}
             onClose={() => setSheet(null)}
             onSaved={onSaved}
+            onDirtyChange={setSheetDirty}
           />
         )}
       </BottomSheet>
+
+      {/* 破棄確認(画面外タップの全消し事故防止) */}
+      {confirmDiscard && (
+        <div
+          className="fixed inset-0 z-[90] flex items-end justify-center bg-black/40 px-4 pb-[calc(env(safe-area-inset-bottom)+16px)]"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="w-full max-w-[360px] rounded-2xl bg-white p-5 shadow-xl">
+            <div className="text-[14px] font-extrabold text-[#2b2620]">記録の途中です。入力した内容を捨てて閉じますか？</div>
+            <p className="mt-1.5 text-[12px] leading-relaxed text-[#6a6256]">
+              閉じると、選んだ品や入力した内容は保存されません。
+            </p>
+            <div className="mt-4 flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setConfirmDiscard(false);
+                  setSheet(null);
+                }}
+                className="w-full rounded-xl border-2 border-[#c2693f] py-2.5 text-[13px] font-extrabold text-[#b0532c]"
+              >
+                捨てて閉じる
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmDiscard(false)}
+                className="w-full rounded-xl bg-[#eef2ee] py-2.5 text-[13px] font-extrabold text-[#34603f]"
+              >
+                続ける
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 生活記録シート(4問) */}
       <BottomSheet open={!!lifeSheet} onClose={() => setLifeSheet(null)} title="今日の調子">
@@ -667,10 +706,12 @@ function TypeCard({
                       <span className="min-w-0 flex-1 truncate">{x.name}</span>
                       <span className="flex-none text-right">
                         <b className="block text-[13px] font-bold text-gray-700">
-                          {noVal ? "--" : Math.round(x.kcal ?? 0)}
+                          {x.kcal == null ? "--" : Math.round(x.kcal)}
                         </b>
                         <small className="block text-[9.5px] text-gray-500">
-                          {noVal ? "P-- F-- C--" : `P${r1(x.protein_g ?? 0)} F${r1(x.fat_g ?? 0)} C${r1(x.carb_g ?? 0)}`}
+                          {noVal
+                            ? "P-- F-- C--"
+                            : `P${x.protein_g == null ? "-" : r1(x.protein_g)} F${x.fat_g == null ? "-" : r1(x.fat_g)} C${x.carb_g == null ? "-" : r1(x.carb_g)}`}
                         </small>
                       </span>
                     </li>

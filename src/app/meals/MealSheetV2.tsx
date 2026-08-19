@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { createMealLog, updateMealLog, type MealItemInput } from "@/lib/meals/actions";
 import {
@@ -44,7 +44,7 @@ type Draft = {
   recipe: Mat[] | null; // 表の内訳(deep copy・調整可)
   recipeTouched: boolean;
   mats: Mat[]; // カスタム組み立て
-  manual: { kcal: number; p: number; f: number; c: number } | null;
+  manual: { kcal: number | null; p: number | null; f: number | null; c: number | null } | null; // 未入力セルはnull(勝手に0を入れない)
   method: string | null;
   // 表品のベース値(1単位あたり) — recipeが無い品のスケール計算用
   base: { kcal: number; p: number; f: number; c: number } | null;
@@ -62,9 +62,9 @@ function calcMats(ms: Mat[]) {
   };
 }
 
-/** 数値の決定則: 手入力 > 内訳/組み立て > 表の値×倍率 > なし */
-function calcDraft(d: Draft): { kcal: number; p: number; f: number; c: number } | null {
-  if (d.manual) return d.manual;
+type DraftVal = { kcal: number | null; p: number | null; f: number | null; c: number | null };
+
+function calcAuto(d: Draft): { kcal: number; p: number; f: number; c: number } | null {
   if (d.recipe && d.recipe.length) return calcMats(d.recipe);
   if (d.customFree) return d.mats.length ? calcMats(d.mats) : null;
   if (d.base && d.unitGrams > 0) {
@@ -72,6 +72,20 @@ function calcDraft(d: Draft): { kcal: number; p: number; f: number; c: number } 
     return { kcal: d.base.kcal * r, p: d.base.p * r, f: d.base.f * r, c: d.base.c * r };
   }
   return null;
+}
+
+/** 数値の決定則: 手入力 > 内訳/組み立て > 表の値×倍率 > なし。手入力はセル単位で上書き(未入力セルは自動値、無ければnull) */
+function calcDraft(d: Draft): DraftVal | null {
+  const auto = calcAuto(d);
+  if (d.manual) {
+    return {
+      kcal: d.manual.kcal ?? auto?.kcal ?? null,
+      p: d.manual.p ?? auto?.p ?? null,
+      f: d.manual.f ?? auto?.f ?? null,
+      c: d.manual.c ?? auto?.c ?? null,
+    };
+  }
+  return auto;
 }
 
 function draftGrams(d: Draft): number {
@@ -143,6 +157,7 @@ export function MealSheetV2({
   foods,
   onClose,
   onSaved,
+  onDirtyChange,
 }: {
   userId: string;
   date: string;
@@ -151,6 +166,8 @@ export function MealSheetV2({
   foods: FoodItem[];
   onClose: () => void;
   onSaved: (msg: string) => void;
+  /** 途中状態(品の出し入れ・メモ変更・パネル操作中)の有無を親へ。画面外タップの破棄確認に使う */
+  onDirtyChange?: (dirty: boolean) => void;
 }) {
   void userId;
   const isEdit = !!editLog;
@@ -162,6 +179,7 @@ export function MealSheetV2({
   const [memo, setMemo] = useState(editLog?.memo ?? "");
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [touched, setTouched] = useState(false);
 
   // カート(たまり場)。編集時は既存品を復元
   const [cart, setCart] = useState<Draft[]>(() =>
@@ -180,7 +198,7 @@ export function MealSheetV2({
       const isCustom = !it.food_table_id;
       const manual =
         it.source === "manual"
-          ? { kcal: it.kcal ?? 0, p: it.protein_g ?? 0, f: it.fat_g ?? 0, c: it.carb_g ?? 0 }
+          ? { kcal: it.kcal ?? null, p: it.protein_g ?? null, f: it.fat_g ?? null, c: it.carb_g ?? null }
           : null;
       return {
         key: nextKey(),
@@ -211,6 +229,12 @@ export function MealSheetV2({
   const [gEditIdx, setGEditIdx] = useState<number | null>(null);
   const [gEditVal, setGEditVal] = useState("");
   const [recipeLoading, setRecipeLoading] = useState(false);
+
+  // 途中状態の有無(新規=品が溜まっている/編集=何か変えた/量パネル操作中)。画面外タップの破棄確認用
+  const dirty = touched || cur != null || (!isEdit && cart.length > 0);
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+  }, [dirty, onDirtyChange]);
 
   // ─── 検索 ───
   const results = useMemo(() => {
@@ -368,6 +392,7 @@ export function MealSheetV2({
       return;
     }
     const item = { ...cur, name: cur.name.trim() };
+    setTouched(true);
     setCart((c) => {
       const next = [...c];
       if (editIdx != null) next[editIdx] = item;
@@ -409,10 +434,10 @@ export function MealSheetV2({
         quantity:
           !d.customFree && d.unitGrams > 0 ? r1((grams ?? d.unitGrams) / d.unitGrams) : null,
         unit: d.customFree ? null : d.unitLabel || null,
-        kcal: v ? Math.round(v.kcal) : null,
-        protein_g: v ? r1(v.p) : null,
-        fat_g: v ? r1(v.f) : null,
-        carb_g: v ? r1(v.c) : null,
+        kcal: v?.kcal != null ? Math.round(v.kcal) : null,
+        protein_g: v?.p != null ? r1(v.p) : null,
+        fat_g: v?.f != null ? r1(v.f) : null,
+        carb_g: v?.c != null ? r1(v.c) : null,
         grams: grams != null ? Math.round(grams) : null,
         recipe_snapshot: snapshot,
       };
@@ -435,7 +460,7 @@ export function MealSheetV2({
     let noVal = 0;
     for (const d of cart) {
       const v = calcDraft(d);
-      if (v) kcal += v.kcal;
+      if (v) kcal += v.kcal ?? 0;
       else noVal++;
     }
     return { kcal: Math.round(kcal), noVal };
@@ -488,7 +513,7 @@ export function MealSheetV2({
                     setGEditIdx(null);
                   }}
                   onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
-                  className="w-14 rounded-md border-[1.5px] border-teal-500 px-0.5 py-0.5 text-center text-[12.5px] font-bold outline-none"
+                  className="w-14 rounded-md border-[1.5px] border-teal-500 bg-white px-0.5 py-0.5 text-center text-[12.5px] font-bold outline-none"
                 />
               ) : (
                 <button
@@ -547,7 +572,7 @@ export function MealSheetV2({
           value={addQ}
           onChange={(e) => setAddQ(e.target.value)}
           placeholder="材料・料理を検索して足す(例: ごはん、からあげ)"
-          className="mb-1.5 w-full rounded-[10px] border-[1.5px] border-teal-500 px-3 py-2 text-[13px] outline-none"
+          className="mb-1.5 w-full rounded-[10px] border-[1.5px] border-teal-500 bg-white px-3 py-2 text-[13px] outline-none"
         />
         {addHits.map((f) => (
           <button
@@ -571,22 +596,16 @@ export function MealSheetV2({
   // 手入力4セル
   const renderManual4 = () => {
     if (!cur) return null;
+    // セルごと独立: 打ったセルだけ値を持つ。触っていないセルはnullのまま(0で埋めない)
     const setM = (idx: number, val: string) => {
       setCur((d) => {
         if (!d) return d;
-        const nums = [
-          idx === 0 ? val : d.manual ? String(d.manual.kcal) : "",
-          idx === 1 ? val : d.manual ? String(d.manual.p) : "",
-          idx === 2 ? val : d.manual ? String(d.manual.f) : "",
-          idx === 3 ? val : d.manual ? String(d.manual.c) : "",
-        ].map((s) => parseFloat(s));
-        const any = nums.some((x) => !isNaN(x));
-        return {
-          ...d,
-          manual: any
-            ? { kcal: nums[0] || 0, p: nums[1] || 0, f: nums[2] || 0, c: nums[3] || 0 }
-            : null,
-        };
+        const n = parseFloat(val);
+        const cell = isNaN(n) ? null : n;
+        const keys = ["kcal", "p", "f", "c"] as const;
+        const m = { ...(d.manual ?? { kcal: null, p: null, f: null, c: null }), [keys[idx]]: cell };
+        const any = m.kcal != null || m.p != null || m.f != null || m.c != null;
+        return { ...d, manual: any ? m : null };
       });
     };
     const v = cur.manual;
@@ -604,7 +623,16 @@ export function MealSheetV2({
               key={ph}
               placeholder={ph}
               inputMode="decimal"
-              defaultValue={v ? [Math.round(v.kcal), r1(v.p), r1(v.f), r1(v.c)][i] : ""}
+              defaultValue={
+                v
+                  ? [
+                      v.kcal != null ? Math.round(v.kcal) : "",
+                      v.p != null ? r1(v.p) : "",
+                      v.f != null ? r1(v.f) : "",
+                      v.c != null ? r1(v.c) : "",
+                    ][i]
+                  : ""
+              }
               onChange={(e) => setM(i, e.target.value)}
               className="w-1/4 flex-1 rounded-lg border border-[#e3cf8f] bg-white px-1 py-2 text-center text-[13px] outline-none"
             />
@@ -617,7 +645,7 @@ export function MealSheetV2({
   // ─── ビュー: 検索 ───
   if (view === "search") {
     return (
-      <div className="flex max-h-[78vh] flex-col">
+      <div className="flex h-[78vh] flex-col">
         <div className="relative mb-2 flex-none">
           <input
             value={q}
@@ -683,28 +711,26 @@ export function MealSheetV2({
               : "＋ 表にない食べ物を自分で記録(名前だけでもOK)"}
           </button>
         </div>
-        {/* カートバー */}
-        <div className="flex-none border-t border-gray-200 bg-white pt-2.5">
-          <button type="button" onClick={() => cart.length && setView("cart")} className="w-full text-left">
-            <div className="flex items-center justify-between">
-              <div className="text-[13.5px] font-extrabold">
-                {cart.length ? (
-                  `${MEAL_LABEL[mealType]}に ${cart.length}品`
-                ) : (
-                  <>
-                    まだ何も入っていません
-                    <span className="ml-1.5 text-[11px] font-semibold text-gray-500">品を選ぶとここに溜まります</span>
-                  </>
-                )}
-              </div>
-              {cart.length > 0 && (
-                <div className="text-[15px] font-extrabold text-teal-700">{cartSum.kcal} kcal</div>
-              )}
+        {/* カートバー(案2: 全面ボタン・横並び) */}
+        <div className="flex-none border-t border-gray-200 pt-2.5">
+          {cart.length ? (
+            <button
+              type="button"
+              onClick={() => setView("cart")}
+              className="flex w-full items-center justify-between rounded-[13px] bg-teal-500 px-3.5 py-3 shadow-[0_3px_0_#0f766e]"
+            >
+              <span className="text-[12.5px] font-bold text-white/90">
+                {MEAL_LABEL[mealType]}に {cart.length}品
+                <b className="ml-1.5 text-[13.5px] font-extrabold text-white">{cartSum.kcal} kcal</b>
+              </span>
+              <span className="text-[14px] font-extrabold text-white">確認して保存 ▲</span>
+            </button>
+          ) : (
+            <div className="text-[13.5px] font-extrabold">
+              まだ何も入っていません
+              <span className="ml-1.5 text-[11px] font-semibold text-gray-500">品を選ぶとここに溜まります</span>
             </div>
-            {cart.length > 0 && (
-              <div className="mt-0.5 text-[10.5px] text-gray-500">タップして確認・保存 ▲</div>
-            )}
-          </button>
+          )}
         </div>
       </div>
     );
@@ -737,7 +763,7 @@ export function MealSheetV2({
               value={cur.name}
               onChange={(e) => setCur((d) => (d ? { ...d, name: e.target.value } : d))}
               placeholder="名前(例: 会社の弁当、居酒屋の唐揚げ)"
-              className="mb-2.5 w-full rounded-[10px] border-[1.5px] border-gray-200 px-3 py-2.5 text-[14px] font-bold outline-none focus:border-teal-500"
+              className="mb-2.5 w-full rounded-[10px] border-[1.5px] border-gray-200 bg-white px-3 py-2.5 text-[14px] font-bold outline-none focus:border-teal-500"
             />
             {cur.mats.length > 0 ? (
               <div className="mb-1.5 text-[12px] font-bold text-gray-500">
@@ -752,7 +778,7 @@ export function MealSheetV2({
                     setCur((d) => (d ? { ...d, grams: parseFloat(e.target.value) || 0 } : d))
                   }
                   placeholder="量"
-                  className="w-28 rounded-[10px] border-[1.5px] border-gray-200 px-2 py-2 text-center text-[15px] font-bold outline-none focus:border-teal-500"
+                  className="w-28 rounded-[10px] border-[1.5px] border-gray-200 bg-white px-2 py-2 text-center text-[15px] font-bold outline-none focus:border-teal-500"
                 />
                 <span className="text-[12px] font-bold text-gray-500">g ・ わかれば(任意)</span>
               </div>
@@ -808,7 +834,7 @@ export function MealSheetV2({
                       const g = parseFloat(e.target.value) || 0;
                       if (g > 0) setCur((d) => (d ? scaleTo(d, g) : d));
                     }}
-                    className="w-[120px] rounded-xl border-2 border-teal-500 p-3 text-center text-[22px] font-extrabold outline-none"
+                    className="w-[120px] rounded-xl border-2 border-teal-500 bg-white p-3 text-center text-[22px] font-extrabold outline-none"
                   />
                   <span className="text-[14px] font-bold text-gray-500">g</span>
                 </div>
@@ -819,12 +845,12 @@ export function MealSheetV2({
 
         {/* 計算値 */}
         <div className="text-center text-[13px] text-gray-500">
-          <b className="text-2xl font-extrabold text-teal-700">{v ? Math.round(v.kcal) : "--"}</b> kcal
+          <b className="text-2xl font-extrabold text-teal-700">{v?.kcal != null ? Math.round(v.kcal) : "--"}</b> kcal
         </div>
         <div className="mb-2.5 flex justify-center gap-4 text-[12px] text-gray-500">
-          <span>P <b className="text-gray-900">{v ? r1(v.p) : "--"}</b>g</span>
-          <span>F <b className="text-gray-900">{v ? r1(v.f) : "--"}</b>g</span>
-          <span>C <b className="text-gray-900">{v ? r1(v.c) : "--"}</b>g</span>
+          <span>P <b className="text-gray-900">{v?.p != null ? r1(v.p) : "--"}</b>g</span>
+          <span>F <b className="text-gray-900">{v?.f != null ? r1(v.f) : "--"}</b>g</span>
+          <span>C <b className="text-gray-900">{v?.c != null ? r1(v.c) : "--"}</b>g</span>
         </div>
 
         {/* 内訳(表の積算品) */}
@@ -940,11 +966,14 @@ export function MealSheetV2({
               </div>
             </button>
             <div className="flex-none text-[14px] font-extrabold text-gray-700">
-              {v ? Math.round(v.kcal) : "--"}
+              {v?.kcal != null ? Math.round(v.kcal) : "--"}
             </div>
             <button
               type="button"
-              onClick={() => setCart((c) => c.filter((_, j) => j !== i))}
+              onClick={() => {
+                setTouched(true);
+                setCart((c) => c.filter((_, j) => j !== i));
+              }}
               className="h-6 w-6 flex-none rounded-md bg-red-100 text-[12px] font-bold text-red-700"
             >
               ×
@@ -954,10 +983,13 @@ export function MealSheetV2({
       })}
       <textarea
         value={memo}
-        onChange={(e) => setMemo(e.target.value)}
+        onChange={(e) => {
+          setTouched(true);
+          setMemo(e.target.value);
+        }}
         rows={2}
         placeholder="メモ(内訳や気づいたことを自由に)"
-        className="mb-2.5 mt-2 w-full rounded-xl border border-gray-200 p-2.5 text-[13px] outline-none focus:border-teal-500"
+        className="mb-2.5 mt-2 w-full rounded-xl border border-gray-200 bg-white p-2.5 text-[13px] outline-none focus:border-teal-500"
       />
       {err && <div className="mb-2 text-[12px] font-bold text-red-600">{err}</div>}
       <button

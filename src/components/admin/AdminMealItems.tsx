@@ -33,6 +33,8 @@ const SOURCE_BADGE: Record<string, { label: string; cls: string; title: string }
 };
 
 const r1 = (x: number) => Math.round(x * 10) / 10;
+// 未入力セルは「-」(0と区別。手入力がセル単位になった 2026-08-19 以降のデータで出る)
+const cell = (x: number | null) => (x == null ? "-" : String(r1(x)));
 
 /** 数値のある品だけの小計。無ければ null */
 export function sumAdminItems(items: AdminMealItemData[]): { kcal: number; p: number; f: number; c: number } | null {
@@ -85,9 +87,9 @@ export function AdminMealItems({ items }: { items: AdminMealItemData[] }) {
                 )}
               </span>
               <span className="flex-none text-right">
-                <b className="text-[11.5px] font-bold text-zinc-800">{noVal ? "--" : Math.round(it.kcal ?? 0)}</b>
+                <b className="text-[11.5px] font-bold text-zinc-800">{it.kcal == null ? "--" : Math.round(it.kcal)}</b>
                 <span className="ml-1 text-[9px] text-zinc-400">
-                  {noVal ? "" : `P${r1(it.p ?? 0)} F${r1(it.f ?? 0)} C${r1(it.c ?? 0)}`}
+                  {noVal ? "" : `P${cell(it.p)} F${cell(it.f)} C${cell(it.c)}`}
                 </span>
               </span>
             </button>
