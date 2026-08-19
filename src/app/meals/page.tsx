@@ -51,7 +51,7 @@ export default async function MealsDayPage({
 
   const yesterday = new Date(baseMs - DAY).toISOString().slice(0, 10);
 
-  const [mealsByDate, condByDate, fbRes, goalRes, askFlag, foods] = await Promise.all([
+  const [mealsByDate, condByDate, fbRes, goalRes, askFlag, foods, recRes] = await Promise.all([
     getMealsForDates(weekDates),
     getDailyConditions(weekDates),
     supabase
@@ -62,7 +62,13 @@ export default async function MealsDayPage({
     supabase.from("goal_sheets").select("content").eq("user_id", user.id).maybeSingle(),
     date === today ? shouldAskYesterday(yesterday) : Promise.resolve(false),
     getActiveFoods(),
+    // 記録ありドット用: 週バー+月カレンダーの両方で使うため全期間の記録日を取得(カレンダー画面と同じ流儀)
+    supabase.from("meal_logs").select("date").eq("user_id", user.id),
   ]);
+
+  const allRecordedDates = Array.from(
+    new Set(((recRes.data ?? []) as { date: string }[]).map((r) => r.date))
+  );
 
   // 写真の署名URLは週まとめて1回
   const allPaths = weekDates.flatMap((d) => mealsByDate[d].flatMap((m) => m.photos));
@@ -115,6 +121,7 @@ export default async function MealsDayPage({
               askYesterday={askYesterday}
               foods={foods}
               autoOpenLife={autoOpenLife}
+              recordedDates={allRecordedDates}
             />
           ) : (
             <DayDetailLegacy

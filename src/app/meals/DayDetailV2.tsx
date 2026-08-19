@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { BottomSheet } from "@/app/record/BottomSheet";
 import { createMealLog, updateMealLog, deleteMealLog, type MealItemInput } from "@/lib/meals/actions";
@@ -51,8 +51,46 @@ function shiftDate(date: string, d: number): string {
 }
 function labelDate(date: string): string {
   const dt = new Date(`${date}T00:00:00Z`);
-  return `${dt.getUTCMonth() + 1}/${dt.getUTCDate()}(${DOW[dt.getUTCDay()]})`;
+  return `${dt.getUTCMonth() + 1}月${dt.getUTCDate()}日 (${DOW[dt.getUTCDay()]})`;
 }
+
+// 上部ナビ+月カレンダー+週バー: カレンダー画面(CalendarDayView)と同じ見た目(修正6・2026-08-19)
+const MCAL_CSS = `
+.mcal{--ink:#2b2620;--ink2:#6a6256;--ink3:#a59b8c;--grn:#4a875b;--grn-d:#34603f;--blue:#3f6fd8;position:relative;color:var(--ink);}
+.mcal .cal-hd{display:flex;align-items:center;justify-content:space-between;padding:0 0 4px;}
+.mcal .cal-hd .hdt{font-size:16px;font-weight:800;color:var(--ink);display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:9px;background:none;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;font-family:inherit;}
+.mcal .cal-hd .hdt.open{background:#e9ecec;}
+.mcal .cal-hd .hdt .caret{width:13px;height:13px;color:var(--ink3);transition:transform .2s;}
+.mcal .cal-hd .hdt.open .caret{transform:rotate(180deg);}
+.mcal .cal-hd .navbtn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:20px;color:var(--ink2);background:none;border:none;cursor:pointer;}
+.mcal .cal-hd .navbtn.dis{opacity:.3;}
+.mcal .cal-pop-mask{position:fixed;inset:0;z-index:20;background:none;border:none;padding:0;cursor:default;}
+.mcal .cal-pop{position:absolute;left:0;right:0;top:42px;z-index:21;}
+.mcal .dropdown{background:#fff;border:1px solid #ececef;border-radius:16px;padding:14px 13px 10px;box-shadow:0 14px 34px rgba(30,30,40,.20);}
+.mcal .dropdown .mgrid-head{display:flex;align-items:center;justify-content:space-between;padding:0 2px 10px;}
+.mcal .dropdown .mgrid-head .mnav{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:#5f6368;font-size:18px;background:none;border:none;cursor:pointer;}
+.mcal .dropdown .mgrid-head .mtitle{font-size:13.5px;font-weight:800;color:#202124;}
+.mcal .dropdown .mgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px 0;}
+.mcal .dropdown .mgrid .wl{text-align:center;font-size:10px;font-weight:700;color:#70757a;padding-bottom:6px;}
+.mcal .dropdown .mgrid .wl.sun{color:#d93025;}.mcal .dropdown .mgrid .wl.sat{color:#1a73e8;}
+.mcal .dropdown .mgrid .c{aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;background:none;border:none;padding:0;cursor:pointer;font-family:inherit;}
+.mcal .dropdown .mgrid .c .dd{width:33px;height:33px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:13.5px;font-weight:600;color:#3c4043;}
+.mcal .dropdown .mgrid .c.sun .dd{color:#d93025;}.mcal .dropdown .mgrid .c.sat .dd{color:#1a73e8;}
+.mcal .dropdown .mgrid .c.sel .dd{background:var(--grn-d);color:#fff;font-weight:800;}
+.mcal .dropdown .mgrid .c.today .dd{box-shadow:inset 0 0 0 1.5px var(--grn-d);color:var(--grn-d);}
+.mcal .dropdown .mgrid .c.sel.today .dd{color:#fff;}
+.mcal .dropdown .mgrid .c.fut .dd{color:#dadce0;}
+.mcal .dropdown .mgrid .c .rec{width:4px;height:4px;border-radius:50%;background:var(--grn-d);position:absolute;bottom:2px;}
+.mcal .week{display:flex;gap:3px;padding:2px 0 0;}
+.mcal .week .day{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0 8px;border-radius:13px;position:relative;background:none;border:none;cursor:pointer;font-family:inherit;}
+.mcal .week .day .w{font-size:10px;color:var(--ink3);font-weight:700;}
+.mcal .week .day .d{font-size:15px;font-weight:800;color:var(--ink);width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:50%;}
+.mcal .week .day.sat .w,.mcal .week .day.sat .d{color:var(--blue);}
+.mcal .week .day.sun .w,.mcal .week .day.sun .d{color:#c2693f;}
+.mcal .week .day.on .d{background:var(--grn);color:#fff;}
+.mcal .week .day .rec{width:5px;height:5px;border-radius:50%;background:var(--grn);position:absolute;bottom:1px;}
+.mcal .week .day.future{opacity:.4;}
+`;
 function timeLabel(iso: string): string {
   const d = new Date(new Date(iso).getTime() + 9 * 3600 * 1000);
   return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`;
@@ -86,6 +124,7 @@ export function DayDetailV2({
   askYesterday = null,
   foods = [],
   autoOpenLife = false,
+  recordedDates = [],
 }: {
   initialDate: string;
   today: string;
@@ -96,9 +135,18 @@ export function DayDetailV2({
   askYesterday?: string | null;
   foods?: FoodItem[];
   autoOpenLife?: boolean;
+  /** 全期間の記録あり日(週バー+月カレンダーのドット用) */
+  recordedDates?: string[];
 }) {
   const router = useRouter();
   const [selDate, setSelDate] = useState(initialDate);
+  // 週外ジャンプ(router.push)ではこのコンポーネントが再マウントされずpropsだけ変わるため、
+  // initialDateの変化に選択日を追従させる(月カレンダーからの遠距離ジャンプで必須)
+  const [prevInitialDate, setPrevInitialDate] = useState(initialDate);
+  if (initialDate !== prevInitialDate) {
+    setPrevInitialDate(initialDate);
+    setSelDate(initialDate);
+  }
   const [sheet, setSheet] = useState<{ mealType: MealType; editLog: MealWithUrls | null } | null>(null);
   // 修正2(2026-08-19): シートに途中状態がある時、画面外タップで即捨てずに破棄確認を挟む
   const [sheetDirty, setSheetDirty] = useState(false);
@@ -137,6 +185,32 @@ export function DayDetailV2({
       router.push(`/meals?date=${ds}`);
     }
   }
+
+  // ─── 日付タップ → ドロップダウン月カレンダー(カレンダー画面と同じ流儀・修正6) ───
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerMonth, setPickerMonth] = useState(() => initialDate.slice(0, 7)); // "YYYY-MM"
+  const monthGrid = useMemo(() => {
+    const [y, m] = pickerMonth.split("-").map(Number);
+    const first = new Date(Date.UTC(y, m - 1, 1));
+    const lead = first.getUTCDay(); // 月初の曜日ぶん空セル
+    const daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
+    const cells: ({ ds: string; dnum: number; dow: number } | null)[] = [];
+    for (let i = 0; i < lead; i++) cells.push(null);
+    for (let d = 1; d <= daysInMonth; d++) {
+      const ds = `${pickerMonth}-${String(d).padStart(2, "0")}`;
+      cells.push({ ds, dnum: d, dow: (lead + d - 1) % 7 });
+    }
+    return { y, m, cells };
+  }, [pickerMonth]);
+  const shiftMonth = (delta: number) => {
+    const [y, m] = pickerMonth.split("-").map(Number);
+    const nd = new Date(Date.UTC(y, m - 1 + delta, 1));
+    setPickerMonth(`${nd.getUTCFullYear()}-${String(nd.getUTCMonth() + 1).padStart(2, "0")}`);
+  };
+  const openPicker = () => {
+    setPickerMonth(selDate.slice(0, 7));
+    setPickerOpen((v) => !v);
+  };
 
   function showToast(m: string) {
     setToast(m);
@@ -218,13 +292,12 @@ export function DayDetailV2({
     router.refresh();
   }
 
-  // ─── 週チップ(下線型) ───
+  // ─── 週バー(カレンダー画面と同じ見た目・修正6) ───
   const baseMs = Date.parse(`${selDate}T00:00:00Z`);
   const sundayMs = baseMs - new Date(baseMs).getUTCDay() * DAY;
   const weekDays = Array.from({ length: 7 }, (_, i) => {
     const ds = new Date(sundayMs + i * DAY).toISOString().slice(0, 10);
-    const d = byDate.get(ds);
-    return { ds, dow: i, num: new Date(sundayMs + i * DAY).getUTCDate(), hasRec: (d?.meals.length ?? 0) > 0 };
+    return { ds, dow: i, num: new Date(sundayMs + i * DAY).getUTCDate(), hasRec: recordedDates.includes(ds) };
   });
 
   const goalK = target?.kcal ?? null;
@@ -245,62 +318,92 @@ export function DayDetailV2({
         onChange={(e) => void onPhotoPicked(e.target.files?.[0] ?? null)}
       />
 
-      {/* 日付ナビ(モック カレンダー案2) */}
-      <div className="flex items-center justify-end gap-1.5">
-        {!isToday && (
+      {/* 日付ナビ+週バー(カレンダー画面と統一・修正6) */}
+      <div className="mcal">
+        <style>{MCAL_CSS}</style>
+        <div className="cal-hd">
           <button
             type="button"
-            onClick={() => selectDate(today)}
-            className="mr-auto rounded-full border border-teal-500 bg-white px-2.5 py-1 text-[11px] font-bold text-teal-700"
+            className="navbtn"
+            onClick={() => selectDate(shiftDate(selDate, -1))}
+            aria-label="前日"
           >
-            今日へ
+            ‹
           </button>
-        )}
-        <button
-          type="button"
-          onClick={() => selectDate(shiftDate(selDate, -1))}
-          className="h-7 w-7 rounded-lg border border-gray-200 bg-white text-[13px] text-gray-500"
-        >
-          &lt;
-        </button>
-        <span className="whitespace-nowrap rounded-lg border border-gray-200 bg-white px-2.5 py-1 text-[13.5px] font-bold">
-          {labelDate(selDate)}
-        </span>
-        <button
-          type="button"
-          onClick={() => selectDate(shiftDate(selDate, 1))}
-          disabled={selDate >= today}
-          className="h-7 w-7 rounded-lg border border-gray-200 bg-white text-[13px] text-gray-500 disabled:opacity-35"
-        >
-          &gt;
-        </button>
-      </div>
-
-      {/* 週チップ(下線型・記録ドット・未来薄く) */}
-      <div className="flex">
-        {weekDays.map((d) => {
-          const selected = d.ds === selDate;
-          const future = d.ds > today;
-          return (
+          <button type="button" className={`hdt ${pickerOpen ? "open" : ""}`} onClick={openPicker}>
+            {labelDate(selDate)}
+            <svg className="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round"><polyline points="6 9 12 15 18 9" /></svg>
+          </button>
+          {today > selDate ? (
             <button
-              key={d.ds}
               type="button"
-              disabled={future}
-              onClick={() => selectDate(d.ds)}
-              className={`relative flex-1 border-b-[2.5px] pb-1.5 pt-1 text-center ${
-                selected ? "border-teal-700" : "border-transparent"
-              } ${future ? "opacity-40" : ""}`}
+              className="navbtn"
+              onClick={() => selectDate(shiftDate(selDate, 1))}
+              aria-label="翌日"
             >
-              <span className="block text-[9.5px] text-gray-500">{DOW[d.dow]}</span>
-              <span className={`block text-[15px] font-bold ${selected ? "font-extrabold text-teal-700" : "text-gray-700"}`}>
-                {d.num}
-              </span>
-              {d.hasRec && !selected && (
-                <span className="absolute bottom-0.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-teal-500" />
-              )}
+              ›
             </button>
-          );
-        })}
+          ) : (
+            <span className="navbtn dis">›</span>
+          )}
+        </div>
+
+        {pickerOpen && (
+          <>
+            <button type="button" className="cal-pop-mask" aria-label="閉じる" onClick={() => setPickerOpen(false)} />
+            <div className="cal-pop">
+              <div className="dropdown">
+                <div className="mgrid-head">
+                  <button type="button" className="mnav" onClick={() => shiftMonth(-1)} aria-label="前の月">‹</button>
+                  <span className="mtitle">{monthGrid.y}年 {monthGrid.m}月</span>
+                  <button type="button" className="mnav" onClick={() => shiftMonth(1)} aria-label="次の月">›</button>
+                </div>
+                <div className="mgrid">
+                  {DOW.map((w, i) => (
+                    <div key={w} className={`wl ${i === 0 ? "sun" : ""} ${i === 6 ? "sat" : ""}`}>{w}</div>
+                  ))}
+                  {monthGrid.cells.map((c, i) => {
+                    if (!c) return <div className="c" key={`e${i}`} />;
+                    const future = c.ds > today;
+                    const cls = ["c", c.dow === 0 ? "sun" : "", c.dow === 6 ? "sat" : "", c.ds === selDate ? "sel" : "", c.ds === today ? "today" : "", future ? "fut" : ""].filter(Boolean).join(" ");
+                    const dot = recordedDates.includes(c.ds) && !future ? <span className="rec" /> : null;
+                    return future ? (
+                      <div className={cls} key={c.ds}><span className="dd">{c.dnum}</span></div>
+                    ) : (
+                      <button
+                        type="button"
+                        className={cls}
+                        key={c.ds}
+                        onClick={() => {
+                          setPickerOpen(false);
+                          selectDate(c.ds);
+                        }}
+                      >
+                        <span className="dd">{c.dnum}</span>
+                        {dot}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        <div className="week">
+          {weekDays.map((d) => {
+            const isSel = d.ds === selDate;
+            const future = d.ds > today;
+            const cls = ["day", isSel ? "on" : "", d.dow === 0 ? "sun" : "", d.dow === 6 ? "sat" : "", future ? "future" : ""].filter(Boolean).join(" ");
+            return (
+              <button key={d.ds} type="button" disabled={future} className={cls} onClick={() => selectDate(d.ds)}>
+                <span className="w">{DOW[d.dow]}</span>
+                <span className="d">{d.num}</span>
+                {d.hasRec && !future && <span className="rec" />}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* サマリー(リング+バー・超過は超過分だけ琥珀) */}
