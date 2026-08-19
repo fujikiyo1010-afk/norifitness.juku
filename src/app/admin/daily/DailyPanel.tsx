@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { AdminMealItems, AdminDayMealTotal } from "@/components/admin/AdminMealItems";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
@@ -376,6 +377,7 @@ function TodayTab({ detail }: { detail: DailyDetail }) {
           <PlaceholderBody text="この日の食事の記録はまだありません。写真から判断してコメントする場合は、この下のFB欄へ。" />
         ) : (
           <div className="space-y-2">
+            <AdminDayMealTotal meals={detail.meals} />
             {detail.meals.map((m, i) => (
               <div
                 key={i}
@@ -411,11 +413,7 @@ function TodayTab({ detail }: { detail: DailyDetail }) {
                       {mealTime(m.postedAt)}
                     </span>
                   </div>
-                  {m.items.length > 0 && (
-                    <div className="mt-0.5 text-[11px] text-zinc-600">
-                      {m.items.join("、")}
-                    </div>
-                  )}
+                  <AdminMealItems items={m.items} />
                   {m.memo && (
                     <div className="mt-0.5 text-[11px] italic text-zinc-400">
                       {m.memo}

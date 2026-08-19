@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import type { AdminMealItemData } from "@/components/admin/AdminMealItems";
 
 /**
  * 管理: ユーザーハブ「食事記録」タブ(M3/M4)のデータ。
@@ -10,9 +11,37 @@ export type AdminMealEntry = {
   mealType: string; // 朝/昼/夕/間
   postedAt: string;
   memo: string | null;
-  items: string[];
+  items: AdminMealItemData[];
   photoUrls: string[];
 };
+
+type RawItem = {
+  name: string;
+  sort_order: number | null;
+  kcal: number | null;
+  protein_g: number | null;
+  fat_g: number | null;
+  carb_g: number | null;
+  source: string | null;
+  grams: number | null;
+  recipe_snapshot: { name: string; grams: number; kcal: number | null }[] | null;
+};
+
+function toAdminItems(raw: RawItem[] | null): AdminMealItemData[] {
+  return (raw ?? [])
+    .slice()
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+    .map((i) => ({
+      name: i.name,
+      kcal: i.kcal,
+      p: i.protein_g,
+      f: i.fat_g,
+      c: i.carb_g,
+      source: i.source,
+      grams: i.grams,
+      recipe: i.recipe_snapshot ?? null,
+    }));
+}
 
 export type AdminMealDay = {
   date: string;
@@ -32,7 +61,7 @@ export async function getMealDaysForUser(
   // S2: 品目は親(meal_logs)にネスト取得(親子2往復→1)。
   const { data: logRows } = await admin
     .from("meal_logs")
-    .select("id, date, meal_type, posted_at, memo, photos, meal_log_items(name, sort_order)")
+    .select("id, date, meal_type, posted_at, memo, photos, meal_log_items(name, sort_order, kcal, protein_g, fat_g, carb_g, source, grams, recipe_snapshot)")
     .eq("user_id", userId)
     .order("date", { ascending: false })
     .order("posted_at", { ascending: true })
@@ -44,7 +73,7 @@ export async function getMealDaysForUser(
     posted_at: string;
     memo: string | null;
     photos: string[] | null;
-    meal_log_items: { name: string; sort_order: number | null }[] | null;
+    meal_log_items: RawItem[] | null;
   }[];
   if (logs.length === 0) return [];
 
@@ -81,10 +110,7 @@ export async function getMealDaysForUser(
   // 日別にまとめ
   const byDate = new Map<string, AdminMealEntry[]>();
   for (const l of logs) {
-    const items = (l.meal_log_items ?? [])
-      .slice()
-      .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
-      .map((i) => i.name);
+    const items = toAdminItems(l.meal_log_items ?? null);
     const arr = byDate.get(l.date) ?? [];
     arr.push({
       mealType: l.meal_type,
