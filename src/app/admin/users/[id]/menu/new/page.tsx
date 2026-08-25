@@ -67,7 +67,7 @@ export default async function AdminMenuNewPage({
     if (!currentMenu) {
       return (
         <div className="min-h-screen bg-zinc-50 p-6">
-          <div className="mx-auto max-w-3xl">
+          <div className="mx-auto max-w-[1400px]">
             <h1 className="text-lg font-bold text-zinc-900">
               メニュー編集
             </h1>
@@ -124,7 +124,7 @@ export default async function AdminMenuNewPage({
     // template も from_scratch もない → マッチング画面に戻す
     return (
       <div className="min-h-screen bg-zinc-50 p-6">
-        <div className="mx-auto max-w-3xl">
+        <div className="mx-auto max-w-[1400px]">
           <h1 className="text-lg font-bold text-zinc-900">
             メニュー配布
           </h1>

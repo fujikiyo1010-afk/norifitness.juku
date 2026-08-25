@@ -353,7 +353,7 @@ export function MenuComposeClient({
     <div className="min-h-screen bg-zinc-50">
       {/* ヘッダー */}
       <header className="sticky top-0 z-10 border-b border-[#e8ebe9] bg-white">
-        <div className="mx-auto max-w-3xl px-4 py-3 flex items-center gap-3">
+        <div className="mx-auto max-w-[1400px] px-4 py-3 flex items-center gap-3">
           <Link
             href={backHref}
             className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-zinc-100"
@@ -391,7 +391,7 @@ export function MenuComposeClient({
 
       {/* リクエスト処理中バナー (= /admin/requests から「メニューを編集」 で来た時のみ) */}
       {fromRequest && (
-        <div className="mx-auto max-w-3xl px-4 pt-4">
+        <div className="mx-auto max-w-[1400px] px-4 pt-4">
           <div className="rounded-[10px] border border-amber-300 bg-amber-50 px-4 py-3 flex items-center justify-between gap-3">
             <div className="text-sm text-amber-900">
               <span className="font-bold">リクエスト処理中です</span>
@@ -409,7 +409,7 @@ export function MenuComposeClient({
         </div>
       )}
 
-      <main className="mx-auto max-w-3xl px-4 py-6 space-y-5 pb-32">
+      <main className="mx-auto max-w-[1400px] px-4 py-6 space-y-5 pb-32">
         {/* のり氏メモ編集 */}
         <section className="rounded-[14px] border border-[#e8ebe9] bg-white p-5">
           <div className="mb-3 flex items-center gap-2">
@@ -717,7 +717,7 @@ export function MenuComposeClient({
 
       {/* フッタ固定 (配布ボタン) */}
       <div className="fixed bottom-0 left-0 right-0 border-t border-[#e8ebe9] bg-white px-4 py-3 shadow-[0_-2px_8px_rgba(0,0,0,0.04)]">
-        <div className="mx-auto max-w-3xl">
+        <div className="mx-auto max-w-[1400px]">
           {/* 再配布の切替方式(P5・進行中の受講生向け) */}
           <div className="mb-2 flex flex-wrap items-center gap-3 text-[11px] text-zinc-600">
             <span className="font-bold text-zinc-500">切替:</span>

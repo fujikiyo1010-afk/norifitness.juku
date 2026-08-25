@@ -276,7 +276,7 @@ export function GoalSheetAuditEditor({
 
       {/* 固定保存バー */}
       <div className="fixed bottom-0 left-0 right-0 border-t border-[#e8ebe9] bg-white px-6 py-3 shadow-[0_-2px_8px_rgba(0,0,0,0.04)]">
-        <div className="mx-auto flex max-w-5xl items-center gap-3">
+        <div className="mx-auto flex max-w-[1400px] items-center gap-3">
           <div className="flex-1 text-xs text-zinc-600">
             添削件数:{" "}
             <span className="font-bold text-zinc-900">

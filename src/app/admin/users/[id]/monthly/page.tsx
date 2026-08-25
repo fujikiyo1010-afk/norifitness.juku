@@ -26,7 +26,7 @@ export default async function UserMonthlyAuditsPage({
   const joinedAt = (u?.joined_at as string | null) ?? null;
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
+    <div className="mx-auto max-w-[1400px] px-4 py-6">
       <h2 className="text-base font-bold text-zinc-900 mb-4">
         月次添削履歴 ({audits.length} 件)
       </h2>

@@ -222,7 +222,7 @@ export default async function AdminUserHubPage({
     <div className="min-h-screen bg-zinc-50">
       {/* ヘッダー (タブバー top-0 の下に重ならないよう top-[44px]) */}
       <header className="sticky top-[44px] z-10 border-b border-[#e8ebe9] bg-white">
-        <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
+        <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-4 py-3">
           <Link
             href={back.href}
             className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-zinc-100"
@@ -330,7 +330,7 @@ export default async function AdminUserHubPage({
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-4 py-6 space-y-5">
+      <main className="mx-auto max-w-[1400px] px-4 py-6 space-y-5">
         {/* 体組成推移 (Step 4-B) */}
         <section className="rounded-[14px] border border-[#e8ebe9] bg-white p-5">
           <div className="mb-4 flex items-center gap-2">
