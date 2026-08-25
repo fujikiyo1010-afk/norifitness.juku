@@ -9,9 +9,15 @@ import {
 
 /**
  * 受講生ハブ 体組成タブ の体型写真セクション(2026-07-22)。
- * サマリの下に「ビフォーアフター(初回→最新) + 撮影日順タイムライン」を出す。
+ * 「ビフォーアフター(初回→最新) + 撮影日順タイムライン」を出す。
  * データは page.tsx(server)で署名URL化して props で受け取る。写真が無ければ何も出さない。
+ *
+ * 2026-08-25: グラフとの並び順を入れ替え(グラフが上・写真が下)。
+ *   ハブ幅を1400pxに広げた際にビフォーアフターが倍の大きさになってしまったため、
+ *   BEFORE_AFTER_MAX_W で従来(768px幅時代)の見え方に固定する。
  */
+/** ビフォーアフターの横幅上限 = 旧レイアウト(ページ768px - px-4 - カードp-4)の内寸 */
+const BEFORE_AFTER_MAX_W = 704;
 function mdLabel(iso: string): string {
   return `${Number(iso.slice(5, 7))}/${Number(iso.slice(8, 10))}`;
 }
@@ -39,7 +45,7 @@ export function MetricsPhotoSection({ photos }: { photos: AdminBodyPhoto[] }) {
   };
 
   return (
-    <div className="bg-white border border-[#e8ebe9] rounded-2xl p-4 mb-4">
+    <div className="bg-white border border-[#e8ebe9] rounded-2xl p-4 mt-4">
       {lbIndex !== null && (
         <PhotoLightbox
           photos={fullUrls}
@@ -55,7 +61,10 @@ export function MetricsPhotoSection({ photos }: { photos: AdminBodyPhoto[] }) {
       {first && last && (
         <div
           className="grid items-center gap-4 mb-4"
-          style={{ gridTemplateColumns: "1fr auto 1fr" }}
+          style={{
+            gridTemplateColumns: "1fr auto 1fr",
+            maxWidth: BEFORE_AFTER_MAX_W,
+          }}
         >
           <PhotoCell label={`初回 ${mdLabel(first.recordedAt)}`} photo={first} onOpen={() => openById(first.id)} />
           <div className="flex flex-col items-center gap-1 text-[11px] font-bold text-[#00897b]">

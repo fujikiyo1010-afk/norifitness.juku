@@ -25,7 +25,8 @@ type MetricRecord = {
  *   3グラフ横並び(ぺたんこ・Y軸の数字なし) → 主役1つ+脇役2つの縦長構成へ。
  *   グラフ本体と変化の基準は MetricsCharts.tsx を参照。
  *
- * 構成: サマリ + 体型写真 + 期間タブ + グラフ(主役/脇役)
+ * 構成: サマリ + 期間タブ + グラフ(主役/脇役) + 体型写真
+ *   (2026-08-25 きよむ指示でグラフと体型写真の並びを入れ替え)
  */
 export default async function UserMetricsPage({
   params,
@@ -80,9 +81,6 @@ export default async function UserMetricsPage({
         </div>
       )}
 
-      {/* 体型写真(ビフォーアフター + タイムライン)。写真があるときだけ表示 */}
-      <MetricsPhotoSection photos={bodyPhotos} />
-
       {/* 期間タブ */}
       <div className="flex gap-2 mb-4">
         <RangeTab label="直近 6 ヶ月" range="6m" current={range} userId={userId} />
@@ -108,6 +106,9 @@ export default async function UserMetricsPage({
           range={range}
         />
       )}
+
+      {/* 体型写真(ビフォーアフター + タイムライン)。写真があるときだけ表示 */}
+      <MetricsPhotoSection photos={bodyPhotos} />
     </div>
   );
 }
