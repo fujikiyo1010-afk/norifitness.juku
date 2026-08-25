@@ -25,7 +25,7 @@ export default async function UserWorkoutPage({
   const h = await getWorkoutHistoryForUser(userId);
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
+    <div className="mx-auto max-w-[1400px] px-4 py-6">
       <div className="mb-3 flex gap-4 text-[12px] text-zinc-500">
         <span>
           いま <b className="text-zinc-900">{h.cycleNumber}</b> 周目

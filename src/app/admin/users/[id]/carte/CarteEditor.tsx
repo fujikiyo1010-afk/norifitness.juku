@@ -336,7 +336,7 @@ export function CarteEditor({
 
       {/* 保存ボタン (フッタ固定) */}
       <div className="fixed bottom-0 left-0 right-0 border-t border-[#e8ebe9] bg-white px-4 py-3 shadow-[0_-2px_8px_rgba(0,0,0,0.04)]">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
+        <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-3">
           <div className="text-xs text-zinc-600">
             {userName} さんのカルテ
             {initialCarte ? " (編集)" : " (新規作成)"}

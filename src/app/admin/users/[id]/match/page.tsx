@@ -93,7 +93,7 @@ export default async function AdminMatchPage({
   if (!carte) {
     return (
       <div className="min-h-screen bg-zinc-50 p-6">
-        <div className="mx-auto max-w-3xl">
+        <div className="mx-auto max-w-[1400px]">
           <Link
             href={`/admin/users/${userId}`}
             className="text-sm text-zinc-500 hover:underline"
@@ -119,7 +119,7 @@ export default async function AdminMatchPage({
   if (!carte.age_band) {
     return (
       <div className="min-h-screen bg-zinc-50 p-6">
-        <div className="mx-auto max-w-3xl">
+        <div className="mx-auto max-w-[1400px]">
           <Link
             href={`/admin/users/${userId}`}
             className="text-sm text-zinc-500 hover:underline"
@@ -156,7 +156,7 @@ export default async function AdminMatchPage({
     <div className="min-h-screen bg-zinc-50">
       {/* ヘッダー */}
       <header className="sticky top-0 z-10 border-b border-[#e8ebe9] bg-white">
-        <div className="mx-auto max-w-3xl px-4 py-3">
+        <div className="mx-auto max-w-[1400px] px-4 py-3">
           <div className="flex items-center gap-3">
             <Link
               href={`/admin/users/${userId}`}
@@ -193,7 +193,7 @@ export default async function AdminMatchPage({
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-4 py-6 space-y-5">
+      <main className="mx-auto max-w-[1400px] px-4 py-6 space-y-5">
         {/* カルテ要約 */}
         <section className="rounded-[14px] border border-[#e8ebe9] bg-white p-5">
           <div className="mb-3 flex items-center gap-2">

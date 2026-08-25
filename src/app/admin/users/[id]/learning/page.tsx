@@ -51,7 +51,7 @@ export default async function UserLearningProgressPage({
   const overallPercent = totalLessons > 0 ? Math.round((totalDone / totalLessons) * 100) : 0;
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
+    <div className="mx-auto max-w-[1400px] px-4 py-6">
       {/* 全体進捗 */}
       <div className="rounded-[14px] border border-[#e8ebe9] bg-white px-5 py-4 mb-5">
         <div className="text-[11px] font-bold tracking-widest text-zinc-500 mb-2">

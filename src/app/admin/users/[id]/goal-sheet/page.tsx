@@ -86,7 +86,7 @@ export default async function AdminGoalSheetAuditPage({
   if (!sheet) {
     return (
       <div className="min-h-screen bg-zinc-50">
-        <div className="mx-auto max-w-4xl px-6 py-8">
+        <div className="mx-auto max-w-[1400px] px-6 py-8">
           <header className="mb-6 flex items-center gap-3">
             <Link
               href={hubHref}

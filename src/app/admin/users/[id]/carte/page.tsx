@@ -61,7 +61,7 @@ export default async function AdminCartePage({
     <div className="min-h-screen bg-zinc-50">
       {/* ヘッダー */}
       <header className="sticky top-0 z-10 border-b border-[#e8ebe9] bg-white">
-        <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
+        <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-4 py-3">
           <Link
             href={`/admin/users/${userId}`}
             className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-zinc-100"
@@ -103,7 +103,7 @@ export default async function AdminCartePage({
 
       {/* リクエスト処理中バナー (= /admin/requests から「カルテを編集」 で来た時のみ) */}
       {fromRequest && (
-        <div className="mx-auto max-w-3xl px-4 pt-4">
+        <div className="mx-auto max-w-[1400px] px-4 pt-4">
           <div className="rounded-[10px] border border-amber-300 bg-amber-50 px-4 py-3 flex items-center justify-between gap-3">
             <div className="text-sm text-amber-900">
               <span className="font-bold">リクエスト処理中です</span>
@@ -123,7 +123,7 @@ export default async function AdminCartePage({
 
       {/* 注意: birthday 未設定の警告 */}
       {!birthday && (
-        <div className="mx-auto max-w-3xl px-4 pt-4">
+        <div className="mx-auto max-w-[1400px] px-4 pt-4">
           <div className="rounded-[14px] border border-amber-200 bg-amber-50 p-4">
             <p className="text-sm text-amber-900">
               この受講生は生年月日 (user_profiles.birthday)
@@ -134,7 +134,7 @@ export default async function AdminCartePage({
       )}
 
       {/* カルテ編集フォーム */}
-      <main className="mx-auto max-w-3xl px-4 py-6 pb-32">
+      <main className="mx-auto max-w-[1400px] px-4 py-6 pb-32">
         <CarteEditor
           userId={userId}
           userName={userRow.nickname || userRow.name}

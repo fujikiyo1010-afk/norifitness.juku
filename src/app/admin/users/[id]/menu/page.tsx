@@ -18,7 +18,7 @@ export default async function UserMenuPage({
   const menu = await getCurrentMenuForAdmin(userId);
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
+    <div className="mx-auto max-w-[1400px] px-4 py-6">
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="text-base font-bold text-zinc-900">筋トレメニュー（配布中）</h2>
         <Link

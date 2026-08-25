@@ -16,7 +16,7 @@ export default async function UserMealsPage({
   const days = await getMealDaysForUser(userId, 30);
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
+    <div className="mx-auto max-w-[1400px] px-4 py-6">
       <div className="mb-3 text-[11px] font-bold tracking-widest text-zinc-500">
         食事記録（直近30日・写真ベース）
       </div>
