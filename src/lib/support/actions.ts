@@ -78,7 +78,6 @@ async function getUserName(userId: string): Promise<string> {
 
 /** 新しいお問い合わせを立てる (フォーム送信)。成功したらスレッドの id を返す */
 export async function createTicket(input: {
-  kind: string;
   screen: string | null;
   body: string;
   photoPath?: string | null;
@@ -100,7 +99,6 @@ export async function createTicket(input: {
     .from("support_tickets")
     .insert({
       user_id: user.id,
-      kind: input.kind,
       screen: input.screen,
       device_info: input.deviceInfo ?? null,
     })
@@ -133,6 +131,7 @@ export async function createTicket(input: {
   ).catch((e) => console.error("[support] push failed", e));
 
   revalidatePath("/support");
+  revalidatePath("/");
   return { ok: true, ticketId };
 }
 
@@ -191,4 +190,30 @@ export async function addMessage(
   revalidatePath(`/support/${ticketId}`);
   revalidatePath("/support");
   return { ok: true };
+}
+
+/**
+ * その件を「読んだ」ことにする(未読の印を消す)。
+ * スレッドを開いた時にクライアントから1回呼ぶ。
+ * 失敗しても画面は成立するので、呼び出し側はエラーを無視してよい。
+ */
+export async function markTicketRead(ticketId: string): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await supabase.from("support_ticket_reads").upsert(
+    {
+      ticket_id: ticketId,
+      user_id: user.id,
+      read_at: new Date().toISOString(),
+    },
+    { onConflict: "ticket_id" }
+  );
+
+  revalidatePath("/support");
+  revalidatePath("/account");
+  revalidatePath("/");
 }

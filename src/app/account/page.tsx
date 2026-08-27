@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { MemberHeader } from "@/components/MemberHeader";
 import { isSupportUser } from "@/lib/auth/support-gate";
+import { hasUnreadSupportReply } from "@/lib/support/queries";
 import { EmailNotificationToggle } from "./EmailNotificationToggle";
 import { LogoutButton } from "./LogoutButton";
 import { PushNotificationRow } from "./PushNotificationRow";
@@ -53,6 +54,8 @@ export default async function AccountPage() {
 
   // お問い合わせ窓口(2026-08-27 新設)は社員4人に先行反映
   const supportUser = await isSupportUser();
+  // 未読のお返事があれば行に NEW ピルを出す(開くと消える)
+  const supportUnread = supportUser ? await hasUnreadSupportReply() : false;
 
   return (
     <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
@@ -93,6 +96,7 @@ export default async function AccountPage() {
               icon={<QuestionIcon />}
               label="お問い合わせ"
               href="/support"
+              badge={supportUnread ? "NEW" : undefined}
             />
           )}
           <LinkRow icon={<InfoIcon />} label="ヘルプ" href="/account/help" />
@@ -141,6 +145,7 @@ function LinkRow({
   href,
   last,
   external,
+  badge,
 }: {
   icon: React.ReactNode;
   label: string;
@@ -148,6 +153,8 @@ function LinkRow({
   last?: boolean;
   /** 外部サイト(取説等)は新しいタブで開く */
   external?: boolean;
+  /** 未読等の印(ホームのタイルと同じ NEW ピル) */
+  badge?: string;
 }) {
   const className = `flex items-center gap-3 px-4 py-3 hover:bg-[#f0e6d3] transition-colors ${
     last ? "" : "border-b border-[#e7dcc9]"
@@ -156,6 +163,11 @@ function LinkRow({
     <>
       <span className="w-4 h-4 text-zinc-700">{icon}</span>
       <span className="flex-1 text-[13px] text-[#2b2620]">{label}</span>
+      {badge && (
+        <span className="rounded-full bg-[#c2693f] px-1.5 py-px text-[9px] font-bold tracking-wide text-white">
+          {badge}
+        </span>
+      )}
       <span className="text-[#a59b8c] text-sm">→</span>
     </>
   );

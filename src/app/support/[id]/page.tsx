@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { MemberHeader } from "@/components/MemberHeader";
 import { isSupportUser } from "@/lib/auth/support-gate";
 import { getTicketThread } from "@/lib/support/queries";
+import { MarkRead } from "./MarkRead";
 import { ReplyBox } from "./ReplyBox";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +12,8 @@ export const dynamic = "force-dynamic";
  * お問い合わせ スレッド ・ /support/[id] (2026-08-27 新設)
  *
  * 1件 = 1本。対応中は入力欄あり / 解決済みは読むだけ。
- * 設計元: public/mock/support-flow.html 画面4・「スレッドの2つの状態」
+ * 入力は玄関(/support)とまったく同じD型 ─ チャットとは見た目でも分ける。
+ * 設計元: public/mock/support-final.html
  */
 export default async function SupportThreadPage({
   params,
@@ -37,8 +39,9 @@ export default async function SupportThreadPage({
     <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
       <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9]">
         <MemberHeader title={subject} fallbackHref="/support" />
+        <MarkRead ticketId={ticket.id} />
 
-        <div className="flex-1 px-4 pt-4 pb-6">
+        <div className="flex-1 px-4 pt-4">
           {/* 状態と、送信時に選んだ内容 */}
           <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-xl px-3 py-2.5 mb-4">
             <span
@@ -51,13 +54,11 @@ export default async function SupportThreadPage({
               <span className="w-[5px] h-[5px] rounded-full bg-current" />
               {resolved ? "解決済み" : "担当者が確認しています"}
             </span>
-            <p className="text-[10.5px] text-[#6b6b6b] leading-relaxed">
-              <span className="inline-block min-w-[34px] text-[#a09684]">種類</span>
-              {ticket.kind}
-            </p>
             {ticket.screen && (
               <p className="text-[10.5px] text-[#6b6b6b] leading-relaxed">
-                <span className="inline-block min-w-[34px] text-[#a09684]">画面</span>
+                <span className="inline-block min-w-[34px] text-[#a09684]">
+                  画面
+                </span>
                 {ticket.screen}
               </p>
             )}
@@ -88,13 +89,13 @@ export default async function SupportThreadPage({
                   >
                     {m.body}
                     {m.photo_url && (
-                      // eslint-disable-next-line @next/next/no-img-element
                       <a
                         href={m.photo_url}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="block mt-2"
                       >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={m.photo_url}
                           alt="添付された画面の写真"
@@ -110,13 +111,13 @@ export default async function SupportThreadPage({
         </div>
 
         {resolved ? (
-          <div className="px-4 pb-8">
+          <div className="px-4 pt-4 pb-10">
             <p className="text-center text-[11.5px] text-[#8a8272] bg-[#efece5] border border-[#e2ddd2] rounded-xl py-3">
               このお問い合わせは解決済みです
             </p>
           </div>
         ) : (
-          <ReplyBox ticketId={ticket.id} userId={user.id} />
+          <ReplyBox ticketId={ticket.id} />
         )}
       </div>
     </main>

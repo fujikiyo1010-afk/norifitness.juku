@@ -2,46 +2,55 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { addMessage } from "@/lib/support/actions";
+import { createTicket } from "@/lib/support/actions";
 import { uploadSupportPhoto } from "@/lib/support/photo-upload";
+import { SUPPORT_SCREENS } from "@/lib/support/types";
+import { collectDeviceInfo } from "@/lib/support/device-info";
 
 /**
- * スレッドの返信欄 (2026-08-27・D型)
+ * 新しいお問い合わせを送る部品 (2026-08-27・玄関 /support の上部)
  *
- * チャットのような下貼り付きのピル入力にはしない ─ ここはチャットとは別の窓口で、
- * 「1件ずつ、書いて送信するを押して送る」場だと見た目でも分けるため。
- * 玄関(SupportComposer)とまったく同じ形にそろえている。
- * 対応中のときだけ表示する(解決済みは page.tsx 側で出さない)。
+ * 送信フォーム専用の画面は作らない ─ 初めての人に「ボタンだけの空っぽの画面」を
+ * 見せないため、玄関にそのまま置く。送信するとその件のスレッドへ移動する。
+ *
+ * 端末・ブラウザ・アプリの版は本人に入力させず、送信時に自動で拾う
+ * (古いアプリ版が端末に残っていると直したはずの不具合が再現するため。
+ *  2026-07-29 の PWA キャッシュ反映不達インシデント参照)。
  */
-export function ReplyBox({ ticketId }: { ticketId: string }) {
+export function SupportComposer() {
   const router = useRouter();
+  const [screen, setScreen] = useState<string>("");
   const [body, setBody] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSend() {
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
     if (sending) return;
-    if (body.trim().length === 0 && !file) return;
+    if (body.trim().length === 0) {
+      setError("内容を入力してください");
+      return;
+    }
     setSending(true);
     setError(null);
     try {
       let photoPath: string | null = null;
       if (file) photoPath = await uploadSupportPhoto(file);
-      const result = await addMessage(
-        ticketId,
-        body.trim().length > 0 ? body : "（写真を送りました）",
-        photoPath
-      );
+
+      const deviceInfo = await collectDeviceInfo();
+      const result = await createTicket({
+        screen: screen || null,
+        body,
+        photoPath,
+        deviceInfo,
+      });
       if (!result.ok) {
         setError(result.message);
         setSending(false);
         return;
       }
-      setBody("");
-      setFile(null);
-      setSending(false);
-      router.refresh();
+      router.push(`/support/${result.ticketId}`);
     } catch (err) {
       setError(
         err instanceof Error
@@ -53,16 +62,28 @@ export function ReplyBox({ ticketId }: { ticketId: string }) {
   }
 
   return (
-    <div className="px-4 pb-10">
-      <div className="border-t border-[#e7dcc9] mb-3.5" />
-
+    <form onSubmit={handleSubmit}>
       <textarea
         value={body}
         onChange={(e) => setBody(e.target.value)}
-        rows={3}
-        placeholder="続けてお伝えすることがあれば…"
+        rows={4}
+        placeholder="例）食事の写真を送ろうとすると、ぐるぐる回ったまま進みません。"
         className="w-full resize-none rounded-lg border-[1.5px] border-[#ded5c4] bg-white px-3 py-2.5 text-[12.5px] leading-relaxed text-[#2b2620] placeholder:text-[#bdb5a6] focus:border-[#4a875b] focus:outline-none"
       />
+
+      <select
+        value={screen}
+        onChange={(e) => setScreen(e.target.value)}
+        aria-label="どの画面のことですか？"
+        className="mt-2.5 w-full rounded-lg border-[1.5px] border-[#ded5c4] bg-white px-3 py-2.5 text-[12.5px] text-[#2b2620] focus:border-[#4a875b] focus:outline-none"
+      >
+        <option value="">どの画面のことですか？</option>
+        {SUPPORT_SCREENS.map((s) => (
+          <option key={s} value={s}>
+            {s}
+          </option>
+        ))}
+      </select>
 
       {file && (
         <p className="mt-2 truncate px-1 text-[11px] text-[#6b6b6b]">
@@ -99,14 +120,13 @@ export function ReplyBox({ ticketId }: { ticketId: string }) {
         </label>
 
         <button
-          type="button"
-          onClick={handleSend}
-          disabled={sending || (body.trim().length === 0 && !file)}
+          type="submit"
+          disabled={sending}
           className="btn3d rounded-lg px-6 py-3 text-[13px] font-bold text-white disabled:opacity-60"
         >
           {sending ? "送信中…" : "送信する"}
         </button>
       </div>
-    </div>
+    </form>
   );
 }

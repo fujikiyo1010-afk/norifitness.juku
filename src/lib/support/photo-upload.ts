@@ -22,12 +22,15 @@ function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
   ]);
 }
 
-export async function uploadSupportPhoto(
-  userId: string,
-  file: File
-): Promise<string> {
+export async function uploadSupportPhoto(file: File): Promise<string> {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("ログインが必要です");
+
   const rand = Math.random().toString(36).slice(2, 8);
-  const path = `${userId}/${Date.now()}-${rand}.jpg`;
+  const path = `${user.id}/${Date.now()}-${rand}.jpg`;
 
   let blob: Blob;
   try {
@@ -36,7 +39,6 @@ export async function uploadSupportPhoto(
     blob = file; // 圧縮に失敗しても原本で続行
   }
 
-  const supabase = createClient();
   let lastErr: unknown = null;
   for (let i = 0; i < 3; i++) {
     try {
