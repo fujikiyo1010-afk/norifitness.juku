@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { OnboardingClient } from "./OnboardingClient";
+import { DEMO_PANEL_ENABLED, DEMO_ACCOUNT_EMAILS } from "@/lib/demo-panel/demo";
 
 export const dynamic = "force-dynamic";
 
@@ -32,5 +33,14 @@ export default async function OnboardingPage() {
   const defaultRecipientName =
     profile?.name ?? (user.user_metadata?.name as string | undefined) ?? "";
 
-  return <OnboardingClient defaultRecipientName={defaultRecipientName} />;
+  // 撮影用デモ垢(dev限定)はブラウザ関門を飛ばし、PCでも8ステップを進められるようにする
+  const skipEnvGate =
+    DEMO_PANEL_ENABLED && DEMO_ACCOUNT_EMAILS.includes(user.email?.toLowerCase() ?? "");
+
+  return (
+    <OnboardingClient
+      defaultRecipientName={defaultRecipientName}
+      skipEnvGate={skipEnvGate}
+    />
+  );
 }

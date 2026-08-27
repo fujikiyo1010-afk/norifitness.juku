@@ -17,8 +17,11 @@ const TOTAL_STEPS = 8;
 
 export function OnboardingClient({
   defaultRecipientName,
+  skipEnvGate = false,
 }: {
   defaultRecipientName: string;
+  /** 撮影用デモ垢のみ: ブラウザ関門(Safariで開いてください等)を飛ばしPCでも進める */
+  skipEnvGate?: boolean;
 }) {
   const [step, setStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
@@ -37,13 +40,13 @@ export function OnboardingClient({
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (isStandaloneDisplay()) {
+    if (skipEnvGate || isStandaloneDisplay()) {
       setEnvState("ready");
       return;
     }
     setCurrentUrl(window.location.href);
     setEnvState(detectBrowserEnv());
-  }, []);
+  }, [skipEnvGate]);
 
   const [postalCode, setPostalCode] = useState("");
   const [addressLine, setAddressLine] = useState("");
