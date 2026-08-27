@@ -29,6 +29,7 @@ export type AdminSideNavProps = {
   pendingRequests: number;
   pendingShipments: number;
   chatUnread: number;
+  supportOpen: number;
 };
 
 export function AdminSideNav({
@@ -38,6 +39,7 @@ export function AdminSideNav({
   pendingRequests,
   pendingShipments,
   chatUnread,
+  supportOpen,
 }: AdminSideNavProps) {
   const pathname = usePathname() ?? "/admin";
 
@@ -81,6 +83,14 @@ export function AdminSideNav({
           matchPrefix: "/admin/messages",
           icon: <ChatIcon />,
           badge: chatUnread,
+          badgeTone: "danger",
+        },
+        {
+          label: "問い合わせ",
+          href: "/admin/support",
+          matchPrefix: "/admin/support",
+          icon: <SupportIcon />,
+          badge: supportOpen,
           badgeTone: "danger",
         },
         {
@@ -297,6 +307,17 @@ function VideoIcon() {
     <svg {...iconProps}>
       <polygon points="23 7 16 12 23 17 23 7" />
       <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+    </svg>
+  );
+}
+
+function SupportIcon() {
+  // 問い合わせ = 円の中に「?」(線画。既存アイコンと同じ stroke 流儀)
+  return (
+    <svg {...iconProps}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M9.2 9.3a2.9 2.9 0 0 1 5.6 1c0 1.9-2.8 2.5-2.8 4" />
+      <path d="M12 17.4h.01" />
     </svg>
   );
 }

@@ -14,7 +14,8 @@ import type { SupportMessage, SupportTicket, TicketListItem } from "./types";
 
 const SUBJECT_MAX = 40;
 
-function toSubject(body: string): string {
+/** 件名 = 最初の受講生メッセージの冒頭。管理画面(admin-queries.ts)からも使う(表記を揃えるため) */
+export function toSubject(body: string): string {
   const t = (body ?? "").replace(/\s+/g, " ").trim();
   if (t.length === 0) return "お問い合わせ";
   return t.length <= SUBJECT_MAX ? t : t.slice(0, SUBJECT_MAX - 1) + "…";
