@@ -1,8 +1,6 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { RequestForm } from "./RequestForm";
 import { MemberHeader } from "@/components/MemberHeader";
-import { isServiceExpiredUser } from "@/lib/auth/service-expired";
 
 export const dynamic = "force-dynamic";
 
@@ -13,10 +11,6 @@ export default async function RequestPage({
 }: {
   searchParams: SearchParams;
 }) {
-  // サービス満了: 運営への要望フォームは閉じる(2026-08-26 C2)
-  if (await isServiceExpiredUser()) {
-    redirect("/");
-  }
   const { submitted } = await searchParams;
 
   if (submitted === "1") {
