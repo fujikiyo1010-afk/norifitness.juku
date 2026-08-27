@@ -59,6 +59,8 @@ export type UserWithAlerts = {
   tags: AlertTag[];
   /** 一番強い重要度 (urgent > warn > null) */
   topSeverity: AlertSeverity | null;
+  /** サービス状態(C2)。expired/grace_meal=満了版UI組。キュー・一覧の絞り込みに使う */
+  serviceState: import("@/lib/auth/service-expired").ServiceState;
 };
 
 // =====================================================================
@@ -521,6 +523,7 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
       joinedAt: user.joined_at as string,
       tags,
       topSeverity,
+      serviceState,
     };
   });
 }

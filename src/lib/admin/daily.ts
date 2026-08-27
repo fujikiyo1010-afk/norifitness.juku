@@ -58,6 +58,13 @@ export async function getDailyQueue(
   ]);
   const doneSet = new Set((fbRes.data ?? []).map((r) => r.user_id as string));
 
+  // C2(2026-08-26): 満了(expired)はキューに出さない=メイン管理はアクティブだけ。
+  // grace_meal(食事添削だけ〜9/30)はキューに残すが、浮上の合図は食事のみ(トレ記録では浮上させない)。
+  const queueUsers = usersWithAlerts.filter((u) => u.serviceState !== "expired");
+  const mealOnlySet = new Set(
+    queueUsers.filter((u) => u.serviceState === "grace_meal").map((u) => u.userId)
+  );
+
   // 記録時刻マップ: 受講生ごとに、その日の記録の「最新時刻」を保持(記録ありの並べ替え用)。
   // トレのスキップは completed_at が無いので created_at を代替に使う(スキップも声かけ材料=記録あり)。
   const recordMsByUser = new Map<string, number>();
@@ -69,15 +76,17 @@ export async function getDailyQueue(
     if (cur == null || t > cur) recordMsByUser.set(userId, t);
   };
   for (const r of mealRes.data ?? []) bump(r.user_id as string, r.posted_at as string);
-  for (const r of workoutRes.data ?? [])
+  for (const r of workoutRes.data ?? []) {
+    if (mealOnlySet.has(r.user_id as string)) continue; // grace_mealはトレでは浮上させない
     bump(r.user_id as string, (r.completed_at as string) ?? (r.created_at as string));
+  }
 
   const recorded: DailyQueueItem[] = [];
   const attention: DailyQueueItem[] = [];
   const pending: DailyQueueItem[] = [];
   const done: DailyQueueItem[] = [];
 
-  for (const u of usersWithAlerts) {
+  for (const u of queueUsers) {
     const recordMs = recordMsByUser.get(u.userId) ?? null;
     // 要Go-1: 「のり宿題」(新1〜3)はキューの要対応に出さない=受講生系タグだけで重要度を判定。
     // のり宿題は管理ホームの「今すぐ対応/今日中」でだけ拾う(受講生の放置警報と混ぜない)。
