@@ -67,11 +67,19 @@ export async function acceptInvitation(
   const newUserId = created.user.id;
 
   // ───── 4. public.users 行作成 ─────
+  // service_started_at = 満了(入会+180日)を数える起点。joined_at は DB 既定の now() が入るが、
+  // こちらは既定値が無いため明示しないと空のまま = 満了判定が永久に「有効」を返し、
+  // エラーも警告も出ないまま その人だけ満了しなくなる(2026-08-27 に5人ぶん発覚)。
+  // 通常入会は「入会した日 = 開始日」。トレクラ/Gyms 移行組だけは過去の開始日が入るので、
+  // そちらは create_accounts.mjs 側で名簿の日付を明示的に渡す。
   const { error: usersError } = await admin.from("users").insert({
     id: newUserId,
     email: inv.email,
     name: inv.name,
     status: "active",
+    service_started_at: new Date().toLocaleDateString("sv-SE", {
+      timeZone: "Asia/Tokyo",
+    }), // JST の YYYY-MM-DD
   });
 
   if (usersError) {
