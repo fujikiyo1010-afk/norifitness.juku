@@ -6,6 +6,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getAdminInfo } from "@/lib/auth/admin";
 import { sendPushToUser, sendPushToAllAdmins } from "@/lib/push/send";
 import { signChatImages } from "./image-sign";
+import { isServiceExpiredUser } from "@/lib/auth/service-expired";
+import { jstTodayStr } from "@/lib/date/jst";
 import type { ChatMessage } from "./types";
 
 const PREVIEW_MAX = 80;
@@ -59,6 +61,24 @@ export async function sendMessageAsUser(body: string): Promise<SendResult> {
   }
   if (!conversationId)
     return { ok: false, message: "会話の作成に失敗しました" };
+
+  // サービス満了: 送信は1日2通まで(JST・受信と過去の閲覧は無制限) 2026-08-26 C2
+  if (await isServiceExpiredUser()) {
+    const todayStartJst = new Date(`${jstTodayStr()}T00:00:00+09:00`).toISOString();
+    const { count } = await supabase
+      .from("messages")
+      .select("id", { count: "exact", head: true })
+      .eq("conversation_id", conversationId)
+      .eq("sender_kind", "user")
+      .gte("created_at", todayStartJst);
+    if ((count ?? 0) >= 2) {
+      return {
+        ok: false,
+        message:
+          "サポート期間終了後のメッセージは1日2通までとなっています。また明日お送りください。",
+      };
+    }
+  }
 
   const { data, error } = await supabase
     .from("messages")

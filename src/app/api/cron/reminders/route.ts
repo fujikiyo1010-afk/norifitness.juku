@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { checkAndSendForUser, type ReminderResult } from "@/lib/reminders/check";
+import { computeServiceState } from "@/lib/auth/service-expired";
 import { sendShipmentAlertsToAdmins } from "@/lib/email/shipment-alerts";
 
 export const dynamic = "force-dynamic";
@@ -32,14 +33,23 @@ export async function GET(req: NextRequest) {
   const admin = createAdminClient();
 
   // ─── 全 active 受講生取得 ───
-  const { data: users, error: usersError } = await admin
+  const { data: usersRaw, error: usersError } = await admin
     .from("users")
-    .select("id, joined_at")
+    .select("id, joined_at, service_started_at, grace_until, grace_scope")
     .eq("status", "active");
   if (usersError) {
     return Response.json({ ok: false, error: usersError.message }, { status: 500 });
   }
-  if (!users || users.length === 0) {
+  // サービス満了(満了版UI組=expired/grace_meal)にはリマインドを一切送らない(2026-08-26 C2)
+  const users = (usersRaw ?? []).filter((u) => {
+    const state = computeServiceState(
+      u.service_started_at as string | null,
+      u.grace_until as string | null,
+      u.grace_scope as string | null
+    );
+    return state === "active" || state === "grace_full";
+  });
+  if (users.length === 0) {
     return Response.json({ ok: true, message: "no active users", duration_ms: Date.now() - start });
   }
 
