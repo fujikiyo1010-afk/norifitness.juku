@@ -23,6 +23,7 @@ import { isNewHomeCardUser } from "@/lib/auth/home-card-gate";
 import { isPausedUser } from "@/lib/auth/paused-gate";
 import { getWeeklyTraining } from "@/lib/workout/weekly";
 import { HomeBeta } from "./HomeBeta";
+import { hasUnreadSupportReply } from "@/lib/support/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -161,6 +162,9 @@ export default async function Home() {
       ? Math.round((stats.completedLessons / stats.totalLessons) * 100)
       : 0;
 
+  // お問い合わせ(2026-08-27): 未読のお返事があれば歯車に赤ドットを出す
+  const supportUnread = await hasUnreadSupportReply();
+
   // P3(ベータ限定): 確定7/7ホーム。非ベータは従来ホーム(下の return)。
   // 藤田さん限定の特典ライブラリ仮反映では、非ベータでも HomeBeta 経路に通す。
   if (isBeta || isTokutenPreview) {
@@ -197,6 +201,7 @@ export default async function Home() {
         unreadReply={unreadReply}
         today={todayActivity}
         alerts={effAlerts}
+        supportUnread={supportUnread}
         showTokuten={isBeta || isTokutenPreview}
         weeklyPool={weeklyPool}
         newHomeCard={isNewHomeCard}
@@ -215,8 +220,11 @@ export default async function Home() {
         <Link
           href="/account"
           aria-label="設定"
-          className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-[#6a6256] hover:text-[#2b2620]"
+          className="relative w-[30px] h-[30px] rounded-full flex items-center justify-center text-[#6a6256] hover:text-[#2b2620]"
         >
+          {supportUnread && (
+            <span className="absolute -top-px -right-px h-[9px] w-[9px] rounded-full bg-[#d6536a] ring-2 ring-[#fffdf8]" />
+          )}
           <svg
             width="20"
             height="20"

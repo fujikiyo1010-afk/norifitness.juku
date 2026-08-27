@@ -3,13 +3,10 @@
  *
  * 目的: アプリの不具合・動作や操作の相談を専用窓口1本に集約する
  * (チャット/LINE/エルメに散らばる問い合わせをここへ。返信はスレッド内で完結)。
+ *
+ * 2026-08-27 改: 「どんなことですか?」の3択は廃止(読めば分かる/対応が変わらない)。
+ * 残すのは「どの画面か」だけ ─ これだけが「どこで起きたか」の往復1回分を消せる。
  */
-
-export const SUPPORT_KINDS = [
-  "うまく動かない",
-  "使い方が分からない",
-  "その他",
-] as const;
 
 export const SUPPORT_SCREENS = [
   "食事の記録",
@@ -26,7 +23,6 @@ export type TicketStatus = "open" | "in_progress" | "resolved";
 export type SupportTicket = {
   id: string;
   user_id: string | null;
-  kind: string;
   screen: string | null;
   status: TicketStatus;
   created_at: string;
@@ -47,8 +43,8 @@ export type SupportMessage = {
 /** 一覧1行ぶん(最初のメッセージ冒頭を件名がわりに使う) */
 export type TicketListItem = SupportTicket & {
   subject: string;
-  /** 管理から返信が付いているか(一覧の「返信あり」表示用) */
-  has_admin_reply: boolean;
+  /** 未読の返事があるか(= 最新の admin メッセージ > 最後に開いた時刻) */
+  unread: boolean;
   /** 最後のやりとりの時刻(一覧の並び順。受講生は updated_at を更新できないため) */
   last_at: string;
 };

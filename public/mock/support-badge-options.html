@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>お問い合わせ 返信の印 パターン比較</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#e8e4dc;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;color:#1c1c1c;padding:26px 16px 70px}
+  h2.title{text-align:center;font-size:17px;font-weight:800;color:#004d40;margin:0 0 4px}
+  p.sub{text-align:center;font-size:12px;color:#7c7c7c;margin:0 0 10px;line-height:1.7}
+  .band{max-width:1080px;margin:0 auto 26px;background:#fffdf8;border:1px solid #e7dcc9;border-radius:11px;padding:12px 16px;font-size:12px;line-height:1.85;color:#5b5b5b}
+  .band b{color:#004d40}
+
+  h3.sec{max-width:1080px;margin:34px auto 14px;font-size:13.5px;font-weight:800;color:#004d40;border-bottom:1px solid #d8d0c0;padding-bottom:7px}
+  h3.sec span{font-weight:600;color:#8a8272;font-size:11.5px;margin-left:8px}
+
+  .row{display:flex;justify-content:center;align-items:flex-start;gap:16px;flex-wrap:wrap}
+  .col{width:330px}
+  .cap{text-align:center;margin-bottom:9px}
+  .cap .n{display:inline-block;background:#4a875b;color:#fff;font-size:10px;font-weight:800;border-radius:20px;padding:3px 11px;margin-bottom:6px}
+  .cap .n.g{background:#9a9384}
+  .cap b{display:block;font-size:12.5px;color:#3d3d3d}
+  .cap em{display:block;font-style:normal;font-size:10.5px;color:#8a8a8a;margin-top:4px;line-height:1.6}
+
+  .ph{width:330px;background:#f9f5ed;border:1px solid #e7dcc9;border-radius:12px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.09)}
+
+  /* ホームヘッダー(実物準拠) */
+  .hhd{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #e7dcc9;background:#fffdf8}
+  .hhd .logo{font-size:16px;font-weight:800;letter-spacing:.04em;color:#004d40}
+  .gearwrap{position:relative;width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:#6a6256}
+  .gearwrap svg.gear{width:20px;height:20px}
+  .hero{background:linear-gradient(135deg,#e0f2f1,#fffbe6);padding:11px 18px;font-size:13px;font-weight:800;color:#2b2620}
+  .homebd{padding:13px 14px 18px}
+  .tile{background:#fffdf8;border:1px solid #e7dcc9;border-radius:14px;height:56px;margin-bottom:8px}
+
+  /* 設定リスト(実物準拠) */
+  .shd{display:flex;align-items:center;gap:7px;padding:11px 13px;background:#fffdf8;border-bottom:1px solid #e7dcc9}
+  .shd svg{width:17px;height:17px;color:#2b2620;flex:none}
+  .shd h1{font-size:12.5px;font-weight:800;color:#004d40;margin:0 auto;padding-right:17px}
+  .sbd{padding:14px 14px 18px}
+  .sec2{font-size:10px;font-weight:800;color:#6a6256;letter-spacing:.08em;margin:0 0 7px}
+  .set{background:#fffdf8;border:1px solid #e7dcc9;border-radius:14px;overflow:hidden}
+  .it{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #f2ece1;font-size:12.5px;color:#2b2620;position:relative}
+  .it:last-child{border-bottom:0}
+  .it > svg{width:16px;height:16px;color:#5c5c5c;flex:none}
+  .it .lb{flex:1;display:flex;align-items:center;gap:7px;min-width:0}
+  .it .ch{color:#a59b8c;font-size:13px;flex:none}
+
+  /* ── 印のバリエーション ── */
+  /* 1 赤ドット */
+  .dot{width:9px;height:9px;border-radius:50%;background:#d6536a;flex:none}
+  .dot.onicon{position:absolute;top:-1px;right:-1px;width:9px;height:9px;border:2px solid #fffdf8;box-sizing:content-box}
+  /* 2 NEWピル(既存流儀 #c2693f) */
+  .pill{background:#c2693f;color:#fff;font-size:8.5px;font-weight:800;border-radius:20px;padding:2px 7px;flex:none;letter-spacing:.04em}
+  .pill.red{background:#d6536a}
+  .pill.onicon{position:absolute;top:-6px;right:-10px;transform:scale(.86);transform-origin:top right;border:1.5px solid #fffdf8}
+  /* 3 数字バッジ */
+  .num{min-width:17px;height:17px;border-radius:20px;background:#d6536a;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 4px;flex:none}
+  .num.onicon{position:absolute;top:-4px;right:-6px;border:2px solid #fffdf8;box-sizing:content-box}
+  /* 4 文字+色 */
+  .txt{font-size:11px;font-weight:800;color:#c2415c;flex:none}
+  /* 5 行ごと色付き */
+  .it.hl{background:#fdf1f3}
+  .it.hl .lb span:first-child{font-weight:800;color:#b3475b}
+  /* 6 左の縦線 */
+  .it.bar::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:#d6536a}
+  /* 7 歯車を緑丸で囲う */
+  .gearwrap.ring{background:#eaf3ec;border-radius:50%;color:#2f6b41}
+
+  .note{font-size:10.5px;color:#8a8272;line-height:1.7;margin-top:11px;text-align:center}
+
+  .legend{max-width:1080px;margin:36px auto 0;background:#fffdf8;border:1px solid #e7dcc9;border-radius:12px;padding:18px 20px}
+  .legend h3{font-size:13.5px;font-weight:800;color:#004d40;margin:0 0 12px}
+  .legend table{width:100%;border-collapse:collapse;font-size:12px}
+  .legend td{padding:9px 8px;border-bottom:1px solid #f0e9dc;line-height:1.75;vertical-align:top}
+  .legend td:first-child{color:#4a875b;font-weight:800;white-space:nowrap;width:104px}
+  .legend tr:last-child td{border-bottom:0}
+  .legend .no{color:#b3475b;font-weight:800}
+</style>
+</head>
+<body>
+
+<h2 class="title">お返事が来たときの「印」 ─ 候補</h2>
+<p class="sub">出す場所は2か所。<b>ホーム右上の歯車</b>と、<b>設定の中の「お問い合わせ」の行</b>。<br>印は「未読のお返事があるとき」だけ出て、そのやりとりを開いたら消えます。</p>
+
+<div class="band">
+  <b>読み方</b>：上段＝ホーム右上の歯車まわり／下段＝設定を開いたときの行。番号は同じ考え方どうしで対応しています（例：1 の赤ドットは、歯車にも行にも同じ赤ドットが付く）。
+  実物の色に合わせてあります（既存の「NEW」は <b>#c2693f</b>／未読の赤は <b>#d6536a</b>）。
+</div>
+
+<h3 class="sec">上段：ホーム右上の歯車 <span>アプリを開いた瞬間に気づけるか</span></h3>
+
+<div class="row">
+
+  <div class="col">
+    <div class="cap"><span class="n">1</span><b>赤ドット（小さい丸）</b>
+      <em>いちばん控えめ。数も文字も出ない</em></div>
+    <div class="ph">
+      <div class="hhd">
+        <div class="logo">筋肉塾</div>
+        <div class="gearwrap">
+          <svg class="gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span class="dot onicon"></span>
+        </div>
+      </div>
+      <div class="hero">こんにちは、藤田 さん</div>
+      <div class="homebd"><div class="tile"></div><div class="tile"></div></div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="cap"><span class="n">2</span><b>NEW ピル</b>
+      <em>既存のホームタイルと同じ流儀</em></div>
+    <div class="ph">
+      <div class="hhd">
+        <div class="logo">筋肉塾</div>
+        <div class="gearwrap">
+          <svg class="gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span class="pill onicon">NEW</span>
+        </div>
+      </div>
+      <div class="hero">こんにちは、藤田 さん</div>
+      <div class="homebd"><div class="tile"></div><div class="tile"></div></div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="cap"><span class="n">3</span><b>数字バッジ</b>
+      <em>何件あるか分かる（LINE風）</em></div>
+    <div class="ph">
+      <div class="hhd">
+        <div class="logo">筋肉塾</div>
+        <div class="gearwrap">
+          <svg class="gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span class="num onicon">1</span>
+        </div>
+      </div>
+      <div class="hero">こんにちは、藤田 さん</div>
+      <div class="homebd"><div class="tile"></div><div class="tile"></div></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="row" style="margin-top:26px">
+
+  <div class="col">
+    <div class="cap"><span class="n">4</span><b>歯車を緑丸で囲う＋赤ドット</b>
+      <em>アイコン自体を目立たせる</em></div>
+    <div class="ph">
+      <div class="hhd">
+        <div class="logo">筋肉塾</div>
+        <div class="gearwrap ring">
+          <svg class="gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span class="dot onicon"></span>
+        </div>
+      </div>
+      <div class="hero">こんにちは、藤田 さん</div>
+      <div class="homebd"><div class="tile"></div><div class="tile"></div></div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="cap"><span class="n g">参考</span><b>印なし（今）</b>
+      <em>返事が来ても気づく手がかりが無い</em></div>
+    <div class="ph">
+      <div class="hhd">
+        <div class="logo">筋肉塾</div>
+        <div class="gearwrap">
+          <svg class="gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </div>
+      </div>
+      <div class="hero">こんにちは、藤田 さん</div>
+      <div class="homebd"><div class="tile"></div><div class="tile"></div></div>
+    </div>
+  </div>
+
+</div>
+
+<h3 class="sec">下段：設定の中の「お問い合わせ」の行 <span>設定を開いたあと、どこを押せばいいか</span></h3>
+
+<div class="row">
+
+  <div class="col">
+    <div class="cap"><span class="n">1</span><b>赤ドット</b>
+      <em>文字の右に小さい丸を1つ</em></div>
+    <div class="ph">
+      <div class="shd">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <h1>設定</h1>
+      </div>
+      <div class="sbd">
+        <p class="sec2">その他</p>
+        <div class="set">
+          <div class="it">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span class="lb"><span>取扱説明書（使い方ガイド）</span></span><span class="ch">→</span>
+          </div>
+          <div class="it">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 013.9-2 2.2 2.2 0 01.2 3.4c-.8.7-1.6 1-1.6 2.1M12 17h.01"/></svg>
+            <span class="lb"><span>お問い合わせ</span><span class="dot"></span></span><span class="ch">→</span>
+          </div>
+          <div class="it">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span class="lb"><span>ヘルプ</span></span><span class="ch">→</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="cap"><span class="n">2</span><b>NEW ピル</b>
+      <em>右端の矢印の手前に置く</em></div>
+    <div class="ph">
+      <div class="shd">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <h1>設定</h1>
+      </div>
+      <div class="sbd">
+        <p class="sec2">その他</p>
+        <div class="set">
+          <div class="it">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span class="lb"><span>取扱説明書（使い方ガイド）</span></span><span class="ch">→</span>
+          </div>
+          <div class="it">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 013.9-2 2.2 2.2 0 01.2 3.4c-.8.7-1.6 1-1.6 2.1M12 17h.01"/></svg>
+            <span class="lb"><span>お問い合わせ</span></span><span class="pill">NEW</span><span class="ch" style="margin-left:9px">→</span>
+          </div>
+          <div class="it">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span class="lb"><span>ヘルプ</span></span><span class="ch">→</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="cap"><span class="n">3</span><b>数字バッジ</b>
+      <em>お返事の件数を出す</em></div>
+    <div class="ph">
+      <div class="shd">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <h1>設定</h1>
+      </div>
+      <div class="sbd">
+        <p class="sec2">その他</p>
+        <div class="set">
+          <div class="it">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span class="lb"><span>取扱説明書（使い方ガイド）</span></span><span class="ch">→</span>
+          </div>
+          <div class="it">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 013.9-2 2.2 2.2 0 01.2 3.4c-.8.7-1.6 1-1.6 2.1M12 17h.01"/></svg>
+            <span class="lb"><span>お問い合わせ</span></span><span class="num">1</span><span class="ch" style="margin-left:9px">→</span>
+          </div>
+          <div class="it">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span class="lb"><span>ヘルプ</span></span><span class="ch">→</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="row" style="margin-top:26px">
+
+  <div class="col">
+    <div class="cap"><span class="n">5</span><b>「お返事あり」の文字</b>
+      <em>読めばそのまま分かる</em></div>
+    <div class="ph">
+      <div class="shd">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <h1>設定</h1>
+      </div>
+      <div class="sbd">
+        <p class="sec2">その他</p>
+        <div class="set">
+          <div class="it">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span class="lb"><span>取扱説明書（使い方ガイド）</span></span><span class="ch">→</span>
+          </div>
+          <div class="it">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 013.9-2 2.2 2.2 0 01.2 3.4c-.8.7-1.6 1-1.6 2.1M12 17h.01"/></svg>
+            <span class="lb"><span>お問い合わせ</span></span><span class="txt">お返事あり</span><span class="ch" style="margin-left:9px">→</span>
+          </div>
+          <div class="it">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span class="lb"><span>ヘルプ</span></span><span class="ch">→</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="cap"><span class="n">6</span><b>行ごと色を付ける</b>
+      <em>行そのものが浮き上がる</em></div>
+    <div class="ph">
+      <div class="shd">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <h1>設定</h1>
+      </div>
+      <div class="sbd">
+        <p class="sec2">その他</p>
+        <div class="set">
+          <div class="it">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span class="lb"><span>取扱説明書（使い方ガイド）</span></span><span class="ch">→</span>
+          </div>
+          <div class="it hl">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color:#b3475b"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 013.9-2 2.2 2.2 0 01.2 3.4c-.8.7-1.6 1-1.6 2.1M12 17h.01"/></svg>
+            <span class="lb"><span>お問い合わせ</span></span><span class="pill red">お返事あり</span><span class="ch" style="margin-left:9px">→</span>
+          </div>
+          <div class="it">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span class="lb"><span>ヘルプ</span></span><span class="ch">→</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="cap"><span class="n">7</span><b>左に縦線＋赤ドット</b>
+      <em>並びを崩さず、端で知らせる</em></div>
+    <div class="ph">
+      <div class="shd">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <h1>設定</h1>
+      </div>
+      <div class="sbd">
+        <p class="sec2">その他</p>
+        <div class="set">
+          <div class="it">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span class="lb"><span>取扱説明書（使い方ガイド）</span></span><span class="ch">→</span>
+          </div>
+          <div class="it bar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 013.9-2 2.2 2.2 0 01.2 3.4c-.8.7-1.6 1-1.6 2.1M12 17h.01"/></svg>
+            <span class="lb"><span>お問い合わせ</span><span class="dot"></span></span><span class="ch">→</span>
+          </div>
+          <div class="it">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span class="lb"><span>ヘルプ</span></span><span class="ch">→</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="legend">
+  <h3>それぞれの違い</h3>
+  <table>
+    <tr><td>1 赤ドット</td><td>いちばん控えめで、どこに付けても邪魔にならない。<b>件数は分からない</b>が、この窓口で同時に何件も動くことはまず無いので実用上は困らない。歯車のような小さいアイコンにも自然に載る</td></tr>
+    <tr><td>2 NEWピル</td><td>ホームのタイル（学び・月次）で<b>すでに使っている流儀</b>なので、アプリ全体で意味が揃う。ただし歯車の上に載せると文字が小さくなり、少し窮屈に見える</td></tr>
+    <tr><td>3 数字バッジ</td><td>LINE風で「何件」まで分かる。反面、<b>数が出ると急かされている感じ</b>が出やすく、寄り添うトーンとはややズレる</td></tr>
+    <tr><td>4 歯車を丸で囲う</td><td>アイコンごと目立たせる案。気づきやすさは最上位だが、<b>返事が無いときの見た目も変える</b>か決める必要があり、ヘッダーの静けさが減る</td></tr>
+    <tr><td>5 文字で出す</td><td>「お返事あり」と書いてあるので<b>説明がいらない</b>。行の幅を取るので、他の行と字面のバランスが少し崩れる</td></tr>
+    <tr><td>6 行ごと色</td><td>設定を開いた瞬間に目が行く。<b>いちばん強い</b>ぶん、他の行が沈んで見えるので、普段の設定画面としては騒がしくなりうる</td></tr>
+    <tr><td>7 左に縦線</td><td>行の中身を動かさずに知らせる。上品だが、<b>この画面で他に使っていない表現</b>なので意味を覚えてもらう必要がある</td></tr>
+  </table>
+</div>
+
+</body>
+</html>
