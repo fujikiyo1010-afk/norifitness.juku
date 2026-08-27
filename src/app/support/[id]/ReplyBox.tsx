@@ -53,13 +53,16 @@ export function ReplyBox({ ticketId }: { ticketId: string }) {
   }
 
   return (
-    <div className="px-4 pb-10">
-      <div className="border-t border-[#e7dcc9] mb-3.5" />
-
+    // 下ナビ(fixed・60px+セーフエリア)のすぐ上に固定する(きよむ指摘 2026-08-27)。
+    // 会話が長くてもスクロールせずに書ける。短い時も sticky が下ナビの上まで持ち上げる。
+    <div
+      className="sticky z-20 bg-[#f9f5ed] border-t border-[#e7dcc9] px-4 pt-3 pb-3"
+      style={{ bottom: "calc(60px + env(safe-area-inset-bottom))" }}
+    >
       <textarea
         value={body}
         onChange={(e) => setBody(e.target.value)}
-        rows={3}
+        rows={2}
         placeholder="続けてお伝えすることがあれば…"
         className="w-full resize-none rounded-lg border-[1.5px] border-[#ded5c4] bg-white px-3 py-2.5 text-[12.5px] leading-relaxed text-[#2b2620] placeholder:text-[#bdb5a6] focus:border-[#4a875b] focus:outline-none"
       />
