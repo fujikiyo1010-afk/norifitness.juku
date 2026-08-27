@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>お問い合わせ 入口ボタン 5案</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#e8e4dc;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;color:#1c1c1c;padding:26px 14px 70px}
+  h2{text-align:center;font-size:16px;font-weight:800;color:#004d40;margin:0 0 4px}
+  p.sub{text-align:center;font-size:12px;color:#7c7c7c;margin:0 0 26px;line-height:1.7}
+  .grid{display:flex;gap:22px;justify-content:center;flex-wrap:wrap;align-items:flex-start}
+  .card{width:340px}
+  .lab{text-align:center;margin-bottom:9px}
+  .lab .n{display:inline-block;background:#4a875b;color:#fff;font-size:10.5px;font-weight:800;border-radius:20px;padding:2px 10px;margin-bottom:5px}
+  .lab b{display:block;font-size:12.5px;color:#3d3d3d}
+  .lab em{display:block;font-style:normal;font-size:11px;color:#8a8a8a;margin-top:3px;line-height:1.6}
+
+  .ph{width:340px;background:#f9f5ed;border:1px solid #e7dcc9;border-radius:12px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.09)}
+  .hd{display:flex;align-items:center;gap:7px;padding:11px 13px;background:#fffdf8;border-bottom:1px solid #e7dcc9}
+  .hd svg{width:19px;height:19px;color:#4a875b;flex:none}
+  .hd h1{font-size:14px;font-weight:800;color:#004d40;margin:0}
+  .bd{padding:16px 14px 20px}
+  .sec{font-size:11px;font-weight:800;color:#a09684;margin:0 0 8px}
+
+  .li{background:#fffdf8;border:1px solid #ece3d3;border-radius:10px;padding:12px 13px;margin-bottom:9px}
+  .li .sb{font-size:13px;font-weight:700;color:#333;line-height:1.5}
+  .li .dt{font-size:11px;color:#a09684;margin-top:5px}
+  .nm{background:#d6536a;color:#fff;font-size:10px;font-weight:800;border-radius:20px;padding:2px 7px;margin-bottom:5px;display:inline-block}
+
+  /* ===== ボタン各案（文字を大きく） ===== */
+  /* A: 立体グリーン(.btn3d 準拠) */
+  .bA{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;border:0;border-radius:12px;padding:17px;
+      font-size:16px;font-weight:800;color:#fff;letter-spacing:.02em;
+      background:linear-gradient(180deg,#54946a,#4a875b 45%,#34603f);box-shadow:0 5px 0 #274c31,0 9px 18px rgba(52,96,63,.28)}
+  .bA svg{width:20px;height:20px}
+
+  /* B: 白カード + 右矢印 */
+  .bB{display:flex;align-items:center;gap:12px;width:100%;background:#fff;border:1.5px solid #ded5c4;border-radius:12px;padding:16px 15px;text-align:left}
+  .bB .ic{width:38px;height:38px;border-radius:10px;background:#eaf3ec;color:#4a875b;display:flex;align-items:center;justify-content:center;flex:none}
+  .bB .ic svg{width:21px;height:21px}
+  .bB .tx{flex:1}
+  .bB .tx b{display:block;font-size:15px;font-weight:800;color:#2e2e2e;line-height:1.4}
+  .bB .tx span{display:block;font-size:11.5px;color:#8a8a8a;margin-top:3px}
+  .bB .ar{color:#c9c0b0;font-size:20px;flex:none}
+
+  /* C: 枠線グリーン（軽い） */
+  .bC{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;background:#fff;border:2px solid #4a875b;border-radius:12px;padding:16px;
+      font-size:16px;font-weight:800;color:#2f6b41}
+  .bC svg{width:20px;height:20px}
+
+  /* D: 淡いグリーン地（塗り・影なし） */
+  .bD{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;background:#eaf3ec;border:1px solid #cfe3d5;border-radius:12px;padding:17px;
+      font-size:16px;font-weight:800;color:#2f6b41}
+  .bD svg{width:20px;height:20px}
+
+  /* E: 見出し風の大きめカード（説明つき・立体） */
+  .bE{width:100%;border:0;border-radius:13px;padding:18px 16px;text-align:left;color:#fff;
+      background:linear-gradient(180deg,#54946a,#4a875b 45%,#34603f);box-shadow:0 5px 0 #274c31,0 9px 18px rgba(52,96,63,.28)}
+  .bE .t{display:flex;align-items:center;gap:9px;font-size:16.5px;font-weight:800;letter-spacing:.02em}
+  .bE .t svg{width:21px;height:21px;flex:none}
+  .bE .d{font-size:11.5px;opacity:.9;margin-top:6px;line-height:1.6;padding-left:30px}
+
+  .note{max-width:1080px;margin:34px auto 0;background:#fffdf8;border:1px solid #e7dcc9;border-radius:12px;padding:18px 20px}
+  .note h3{font-size:13px;font-weight:800;color:#004d40;margin:0 0 10px}
+  .note table{width:100%;border-collapse:collapse;font-size:12px}
+  .note td{padding:8px;border-bottom:1px solid #f0e9dc;line-height:1.7;vertical-align:top}
+  .note td:first-child{color:#a09684;font-weight:700;white-space:nowrap;width:70px}
+  .note tr:last-child td{border-bottom:0}
+</style>
+</head>
+<body>
+
+<h2>お問い合わせ 入口ボタン 5案</h2>
+<p class="sub">一覧ページの一番上に置くボタン。文字は今より大きくしています<br>（既存の受講生ボタンの標準＝立体グリーン .btn3d との相性も見てください）</p>
+
+<div class="grid">
+
+  <!-- A -->
+  <div class="card">
+    <div class="lab"><span class="n">A</span><b>立体グリーン（既存の標準）</b>
+      <em>アプリ内の他のボタンと同じ見た目</em></div>
+    <div class="ph">
+      <div class="hd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg><h1>お問い合わせ</h1></div>
+      <div class="bd">
+        <button class="bA">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4V5z"/></svg>
+          お問い合わせフォームへ
+        </button>
+        <p class="sec" style="margin-top:20px">これまでの問い合わせ</p>
+        <div class="li"><span class="nm">返信あり</span><p class="sb">食事の写真が送れない</p><p class="dt">8月27日 ・ 対応中</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B -->
+  <div class="card">
+    <div class="lab"><span class="n">B</span><b>白カード＋説明つき</b>
+      <em>設定の行と同じ雰囲気。押しやすさ重視</em></div>
+    <div class="ph">
+      <div class="hd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg><h1>お問い合わせ</h1></div>
+      <div class="bd">
+        <button class="bB">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4V5z"/></svg></span>
+          <span class="tx"><b>お問い合わせフォームへ</b><span>不具合・使い方のご相談</span></span>
+          <span class="ar">›</span>
+        </button>
+        <p class="sec" style="margin-top:20px">これまでの問い合わせ</p>
+        <div class="li"><span class="nm">返信あり</span><p class="sb">食事の写真が送れない</p><p class="dt">8月27日 ・ 対応中</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- C -->
+  <div class="card">
+    <div class="lab"><span class="n">C</span><b>枠線グリーン</b>
+      <em>主張ひかえめ。一覧が主役になる</em></div>
+    <div class="ph">
+      <div class="hd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg><h1>お問い合わせ</h1></div>
+      <div class="bd">
+        <button class="bC">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4V5z"/></svg>
+          お問い合わせフォームへ
+        </button>
+        <p class="sec" style="margin-top:20px">これまでの問い合わせ</p>
+        <div class="li"><span class="nm">返信あり</span><p class="sb">食事の写真が送れない</p><p class="dt">8月27日 ・ 対応中</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- D -->
+  <div class="card">
+    <div class="lab"><span class="n">D</span><b>淡いグリーン地</b>
+      <em>柔らかい。影がないぶん軽い印象</em></div>
+    <div class="ph">
+      <div class="hd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg><h1>お問い合わせ</h1></div>
+      <div class="bd">
+        <button class="bD">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4V5z"/></svg>
+          お問い合わせフォームへ
+        </button>
+        <p class="sec" style="margin-top:20px">これまでの問い合わせ</p>
+        <div class="li"><span class="nm">返信あり</span><p class="sb">食事の写真が送れない</p><p class="dt">8月27日 ・ 対応中</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- E -->
+  <div class="card">
+    <div class="lab"><span class="n">E</span><b>立体＋説明つき（大きめ）</b>
+      <em>Aの立体に、何ができるかを添えた形</em></div>
+    <div class="ph">
+      <div class="hd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg><h1>お問い合わせ</h1></div>
+      <div class="bd">
+        <button class="bE">
+          <span class="t">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4V5z"/></svg>
+            お問い合わせフォームへ
+          </span>
+          <span class="d">アプリの不具合・使い方のご相談はこちらから</span>
+        </button>
+        <p class="sec" style="margin-top:20px">これまでの問い合わせ</p>
+        <div class="li"><span class="nm">返信あり</span><p class="sb">食事の写真が送れない</p><p class="dt">8月27日 ・ 対応中</p></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="note">
+  <h3>各案のちがい</h3>
+  <table>
+    <tr><td>A</td><td>アプリ内の他のボタン（.btn3d＝受講生ボタンの標準）と完全に同じ見た目。統一感は一番。ただ「押してほしい感」が強め</td></tr>
+    <tr><td>B</td><td>設定画面の行と同じ雰囲気で、説明も添えられる。押しやすいが、ボタンらしさは弱め</td></tr>
+    <tr><td>C</td><td>枠線だけ。主張が弱いので、過去の一覧が主役になる。初回（一覧が空）のときは少し寂しい</td></tr>
+    <tr><td>D</td><td>淡い緑の塗り。柔らかく、圧がない。統一ルール（立体グリーンが標準）からは外れる</td></tr>
+    <tr><td>E</td><td>Aの立体に「何ができるか」の一行を追加。初めての人にも用途が伝わる。そのぶん背が高い</td></tr>
+  </table>
+</div>
+
+</body>
+</html>
