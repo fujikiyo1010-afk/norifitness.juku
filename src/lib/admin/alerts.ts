@@ -1,6 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { daysSinceDateJST, daysSinceTsJST } from "@/lib/date/jst";
-import { SERVICE_EXPIRED_EMAILS } from "@/lib/auth/service-expired";
+import { computeServiceState } from "@/lib/auth/service-expired";
 
 /**
  * 管理画面 アラートタグ集計
@@ -131,7 +131,7 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
   // 受講生一覧(ア1: 退塾者を除外＝在籍中 status='active' のみ)
   const { data: allUsers } = await admin
     .from("users")
-    .select("id, name, email, joined_at, last_seen_at, is_beta")
+    .select("id, name, email, joined_at, last_seen_at, is_beta, service_started_at, grace_until, grace_scope")
     .eq("status", "active")
     .order("joined_at", { ascending: false });
 
@@ -301,10 +301,20 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
 
   return users.map((user) => {
     const tags: AlertTag[] = [];
-    // サービス満了(180日)ユーザー: 月次/目標シートは閉鎖済みのため警告を出さない(2026-08-14)
-    const serviceExpired = SERVICE_EXPIRED_EMAILS.includes(
-      ((user as { email?: string | null }).email ?? "").toLowerCase()
+    // サービス満了(180日+grace判定)ユーザー: 月次/目標シートは閉鎖済みのため警告を出さない
+    // grace_full(〜9/30通常維持)は警告対象のまま。満了版UI組(expired/grace_meal)だけ除外
+    const u = user as {
+      service_started_at?: string | null;
+      grace_until?: string | null;
+      grace_scope?: string | null;
+    };
+    const serviceState = computeServiceState(
+      u.service_started_at,
+      u.grace_until,
+      u.grace_scope
     );
+    const serviceExpired =
+      serviceState === "expired" || serviceState === "grace_meal";
     // ア2: 入会からの経過は JST暦日で数える(UTC直だと深夜に1日ズレる)
     const daysSinceJoined = daysSinceTsJST(user.joined_at as string);
 
