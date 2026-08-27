@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>お問い合わせ 導線マップ</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#e8e4dc;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;color:#1c1c1c;padding:26px 16px 70px}
+  h2.title{text-align:center;font-size:16px;font-weight:800;color:#004d40;margin:0 0 4px}
+  p.sub{text-align:center;font-size:12px;color:#7c7c7c;margin:0 0 26px}
+
+  .flow{display:flex;justify-content:center;align-items:flex-start;gap:0;flex-wrap:wrap}
+  .node{width:300px}
+  .arrow{width:74px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:150px;flex:none}
+  .arrow svg{width:30px;height:30px;color:#8aa894}
+  .arrow span{font-size:10.5px;color:#7f7f7f;text-align:center;line-height:1.5;margin-top:5px;font-weight:700}
+
+  .cap{text-align:center;margin-bottom:8px}
+  .cap .n{display:inline-block;background:#4a875b;color:#fff;font-size:10px;font-weight:800;border-radius:20px;padding:2px 9px;margin-bottom:5px}
+  .cap b{display:block;font-size:12.5px;color:#3d3d3d}
+  .cap em{display:block;font-style:normal;font-size:10.5px;color:#8a8a8a;margin-top:3px;line-height:1.5}
+
+  .ph{width:300px;background:#f9f5ed;border:1px solid #e7dcc9;border-radius:12px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.09)}
+  .hd{display:flex;align-items:center;gap:7px;padding:10px 12px;background:#fffdf8;border-bottom:1px solid #e7dcc9}
+  .hd svg{width:18px;height:18px;color:#4a875b;flex:none}
+  .hd h1{font-size:13px;font-weight:800;color:#004d40;margin:0}
+  .hd .bdg{margin-left:auto;background:#eaf3ec;color:#2f6b41;font-size:9px;font-weight:800;border-radius:20px;padding:2px 7px}
+  .bd{padding:13px 12px 16px}
+
+  /* 設定リスト */
+  .set{background:#fff;border:1px solid #ece3d3;border-radius:9px;overflow:hidden}
+  .set .it{display:flex;align-items:center;gap:9px;padding:11px 12px;border-bottom:1px solid #f2ece1;font-size:12px;color:#3d3d3d}
+  .set .it:last-child{border-bottom:0}
+  .set .it svg{width:16px;height:16px;color:#8aa894;flex:none}
+  .set .it .ch{margin-left:auto;color:#c9c0b0;font-size:13px}
+  .set .it.hot{background:#eaf3ec}
+  .set .it.hot span:first-of-type{font-weight:800;color:#2f6b41}
+  .sec{font-size:10px;font-weight:800;color:#a09684;margin:14px 0 6px}
+
+  /* フォーム簡略 */
+  .lead{font-size:11.5px;line-height:1.7;color:#5b5b5b;margin:0 0 12px}
+  .lead b{color:#004d40}
+  .q{font-size:11px;font-weight:800;color:#004d40;margin:0 0 6px}
+  .chips{display:flex;gap:5px;margin-bottom:12px}
+  .chip{flex:1;text-align:center;padding:8px 2px;border-radius:8px;border:1.5px solid #ded5c4;background:#fffdf8;font-size:10.5px;font-weight:700;color:#6b6b6b}
+  .chip.on{border-color:#4a875b;background:#eaf3ec;color:#2f6b41}
+  .inp{width:100%;border:1.5px solid #ded5c4;background:#fff;border-radius:8px;padding:9px 10px;font-size:11.5px;color:#999;margin-bottom:12px}
+  .ta{min-height:62px}
+  .btn{display:block;width:100%;border:0;border-radius:9px;padding:12px;font-size:12.5px;font-weight:800;color:#fff;
+       background:linear-gradient(180deg,#54946a,#4a875b 45%,#34603f);box-shadow:0 4px 0 #274c31}
+
+  /* スレッド */
+  .meta{background:#fffdf8;border:1px solid #ece3d3;border-radius:9px;padding:9px 10px;margin-bottom:12px}
+  .st{display:inline-flex;align-items:center;gap:4px;background:#fff4e0;color:#a4700f;font-size:9.5px;font-weight:800;border-radius:20px;padding:2px 8px;margin-bottom:6px}
+  .st i{width:5px;height:5px;border-radius:50%;background:currentColor}
+  .mrow{font-size:10.5px;color:#6b6b6b;line-height:1.8}
+  .mrow s{text-decoration:none;color:#a09684;display:inline-block;min-width:34px}
+  .msg{max-width:84%;margin-bottom:9px;font-size:11.5px;line-height:1.7}
+  .msg .who{font-size:9.5px;color:#a09684;margin:0 0 3px;font-weight:700}
+  .msg .bb{padding:9px 11px;border-radius:11px}
+  .mine{margin-left:auto}.mine .who{text-align:right}
+  .mine .bb{background:#dcefe0;border:1px solid #c9e3ce;border-bottom-right-radius:3px;color:#22432c}
+  .stf .bb{background:#fff;border:1px solid #e7dcc9;border-bottom-left-radius:3px;color:#333}
+  .rep{border-top:1px solid #e7dcc9;background:#fffdf8;padding:9px 11px;display:flex;gap:7px;align-items:center}
+  .rep .box{flex:1;border:1.5px solid #ded5c4;background:#fff;border-radius:18px;padding:9px 12px;font-size:11px;color:#b9b9b9}
+  .rep .ph-btn{width:34px;height:34px;border-radius:50%;border:1.5px solid #ded5c4;background:#fff;color:#8aa894;display:flex;align-items:center;justify-content:center;flex:none}
+  .rep .ph-btn svg{width:17px;height:17px}
+  .rep .snd{width:34px;height:34px;border-radius:50%;background:#4a875b;color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+  .rep .snd svg{width:15px;height:15px}
+
+  /* 通知バナー */
+  .push{background:#fff;border:1px solid #ddd;border-radius:11px;padding:10px 12px;box-shadow:0 4px 14px rgba(0,0,0,.13);display:flex;gap:9px;align-items:center;margin-bottom:9px}
+  .push .ic{width:30px;height:30px;border-radius:8px;background:#4a875b;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;flex:none}
+  .push .tx{font-size:11px;line-height:1.5}
+  .push .tx b{display:block;font-size:11.5px;color:#222}
+  .push .tx span{color:#7c7c7c}
+
+  /* 一覧 */
+  .li{background:#fffdf8;border:1px solid #ece3d3;border-radius:9px;padding:10px 11px;margin-bottom:7px}
+  .li .sb{font-size:11.5px;font-weight:700;color:#333;line-height:1.5}
+  .li .dt{font-size:9.5px;color:#a09684;margin-top:4px}
+  .nm{background:#d6536a;color:#fff;font-size:9px;font-weight:800;border-radius:20px;padding:2px 6px;margin-bottom:4px;display:inline-block}
+  .nb{display:block;text-align:center;border:1.5px dashed #cbbfa8;border-radius:9px;padding:11px;font-size:11.5px;font-weight:700;color:#6b6b6b;margin-bottom:14px}
+
+  .legend{max-width:1050px;margin:34px auto 0;background:#fffdf8;border:1px solid #e7dcc9;border-radius:12px;padding:18px 20px}
+  .legend h3{font-size:13px;font-weight:800;color:#004d40;margin:0 0 10px}
+  .legend table{width:100%;border-collapse:collapse;font-size:12px}
+  .legend td{padding:7px 8px;border-bottom:1px solid #f0e9dc;line-height:1.6;vertical-align:top}
+  .legend td:first-child{color:#a09684;font-weight:700;white-space:nowrap;width:150px}
+  .legend tr:last-child td{border-bottom:0}
+</style>
+</head>
+<body>
+
+<h2 class="title">お問い合わせ 導線マップ（案C）</h2>
+<p class="sub">どこから入って、どう移動するか</p>
+
+<div class="flow">
+
+  <!-- 1: 設定から入る -->
+  <div class="node">
+    <div class="cap"><span class="n">1</span><b>入口 ─ 設定（アカウント）</b>
+      <em>取扱説明書のすぐ下に置く</em></div>
+    <div class="ph">
+      <div class="hd">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <h1>アカウント</h1>
+      </div>
+      <div class="bd">
+        <p class="sec">アプリについて</p>
+        <div class="set">
+          <div class="it">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+            <span>取扱説明書</span><span class="ch">›</span>
+          </div>
+          <div class="it hot">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 013.9-2 2.2 2.2 0 01.2 3.4c-.8.7-1.6 1-1.6 2.1M12 17h.01"/></svg>
+            <span>お問い合わせ</span><span class="ch">›</span>
+          </div>
+          <div class="it">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+            <span>利用規約</span><span class="ch">›</span>
+          </div>
+        </div>
+        <p style="font-size:10px;color:#a09684;margin-top:10px;line-height:1.6">
+          ※ URL <b style="color:#4a875b">juku.norifitness.com/support</b><br>を直接開いても、同じ画面に来ます
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    <span>タップ</span>
+  </div>
+
+  <!-- 2: 一覧 -->
+  <div class="node">
+    <div class="cap"><span class="n">2</span><b>お問い合わせ（一覧）</b>
+      <em>初めての人は空。ここが玄関</em></div>
+    <div class="ph">
+      <div class="hd">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <h1>お問い合わせ</h1>
+      </div>
+      <div class="bd">
+        <a class="nb" style="border-style:solid;border-color:#4a875b;background:#eaf3ec;color:#2f6b41">お問い合わせフォームへ</a>
+        <p class="sec">これまでの問い合わせ</p>
+        <div class="li">
+          <span class="nm">返信あり</span>
+          <p class="sb">食事の写真が送れない</p>
+          <p class="dt">8月27日 ・ 対応中 <span style="color:#4a875b">（続けて聞けます）</span></p>
+        </div>
+        <div class="li" style="opacity:.72">
+          <p class="sb">動画が途中で止まる</p>
+          <p class="dt">8月11日 ・ 解決済み <span style="color:#a09684">（読むだけ）</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    <span>ボタンを<br>押す</span>
+  </div>
+
+  <!-- 3: フォーム -->
+  <div class="node">
+    <div class="cap"><span class="n">3</span><b>送信フォーム</b>
+      <em>送ると 4 のスレッドが生まれる</em></div>
+    <div class="ph">
+      <div class="hd">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <h1>お問い合わせフォーム</h1>
+      </div>
+      <div class="bd">
+        <p class="lead">アプリの不具合や、使い方で分からないことをお送りください。<br>担当者が確認して、このページでお返事します。</p>
+        <p class="q">どんなことですか？</p>
+        <div class="chips">
+          <div class="chip on">うまく動かない</div>
+          <div class="chip">使い方</div>
+          <div class="chip">その他</div>
+        </div>
+        <p class="q">どの画面のことですか？</p>
+        <div class="inp">食事の記録 ▾</div>
+        <p class="q">詳しく教えてください</p>
+        <div class="inp ta">例）食事の写真を送ろうとすると…</div>
+        <p class="q">画面の写真（任意）</p>
+        <div class="inp">📷 写真を選ぶ</div>
+        <button class="btn">送信する</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 2段目 -->
+<div class="flow" style="margin-top:34px">
+
+  <!-- 4: スレッド -->
+  <div class="node">
+    <div class="cap"><span class="n">4</span><b>やりとり（対応中）</b>
+      <em>送信直後にここへ着地。入力欄あり</em></div>
+    <div class="ph">
+      <div class="hd">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <h1>食事の写真が送れない</h1>
+        <span class="bdg">対応中</span>
+      </div>
+      <div class="bd" style="padding-bottom:0">
+        <div class="meta">
+          <div class="st"><i></i>担当者が確認しています</div>
+          <div class="mrow"><s>種類</s>うまく動かない</div>
+          <div class="mrow"><s>画面</s>食事の記録</div>
+        </div>
+        <div class="msg mine">
+          <p class="who">あなた</p>
+          <div class="bb">食事の写真を送ろうとすると、ぐるぐる回ったまま進みません。</div>
+        </div>
+        <div class="msg stf">
+          <p class="who">のりfitness 担当</p>
+          <div class="bb">確認しました。一度アプリを閉じて開き直していただけますか。</div>
+        </div>
+        <div class="msg mine">
+          <p class="who">あなた</p>
+          <div class="bb">送れました！ありがとうございます。</div>
+        </div>
+      </div>
+      <div class="rep">
+        <div class="box">続けて聞きたいことがあれば…</div>
+        <div class="snd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow" style="padding-top:120px">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+    <span>返信が来ると</span>
+  </div>
+
+  <!-- 5: 通知 -->
+  <div class="node">
+    <div class="cap"><span class="n">5</span><b>返信の知らせ方</b>
+      <em>チャットには一切流れない</em></div>
+    <div class="ph">
+      <div class="hd"><h1 style="margin:0 auto">スマホの画面</h1></div>
+      <div class="bd">
+        <div class="push">
+          <div class="ic">筋</div>
+          <div class="tx"><b>お問い合わせにお返事があります</b><span>食事の写真が送れない</span></div>
+        </div>
+        <p style="font-size:10.5px;color:#7c7c7c;line-height:1.8;margin:12px 0 0">
+          ・プッシュ通知をタップ → <b style="color:#4a875b">4 のスレッド</b>が直接ひらく<br>
+          ・アプリのホームにも「お問い合わせに返信」の合図が出る<br>
+          ・チャット（のり先生とのやりとり）には<b style="color:#b3475b">入りません</b>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow" style="padding-top:120px">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    <span>管理側</span>
+  </div>
+
+  <!-- 6: 管理画面 -->
+  <div class="node">
+    <div class="cap"><span class="n">6</span><b>管理画面（きよむさん）</b>
+      <em>サイドバー「毎日の仕事」に新設</em></div>
+    <div class="ph" style="background:#fff;border-color:#e6e6e6">
+      <div class="hd" style="background:#fafafa;border-color:#eee">
+        <h1 style="color:#00695c">お問い合わせ</h1>
+        <span class="bdg" style="background:#fdeaee;color:#c2415c">未対応 2</span>
+      </div>
+      <div class="bd">
+        <div class="li" style="background:#fff;border-color:#eee">
+          <span class="nm">未対応</span>
+          <p class="sb">丹野友美 ・ 食事の写真が送れない</p>
+          <p class="dt">iPhone / Safari / v18 ・ 14:20</p>
+        </div>
+        <div class="li" style="background:#fff;border-color:#eee">
+          <span class="nm">未対応</span>
+          <p class="sb">山田太郎（アプリ外）・ ログインできない</p>
+          <p class="dt">メール返信 ・ 13:05</p>
+        </div>
+        <div class="li" style="background:#fff;border-color:#eee">
+          <p class="sb">石亀翔聖 ・ 動画が止まる</p>
+          <p class="dt">対応済み ・ 8月11日</p>
+        </div>
+        <p style="font-size:10.5px;color:#8a8a8a;line-height:1.7;margin-top:12px">
+          開いて返信を書くだけ。<br>
+          アプリから来た人＝スレッドへ、<br>アプリ外＝メールへ<b style="color:#00695c">自動で振り分け</b>
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 3段目: 対応中 vs 解決済み -->
+<h2 class="title" style="margin-top:40px">スレッドの2つの状態</h2>
+<p class="sub">対応中は続けて聞ける／解決済みは読むだけ</p>
+
+<div class="flow">
+  <div class="node">
+    <div class="cap"><span class="n" style="background:#a4700f">対応中</span><b>入力欄あり</b>
+      <em>やりとりが続けられる</em></div>
+    <div class="ph">
+      <div class="hd">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <h1>食事の写真が送れない</h1>
+        <span class="bdg" style="background:#fff4e0;color:#a4700f">対応中</span>
+      </div>
+      <div class="bd" style="padding-bottom:0">
+        <div class="msg mine"><p class="who">あなた</p><div class="bb">写真が送れません。</div></div>
+        <div class="msg stf"><p class="who">のりfitness 担当</p><div class="bb">一度アプリを開き直していただけますか。</div></div>
+      </div>
+      <div class="rep">
+        <div class="ph-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.2"/></svg></div>
+        <div class="box">続けて聞きたいことがあれば…</div>
+        <div class="snd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></div>
+      </div>
+      <p style="font-size:10px;color:#a09684;text-align:center;padding:0 0 9px">写真も送れます</p>
+    </div>
+  </div>
+
+  <div class="arrow" style="padding-top:150px">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    <span>解決したら</span>
+  </div>
+
+  <div class="node">
+    <div class="cap"><span class="n" style="background:#8a8272">解決済み</span><b>入力欄なし</b>
+      <em>読むだけ。新しい相談は新しく送る</em></div>
+    <div class="ph">
+      <div class="hd">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <h1>動画が途中で止まる</h1>
+        <span class="bdg" style="background:#efece5;color:#8a8272">解決済み</span>
+      </div>
+      <div class="bd" style="padding-bottom:0">
+        <div class="msg mine"><p class="who">あなた</p><div class="bb">動画が途中で止まります。</div></div>
+        <div class="msg stf"><p class="who">のりfitness 担当</p><div class="bb">Wi-Fi の電波を確認してみてください。</div></div>
+        <div class="msg mine"><p class="who">あなた</p><div class="bb">直りました！</div></div>
+      </div>
+      <div class="done" style="margin:14px 12px 16px">
+        このお問い合わせは解決済みです
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="legend">
+  <h3>位置関係のまとめ</h3>
+  <table>
+    <tr><td>入口（アプリ内）</td><td>設定（アカウント）→「お問い合わせ」。取扱説明書のすぐ下。<b>URL <code>/support</code> を直接開いても同じ場所へ</b></td></tr>
+    <tr><td>入口（アプリ外）</td><td>ログイン画面の下部「アプリが開かない方はこちら」／LINEにURLを貼る → 公開フォーム <code>/help</code>（ログイン不要・名前とメール記入・返信はメール）</td></tr>
+    <tr><td>①玄関＝一覧</td><td>過去の問い合わせが並ぶ。初回は空。上に「お問い合わせフォームへ」ボタン</td></tr>
+    <tr><td>②送信フォーム</td><td>ボタンから開く。送信すると、その件のスレッドが1本できて<b>そのまま着地</b></td></tr>
+    <tr><td>③スレッド</td><td>1件＝1本。<b>対応中は入力欄あり</b>（続けて聞ける）／<b>解決済みは読むだけ</b>（入力欄を出さない・「また困ったら新しくお送りください」と案内）</td></tr>
+    <tr><td>返信の知らせ</td><td>プッシュ通知 → タップでスレッドが直接ひらく。<b>チャットには流れない</b></td></tr>
+    <tr><td>管理側</td><td>管理画面サイドバー「毎日の仕事」に新設。通知は<b>きよむさんだけ</b>に飛ぶ</td></tr>
+  </table>
+</div>
+
+</body>
+</html>
