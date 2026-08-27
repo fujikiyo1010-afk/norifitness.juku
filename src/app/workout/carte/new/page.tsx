@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getMyCarte } from "@/lib/workout/queries";
 import { isBetaUser } from "@/lib/auth/beta";
+import { isServiceExpiredUser } from "@/lib/auth/service-expired";
 import { CarteIntakeForm } from "./CarteIntakeForm";
 import { MemberHeader } from "@/components/MemberHeader";
 
@@ -19,6 +20,10 @@ export const dynamic = "force-dynamic";
  *   - A 案: 1 画面でスクロール / 下書き保存あり (localStorage) / 必須項目チェック
  */
 export default async function WorkoutCarteNewPage() {
+  // サービス満了: カルテ新規(=メニュー作成依頼)は発生しない
+  if (await isServiceExpiredUser()) {
+    redirect("/");
+  }
   // 既にカルテがある場合はリダイレクト (重複提出防止)
   const existing = await getMyCarte();
   if (existing) {

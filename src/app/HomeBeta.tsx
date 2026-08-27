@@ -35,6 +35,8 @@ export function HomeBeta({
   lastWatched,
   monthlyBadge,
   serviceExpired = false,
+  expiredHasGoalSheet = false,
+  expiredHasPastMonthly = false,
   boardItems,
   unreadReply,
   today,
@@ -53,8 +55,12 @@ export function HomeBeta({
   totalLessons: number;
   lastWatched: LastWatchedLesson | null;
   monthlyBadge: boolean;
-  /** サービス満了(180日)ユーザー: 月次/目標シートの導線を出さない(2026-08-14) */
+  /** サービス満了(180日)ユーザー: 添削系の導線を消し、過去資産は閲覧入口に変える(2026-08-26 C2) */
   serviceExpired?: boolean;
+  /** 満了版: 過去に書いた目標シートがある(閲覧入口を出す) */
+  expiredHasGoalSheet?: boolean;
+  /** 満了版: 提出済みの月次がある(アーカイブ入口を出す) */
+  expiredHasPastMonthly?: boolean;
   boardItems: BoardItem[];
   unreadReply: boolean;
   today: TodayActivity;
@@ -245,15 +251,15 @@ export function HomeBeta({
               iconBg="#eaf3ec"
               badge={unreadReply ? "NEW" : undefined}
             />
-            {!serviceExpired && (
+            {(!serviceExpired || expiredHasPastMonthly) && (
               <BigTile
                 href="/monthly-review"
                 name="月次添削"
-                desc="動画返信・履歴"
+                desc={serviceExpired ? "過去の動画を見る" : "動画返信・履歴"}
                 icon={<MonthlyTileIcon />}
                 iconColor="#d6536a"
                 iconBg="#fbe9ee"
-                badge={monthlyBadge ? "NEW" : undefined}
+                badge={!serviceExpired && monthlyBadge ? "NEW" : undefined}
               />
             )}
             {/* 2行目: 学びの記録(左・金) / 目標シート(右) */}
@@ -265,11 +271,11 @@ export function HomeBeta({
               iconColor="#b8860b"
               iconBg="#f7efd4"
             />
-            {!serviceExpired && (
+            {(!serviceExpired || expiredHasGoalSheet) && (
               <BigTile
                 href="/goal-sheet"
                 name="目標シート"
-                desc="今月の目標"
+                desc={serviceExpired ? "過去の目標を見る" : "今月の目標"}
                 icon={<GoalTileIcon />}
                 iconColor="#2f7d6b"
                 iconBg="#e3f1ee"
@@ -295,14 +301,16 @@ export function HomeBeta({
               iconColor="#7a5af0"
               iconBg="#efeafd"
             />
-            <BigTile
-              href="/form-review"
-              name="フォーム添削"
-              desc="オンラインで直接"
-              icon={<FormReviewTileIcon />}
-              iconColor="#c2693f"
-              iconBg="#f7ece2"
-            />
+            {!serviceExpired && (
+              <BigTile
+                href="/form-review"
+                name="フォーム添削"
+                desc="オンラインで直接"
+                icon={<FormReviewTileIcon />}
+                iconColor="#c2693f"
+                iconBg="#f7ece2"
+              />
+            )}
             <BigTile
               href="/protein"
               name="プロテイン"

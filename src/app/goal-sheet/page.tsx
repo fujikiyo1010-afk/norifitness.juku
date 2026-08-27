@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getMyGoalSheet } from "@/lib/goal-sheet/queries";
 import { MemberHeader } from "@/components/MemberHeader";
 import { RefreshOnFocus } from "@/components/RefreshOnFocus";
@@ -13,7 +14,6 @@ import {
 } from "@/lib/goal-sheet/types";
 import { SavedToast } from "./SavedToast";
 import { isServiceExpiredUser } from "@/lib/auth/service-expired";
-import { ServiceExpiredNotice } from "@/components/ServiceExpiredNotice";
 
 export const dynamic = "force-dynamic";
 
@@ -26,11 +26,13 @@ export const dynamic = "force-dynamic";
  *   編集画面(edit/GoalSheetEditor.tsx)には一切触れない。
  */
 export default async function GoalSheetPage() {
-  // サービス満了(180日)ユーザーは期間サポート機能を閉じる(2026-08-14)
-  if (await isServiceExpiredUser()) {
-    return <ServiceExpiredNotice title="目標シート" />;
-  }
+  // サービス満了: 過去に書いたシートは閲覧専用で残す(2026-08-26 C2・議案1=B)。
+  // 修正リクエスト等の編集導線だけ消す。シートが無い満了者はホームへ(入口も出ていない)。
+  const serviceExpired = await isServiceExpiredUser();
   const sheet = await getMyGoalSheet();
+  if (serviceExpired && !sheet) {
+    redirect("/");
+  }
 
   // === シート未作成: 初回記入 CTA(現状維持) ===
   if (!sheet) {
@@ -216,17 +218,20 @@ export default async function GoalSheetPage() {
             {audits?.section_comments?.self_image && <NoriAudit audit={audits.section_comments.self_image} />}
           </SheetCard>
 
-          {/* 最下部ボタン1本: 目標修正リクエスト(緑立体・祝福型)。着地は従来の /goal-sheet/edit(挙動不変)。 */}
-          <Link
-            href="/goal-sheet/edit"
-            className="mt-1 block rounded-[10px] py-3.5 text-center text-[14px] font-extrabold text-white active:translate-y-[2px]"
-            style={{
-              background: "linear-gradient(180deg,#54946a,#4a875b 45%,#34603f)",
-              boxShadow: "0 5px 0 #274c31, 0 9px 18px rgba(52,96,63,0.3)",
-            }}
-          >
-            目標修正リクエスト
-          </Link>
+          {/* 最下部ボタン1本: 目標修正リクエスト(緑立体・祝福型)。着地は従来の /goal-sheet/edit(挙動不変)。
+              満了版は閲覧専用のため非表示(2026-08-26 C2)。 */}
+          {!serviceExpired && (
+            <Link
+              href="/goal-sheet/edit"
+              className="mt-1 block rounded-[10px] py-3.5 text-center text-[14px] font-extrabold text-white active:translate-y-[2px]"
+              style={{
+                background: "linear-gradient(180deg,#54946a,#4a875b 45%,#34603f)",
+                boxShadow: "0 5px 0 #274c31, 0 9px 18px rgba(52,96,63,0.3)",
+              }}
+            >
+              目標修正リクエスト
+            </Link>
+          )}
         </div>
       </main>
     </>

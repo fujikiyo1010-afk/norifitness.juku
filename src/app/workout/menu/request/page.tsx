@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { isServiceExpiredUser } from "@/lib/auth/service-expired";
 import { getMyCurrentMenu, getMyCarte } from "@/lib/workout/queries";
 import { formatDistributionDate } from "@/lib/workout/menu-display";
 import { RequestForm } from "../../_components/RequestForm";
@@ -14,6 +15,10 @@ export const dynamic = "force-dynamic";
  *   - メニューあり → 現状メニュー情報を表示 + リクエスト入力
  */
 export default async function MenuRequestPage() {
+  // サービス満了: メニュー変更リクエストは受け付けない
+  if (await isServiceExpiredUser()) {
+    redirect("/workout");
+  }
   const [menu, carte] = await Promise.all([getMyCurrentMenu(), getMyCarte()]);
   if (!menu) {
     redirect("/workout");

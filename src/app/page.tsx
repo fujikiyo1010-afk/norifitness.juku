@@ -186,6 +186,18 @@ export default async function Home() {
     }
     // 週間プール(藤田先行): この人だけトレカードを週間表示に差し替える。
     const weeklyPool = isPool ? await getWeeklyTraining() : null;
+    // 満了版: 過去資産(月次)がある人にだけアーカイブ入口タイルを出す(C2)
+    let expiredHasPastMonthly = false;
+    if (serviceExpired) {
+      const supa = await createClient();
+      const { data: pastAudit } = await supa
+        .from("monthly_audits")
+        .select("id")
+        .not("submitted_at", "is", null)
+        .limit(1)
+        .maybeSingle();
+      expiredHasPastMonthly = !!pastAudit;
+    }
     return (
       <HomeBeta
         displayName={displayName}
@@ -206,6 +218,8 @@ export default async function Home() {
         weeklyPool={weeklyPool}
         newHomeCard={isNewHomeCard}
         serviceExpired={serviceExpired}
+        expiredHasGoalSheet={serviceExpired && goalSheet.hasContent}
+        expiredHasPastMonthly={expiredHasPastMonthly}
       />
     );
   }

@@ -29,8 +29,8 @@ import {
 import { CategoryScoresBlock } from "./CategoryScoresBlock";
 import { CategoryTrendChart } from "./CategoryTrendChart";
 import { TrendChart } from "./TrendChart";
+import { redirect } from "next/navigation";
 import { isServiceExpiredUser } from "@/lib/auth/service-expired";
-import { ServiceExpiredNotice } from "@/components/ServiceExpiredNotice";
 
 export const dynamic = "force-dynamic";
 
@@ -46,12 +46,13 @@ export const dynamic = "force-dynamic";
  *   - ブロック C: 月別ログ一覧 (タップで月詳細へ)
  */
 export default async function MonthlyReviewHistoryPage() {
-  // サービス満了(180日)ユーザーは期間サポート機能を閉じる(2026-08-14)
-  if (await isServiceExpiredUser()) {
-    return <ServiceExpiredNotice title="月次添削" />;
-  }
+  // サービス満了: 提出(ブロックA)は閉じ、過去の月次はアーカイブとして閲覧可(2026-08-26 C2)
+  const serviceExpired = await isServiceExpiredUser();
   const currentAudit = await getMyCurrentMonthAudit();
   const allAudits = await listMyAudits(24); // 過去 2 年分
+  if (serviceExpired && allAudits.length === 0) {
+    redirect("/"); // 過去資産なし=入口も出ていない
+  }
   const currentStatus = getAuditStatus(currentAudit);
   const cycle = await getMyCurrentCycle(); // 入会日起点の今の回(第1回前=cycleNumber 0)
 
@@ -78,15 +79,17 @@ export default async function MonthlyReviewHistoryPage() {
 
         {/* スクロール本体 */}
         <div className="bg-[#f9f5ed] pb-20">
-          {/* ====== ブロック A: 今月の月次添削 (4 状態カード) ====== */}
-          <BlockWrapper title="今月の月次添削" icon="clipboard">
-            <CurrentMonthCard
-              status={currentStatus}
-              audit={currentAudit}
-              cycle={cycle}
-              hasAnyAudit={allAudits.length > 0}
-            />
-          </BlockWrapper>
+          {/* ====== ブロック A: 今月の月次添削 (4 状態カード)。満了版は提出なし=非表示 ====== */}
+          {!serviceExpired && (
+            <BlockWrapper title="今月の月次添削" icon="clipboard">
+              <CurrentMonthCard
+                status={currentStatus}
+                audit={currentAudit}
+                cycle={cycle}
+                hasAnyAudit={allAudits.length > 0}
+              />
+            </BlockWrapper>
+          )}
 
           {/* ====== ブロック B-1: 最新カテゴリ別スコア (2026-06-17 1 件目から表示) ====== */}
           <BlockWrapper title="カテゴリ別スコア" icon="bar" hint={latestSubmittedAudit ? formatTargetMonthLabel(latestSubmittedAudit.target_month) : undefined}>
