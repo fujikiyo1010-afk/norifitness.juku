@@ -83,9 +83,11 @@ export function SupportShell({
   );
 
   return (
-    <div className="flex min-h-screen">
+    // 画面の高さで止める(h-full + overflow-hidden)。こうしないとページ全体が伸びて
+    // ヘッダ・環境の帯・返信欄が一緒に流れてしまう。スクロールするのは一覧と本文だけ。
+    <div className="flex h-full overflow-hidden">
       {/* 左 ・ 一覧 */}
-      <aside className="sticky top-0 flex h-screen w-[400px] flex-shrink-0 flex-col border-r border-[#e8ebe9] bg-white">
+      <aside className="flex h-full w-[400px] flex-shrink-0 flex-col border-r border-[#e8ebe9] bg-white">
         <div className="border-b border-[#e8ebe9] px-3.5 pt-3 pb-0">
           <h1 className="mb-2 text-[15px] font-bold">問い合わせ</h1>
           <div className="flex gap-1">
@@ -136,8 +138,8 @@ export function SupportShell({
         </div>
       </aside>
 
-      {/* 右 ・ 詳細 */}
-      <div className="flex min-w-0 flex-1 flex-col bg-[#f4f6f5]">{children}</div>
+      {/* 右 ・ 詳細 (上=ヘッダ/環境の帯・下=返信欄 は固定、間の本文だけスクロール) */}
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden bg-[#f4f6f5]">{children}</div>
     </div>
   );
 }

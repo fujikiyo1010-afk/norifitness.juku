@@ -38,7 +38,7 @@ export default async function AdminSupportDetailPage({
   return (
     <>
       {/* ヘッダ */}
-      <header className="flex flex-wrap items-center gap-3 border-b border-[#e8ebe9] bg-white px-5 py-2.5">
+      <header className="flex flex-shrink-0 flex-wrap items-center gap-3 border-b border-[#e8ebe9] bg-white px-5 py-2.5">
         <span className="text-[15px] font-bold text-zinc-900">{data.userName} さん</span>
         <span
           className={`rounded-full border px-2.5 py-0.5 text-[10.5px] font-bold ${statusPill.cls}`}
@@ -59,7 +59,7 @@ export default async function AdminSupportDetailPage({
       </header>
 
       {/* 環境の帯 */}
-      <div className="flex flex-wrap gap-x-6 gap-y-1 border-b border-[#e8ebe9] bg-white px-5 py-2">
+      <div className="flex flex-shrink-0 flex-wrap gap-x-6 gap-y-1 border-b border-[#e8ebe9] bg-white px-5 py-2">
         <Env k="画面" v={data.ticket.screen ?? "—"} />
         <Env k="端末" v={str(dev.platform) ?? "—"} />
         <Env
