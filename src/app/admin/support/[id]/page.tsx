@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/admin";
 import { getSupportTicketForAdmin } from "@/lib/support/admin-queries";
 import { currentAppVersion } from "@/lib/support/app-version";
+import { EnvBar } from "./EnvBar";
 import { SupportThread } from "./SupportThread";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +27,6 @@ export default async function AdminSupportDetailPage({
   const str = (v: unknown) => (typeof v === "string" && v.length > 0 ? v : null);
   const appVersion = str(dev.app_version);
   const now = currentAppVersion();
-  const stale = !!now && !!appVersion && appVersion !== now;
 
   const statusPill =
     data.ticket.status === "open"
@@ -58,24 +58,18 @@ export default async function AdminSupportDetailPage({
         </div>
       </header>
 
-      {/* 環境の帯 */}
-      <div className="flex flex-shrink-0 flex-wrap gap-x-6 gap-y-1 border-b border-[#e8ebe9] bg-white px-5 py-2">
-        <Env k="画面" v={data.ticket.screen ?? "—"} />
-        <Env k="端末" v={str(dev.platform) ?? "—"} />
-        <Env
-          k="アプリの版"
-          v={
-            appVersion
-              ? stale
-                ? `${appVersion}　⚠ 古い版（本番は ${now}）`
-                : appVersion
-              : "—"
-          }
-          warn={stale}
-        />
-        <Env k="最初の送信" v={jstDateTime(data.ticket.created_at)} mono />
-        {str(dev.ua) && <Env k="UA" v={str(dev.ua) as string} mono dim />}
-      </div>
+      {/* 環境の帯(画面/端末/送信 + 古い版の警告。版・UA等は折りたたみの中) */}
+      <EnvBar
+        screen={data.ticket.screen}
+        platform={str(dev.platform)}
+        sentAt={jstDateTime(data.ticket.created_at)}
+        appVersion={appVersion}
+        currentVersion={now}
+        ua={str(dev.ua)}
+        screenSize={str(dev.screen)}
+        language={str(dev.language)}
+        standalone={typeof dev.standalone === "boolean" ? dev.standalone : null}
+      />
 
       <SupportThread
         ticketId={data.ticket.id}
@@ -87,32 +81,6 @@ export default async function AdminSupportDetailPage({
   );
 }
 
-function Env({
-  k,
-  v,
-  warn,
-  mono,
-  dim,
-}: {
-  k: string;
-  v: string;
-  warn?: boolean;
-  mono?: boolean;
-  dim?: boolean;
-}) {
-  return (
-    <div className="text-[11px]">
-      <span className="mr-1.5 font-bold text-zinc-400">{k}</span>
-      <span
-        className={`font-bold ${warn ? "text-[#c2410c]" : dim ? "text-zinc-400" : "text-zinc-700"} ${
-          mono ? "font-mono" : ""
-        }`}
-      >
-        {v}
-      </span>
-    </div>
-  );
-}
 
 /** JST で 月/日 時:分 (サーバはUTCで動くので必ず +9h) */
 function jstDateTime(iso: string): string {

@@ -16,6 +16,9 @@ import type { TicketStatus } from "@/lib/support/types";
  *   解決済み resolved  = 閉じた(受講生は書けない)
  *
  * 件数が少ないので絞り込みはクライアントで行う(レイアウトは searchParams を受け取れないため)。
+ *
+ * ★アプリの版は行に出さない(2026-08-28 きよむ判断・A案)。文字列が長く一覧が読みにくいため、
+ *   詳細の「環境の詳細」を開けば分かる、という整理。
  */
 type Tab = "open" | "in_progress" | "resolved" | "all";
 
@@ -49,11 +52,9 @@ function daysSince(iso: string): number {
 
 export function SupportShell({
   tickets,
-  currentVersion,
   children,
 }: {
   tickets: AdminTicketRow[];
-  currentVersion: string | null;
   children: ReactNode;
 }) {
   const pathname = usePathname();
@@ -127,12 +128,7 @@ export function SupportShell({
             </div>
           ) : (
             visible.map((t) => (
-              <Row
-                key={t.id}
-                t={t}
-                selected={t.id === selectedId}
-                stale={!!currentVersion && !!t.appVersion && t.appVersion !== currentVersion}
-              />
+              <Row key={t.id} t={t} selected={t.id === selectedId} />
             ))
           )}
         </div>
@@ -165,15 +161,7 @@ function Chip({
   );
 }
 
-function Row({
-  t,
-  selected,
-  stale,
-}: {
-  t: AdminTicketRow;
-  selected: boolean;
-  stale: boolean;
-}) {
+function Row({ t, selected }: { t: AdminTicketRow; selected: boolean }) {
   const unhandled = t.status === "open";
   return (
     <Link
@@ -204,12 +192,6 @@ function Row({
         {t.isFollowUp && <Chip tone="unread">再質問</Chip>}
         {!t.userId && <Chip tone="warn">アプリ外</Chip>}
         {t.platform && <Chip>{t.platform}</Chip>}
-        {t.appVersion && (
-          <Chip tone={stale ? "warn" : "gray"}>
-            {stale ? "⚠ " : ""}
-            {t.appVersion}
-          </Chip>
-        )}
         {t.hasPhoto && <Chip tone="photo">写真</Chip>}
         {t.status === "in_progress" && t.studentRead === false && (
           <Chip tone="unread">未読</Chip>
