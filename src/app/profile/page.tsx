@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { MemberHeader } from "@/components/MemberHeader";
 import { isBetaUser } from "@/lib/auth/beta";
+import { hasUnreadSupportReply } from "@/lib/support/queries";
 import { isStaffPreviewUser } from "@/lib/auth/staff-preview";
 import { LogoutButton } from "@/app/account/LogoutButton";
 
@@ -65,6 +66,9 @@ export default async function ProfilePage() {
 
   // B11: プロフィール最下部に「アカウント設定」への導線(ベータ限定)
   const isBeta = await isBetaUser();
+
+  // お問い合わせ(2026-08-28 入口をプロフィールに一本化): 未読の返事があれば NEW ピル
+  const supportUnread = await hasUnreadSupportReply();
 
   // 2026-07-27 プロフィール再設計(森川さん要望): 文字大きめ / 入塾特典を脇役に畳む /
   // お問い合わせを表に。まず社員4人(staff-preview)に仮反映。全公開時はこの分岐を外す。
@@ -216,22 +220,49 @@ export default async function ProfilePage() {
               </div>
               <div className="bg-[#fffdf8] border border-[#e7dcc9] rounded-2xl overflow-hidden">
                 <Link
+                  href="/support"
+                  className="flex items-center gap-3.5 px-[18px] py-4 border-b border-[#eee2cc] hover:bg-[#f0e6d3] transition-colors"
+                >
+                  <ChatIcon />
+                  <span className="flex-1 text-[15.5px] font-semibold text-[#2b2620]">
+                    お問い合わせ
+                  </span>
+                  {supportUnread && (
+                    <span className="rounded-full bg-[#c2693f] px-2 py-0.5 text-[10px] font-bold tracking-wide text-white">
+                      NEW
+                    </span>
+                  )}
+                  <span className="text-[#c9bfa9] text-lg">›</span>
+                </Link>
+                <a
+                  href="https://guide.norifitness.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3.5 px-[18px] py-4 border-b border-[#eee2cc] hover:bg-[#f0e6d3] transition-colors"
+                >
+                  <GuideIcon />
+                  <span className="flex-1 text-[15.5px] font-semibold text-[#2b2620]">
+                    取扱説明書（使い方ガイド）
+                  </span>
+                  <span className="text-[#c9bfa9] text-lg">›</span>
+                </a>
+                <Link
+                  href="/account/help"
+                  className="flex items-center gap-3.5 px-[18px] py-4 border-b border-[#eee2cc] hover:bg-[#f0e6d3] transition-colors"
+                >
+                  <FaqIcon />
+                  <span className="flex-1 text-[15.5px] font-semibold text-[#2b2620]">
+                    よくある質問
+                  </span>
+                  <span className="text-[#c9bfa9] text-lg">›</span>
+                </Link>
+                <Link
                   href="/account"
                   className="flex items-center gap-3.5 px-[18px] py-4 border-b border-[#eee2cc] hover:bg-[#f0e6d3] transition-colors"
                 >
                   <GearIcon />
                   <span className="flex-1 text-[15.5px] font-semibold text-[#2b2620]">
                     設定（通知・パスワード）
-                  </span>
-                  <span className="text-[#c9bfa9] text-lg">›</span>
-                </Link>
-                <Link
-                  href="/account/help"
-                  className="flex items-center gap-3.5 px-[18px] py-4 border-b border-[#eee2cc] hover:bg-[#f0e6d3] transition-colors"
-                >
-                  <ChatIcon />
-                  <span className="flex-1 text-[15.5px] font-semibold text-[#2b2620]">
-                    お問い合わせ
                   </span>
                   <span className="text-[#c9bfa9] text-lg">›</span>
                 </Link>
@@ -438,6 +469,25 @@ function GiftIcon() {
   );
 }
 
+function GuideIcon() {
+  return (
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#6a6256" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="9" y1="13" x2="15" y2="13" />
+      <line x1="9" y1="17" x2="13" y2="17" />
+    </svg>
+  );
+}
+function FaqIcon() {
+  return (
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#6a6256" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M9.5 9.5a2.5 2.5 0 0 1 3.9-2 2.2 2.2 0 0 1 .2 3.4c-.8.7-1.6 1-1.6 2.1" />
+      <path d="M12 17h.01" />
+    </svg>
+  );
+}
 function GearIcon() {
   return (
     <svg className="w-[21px] h-[21px] text-[#4a4034] flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">

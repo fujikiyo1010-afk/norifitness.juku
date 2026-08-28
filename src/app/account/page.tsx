@@ -2,8 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { MemberHeader } from "@/components/MemberHeader";
-import { isSupportUser } from "@/lib/auth/support-gate";
-import { hasUnreadSupportReply } from "@/lib/support/queries";
 import { EmailNotificationToggle } from "./EmailNotificationToggle";
 import { LogoutButton } from "./LogoutButton";
 import { PushNotificationRow } from "./PushNotificationRow";
@@ -52,11 +50,6 @@ export default async function AccountPage() {
     profile?.email_notification_enabled ?? true
   );
 
-  // お問い合わせ窓口(2026-08-27 新設)は社員4人に先行反映
-  const supportUser = await isSupportUser();
-  // 未読のお返事があれば行に NEW ピルを出す(開くと消える)
-  const supportUnread = supportUser ? await hasUnreadSupportReply() : false;
-
   return (
     <main className="flex flex-1 flex-col bg-[#f9f5ed] min-h-screen">
       <div className="mx-auto w-full max-w-[460px] flex flex-1 flex-col border-x border-[#e7dcc9]">
@@ -83,23 +76,8 @@ export default async function AccountPage() {
           />
         </Section>
 
-        {/* その他 */}
+        {/* その他 (2026-08-28: 取説/お問い合わせ/よくある質問はプロフィールへ一本化・きよむ指示) */}
         <Section title="その他">
-          <LinkRow
-            icon={<DocIcon />}
-            label="取扱説明書（使い方ガイド）"
-            href="https://guide.norifitness.com/"
-            external
-          />
-          {supportUser && (
-            <LinkRow
-              icon={<QuestionIcon />}
-              label="お問い合わせ"
-              href="/support"
-              badge={supportUnread ? "NEW" : undefined}
-            />
-          )}
-          <LinkRow icon={<InfoIcon />} label="ヘルプ" href="/account/help" />
           <LinkRow icon={<DocIcon />} label="利用規約" href="/account/terms" />
           <LinkRow icon={<ShieldIcon />} label="プライバシーポリシー" href="/account/privacy" />
           <LinkRow icon={<DocIcon />} label="特定商取引法に基づく表記" href="/account/tokushoho" last />
@@ -229,15 +207,6 @@ function MailIcon() {
     </svg>
   );
 }
-function InfoIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" />
-      <line x1="12" y1="16" x2="12" y2="12" />
-      <line x1="12" y1="8" x2="12.01" y2="8" />
-    </svg>
-  );
-}
 function DocIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -250,15 +219,6 @@ function ShieldIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-    </svg>
-  );
-}
-function QuestionIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="9" />
-      <path d="M9.5 9.5a2.5 2.5 0 0 1 3.9-2 2.2 2.2 0 0 1 .2 3.4c-.8.7-1.6 1-1.6 2.1" />
-      <path d="M12 17h.01" />
     </svg>
   );
 }

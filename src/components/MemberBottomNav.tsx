@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -64,6 +65,23 @@ export function MemberBottomNav({
   isCalendar?: boolean;
 }) {
   const pathname = usePathname() ?? "/";
+
+  // お問い合わせに未読の返事があるか(2026-08-28)。プロフィールタブに赤ドットを出す。
+  // 画面遷移のたびに軽く確認(読むと消える)。失敗しても無印なだけ。
+  const [supportUnread, setSupportUnread] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/support/unread")
+      .then((r) => (r.ok ? r.json() : { unread: false }))
+      .then((d) => {
+        if (alive) setSupportUnread(!!(d as { unread?: boolean }).unread);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [pathname]);
+
   if (HIDDEN_PREFIXES.some((p) => pathname.startsWith(p))) return null;
   const TABS = tabsFor(isBeta, isCalendar);
 
@@ -108,13 +126,21 @@ export function MemberBottomNav({
                     isActive ? "bg-[#eaf3ec]" : ""
                   }`}
                 >
-                  {"cal" in tab && tab.cal ? (
-                    <CalendarIcon />
-                  ) : "chat" in tab && tab.chat ? (
-                    <ChatIcon />
-                  ) : (
-                    <MaskIcon name={(tab as { mask: string }).mask} />
-                  )}
+                  <span className="relative">
+                    {"cal" in tab && tab.cal ? (
+                      <CalendarIcon />
+                    ) : "chat" in tab && tab.chat ? (
+                      <ChatIcon />
+                    ) : (
+                      <MaskIcon name={(tab as { mask: string }).mask} />
+                    )}
+                    {/* お問い合わせ未読(プロフィールタブのみ) */}
+                    {supportUnread &&
+                      "mask" in tab &&
+                      (tab as { mask: string }).mask === "profile" && (
+                        <span className="absolute -top-0.5 -right-1 h-[9px] w-[9px] rounded-full bg-[#d6536a] ring-2 ring-[#fffdf8]" />
+                      )}
+                  </span>
                   <span
                     className={`text-[10px] leading-none whitespace-nowrap ${
                       isActive ? "font-extrabold text-[#34603f]" : "font-bold"

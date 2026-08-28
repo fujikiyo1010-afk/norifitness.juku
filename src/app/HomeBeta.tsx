@@ -37,7 +37,6 @@ export function HomeBeta({
   serviceExpired = false,
   expiredHasGoalSheet = false,
   expiredHasPastMonthly = false,
-  supportUnread = false,
   boardItems,
   unreadReply,
   today,
@@ -62,8 +61,6 @@ export function HomeBeta({
   expiredHasGoalSheet?: boolean;
   /** 満了版: 提出済みの月次がある(アーカイブ入口を出す) */
   expiredHasPastMonthly?: boolean;
-  /** お問い合わせに未読のお返事がある(歯車の赤ドット・2026-08-27) */
-  supportUnread?: boolean;
   boardItems: BoardItem[];
   unreadReply: boolean;
   today: TodayActivity;
@@ -113,10 +110,6 @@ export function HomeBeta({
             aria-label="設定"
             className="relative w-[30px] h-[30px] rounded-full flex items-center justify-center text-[#6a6256] hover:text-[#2b2620]"
           >
-            {/* お問い合わせに未読のお返事(2026-08-27)。開くと消える */}
-            {supportUnread && (
-              <span className="absolute -top-px -right-px h-[9px] w-[9px] rounded-full bg-[#d6536a] ring-2 ring-[#fffdf8]" />
-            )}
             <GearIcon />
           </Link>
         </header>
