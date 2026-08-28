@@ -57,7 +57,12 @@ function bodyToHtml(body: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
-  const paragraphs = escaped
+  // URLをタップで開けるように(2026-08-28 きよむ指摘)。エスケープ後なので & < > は既に無害
+  const linked = escaped.replace(
+    /(https?:\/\/[^\s<]+)/g,
+    '<a href="$1" style="color: #00695c; font-weight: 700;">$1</a>'
+  );
+  const paragraphs = linked
     .split(/\n{2,}/)
     .map((p) => `<p style="font-size: 14px; color: #333; line-height: 1.8; margin: 0 0 16px;">${p.replace(/\n/g, "<br>")}</p>`)
     .join("");

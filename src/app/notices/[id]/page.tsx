@@ -37,7 +37,7 @@ export default async function NoticeDetailPage({
               {ann.subject}
             </h1>
             <div className="mt-3 whitespace-pre-wrap text-[13px] leading-relaxed text-[#3f3a32]">
-              {ann.body_text}
+              {linkify(ann.body_text)}
             </div>
             <div className="mt-5 flex items-center gap-2 border-t border-[#efe6d4] pt-3">
               <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#4a875b] text-[12px] font-bold text-white">
@@ -52,4 +52,23 @@ export default async function NoticeDetailPage({
       </main>
     </>
   );
+}
+
+// 本文中のURLをタップで開けるように(2026-08-28 きよむ指摘)。
+// アプリ内URLは同タブ・外部は別タブ(チャットのMessageBodyと同じ方針の最小版)。
+function linkify(text: string): React.ReactNode[] {
+  return text.split(/(https?:\/\/[^\s]+)/g).map((part, i) => {
+    if (!/^https?:\/\//.test(part)) return part;
+    const internal = part.startsWith("https://juku.norifitness.com");
+    return (
+      <a
+        key={i}
+        href={internal ? part.replace("https://juku.norifitness.com", "") : part}
+        {...(internal ? {} : { target: "_blank", rel: "noopener noreferrer" })}
+        className="font-bold text-[#00695c] underline underline-offset-2"
+      >
+        {part}
+      </a>
+    );
+  });
 }
