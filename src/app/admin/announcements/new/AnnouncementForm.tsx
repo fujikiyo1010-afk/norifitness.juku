@@ -83,27 +83,21 @@ export function AnnouncementForm() {
         </p>
       </div>
 
-      {/* メール OFF の人にも送るか */}
-      <div className="bg-amber-50 border border-amber-200 rounded-md p-4">
-        <label className="flex items-start gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={includeOptOut}
-            onChange={(e) => setIncludeOptOut(e.target.checked)}
-            className="mt-0.5 w-4 h-4 accent-amber-600"
-          />
-          <div className="flex-1">
-            <div className="text-sm font-bold text-amber-900">
-              メール通知 OFF の受講生にも強制送信する
-            </div>
-            <div className="text-[11px] text-amber-800 mt-1 leading-relaxed">
-              利用規約改定 / プライバシーポリシー改定 / インシデント告知 など、
-              <strong>法的に全員へ通知が必要な場合は ON にしてください</strong>。
-              <br />
-              通常のお知らせ (= メンテ告知 / 業務案内) では OFF のままで OK。
-            </div>
-          </div>
-        </label>
+      {/* 強制送信は停止中(2026-08-28 きよむ指示):
+          トレクラ/Gyms移行で「アプリ未配布の人」のメール通知を意図的に OFF にしている間、
+          このチェックが押されると閉鎖を貫通して届いてしまうため、UI ごと封印。
+          送信側(sendAnnouncement)でもフラグを無視している。
+          移行完了後に戻す時は、この説明ブロックを元のチェックボックスに戻し、
+          actions.ts の同日コメント箇所も戻すこと。 */}
+      <div className="bg-zinc-50 border border-zinc-200 rounded-md p-4">
+        <div className="text-sm font-bold text-zinc-500">
+          「メール通知 OFF の受講生にも強制送信する」は現在停止中です
+        </div>
+        <div className="text-[11px] text-zinc-500 mt-1 leading-relaxed">
+          アプリをまだお渡ししていない方に届かないよう、意図的にメール通知を
+          閉じている期間のため、この機能は使えません（移行完了後に戻します）。
+          法的に全員へ通知が必要な場合は、先に開発担当へ相談してください。
+        </div>
       </div>
 
       {/* エラー */}

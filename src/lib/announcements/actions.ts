@@ -86,9 +86,11 @@ export async function sendAnnouncement(
     .from("users")
     .select("id, email, email_notification_enabled")
     .eq("status", "active");
-  if (!row.include_opt_out_users) {
-    q = q.neq("email_notification_enabled", false);
-  }
+  // 強制送信は停止中(2026-08-28 きよむ指示): 移行の「未配布メール閉鎖」を
+  // どの経路からも貫通できないよう、保存済みフラグも無視して常に OFF を除外する。
+  // 移行完了後に戻す時は if (!row.include_opt_out_users) の条件を復元。
+  void row.include_opt_out_users;
+  q = q.neq("email_notification_enabled", false);
   const { data: users, error: usersError } = await q;
   if (usersError) return { ok: false, message: usersError.message };
   const recipients = (users ?? [])
