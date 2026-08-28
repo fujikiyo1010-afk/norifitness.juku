@@ -228,6 +228,7 @@ export function MealSheetV2({
   const [addQ, setAddQ] = useState("");
   const [gEditIdx, setGEditIdx] = useState<number | null>(null);
   const [gEditVal, setGEditVal] = useState("");
+  const [gText, setGText] = useState<string | null>(null); // 「gで入力」編集中の文字列(空を許す=全部消してから打ち直せる)
   const [recipeLoading, setRecipeLoading] = useState(false);
 
   // 途中状態の有無(新規=品が溜まっている/編集=何か変えた/量パネル操作中)。画面外タップの破棄確認用
@@ -271,6 +272,7 @@ export function MealSheetV2({
     setCol("kcal");
     setUwOpen(false);
     setAddQ("");
+    setGText(null);
     if (fromIdx != null) {
       setCur({ ...cart[fromIdx], recipe: cart[fromIdx].recipe ? cart[fromIdx].recipe!.map((m) => ({ ...m })) : null, mats: cart[fromIdx].mats.map((m) => ({ ...m })) });
       setView("qty");
@@ -792,7 +794,10 @@ export function MealSheetV2({
                 <button
                   key={m}
                   type="button"
-                  onClick={() => setCur((d) => (d ? { ...d, mode: m } : d))}
+                  onClick={() => {
+                    setGText(null);
+                    setCur((d) => (d ? { ...d, mode: m } : d));
+                  }}
                   className={`flex-1 rounded-lg py-1.5 text-center text-[12.5px] font-bold ${
                     cur.mode === m ? "bg-white text-teal-700 shadow-sm" : "text-gray-500"
                   }`}
@@ -829,11 +834,14 @@ export function MealSheetV2({
                 <div className="flex items-center justify-center gap-2">
                   <input
                     inputMode="numeric"
-                    value={Math.round(grams) || ""}
+                    value={gText ?? (Math.round(grams) || "")}
+                    onFocus={() => setGText(String(Math.round(grams) || ""))}
                     onChange={(e) => {
-                      const g = parseFloat(e.target.value) || 0;
-                      if (g > 0) setCur((d) => (d ? scaleTo(d, g) : d));
+                      setGText(e.target.value);
+                      const g = parseFloat(e.target.value);
+                      if (!isNaN(g) && g > 0) setCur((d) => (d ? scaleTo(d, g) : d));
                     }}
+                    onBlur={() => setGText(null)}
                     className="w-[120px] rounded-xl border-2 border-teal-500 bg-white p-3 text-center text-[22px] font-extrabold outline-none"
                   />
                   <span className="text-[14px] font-bold text-gray-500">g</span>
