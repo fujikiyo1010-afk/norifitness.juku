@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { requireAdmin } from "@/lib/auth/admin";
 import { listSupportTicketsForAdmin } from "@/lib/support/admin-queries";
-import { currentAppVersion } from "@/lib/support/app-version";
 import { SupportShell } from "./SupportShell";
 
 export const dynamic = "force-dynamic";
@@ -18,8 +17,6 @@ export default async function AdminSupportLayout({ children }: { children: React
   const tickets = await listSupportTicketsForAdmin();
 
   return (
-    <SupportShell tickets={tickets} currentVersion={currentAppVersion()}>
-      {children}
-    </SupportShell>
+    <SupportShell tickets={tickets}>{children}</SupportShell>
   );
 }
