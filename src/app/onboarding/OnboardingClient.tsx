@@ -13,17 +13,37 @@ import {
 import { subscribeToPush } from "@/lib/push/client";
 import { saveSubscription } from "@/lib/push/actions";
 
-const TOTAL_STEPS = 8;
+/**
+ * オンボの流れは2種類(2026-08-28 満了版追加・閉開仕様 決定4+8/26指示):
+ *   通常   = ようこそ→月次→カルテ→目標→体組成→発送先→通知→完了(カルテへ)
+ *   満了版 = ようこそ→お知らせ(このアプリについて)→体組成→通知(文言違い)→完了(ホームへ)
+ * 対象: 満了(expired)と特別食事(expired_meal=お知らせに9/30の1行が付く)。
+ * 通常の人の流れは1画面も変えない。
+ */
+const NORMAL_FLOW = [
+  "welcome", "monthly", "carte", "goal", "body", "shipping", "notify", "done",
+] as const;
+const EXPIRED_FLOW = ["welcome", "about", "body", "notify", "done"] as const;
+type StepKey = (typeof NORMAL_FLOW)[number] | (typeof EXPIRED_FLOW)[number];
+
+export type OnboardingVariant = "normal" | "expired" | "expired_meal";
 
 export function OnboardingClient({
   defaultRecipientName,
   skipEnvGate = false,
+  variant = "normal",
 }: {
   defaultRecipientName: string;
   /** 撮影用デモ垢のみ: ブラウザ関門(Safariで開いてください等)を飛ばしPCでも進める */
   skipEnvGate?: boolean;
+  /** 満了版(後日3人)/特別食事(4人)は短縮フロー。それ以外は通常 */
+  variant?: OnboardingVariant;
 }) {
+  const flow: readonly StepKey[] =
+    variant === "normal" ? NORMAL_FLOW : EXPIRED_FLOW;
+  const totalSteps = flow.length;
   const [step, setStep] = useState(1);
+  const cur: StepKey = flow[step - 1];
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -64,7 +84,7 @@ export function OnboardingClient({
 
   function next() {
     setError(null);
-    setStep((s) => Math.min(s + 1, TOTAL_STEPS));
+    setStep((s) => Math.min(s + 1, totalSteps));
   }
 
   function back() {
@@ -91,6 +111,11 @@ export function OnboardingClient({
   }
 
   function finish() {
+    if (variant !== "normal") {
+      // 満了版: カルテは作らないのでホームへ
+      router.push("/");
+      return;
+    }
     // 層1: オンボ最後にカルテ入力を必須化 (= カルテ入力ページへ送る関所)
     router.push("/workout/carte/new");
   }
@@ -131,34 +156,40 @@ export function OnboardingClient({
         >
           <div className="absolute -top-20 -right-20 w-[200px] h-[200px] rounded-full bg-[#4a875b]/[0.04] pointer-events-none" />
 
-          <StepIndicator current={step} total={TOTAL_STEPS} />
+          <StepIndicator current={step} total={totalSteps} />
 
           {/* コンテンツエリア = Step 6 等内容が多い時のみ縦スクロール / それ以外は 1 画面に収まる */}
           <div className="flex-1 flex flex-col z-10 min-h-0 overflow-y-auto">
-            {step === 1 && <Step1 />}
-            {step === 2 && <Step2 />}
-            {step === 3 && <StepIntro
+            {cur === "welcome" && <Step1 />}
+            {cur === "about" && (
+              <StepAbout
+                name={defaultRecipientName}
+                meal={variant === "expired_meal"}
+              />
+            )}
+            {cur === "monthly" && <Step2 />}
+            {cur === "carte" && <StepIntro
               icon={<DocIcon />}
               title="カルテ"
               lead={<>あなた専用の<br/><b>筋トレメニュー</b>を作るための情報</>}
               detail="性別 / 年齢 / 重点部位 / 環境 / 頻度 / 経験 / けが など"
               after="このあと、最後に入力します"
             />}
-            {step === 4 && <StepIntro
+            {cur === "goal" && <StepIntro
               icon={<TargetIcon />}
               title="目標管理シート"
               lead={<><b>ゴールの言語化</b>が<br/>達成への第一歩</>}
               detail="目標体重 / 短期目標 / 長期目標 / プロセス / PFC など"
               after="ホーム画面からあとで記入してください"
             />}
-            {step === 5 && <StepIntro
+            {cur === "body" && <StepIntro
               icon={<ChartIcon />}
               title="体組成記録"
               lead={<>成長のための<br/><b>基準値</b>を把握する</>}
               detail="体重 / 体脂肪率 / ウエスト / 首回り / 身長 など"
               after="ホーム画面からあとで記録してください"
             />}
-            {step === 6 && (
+            {cur === "shipping" && (
               <Step6Form
                 postalCode={postalCode}
                 onPostalCodeChange={setPostalCode}
@@ -176,8 +207,9 @@ export function OnboardingClient({
                 disabled={isPending}
               />
             )}
-            {step === 7 && (
+            {cur === "notify" && (
               <Step7Permission
+                expired={variant !== "normal"}
                 onPermit={async () => {
                   // メール = デフォルト true なので明示的に true 設定 (= 触ってきた場合の保険)
                   await toggleEmailNotification(true);
@@ -192,16 +224,16 @@ export function OnboardingClient({
                   } catch {
                     // ignore
                   }
-                  setStep(8);
+                  setStep(totalSteps);
                 }}
                 onSkip={async () => {
                   // OFF を選んだ受講生はメールも OFF にする (= 明確な拒否意思)
                   await toggleEmailNotification(false);
-                  setStep(8);
+                  setStep(totalSteps);
                 }}
               />
             )}
-            {step === 8 && <Step8 />}
+            {cur === "done" && (variant === "normal" ? <Step8 /> : <Step8Expired />)}
           </div>
 
           {error && (
@@ -210,20 +242,20 @@ export function OnboardingClient({
             </div>
           )}
 
-          {step < 8 ? (
+          {step < totalSteps ? (
             <Footer
               showBack={step > 1}
               onBack={back}
-              onNext={step === 6 ? handleStep6Submit : next}
+              onNext={cur === "shipping" ? handleStep6Submit : next}
               nextLabel={
-                step === 6
+                cur === "shipping"
                   ? isPending
                     ? "登録中..."
                     : "登録して次へ →"
                   : "次へ →"
               }
-              nextDisabled={step === 6 ? !step6Valid || isPending : false}
-              nextFaded={step === 7}
+              nextDisabled={cur === "shipping" ? !step6Valid || isPending : false}
+              nextFaded={cur === "notify"}
             />
           ) : (
             <div className="z-10 pt-3 border-t border-dashed border-[#4a875b]/15">
@@ -231,7 +263,7 @@ export function OnboardingClient({
                 onClick={finish}
                 className="w-full btn3d text-white rounded-xl py-3.5 text-sm font-bold shadow-md shadow-[#4a875b]/25 transition-colors"
               >
-                カルテを入力する →
+                {variant === "normal" ? "カルテを入力する →" : "はじめる →"}
               </button>
             </div>
           )}
@@ -861,9 +893,12 @@ function Field({
 function Step7Permission({
   onPermit,
   onSkip,
+  expired = false,
 }: {
   onPermit: () => void;
   onSkip: () => void;
+  /** 満了版: 添削・月次の話をせず「動画追加などのお知らせ」だけを約束する(リマインドは送らない) */
+  expired?: boolean;
 }) {
   const [pending, setPending] = useState(false);
 
@@ -882,32 +917,52 @@ function Step7Permission({
       <div className="w-20 h-20 mb-4 rounded-2xl border border-[#4a875b]/20 bg-[#4a875b]/[0.08] flex items-center justify-center">
         <BellIcon />
       </div>
-      <h1 className="text-[20px] font-bold text-[#004d40] leading-snug mb-2.5">
-        通知を
-        <br />
-        オンに
-      </h1>
-      <p className="text-xs text-zinc-600 leading-relaxed">
-        筋肉塾の通知は、
-        <br />
-        <b className="text-[#004d40] font-bold">
-          学習を続けるための情報インフラ
-        </b>
-        です
-      </p>
-      <p className="text-[11px] text-[#6a6256] leading-relaxed mt-2.5">
-        メニュー配布 ・ 添削完了 ・ 月次添削など
-        <br />
-        大切なお知らせを メール + iPhone 通知でお届けします
-      </p>
+      {expired ? (
+        <>
+          <h1 className="text-[20px] font-bold text-[#004d40] leading-snug mb-2.5">
+            お知らせを
+            <br />
+            受け取りますか
+          </h1>
+          <p className="text-xs text-zinc-600 leading-relaxed">
+            動画の追加など、新しい
+            <br />
+            お知らせをお届けします
+          </p>
+          <p className="text-[11px] text-[#6a6256] leading-relaxed mt-2.5">
+            あとから 設定 → 通知 で変更できます
+          </p>
+        </>
+      ) : (
+        <>
+          <h1 className="text-[20px] font-bold text-[#004d40] leading-snug mb-2.5">
+            通知を
+            <br />
+            オンに
+          </h1>
+          <p className="text-xs text-zinc-600 leading-relaxed">
+            筋肉塾の通知は、
+            <br />
+            <b className="text-[#004d40] font-bold">
+              学習を続けるための情報インフラ
+            </b>
+            です
+          </p>
+          <p className="text-[11px] text-[#6a6256] leading-relaxed mt-2.5">
+            メニュー配布 ・ 添削完了 ・ 月次添削など
+            <br />
+            大切なお知らせを メール + iPhone 通知でお届けします
+          </p>
 
-      <div className="mt-4 bg-[#fffdf8] border border-[#4a875b]/15 rounded-lg px-3 py-2.5 text-left text-[10.5px] text-[#2b2620] leading-relaxed">
-        <b className="text-[#004d40]">受講料の投資を最大化するため</b>、
-        全 ON で使うことを<b className="text-[#004d40]">強く推奨</b>します。
-        <br />
-        うるさいと感じた通知は、 後で <b>設定 → 通知</b> から
-        個別に OFF にできます。
-      </div>
+          <div className="mt-4 bg-[#fffdf8] border border-[#4a875b]/15 rounded-lg px-3 py-2.5 text-left text-[10.5px] text-[#2b2620] leading-relaxed">
+            <b className="text-[#004d40]">受講料の投資を最大化するため</b>、
+            全 ON で使うことを<b className="text-[#004d40]">強く推奨</b>します。
+            <br />
+            うるさいと感じた通知は、 後で <b>設定 → 通知</b> から
+            個別に OFF にできます。
+          </div>
+        </>
+      )}
 
       <div className="w-full mt-4">
         <button
@@ -916,7 +971,7 @@ function Step7Permission({
           disabled={pending}
           className="w-full btn3d text-white rounded-xl py-3 text-[13px] font-bold shadow-md shadow-[#4a875b]/25 transition-colors mb-2 disabled:opacity-60"
         >
-          {pending ? "設定中…" : "通知をオンにする ・ 推奨"}
+          {pending ? "設定中…" : expired ? "受け取る" : "通知をオンにする ・ 推奨"}
         </button>
         <button
           type="button"
@@ -924,9 +979,91 @@ function Step7Permission({
           disabled={pending}
           className="block w-full text-[11px] text-[#a59b8c] py-1.5 hover:text-zinc-600 transition-colors disabled:opacity-50"
         >
-          オフのまま進む (後で設定から変更可)
+          {expired ? "あとで (設定から変更できます)" : "オフのまま進む (後で設定から変更可)"}
         </button>
       </div>
+    </div>
+  );
+}
+
+// =====================================================================
+// 満了版 Step2: お知らせ「このアプリについて」 (2026-08-28 新設・文面はきよむOK済み)
+// =====================================================================
+
+function StepAbout({ name, meal }: { name: string; meal: boolean }) {
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center text-center z-10 pb-4">
+      <div className="w-16 h-16 mb-3.5 rounded-2xl border border-[rgba(255,235,59,.5)] bg-[rgba(255,235,59,.12)] flex items-center justify-center anim-char-pop">
+        <InfoCircleIcon />
+      </div>
+      <h1 className="text-[20px] font-bold text-[#004d40] leading-snug mb-2.5 anim-fade-up anim-delay-1">
+        このアプリについて
+      </h1>
+      <p className="text-xs text-zinc-600 leading-relaxed anim-fade-up anim-delay-2">
+        {name ? `${name} さんの` : ""}サポート期間は終了しているため、
+        <br />
+        このアプリは「<b className="text-[#004d40] font-bold">記録と学習の版</b>」で
+        <br />
+        お渡ししています
+      </p>
+
+      <div className="mt-4 w-full bg-[#fffdf8]/80 border border-[#e7dcc9] rounded-lg px-3.5 py-3 text-left text-[11px] leading-relaxed anim-fade-up anim-delay-2">
+        <p className="font-bold text-[#2f6b41] mb-1">✓ ずっと使えるもの</p>
+        <p className="text-[#52525b]">
+          ・体重・食事・トレーニングの記録
+          <br />
+          ・レッスン動画での学習
+          <br />
+          ・これまでの記録の見返し
+        </p>
+        <p className="font-bold text-[#8a8272] mt-2.5 mb-1">− 終了しているもの</p>
+        <p className="text-[#52525b]">・月次添削・フォーム添削など、添削が伴う機能</p>
+      </div>
+
+      {meal && (
+        <div className="mt-2.5 w-full bg-[#c2693f]/[0.07] border-l-[3px] border-[#c2693f] rounded-sm px-3.5 py-2.5 text-left text-[11px] text-[#7a4a2b] leading-relaxed anim-fade-up anim-delay-3">
+          <b>食事の記録への添削は 9/30 まで続きます</b>
+        </div>
+      )}
+
+      <div className="mt-2.5 w-full bg-[#4a875b]/[0.06] border-l-[3px] border-[#4a875b] rounded-sm px-3.5 py-2.5 text-left text-[11px] text-[#004d40] anim-fade-up anim-delay-3">
+        これまでの学びを、ご自身のペースで続けられる形です。
+      </div>
+    </div>
+  );
+}
+
+// =====================================================================
+// 満了版 Step5: 完了 (カルテ誘導なし・ホームへ)
+// =====================================================================
+
+function Step8Expired() {
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center text-center z-10 pb-4">
+      <div className="w-[110px] h-[110px] rounded-full shadow-lg shadow-[#4a875b]/20 mb-5 overflow-hidden bg-[#fffdf8] anim-char-pop">
+        <div className="w-full h-full relative scale-[1.2]">
+          <Image
+            src="/images/nori-character.png"
+            alt="のりキャラクター"
+            fill
+            sizes="110px"
+            className="object-cover"
+          />
+        </div>
+      </div>
+      <h1 className="text-[20px] font-bold text-[#004d40] leading-snug mb-2.5 anim-fade-up anim-delay-1">
+        準備が
+        <br />
+        できました
+      </h1>
+      <p className="text-xs text-zinc-600 leading-relaxed anim-fade-up anim-delay-2">
+        これまでの記録も
+        <br />
+        引き継がれています
+      </p>
+      <p className="text-[11px] text-[#6a6256] leading-relaxed mt-2.5 anim-fade-up anim-delay-3">
+        学習と記録を、これからもご活用ください
+      </p>
     </div>
   );
 }
@@ -973,6 +1110,16 @@ const ICO_PROPS = {
   strokeLinecap: "round" as const,
   strokeLinejoin: "round" as const,
 };
+
+function InfoCircleIcon() {
+  return (
+    <svg width="32" height="32" {...ICO_PROPS}>
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="16" x2="12" y2="12" />
+      <line x1="12" y1="8" x2="12.01" y2="8" />
+    </svg>
+  );
+}
 
 function MailIcon() {
   return (
