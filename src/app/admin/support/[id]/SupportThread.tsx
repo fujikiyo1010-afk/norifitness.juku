@@ -92,7 +92,7 @@ export function SupportThread({
       {lightbox && <PhotoLightbox photos={[lightbox]} onClose={() => setLightbox(null)} />}
 
       {/* やりとり */}
-      <div className="flex flex-1 flex-col gap-2.5 overflow-y-auto px-5 py-4">
+      <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto px-5 py-4">
         {messages.length === 0 ? (
           <div className="py-10 text-center text-[12.5px] text-zinc-400">
             まだやりとりがありません
@@ -147,7 +147,7 @@ export function SupportThread({
 
       {/* 返信 or 閉じた表示 */}
       {closed ? (
-        <div className="border-t border-[#e8ebe9] bg-zinc-100 px-5 py-3.5 text-center">
+        <div className="flex-shrink-0 border-t border-[#e8ebe9] bg-zinc-100 px-5 py-3.5 text-center">
           <p className="text-[12px] text-zinc-600">
             この問い合わせは<b>解決済み</b>です。受講生の入力欄は閉じています。
           </p>
@@ -161,7 +161,7 @@ export function SupportThread({
           </button>
         </div>
       ) : (
-        <div className="border-t border-[#e8ebe9] bg-white px-5 py-3">
+        <div className="flex-shrink-0 border-t border-[#e8ebe9] bg-white px-5 py-3">
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
