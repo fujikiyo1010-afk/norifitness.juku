@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/lib/auth/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { applyVisible } from "@/lib/admin/undistributed";
 import {
   listPendingAudits,
   listAllAudits,
@@ -74,7 +75,9 @@ export default async function AdminMonthlyReviewInboxPage() {
   // 総5: 月度はJSTで(UTCサーバのgetMonthだと月末深夜に前月へズレる)
   const targetMonth = `${jstTodayStr().slice(0, 7)}-01`;
   const [usersCount, completedCount] = await Promise.all([
-    supabase.from("users").select("id", { count: "exact", head: true }),
+    // 未配布は分母に入れない(2026-09-01)。受信箱自体は提出ベースなので対処不要だが、
+    // この進捗バーだけ users の全件を数えていた。
+    applyVisible(supabase.from("users").select("id", { count: "exact", head: true })),
     supabase
       .from("monthly_audits")
       .select("id", { count: "exact", head: true })

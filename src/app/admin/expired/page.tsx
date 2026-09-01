@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/lib/auth/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { applyVisible } from "@/lib/admin/undistributed";
 import {
   computeServiceState,
   SERVICE_PERIOD_DAYS,
@@ -45,11 +46,13 @@ const STATE_CHIP: Record<string, { label: string; cls: string }> = {
 export default async function AdminExpiredPage() {
   await requireAdmin();
   const admin = createAdminClient();
-  const { data } = await admin
-    .from("users")
-    .select("id, name, service_started_at, grace_until, grace_scope, status")
-    .eq("status", "active")
-    .order("service_started_at", { ascending: true });
+  // 未配布(発行済み・本人未配布)は満了タブにも出さない(2026-09-01)
+  const { data } = await applyVisible(
+    admin
+      .from("users")
+      .select("id, name, service_started_at, grace_until, grace_scope, status")
+      .eq("status", "active")
+  ).order("service_started_at", { ascending: true });
 
   const now = Date.now();
   const rows: Row[] = (data ?? []).map((u) => {

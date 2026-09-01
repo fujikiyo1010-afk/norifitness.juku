@@ -13,6 +13,7 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
+import { applyVisible } from "@/lib/admin/undistributed";
 import {
   getGoalSheetState,
   type GoalSheetState,
@@ -491,10 +492,10 @@ export async function listAllUsersWithStatus(): Promise<UserListSummary[]> {
   const supabase = await createClient();
 
   // 1. 全受講生取得
-  const { data: usersData } = await supabase
-    .from("users")
-    .select("id, name, nickname, joined_at")
-    .order("joined_at", { ascending: false });
+  // 未配布(発行済み・本人未配布)は管理画面の一覧に出さない
+  const { data: usersData } = await applyVisible(
+    supabase.from("users").select("id, name, nickname, joined_at")
+  ).order("joined_at", { ascending: false });
   const users = usersData ?? [];
   if (users.length === 0) return [];
   const userIds = users.map((u) => u.id as string);
@@ -707,7 +708,8 @@ export async function countAdminDashboardMetrics(): Promise<{
   const supabase = await createClient();
   const [usersRes, auditRes, carteReqRes, workoutReqRes, flagRes] =
     await Promise.all([
-      supabase.from("users").select("id", { count: "exact", head: true }),
+      // サイドバーの「受講生」件数。未配布は数えない(2026-09-01)
+      applyVisible(supabase.from("users").select("id", { count: "exact", head: true })),
       supabase
         .from("monthly_audits")
         .select("id", { count: "exact", head: true })

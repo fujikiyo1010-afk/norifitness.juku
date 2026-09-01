@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { applyVisible } from "@/lib/admin/undistributed";
 import { daysSinceDateJST, daysSinceTsJST } from "@/lib/date/jst";
 import { computeServiceState } from "@/lib/auth/service-expired";
 
@@ -131,11 +132,14 @@ export async function listUsersWithAlerts(): Promise<UserWithAlerts[]> {
   const now = new Date();
 
   // 受講生一覧(ア1: 退塾者を除外＝在籍中 status='active' のみ)
-  const { data: allUsers } = await admin
-    .from("users")
-    .select("id, name, email, joined_at, last_seen_at, is_beta, service_started_at, grace_until, grace_scope")
-    .eq("status", "active")
-    .order("joined_at", { ascending: false });
+  // 未配布(発行済み・本人未配布)も除外。渡していない人に警報を出しても消せないため(2026-09-01)。
+  // デイリー添削のキューもこの一覧から作られるので、ここ1箇所で両方に効く。
+  const { data: allUsers } = await applyVisible(
+    admin
+      .from("users")
+      .select("id, name, email, joined_at, last_seen_at, is_beta, service_started_at, grace_until, grace_scope")
+      .eq("status", "active")
+  ).order("joined_at", { ascending: false });
 
   if (!allUsers || allUsers.length === 0) return [];
 

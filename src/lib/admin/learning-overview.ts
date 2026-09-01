@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { applyVisible } from "@/lib/admin/undistributed";
 
 /**
  * 管理画面 ・ 全受講生 学習進捗オーバービュー (2026-07-07)
@@ -31,7 +32,7 @@ export async function getLearningOverview(): Promise<LearningOverview> {
 
   const [coursesRes, usersRes, progressRes] = await Promise.all([
     admin.from("courses").select("id, chapters(id, lessons(id))"),
-    admin.from("users").select("id, name, joined_at").order("joined_at", {
+    applyVisible(admin.from("users").select("id, name, joined_at")).order("joined_at", {
       ascending: true,
     }),
     admin

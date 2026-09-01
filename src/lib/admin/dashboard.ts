@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { applyVisible } from "@/lib/admin/undistributed";
 
 /**
  * 管理画面 ホームダッシュボード KPI 集計
@@ -53,7 +54,7 @@ export async function getDashboardKPI(): Promise<DashboardKPI> {
     inviteRes,
     pendingShipmentsRes,
   ] = await Promise.all([
-    admin.from("users").select("id", { count: "exact", head: true }),
+    applyVisible(admin.from("users").select("id", { count: "exact", head: true })),
     admin
       .from("monthly_audits")
       .select("id", { count: "exact", head: true })
