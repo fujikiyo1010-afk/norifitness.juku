@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { upsertBodyMetric } from "@/lib/body-metrics/actions";
 import { NumberWheel } from "./Wheel";
@@ -64,6 +64,20 @@ export function RecordSheetBody({
   );
   const [recordedAt, setRecordedAt] = useState(todayString());
   const [showDetails, setShowDetails] = useState(false);
+  // 日付事故対策(2026-09-04): iOS PWA が前夜から凍結復元されると recordedAt が古い日付の
+  // まま保存され、過去日の記録を上書きする事故があった(実例: 朝7時保存→2日前の行)。
+  //   1. ユーザーが日付欄を明示的に触ったかを ref で持つ(バックデート意図の判別)。
+  //   2. 画面復帰(visibilitychange)時、未タッチなら日付を今日へ更新。
+  //   3. 保存の瞬間にも、未タッチなら todayString() を取り直す(確実な最終防衛線)。
+  const dateTouchedRef = useRef(false);
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState !== "visible") return;
+      if (!dateTouchedRef.current) setRecordedAt(todayString());
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, []);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -87,9 +101,11 @@ export function RecordSheetBody({
       setError("体重・ウエスト・体脂肪率のいずれかを入力してください");
       return;
     }
+    // 日付欄を触っていなければ「保存を押した瞬間の今日」で保存(凍結復元の古い日付を無視)
+    const dateToSave = dateTouchedRef.current ? recordedAt : todayString();
     startTransition(async () => {
       const result = await upsertBodyMetric({
-        recorded_at: recordedAt,
+        recorded_at: dateToSave,
         weight_kg: weightVal,
         body_fat_percent: bodyFatVal,
         waist_cm: waistVal,
@@ -189,7 +205,10 @@ export function RecordSheetBody({
               type="date"
               value={recordedAt}
               max={todayString()}
-              onChange={(e) => setRecordedAt(e.target.value)}
+              onChange={(e) => {
+                dateTouchedRef.current = true; // 明示変更=バックデート意図あり
+                setRecordedAt(e.target.value);
+              }}
               className="w-full appearance-none rounded-lg border border-[#e7dcc9] bg-white px-3 py-2 text-left text-[13px] text-[#2b2620] [color-scheme:light] focus:border-[#4a875b] focus:outline-none"
             />
           </div>
