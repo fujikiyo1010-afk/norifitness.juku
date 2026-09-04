@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Service Worker 登録 (2026-06-18 Web Push 基盤) + 体7 更新バナー
@@ -18,6 +18,77 @@ import { useEffect, useState } from "react";
  */
 export function ServiceWorkerRegister() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
+
+  // ===== 対策C: 凍結復元PWAの鮮度チェック (2026-09-04) =====
+  // iOSはPWAを前夜から開きっぱなしにすると画面ごと凍結保存し、翌朝そのまま復元する。
+  // 凍結中にデプロイが挟まると、古い画面の保存ボタンが接続先を失い黙って失敗する
+  // (実例: 朝6:30-7:30の体重記録が消える/過去日に入る)。
+  // → 復帰の瞬間に /api/version と自分の版を突き合わせ、古ければ読み込み直す。
+  //
+  // 安全弁(入力を壊さない):
+  //   - シートやモーダルが開いている(= body の overflow が hidden) → 自動リロードせずバナー提示
+  //   - 入力欄にフォーカス中 → 同上
+  //   - 管理画面(/admin)は下書き作業が長いので常にバナー提示のみ(自動リロードしない)
+  //   - 短い離脱(60秒未満)では確認そのものをしない(アプリ切替の度に走らせない)
+  const baseVersionRef = useRef<string | null>(null);
+  const hiddenAtRef = useRef<number | null>(null);
+  const checkingRef = useRef(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const fetchVersion = async (): Promise<string | null> => {
+      try {
+        const res = await fetch("/api/version", { cache: "no-store" });
+        if (!res.ok) return null;
+        const j = (await res.json()) as { v?: string | null };
+        return j.v ?? null;
+      } catch {
+        return null; // オフライン等は静かに諦める(次の復帰で再試行)
+      }
+    };
+
+    // 基準版: マウント直後の本番版を「この画面の版」とみなす
+    void fetchVersion().then((v) => {
+      if (baseVersionRef.current === null) baseVersionRef.current = v;
+    });
+
+    const MIN_HIDDEN_MS = 60_000;
+
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") {
+        hiddenAtRef.current = Date.now();
+        return;
+      }
+      // ここから「復帰」
+      const hiddenAt = hiddenAtRef.current;
+      hiddenAtRef.current = null;
+      if (hiddenAt === null || Date.now() - hiddenAt < MIN_HIDDEN_MS) return;
+      if (checkingRef.current) return;
+      checkingRef.current = true;
+      void fetchVersion()
+        .then((now) => {
+          const base = baseVersionRef.current;
+          if (!now || !base || now === base) return; // 最新 or 判定不能 → 何もしない
+          // 版が違う = 凍結中にデプロイがあった
+          const sheetOpen = document.body.style.overflow === "hidden";
+          const tag = document.activeElement?.tagName ?? "";
+          const typing = tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
+          const isAdmin = window.location.pathname.startsWith("/admin");
+          if (sheetOpen || typing || isAdmin) {
+            setUpdateAvailable(true); // 自動リロードは危険 → バナーで本人に委ねる
+            return;
+          }
+          window.location.reload();
+        })
+        .finally(() => {
+          checkingRef.current = false;
+        });
+    };
+
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
